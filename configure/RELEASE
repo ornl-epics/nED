@@ -25,3 +25,4 @@ SUPPORT=/home/controls/epics/R3.14.12.2/support
 ASYN=           $(SUPPORT)/asyn
 AUTOSAVE=       $(SUPPORT)/autosave
 STREAMDEVICE=   $(SUPPORT)/StreamDevice
+OCCLIB=         /home/controls/occ/lib

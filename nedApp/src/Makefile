@@ -1,6 +1,6 @@
 TOP=../..
 
-OCCLIB_DIR=$(TOP)/../occlib
+OCCLIB_DIR=$(OCCLIB)
 
 include $(TOP)/configure/CONFIG
 #----------------------------------------
