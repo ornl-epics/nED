@@ -70,8 +70,8 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         enum {
             STALL_NONE          = 0,    //!< Not stalled
             STALL_DMA           = 1,    //!< DMA buffer stalled
-            STALL_COPY          = 2,    //!< Copy buffer stalled
-            STALL_DMA_COPY      = 3,    //!< DMA and copy buffer stalled
+            STALL_FIFO          = 2,    //!< Internal OCC FIFO overflowed
+            STALL_COPY          = 3,    //!< Copy buffer stalled
         };
 
         /**
@@ -140,7 +140,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
 		/**
 		 * Report an error detected in receive data thread
 		 */
-		void reportRecvDataError(int ret);
+		void handleRecvError(int ret);
 
     public:
         /**

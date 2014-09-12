@@ -119,10 +119,10 @@ record(mbbi, "$(P)RxStalled")
     field(ONST, "DMA stalled")
     field(ONSV, "MAJOR")
     field(TWVL, "2")
-    field(TWST, "Copy stalled")
+    field(TWST, "FIFO stalled")
     field(TWSV, "MAJOR")
     field(THVL, "3")
-    field(THST, "DMA and copy stalled")
+    field(THST, "Copy stalled")
     field(THSV, "MAJOR")
     field(UNSV, "MINOR")
 }
@@ -183,7 +183,7 @@ record(ai, "$(P)SfpTemp")
     field(PREC, "2")
     field(HIHI, "50")
     field(HHSV, "MAJOR")
-    field(SCAN, "10 second")
+    field(SCAN, "I/O Intr")
 }
 record(ai, "$(P)SfpRxPower")
 {
@@ -194,7 +194,7 @@ record(ai, "$(P)SfpRxPower")
     field(PREC, "0")
     field(LOLO, "100")
     field(LLSV, "MAJOR")
-    field(SCAN, "10 second")
+    field(SCAN, "I/O Intr")
 }
 record(ai, "$(P)SfpTxPower")
 {
@@ -204,7 +204,7 @@ record(ai, "$(P)SfpTxPower")
     field(EGU,  "uW")
     field(LOLO, "400")
     field(LLSV, "MAJOR")
-    field(SCAN, "10 second")
+    field(SCAN, "I/O Intr")
 }
 record(ai, "$(P)SfpVccPower")
 {
@@ -217,7 +217,7 @@ record(ai, "$(P)SfpVccPower")
     field(HIHI, "3.4")
     field(LLSV, "MAJOR")
     field(HHSV, "MAJOR")
-    field(SCAN, "10 second")
+    field(SCAN, "I/O Intr")
 }
 record(ai, "$(P)SfpTxBiasCur")
 {
@@ -225,7 +225,7 @@ record(ai, "$(P)SfpTxBiasCur")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpTxBiasCur")
     field(EGU,  "uA")
-    field(SCAN, "10 second")
+    field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)ErrCrc")
 {

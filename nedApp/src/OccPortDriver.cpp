@@ -24,7 +24,7 @@ static const int asynStackSize     = 0;
 
 EPICS_REGISTER(Occ, OccPortDriver, 2, "Port name", string, "Local buffer size", int);
 
-const float OccPortDriver::DEFAULT_BASIC_STATUS_INTERVAL = 1.0;     //!< How often to update frequent OCC status parameters
+const float OccPortDriver::DEFAULT_BASIC_STATUS_INTERVAL = 5.0;     //!< How often to update frequent OCC status parameters
 const float OccPortDriver::DEFAULT_EXTENDED_STATUS_INTERVAL = 60.0; //!< How ofter to update less frequently changing OCC status parameters
 
 extern "C" {
@@ -82,6 +82,7 @@ OccPortDriver::OccPortDriver(const char *portName, uint32_t localBufferSize)
     setDoubleParam(StatusInt, DEFAULT_BASIC_STATUS_INTERVAL);
     setDoubleParam(ExtStatusInt, DEFAULT_EXTENDED_STATUS_INTERVAL);
     setIntegerParam(DataRateOut, 0);
+    setIntegerParam(RxStalled, STALL_NONE);
 
     // Initialize OCC board
     status = occ_open(portName, OCC_INTERFACE_OPTICAL, &m_occ);
@@ -138,40 +139,15 @@ void OccPortDriver::refreshOccStatusThread()
     int ret;
     epicsTimeStamp lastExtStatusUpdate = { 0, 0 };
     occ_status_t occstatus; // Keep at function scope so that it caches values between runs
-    bool first_run = true;  // Prevent querying extended status on first run as it takes long time and PINIed PVs will complain
+    bool basic_status = true;
+    bool first_run = true;
 
+    epicsTimeGetCurrent(&lastExtStatusUpdate);
     while (true) {
-        double refreshPeriod = 1.0; // Set default value for first run only
-        bool basic_status = true;
+        double refreshPeriod;
 
-        // Basic status query only in the first run
-        if (first_run == false) {
-            epicsTimeStamp now;
-            epicsTimeGetCurrent(&now);
-
-            this->lock();
-
-            // Determine whether extended status need to be refreshed
-            if (getDoubleParam(ExtStatusInt, &refreshPeriod) != asynSuccess)
-                refreshPeriod = DEFAULT_EXTENDED_STATUS_INTERVAL;
-            if (refreshPeriod < 1.0)
-                refreshPeriod = 1.0;
-            refreshPeriod -= 0.1; // compensate for the time difference between now and lastExtStatusUpdate are populated, 0.1 should be enough
-            if (epicsTimeDiffInSeconds(&now, &lastExtStatusUpdate) >= refreshPeriod) {
-                basic_status = false;
-                epicsTimeGetCurrent(&lastExtStatusUpdate);
-            }
-
-            // Determine refresh interval
-            if (getDoubleParam(StatusInt, &refreshPeriod) != asynSuccess)
-                refreshPeriod = DEFAULT_BASIC_STATUS_INTERVAL;
-            else if (refreshPeriod < 0.1) // prevent querying to often
-                refreshPeriod = 0.1;
-
-            this->unlock();
-        } else {
-            first_run = false;
-        }
+        if (!basic_status)
+            epicsTimeGetCurrent(&lastExtStatusUpdate);
 
         // This one can take long time to execute, don't lock the driver while it's executing
         ret = occ_status(m_occ, &occstatus, basic_status);
@@ -182,8 +158,6 @@ void OccPortDriver::refreshOccStatusThread()
             setIntegerParam(LastErr, -ret);
             LOG_ERROR("Failed to query OCC status: %s(%d)", strerror(-ret), ret);
         } else {
-            int val;
-
             setIntegerParam(BoardType,      occstatus.board);
             setIntegerParam(BoardFwVer,     occstatus.firmware_ver);
             setIntegerParam(BoardFwDate,    occstatus.firmware_date);
@@ -207,15 +181,51 @@ void OccPortDriver::refreshOccStatusThread()
             setIntegerParam(CopyBufUsed,    m_circularBuffer->used());
             setIntegerParam(CopyBufSize,    m_circularBuffer->size());
 
-            getIntegerParam(RxStalled,      &val);
-            setIntegerParam(RxStalled,      (occstatus.stalled ? val | STALL_DMA : val & ~STALL_DMA));
+            if (occstatus.stalled)
+                setIntegerParam(RxStalled,  STALL_DMA);
+            else if (occstatus.overflowed)
+                setIntegerParam(RxStalled,  STALL_FIFO);
         }
 
         callParamCallbacks();
 
+        if (first_run == false) {
+            // Set basic status as default, if signal is received before timeout
+            // or not time for extended status yet
+            basic_status = true;
+
+            // Determine refresh interval
+            if (getDoubleParam(StatusInt, &refreshPeriod) != asynSuccess)
+                refreshPeriod = DEFAULT_BASIC_STATUS_INTERVAL;
+            else if (refreshPeriod < 1.0) // prevent querying to often
+                refreshPeriod = 1.0;
+        } else {
+            // First run is completed and PINIed PVs are initialized and happy,
+            // execute second round with extended params right away
+            first_run = false;
+            refreshPeriod = 0.1;
+            lastExtStatusUpdate = { 0, 0 };
+        }
+
         this->unlock();
 
-        m_statusEvent.wait(refreshPeriod);
+        if (m_statusEvent.wait(refreshPeriod) == false) {
+            // Timer expired, check if we need to query extended status next round
+            epicsTimeStamp now;
+            epicsTimeGetCurrent(&now);
+
+            this->lock();
+            if (getDoubleParam(ExtStatusInt, &refreshPeriod) != asynSuccess)
+                refreshPeriod = DEFAULT_EXTENDED_STATUS_INTERVAL;
+            if (refreshPeriod < 1.0)
+                refreshPeriod = 1.0;
+            this->unlock();
+
+            if (epicsTimeDiffInSeconds(&now, &lastExtStatusUpdate) >= refreshPeriod) {
+                basic_status = false;
+                epicsTimeGetCurrent(&lastExtStatusUpdate);
+            }
+        }
     }
 }
 
@@ -292,7 +302,7 @@ void OccPortDriver::calculateDataRateOut(uint32_t consumed)
     this->unlock();
 }
 
-void OccPortDriver::reportRecvDataError(int ret)
+void OccPortDriver::handleRecvError(int ret)
 {
     this->lock();
     setIntegerParam(DataRateOut, 0);
@@ -300,15 +310,13 @@ void OccPortDriver::reportRecvDataError(int ret)
     if (ret == -EBADMSG) {
         setIntegerParam(Status, STAT_BAD_DATA);
     } else {
-        int val;
         setIntegerParam(LastErr, -ret);
-        getIntegerParam(RxStalled, &val);
-        if (ret == -EOVERFLOW) { // DMA buffer overflow
+        if (ret == -EOVERFLOW) { // DMA buffer full or FIFO overflow => OCC error
+            m_statusEvent.signal();
             setIntegerParam(Status, STAT_BUFFER_FULL);
-            setIntegerParam(RxStalled, val | STALL_DMA);
         } else if (ret == -ENOSPC) { // Local circular buffer is full
             setIntegerParam(Status, STAT_BUFFER_FULL);
-            setIntegerParam(RxStalled, val | STALL_COPY);
+            setIntegerParam(RxStalled, STALL_COPY);
         } else {
             setIntegerParam(Status, STAT_OCC_ERROR);
         }
@@ -338,7 +346,7 @@ void OccPortDriver::processOccDataThread()
             calculateDataRateOut(0);
             continue;
         } else if (ret != 0) {
-            reportRecvDataError(ret);
+            handleRecvError(ret);
             LOG_ERROR("Unable to receive data from OCC, stopped - %s(%d)\n", strerror(-ret), ret);
             break;
         }
@@ -378,7 +386,7 @@ void OccPortDriver::processOccDataThread()
 
         // Corrupted data check
         if (consumed == 0 && length > DasPacket::MinLength) {
-            reportRecvDataError(-EBADMSG);
+            handleRecvError(-EBADMSG);
             LOG_ERROR("Corrupted data in queue, aborting process thread");
             break;
         }

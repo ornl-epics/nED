@@ -40,9 +40,10 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="AcpcFemPlugin.cpp" />
+		<Unit filename="AcpcFemPlugin.h" />
 		<Unit filename="AdaraPlugin.cpp" />
 		<Unit filename="AdaraPlugin.h" />
-		<Unit filename="BaseCircularBuffer.cpp" />
 		<Unit filename="BaseCircularBuffer.h" />
 		<Unit filename="BaseModulePlugin.cpp" />
 		<Unit filename="BaseModulePlugin.h" />
@@ -71,6 +72,9 @@
 		<Unit filename="EpicsRegister.h" />
 		<Unit filename="FemPlugin.cpp" />
 		<Unit filename="FemPlugin.h" />
+		<Unit filename="Fifo.h" />
+		<Unit filename="GenericModulePlugin.cpp" />
+		<Unit filename="GenericModulePlugin.h" />
 		<Unit filename="Log.h" />
 		<Unit filename="OccPortDriver.cpp" />
 		<Unit filename="OccPortDriver.h" />
@@ -78,6 +82,9 @@
 		<Unit filename="ProxyPlugin.h" />
 		<Unit filename="RocPlugin.cpp" />
 		<Unit filename="RocPlugin.h" />
+		<Unit filename="RocPlugin_v51.cpp" />
+		<Unit filename="RocPlugin_v52.cpp" />
+		<Unit filename="RocPlugin_v54.cpp" />
 		<Unit filename="RtdlPlugin.cpp" />
 		<Unit filename="RtdlPlugin.h" />
 		<Unit filename="StatPlugin.cpp" />
