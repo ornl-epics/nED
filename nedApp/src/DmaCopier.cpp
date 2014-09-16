@@ -8,30 +8,18 @@
 
 DmaCopier::DmaCopier(struct occ_handle *occ, uint32_t bufferSize)
     : CircularBuffer(bufferSize)
-    , m_thread(*this, "DmaCopier", epicsThreadGetStackSize(epicsThreadStackBig), epicsThreadPriorityHigh)
+    , Thread("DmaCopier", std::bind(&DmaCopier::copyWorker, this, std::placeholders::_1), epicsThreadGetStackSize(epicsThreadStackBig), epicsThreadPriorityHigh)
     , m_occ(occ)
-    , m_shutdown(false)
 {
-    m_thread.start();
+    Thread::start();
 }
 
-DmaCopier::~DmaCopier()
+void DmaCopier::copyWorker(epicsEvent *shutdown)
 {
-    m_shutdown = true;
-    m_thread.exitWait();
-}
-
-void DmaCopier::run()
-{
-    while (true) {
+    while (shutdown->tryWait() == false) {
         void *data;
         size_t len;
         int status;
-
-        if (m_shutdown) {
-            wakeUpConsumer(-ESHUTDOWN);
-            break;
-        }
 
         if (full()) {
             // There's no space in circular buffer, give consumers some extra
@@ -53,7 +41,7 @@ void DmaCopier::run()
 
         len = CircularBuffer::push(data, len);
         if (len == 0) {
-            wakeUpConsumer(-ENOSPC);
+            wakeUpConsumer(-ENODATA);
             break;
         }
 

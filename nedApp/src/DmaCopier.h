@@ -1,21 +1,31 @@
 #ifndef DMA_COPIER_H
 #define DMA_COPIER_H
 
-#include <epicsThread.h>
-
 #include "CircularBuffer.h"
+#include "Thread.h"
 
 struct occ_handle;
 
-class DmaCopier : public epicsThreadRunable, public CircularBuffer {
+/**
+ * Thread moving data from DMA buffer to circular buffer
+ */
+class DmaCopier : public CircularBuffer, public Thread {
     public:
+        /**
+         * Create thread and initialize circular buffer
+         *
+         * @param[in] occ handle to OCC device
+         * @param[in] bufferSize size of circular buffer in bytes
+         */
         DmaCopier(struct occ_handle *occ, uint32_t bufferSize);
-        ~DmaCopier();
-        void run();
+
     private:
-        epicsThread m_thread;
         struct occ_handle *m_occ;
-        bool m_shutdown;
+
+        /**
+         * Worker function running in thread.
+         */
+        void copyWorker(epicsEvent *shutdown);
 };
 
 #endif // DMA_COPIER_H

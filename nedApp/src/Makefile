@@ -50,6 +50,7 @@ SHARED_LIBRARIES = NO
 INC += CircularBuffer.h
 
 $(PROD_NAME)_SRCS  += Timer.cpp
+$(PROD_NAME)_SRCS  += Thread.cpp
 $(PROD_NAME)_SRCS  += OccPortDriver.cpp
 $(PROD_NAME)_SRCS  += DmaCircularBuffer.cpp
 $(PROD_NAME)_SRCS  += CircularBuffer.cpp

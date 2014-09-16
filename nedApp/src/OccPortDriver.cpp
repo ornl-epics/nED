@@ -27,37 +27,21 @@ EPICS_REGISTER(Occ, OccPortDriver, 2, "Port name", string, "Local buffer size", 
 const float OccPortDriver::DEFAULT_BASIC_STATUS_INTERVAL = 5.0;     //!< How often to update frequent OCC status parameters
 const float OccPortDriver::DEFAULT_EXTENDED_STATUS_INTERVAL = 60.0; //!< How ofter to update less frequently changing OCC status parameters
 
-extern "C" {
-    static void processOccDataC(void *drvPvt)
-    {
-        OccPortDriver *driver = reinterpret_cast<OccPortDriver *>(drvPvt);
-        driver->processOccDataThread();
-    }
-    static void refreshOccStatusC(void *drvPvt)
-    {
-        OccPortDriver *driver = reinterpret_cast<OccPortDriver *>(drvPvt);
-        driver->refreshOccStatusThread();
-    }
-}
-
 OccPortDriver::OccPortDriver(const char *portName, uint32_t localBufferSize)
 	: asynPortDriver(portName, asynMaxAddr, NUM_OCCPORTDRIVER_PARAMS, asynInterfaceMask,
 	                 asynInterruptMask, asynFlags, asynAutoConnect, asynPriority, asynStackSize)
     , m_occ(NULL)
-    , m_occBufferReadThreadId(0)
 {
     int status;
 
     // Register params with asyn
-    createParam("Status",           asynParamInt32,     &Status);
-    createParam("LastErr",          asynParamInt32,     &LastErr);
+    createParam("Status",           asynParamInt32,     &Status,            STAT_OK);
+    createParam("LastErr",          asynParamInt32,     &LastErr,           0);
     createParam("BoardType",        asynParamInt32,     &BoardType);
     createParam("BoardFwVer",       asynParamInt32,     &BoardFwVer);
     createParam("BoardFwDate",      asynParamInt32,     &BoardFwDate);
     createParam("OpticsPresent",    asynParamInt32,     &OpticsPresent);
-    createParam("OpticsEnabled",    asynParamInt32,     &OpticsEnabled);
-    createParam("RxStalled",        asynParamInt32,     &RxStalled);
-    createParam("ErrPktsEnabled",   asynParamInt32,     &ErrPktsEnabled);
+    createParam("RxStalled",        asynParamInt32,     &RxStalled,         STALL_NONE);
     createParam("Command",          asynParamInt32,     &Command);
     createParam("FpgaTemp",         asynParamFloat64,   &FpgaTemp);
     createParam("FpgaCoreVolt",     asynParamFloat64,   &FpgaCoreVolt);
@@ -70,19 +54,23 @@ OccPortDriver::OccPortDriver(const char *portName, uint32_t localBufferSize)
     createParam("SfpTxPower",       asynParamFloat64,   &SfpTxPower);
     createParam("SfpVccPower",      asynParamFloat64,   &SfpVccPower);
     createParam("SfpTxBiasCur",     asynParamFloat64,   &SfpTxBiasCur);
-    createParam("StatusInt",        asynParamFloat64,   &StatusInt);
-    createParam("ExtStatusInt",     asynParamFloat64,   &ExtStatusInt);
+    createParam("StatusInt",        asynParamInt32,     &StatusInt,         DEFAULT_BASIC_STATUS_INTERVAL);
+    createParam("ExtStatusInt",     asynParamInt32,     &ExtStatusInt,      DEFAULT_EXTENDED_STATUS_INTERVAL);
     createParam("DmaBufUsed",       asynParamInt32,     &DmaBufUsed);
     createParam("DmaBufSize",       asynParamInt32,     &DmaBufSize);
     createParam("CopyBufUsed",      asynParamInt32,     &CopyBufUsed);
     createParam("CopyBufSize",      asynParamInt32,     &CopyBufSize);
     createParam("DataRateOut",      asynParamInt32,     &DataRateOut);
-
-    setIntegerParam(Status, STAT_OK);
-    setDoubleParam(StatusInt, DEFAULT_BASIC_STATUS_INTERVAL);
-    setDoubleParam(ExtStatusInt, DEFAULT_EXTENDED_STATUS_INTERVAL);
-    setIntegerParam(DataRateOut, 0);
-    setIntegerParam(RxStalled, STALL_NONE);
+    createParam("RxEn",             asynParamInt32,     &RxEn);
+    createParam("RxEnRbv",          asynParamInt32,     &RxEnRbv);
+    createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);
+    createParam("ErrPktEnRbv",      asynParamInt32,     &ErrPktEnRbv);
+    createParam("AutoReset",        asynParamInt32,     &AutoReset,         0);
+    createParam("RstCntBad",        asynParamInt32,     &RstCntBad,         0);
+    createParam("RstCntOvrflw",     asynParamInt32,     &RstCntOvrflw,      0);
+    createParam("RstCntDma",        asynParamInt32,     &RstCntDma,         0);
+    createParam("RstCntCopy",       asynParamInt32,     &RstCntCopy,        0);
+    createParam("RstCntErr",        asynParamInt32,     &RstCntErr,         0);
 
     // Initialize OCC board
     status = occ_open(portName, OCC_INTERFACE_OPTICAL, &m_occ);
@@ -91,8 +79,9 @@ OccPortDriver::OccPortDriver(const char *portName, uint32_t localBufferSize)
         setIntegerParam(Status, STAT_OCC_ERROR);
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "Unable to open OCC device - %s(%d)\n", strerror(-status), status);
         m_occ = NULL;
-        return;
     }
+
+    callParamCallbacks();
 
     // Start DMA copy thread or use DMA buffer directly
     if (localBufferSize > 0)
@@ -104,26 +93,29 @@ OccPortDriver::OccPortDriver(const char *portName, uint32_t localBufferSize)
         return;
     }
 
-    callParamCallbacks();
-
-    m_occStatusRefreshThreadId = epicsThreadCreate("OCC status",
-                                                   epicsThreadPriorityLow,
-                                                   epicsThreadGetStackSize(epicsThreadStackSmall),
-                                                   (EPICSTHREADFUNC)refreshOccStatusC,
-                                                   this);
-
-    m_occBufferReadThreadId = epicsThreadCreate(portName,
-                                                epicsThreadPriorityHigh,
-                                                epicsThreadGetStackSize(epicsThreadStackMedium),
-                                                (EPICSTHREADFUNC)processOccDataC,
-                                                this);
+    m_occBufferReadThread = new Thread(
+        "Process incoming data",
+        std::bind(&OccPortDriver::processOccDataThread, this, std::placeholders::_1),
+        epicsThreadGetStackSize(epicsThreadStackMedium),
+        epicsThreadPriorityHigh
+    );
+    m_occBufferReadThread->start();
+    m_occStatusRefreshThread = new Thread(
+        "OCC status",
+        std::bind(&OccPortDriver::refreshOccStatusThread, this, std::placeholders::_1),
+        epicsThreadGetStackSize(epicsThreadStackSmall),
+        epicsThreadPriorityLow
+    );
+    m_occStatusRefreshThread->start();
 }
 
 OccPortDriver::~OccPortDriver()
 {
-    // Kick threads out of waiting for OCC
-    occ_reset(m_occ);
+    m_occBufferReadThread->stop();
+    m_occStatusRefreshThread->stop();
 
+    delete m_occBufferReadThread;
+    delete m_occStatusRefreshThread;
     delete m_circularBuffer;
 
     if (m_occ) {
@@ -134,7 +126,7 @@ OccPortDriver::~OccPortDriver()
     }
 }
 
-void OccPortDriver::refreshOccStatusThread()
+void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
 {
     int ret;
     epicsTimeStamp lastExtStatusUpdate = { 0, 0 };
@@ -143,7 +135,7 @@ void OccPortDriver::refreshOccStatusThread()
     bool first_run = true;
 
     epicsTimeGetCurrent(&lastExtStatusUpdate);
-    while (true) {
+    while (shutdown->tryWait() == false) {
         double refreshPeriod;
 
         if (!basic_status)
@@ -162,8 +154,8 @@ void OccPortDriver::refreshOccStatusThread()
             setIntegerParam(BoardFwVer,     occstatus.firmware_ver);
             setIntegerParam(BoardFwDate,    occstatus.firmware_date);
             setIntegerParam(OpticsPresent,  occstatus.optical_signal);
-            setIntegerParam(OpticsEnabled,  occstatus.rx_enabled);
-            setIntegerParam(ErrPktsEnabled, occstatus.err_packets_enabled);
+            setIntegerParam(RxEnRbv,        occstatus.rx_enabled);
+            setIntegerParam(ErrPktEnRbv,    occstatus.err_packets_enabled);
             setDoubleParam(FpgaTemp,        occstatus.fpga_temp);
             setDoubleParam(FpgaCoreVolt,    occstatus.fpga_core_volt);
             setDoubleParam(FpgaAuxVolt,     occstatus.fpga_aux_volt);
@@ -234,30 +226,44 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     int ret;
     if (pasynUser->reason == Command) {
         switch (value) {
-        case CMD_OPTICS_ENABLE:
-        case CMD_OPTICS_DISABLE:
-            ret = occ_enable_rx(m_occ, value == CMD_OPTICS_ENABLE);
-            if (ret != 0) {
-                LOG_ERROR("Unable to %s optical link - %s(%d)", (value == CMD_OPTICS_ENABLE ? "enable" : "disable"), strerror(-ret), ret);
-                return asynError;
-            }
-            // There's a thread to refresh OCC status, including RX enabled
-            m_statusEvent.signal();
-            return asynSuccess;
-        case CMD_ERROR_PACKETS_ENABLE:
-        case CMD_ERROR_PACKETS_DISABLE:
-            ret = occ_enable_error_packets(m_occ, value == CMD_ERROR_PACKETS_ENABLE);
-            if (ret != 0) {
-                LOG_ERROR("Unable to %s error packets - %s(%d)", (value == CMD_ERROR_PACKETS_ENABLE ? "enable" : "disable"), strerror(-ret), ret);
-                return asynError;
-            }
-            // There's a thread to refresh OCC status, including error packets enabled
-            m_statusEvent.signal();
+        case CMD_RESET:
+            this->unlock();
+            reset();
+            this->lock();
             return asynSuccess;
         default:
             LOG_ERROR("Unrecognized command '%d'", value);
             return asynError;
         }
+    } else if (pasynUser->reason == RxEn) {
+        if ((ret = occ_enable_rx(m_occ, value > 0)) != 0) {
+            LOG_ERROR("Unable to %s optical link - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
+            setIntegerParam(LastErr, -ret);
+            callParamCallbacks();
+            return asynError;
+        }
+
+        if (value == 0) {
+            // RX could be switched off in the middle of the incoming packet.
+            // Second half of that packet would show up in the queue next time
+            // enabled. Calling occ_reset() to avoid it.
+            this->unlock();
+            reset();
+            this->lock();
+        } else {
+            // There's a thread to refresh OCC status, including RX enabled
+            m_statusEvent.signal();
+        }
+    } else if (pasynUser->reason == ErrPktEn) {
+        if ((ret = occ_enable_error_packets(m_occ, value > 0)) != 0) {
+            LOG_ERROR("Unable to %s error packets output - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
+            setIntegerParam(LastErr, -ret);
+            callParamCallbacks();
+            return asynError;
+        }
+
+        // There's a thread to refresh OCC status, including error packets enabled
+        m_statusEvent.signal();
     }
     return asynPortDriver::writeInt32(pasynUser, value);
 }
@@ -281,6 +287,14 @@ asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer
     return asynSuccess;
 }
 
+asynStatus OccPortDriver::createParam(const char *name, asynParamType type, int *index, int defaultValue)
+{
+    asynStatus status = asynPortDriver::createParam(name, type, index);
+    if (status == asynSuccess)
+        status = setIntegerParam(*index, defaultValue);
+    return status;
+}
+
 void OccPortDriver::calculateDataRateOut(uint32_t consumed)
 {
     epicsTimeStamp now;
@@ -302,30 +316,102 @@ void OccPortDriver::calculateDataRateOut(uint32_t consumed)
     this->unlock();
 }
 
+void OccPortDriver::reset() {
+    int rxEnabled = 0;
+    int errPktEnabled = 0;
+    DmaCopier *dmaCopier = 0;
+
+    try {
+        dmaCopier = dynamic_cast<DmaCopier *>(m_circularBuffer);
+    } catch (std::exception &e) {}
+
+    // Flag resetting mode, status thread will recover
+    this->lock();
+    setIntegerParam(Status, STAT_RESETTING);
+    callParamCallbacks();
+    getIntegerParam(RxEn, &rxEnabled);
+    getIntegerParam(ErrPktEn, &errPktEnabled);
+    this->unlock();
+
+    // Stop all threads and clear all states
+    if (dmaCopier)
+        dmaCopier->stop();
+    m_occBufferReadThread->stop();
+    m_circularBuffer->clear();
+
+    // Don't start threads on error, they would trigger another stall/corruption
+    if (occ_reset(m_occ) != 0)
+        return;
+
+    // Restore threads and other relevant params
+    if (dmaCopier)
+        dmaCopier->start();
+    m_occBufferReadThread->start();
+    if (rxEnabled > 0)
+        (void)occ_enable_rx(m_occ, true);
+    if (errPktEnabled)
+        (void)occ_enable_error_packets(m_occ, true);
+
+    // Refresh the status parameters
+    m_statusEvent.signal();
+
+    // Flag resetting mode, status thread will recover
+    this->lock();
+    setIntegerParam(Status, STAT_OK);
+    callParamCallbacks();
+    this->unlock();
+}
+
 void OccPortDriver::handleRecvError(int ret)
 {
+    int autoReset = 0;
+    int resetParam = 0;
+
     this->lock();
     setIntegerParam(DataRateOut, 0);
 
     if (ret == -EBADMSG) {
         setIntegerParam(Status, STAT_BAD_DATA);
+        resetParam = RstCntBad;
+
+    } else if (ret == -EOVERFLOW) { // OCC FIFO overflow
+        setIntegerParam(LastErr, EOVERFLOW);
+        setIntegerParam(Status, STAT_BUFFER_FULL);
+        setIntegerParam(RxStalled, STALL_FIFO);
+        resetParam = RstCntOvrflw;
+
+    } else if (ret == -ENOSPC) { // OCC DMA full
+        setIntegerParam(LastErr, ENOSPC);
+        setIntegerParam(Status, STAT_BUFFER_FULL);
+        setIntegerParam(RxStalled, STALL_DMA);
+        resetParam = RstCntDma;
+
+    } else if (ret == -ENODATA) { // DmaCopier full
+        setIntegerParam(Status, STAT_BUFFER_FULL);
+        setIntegerParam(RxStalled, STALL_COPY);
+        resetParam = RstCntCopy;
+
     } else {
         setIntegerParam(LastErr, -ret);
-        if (ret == -EOVERFLOW) { // DMA buffer full or FIFO overflow => OCC error
-            m_statusEvent.signal();
-            setIntegerParam(Status, STAT_BUFFER_FULL);
-        } else if (ret == -ENOSPC) { // Local circular buffer is full
-            setIntegerParam(Status, STAT_BUFFER_FULL);
-            setIntegerParam(RxStalled, STALL_COPY);
-        } else {
-            setIntegerParam(Status, STAT_OCC_ERROR);
-        }
+        setIntegerParam(Status, STAT_OCC_ERROR);
+        resetParam = RstCntErr;
     }
+
+    getIntegerParam(AutoReset, &autoReset);
+    if (autoReset) {
+        int value;
+        getIntegerParam(resetParam, &value);
+        setIntegerParam(resetParam, value+1);
+    }
+
     callParamCallbacks();
     this->unlock();
+
+    if (autoReset)
+        reset();
 }
 
-void OccPortDriver::processOccDataThread()
+void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 {
     void *data;
     uint32_t length;
@@ -337,7 +423,7 @@ void OccPortDriver::processOccDataThread()
     epicsTimeGetCurrent(&m_dataRateOutTime);
     m_dataRateOutCount = 0;
 
-    while (true) {
+    while (shutdown->tryWait() == false) {
         consumed = 0;
 
         // Wait for data, use a timeout for data rate out calculation

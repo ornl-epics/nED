@@ -48,6 +48,11 @@ CircularBuffer::~CircularBuffer()
     m_buffer = NULL;
 }
 
+void CircularBuffer::clear()
+{
+    m_consumer = m_producer = 0;
+}
+
 uint32_t CircularBuffer::push(void *data, uint32_t len)
 {
     uint32_t prod, cons;

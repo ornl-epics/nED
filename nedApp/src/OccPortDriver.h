@@ -3,6 +3,7 @@
 
 #include "BaseCircularBuffer.h"
 #include "DasPacketList.h"
+#include "Thread.h"
 
 #include <asynPortDriver.h>
 #include <epicsThread.h>
@@ -26,12 +27,11 @@ struct occ_handle;
  * asyn param    | asyn param type | init val | mode | Description                   |
  * ------------- | --------------- | -------- | ---- | ------------------------------
  * Status        | asynParamInt32  | 0        | RO   | Status of OccPortDriver       (0=OK,1=buffer full,2=OCC error,3=Data corrupted)
- * Command       | asynParamInt32  | 0        | RW   | Issue OccPortDriver command   (1=optics enable)
+ * Command       | asynParamInt32  | 0        | RW   | Issue OccPortDriver command   (0=no action,1=reset)
  * LastErr       | asynParamInt32  | 0        | RO   | Last error code returned by OCC API
  * BoardType     | asynParamInt32  | 0        | RO   | OCC board type                (1=SNS PCI-X,2=SNS PCIe,15=simulator)
  * BoardFwVer    | asynParamInt32  | 0        | RO   | OCC board firmware version
  * OpticsPresent | asynParamInt32  | 0        | RO   | Is optical cable present      (0=not present,1=present)
- * OpticsEnabled | asynParamInt32  | 0        | RO   | Is optical link enabled       (0=not enabled,1=enabled)
  * RxStalled     | asynParamInt32  | 0        | RO   | Incoming data stalled         (0=not stalled,1=OCC stalled,2=copy stalled,3=both stalled)
  * ErrCrc        | asynParamInt32  | 0        | RO   | Number of CRC errors detected by OCC
  * ErrLength     | asynParamInt32  | 0        | RO   | Number of length errors detected by OCC
@@ -44,13 +44,23 @@ struct occ_handle;
  * SfpTxPower    | asynParamFloat64| 0.0      | RO   | SFP TX power in uW
  * SfpVccPower   | asynParamFloat64| 0.0      | RO   | SFP VCC power in Volts
  * SfpTxBiasCur  | asynParamFloat64| 0.0      | RO   | SFP TX bias current in uA
- * StatusInt     | asynParamFloat64| 1.0      | RW   | OCC status refresh interval in s
- * ExtStatusInt  | asynParamFloat64| 60.0     | RW   | OCC extended status refresh interval in s
+ * StatusInt     | asynParamInt32  | 5        | RW   | OCC status refresh interval in s
+ * ExtStatusInt  | asynParamInt32  | 60       | RW   | OCC extended status refresh interval in s
  * DmaBufUsed    | asynParamInt32  | 0        | RO   | DMA memory used space
  * DmaBufSize    | asynParamInt32  | 0        | RO   | DMA memory size
  * CopyBufUsed   | asynParamInt32  | 0        | RO   | Virtual buffer used space
  * CopyBufSize   | asynParamInt32  | 0        | RO   | Virtual buffer size
  * DataRateOut   | asynParamInt32  | 0        | RO   | Data processing throughput in B/s
+ * RxEn          | asynParamInt32  | 0        | RW   | Enable incoming data          (0=disable,1=enable)
+ * RxEnRbv       | asynParamInt32  | 0        | RO   | Incoming data enabled         (0=disabled,1=enabled)
+ * ErrPktEn      | asynParamInt32  | 0        | RW   | Error packets output switch   (0=disable,1=enable)
+ * ErrPktEnRbv   | asynParamInt32  | 0        | RO   | Error packets enabled         (0=disabled,1=enabled)
+ * AutoReset     | asynParamInt32  | 0        | RW   | Auto reset on error switch    (0=disable,1=enable)
+ * RstCntBad     | asynParamInt32  | 0        | RO   | Num corrupted queue auto-resets
+ * RstCntOvrflw  | asynParamInt32  | 0        | RO   | Num FIFO overflow auto-resets
+ * RstCntDma     | asynParamInt32  | 0        | RO   | Num DMA full auto-resets
+ * RstCndCopy    | asynParamInt32  | 0        | RO   | Num buffer full auto-resets
+ * RstCntErr     | asynParamInt32  | 0        | RO   | Num OCC error auto-resets
  */
 class epicsShareFunc OccPortDriver : public asynPortDriver {
     private:
@@ -62,6 +72,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
             STAT_BUFFER_FULL    = 1,    //!< Receive buffer is full, acquisition was stopped
             STAT_OCC_ERROR      = 2,    //!< OCC error was detected
             STAT_BAD_DATA       = 3,    //!< Bad or corrupted data detected in queue
+            STAT_RESETTING      = 4,    //!< Resetting OCC and internal OccPortDriver state
         };
 
         /**
@@ -78,10 +89,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          * Recognized command values through Command parameter.
          */
         enum {
-            CMD_OPTICS_ENABLE           = 1,    //!< Enable optical link
-            CMD_OPTICS_DISABLE          = 2,    //!< Disable optical link
-            CMD_ERROR_PACKETS_ENABLE    = 3,    //!< Report link errors as verbose error packets
-            CMD_ERROR_PACKETS_DISABLE   = 4,    //!< Don't report link errors as error packets
+            CMD_RESET           = 1,    //!< Reset OCC device and internal state
         };
 
 	public:
@@ -106,8 +114,8 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
 
         struct occ_handle *m_occ;
         BaseCircularBuffer *m_circularBuffer;
-        epicsThreadId m_occBufferReadThreadId;
-        epicsThreadId m_occStatusRefreshThreadId;
+        Thread *m_occBufferReadThread;
+        Thread *m_occStatusRefreshThread;
         epicsEvent m_statusEvent;
         epicsTimeStamp m_dataRateOutTime;                       //!< Used to track time since last DataRateOut parameter calculation, private to calculateDataRateOut() function
         uint32_t m_dataRateOutCount;                            //!< Used to track number of bytes since last DataRateOut parameter calculation, private to calculateDataRateOut() function
@@ -130,7 +138,13 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         /**
          * Overloaded method.
          */
-		asynStatus writeGenericPointer (asynUser *pasynUser, void *pointer);
+		asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
+
+        /**
+         * Helper function to create output asynPortDriver param with default value.
+         */
+        asynStatus createParam(const char *name, asynParamType type, int *index, int defaultValue);
+        using asynPortDriver::createParam;
 
         /**
          * Calculate data processing rate
@@ -142,7 +156,13 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
 		 */
 		void handleRecvError(int ret);
 
-    public:
+        /**
+         * Reset OCC device and all internal states, including restarting read threads.
+         *
+         * This function must not be called during global lock.
+         */
+        void reset();
+
         /**
          * Process data from OCC buffer and dispatch it to the registered plugins.
          *
@@ -150,11 +170,8 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          * list of packets and send the list to the registered plugins. Wait for all
          * plugins to complete processing it and than advance OCC buffer consumer
          * index for the amount of bytes processed. Start monitoring again.
-         *
-         * Runs from the worker thread through C static linkage, this function
-         * must be public.
          */
-        void processOccDataThread();
+        void processOccDataThread(epicsEvent *shutdown);
 
         /**
          * Thread refreshing OCC status periodically.
@@ -166,11 +183,8 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          * expires, it queries for OCC status and updates all the parameters. If the
          * ExtStatusInt also expired, it will also query for parameters which take longer
          * to update but are not required to refresh frequently.
-         *
-         * Runs from the worker thread through C static linkage, this function
-         * must be public.
          */
-        void refreshOccStatusThread();
+        void refreshOccStatusThread(epicsEvent *shutdown);
 
     private:
         #define FIRST_OCCPORTDRIVER_PARAM Status
@@ -181,9 +195,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         int BoardFwVer;
         int BoardFwDate;
         int OpticsPresent;
-        int OpticsEnabled;
         int RxStalled;
-        int ErrPktsEnabled;
         int FpgaTemp;
         int FpgaCoreVolt;
         int FpgaAuxVolt;
@@ -202,7 +214,17 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         int CopyBufUsed;
         int CopyBufSize;
         int DataRateOut;
-        #define LAST_OCCPORTDRIVER_PARAM DataRateOut
+        int RxEn;
+        int RxEnRbv;
+        int ErrPktEn;
+        int ErrPktEnRbv;
+        int AutoReset;
+        int RstCntBad;
+        int RstCntOvrflw;
+        int RstCntDma;
+        int RstCntCopy;
+        int RstCntErr;
+        #define LAST_OCCPORTDRIVER_PARAM RstCntErr
 };
 
 #endif // OCCPORTDRIVER_H

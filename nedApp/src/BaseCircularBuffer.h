@@ -14,6 +14,11 @@ class BaseCircularBuffer {
         virtual ~BaseCircularBuffer() {}
 
         /**
+         * Remove data from buffer and reset indexes.
+         */
+        virtual void clear() { };
+
+        /**
          * Copy data from memory area data to the circular buffer.
          *
          * @param[in] data Pointer to the start of the source buffer.
