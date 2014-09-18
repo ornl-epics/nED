@@ -161,6 +161,12 @@ class BasePlugin : public asynPortDriver {
         virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
+         * Helper function to create output asynPortDriver param with initial value set.
+         */
+        asynStatus createParam(const char *name, asynParamType type, int *index, int initValue);
+        using asynPortDriver::createParam;
+
+        /**
          * Send single packet to the dispatcher to transmit it through optics.
          *
          * This is always blocking call, it will only return when the dispatcher

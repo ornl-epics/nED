@@ -103,6 +103,14 @@ asynStatus BasePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return asynPortDriver::writeInt32(pasynUser, value);
 }
 
+asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *index, int initValue)
+{
+    asynStatus status = asynPortDriver::createParam(name, type, index);
+    if (status == asynSuccess && type == asynParamInt32)
+        status = setIntegerParam(*index, initValue);
+    return status;
+}
+
 void BasePlugin::dispatcherCallback(asynUser *pasynUser, void *genericPointer)
 {
     DasPacketList *packetList = reinterpret_cast<DasPacketList *>(genericPointer);

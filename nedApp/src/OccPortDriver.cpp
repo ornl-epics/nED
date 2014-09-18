@@ -24,8 +24,8 @@ static const int asynStackSize     = 0;
 
 EPICS_REGISTER(Occ, OccPortDriver, 2, "Port name", string, "Local buffer size", int);
 
-const float OccPortDriver::DEFAULT_BASIC_STATUS_INTERVAL = 5.0;     //!< How often to update frequent OCC status parameters
-const float OccPortDriver::DEFAULT_EXTENDED_STATUS_INTERVAL = 60.0; //!< How ofter to update less frequently changing OCC status parameters
+const int OccPortDriver::DEFAULT_BASIC_STATUS_INTERVAL = 5;     //!< How often to update frequent OCC status parameters
+const int OccPortDriver::DEFAULT_EXTENDED_STATUS_INTERVAL = 60; //!< How ofter to update less frequently changing OCC status parameters
 
 OccPortDriver::OccPortDriver(const char *portName, uint32_t localBufferSize)
 	: asynPortDriver(portName, asynMaxAddr, NUM_OCCPORTDRIVER_PARAMS, asynInterfaceMask,
@@ -136,7 +136,7 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
 
     epicsTimeGetCurrent(&lastExtStatusUpdate);
     while (shutdown->tryWait() == false) {
-        double refreshPeriod;
+        int refreshPeriod;
 
         if (!basic_status)
             epicsTimeGetCurrent(&lastExtStatusUpdate);
@@ -187,15 +187,15 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             basic_status = true;
 
             // Determine refresh interval
-            if (getDoubleParam(StatusInt, &refreshPeriod) != asynSuccess)
+            if (getIntegerParam(StatusInt, &refreshPeriod) != asynSuccess)
                 refreshPeriod = DEFAULT_BASIC_STATUS_INTERVAL;
-            else if (refreshPeriod < 1.0) // prevent querying to often
-                refreshPeriod = 1.0;
+            else if (refreshPeriod < 1) // prevent querying to often
+                refreshPeriod = 1;
         } else {
             // First run is completed and PINIed PVs are initialized and happy,
             // execute second round with extended params right away
             first_run = false;
-            refreshPeriod = 0.1;
+            refreshPeriod = 0;
             lastExtStatusUpdate = { 0, 0 };
         }
 
@@ -207,10 +207,10 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             epicsTimeGetCurrent(&now);
 
             this->lock();
-            if (getDoubleParam(ExtStatusInt, &refreshPeriod) != asynSuccess)
+            if (getIntegerParam(ExtStatusInt, &refreshPeriod) != asynSuccess)
                 refreshPeriod = DEFAULT_EXTENDED_STATUS_INTERVAL;
-            if (refreshPeriod < 1.0)
-                refreshPeriod = 1.0;
+            if (refreshPeriod < 1)
+                refreshPeriod = 1;
             this->unlock();
 
             if (epicsTimeDiffInSeconds(&now, &lastExtStatusUpdate) >= refreshPeriod) {

@@ -119,8 +119,8 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         epicsEvent m_statusEvent;
         epicsTimeStamp m_dataRateOutTime;                       //!< Used to track time since last DataRateOut parameter calculation, private to calculateDataRateOut() function
         uint32_t m_dataRateOutCount;                            //!< Used to track number of bytes since last DataRateOut parameter calculation, private to calculateDataRateOut() function
-        static const float DEFAULT_BASIC_STATUS_INTERVAL;
-        static const float DEFAULT_EXTENDED_STATUS_INTERVAL;
+        static const int DEFAULT_BASIC_STATUS_INTERVAL;
+        static const int DEFAULT_EXTENDED_STATUS_INTERVAL;
 
         /**
          * Send list of packets to the plugins.
