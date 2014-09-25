@@ -21,8 +21,11 @@
 
 EPICS_BASE=/home/controls/epics/R3.14.12.2/base
 SUPPORT=/home/controls/epics/R3.14.12.2/support
+BASEV4=/home/controls/epics/basev4/master
 
 ASYN=           $(SUPPORT)/asyn
 AUTOSAVE=       $(SUPPORT)/autosave
 STREAMDEVICE=   $(SUPPORT)/StreamDevice
 OCCLIB=         /home/controls/occ/lib
+
+include $(BASEV4)/RELEASE.local

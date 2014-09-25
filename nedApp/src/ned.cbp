@@ -51,6 +51,8 @@
 		<Unit filename="BasePlugin.h" />
 		<Unit filename="BaseSocketPlugin.cpp" />
 		<Unit filename="BaseSocketPlugin.h" />
+		<Unit filename="CalibrationPlugin.cpp" />
+		<Unit filename="CalibrationPlugin.h" />
 		<Unit filename="CircularBuffer.cpp" />
 		<Unit filename="CircularBuffer.h" />
 		<Unit filename="CmdDispatcher.cpp" />

@@ -9,7 +9,7 @@ epicsEnvSet("STREAM_PROTOCOL_PATH", "../../protocol/")
 
 ## Register all support components
 dbLoadDatabase("../../dbd/ned.dbd",0,0)
-ned_registerRecordDeviceDriver(pdbbase) 
+ned_registerRecordDeviceDriver(pdbbase)
 
 # Autosave
 epicsEnvSet SAVE_DIR /home/controls/var/$(IOCNAME)
@@ -43,6 +43,9 @@ ProxyPluginConfigure("proxy1", "$(OCC1)")
 dbLoadRecords("../../db/BaseSocketPlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 
+CalibrationPluginConfigure("Calibration1", "$(OCC1)")
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:cal1:,PORT=Calibration1")
+
 #DspPluginConfigure("Dsp1", "$(OCC1)", "0x15FA76DF")
 DspPluginConfigure("Dsp1", "cmd", "21.250.118.223", "v63", 0)
 dbLoadRecords("../../db/DspPlugin.template","P=$(PREFIX)Det:dsp1:,PORT=Dsp1")
@@ -53,7 +56,7 @@ dbLoadRecords("../../db/DiscoverPlugin.template","P=$(PREFIX)Det:disc:,PORT=Disc
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:disc:,PORT=Disc")
 
 RocPluginConfigure("roc1", "cmd", "20.39.216.73", "v52", 0)
-dbLoadRecords("../../db/ROCHV.db","P=$(PREFIX)Det:HV1,G=$(PREFIX)Det:HVG,PORT=roc1")
+#dbLoadRecords("../../db/ROCHV.db","P=$(PREFIX)Det:HV1,G=$(PREFIX)Det:HVG,PORT=roc1")
 dbLoadRecords("../../db/RocPlugin_v52.template","P=$(PREFIX)Det:roc1:,PORT=roc1")
 dbLoadRecords("../../db/BaseModulePlugin.template","P=$(PREFIX)Det:roc1:,PORT=roc1")
 
@@ -61,9 +64,9 @@ DumpPluginConfigure("dump", "$(OCC1)", 0)
 dbLoadRecords("../../db/DumpPlugin.template","P=$(PREFIX)Det:dump:,PORT=dump")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:dump:,PORT=dump")
 
-StatPluginConfigure("stat", "$(OCC1)", 0)
-dbLoadRecords("../../db/StatPlugin.template","P=$(PREFIX)Det:stat:,PORT=stat")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:stat:,PORT=stat")
+StatPluginConfigure("stat1", "$(OCC1)", 0)
+dbLoadRecords("../../db/StatPlugin.db","P=$(PREFIX)Det:stat1:,PORT=stat1")
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:stat1:,PORT=stat1")
 
 RtdlPluginConfigure("rtdl", "$(OCC1)", 0)
 dbLoadRecords("../../db/RtdlPlugin.template","P=$(PREFIX)Det:rtdl:,PORT=rtdl")
@@ -93,5 +96,9 @@ create_monitor_set("$(IOCNAME).req", 30)
 save_restoreShow(10)
 
 # Fanout record for init in HVROC.db instead of PINI mechanism
-epicsThreadSleep 1 
-dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
+epicsThreadSleep 1
+#dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
+
+startPVAServer
+
+pvdbl
