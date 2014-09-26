@@ -83,7 +83,7 @@ record(mbbo, "$(P)CmdReq")
 {
     field(DESC, "Send command to module")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))Command")
+    field(OUT,  "@asyn($(PORT))CmdReq")
     field(ZRVL, "0")
     field(ZRST, "Reset")
     field(ONVL, "128")
