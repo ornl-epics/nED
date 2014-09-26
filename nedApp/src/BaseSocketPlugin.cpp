@@ -1,3 +1,12 @@
+/* BaseSocketPlugin.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "BaseSocketPlugin.h"
 #include "Log.h"
 
@@ -235,7 +244,7 @@ void BaseSocketPlugin::disconnectClient()
 float BaseSocketPlugin::checkClient()
 {
     if (!isClientConnected()) {
-	    connectClient();
+        connectClient();
     }
 
     int delay;

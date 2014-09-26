@@ -1,3 +1,12 @@
+/* BasePlugin.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "BasePlugin.h"
 #include "DasPacketList.h"
 #include "Log.h"
@@ -29,8 +38,8 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortName, int
                        int numParams, int maxAddr, int interfaceMask,
                        int interruptMask, int asynFlags, int autoConnect,
                        int priority, int stackSize)
-	: asynPortDriver(portName, maxAddr, NUM_BASEPLUGIN_PARAMS + numParams, interfaceMask | defaultInterfaceMask,
-	                 interruptMask | defaultInterruptMask, asynFlags, autoConnect, priority, stackSize)
+    : asynPortDriver(portName, maxAddr, NUM_BASEPLUGIN_PARAMS + numParams, interfaceMask | defaultInterfaceMask,
+                     interruptMask | defaultInterruptMask, asynFlags, autoConnect, priority, stackSize)
     , m_portName(portName)
     , m_dispatcherPortName(dispatcherPortName)
     , m_asynGenericPointerInterrupt(0)

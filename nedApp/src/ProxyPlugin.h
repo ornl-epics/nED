@@ -1,3 +1,12 @@
+/* ProxyPlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef PROXY_PLUGIN_H
 #define PROXY_PLUGIN_H
 
@@ -35,10 +44,10 @@ class ProxyPlugin : public BaseSocketPlugin {
     public:
         /**
          * Constructor
-	     *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-	     * @param[in] blocking Should processing of callbacks block execution of caller thread or not.
+         *
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] blocking Should processing of callbacks block execution of caller thread or not.
          */
         ProxyPlugin(const char *portName, const char *dispatcherPortName, int blocking);
 

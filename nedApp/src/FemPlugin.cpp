@@ -1,3 +1,12 @@
+/* FemPlugin.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "FemPlugin.h"
 #include "Log.h"
 
@@ -205,7 +214,7 @@ void FemPlugin::createStatusParams_V10()
     createStatusParam("CtrlDatCmdEr",   0x5,  1,  1); // CTRL DATA/COMMAND type err    (0=no error,1=error)
     createStatusParam("CtrlParityEr",   0x5,  1,  0); // CTRL parity error             (0=no error,1=error)
 
-    // Verify, dcomserver thinks 	{SYSLEVEL_WARN,			{7,7,-1},{6,8,-1},	CHECK_VALUE,	"Filtered NACKs"},
+    // Verify, dcomserver thinks     {SYSLEVEL_WARN,            {7,7,-1},{6,8,-1},    CHECK_VALUE,    "Filtered NACKs"},
     createStatusParam("FilterdNacks",   0x6,  8,  0); // Filtered NACKS
 
     createStatusParam("Ch8GotCmd",      0x7,  1, 15); // Chan8 got command packet      (0=no,1=yes)

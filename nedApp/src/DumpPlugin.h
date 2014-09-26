@@ -1,3 +1,12 @@
+/* DumpPlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef DUMP_PLUGIN_H
 #define DUMP_PLUGIN_H
 
@@ -38,8 +47,8 @@ class DumpPlugin : public BasePlugin {
          *
          * Only initialize parameters in constructor, don't open the file.
          *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
         DumpPlugin(const char *portName, const char *dispatcherPortName, int blocking);

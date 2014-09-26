@@ -1,3 +1,12 @@
+/* DspPlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef DSP_PLUGIN_H
 #define DSP_PLUGIN_H
 
@@ -30,9 +39,9 @@ class DspPlugin : public BaseModulePlugin {
          *
          * Constructor will create and populate PVs with default values.
          *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-	     * @param[in] hardwareId Hardware ID of the DSP module, can be in IP format (xxx.xxx.xxx.xxx) or
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] hardwareId Hardware ID of the DSP module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version Configured module version, must match the actual version
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.

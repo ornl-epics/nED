@@ -1,3 +1,12 @@
+/* BasePlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef PLUGIN_DRIVER_H
 #define PLUGIN_DRIVER_H
 
@@ -85,9 +94,9 @@ class Timer;
  * DataMode      | asynParamInt32  | 0        | RW   | Data format mode, see BasePvaPlugin::DataMode
  */
 class BasePlugin : public asynPortDriver {
-	public:
-	    static const int defaultInterfaceMask = asynInt32Mask | asynGenericPointerMask | asynDrvUserMask;
-	    static const int defaultInterruptMask = asynInt32Mask;
+    public:
+        static const int defaultInterfaceMask = asynInt32Mask | asynGenericPointerMask | asynDrvUserMask;
+        static const int defaultInterruptMask = asynInt32Mask;
 
         /**
          * Detector data modes.

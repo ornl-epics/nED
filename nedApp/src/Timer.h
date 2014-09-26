@@ -1,3 +1,12 @@
+/* Timer.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef TIMER_H
 #define TIMER_H
 

@@ -1,3 +1,12 @@
+/* ProxyPlugin.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "ProxyPlugin.h"
 
 #include <poll.h>
