@@ -1,5 +1,6 @@
 #include "BasePlugin.h"
 #include "DasPacketList.h"
+#include "Log.h"
 #include "Timer.h"
 
 #include <epicsThread.h>
@@ -44,12 +45,10 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortName, int
     m_pasynuser->reason = reason;
 
     createParam("Enable",       asynParamInt32,     &Enable); // Plugin does not receive any data until callbacks are enabled
-    createParam("ProcCount",    asynParamInt32,     &ProcCount);
-    createParam("RxCount",      asynParamInt32,     &RxCount);
-    createParam("TxCount",      asynParamInt32,     &TxCount);
-
-    setIntegerParam(ProcCount,  0);
-    setIntegerParam(RxCount,    0);
+    createParam("ProcCount",    asynParamInt32,     &ProcCount, 0);
+    createParam("RxCount",      asynParamInt32,     &RxCount,   0);
+    createParam("TxCount",      asynParamInt32,     &TxCount,   0);
+    createParam("DataMode",     asynParamInt32,     &DataModeP, DATA_MODE_NORMAL);
 
     // Connect to dispatcher port permanently. Don't allow connecting to different port at runtime.
     // Callbacks need to be enabled separately in order to actually get triggered from dispatcher.
@@ -98,6 +97,17 @@ asynStatus BasePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == Enable) {
         if (enableCallbacks(value > 0) == false)
             return asynError;
+    } else if (pasynUser->reason == DataModeP) {
+        switch (value) {
+        case DATA_MODE_NORMAL:
+        case DATA_MODE_RAW:
+        case DATA_MODE_VERBOSE:
+            m_dataMode = static_cast<DataMode>(value);
+            break;
+        default:
+            LOG_ERROR("Ignoring invalid output mode %d", value);
+            return asynError;
+        }
     }
 
     return asynPortDriver::writeInt32(pasynUser, value);

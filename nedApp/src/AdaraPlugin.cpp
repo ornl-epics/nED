@@ -52,6 +52,9 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
 {
     uint32_t outpacket[10];
 
+    if (getDataMode() != DATA_MODE_NORMAL)
+        return;
+
     for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
         m_nReceived++;
 

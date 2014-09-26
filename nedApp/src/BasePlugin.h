@@ -79,25 +79,41 @@ class Timer;
  * asyn param    | asyn param type | init val | mode | Description                   |
  * ------------- | --------------- | -------- | ---- | ------------------------------
  * Enable        | asynParamInt32  | 0        | RW   | Enable or disable plugin
+ * TxCount       | asynParamInt32  | 0        | RO   | Number of sent packets
  * RxCount       | asynParamInt32  | 0        | RO   | Number of packets received
  * ProcCount     | asynParamInt32  | 0        | RO   | Number of packets processed
+ * DataMode      | asynParamInt32  | 0        | RW   | Data format mode, see BasePvaPlugin::DataMode
  */
 class BasePlugin : public asynPortDriver {
 	public:
 	    static const int defaultInterfaceMask = asynInt32Mask | asynGenericPointerMask | asynDrvUserMask;
 	    static const int defaultInterruptMask = asynInt32Mask;
 
-	    /**
-	     * Constructor
-	     *
-	     * Initialize internal state of the class. This includes calling asynPortDriver
-	     * constructor, creating and setting default values for class parameters and creating
-	     * worker thread for received data callbacks. It does not, however, register to the
-	     * dispatcher messages. It needs to be manually enabled by the derived classes after
+        /**
+         * Detector data modes.
+         *
+         * Detectors can output data in various formats based on the configuration.
+         * They can switch between these values. The data format depends on the
+         * detector type.
+         */
+        typedef enum {
+            DATA_MODE_NORMAL    = 0, //!< Usually provides at least tof,pixel id
+            DATA_MODE_RAW       = 1, //!< Raw sample values
+            DATA_MODE_VERBOSE   = 2, //!< Usually raw sample values and the calculated pixel id
+            DATA_MODE_EXTENDED  = 2, //!< Typically single sample at multiple times, for testing detector firmware
+        } DataMode;
+
+        /**
+         * Constructor
+         *
+         * Initialize internal state of the class. This includes calling asynPortDriver
+         * constructor, creating and setting default values for class parameters and creating
+         * worker thread for received data callbacks. It does not, however, register to the
+         * dispatcher messages. It needs to be manually enabled by the derived classes after
          * BasePlugin object has been fully constructed or through Enable asyn parameter.
-	     *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         *
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] reason Type of the messages to receive callbacks for.
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          * @param[in] numParams The number of parameters that the derived class supports.
@@ -108,16 +124,16 @@ class BasePlugin : public asynPortDriver {
          * @param[in] autoConnect The autoConnect flag for the asyn port driver.
          * @param[in] priority The thread priority for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          * @param[in] stackSize The stack size for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
-	     */
+         */
         BasePlugin(const char *portName, const char *dispatcherPortName, int reason, int blocking=0,
                    int numParams=0, int maxAddr=1, int interfaceMask=BasePlugin::defaultInterfaceMask,
                    int interruptMask=BasePlugin::defaultInterruptMask, int asynFlags=0, int autoConnect=1,
                    int priority=0, int stackSize=0);
 
-		/**
-		 * Destructor.
-		 */
-		virtual ~BasePlugin() = 0;
+        /**
+         * Destructor.
+         */
+        virtual ~BasePlugin() = 0;
 
         /**
          * Process the DAS packets received from the dispatcher.
@@ -215,6 +231,20 @@ class BasePlugin : public asynPortDriver {
          */
         bool enableCallbacks(bool enable);
 
+        /**
+         * Return current data mode.
+         *
+         * Data mode can be switched through DataMode PV. It tells how
+         * the incoming OCC data should be parsed. Detectors must be switched
+         * to the same mode or parsing data will be erronous. DasPacket does
+         * not provide information what it contains.
+         *
+         * Default data mode is DATA_MODE_NORMAL until switched using DataMode PV.
+         *
+         * @return Currently configured data mode.
+         */
+        inline DataMode getDataMode() { return m_dataMode; };
+
     protected:
         asynUser *m_pasynuser;                      //!< asynUser handler for asyn management
         std::string m_portName;                     //!< Port name
@@ -226,6 +256,7 @@ class BasePlugin : public asynPortDriver {
         epicsThreadId m_threadId;                   //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
         std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
+        DataMode m_dataMode;                        //!< Member copy of DataMode parameter, used often in processData() - needs to be efficient
 
         /**
          * Called from epicsTimer when timer expires.
@@ -253,7 +284,8 @@ class BasePlugin : public asynPortDriver {
         int RxCount;
         int TxCount;        //!< Number of sent commands
         int ProcCount;
-        #define LAST_BASEPLUGIN_PARAM ProcCount
+        int DataModeP;      //!< Currently selected data mode
+        #define LAST_BASEPLUGIN_PARAM DataModeP
 };
 
 #endif // PLUGIN_DRIVER_H

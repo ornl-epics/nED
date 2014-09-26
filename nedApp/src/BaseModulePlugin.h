@@ -59,12 +59,16 @@
  *
  * Commands can be issued independently from each other as long as
  * response for the previous command was received or timed out.
+ * Command can be issued using CmdReq PV which atomically sends
+ * OCC command to the module and switches CmdRsp PV to waiting state.
+ * Reading the CmdRsp PV immediately after writing CmdReq will
+ * @b always give accurate last command status.
  *
  * General plugin parameters:
  * asyn param    | asyn param type | init val | mode | Description
  * ------------- | --------------- | -------- | ---- | -----------
  * HwId          | asynParamInt32  | 0        | RO   | Connected module hardware id
- * LastCmdRsp    | asynParamInt32  | 0        | RO   | Last command response status   (see LastCommandResponse for valid values)
+ * CmdRsp        | asynParamInt32  | 0        | RO   | Last command response status   (see LastCommandResponse for valid values)
  * Command       | asynParamInt32  | 0        | RW   | Issue RocPlugin command        (see DasPacket::CommandType for valid values)
  * Supported     | asynParamInt32  | 0        | RO   | Flag whether module is supported
  * Verified      | asynParamInt32  | 0        | RO   | Flag whether module type and version were verified
@@ -465,9 +469,9 @@ class BaseModulePlugin : public BasePlugin {
         void recalculateConfigParams();
 
     protected:
-        #define FIRST_BASEMODULEPLUGIN_PARAM Command
-        int Command;        //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
-        int LastCmdRsp;     //!< Last command response status
+        #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
+        int CmdReq;         //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
+        int CmdRsp;         //!< Last command response status
         int HardwareVer;    //!< Module hardware version
         int HardwareRev;    //!< Module hardware revision
         int HardwareDate;   //!< Module hardware date
