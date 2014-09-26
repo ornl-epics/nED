@@ -73,6 +73,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
             STAT_OCC_ERROR      = 2,    //!< OCC error was detected
             STAT_BAD_DATA       = 3,    //!< Bad or corrupted data detected in queue
             STAT_RESETTING      = 4,    //!< Resetting OCC and internal OccPortDriver state
+            STAT_OCC_NOT_INIT   = 5,    //!< OCC device not initialized, check LastErr for details
         };
 
         /**
@@ -97,11 +98,12 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
 	     * Constructor
 	     *
 	     * @param[in] portName Name of the asyn port to which plugins can connect
+         * @param[in] devfile Absolute path to OCC device file
 	     * @param[in] localBufferSize If not zero, a local buffer will be created
 	     *            where all data from OCC DMA buffer will be copied to as soon
 	     *            as it is available.
 	     */
-		OccPortDriver(const char *portName, uint32_t localBufferSize);
+		OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize);
 
 		/**
 		 * Destructor
