@@ -23,10 +23,10 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("timeStamp", standardField->timeStamp())
         ->add("tof", standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("pixel", standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sampleA", standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sampleB", standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->createStructure()
     );
-
-    new PvaNeutronData(recordName, pvStructure);
 
     PvaNeutronData::shared_pointer pvRecord(new PvaNeutronData(recordName, pvStructure));
     if (pvRecord && !pvRecord->init())
@@ -63,6 +63,14 @@ bool PvaNeutronData::init()
 
     pixel = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("pixel.value");
     if (pixel.get() == NULL)
+        return false;
+
+    sampleA = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sampleA.value");
+    if (sampleA.get() == NULL)
+        return false;
+
+    sampleB = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sampleB.value");
+    if (sampleB.get() == NULL)
         return false;
 
     return true;

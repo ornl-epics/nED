@@ -24,7 +24,7 @@ BasePvaPlugin::~BasePvaPlugin()
 asynStatus BasePvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Enable) {
-        if (value > 0 || !m_pvRecord) {
+        if (value > 0 && !m_pvRecord) {
             LOG_ERROR("Can't enable plugin, PV record not initialized");
             return asynError;
         }

@@ -79,6 +79,9 @@ GenericModulePluginConfigure("gm", "cmd", 0)
 dbLoadRecords("../../db/GenericModulePlugin.template","P=$(PREFIX)Det:gm:,PORT=gm")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:gm:,PORT=gm")
 
+ArocPvaPluginConfigure("ArocPva", "occ1", 0)
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:arpv:,PORT=ArocPva")
+
 iocInit()
 
 # Create request file and start periodic 'save'
@@ -93,3 +96,6 @@ save_restoreShow(10)
 # Fanout record for init in HVROC.db instead of PINI mechanism
 epicsThreadSleep 1 
 dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
+
+casr
+startPVAServer
