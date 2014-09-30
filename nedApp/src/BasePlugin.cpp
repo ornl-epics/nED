@@ -22,11 +22,6 @@
 /* Helper C functions for asyn/EPICS registration
  */
 extern "C" {
-    static void processDataThread(void *drvPvt)
-    {
-        BasePlugin *plugin = reinterpret_cast<BasePlugin *>(drvPvt);
-        plugin->processDataThread();
-    }
     static void dispatcherCallback(void *drvPvt, asynUser *pasynUser, void *genericPointer)
     {
         BasePlugin *plugin = reinterpret_cast<BasePlugin *>(drvPvt);
@@ -44,7 +39,7 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortName, int
     , m_dispatcherPortName(dispatcherPortName)
     , m_asynGenericPointerInterrupt(0)
     , m_messageQueue(MESSAGE_QUEUE_SIZE, sizeof(void*))
-    , m_threadId(0)
+    , m_thread(0)
     , m_shutdown(false)
 {
     int status;
@@ -63,31 +58,32 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortName, int
     // Callbacks need to be enabled separately in order to actually get triggered from dispatcher.
     status = pasynManager->connectDevice(m_pasynuser, dispatcherPortName, 0);
     if (status != asynSuccess) {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "BasePlugin: Error calling pasynManager->connectDevice to port %s (status=%d, error=%s)\n",
+        LOG_ERROR("Failed calling pasynManager->connectDevice to port %s (status=%d, error=%s)",
                   portName, status, m_pasynuser->errorMessage);
     }
 
     if (blocking) {
         std::string threadName = m_portName + "_Thread";
-        m_threadId = epicsThreadCreate(threadName.c_str(),
-                                       epicsThreadPriorityMedium,
-                                       epicsThreadGetStackSize(epicsThreadStackMedium),
-                                       (EPICSTHREADFUNC)::processDataThread,
-                                       this);
-        if (m_threadId == (epicsThreadId)0) {
-            asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "Failed to create data processing thread - %s\n", threadName.c_str());
-        }
+        m_thread = new Thread(
+            threadName.c_str(),
+            std::bind(&BasePlugin::processDataThread, this),
+            epicsThreadGetStackSize(epicsThreadStackMedium),
+            epicsThreadPriorityMedium
+        );
+        if (m_thread)
+            m_thread->start();
     }
 }
 
 BasePlugin::~BasePlugin()
 {
-    if (m_threadId != (epicsThreadId)0) {
+    if (m_thread) {
         // Wake-up processing thread by sending a dummy message. The thread
         // will then exit based on the changed m_shutdown param.
         m_shutdown = true;
         m_messageQueue.send(0, 0);
+        m_thread->stop();
+        delete m_thread;
     }
 
     // Make sure to disconnect from asyn ports
@@ -137,7 +133,7 @@ void BasePlugin::dispatcherCallback(asynUser *pasynUser, void *genericPointer)
     if (packetList == 0)
         return;
 
-    if (m_threadId == (epicsThreadId)0) {
+    if (m_thread) {
         /* In blocking mode, process the callback in calling thread. Return when
          * processing is complete.
          */
@@ -149,7 +145,7 @@ void BasePlugin::dispatcherCallback(asynUser *pasynUser, void *genericPointer)
         packetList->reserve();
         if (m_messageQueue.trySend(&packetList, sizeof(&packetList)) == -1) {
             packetList->release();
-            asynPrint(pasynUser, ASYN_TRACE_FLOW, "BasePlugin:%s message queue full\n", __func__);
+            LOG_ERROR("Message queue full");
         }
     }
 }
@@ -158,9 +154,7 @@ void BasePlugin::sendToDispatcher(const DasPacket *packet)
 {
     asynInterface *interface = pasynManager->findInterface(m_pasynuser, asynGenericPointerType, 1);
     if (!interface) {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "BasePlugin::%s ERROR: Can't find %s interface on array port %s\n",
-                  __func__, asynGenericPointerType, m_dispatcherPortName.c_str());
+        LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, m_dispatcherPortName.c_str());
         return;
     }
 
@@ -210,9 +204,7 @@ bool BasePlugin::enableCallbacks(bool enable)
 
     asynInterface *interface = pasynManager->findInterface(m_pasynuser, asynGenericPointerType, 1);
     if (!interface) {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                  "BasePlugin::%s ERROR: Can't find asynGenericPointer interface on array port %s\n",
-                  __func__, m_dispatcherPortName.c_str());
+        LOG_ERROR("Can't find asynGenericPointer interface on array port %s", m_dispatcherPortName.c_str());
         return false;
     }
 
@@ -222,9 +214,7 @@ bool BasePlugin::enableCallbacks(bool enable)
                     interface->drvPvt, m_pasynuser,
                     ::dispatcherCallback, this, &m_asynGenericPointerInterrupt);
         if (status != asynSuccess) {
-            asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                      "BasePlugin::%s ERROR: Can't enable interrupt callbacks on dispatcher port: %s\n",
-                      __func__, m_pasynuser->errorMessage);
+            LOG_ERROR("Can't enable interrupt callbacks on dispatcher port: %s", m_pasynuser->errorMessage);
         }
     }
     if (!enable && m_asynGenericPointerInterrupt) {
@@ -235,9 +225,7 @@ bool BasePlugin::enableCallbacks(bool enable)
             m_asynGenericPointerInterrupt);
         m_asynGenericPointerInterrupt = NULL;
         if (status != asynSuccess) {
-            asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-              "BasePlugin::%s ERROR: Can't disable interrupt callbacks on dispatcher port: %s\n",
-              __func__, m_pasynuser->errorMessage);
+            LOG_ERROR("Can't disable interrupt callbacks on dispatcher port: %s", m_pasynuser->errorMessage);
         }
     }
 
