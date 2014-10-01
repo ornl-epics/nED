@@ -75,6 +75,7 @@ $(PROD_NAME)_SRCS  += DumpPlugin.cpp
 $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += GenericModulePlugin.cpp
+$(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 
 $(PROD_NAME)_DOXS  += DspPlugin.dox
 $(PROD_NAME)_DOXS  += RocPlugin.dox
