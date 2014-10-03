@@ -9,6 +9,18 @@
 
 #include "RocPlugin.h"
 
+/**
+ * @file RocPlugin_v54.cpp
+ *
+ * ROC 5.4 parameters
+ *
+ * ROC 5.4 firmware seems to be an update of 5.2, adding baseline support.
+ * The status registers are all different though, unfortunately the AcquireStatus
+ * register is no longer available. There are other quirks as well. The version
+ * response includes additional 'vendor' information. The READ_CONFIG response
+ * reports bad packet length - v5.5 fixes that.
+ */
+
 void RocPlugin::createStatusParams_v54()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                       | EPICS record description  | (bi and mbbi description)

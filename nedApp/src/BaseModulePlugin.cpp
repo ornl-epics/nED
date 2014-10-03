@@ -23,6 +23,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
                  interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
     , m_hardwareId(ip2addr(hardwareId))
     , m_statusPayloadLength(0)
+    , m_countersPayloadLength(0)
     , m_configPayloadLength(0)
     , m_verifySM(ST_TYPE_VERSION_INIT)
     , m_waitingResponse(static_cast<DasPacket::CommandType>(0))
@@ -76,6 +77,9 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             break;
         case DasPacket::CMD_READ_STATUS:
             reqReadStatus();
+            break;
+        case DasPacket::CMD_READ_STATUS_COUNTERS:
+            reqReadStatusCounters();
             break;
         case DasPacket::CMD_READ_CONFIG:
             reqReadConfig();
@@ -184,6 +188,9 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     case DasPacket::CMD_READ_STATUS:
         ack = rspReadStatus(packet);
         break;
+    case DasPacket::CMD_READ_STATUS_COUNTERS:
+        ack = rspReadStatusCounters(packet);
+        break;
     case DasPacket::CMD_WRITE_CONFIG:
         ack = rspWriteConfig(packet);
         break;
@@ -254,6 +261,43 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet)
 
     const uint32_t *payload = packet->getPayload();
     for (std::map<int, StatusParamDesc>::iterator it=m_statusParams.begin(); it != m_statusParams.end(); it++) {
+        int offset = it->second.offset;
+        int shift = it->second.shift;
+        if (m_behindDsp) {
+            shift += (offset % 2 == 0 ? 0 : 16);
+            offset /= 2;
+        }
+        int value = payload[offset] >> shift;
+        if ((shift + it->second.width) > 32) {
+            value |= payload[offset + 1] << (32 - shift);
+        }
+        value &= (0x1ULL << it->second.width) - 1;
+        setIntegerParam(it->first, value);
+    }
+    callParamCallbacks();
+    return true;
+}
+
+void BaseModulePlugin::reqReadStatusCounters()
+{
+    sendToDispatcher(DasPacket::CMD_READ_STATUS_COUNTERS);
+    scheduleTimeoutCallback(DasPacket::CMD_READ_STATUS_COUNTERS, NO_RESPONSE_TIMEOUT);
+}
+
+bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
+{
+    if (!cancelTimeoutCallback()) {
+        LOG_WARN("Received READ_STATUS_COUNTERS response after timeout");
+        return false;
+    }
+
+    if (packet->getPayloadLength() != m_countersPayloadLength) {
+        LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; received %u, expected %u", packet->getPayloadLength(), m_countersPayloadLength);
+        return false;
+    }
+
+    const uint32_t *payload = packet->getPayload();
+    for (std::map<int, StatusParamDesc>::iterator it=m_counterParams.begin(); it != m_counterParams.end(); it++) {
         int offset = it->second.offset;
         int shift = it->second.shift;
         if (m_behindDsp) {
@@ -417,6 +461,27 @@ void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint
         length++;
     uint32_t wordsize = (m_behindDsp ? 2 : 4);
     m_statusPayloadLength = std::max(m_statusPayloadLength, length*wordsize);
+}
+
+void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
+{
+    int index;
+    if (createParam(name, asynParamInt32, &index) != asynSuccess) {
+        LOG_ERROR("Module status counter parameter '%s' cannot be created (already exist?)", name);
+        return;
+    }
+
+    StatusParamDesc desc;
+    desc.offset = offset;
+    desc.shift = shift;
+    desc.width = nBits;
+    m_counterParams[index] = desc;
+
+    uint32_t length = offset +1;
+    if (m_behindDsp && nBits > 16)
+        length++;
+    uint32_t wordsize = (m_behindDsp ? 2 : 4);
+    m_countersPayloadLength = std::max(m_countersPayloadLength, length*wordsize);
 }
 
 void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value)

@@ -23,6 +23,8 @@ record(mbbo, "$(P)ReqCmd")
     field(EIST, "LVDS verify")
     field(NIVL, "40")
     field(NIST, "LVDS powerdown")
+    field(TEVL, "36")
+    field(TEST, "Read counters")
 }
 record(stringout, "$(P)ReqDest")
 {
@@ -112,6 +114,8 @@ record(mbbi, "$(P)RspCmd")
     field(ELVL, "39")
     field(ELST, "LVDS verify")
     field(TVVL, "40")
+    field(TTST, "Read counters")
+    field(TTVL, "36")
     field(TVST, "LVDS powerdown")
 }
 record(mbbi, "$(P)RspCmdAck")

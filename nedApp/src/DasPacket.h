@@ -90,6 +90,7 @@ struct DasPacket
             CMD_READ_VERSION            = 0x20, //!< Read module version
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
             CMD_READ_STATUS             = 0x22, //!< Read module status
+            CMD_READ_STATUS_COUNTERS    = 0x24, //!< Read module status counters
             CMD_WRITE_CONFIG            = 0x30, //!< Write module configuration
             RSP_NACK                    = 0x40, //!< NACK to the command, the command that is being acknowledged is in payload[0] or payload[1]
             RSP_ACK                     = 0x41, //!< ACK to the command, the command that is being acknowledged is in payload[0] or payload[1]

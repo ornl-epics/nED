@@ -34,7 +34,8 @@ sub trunc {
 open (INFILE, $input_file);
 foreach $line ( <INFILE> ) {
     chomp($line);
-    if ($line =~ m/createStatusParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+    if ($line =~ m/createStatusParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/ ||
+        $line =~ m/createCounterParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
         my ($name,$offset,$width,$shift,$comment) = ($1,$2,$3,$4,$5);
         $comment =~ /^\s*([^\(]*)\(?(.*)\)?$/;
         my ($desc, $valstr) = ($1, $2);
@@ -90,6 +91,21 @@ foreach $line ( <INFILE> ) {
             print ("    field(DTYP, \"asynInt32\")\n");
             print ("    field(INP,  \"\@asyn(\$(PORT))$name\")\n");
             print ("    field(SCAN, \"I/O Intr\")\n");
+            if ($valstr =~ /calc:([^,]*)/) {
+                print ("    field(FLNK, \"\$(P)${name}C\")\n");
+                print ("\}\n");
+                print ("record(calc, \"\$(P)${name}C\")\n");
+                print ("\{\n");
+                print ("    field(DESC, \"$desc\")\n");
+                print ("    field(INPA, \"\$(P)$name\")\n");
+                print ("    field(CALC, \"$1\")\n");
+            }
+            if ($valstr =~ /prec:([0-9]*)/) {
+                print ("    field(PREC, \"$1\")\n");
+            }
+            if ($valstr =~ /unit:([^,]*)/) {
+                print ("    field(EGU,  \"$1\")\n");
+            }
             print ("\}\n");
         }
     }
