@@ -16,13 +16,10 @@ if ($input_file =~ m/^([.\.]*)/) {
 
 print <<EOF;
 /**
- * \\${class} DspPlugin
-EOF
-
-print <<EOF;
+ * \\class ${class}
  *
- * Following parameters describe the DSP status:
- * Parameter name | asyn type      | DSP cfg register  | Description |
+ * Following parameters describe module status:
+ * Parameter name | asyn type      | Status register   | Description |
  * -------------- | -------------- | ----------------- | ----------- |
 EOF
 open (INFILE, $input_file);
@@ -38,8 +35,25 @@ close (INFILE);
 
 print <<EOF;
  *
- * Following parameters describe the DSP configuration:
- * Parameter name | asyn type      | init val | DSP cfg register | Description |
+ * Following parameters describe module counters:
+ * Parameter name | asyn type      | init val | Counter register | Description |
+ * -------------- | -------------- | -------- | ---------------- | ----------- |
+EOF
+open (INFILE, $input_file);
+foreach $line ( <INFILE> ) {
+    chomp($line);
+    if ($line =~ m/createCounterParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9xX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+        my ($name,$offset,$width,$shift,$comment) = ($1,$2,$3,$4,$5);
+        my $reg = sprintf("0x%X %d-%d", $offset, $shift, $shift+$width-1);
+        printf (" * %-14s | %-14s | %-17s | %s\n", $name, "asynParamInt32", $reg, $comment);
+    }
+}
+close (INFILE);
+
+print <<EOF;
+ *
+ * Following parameters describe module configuration:
+ * Parameter name | asyn type      | init val | Config register  | Description |
  * -------------- | -------------- | -------- | ---------------- | ----------- |
 EOF
 open (INFILE, $input_file);
@@ -50,7 +64,6 @@ foreach $line ( <INFILE> ) {
         my $reg = sprintf("%s 0x%X %d-%d", $section, $offset, $shift, $shift+$width-1);
         printf (" * %-14s | %-14s | %8d | %-17s | %s\n", $name, "asynParamInt32", $val, $reg, $comment);
     }
-
 }
 close (INFILE);
 

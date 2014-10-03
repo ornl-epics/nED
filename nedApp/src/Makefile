@@ -77,24 +77,16 @@ $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += GenericModulePlugin.cpp
 
-$(PROD_NAME)_DOXS  += DspPlugin.dox
-$(PROD_NAME)_DOXS  += RocPlugin.dox
-$(PROD_NAME)_DOXS  += RocPlugin_v51.dox
-$(PROD_NAME)_DOXS  += RocPlugin_v52.dox
-$(PROD_NAME)_DOXS  += RocPlugin_v54.dox
-$(PROD_NAME)_DOXS  += RocPlugin_v56.dox
-$(PROD_NAME)_DOXS  += FemPlugin.dox
-$(PROD_NAME)_DOCS  += AcpcFemPlugin.dox
-
-$(PROD_NAME)_TMPL  += DspPlugin.template
-$(PROD_NAME)_TMPL  += RocPlugin.template
-$(PROD_NAME)_TMPL  += FemPlugin.template
-$(PROD_NAME)_TMPL  += AcpcFemPlugin.template
-$(PROD_NAME)_TMPL  += RocPlugin_v51.template
-$(PROD_NAME)_TMPL  += RocPlugin_v52.template
-$(PROD_NAME)_TMPL  += RocPlugin_v54.template
-$(PROD_NAME)_TMPL  += RocPlugin_v56.template
-
+# These files contain descriptions of PVs that we use to generate template
+# files for EPICS database, Doxygen documentation and PVtable.
+$(PROD_NAME)_PVS   += DspPlugin.cpp
+$(PROD_NAME)_PVS   += RocPlugin.cpp
+$(PROD_NAME)_PVS   += RocPlugin_v51.cpp
+$(PROD_NAME)_PVS   += RocPlugin_v52.cpp
+$(PROD_NAME)_PVS   += RocPlugin_v54.cpp
+$(PROD_NAME)_PVS   += RocPlugin_v56.cpp
+$(PROD_NAME)_PVS   += FemPlugin.cpp
+$(PROD_NAME)_PVS   += AcpcFemPlugin.cpp
 
 #===========================
 
@@ -105,14 +97,19 @@ include $(TOP)/configure/RULES
 %.dox: %.cpp
 	./tools/export2doxy.pl -input_file=$^ > $@
 
-doc: Doxyfile $($(PROD_NAME)_DOXS)
+doc: Doxyfile $($(PROD_NAME)_PVS:.cpp=.dox)
 	doxygen >/dev/null
 
 %.template: %.cpp
-	./tools/export2epics.pl -name_prefix=BL99b:xxxx: -input_file=$^ > ../Db/$@
-	./tools/export2epics.pl -name_prefix=BL99b:xxxx: -input_file=$^ -cfg_rbv=1 > ../Db/RB_$@
+	./tools/export2epics.pl -name_prefix=BL99b:xxxx: < $^ > ../Db/$@
+	./tools/export2epics.pl -name_prefix=BL99b:xxxx: -cfg_rbv=1 < $^ > ../Db/RB_$@
+epicsdb: $($(PROD_NAME)_PVS:.cpp=.template)
 
-dbtemplates: $(ned_TMPL)
+%.pvtt: %.cpp
+	./tools/export2pvtable.pl -mode=status  < $^ > ../../pvtable/$(@:.pvtt=_status.pvtt)
+	./tools/export2pvtable.pl -mode=counter < $^ > ../../pvtable/$(@:.pvtt=_counter.pvtt)
+	./tools/export2pvtable.pl -mode=config  < $^ > ../../pvtable/$(@:.pvtt=_config.pvtt)
+pvtable: $($(PROD_NAME)_PVS:.cpp=.pvtt)
 
 clean::
 	rm -f $($(PROD_NAME)_DOXS)
