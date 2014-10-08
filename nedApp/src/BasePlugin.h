@@ -12,6 +12,7 @@
 
 #include "DasPacketList.h"
 #include "EpicsRegister.h"
+#include "Thread.h"
 
 #include <stdint.h>
 #include <string>
@@ -262,7 +263,7 @@ class BasePlugin : public asynPortDriver {
     private:
         void *m_asynGenericPointerInterrupt;        //!< Generic pointer interrupt handler
         epicsMessageQueue m_messageQueue;           //!< Message queue for non-blocking mode
-        epicsThreadId m_threadId;                   //!< Thread ID if created during constructor, 0 otherwise
+        Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
         std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
         DataMode m_dataMode;                        //!< Member copy of DataMode parameter, used often in processData() - needs to be efficient

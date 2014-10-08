@@ -79,6 +79,10 @@ GenericModulePluginConfigure("gm", "cmd", 0)
 dbLoadRecords("../../db/GenericModulePlugin.template","P=$(PREFIX)Det:gm:,PORT=gm")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:gm:,PORT=gm")
 
+FlatFieldPluginConfigure("ff", "occ1", 0)
+dbLoadRecords("../../db/FlatFieldPlugin.template","P=$(PREFIX)Det:ff:,PORT=ff")
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:ff:,PORT=ff")
+
 ArocPvaPluginConfigure("ArocPva", "occ1", 0)
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:arpv:,PORT=ArocPva")
 
