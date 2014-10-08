@@ -99,6 +99,7 @@ include $(TOP)/configure/RULES
 
 doc: Doxyfile $($(PROD_NAME)_PVS:.cpp=.dox)
 	doxygen >/dev/null
+	(cd latex/; make pdf > /dev/null)
 
 %.template: %.cpp
 	./tools/export2epics.pl -name_prefix=BL99b:xxxx: < $^ > ../Db/$@
@@ -112,4 +113,4 @@ epicsdb: $($(PROD_NAME)_PVS:.cpp=.template)
 pvtable: $($(PROD_NAME)_PVS:.cpp=.pvtt)
 
 clean::
-	rm -f $($(PROD_NAME)_DOXS)
+	rm -fR $($(PROD_NAME)_PVS:.cpp=.dox) latex/ html/

@@ -10,59 +10,77 @@ if (!defined $input_file) {
     exit 1;
 }
 my $class=$input_file;
-if ($input_file =~ m/^([.\.]*)/) {
+my $version="";
+if ($input_file =~ /^([^_]*)_(v[0-9]*)/) {
+    $class=$1;
+    $version=$2;
+} else if ($input_file =~ /^([^\.]*)/) {
     $class=$1;
 }
+
+my $reg;
 
 print <<EOF;
 /**
  * \\class ${class}
  *
- * Following parameters describe module status:
- * Parameter name | asyn type      | Status register   | Description |
- * -------------- | -------------- | ----------------- | ----------- |
+ * Following parameters describe module ${class} ${version} status:
+ * Parameter name | Status register   | Description |
+ * -------------- | ----------------- | ----------- |
 EOF
 open (INFILE, $input_file);
 foreach $line ( <INFILE> ) {
     chomp($line);
-    if ($line =~ m/createStatusParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9xX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+    if ($line =~ m/createStatusParam *\( *"([a-zA-Z0-9_]+)" *, *(0x[0-9A-Fa-f]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
         my ($name,$offset,$width,$shift,$comment) = ($1,$2,$3,$4,$5);
-        my $reg = sprintf("0x%X %d-%d", $offset, $shift, $shift+$width-1);
-        printf (" * %-14s | %-14s | %-17s | %s\n", $name, "asynParamInt32", $reg, $comment);
+        if ($width == 1) {
+            $reg = sprintf("Reg %s Bit %d", $offset, $shift);
+        } else {
+            $reg = sprintf("Reg %s Bits %d:%d", $offset, $shift, $shift+$width-1);
+        }
+        printf (" * %-14s | %-17s | %s\n", $name, $reg, $comment);
     }
 }
 close (INFILE);
 
 print <<EOF;
  *
- * Following parameters describe module counters:
- * Parameter name | asyn type      | init val | Counter register | Description |
- * -------------- | -------------- | -------- | ---------------- | ----------- |
+ * Following parameters describe module ${class} ${version} counters:
+ * Parameter name | init val | Counter register | Description |
+ * -------------- | -------- | ---------------- | ----------- |
 EOF
 open (INFILE, $input_file);
 foreach $line ( <INFILE> ) {
     chomp($line);
-    if ($line =~ m/createCounterParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9xX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+    if ($line =~ m/createCounterParam *\( *"([a-zA-Z0-9_]+)" *, *(0x[0-9A-Fa-f]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
         my ($name,$offset,$width,$shift,$comment) = ($1,$2,$3,$4,$5);
-        my $reg = sprintf("0x%X %d-%d", $offset, $shift, $shift+$width-1);
-        printf (" * %-14s | %-14s | %-17s | %s\n", $name, "asynParamInt32", $reg, $comment);
+        if ($width == 1) {
+            $reg = sprintf("Reg %s Bit %d", $offset, $shift);
+        } else {
+            $reg = sprintf("Reg %s Bits %d:%d", $offset, $shift, $shift+$width-1);
+        }
+        printf (" * %-14s | %-17s | %s\n", $name, $reg, $comment);
     }
 }
 close (INFILE);
 
 print <<EOF;
  *
- * Following parameters describe module configuration:
- * Parameter name | asyn type      | init val | Config register  | Description |
- * -------------- | -------------- | -------- | ---------------- | ----------- |
+ * Following parameters describe module ${class} ${version} configuration:
+ * Parameter name | init val | Config register  | Description |
+ * -------------- | -------- | ---------------- | ----------- |
 EOF
 open (INFILE, $input_file);
 foreach $line ( <INFILE> ) {
     chomp($line);
-    if ($line =~ m/createConfigParam *\( *"([a-zA-Z0-9_]+)" *, *'([0-9A-F])' *, *([0-9A-FxX]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+    if ($line =~ m/createConfigParam *\( *"([a-zA-Z0-9_]+)" *, *'([0-9A-Fa-f])' *, *(0x[0-9A-Fa-f]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
         my ($name,$section,$offset,$width,$shift,$val,$comment) = ($1,$2,$3,$4,$5,$6,$7);
-        my $reg = sprintf("%s 0x%X %d-%d", $section, $offset, $shift, $shift+$width-1);
-        printf (" * %-14s | %-14s | %8d | %-17s | %s\n", $name, "asynParamInt32", $val, $reg, $comment);
+        if ($width == 1) {
+            $reg = sprintf("Reg %s Bit %d", $offset, $shift);
+        } else {
+            $reg = sprintf("Reg %s Bits %d:%d", $offset, $shift, $shift+$width-1);
+        }
+        printf (" * %-14s | %8d | %-17s | %s\n", $name, $val, $reg, $comment);
     }
 }
 close (INFILE);
