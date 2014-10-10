@@ -12,10 +12,14 @@
 
 #define NUM_BASEPVAPLUGIN_PARAMS 0 // ((int)(&LAST_BASEPVAPLUGIN_PARAM - &FIRST_BASEPVAPLUGIN_PARAM + 1))
 
-BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
+BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, 0, NUM_BASEPVAPLUGIN_PARAMS)
-    , m_pvRecord(PvaNeutronData::create(std::string(pvPrefix) + "Neutrons"))
 {
+    m_pvRecord = PvaNeutronData::create(pvName);
+    if (!m_pvRecord)
+        LOG_ERROR("Cannot create PVA record '%s'", pvName);
+    else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_pvRecord) == false)
+        LOG_ERROR("Cannot register PVA record '%s'", pvName);
 }
 
 BasePvaPlugin::~BasePvaPlugin()
@@ -34,11 +38,19 @@ asynStatus BasePvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 void BasePvaPlugin::processData(const DasPacketList * const packetList)
 {
-    switch (getDataMode()) {
-    case DATA_MODE_NORMAL:
-        processDataNormal(packetList);
-        break;
-    default:
-        break;
+    if (!!m_pvRecord) {
+        switch (getDataMode()) {
+        case DATA_MODE_NORMAL:
+            processDataNormal(packetList);
+            break;
+        case DATA_MODE_RAW:
+            processDataRaw(packetList);
+            break;
+        case DATA_MODE_EXTENDED:
+            processDataExtended(packetList);
+            break;
+        default:
+            break;
+        }
     }
 }

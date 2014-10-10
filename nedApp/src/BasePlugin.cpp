@@ -133,7 +133,7 @@ void BasePlugin::dispatcherCallback(asynUser *pasynUser, void *genericPointer)
     if (packetList == 0)
         return;
 
-    if (m_thread) {
+    if (m_thread == 0) {
         /* In blocking mode, process the callback in calling thread. Return when
          * processing is complete.
          */

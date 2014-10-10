@@ -81,7 +81,7 @@ $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += GenericModulePlugin.cpp
 $(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
-$(PROD_NAME)_SRCS  += ArocPvaPlugin.cpp
+$(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
 
 $(PROD_NAME)_DOXS  += DspPlugin.dox

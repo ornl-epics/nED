@@ -42,10 +42,10 @@
 		</Compiler>
 		<Unit filename="AcpcFemPlugin.cpp" />
 		<Unit filename="AcpcFemPlugin.h" />
+		<Unit filename="AcpcPvaPlugin.cpp" />
+		<Unit filename="AcpcPvaPlugin.h" />
 		<Unit filename="AdaraPlugin.cpp" />
 		<Unit filename="AdaraPlugin.h" />
-		<Unit filename="ArocPvaPlugin.cpp" />
-		<Unit filename="ArocPvaPlugin.h" />
 		<Unit filename="BaseCircularBuffer.h" />
 		<Unit filename="BaseModulePlugin.cpp" />
 		<Unit filename="BaseModulePlugin.h" />

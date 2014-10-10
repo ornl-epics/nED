@@ -19,14 +19,41 @@
  *
  * The structure combines data from all detectors in normal, raw and extended
  * mode. Record gets updated by updating public members in single or group mode.
+ *
+ * Structure is also an EPICSv4 PVrecord which means it's responsible for sending
+ * data to the clients. The PvaNeutronData tries to hide most dirty work away by
+ * providing two modes of operation:
+ *   - using cache and sending cache contents atomically
+ *   - embedding variable updates inside transaction, when transaction is closed
+ *     data gets send to clients
  */
 class PvaNeutronData : public epics::pvDatabase::PVRecord {
     public: // Pointers in to the PV records' data structure
-        epics::pvData::PVTimeStamp timeStamp;   //!< Pulses' absolute EPICS timestamp, in sec.nsec since January 1, 1990
-        epics::pvData::PVUIntArrayPtr tof;      //!< Time of flight offest from pulse start
-        epics::pvData::PVUIntArrayPtr pixel;    //!< Pixel ID
-        epics::pvData::PVUIntArrayPtr sampleA;  //!< SampleA raw data
-        epics::pvData::PVUIntArrayPtr sampleB;  //!< SampleB raw data
+        epics::pvData::PVTimeStamp    timeStamp;        //!< Pulses' absolute EPICS timestamp, in sec.nsec since January 1, 1990
+        epics::pvData::PVDoublePtr    proton_charge;    //!< Pulse proton charge
+        epics::pvData::PVUIntArrayPtr time_of_flight;   //!< Time of flight offest from pulse start
+        epics::pvData::PVUIntArrayPtr pixel;            //!< Pixel ID
+        epics::pvData::PVUIntArrayPtr position_index;   //!< Position index mapping
+        epics::pvData::PVUIntArrayPtr position_x;       //!< Position X
+        epics::pvData::PVUIntArrayPtr position_y;       //!< Position Y
+        epics::pvData::PVUIntArrayPtr photo_sum_x;      //!< Photo sum X
+        epics::pvData::PVUIntArrayPtr photo_sum_y;      //!< Photo sum Y
+
+    public:
+        /**
+         * A cache to store data until it's posted.
+         */
+        struct {
+            epics::pvData::TimeStamp            timeStamp;
+            epics::pvData::PVUIntArray::svector time_of_flight;
+            double                              proton_charge;
+            epics::pvData::PVUIntArray::svector pixel;
+            epics::pvData::PVUIntArray::svector position_index;
+            epics::pvData::PVUIntArray::svector position_x;
+            epics::pvData::PVUIntArray::svector position_y;
+            epics::pvData::PVUIntArray::svector photo_sum_x;
+            epics::pvData::PVUIntArray::svector photo_sum_y;
+        } cache;
 
     public:
         POINTER_DEFINITIONS(PvaNeutronData);
@@ -58,6 +85,16 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
          * Complete transaction and post updates.
          */
         virtual void endGroupPut();
+
+        /**
+         * Post current contents of the cache and clear it.
+         */
+        void postCachedUnlocked();
+
+        /**
+         * Lock entire PVrecord and post cached values.
+         */
+        void postCached();
 
     protected:
         /**
