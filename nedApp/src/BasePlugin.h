@@ -286,7 +286,7 @@ class BasePlugin : public asynPortDriver {
          *
          * Thread will automatically stop when PluginBlockingCallbacks is set to 0.
          */
-        void processDataThread();
+        void processDataThread(epicsEvent *shutdown);
 
     protected:
         #define FIRST_BASEPLUGIN_PARAM Enable

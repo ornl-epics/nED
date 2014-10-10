@@ -66,7 +66,7 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortName, int
         std::string threadName = m_portName + "_Thread";
         m_thread = new Thread(
             threadName.c_str(),
-            std::bind(&BasePlugin::processDataThread, this),
+            std::bind(&BasePlugin::processDataThread, this, std::placeholders::_1),
             epicsThreadGetStackSize(epicsThreadStackMedium),
             epicsThreadPriorityMedium
         );
@@ -133,7 +133,7 @@ void BasePlugin::dispatcherCallback(asynUser *pasynUser, void *genericPointer)
     if (packetList == 0)
         return;
 
-    if (m_thread) {
+    if (m_thread == 0) {
         /* In blocking mode, process the callback in calling thread. Return when
          * processing is complete.
          */
@@ -183,7 +183,7 @@ const char *BasePlugin::getParamName(int index)
     return name;
 }
 
-void BasePlugin::processDataThread(void)
+void BasePlugin::processDataThread(epicsEvent *shutdown)
 {
     while (!m_shutdown) {
         DasPacketList *packetList;

@@ -262,6 +262,7 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
 
+        setIntegerParam(RxEn, value);
         if (value == 0) {
             // RX could be switched off in the middle of the incoming packet.
             // Second half of that packet would show up in the queue next time
