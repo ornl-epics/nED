@@ -28,7 +28,6 @@ BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherP
     createParam("ListenIp",     asynParamOctet,     &ListenIP);
     createParam("ListenPort",   asynParamInt32,     &ListenPort);
     createParam("ClientIp",     asynParamOctet,     &ClientIP);
-    createParam("TxCount",      asynParamInt32,     &TxCount);
     createParam("CheckClientDel",asynParamInt32,    &CheckClientDelay);
 
     setStringParam(ClientIP,        "");

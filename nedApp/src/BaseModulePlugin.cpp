@@ -481,7 +481,7 @@ bool BaseModulePlugin::scheduleTimeoutCallback(DasPacket::CommandType command, d
 {
     std::function<float(void)> timeoutCb = std::bind(&BaseModulePlugin::noResponseCleanup, this, command);
     m_timeoutTimer = scheduleCallback(timeoutCb, NO_RESPONSE_TIMEOUT);
-    return (m_timeoutTimer);
+    return (m_timeoutTimer.get() != 0);
 }
 
 bool BaseModulePlugin::cancelTimeoutCallback()

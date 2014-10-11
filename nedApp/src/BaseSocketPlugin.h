@@ -165,7 +165,6 @@ class BaseSocketPlugin : public BasePlugin {
         int ListenIP;
         int ListenPort;
         int ClientIP;
-        int TxCount;
         int CheckClientDelay;
         #define LAST_BASESOCKETPLUGIN_PARAM CheckClientDelay
 };
