@@ -349,6 +349,16 @@ struct DasPacket
         }
 #endif
 
+        /**
+         * Copy all contents of this container to another one.
+         */
+        bool copy(DasPacket *dest, uint32_t destSize) const;
+
+        /**
+         * Copy header and RTDL header of this container to another one.
+         */
+        bool copyHeader(DasPacket *dest, uint32_t destSize) const;
+
     private:
 
         /**

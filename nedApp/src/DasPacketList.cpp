@@ -10,6 +10,7 @@
 #include "DasPacketList.h"
 
 #include <epicsAlgorithm.h>
+#include <string.h> //memcpy
 
 DasPacketList::DasPacketList()
     : m_address(0)
@@ -108,7 +109,7 @@ bool DasPacketList::reset(const uint8_t *addr, uint32_t length)
 
     m_lock.lock();
     if (m_refcount == 0) {
-        m_address = addr;
+        m_address = const_cast<uint8_t *>(addr);
         m_length = length;
         m_refcount = 1;
         reseted = true;
@@ -140,6 +141,11 @@ DasPacket *prev = 0;
 bool DasPacketList::reset(const DasPacket * const packet)
 {
     return reset(reinterpret_cast<const uint8_t *>(packet), packet->length());
+}
+
+bool DasPacketList::reset(const DasPacketList *original)
+{
+    return reset(original->m_address, original->m_length);
 }
 
 void DasPacketList::waitAllReleased() const

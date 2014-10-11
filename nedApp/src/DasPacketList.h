@@ -32,7 +32,7 @@ class DasPacketList
 {
     public:
         /**
-         * Constructor initialized internal structures.
+         * Constructor initializes internal structures.
          */
         DasPacketList();
 
@@ -74,7 +74,7 @@ class DasPacketList
         void release();
 
         /**
-         * Reset the list with new OCC data.
+         * Point list to new OCC data.
          *
          * The reference count must be 0 for this function to succeed.
          * The function should only be used by producers, check
@@ -88,11 +88,18 @@ class DasPacketList
         bool reset(const uint8_t *addr, uint32_t length);
 
         /**
-         * Reset the list and put a single DasPacket in it.
+         * Point list to a single packet.
          *
          * This is a convinience wrapper function for the reset(const uint8_t*, uint32_t)
          */
         bool reset(const DasPacket * const packet);
+
+        /**
+         * Point list to the same data as original list.
+         *
+         * This is a convinience wrapper function for the reset(const uint8_t*, uint32_t)
+         */
+        bool reset(const DasPacketList *original);
 
         /**
          * Wait for all consumers to release the object.
@@ -103,7 +110,7 @@ class DasPacketList
         void waitAllReleased() const;
 
     private:
-        const uint8_t *m_address;
+        uint8_t *m_address;
         uint32_t m_length;
         uint32_t m_consumed;
 

@@ -1,0 +1,48 @@
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(mbbi, "$(P)MapError")
+{
+    field(DESC, "Last severe map error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))MapError")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "No error")
+    field(ONVL, "1")
+    field(ONST, "No pixelmap file")
+    field(TWVL, "2")
+    field(TWST, "File parse error")
+    field(THVL, "3")
+    field(THST, "Memory alloc err")
+}
+record(bo, "$(P)PassThru")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Disable pixel mapping")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PassThru")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "Mapping enabled")
+    field(ONAM, "Mapping disabled")
+}
+record(longin, "$(P)UnmapCount")
+{
+    field(DESC, "Number unmapped pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UnmapCount")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(longin, "$(P)SplitCount")
+{
+    field(DESC, "Number of splits occurred")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UnmapCount")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}

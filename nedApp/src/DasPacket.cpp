@@ -194,7 +194,13 @@ const DasPacket::Event *DasPacket::getEventData(uint32_t *count) const
         start = reinterpret_cast<const uint8_t *>(payload);
         if (datainfo.rtdl_present)
             start += sizeof(RtdlHeader);
-        *count = (payload_length - (start - reinterpret_cast<const uint8_t*>(payload))) / 8;
+        *count = (payload_length - (start - reinterpret_cast<const uint8_t*>(payload)));
+        if (*count % 8 == 0) {
+            *count /= 8;
+        } else {
+            *count = 0;
+            start = 0;
+        }
     }
     return reinterpret_cast<const Event *>(start);
 }
@@ -267,4 +273,36 @@ bool DasPacket::lvdsParity(int number)
         number >>= 1;
     }
     return temp;
+}
+
+bool DasPacket::copy(DasPacket *dest, uint32_t destSize) const
+{
+    uint32_t len = length();
+    if (destSize < len)
+        return false;
+
+    memcpy(dest, this, len);
+    return true;
+}
+
+bool DasPacket::copyHeader(DasPacket *dest, uint32_t destSize) const
+{
+    if (destSize < sizeof(DasPacket))
+        return false;
+
+    dest->source = this->source;
+    dest->destination = this->destination;
+    dest->info = this->info;
+    dest->payload_length = 0;
+    dest->reserved1 = this->reserved1;
+    dest->reserved2 = this->reserved2;
+
+    if (getRtdlHeader() != 0) {
+        if (destSize < sizeof(RtdlHeader))
+            return false;
+        memcpy(dest->payload, this->payload, sizeof(RtdlHeader));
+        dest->payload_length += sizeof(RtdlHeader);
+    }
+
+    return true;
 }

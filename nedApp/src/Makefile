@@ -61,6 +61,7 @@ $(PROD_NAME)_SRCS  += BasePlugin.cpp
 $(PROD_NAME)_SRCS  += BaseSocketPlugin.cpp
 $(PROD_NAME)_SRCS  += ProxyPlugin.cpp
 $(PROD_NAME)_SRCS  += AdaraPlugin.cpp
+$(PROD_NAME)_SRCS  += BaseDispatcherPlugin.cpp
 $(PROD_NAME)_SRCS  += CmdDispatcher.cpp
 $(PROD_NAME)_SRCS  += BaseModulePlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin.cpp
@@ -75,6 +76,7 @@ $(PROD_NAME)_SRCS  += DumpPlugin.cpp
 $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += GenericModulePlugin.cpp
+$(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 
 $(PROD_NAME)_DOXS  += DspPlugin.dox
 $(PROD_NAME)_DOXS  += RocPlugin.dox
