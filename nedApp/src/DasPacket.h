@@ -272,7 +272,14 @@ struct DasPacket
         const RtdlHeader *getRtdlHeader() const;
 
         /**
-         * Return starting address of the Event Data regardless of RtdlHeader included or not.
+         * Return pointer to the data regardless of RtdlHeader included or not.
+         *
+         * @param[out] count Number of 4-byte blocks in the returned memory.
+         */
+        const uint32_t *getData(uint32_t *count) const;
+
+        /**
+         * Return pointer to DasPacket::Event data regardless of RtdlHeader included or not.
          *
          * @param[out] count Number of Events in the returned memory.
          */

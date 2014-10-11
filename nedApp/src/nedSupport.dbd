@@ -1,6 +1,10 @@
 include "base.dbd"
 include "stream.dbd"
 include "asyn.dbd"
+include "PVAClientRegister.dbd"
+include "PVAServerRegister.dbd"
+include "registerChannelProviderLocal.dbd"
+include "dbPv.dbd"
 registrar("OccRegister")
 registrar("CmdDispatcherRegister")
 registrar("DiscoverPluginRegister")
@@ -14,3 +18,5 @@ registrar("DumpPluginRegister")
 registrar("StatPluginRegister")
 registrar("RtdlPluginRegister")
 registrar("GenericModulePluginRegister")
+registrar("FlatFieldPluginRegister")
+registrar("AcpcPvaPluginRegister")
