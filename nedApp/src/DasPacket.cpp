@@ -1,3 +1,12 @@
+/* DasPacket.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "DasPacket.h"
 
 #include <stdexcept>
@@ -176,7 +185,7 @@ const DasPacket::RtdlHeader *DasPacket::getRtdlHeader() const
     return 0;
 };
 
-const DasPacket::Event *DasPacket::getEventData(uint32_t *count) const
+const uint32_t *DasPacket::getData(uint32_t *count) const
 {
     // DSP aggregates detectors data into data packets and the data is always at the start of payload
     const uint8_t *start = 0;
@@ -185,9 +194,16 @@ const DasPacket::Event *DasPacket::getEventData(uint32_t *count) const
         start = reinterpret_cast<const uint8_t *>(payload);
         if (datainfo.rtdl_present)
             start += sizeof(RtdlHeader);
-        *count = (payload_length - (start - reinterpret_cast<const uint8_t*>(payload))) / 8;
+        *count = (payload_length - (start - reinterpret_cast<const uint8_t*>(payload))) / 4;
     }
-    return reinterpret_cast<const Event *>(start);
+    return reinterpret_cast<const uint32_t *>(start);
+}
+
+const DasPacket::Event *DasPacket::getEventData(uint32_t *count) const
+{
+    const uint32_t *data = DasPacket::getData(count);
+    *count /= sizeof(Event) / sizeof(uint32_t);
+    return reinterpret_cast<const Event *>(data);
 }
 
 DasPacket::CommandType DasPacket::getResponseType() const

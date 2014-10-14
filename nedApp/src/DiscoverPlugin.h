@@ -1,3 +1,12 @@
+/* DiscoverPlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef DISCOVER_PLUGIN_H
 #define DISCOVER_PLUGIN_H
 
@@ -44,8 +53,8 @@ class DiscoverPlugin : public BasePlugin {
          *
          * Constructor will create and populate PVs with default values.
          *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          */
         DiscoverPlugin(const char *portName, const char *dispatcherPortName);
 

@@ -35,6 +35,7 @@ DB += RtdlPlugin.template
 DB += AdaraPlugin.template
 DB += CmdPlugin.template
 DB += GenericModulePlugin.template
+DB += FlatFieldPlugin.template
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add

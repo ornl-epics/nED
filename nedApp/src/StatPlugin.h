@@ -1,3 +1,12 @@
+/* StatPlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef STAT_PLUGIN_H
 #define STAT_PLUGIN_H
 
@@ -30,8 +39,8 @@ class StatPlugin : public BasePlugin {
         /**
          * Constructor
          *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
         StatPlugin(const char *portName, const char *dispatcherPortName, int blocking);

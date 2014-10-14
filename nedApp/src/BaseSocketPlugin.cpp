@@ -1,3 +1,12 @@
+/* BaseSocketPlugin.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "BaseSocketPlugin.h"
 #include "Log.h"
 
@@ -19,7 +28,6 @@ BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherP
     createParam("ListenIp",     asynParamOctet,     &ListenIP);
     createParam("ListenPort",   asynParamInt32,     &ListenPort);
     createParam("ClientIp",     asynParamOctet,     &ClientIP);
-    createParam("TxCount",      asynParamInt32,     &TxCount);
     createParam("CheckClientDel",asynParamInt32,    &CheckClientDelay);
 
     setStringParam(ClientIP,        "");
@@ -235,7 +243,7 @@ void BaseSocketPlugin::disconnectClient()
 float BaseSocketPlugin::checkClient()
 {
     if (!isClientConnected()) {
-	    connectClient();
+        connectClient();
     }
 
     int delay;

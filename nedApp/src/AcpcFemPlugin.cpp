@@ -1,3 +1,12 @@
+/* AcpcFemPlugin.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "AcpcFemPlugin.h"
 #include "Log.h"
 
@@ -212,7 +221,7 @@ void AcpcFemPlugin::createStatusParams()
     createStatusParam("Ch1GotData",     0x6,  1,  0); // Chan1 got data packet         (0=no,1=yes)
 
     createStatusParam("FilterdAcks",    0x7,  8,  8); // Filtered ACKS
-    createStatusParam("DataMode",       0x7,  2,  6); // Data mode TODO verify values  (0=normal mode,1=off,2=raw mode,3=verbose mode)
+    createStatusParam("OutputMode",     0x7,  2,  6); // Data mode TODO verify values  (0=normal mode,1=off,2=raw mode,3=verbose mode)
     createStatusParam("AcquireStat",    0x7,  1,  5); // Acquiring data                (0=not acquiring,1=acquiring)
     createStatusParam("FoundHw",        0x7,  1,  4); // Found new hardware            (0=no,1=yes)
     createStatusParam("CtrlGotCmd",     0x7,  1,  3); // CTRL got command packet       (0=no,1=yes)

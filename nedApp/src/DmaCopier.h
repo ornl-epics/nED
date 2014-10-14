@@ -1,3 +1,12 @@
+/* DmaCopier.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef DMA_COPIER_H
 #define DMA_COPIER_H
 

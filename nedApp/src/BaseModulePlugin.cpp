@@ -1,3 +1,12 @@
+/* BaseModulePlugin.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "BaseModulePlugin.h"
 #include "Log.h"
 
@@ -29,8 +38,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     m_verifySM.addState(ST_VERSION_OK,              SM_ACTION_ERR(DasPacket::CMD_DISCOVER),         ST_TYPE_ERR);
 
     createParam("HardwareId",   asynParamOctet, &HardwareId);
-    createParam("LastCmdRsp",   asynParamInt32, &LastCmdRsp);
-    createParam("Command",      asynParamInt32, &Command);
+    createParam("CmdRsp",       asynParamInt32, &CmdRsp);
+    createParam("CmdReq",       asynParamInt32, &CmdReq);
     createParam("HardwareDate", asynParamOctet, &HardwareDate);
     createParam("HardwareVer",  asynParamInt32, &HardwareVer);
     createParam("HardwareRev",  asynParamInt32, &HardwareRev);
@@ -43,7 +52,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
 
     std::string hardwareIp = addr2ip(m_hardwareId);
     setStringParam(HardwareId, hardwareIp.c_str());
-    setIntegerParam(LastCmdRsp, LAST_CMD_NONE);
+    setIntegerParam(CmdRsp, LAST_CMD_NONE);
     callParamCallbacks();
 }
 
@@ -52,7 +61,7 @@ BaseModulePlugin::~BaseModulePlugin()
 
 asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    if (pasynUser->reason == Command) {
+    if (pasynUser->reason == CmdReq) {
         if (m_waitingResponse != 0) {
             LOG_WARN("Command '%d' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
             return asynError;
@@ -85,7 +94,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
         m_waitingResponse = static_cast<DasPacket::CommandType>(value);
-        setIntegerParam(LastCmdRsp, LAST_CMD_WAIT);
+        setIntegerParam(CmdRsp, LAST_CMD_WAIT);
         callParamCallbacks();
         return asynSuccess;
     }
@@ -189,7 +198,7 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
         return false;
     }
 
-    setIntegerParam(LastCmdRsp, (ack ? LAST_CMD_OK : LAST_CMD_ERROR));
+    setIntegerParam(CmdRsp, (ack ? LAST_CMD_OK : LAST_CMD_ERROR));
     callParamCallbacks();
     return true;
 }
@@ -462,7 +471,7 @@ float BaseModulePlugin::noResponseCleanup(DasPacket::CommandType command)
 {
     if (m_waitingResponse == command) {
         m_waitingResponse = static_cast<DasPacket::CommandType>(0);
-        setIntegerParam(LastCmdRsp, LAST_CMD_TIMEOUT);
+        setIntegerParam(CmdRsp, LAST_CMD_TIMEOUT);
         callParamCallbacks();
     }
     return 0;
@@ -472,7 +481,7 @@ bool BaseModulePlugin::scheduleTimeoutCallback(DasPacket::CommandType command, d
 {
     std::function<float(void)> timeoutCb = std::bind(&BaseModulePlugin::noResponseCleanup, this, command);
     m_timeoutTimer = scheduleCallback(timeoutCb, NO_RESPONSE_TIMEOUT);
-    return (m_timeoutTimer);
+    return (m_timeoutTimer.get() != 0);
 }
 
 bool BaseModulePlugin::cancelTimeoutCallback()

@@ -1,3 +1,12 @@
+/* CircularBuffer.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "CircularBuffer.h"
 
 #include <cantProceed.h>
@@ -21,7 +30,7 @@ CircularBuffer::CircularBuffer(uint32_t size)
     , m_consumer(0)
     , m_producer(0)
 {
-	if (size > (numeric_limits<uint32_t>::max()/2)) { // I wish there was a portable way like numeric_limits<typeof(m_size)>::max
+    if (size > (numeric_limits<uint32_t>::max()/2)) { // I wish there was a portable way like numeric_limits<typeof(m_size)>::max
         // Consult also comment in CircularBuffer:consume()
         throw length_error("Requested buffer size too big");
     }
@@ -155,7 +164,7 @@ int CircularBuffer::consume(uint32_t len)
     // of the type used for m_size,m_producer,m_consumer variables.
     used = (m_size + m_producer - m_consumer) % m_size;
     if (used < len) {
-		// If this happens, the client code is broken and should be fixed.
+        // If this happens, the client code is broken and should be fixed.
         // Likely this will cause the next wait() to return address
         // in the middle of the packet.
         len = used;

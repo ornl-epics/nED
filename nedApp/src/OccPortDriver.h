@@ -1,3 +1,12 @@
+/* OccPortDriver.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef OCCPORTDRIVER_H
 #define OCCPORTDRIVER_H
 
@@ -73,6 +82,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
             STAT_OCC_ERROR      = 2,    //!< OCC error was detected
             STAT_BAD_DATA       = 3,    //!< Bad or corrupted data detected in queue
             STAT_RESETTING      = 4,    //!< Resetting OCC and internal OccPortDriver state
+            STAT_OCC_NOT_INIT   = 5,    //!< OCC device not initialized, check LastErr for details
         };
 
         /**
@@ -92,21 +102,22 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
             CMD_RESET           = 1,    //!< Reset OCC device and internal state
         };
 
-	public:
-	    /**
-	     * Constructor
-	     *
-	     * @param[in] portName Name of the asyn port to which plugins can connect
-	     * @param[in] localBufferSize If not zero, a local buffer will be created
-	     *            where all data from OCC DMA buffer will be copied to as soon
-	     *            as it is available.
-	     */
-		OccPortDriver(const char *portName, uint32_t localBufferSize);
+    public:
+        /**
+         * Constructor
+         *
+         * @param[in] portName Name of the asyn port to which plugins can connect
+         * @param[in] devfile Absolute path to OCC device file
+         * @param[in] localBufferSize If not zero, a local buffer will be created
+         *            where all data from OCC DMA buffer will be copied to as soon
+         *            as it is available.
+         */
+        OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize);
 
-		/**
-		 * Destructor
-		 */
-		~OccPortDriver();
+        /**
+         * Destructor
+         */
+        ~OccPortDriver();
 
     private:
         int m_version;
@@ -133,12 +144,12 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         /**
          * Overloaded method.
          */
-		asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
          * Overloaded method.
          */
-		asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
+        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
 
         /**
          * Helper function to create output asynPortDriver param with default value.
@@ -149,12 +160,12 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         /**
          * Calculate data processing rate
          */
-		void calculateDataRateOut(uint32_t consumed);
+        void calculateDataRateOut(uint32_t consumed);
 
-		/**
-		 * Report an error detected in receive data thread
-		 */
-		void handleRecvError(int ret);
+        /**
+         * Report an error detected in receive data thread
+         */
+        void handleRecvError(int ret);
 
         /**
          * Reset OCC device and all internal states, including restarting read threads.

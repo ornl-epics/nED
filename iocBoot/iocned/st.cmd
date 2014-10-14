@@ -27,19 +27,17 @@ set_pass1_restoreFile("$(IOCNAME).sav")
 
 ## Load record instances
 epicsEnvSet("PREFIX", "BL99:")
-epicsEnvSet("OCC1",   "/dev/snsocb1")
-#asynSetTraceIOMask("$(OCC1)",0,255)
-OccConfigure("$(OCC1)", 40000000)
-dbLoadRecords("../../db/Occ.template","P=$(PREFIX)Det:occ1:,PORT=$(OCC1)")
+OccConfigure("occ1", "/dev/snsocb1", 40000000)
+dbLoadRecords("../../db/Occ.template","P=$(PREFIX)Det:occ1:,PORT=occ1")
 
-CmdDispatcherConfigure("cmd", "$(OCC1)")
+CmdDispatcherConfigure("cmd", "occ1")
 dbLoadRecords("../../db/CmdPlugin.template","P=$(PREFIX)Det:cmd:,PORT=cmd")
 
-AdaraPluginConfigure("Adara1", "$(OCC1)", 1, 2)
+AdaraPluginConfigure("Adara1", "occ1", 1, 2)
 dbLoadRecords("../../db/AdaraPlugin.template","P=$(PREFIX)Det:adara1:,PORT=Adara1")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:adara1:,PORT=Adara1")
 
-ProxyPluginConfigure("proxy1", "$(OCC1)")
+ProxyPluginConfigure("proxy1", "occ1")
 dbLoadRecords("../../db/BaseSocketPlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 
@@ -47,11 +45,12 @@ CalibrationPluginConfigure("Calibration1", "$(OCC1)")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:cal1:,PORT=Calibration1")
 
 #DspPluginConfigure("Dsp1", "$(OCC1)", "0x15FA76DF")
+
 DspPluginConfigure("Dsp1", "cmd", "21.250.118.223", "v63", 0)
 dbLoadRecords("../../db/DspPlugin.template","P=$(PREFIX)Det:dsp1:,PORT=Dsp1")
 dbLoadRecords("../../db/BaseModulePlugin.template","P=$(PREFIX)Det:dsp1:,PORT=Dsp1")
 
-DiscoverPluginConfigure("Disc", "$(OCC1)")
+DiscoverPluginConfigure("Disc", "occ1")
 dbLoadRecords("../../db/DiscoverPlugin.template","P=$(PREFIX)Det:disc:,PORT=Disc")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:disc:,PORT=Disc")
 
@@ -60,7 +59,7 @@ RocPluginConfigure("roc1", "cmd", "20.39.216.73", "v52", 0)
 dbLoadRecords("../../db/RocPlugin_v52.template","P=$(PREFIX)Det:roc1:,PORT=roc1")
 dbLoadRecords("../../db/BaseModulePlugin.template","P=$(PREFIX)Det:roc1:,PORT=roc1")
 
-DumpPluginConfigure("dump", "$(OCC1)", 0)
+DumpPluginConfigure("dump", "occ1", 0)
 dbLoadRecords("../../db/DumpPlugin.template","P=$(PREFIX)Det:dump:,PORT=dump")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:dump:,PORT=dump")
 
@@ -68,7 +67,7 @@ StatPluginConfigure("stat1", "$(OCC1)", 0)
 dbLoadRecords("../../db/StatPlugin.db","P=$(PREFIX)Det:stat1:,PORT=stat1")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:stat1:,PORT=stat1")
 
-RtdlPluginConfigure("rtdl", "$(OCC1)", 0)
+RtdlPluginConfigure("rtdl", "occ1", 0)
 dbLoadRecords("../../db/RtdlPlugin.template","P=$(PREFIX)Det:rtdl:,PORT=rtdl")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:rtdl:,PORT=rtdl")
 
@@ -84,6 +83,13 @@ GenericModulePluginConfigure("gm", "cmd", 0)
 dbLoadRecords("../../db/GenericModulePlugin.template","P=$(PREFIX)Det:gm:,PORT=gm")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:gm:,PORT=gm")
 
+FlatFieldPluginConfigure("ff", "occ1", 0)
+dbLoadRecords("../../db/FlatFieldPlugin.template","P=$(PREFIX)Det:ff:,PORT=ff")
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:ff:,PORT=ff")
+
+AcpcPvaPluginConfigure("AcpcPva", "occ1", "$(PREFIX)Det:pva1:Neutrons")
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:pva1:,PORT=AcpcPva")
+
 iocInit()
 
 # Create request file and start periodic 'save'
@@ -96,9 +102,11 @@ create_monitor_set("$(IOCNAME).req", 30)
 save_restoreShow(10)
 
 # Fanout record for init in HVROC.db instead of PINI mechanism
+
 epicsThreadSleep 1
 #dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
 
 startPVAServer
 
 pvdbl
+

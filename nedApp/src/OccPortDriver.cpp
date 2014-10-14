@@ -1,3 +1,12 @@
+/* OccPortDriver.cpp
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "OccPortDriver.h"
 #include "DmaCircularBuffer.h"
 #include "DmaCopier.h"
@@ -22,14 +31,14 @@ static const int asynStackSize     = 0;
 
 #define NUM_OCCPORTDRIVER_PARAMS ((int)(&LAST_OCCPORTDRIVER_PARAM - &FIRST_OCCPORTDRIVER_PARAM + 1))
 
-EPICS_REGISTER(Occ, OccPortDriver, 2, "Port name", string, "Local buffer size", int);
+EPICS_REGISTER(Occ, OccPortDriver, 3, "Port name", string, "OCC device file", string, "Local buffer size", int);
 
 const int OccPortDriver::DEFAULT_BASIC_STATUS_INTERVAL = 5;     //!< How often to update frequent OCC status parameters
 const int OccPortDriver::DEFAULT_EXTENDED_STATUS_INTERVAL = 60; //!< How ofter to update less frequently changing OCC status parameters
 
-OccPortDriver::OccPortDriver(const char *portName, uint32_t localBufferSize)
-	: asynPortDriver(portName, asynMaxAddr, NUM_OCCPORTDRIVER_PARAMS, asynInterfaceMask,
-	                 asynInterruptMask, asynFlags, asynAutoConnect, asynPriority, asynStackSize)
+OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize)
+    : asynPortDriver(portName, asynMaxAddr, NUM_OCCPORTDRIVER_PARAMS, asynInterfaceMask,
+                     asynInterruptMask, asynFlags, asynAutoConnect, asynPriority, asynStackSize)
     , m_occ(NULL)
 {
     int status;
@@ -73,40 +82,43 @@ OccPortDriver::OccPortDriver(const char *portName, uint32_t localBufferSize)
     createParam("RstCntErr",        asynParamInt32,     &RstCntErr,         0);
 
     // Initialize OCC board
-    status = occ_open(portName, OCC_INTERFACE_OPTICAL, &m_occ);
+    status = occ_open(devfile, OCC_INTERFACE_OPTICAL, &m_occ);
     setIntegerParam(LastErr, -status);
     if (status != 0) {
-        setIntegerParam(Status, STAT_OCC_ERROR);
+        setIntegerParam(Status, STAT_OCC_NOT_INIT);
+        setIntegerParam(LastErr, -status);
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "Unable to open OCC device - %s(%d)\n", strerror(-status), status);
         m_occ = NULL;
     }
 
     callParamCallbacks();
 
-    // Start DMA copy thread or use DMA buffer directly
-    if (localBufferSize > 0)
-        m_circularBuffer = new DmaCopier(m_occ, localBufferSize);
-    else
-        m_circularBuffer = new DmaCircularBuffer(m_occ);
-    if (!m_circularBuffer) {
-        asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "Unable to create circular buffer handler\n");
-        return;
-    }
+    if (m_occ != NULL) {
+        // Start DMA copy thread or use DMA buffer directly
+        if (localBufferSize > 0)
+            m_circularBuffer = new DmaCopier(m_occ, localBufferSize);
+        else
+            m_circularBuffer = new DmaCircularBuffer(m_occ);
+        if (!m_circularBuffer) {
+            asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "Unable to create circular buffer handler\n");
+            return;
+        }
 
-    m_occBufferReadThread = new Thread(
-        "Process incoming data",
-        std::bind(&OccPortDriver::processOccDataThread, this, std::placeholders::_1),
-        epicsThreadGetStackSize(epicsThreadStackMedium),
-        epicsThreadPriorityHigh
-    );
-    m_occBufferReadThread->start();
-    m_occStatusRefreshThread = new Thread(
-        "OCC status",
-        std::bind(&OccPortDriver::refreshOccStatusThread, this, std::placeholders::_1),
-        epicsThreadGetStackSize(epicsThreadStackSmall),
-        epicsThreadPriorityLow
-    );
-    m_occStatusRefreshThread->start();
+        m_occBufferReadThread = new Thread(
+            "Process incoming data",
+            std::bind(&OccPortDriver::processOccDataThread, this, std::placeholders::_1),
+            epicsThreadGetStackSize(epicsThreadStackMedium),
+            epicsThreadPriorityHigh
+        );
+        m_occBufferReadThread->start();
+        m_occStatusRefreshThread = new Thread(
+            "OCC status",
+            std::bind(&OccPortDriver::refreshOccStatusThread, this, std::placeholders::_1),
+            epicsThreadGetStackSize(epicsThreadStackSmall),
+            epicsThreadPriorityLow
+        );
+        m_occStatusRefreshThread->start();
+    }
 }
 
 OccPortDriver::~OccPortDriver()
@@ -224,6 +236,13 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
 asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     int ret;
+
+    if (m_occ == NULL) {
+        // OCC not initialized, nothing that we can do here
+        LOG_ERROR("OCC device not initialized");
+        return asynError;
+    }
+
     if (pasynUser->reason == Command) {
         switch (value) {
         case CMD_RESET:
@@ -243,6 +262,7 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
 
+        setIntegerParam(RxEn, value);
         if (value == 0) {
             // RX could be switched off in the middle of the incoming packet.
             // Second half of that packet would show up in the queue next time
@@ -270,6 +290,11 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer)
 {
+    if (m_occ == NULL) {
+        LOG_ERROR("OCC device not initialized");
+        return asynError;
+    }
+
     if (pasynUser->reason == REASON_OCCDATA) {
         DasPacketList *packets = reinterpret_cast<DasPacketList *>(pointer);
         const DasPacket *packet = packets->first();

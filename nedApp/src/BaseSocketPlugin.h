@@ -1,3 +1,12 @@
+/* BaseSocketPlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef BASESOCKET_PLUGIN_H
 #define BASESOCKET_PLUGIN_H
 
@@ -28,15 +37,15 @@ class BaseSocketPlugin : public BasePlugin {
         int m_clientSock;           //!< Client socket to send/receive data to/from, -1 when no client
 
     public:
-	    static const int defaultInterfaceMask = asynOctetMask | BasePlugin::defaultInterfaceMask;
-	    static const int defaultInterruptMask = asynOctetMask | BasePlugin::defaultInterruptMask;
+        static const int defaultInterfaceMask = asynOctetMask | BasePlugin::defaultInterfaceMask;
+        static const int defaultInterruptMask = asynOctetMask | BasePlugin::defaultInterruptMask;
 
         /**
          * Constructor
-	     *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-	     * @param[in] blocking Should processing of callbacks block execution of caller thread or not.
+         *
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] blocking Should processing of callbacks block execution of caller thread or not.
          */
         BaseSocketPlugin(const char *portName, const char *dispatcherPortName, int blocking, int numParams=0,
                      int maxAddr=1, int interfaceMask=defaultInterfaceMask, int interruptMask=defaultInterruptMask,
@@ -156,7 +165,6 @@ class BaseSocketPlugin : public BasePlugin {
         int ListenIP;
         int ListenPort;
         int ClientIP;
-        int TxCount;
         int CheckClientDelay;
         #define LAST_BASESOCKETPLUGIN_PARAM CheckClientDelay
 };

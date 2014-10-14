@@ -939,11 +939,11 @@ record(longin, "$(P)FilterdAcks")
     field(INP,  "@asyn($(PORT))FilterdAcks")
     field(SCAN, "I/O Intr")
 }
-record(mbbi, "$(P)DataMode")
+record(mbbi, "$(P)OutputMode")
 {
     field(DESC, "Data mode TODO verify values")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))DataMode")
+    field(INP,  "@asyn($(PORT))OutputMode")
     field(SCAN, "I/O Intr")
     field(ZRVL, "0")
     field(ZRST, "normal mode")

@@ -1,0 +1,8 @@
+record(waveform,"$(P)RefTable") {
+    field(DESC, "Axis positions")
+    field(DTYP, "asynInt32ArrayOut")
+    field(INP,  "@asyn($(PORT))RefTable")
+    field(NELM, "10")
+    field(FTVL, "LONG")
+}
+

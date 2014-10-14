@@ -1,3 +1,12 @@
+/* BaseModulePlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef BASE_MODULE_PLUGIN_H
 #define BASE_MODULE_PLUGIN_H
 
@@ -59,12 +68,16 @@
  *
  * Commands can be issued independently from each other as long as
  * response for the previous command was received or timed out.
+ * Command can be issued using CmdReq PV which atomically sends
+ * OCC command to the module and switches CmdRsp PV to waiting state.
+ * Reading the CmdRsp PV immediately after writing CmdReq will
+ * @b always give accurate last command status.
  *
  * General plugin parameters:
  * asyn param    | asyn param type | init val | mode | Description
  * ------------- | --------------- | -------- | ---- | -----------
  * HwId          | asynParamInt32  | 0        | RO   | Connected module hardware id
- * LastCmdRsp    | asynParamInt32  | 0        | RO   | Last command response status   (see LastCommandResponse for valid values)
+ * CmdRsp        | asynParamInt32  | 0        | RO   | Last command response status   (see LastCommandResponse for valid values)
  * Command       | asynParamInt32  | 0        | RW   | Issue RocPlugin command        (see DasPacket::CommandType for valid values)
  * Supported     | asynParamInt32  | 0        | RO   | Flag whether module is supported
  * Verified      | asynParamInt32  | 0        | RO   | Flag whether module type and version were verified
@@ -169,9 +182,9 @@ class BaseModulePlugin : public BasePlugin {
          *
          * Constructor will create and populate PVs with default values.
          *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-	     * @param[in] hardwareId Hardware ID of the module, can be in IP format (xxx.xxx.xxx.xxx) or
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] hardwareId Hardware ID of the module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] behindDsp Is this module behind the DSP which transforms some of the packets?
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
@@ -465,9 +478,9 @@ class BaseModulePlugin : public BasePlugin {
         void recalculateConfigParams();
 
     protected:
-        #define FIRST_BASEMODULEPLUGIN_PARAM Command
-        int Command;        //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
-        int LastCmdRsp;     //!< Last command response status
+        #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
+        int CmdReq;         //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
+        int CmdRsp;         //!< Last command response status
         int HardwareVer;    //!< Module hardware version
         int HardwareRev;    //!< Module hardware revision
         int HardwareDate;   //!< Module hardware date

@@ -1,3 +1,12 @@
+/* AdaraPlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #include "AdaraPlugin.h"
 #include "Log.h"
 
@@ -51,6 +60,9 @@ AdaraPlugin::~AdaraPlugin()
 void AdaraPlugin::processData(const DasPacketList * const packetList)
 {
     uint32_t outpacket[10];
+
+    if (getDataMode() != DATA_MODE_NORMAL)
+        return;
 
     for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
         m_nReceived++;

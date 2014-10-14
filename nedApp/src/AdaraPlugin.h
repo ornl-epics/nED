@@ -1,3 +1,12 @@
+/* AdaraPlugin.h
+ *
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Klemen Vodopivec
+ */
+
 #ifndef ADARA_PLUGIN_H
 #define ADARA_PLUGIN_H
 
@@ -84,11 +93,11 @@ class AdaraPlugin : public BaseSocketPlugin {
     public:
         /**
          * Constructor
-	     *
-	     * @param[in] portName asyn port name.
-	     * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-	     * @param[in] blocking Should processing of callbacks block execution of caller thread or not.
-	     * @param[in] numDsps Number of DSPs that will be sending data
+         *
+         * @param[in] portName asyn port name.
+         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] blocking Should processing of callbacks block execution of caller thread or not.
+         * @param[in] numDsps Number of DSPs that will be sending data
          */
         AdaraPlugin(const char *portName, const char *dispatcherPortName, int blocking, int numDsps);
 
