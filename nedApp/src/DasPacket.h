@@ -29,18 +29,6 @@ struct DasPacket
             uint32_t pixelid;
         };
 
-	/** 
-	 * Structure representing RAW mode data packet
-         */
-	struct RawEvent {
-	    uint32_t timestamp;
-	    uint32_t posindex;
-	    uint16_t sample1A;
-	    uint16_t sample1B;
-	    uint16_t sample2A;
-	    uint16_t sample2B;
-	};
-
         /**
          * Structure representing RTDL header in data packets, when rtdl_present bit is set.
          */

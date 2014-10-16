@@ -24,6 +24,14 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("proton_charge",  epics::pvData::pvDouble)
         ->add("time_of_flight", standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("pixel",          standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a2",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a19",     standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a48",     standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b12",     standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_index", standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_x",     standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_y",     standardField->scalarArray(epics::pvData::pvUInt, ""))
@@ -62,6 +70,14 @@ void PvaNeutronData::postCachedUnlocked()
     time_of_flight->replace(freeze(cache.time_of_flight));
     proton_charge->put(cache.proton_charge);
     pixel->replace(freeze(cache.pixel));
+    sample_a1->replace(freeze(cache.sample_a1));
+    sample_a2->replace(freeze(cache.sample_a2));
+    sample_a8->replace(freeze(cache.sample_a8));
+    sample_a19->replace(freeze(cache.sample_a19));
+    sample_a48->replace(freeze(cache.sample_a48));
+    sample_b1->replace(freeze(cache.sample_b1));
+    sample_b8->replace(freeze(cache.sample_b8));
+    sample_b12->replace(freeze(cache.sample_b12));
     position_index->replace(freeze(cache.position_index));
     position_x->replace(freeze(cache.position_x));
     position_y->replace(freeze(cache.position_y));
@@ -71,6 +87,14 @@ void PvaNeutronData::postCachedUnlocked()
 
     cache.time_of_flight.clear();
     cache.pixel.clear();
+    cache.sample_a1.clear();
+    cache.sample_a2.clear();
+    cache.sample_a8.clear();
+    cache.sample_a19.clear();
+    cache.sample_a48.clear();
+    cache.sample_b1.clear();
+    cache.sample_b8.clear();
+    cache.sample_b12.clear();
     cache.position_index.clear();
     cache.position_x.clear();
     cache.position_y.clear();
@@ -102,6 +126,38 @@ bool PvaNeutronData::init()
 
     pixel = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("pixel.value");
     if (pixel.get() == NULL)
+        return false;
+
+    sample_a1 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a1.value");
+    if (sample_a1.get() == NULL)
+        return false;
+
+    sample_a2 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a2.value");
+    if (sample_a2.get() == NULL)
+        return false;
+
+    sample_a8 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a8.value");
+    if (sample_a8.get() == NULL)
+        return false; 
+
+    sample_a19 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a19.value");
+    if (sample_a19.get() == NULL)
+        return false;
+
+    sample_a48 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a48.value");
+    if (sample_a48.get() == NULL)
+        return false;
+
+    sample_b1 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b1.value");
+    if (sample_b1.get() == NULL)
+        return false;
+
+    sample_b8 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b8.value");
+    if (sample_b8.get() == NULL)
+        return false;
+
+    sample_b12 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b12.value");
+    if (sample_b12.get() == NULL)
         return false;
 
     position_index = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("position_index.value");

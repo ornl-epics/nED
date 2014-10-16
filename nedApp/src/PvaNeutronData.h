@@ -33,6 +33,14 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVDoublePtr    proton_charge;    //!< Pulse proton charge
         epics::pvData::PVUIntArrayPtr time_of_flight;   //!< Time of flight offest from pulse start
         epics::pvData::PVUIntArrayPtr pixel;            //!< Pixel ID
+        epics::pvData::PVUIntArrayPtr sample_a1;        //!< LPSD ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_a2;        //!< CROC ONLY: TimeRange samples
+        epics::pvData::PVUIntArrayPtr sample_a8;        //!< AROC/ACPC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_a19;       //!< BNLROC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_a48;       //!< ACPC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_b1;        //!< LPSD ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC/ACPC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_b12;       //!< AROC ONLY: Diagnostic values
         epics::pvData::PVUIntArrayPtr position_index;   //!< Position index mapping
         epics::pvData::PVUIntArrayPtr position_x;       //!< Position X
         epics::pvData::PVUIntArrayPtr position_y;       //!< Position Y
@@ -48,6 +56,14 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
             epics::pvData::PVUIntArray::svector time_of_flight;
             double                              proton_charge;
             epics::pvData::PVUIntArray::svector pixel;
+            epics::pvData::PVUIntArray::svector sample_a1;
+            epics::pvData::PVUIntArray::svector sample_a2;
+            epics::pvData::PVUIntArray::svector sample_a8;
+            epics::pvData::PVUIntArray::svector sample_a19;
+            epics::pvData::PVUIntArray::svector sample_a48;
+            epics::pvData::PVUIntArray::svector sample_b1;
+            epics::pvData::PVUIntArray::svector sample_b8;
+            epics::pvData::PVUIntArray::svector sample_b12; 
             epics::pvData::PVUIntArray::svector position_index;
             epics::pvData::PVUIntArray::svector position_x;
             epics::pvData::PVUIntArray::svector position_y;

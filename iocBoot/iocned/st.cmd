@@ -41,7 +41,7 @@ ProxyPluginConfigure("proxy1", "occ1")
 dbLoadRecords("../../db/BaseSocketPlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 
-CalibrationPluginConfigure("Calibration1", "$(OCC1)")
+CalibrationPvaPluginConfigure("Calibration1", "occ1", "$(PREFIX)Det:cal1:Neutrons")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:cal1:,PORT=Calibration1")
 
 #DspPluginConfigure("Dsp1", "$(OCC1)", "0x15FA76DF")
@@ -63,7 +63,7 @@ DumpPluginConfigure("dump", "occ1", 0)
 dbLoadRecords("../../db/DumpPlugin.template","P=$(PREFIX)Det:dump:,PORT=dump")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:dump:,PORT=dump")
 
-StatPluginConfigure("stat1", "$(OCC1)", 0)
+StatPluginConfigure("stat1", "occ1", 0)
 dbLoadRecords("../../db/StatPlugin.db","P=$(PREFIX)Det:stat1:,PORT=stat1")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:stat1:,PORT=stat1")
 
@@ -104,7 +104,7 @@ save_restoreShow(10)
 # Fanout record for init in HVROC.db instead of PINI mechanism
 
 epicsThreadSleep 1
-#dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
+dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
 
 startPVAServer
 
