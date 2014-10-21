@@ -51,8 +51,11 @@ StatPlugin::StatPlugin(const char *portName, const char *dispatcherPortName, int
 
 void StatPlugin::processData(const DasPacketList * const packetList)
 {
-    for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
-        m_receivedCount++;
+    m_receivedCount += packetList->size();
+
+    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+        const DasPacket *packet = *it;
+
         m_receivedBytes += packet->length();
         if (packet->isResponse()) {
             m_cmdCount++;

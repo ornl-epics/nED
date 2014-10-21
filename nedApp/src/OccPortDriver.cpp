@@ -296,18 +296,19 @@ asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer
     }
 
     if (pasynUser->reason == REASON_OCCDATA) {
-        DasPacketList *packets = reinterpret_cast<DasPacketList *>(pointer);
-        const DasPacket *packet = packets->first();
+        DasPacketList *packetList = reinterpret_cast<DasPacketList *>(pointer);
 
-        int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), packet->length());
-        if (ret != 0) {
-            setIntegerParam(LastErr, -ret);
-            setIntegerParam(Status, STAT_OCC_ERROR);
-            callParamCallbacks();
-            LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
-            return asynError;
+        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+            const DasPacket *packet = *it;
+            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), packet->length());
+            if (ret != 0) {
+                setIntegerParam(LastErr, -ret);
+                setIntegerParam(Status, STAT_OCC_ERROR);
+                callParamCallbacks();
+                LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
+                return asynError;
+            }
         }
-
     }
     return asynSuccess;
 }
@@ -441,7 +442,6 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
     void *data;
     uint32_t length;
     uint32_t consumed;
-    bool resetErrorRatelimit = false;
     DasPacketList packetsList;
 
     // Initialize members used in helper function calculateDataRateOut()
@@ -462,41 +462,25 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             break;
         }
 
-        if (!packetsList.reset(reinterpret_cast<uint8_t*>(data), length)) {
-            // This should not happen. If it does it's certainly a code error that needs to be fixed.
-            if (!resetErrorRatelimit) {
-                LOG_ERROR("PluginDriver:%s ERROR failed to reset DasPacketList\n", __func__);
-                resetErrorRatelimit = true;
-            }
-            continue;
-        }
-        resetErrorRatelimit = false;
+        consumed = packetsList.reset(reinterpret_cast<uint8_t*>(data), length);
 
-        // Notify everybody about new data
-        sendToPlugins(REASON_OCCDATA, &packetsList);
+        if (packetsList.empty() == false) {
+            // Notify everybody about new data
+            sendToPlugins(REASON_OCCDATA, &packetsList);
 
-        // Plugins have been notified, hopefully they're all non-blocking.
-        // While waiting, calculate how much data can be consumed from circular buffer.
-        for (const DasPacket *packet = packetsList.first(); packet != 0; packet = packetsList.next(packet)) {
-#ifdef DWORD_PADDING_WORKAROUND
-            consumed += packet->getAlignedLength();
-#else
-            consumed += packet->length();
-#endif
-        }
+            // Plugins have been notified, hopefully they're all non-blocking.
+            // While waiting for threads to synchronize, we have some time.
 
-        // Calculate data processing throughput every second
-        calculateDataRateOut(consumed);
+            // Calculate data processing throughput every second
+            calculateDataRateOut(consumed);
 
-        // Decrease reference counter and wait for everybody else to do the same
-        packetsList.release(); // reset() set it to 1
-        packetsList.waitAllReleased();
+            // Decrease reference counter and wait for everybody else to do the same
+            packetsList.release(); // reset() set it to 1
+            packetsList.waitAllReleased();
 
-        // Nobody is using data anymore
-        m_circularBuffer->consume(consumed);
-
-        // Corrupted data check
-        if (consumed == 0 && length > DasPacket::MinLength) {
+            // Nobody is using data anymore
+            m_circularBuffer->consume(consumed);
+        } else if (length > DasPacket::MinLength) { // Corrupted data check
             handleRecvError(-EBADMSG);
             LOG_ERROR("Corrupted data in queue, aborting process thread");
             break;

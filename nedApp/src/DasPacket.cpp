@@ -275,34 +275,19 @@ bool DasPacket::lvdsParity(int number)
     return temp;
 }
 
-bool DasPacket::copy(DasPacket *dest, uint32_t destSize) const
-{
-    uint32_t len = length();
-    if (destSize < len)
-        return false;
-
-    memcpy(dest, this, len);
-    return true;
-}
-
 bool DasPacket::copyHeader(DasPacket *dest, uint32_t destSize) const
 {
-    if (destSize < sizeof(DasPacket))
-        return false;
-
-    dest->source = this->source;
-    dest->destination = this->destination;
-    dest->info = this->info;
-    dest->payload_length = 0;
-    dest->reserved1 = this->reserved1;
-    dest->reserved2 = this->reserved2;
-
+    uint32_t copySize = sizeof(DasPacket);
+    uint32_t payload_length = 0;
     if (getRtdlHeader() != 0) {
-        if (destSize < sizeof(RtdlHeader))
-            return false;
-        memcpy(dest->payload, this->payload, sizeof(RtdlHeader));
-        dest->payload_length += sizeof(RtdlHeader);
+        copySize += sizeof(RtdlHeader);
+        payload_length += sizeof(RtdlHeader);
     }
 
+    if (destSize < copySize)
+        return false;
+
+    memcpy(dest, this, copySize);
+    dest->payload_length = payload_length;
     return true;
 }

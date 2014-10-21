@@ -66,54 +66,58 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
         passthru = 1;
     this->unlock();
 
-    DasPacketList newPacketList;
+    nReceived += packetList->size();
+
+    // Software design ensures single instance of this function running
+    // at any given time. We must ensure the same for our clients - that is
+    // wait until they're done processing before sending them some more data.
 
     if (passthru != 0) {
-        newPacketList.reset(packetList);
-        for (const DasPacket *packet = newPacketList.first(); packet != 0; packet = newPacketList.next(packet)) {
-            nReceived++;
-        }
-        sendToPlugins(&newPacketList);
-        newPacketList.release();
-        newPacketList.waitAllReleased();
+        m_packetList.reset(packetList); // reset() automatically reserves
     } else {
-
         uint32_t bufferOffset = 0;
 
-        for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
-            nReceived++;
+        m_packetList.clear();
+        m_packetList.reserve();
 
+        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+            const DasPacket *packet = *it;
+
+            // If running out of space, send this batch and free buffer
             uint32_t remain = m_bufferSize - bufferOffset;
             if (remain < packet->length()) {
-                newPacketList.reset(m_buffer, bufferOffset);
-                sendToPlugins(&newPacketList);
-                newPacketList.release();
-                newPacketList.waitAllReleased();
+                sendToPlugins(&m_packetList);
+                m_packetList.release();
+                m_packetList.waitAllReleased();
+                m_packetList.clear();
+                m_packetList.reserve();
                 bufferOffset = 0;
                 nSplits++;
             }
 
+            // Reuse the original packet if nothing to map
+            if (packet->isNeutronData() == false) {
+                m_packetList.push_back(packet);
+                continue;
+            }
+
             // Reserve part of buffer for this packet, it may shrink from original but never grow
             DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
+            m_packetList.push_back(newPacket);
             bufferOffset += packet->length();
 
-            if (packet->isNeutronData() == true) {
-                // Do the pixel id mapping - this can be parallelized
-                nUnmapped += packetMap(packet, newPacket);
-            } else {
-                packet->copy(newPacket, packet->length());
-            }
+            // Do the pixel id mapping - this can be parallelized
+            nUnmapped += packetMap(packet, newPacket);
 
             nProcessed++;
         }
+    }
 
-        if (bufferOffset > 0) {
-            DasPacketList newPacketList;
-            newPacketList.reset(m_buffer, bufferOffset);
-            sendToPlugins(&newPacketList);
-            newPacketList.release();
-            newPacketList.waitAllReleased();
-        }
+    if (m_packetList.empty() == false) {
+        sendToPlugins(&m_packetList);
+        m_packetList.release();
+        m_packetList.waitAllReleased();
+        m_packetList.clear();
     }
 
     this->lock();
@@ -144,6 +148,12 @@ uint32_t PixelMapPlugin::packetMap(const DasPacket *srcPacket, DasPacket *destPa
             srcEvent++;
             destEvent++;
         } else {
+#ifdef PIXMAP_PASSTHRU_UNMAPPED
+            destEvent->tof = srcEvent->tof;
+            destEvent->pixelid = srcEvent->pixelid;
+            destPacket->payload_length += sizeof(DasPacket::Event);
+            destEvent++;
+#endif
             nUnmapped++;
             srcEvent++;
         }

@@ -39,8 +39,11 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *dispatcherPortName, int
 
 void RtdlPlugin::processData(const DasPacketList * const packetList)
 {
-    for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
-        m_receivedCount++;
+    m_receivedCount += packetList->size();
+
+    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+        const DasPacket *packet = *it;
+
         if (packet->isRtdl()) {
             const DasPacket::RtdlHeader *rtdl = reinterpret_cast<const DasPacket::RtdlHeader *>(packet->getPayload());
             epicsTimeStamp rtdlTime;
