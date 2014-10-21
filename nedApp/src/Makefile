@@ -14,12 +14,13 @@ include $(TOP)/configure/CONFIG
 # The C/C++ bitfield ordering in structs is platform AND compiler dependant
 # 
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
+USR_CXXFLAGS += -DPIXMAP_PASSTHRU_UNMAPPED
 USR_CXXFLAGS += -std=c++0x
-# The temporary DWord alignment workaround in FPGA is to set bit 31 in the
-# packet header length.
+USR_CXXFLAGS += -fopenmp
+USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)
-CXXFLAGS += -g -ggdb
-#CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
+#CXXFLAGS += -g -ggdb
+CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
 
 # Product
 PROD_NAME = ned

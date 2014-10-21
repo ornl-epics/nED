@@ -74,50 +74,62 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
 
     if (passthru != 0) {
         m_packetList.reset(packetList); // reset() automatically reserves
-    } else {
-        uint32_t bufferOffset = 0;
-
-        m_packetList.clear();
-        m_packetList.reserve();
-
-        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-            const DasPacket *packet = *it;
-
-            // If running out of space, send this batch and free buffer
-            uint32_t remain = m_bufferSize - bufferOffset;
-            if (remain < packet->length()) {
-                sendToPlugins(&m_packetList);
-                m_packetList.release();
-                m_packetList.waitAllReleased();
-                m_packetList.clear();
-                m_packetList.reserve();
-                bufferOffset = 0;
-                nSplits++;
-            }
-
-            // Reuse the original packet if nothing to map
-            if (packet->isNeutronData() == false) {
-                m_packetList.push_back(packet);
-                continue;
-            }
-
-            // Reserve part of buffer for this packet, it may shrink from original but never grow
-            DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
-            m_packetList.push_back(newPacket);
-            bufferOffset += packet->length();
-
-            // Do the pixel id mapping - this can be parallelized
-            nUnmapped += packetMap(packet, newPacket);
-
-            nProcessed++;
-        }
-    }
-
-    if (m_packetList.empty() == false) {
         sendToPlugins(&m_packetList);
         m_packetList.release();
         m_packetList.waitAllReleased();
         m_packetList.clear();
+    } else {
+        // Break single loop into two parts to have single point of sending data
+        for (auto it = packetList->cbegin(); it != packetList->cend(); ) {
+
+            uint32_t bufferOffset = 0;
+            m_packetList.clear();
+            m_packetList.reserve();
+
+            // Limit number of threads as working payload is not that big.
+            // More threads showed more synchronization and bigger runtime overall
+            #pragma omp parallel num_threads(4)
+            #pragma omp single
+            {
+                for (; it != packetList->cend(); it++) {
+                    const DasPacket *packet = *it;
+
+                    // If running out of space, send this batch
+                    uint32_t remain = m_bufferSize - bufferOffset;
+                    if (remain < packet->length()) {
+                        nSplits++;
+                        break;
+                    }
+
+                    // Reuse the original packet if nothing to map
+                    if (packet->isNeutronData() == false) {
+                        m_packetList.push_back(packet);
+                        continue;
+                    }
+
+                    // Reserve part of buffer for this packet, it may shrink from original but never grow
+                    DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
+                    m_packetList.push_back(newPacket);
+                    bufferOffset += packet->length();
+
+                    // Do the pixel id mapping - this can be parallelized
+                    #pragma omp task firstprivate(packet, newPacket) shared(nUnmapped)
+                    nUnmapped += packetMap(packet, newPacket);
+
+                    nProcessed++;
+                }
+
+                // Synchronize threads
+                #pragma omp taskwait
+
+                sendToPlugins(&m_packetList);
+                m_packetList.release();
+                m_packetList.waitAllReleased();
+            }
+        }
+    }
+
+    if (m_packetList.empty() == false) {
     }
 
     this->lock();
