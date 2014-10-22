@@ -5,21 +5,16 @@
 # createStatusParam("UartByteErr", 0x0,  1, 29); // UART: Byte error              (0=no error,1=error)
 # The name and description are truncd to match EPICS string specifications
 
-if (!defined $name_prefix || !defined $input_file) {
-    print { STDERR } "Usage: $0 -name_prefix=<BLXXX:Det:RocYYY:> -input_file=<input file>\n";
+my $MAX_NAME_LEN      = 29 - length($name_prefix);
+my $MAX_DESC_LEN      = 29;
+
+if (!defined $name_prefix) {
+    print { STDERR } "Usage: $0 -name_prefix=<BLXXX:Det:RocYYY:> [-cfg_rbv=1]\n";
     exit 1;
 }
 if (!defined $cfg_rbv || $cfg_rbv != 1) {
     $cfg_rbv = 0;
 }
-
-my $MAX_NAME_LEN      = 29 - length($name_prefix);
-my $MAX_DESC_LEN      = 29;
-my $MAX_MBBO_xNAM_LEN = 16;
-my $MAX_BO_xNAM_LEN   = 20;
-
-my @vals = ("ZRVL","ONVL","TWVL","THVL","FRVL","FVVL","SXVL","SVVL","EIVL","NIVL","TEVL","ELVL","TVVL","TTVL","FTVL","FFVL");
-my @nams = ("ZRST","ONST","TWST","THST","FRST","FVST","SXST","SVST","EIST","NIST","TEST","ELST","TVST","TTST","FTST","FFST");
 
 sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 sub trunc {
@@ -31,66 +26,166 @@ sub trunc {
     return substr($str, 0, $max_len);
 }
 
-open (INFILE, $input_file);
-foreach $line ( <INFILE> ) {
+# Print bi or bo record
+# 
+# Params:
+# * type - <bi|bo>
+# * name - Record name, might get truncated
+# * desc - Record description, might get truncated
+# * valstr - Part of the comment inside the (), used to give fields a name
+# * val - default value, might be undefined
+# * autosave - when defined, make the record autosave-able
+sub bibo {
+    my $MAX_BO_xNAM_LEN = 20;
+
+    my ($type, $name, $desc, $valstr, $val, $autosave) = @_;
+    $type = ( $type eq "bi" ? "bi" : "bo" );
+    my $io = ( $type eq "bi" ? "INP" : "OUT" );
+    $name = trunc($name, $MAX_NAME_LEN, $name, "name");
+    $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
+
+    print ("record($type, \"\$(P)$name\")\n");
+    print ("\{\n");
+    if (defined $autosave) {
+        print ("    info(autosaveFields, \"VAL\")\n");
+    }
+    print ("    field(DESC, \"$desc\")\n");
+    print ("    field(DTYP, \"asynInt32\")\n");
+    print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
+    if ($type eq "bi") {
+        print ("    field(SCAN, \"I/O Intr\")\n");
+    } else {
+        print ("    field(PINI, \"YES\")\n");
+    }
+    if (defined $val) {
+        print ("    field(VAL,  \"$val\")\n");
+    }
+    if ($valstr =~ m/([0-9]+) *= *([^,]+), *([0-9]+) *= *(.+)$/) {
+        my ($zval,$znam,$oval,$onam) = ($1,$2,$3,$4);
+        if ($zval != 0) { my $temp=$znam; $znam=$onam; $onam=$temp; }
+        $znam = trunc($znam, $MAX_BO_xNAM_LEN, $name, "ZNAM");
+        $onam = trunc($onam, $MAX_BO_xNAM_LEN, $name, "ONAM");
+        print ("    field(ZNAM, \"$znam\")\n");
+        print ("    field(ONAM, \"$onam\")\n");
+    }
+    print ("\}\n");
+}
+
+# Print mbbi or mbbo record
+# 
+# Params:
+# * type - <mbbi|mbbo>
+# * name - Record name, might get truncated
+# * desc - Record description, might get truncated
+# * valstr - Part of the comment inside the (), used to give fields a name
+# * val - default value, might be undefined
+# * autosave - when defined, make the record autosave-able
+sub mbbimbbo {
+    my $MAX_MBBO_xNAM_LEN = 16;
+    my @vals = ("ZRVL","ONVL","TWVL","THVL","FRVL","FVVL","SXVL","SVVL","EIVL","NIVL","TEVL","ELVL","TVVL","TTVL","FTVL","FFVL");
+    my @nams = ("ZRST","ONST","TWST","THST","FRST","FVST","SXST","SVST","EIST","NIST","TEST","ELST","TVST","TTST","FTST","FFST");
+
+    my ($type, $name, $desc, $valstr, $val, $autosave) = @_;
+    $type = ( $type eq "mbbi" ? "mbbi" : "mbbo" );
+    my $io = ( $type eq "mbbi" ? "INP" : "OUT" );
+    $name = trunc($name, $MAX_NAME_LEN, $name, "name");
+    $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
+
+    print ("record($type, \"\$(P)$name\")\n");
+    print ("\{\n");
+    if (defined $autosave) {
+        print ("    info(autosaveFields, \"VAL\")\n");
+    }
+    print ("    field(DESC, \"$desc\")\n");
+    print ("    field(DTYP, \"asynInt32\")\n");
+    print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
+    if ($type eq "mbbi") {
+        print ("    field(SCAN, \"I/O Intr\")\n");
+    } else {
+        print ("    field(PINI, \"YES\")\n");
+    }
+    if (defined $val) {
+        print ("    field(VAL,  \"$val\")\n");
+    }
+    my $i=0;
+    foreach (split(',', $valstr)) {
+        my ($xval,$xnam) = split(/=/, $_);
+        $xnam = trunc($xnam, $MAX_MBBO_xNAM_LEN, $name, $nams[$i]);
+        print ("    field($vals[$i], \"$xval\")\n");
+        print ("    field($nams[$i], \"$xnam\")\n");
+        $i++;
+    }
+    print ("\}\n");
+}
+
+# Print longin or longout record
+# 
+# Params:
+# * type - <longin|longout>
+# * name - Record name, might get truncated
+# * desc - Record description, might get truncated
+# * valstr - Part of the comment inside the (), additional record instructions, like calc,prec,etc.
+# * val - default value, might be undefined
+# * autosave - when defined, make the record autosave-able
+sub longinlongout {
+    my ($type, $name, $desc, $valstr, $val, $autosave) = @_;
+    $type = ( $type eq "longin" ? "longin" : "longout" );
+    my $io = ( $type eq "longin" ? "INP" : "OUT" );
+    $name = trunc($name, $MAX_NAME_LEN, $name, "name");
+    $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
+
+    print ("record($type, \"\$(P)$name\")\n");
+    print ("\{\n");
+    if (defined $autosave) {
+        print ("    info(autosaveFields, \"VAL\")\n");
+    }
+    print ("    field(DESC, \"$desc\")\n");
+    print ("    field(DTYP, \"asynInt32\")\n");
+    print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
+    if ($type eq "longin") {
+        print ("    field(SCAN, \"I/O Intr\")\n");
+    } else {
+        print ("    field(PINI, \"YES\")\n");
+    }
+    if (defined $val) {
+        print ("    field(VAL,  \"$val\")\n");
+    }
+    if ($valstr =~ /calc:([^,]*)/) {
+        print ("    field(FLNK, \"\$(P)${name}C\")\n");
+        print ("\}\n");
+        print ("record(calc, \"\$(P)${name}C\")\n");
+        print ("\{\n");
+        print ("    field(DESC, \"$desc\")\n");
+        print ("    field(INPA, \"\$(P)$name\")\n");
+        print ("    field(CALC, \"$1\")\n");
+    }
+    if ($valstr =~ /prec:([0-9]*)/) {
+        print ("    field(PREC, \"$1\")\n");
+    }
+    if ($valstr =~ /unit:([^,]*)/) {
+        print ("    field(EGU,  \"$1\")\n");
+    }
+    print ("\}\n");
+}
+
+# Extract matching lines from stdin
+foreach $line ( <STDIN> ) {
     chomp($line);
-    if ($line =~ m/createStatusParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+    if ($line =~ m/createStatusParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/ ||
+        $line =~ m/createCounterParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
         my ($name,$offset,$width,$shift,$comment) = ($1,$2,$3,$4,$5);
         $comment =~ /^\s*([^\(]*)\(?(.*)\)?$/;
         my ($desc, $valstr) = ($1, $2);
         $valstr =~ s/\)$//;
 
-        $name = trunc($name, $MAX_NAME_LEN, $name, "name");
-        $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
-       
         if ($valstr =~ /^range/) {
-            print ("record(longin, \"\$(P)$name\")\n");
-            print ("\{\n");
-            print ("    field(DESC, \"$desc\")\n");
-            print ("    field(DTYP, \"asynInt32\")\n");
-            print ("    field(INP,  \"\@asyn(\$(PORT))$name\")\n");
-	    print ("    field(SCAN, \"I/O Intr\")\n");
-            print ("\}\n");
+            longinlongout("longin", $name, $desc, $valstr);
         } elsif ($width == 1) {
-            print ("record(bi, \"\$(P)$name\")\n");
-            print ("\{\n");
-            print ("    field(DESC, \"$desc\")\n");
-            print ("    field(DTYP, \"asynInt32\")\n");
-            print ("    field(INP,  \"\@asyn(\$(PORT))$name\")\n");
-            print ("    field(SCAN, \"I/O Intr\")\n");
-            if ($valstr =~ m/([0-9]+) *= *([^,]+), *([0-9]+) *= *(.+)$/) {
-                my ($zval,$znam,$oval,$onam) = ($1,$2,$3,$4);
-                if ($zval != 0) { my $temp=$znam; $znam=$onam; $onam=$temp; }
-                $znam = trunc($znam, $MAX_BO_xNAM_LEN, $name, "ZNAM");
-                $onam = trunc($onam, $MAX_BO_xNAM_LEN, $name, "ONAM");
-                print ("    field(ZNAM, \"$znam\")\n");
-                print ("    field(ONAM, \"$onam\")\n");
-            }
-            print ("\}\n");
+            bibo("bi", $name, $desc, $valstr);
         } elsif ($width > 1 && $width < 15 && $valstr ne "") {
-            print ("record(mbbi, \"\$(P)$name\")\n");
-            print ("\{\n");
-            print ("    field(DESC, \"$desc\")\n");
-            print ("    field(DTYP, \"asynInt32\")\n");
-            print ("    field(INP,  \"\@asyn(\$(PORT))$name\")\n");
-            print ("    field(SCAN, \"I/O Intr\")\n");
-            my $i=0;
-            foreach (split(',',$valstr)) {
-                my ($xval,$xnam) = split('=', $_);
-                $xnam = trunc($xnam, $MAX_MBBO_xNAM_LEN, $name, $nams[$i]);
-                print ("    field($vals[$i], \"$xval\")\n");
-                print ("    field($nams[$i], \"$xnam\")\n");
-                $i++;
-            }
-            print ("\}\n");
+            mbbimbbo("mbbi", $name, $desc, $valstr);
         } else {
-            print ("record(longin, \"\$(P)$name\")\n");
-            print ("\{\n");
-            print ("    field(DESC, \"$desc\")\n");
-            print ("    field(DTYP, \"asynInt32\")\n");
-            print ("    field(INP,  \"\@asyn(\$(PORT))$name\")\n");
-            print ("    field(SCAN, \"I/O Intr\")\n");
-            print ("\}\n");
+            longinlongout("longin", $name, $desc, $valstr);
         }
     }
     if ($line =~ m/createConfigParam *\( *"([a-zA-Z0-9_]+)" *, *'([0-9A-F])' *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
@@ -99,87 +194,18 @@ foreach $line ( <INFILE> ) {
         my ($desc, $valstr) = ($1, $2);
         $valstr =~ s/\)$//;
 
-        $name = trunc($name, $MAX_NAME_LEN, $name, "name");
-        $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
-        $io = ( $cfg_rbv == 1 ? "INP" : "OUT" );
-       
         if ($valstr =~ /^range/) {
             my $type = ( $cfg_rbv == 1 ? "longin" : "longout" );
-            print ("record($type, \"\$(P)$name\")\n");
-            print ("\{\n");
-            print ("    info(autosaveFields, \"VAL\")\n");
-            print ("    field(DESC, \"$desc\")\n");
-            print ("    field(DTYP, \"asynInt32\")\n");
-            print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
-            if ($cfg_rbv == 0) {
-	        print ("    field(PINI, \"YES\")\n");
-            } else {
-                print ("    field(SCAN, \"I/O Intr\")\n");
-            }
-	    print ("    field(VAL,  \"$val\")\n");
-            print ("\}\n");
+            longinlongout($type, $name, $desc, $valstr, $val, "autosave");
         } elsif ($width == 1) {
             my $type = ( $cfg_rbv == 1 ? "bi" : "bo" );
-            print ("record($type, \"\$(P)$name\")\n");
-            print ("\{\n");
-            print ("    info(autosaveFields, \"VAL\")\n");
-            print ("    field(DESC, \"$desc\")\n");
-            print ("    field(DTYP, \"asynInt32\")\n");
-            print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
-            if ($cfg_rbv == 0) {
-	        print ("    field(PINI, \"YES\")\n");
-            } else {
-                print ("    field(SCAN, \"I/O Intr\")\n");
-            }
-	    print ("    field(VAL,  \"$val\")\n");
-            if ($valstr =~ m/([0-9]) *= *([^,]+), *([0-9]) *= *(.+)/) {
-                my ($zval,$znam,$oval,$onam) = ($1,$2,$3,$4);
-                if ($zval != 0) { my $temp=$znam; $znam=$onam; $onam=$temp; }
-                $znam = trunc($znam, $MAX_BO_xNAM_LEN, $name, "ZNAM");
-                $onam = trunc($onam, $MAX_BO_xNAM_LEN, $name, "ONAM");
-                print ("    field(ZNAM, \"$znam\")\n");
-                print ("    field(ONAM, \"$onam\")\n");
-            }
-            print ("\}\n");
+            bibo($type, $name, $desc, $valstr, $val, "autosave");
         } elsif ($width > 1 && $width < 15 && $valstr ne "") {
             my $type = ( $cfg_rbv == 1 ? "mbbi" : "mbbo" );
-            print ("record($type, \"\$(P)$name\")\n");
-            print ("\{\n");
-            print ("    info(autosaveFields, \"VAL\")\n");
-            print ("    field(DESC, \"$desc\")\n");
-            print ("    field(DTYP, \"asynInt32\")\n");
-            print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
-            if ($cfg_rbv == 0) {
-	        print ("    field(PINI, \"YES\")\n");
-            } else {
-                print ("    field(SCAN, \"I/O Intr\")\n");
-            }
-	    print ("    field(VAL,  \"$val\")\n");
-            my $i=0;
-            foreach (split(',', $valstr)) {
-                my ($xval,$xnam) = split(/=/, $_);
-                $xnam = trunc($xnam, $MAX_MBBO_xNAM_LEN, $name, $nams[$i]);
-                print ("    field($vals[$i], \"$xval\")\n");
-                print ("    field($nams[$i], \"$xnam\")\n");
-                $i++;
-            }
-            print ("\}\n");
+            mbbimbbo($type, $name, $desc, $valstr, $val, "autosave");
         } else {
             my $type = ( $cfg_rbv == 1 ? "longin" : "longout" );
-            print ("record($type, \"\$(P)$name\")\n");
-            print ("\{\n");
-            print ("    info(autosaveFields, \"VAL\")\n");
-            print ("    field(DESC, \"$desc\")\n");
-            print ("    field(DTYP, \"asynInt32\")\n");
-            print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
-            if ($cfg_rbv == 0) {
-	        print ("    field(PINI, \"YES\")\n");
-            } else {
-                print ("    field(SCAN, \"I/O Intr\")\n");
-            }
-	    print ("    field(VAL,  \"$val\")\n");
-            print ("\}\n");
+            longinlongout($type, $name, $desc, $valstr, $val, "autosave");
         }
     }
 }
-close (INFILE);

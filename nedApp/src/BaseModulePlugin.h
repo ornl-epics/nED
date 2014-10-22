@@ -163,8 +163,10 @@ class BaseModulePlugin : public BasePlugin {
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
         uint32_t m_statusPayloadLength;                 //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
+        uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
         uint32_t m_configPayloadLength;                 //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParam()
         std::map<int, StatusParamDesc> m_statusParams;  //!< Map of exported status parameters
+        std::map<int, StatusParamDesc> m_counterParams; //!< Map of exported status counter parameters
         std::map<int, ConfigParamDesc> m_configParams;  //!< Map of exported config parameters
         StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
@@ -312,6 +314,24 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspReadStatus(const DasPacket *packet);
 
         /**
+         * Called when read status counters request to the module should be made.
+         *
+         * Base implementation simply sends a READ_STATUS_COUNTERS command and sets up
+         * timeout callback.
+         */
+        virtual void reqReadStatusCounters();
+
+        /**
+         * Default handler for READ_STATUS_COUNTERS response.
+         *
+         * Read the packet payload and populate counters parameters.
+         *
+         * @param[in] packet with response to READ_STATUS_COUNTERS
+         * @return true if packet was parsed and module version verified.
+         */
+        virtual bool rspReadStatusCounters(const DasPacket *packet);
+
+        /**
          * Called when read config request to the module should be made.
          *
          * Base implementation simply sends a READ_CONFIG command and sets up
@@ -409,6 +429,13 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] shift Starting bit position within the word/dword.
          */
         void createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
+
+        /**
+         * Create and register single integer status counter parameter.
+         *
+         * Status counters provide a way to diagnose communication problems.
+         */
+        void createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
 
         /**
          * Create and register single integer config parameter.

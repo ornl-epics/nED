@@ -16,7 +16,7 @@
 
 EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 500;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 600;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
 const float    RocPlugin::NO_RESPONSE_TIMEOUT           = 1.0;
 
 /**
@@ -61,6 +61,11 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         createStatusParams_v54();
         createConfigParams_v54();
         createParam("AcquireStat", asynParamInt32, &AcquireStat); // v5.4 doesn't support AcquireStat through registers, we simulate by receiving ACK on START
+    } else if (m_version == "v56") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v56();
+        createCounterParams_v56();
+        createConfigParams_v56();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);
@@ -167,6 +172,8 @@ bool RocPlugin::rspReadVersion(const DasPacket *packet)
             return true;
         if (m_version == "v55" && version.fw_revision == 5)
             return true;
+        if (m_version == "v56" && version.fw_revision == 6)
+            return true;
     }
 
     LOG_WARN("Unsupported ROC version");
@@ -213,6 +220,8 @@ bool RocPlugin::rspReadConfig(const DasPacket *packet)
         memcpy(buffer, packet, packet->length());
         packet = reinterpret_cast<const DasPacket *>(buffer);
         const_cast<DasPacket *>(packet)->payload_length -= 4; // This is the only reason we're doing all the buffering
+
+        return BaseModulePlugin::rspReadConfig(packet);
     }
 
     return BaseModulePlugin::rspReadConfig(packet);

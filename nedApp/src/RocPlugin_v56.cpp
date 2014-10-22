@@ -1,4 +1,4 @@
-/* RocPlugin_v52.cpp
+/* RocPlugin_v56.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -10,15 +10,16 @@
 #include "RocPlugin.h"
 
 /**
- * @file RocPlugin_v52.cpp
+ * @file RocPlugin_v56.cpp
  *
- * ROC 5.2 parameters
+ * ROC 5.6 parameters
  *
- * ROC 5.2 is golden firmware (September 2014). It's being well tested, firmware
- * sources are available and it's installed to most beam-lines.
+ * The ROC 5.6 firmware is identical to ROC 5.2 except that it adds support for
+ * error counter and rate meter registers using READ_STATUS_COUNTERS (0x24)
+ * command.
  */
 
-void RocPlugin::createStatusParams_v52()
+void RocPlugin::createStatusParams_v56()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                       | EPICS record description  | (bi and mbbi description)
     createStatusParam("UartByteErr",    0x0,  1, 13); // UART: Byte error              (0=no error,1=error)
@@ -303,7 +304,67 @@ void RocPlugin::createStatusParams_v52()
     createStatusParam("Ch8BOverflw",    0x1F, 1,  1); // Chan8 B Auto-Adjust overflow  (0=no,1=yes)
 }
 
-void RocPlugin::createConfigParams_v52()
+void RocPlugin::createCounterParams_v56()
+{
+    createCounterParam("CntLvdsPar",    0x0, 16,  0); // LVDS parity error counter
+    createCounterParam("CntLvdsTyp",    0x1, 16,  0); // LVDS data type error counter
+    createCounterParam("CntLvdsLen",    0x2, 16,  0); // LVDS length error counter
+    createCounterParam("CntLvdsTim",    0x3, 16,  0); // LVDS timeout counter
+    createCounterParam("CntLvdsSta",    0x4, 16,  0); // LVDS no start error counter
+    createCounterParam("CntLvdsSts",    0x5, 16,  0); // LVDS start before stop cnt
+    createCounterParam("CntLvdsFul",    0x6, 16,  0); // LVDS FIFO full error counter
+    createCounterParam("CntNoTsync",    0x7, 16,  0); // Timestamp overflow counter
+    createCounterParam("CntUnknCmd",    0x8, 16,  0); // Unknown command counter
+    createCounterParam("CntLenErr",     0x9, 16,  0); // Command length error counter
+    createCounterParam("CntPrgErr",     0xA, 16,  0); // Write cnfg disallowed cnt
+    createCounterParam("CntUartPar",    0xB, 16,  0); // UART parity error counter
+    createCounterParam("CntUartByt",    0xC, 16,  0); // UART byte error counter
+    createCounterParam("CntDataFul",    0xD, 16,  0); // Data almost full counter
+    createCounterParam("CntCh0Ful",     0xE, 16,  0); // Ch0 ADC FIFO full counter
+    createCounterParam("CntCh1Ful",     0xF, 16,  0); // Ch1 ADC FIFO full counter
+    createCounterParam("CntCh2Ful",    0x10, 16,  0); // Ch2 ADC FIFO full counter
+    createCounterParam("CntCh3Ful",    0x11, 16,  0); // Ch3 ADC FIFO full counter
+    createCounterParam("CntCh4Ful",    0x12, 16,  0); // Ch4 ADC FIFO full counter
+    createCounterParam("CntCh5Ful",    0x13, 16,  0); // Ch5 ADC FIFO full counter
+    createCounterParam("CntCh6Ful",    0x14, 16,  0); // Ch6 ADC FIFO full counter
+    createCounterParam("CntCh7Ful",    0x15, 16,  0); // Ch7 ADC FIFO full counter
+    createCounterParam("CntMisClk",    0x16, 16,  0); // Link RX clock missing cnt
+    createCounterParam("CntCh0PosE",   0x17, 16,  0); // Ch0 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh1PosE",   0x18, 16,  0); // Ch1 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh2PosE",   0x19, 16,  0); // Ch2 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh3PosE",   0x1A, 16,  0); // Ch3 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh4PosE",   0x1B, 16,  0); // Ch4 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh5PosE",   0x1C, 16,  0); // Ch5 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh6PosE",   0x1D, 16,  0); // Ch6 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh7PosE",   0x1E, 16,  0); // Ch7 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh0SumH",   0x1F, 16,  0); // Ch0 SUM high counter          (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh1SumH",   0x20, 16,  0); // Ch1 SUM high counter          (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("CntCh2SumH",   0x21, 16,  0); // Ch2 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh3SumH",   0x22, 16,  0); // Ch3 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh4SumH",   0x23, 16,  0); // Ch4 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh5SumH",   0x24, 16,  0); // Ch5 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh6SumH",   0x25, 16,  0); // Ch6 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh7SumH",   0x26, 16,  0); // Ch7 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh0SumL",   0x27, 16,  0); // Ch0 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh1SumL",   0x28, 16,  0); // Ch1 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh2SumL",   0x29, 16,  0); // Ch2 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh3SumL",   0x2A, 16,  0); // Ch3 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh4SumL",   0x2B, 16,  0); // Ch4 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh5SumL",   0x2C, 16,  0); // Ch5 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh6SumL",   0x2D, 16,  0); // Ch6 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh7SumL",   0x2E, 16,  0); // Ch7 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh0Rate",   0x2F, 16,  0); // Ch0 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh1Rate",   0x30, 16,  0); // Ch1 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh2Rate",   0x31, 16,  0); // Ch2 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh3Rate",   0x32, 16,  0); // Ch3 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh4Rate",   0x33, 16,  0); // Ch4 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh5Rate",   0x34, 16,  0); // Ch5 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh6Rate",   0x35, 16,  0); // Ch6 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntCh7Rate",   0x36, 16,  0); // Ch7 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntOutRate",   0x37, 16,  0); // Total outrate counter         (calc:1000*A/52.4288,unit:counts/s,prec:0)
+}
+
+void RocPlugin::createConfigParams_v56()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                                | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1PosIdx",   '1', 0x0,  32, 0, 0);     // Chan1 position index

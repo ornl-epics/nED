@@ -21,17 +21,24 @@
 struct occ_handle;
 
 /**
- * Main class for ned
+ * OCC interface and top level data dispatcher
  *
- * This is a glue class that brings all the main pieces together. It communicates
- * directly to OCC board to initialize it, it creates handler for reading the OCC
- * buffer and serves as the main dispatcher of all OCC data.
+ * An OccPortDriver instance connects to OCC device for data exchange and status
+ * querying. Incoming data (data received from OCC device) is distributed to
+ * all registered plugins. Plugins receive pointer to read-only DMA memory and
+ * it's their responsibility to process all data received. Optionally
+ * OccPortDriver can be enabled to copy data to a bigger buffer in application
+ * memory space. In such case copying is done in dedicated thread. Outgoing data
+ * sent by plugins is forwarded intact to the OCC device.
+ *
+ * Another thread is created to periodically poll OCC status with two user
+ * configurable intervals (basic vs extended status).
  *
  * Next table lists asyn parameters provided and can be used from EPICS PV infrastructure.
  * Some naming restrictions enforced by EPICS records apply:
- * - PV name length is limited to 27 characters in total, where the static prefix
- *   is BLXXX:Det:OccX: long, living 13 characters to asyn param name
- * - PV comment can be 29 characters long (text in brackets may be used to describe EPICS
+ * - PV name length is limited to 28 characters in total, where the static prefix
+ *   is BLXXX:Det:OccX: long, leaving 13 characters to asyn param name
+ * - PV comment can be 28 characters long (text in brackets may be used to describe EPICS
  *   PV valid values)
  * asyn param    | asyn param type | init val | mode | Description                   |
  * ------------- | --------------- | -------- | ---- | ------------------------------
