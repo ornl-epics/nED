@@ -41,8 +41,8 @@ ProxyPluginConfigure("proxy1", "occ1")
 dbLoadRecords("../../db/BaseSocketPlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 
-CalibrationPvaPluginConfigure("Calibration1", "occ1", "$(PREFIX)Det:cal1:Neutrons")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:cal1:,PORT=Calibration1")
+RocPvaPluginConfigure("rocPva1", "occ1", "$(PREFIX)Det:rocpva1:Neutrons")
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:rocpva1:,PORT=rocPva1")
 
 #DspPluginConfigure("Dsp1", "$(OCC1)", "0x15FA76DF")
 

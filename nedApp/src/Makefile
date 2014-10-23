@@ -19,6 +19,7 @@ USR_CXXFLAGS += -std=c++0x
 # packet header length.
 #USR_CXXFLAGS += -DDWORD_PADDING_WORKAROUND
 CXXFLAGS = -Wall -g -ggdb $(USR_CXXFLAGS)
+#CXXFLAGS = -Wall -O2 $(USR_CXXFLAGS)
 
 # Product
 PROD_NAME = ned
@@ -83,7 +84,7 @@ $(PROD_NAME)_SRCS  += GenericModulePlugin.cpp
 $(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
-$(PROD_NAME)_SRCS  += CalibrationPvaPlugin.cpp
+$(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
 
 $(PROD_NAME)_DOXS  += DspPlugin.dox

@@ -21,7 +21,7 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
     epics::pvData::PVStructurePtr pvStructure = pvDataCreate->createPVStructure(
         fieldCreate->createFieldBuilder()
         ->add("timeStamp",      standardField->timeStamp())
-        ->add("proton_charge",  epics::pvData::pvDouble)
+        ->add("proton_charge",  standardField->scalar(epics::pvData::pvDouble, ""))
         ->add("time_of_flight", standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("pixel",          standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_a1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
@@ -65,25 +65,32 @@ void PvaNeutronData::endGroupPut()
 
 void PvaNeutronData::postCachedUnlocked()
 {
-    // TODO: Will EPICSv4 recognize not updated fields and optimize them away?
-    epics::pvDatabase::PVRecord::beginGroupPut();
-    time_of_flight->replace(freeze(cache.time_of_flight));
-    proton_charge->put(cache.proton_charge);
-    pixel->replace(freeze(cache.pixel));
-    sample_a1->replace(freeze(cache.sample_a1));
-    sample_a2->replace(freeze(cache.sample_a2));
-    sample_a8->replace(freeze(cache.sample_a8));
-    sample_a19->replace(freeze(cache.sample_a19));
-    sample_a48->replace(freeze(cache.sample_a48));
-    sample_b1->replace(freeze(cache.sample_b1));
-    sample_b8->replace(freeze(cache.sample_b8));
-    sample_b12->replace(freeze(cache.sample_b12));
-    position_index->replace(freeze(cache.position_index));
-    position_x->replace(freeze(cache.position_x));
-    position_y->replace(freeze(cache.position_y));
-    photo_sum_x->replace(freeze(cache.photo_sum_x));
-    photo_sum_y->replace(freeze(cache.photo_sum_y));
-    epics::pvDatabase::PVRecord::endGroupPut();
+    try {
+        // TODO: Will EPICSv4 recognize not updated fields and optimize them away?
+        epics::pvDatabase::PVRecord::beginGroupPut();
+	timeStamp.set(cache.timeStamp);
+        time_of_flight->replace(freeze(cache.time_of_flight));
+        proton_charge->put(cache.proton_charge);
+        pixel->replace(freeze(cache.pixel));
+        sample_a1->replace(freeze(cache.sample_a1));
+        sample_a2->replace(freeze(cache.sample_a2));
+        sample_a8->replace(freeze(cache.sample_a8));
+        sample_a19->replace(freeze(cache.sample_a19));
+        sample_a48->replace(freeze(cache.sample_a48));
+        sample_b1->replace(freeze(cache.sample_b1));
+        sample_b8->replace(freeze(cache.sample_b8));
+        sample_b12->replace(freeze(cache.sample_b12));
+        position_index->replace(freeze(cache.position_index));
+        position_x->replace(freeze(cache.position_x));
+        position_y->replace(freeze(cache.position_y));
+        photo_sum_x->replace(freeze(cache.photo_sum_x));
+        photo_sum_y->replace(freeze(cache.photo_sum_y));
+        epics::pvDatabase::PVRecord::endGroupPut();
+    }
+    catch (...) {
+        unlock();
+        throw;
+    }
 
     cache.time_of_flight.clear();
     cache.pixel.clear();
@@ -116,7 +123,7 @@ bool PvaNeutronData::init()
     if (!timeStamp.attach(getPVStructure()->getSubField("timeStamp")))
         return false;
 
-    proton_charge = getPVStructure()->getSubField<epics::pvData::PVDouble>("proton_charge");
+    proton_charge = getPVStructure()->getDoubleField("proton_charge.value");
     if (proton_charge.get() == NULL)
         return false;
 
@@ -138,7 +145,7 @@ bool PvaNeutronData::init()
 
     sample_a8 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a8.value");
     if (sample_a8.get() == NULL)
-        return false; 
+        return false;
 
     sample_a19 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a19.value");
     if (sample_a19.get() == NULL)

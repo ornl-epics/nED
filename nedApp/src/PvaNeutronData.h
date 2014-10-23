@@ -63,7 +63,7 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
             epics::pvData::PVUIntArray::svector sample_a48;
             epics::pvData::PVUIntArray::svector sample_b1;
             epics::pvData::PVUIntArray::svector sample_b8;
-            epics::pvData::PVUIntArray::svector sample_b12; 
+            epics::pvData::PVUIntArray::svector sample_b12;
             epics::pvData::PVUIntArray::svector position_index;
             epics::pvData::PVUIntArray::svector position_x;
             epics::pvData::PVUIntArray::svector position_y;
@@ -92,7 +92,7 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
          *
          * Any updates within the beginGroupPut() and endGroupPut() result in a
          * single record update, that is a single monitor event on the client side.
-         * Writing to public members variables outside the transcaction will post
+         * Writing to public members variables outside the transaction will post
          * individual changes immediately.
          */
         virtual void beginGroupPut();
