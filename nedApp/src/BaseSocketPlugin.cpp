@@ -15,7 +15,6 @@
 #include <string.h> // strerror
 
 #define NUM_BASESOCKETPLUGIN_PARAMS     ((int)(&LAST_BASESOCKETPLUGIN_PARAM - &FIRST_BASESOCKETPLUGIN_PARAM + 1))
-#define DEFAULT_CHECKCLIENT_DELAY       2
 
 BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherPortName, int blocking,
                            int numParams, int maxAddr, int interfaceMask, int interruptMask,
@@ -25,19 +24,14 @@ BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherP
     , m_listenSock(-1)
     , m_clientSock(-1)
 {
-    createParam("ListenIp",     asynParamOctet,     &ListenIP);
-    createParam("ListenPort",   asynParamInt32,     &ListenPort);
-    createParam("ClientIp",     asynParamOctet,     &ClientIP);
-    createParam("CheckClientDel",asynParamInt32,    &CheckClientDelay);
-
-    setStringParam(ClientIP,        "");
-    setIntegerParam(TxCount,        0);
-    setIntegerParam(CheckClientDelay,  DEFAULT_CHECKCLIENT_DELAY);
-
+    createParam("ListenIp",     asynParamOctet,     &ListenIP);         // WRITE - Hostname or IP address to listen to
+    createParam("ListenPort",   asynParamInt32,     &ListenPort);       // WRITE - Port number to listen to
+    createParam("ClientIp",     asynParamOctet,     &ClientIP, "");     // READ - Client IP if connected, or empty string
+    createParam("CheckInt",     asynParamInt32,     &CheckInt, 2);      // WRITE - Check client interval in seconds
     callParamCallbacks();
 
     std::function<float(void)> watchdogCb = std::bind(&BaseSocketPlugin::checkClient, this);
-    scheduleCallback(watchdogCb, DEFAULT_CHECKCLIENT_DELAY);
+    scheduleCallback(watchdogCb, 2.0);
 }
 
 BaseSocketPlugin::~BaseSocketPlugin()
@@ -94,12 +88,12 @@ asynStatus BaseSocketPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
         LOG_INFO("Listening on %s:%d", host, value);
         return asynSuccess;
-    } else if (pasynUser->reason == CheckClientDelay) {
+    } else if (pasynUser->reason == CheckInt) {
         // If we were to add support for canceling the timer through value 0 here,
         // we'd have to implement canceling old timer and scheduling new one.
         if (value < 1)
             value = 1;
-        setIntegerParam(CheckClientDelay, value);
+        setIntegerParam(CheckInt, value);
         callParamCallbacks();
         return asynSuccess;
     }
@@ -247,6 +241,6 @@ float BaseSocketPlugin::checkClient()
     }
 
     int delay;
-    getIntegerParam(CheckClientDelay, &delay);
+    getIntegerParam(CheckInt, &delay);
     return delay;
 }

@@ -43,7 +43,7 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
     createStatusParams();
     createConfigParams();
 
-    setIntegerParam(Type, DasPacket::MOD_TYPE_ACPCFEM);
+    setIntegerParam(HwType, DasPacket::MOD_TYPE_ACPCFEM);
     setIntegerParam(Supported, 1);
 
     LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
@@ -70,13 +70,13 @@ bool AcpcFemPlugin::rspReadVersion(const DasPacket *packet)
         return false;
     }
 
-    setIntegerParam(HardwareVer, version.hw_version);
-    setIntegerParam(HardwareRev, version.hw_revision);
-    setStringParam(HardwareDate, "");
-    setIntegerParam(FirmwareVer, version.fw_version);
-    setIntegerParam(FirmwareRev, version.fw_revision);
+    setIntegerParam(HwVer, version.hw_version);
+    setIntegerParam(HwRev, version.hw_revision);
+    setStringParam(HwDate, "");
+    setIntegerParam(FwVer, version.fw_version);
+    setIntegerParam(FwRev, version.fw_revision);
     snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FirmwareDate, date);
+    setStringParam(FwDate, date);
 
     callParamCallbacks();
 

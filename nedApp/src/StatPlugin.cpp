@@ -32,21 +32,21 @@ StatPlugin::StatPlugin(const char *portName, const char *dispatcherPortName, int
     , m_badCount(0)
     , m_badBytes(0)
 {
-    createParam("CmdCnt",       asynParamInt32, &CmdCnt,    m_cmdCount);
-    createParam("DataCnt",      asynParamInt32, &DataCnt,   m_dataCount);
-    createParam("MetaCnt",      asynParamInt32, &MetaCnt,   m_metaCount);
-    createParam("RtdlCnt",      asynParamInt32, &RtdlCnt,   m_rtdlCount);
-    createParam("TsyncCnt",     asynParamInt32, &TsyncCnt,  m_tsyncCount);
-    createParam("BadCnt",       asynParamInt32, &BadCnt,    m_badCount);
-    createParam("TotCnt",       asynParamInt32, &TotCnt,    m_receivedCount);
+    createParam("CmdCnt",       asynParamInt32, &CmdCnt,    0); // READ - Number of command response packets
+    createParam("DataCnt",      asynParamInt32, &DataCnt,   0); // READ - Number of data packets
+    createParam("MetaCnt",      asynParamInt32, &MetaCnt,   0); // READ - Number of metadata packets
+    createParam("RtdlCnt",      asynParamInt32, &RtdlCnt,   0); // READ - Number of RTDL packets
+    createParam("TsyncCnt",     asynParamInt32, &TsyncCnt,  0); // READ - Number of TSYNC packets
+    createParam("BadCnt",       asynParamInt32, &BadCnt,    0); // READ - Number of bad packets
+    createParam("TotCnt",       asynParamInt32, &TotCnt,    0); // READ - Total number of packets
 
-    createParam("CmdByte",      asynParamInt32, &CmdByte,   m_cmdBytes);
-    createParam("DataByte",     asynParamInt32, &DataByte,  m_dataBytes);
-    createParam("MetaByte",     asynParamInt32, &MetaByte,  m_metaBytes);
-    createParam("RtdlByte",     asynParamInt32, &RtdlByte,  m_rtdlBytes);
-    createParam("TsyncByte",    asynParamInt32, &TsyncByte, m_tsyncBytes);
-    createParam("BadByte",      asynParamInt32, &BadByte,   m_badBytes);
-    createParam("TotByte",      asynParamInt32, &TotByte,   m_receivedBytes);
+    createParam("CmdByte",      asynParamInt32, &CmdByte,   0); // READ - Bytes of command response packets
+    createParam("DataByte",     asynParamInt32, &DataByte,  0); // READ - Bytes of data packets
+    createParam("MetaByte",     asynParamInt32, &MetaByte,  0); // READ - Bytes of metadata packets
+    createParam("RtdlByte",     asynParamInt32, &RtdlByte,  0); // READ - Bytes of RTDL packets
+    createParam("TsyncByte",    asynParamInt32, &TsyncByte, 0); // READ - Bytes of TSYNCpackets
+    createParam("BadByte",      asynParamInt32, &BadByte,   0); // READ - Bytes of bad packets
+    createParam("TotByte",      asynParamInt32, &TotByte,   0); // READ - Total number of bytes received
 }
 
 void StatPlugin::processData(const DasPacketList * const packetList)

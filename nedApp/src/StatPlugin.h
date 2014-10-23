@@ -13,26 +13,7 @@
 #include "BasePlugin.h"
 
 /**
- * Gather and display statistical information of the incoming data
- *
- * Available StatPlugin parameters (in addition to ones from BasePlugin):
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * Reset         | asynParamInt32  | 0        | RW   | Reset counters
- * CmdCnt        | asynParamInt32  | 0        | RO   | Number of command response packets
- * DataCnt       | asynParamInt32  | 0        | RO   | Number of data packets
- * MetaCnt       | asynParamInt32  | 0        | RO   | Number of data packets
- * RtdlCnt       | asynParamInt32  | 0        | RO   | Number of RTDL packets
- * TsyncCnt      | asynParamInt32  | 0        | RO   | Number of TSYNC packets
- * BadCnt        | asynParamInt32  | 0        | RO   | Number of bad packets
- * TotCnt        | asynParamInt32  | 0        | RO   | Total number of packets
- * CmdByte       | asynParamInt32  | 0        | RO   | Bytes of command response packets
- * DataByte      | asynParamInt32  | 0        | RO   | Bytes of data packets
- * MetaByte      | asynParamInt32  | 0        | RO   | Bytes of data packets
- * RtdlByte      | asynParamInt32  | 0        | RO   | Bytes of RTDL packets
- * TsyncByte     | asynParamInt32  | 0        | RO   | Bytes of TSYNC packets
- * BadByte       | asynParamInt32  | 0        | RO   | Bytes of bad packets
- * TotByte       | asynParamInt32  | 0        | RO   | Total number of packets
+ * Gather and present statistical information of the incoming data
  */
 class StatPlugin : public BasePlugin {
     public: // functions

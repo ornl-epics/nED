@@ -103,9 +103,9 @@ include $(TOP)/configure/RULES
 #  ADD RULES AFTER THIS LINE
 
 %.dox: %.cpp
-	./tools/export2doxy.pl -input_file=$^ > $@
+	./tools/export2doxy.pl -input_file=$^ -output_file=$@
 
-doc: Doxyfile $($(PROD_NAME)_PVS:.cpp=.dox)
+doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
 	doxygen >/dev/null
 	(cd latex/; make pdf > /dev/null)
 
@@ -118,7 +118,7 @@ epicsdb: $($(PROD_NAME)_PVS:.cpp=.template)
 	./tools/export2pvtable.pl -mode=status  < $^ > ../../pvtable/$(@:.pvtt=_status.pvtt)
 	./tools/export2pvtable.pl -mode=counter < $^ > ../../pvtable/$(@:.pvtt=_counter.pvtt)
 	./tools/export2pvtable.pl -mode=config  < $^ > ../../pvtable/$(@:.pvtt=_config.pvtt)
-pvtable: $($(PROD_NAME)_PVS:.cpp=.pvtt)
+pvtables: $($(PROD_NAME)_PVS:.cpp=.pvtt)
 
 clean::
-	rm -fR $($(PROD_NAME)_PVS:.cpp=.dox) latex/ html/
+	rm -fR $($(PROD_NAME)_SRCS:.cpp=.dox) latex/ html/

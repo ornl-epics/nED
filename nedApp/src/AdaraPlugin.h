@@ -33,12 +33,6 @@
  * packets are transformed into ADARA format and sent over socket, one packet
  * at a time. Client socket is disconnected on any error. ADARA is supposed
  * to reconnect immediately.
- *
- * AdaraPlugin provides following asyn parameters:
- * asyn param    | asyn param type | init val | mode | Description
- * ------------- | --------------- | -------- | ---- | -----------
- * BadPulseDrops | asynParamInt32  | 0        | RO   | Num dropped packets associated to already completed pulse
- * BadDspDrops   | asynParamInt32  | 0        | RO   | Num dropped packets from unexpected DSP
  */
 class AdaraPlugin : public BaseSocketPlugin {
     private:
@@ -138,10 +132,10 @@ class AdaraPlugin : public BaseSocketPlugin {
         SourceSequence* findSourceSequence(uint32_t dspId, bool isNeutron);
 
     protected:
-        #define FIRST_ADARAPLUGIN_PARAM BadPulseDrops
-        int BadPulseDrops;
-        int BadDspDrops;
-        #define LAST_ADARAPLUGIN_PARAM BadDspDrops
+        #define FIRST_ADARAPLUGIN_PARAM BadPulsCnt
+        int BadPulsCnt;
+        int BadDspCnt;
+        #define LAST_ADARAPLUGIN_PARAM BadDspCnt
 };
 
 #endif // ADARA_PLUGIN_H

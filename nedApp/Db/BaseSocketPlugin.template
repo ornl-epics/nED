@@ -23,11 +23,11 @@ record(longin, "$(P)TxCount")
     field(VAL,  "0")
     field(SCAN, "I/O Intr")
 }
-record(longout, "$(P)CheckClientDel")
+record(longout, "$(P)CheckInt")
 {
     field(DESC, "Check client interval")
     field(EGU,  "seconds")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))CheckClientDel")
+    field(OUT,  "@asyn($(PORT))CheckInt")
     field(VAL,  "2")
 }

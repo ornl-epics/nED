@@ -72,16 +72,6 @@
  * OCC command to the module and switches CmdRsp PV to waiting state.
  * Reading the CmdRsp PV immediately after writing CmdReq will
  * @b always give accurate last command status.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description
- * ------------- | --------------- | -------- | ---- | -----------
- * HwId          | asynParamInt32  | 0        | RO   | Connected module hardware id
- * CmdRsp        | asynParamInt32  | 0        | RO   | Last command response status   (see LastCommandResponse for valid values)
- * Command       | asynParamInt32  | 0        | RW   | Issue RocPlugin command        (see DasPacket::CommandType for valid values)
- * Supported     | asynParamInt32  | 0        | RO   | Flag whether module is supported
- * Verified      | asynParamInt32  | 0        | RO   | Flag whether module type and version were verified
- * Type          | asynParamInt32  | 0        | RO   | Module type                    (see DasPacket::ModuleType for valid values)
  */
 class BaseModulePlugin : public BasePlugin {
     public: // structures and defines
@@ -508,19 +498,17 @@ class BaseModulePlugin : public BasePlugin {
         #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
         int CmdReq;         //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
         int CmdRsp;         //!< Last command response status
-        int HardwareVer;    //!< Module hardware version
-        int HardwareRev;    //!< Module hardware revision
-        int HardwareDate;   //!< Module hardware date
-        int FirmwareVer;    //!< Module firmware version
-        int FirmwareRev;    //!< Module firmware revision
-        int FirmwareDate;   //!< Module firmware date
+        int HwId;           //!< Hw ID that this object is controlling
+        int HwType;         //!< Configured module type
+        int HwVer;          //!< Module hardware version
+        int HwRev;          //!< Module hardware revision
+        int HwDate;         //!< Module hardware date
+        int FwVer;          //!< Module firmware version
+        int FwRev;          //!< Module firmware revision
+        int FwDate;         //!< Module firmware date
         int Supported;      //!< Flag whether module is supported
         int Verified;       //!< Hardware id, version and type all verified
-        int Type;           //!< Configured module type
-    private:
-        int HardwareId;     //!< Hardware ID that this object is controlling
-        #define LAST_BASEMODULEPLUGIN_PARAM HardwareId
-
+        #define LAST_BASEMODULEPLUGIN_PARAM Verified
 };
 
 #endif // BASE_MODULE_PLUGIN_H

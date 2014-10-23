@@ -14,10 +14,6 @@
 
 /**
  * Plugin for ACPC FEM module.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
  */
 class AcpcFemPlugin : public BaseModulePlugin {
     private: // structures and definitions

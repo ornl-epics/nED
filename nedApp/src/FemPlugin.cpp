@@ -79,21 +79,21 @@ bool FemPlugin::rspReadVersion_V10(const DasPacket *packet)
         return false;
     }
 
-    setIntegerParam(HardwareVer, response->hw_version);
-    setIntegerParam(HardwareRev, response->hw_revision);
+    setIntegerParam(HwVer, response->hw_version);
+    setIntegerParam(HwRev, response->hw_revision);
     snprintf(date, sizeof(date), "%d%d/%d/%d", HEX_BYTE_TO_DEC(response->hw_year >> 8),
                                                HEX_BYTE_TO_DEC(response->hw_year),
                                                HEX_BYTE_TO_DEC(response->hw_month),
                                                HEX_BYTE_TO_DEC(response->hw_day));
-    setStringParam(HardwareDate, date);
+    setStringParam(HwDate, date);
 
-    setIntegerParam(FirmwareVer, response->fw_version);
-    setIntegerParam(FirmwareRev, response->fw_revision);
+    setIntegerParam(FwVer, response->fw_version);
+    setIntegerParam(FwRev, response->fw_revision);
     snprintf(date, sizeof(date), "%d%d/%d/%d", HEX_BYTE_TO_DEC(response->fw_year >> 8),
                                                HEX_BYTE_TO_DEC(response->fw_year),
                                                HEX_BYTE_TO_DEC(response->fw_month),
                                                HEX_BYTE_TO_DEC(response->fw_day));
-    setStringParam(FirmwareDate, date);
+    setStringParam(FwDate, date);
 
     callParamCallbacks();
 

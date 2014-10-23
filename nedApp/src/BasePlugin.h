@@ -84,15 +84,6 @@ class Timer;
  * in the code. For runtime loaded plugins, the plugin class implementation must
  * export its functionality through EPICS. New instances can then be created from
  * the EPICS shell. Use #EPICS_REGISTER_PLUGIN macro to export plugin to EPICS.
- *
- * BasePlugin provides following asyn parameters:
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * Enable        | asynParamInt32  | 0        | RW   | Enable or disable plugin
- * TxCount       | asynParamInt32  | 0        | RO   | Number of sent packets
- * RxCount       | asynParamInt32  | 0        | RO   | Number of packets received
- * ProcCount     | asynParamInt32  | 0        | RO   | Number of packets processed
- * DataMode      | asynParamInt32  | 0        | RW   | Data format mode, see BasePvaPlugin::DataMode
  */
 class BasePlugin : public asynPortDriver {
     public:
@@ -190,6 +181,12 @@ class BasePlugin : public asynPortDriver {
          * Helper function to create output asynPortDriver param with initial value set.
          */
         asynStatus createParam(const char *name, asynParamType type, int *index, int initValue);
+
+        /**
+         * Helper function to create output asynPortDriver param with initial value set.
+         */
+        asynStatus createParam(const char *name, asynParamType type, int *index, const char *initValue);
+
         using asynPortDriver::createParam;
 
         /**

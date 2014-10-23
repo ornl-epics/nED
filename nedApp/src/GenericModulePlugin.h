@@ -31,22 +31,6 @@
  *
  * User can send any 8 bit OCC command. The plugin does not check command value
  * and thus allows extensibility through EPICS database.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description
- * ------------- | --------------- | -------- | ---- | -----------
- * ReqDest       | asynParamOctet  | ""       | RW   | Module address to communicate with
- * ReqCmd        | asynParamInt32  | 0        | RW   | Command to be sent
- * ReqIsDsp      | asynParamInt32  | 0        | RW   | Is the module we communicate with behinds the DSP, using LVDS link
- * RspCmd        | asynParamInt32  | 0        | RO   | Response command, see DasPacket::CommandType
- * RspCmdAck     | asynParamInt32  | 0        | RO   | Response ACK/NACK
- * RspHwType     | asynParamInt32  | 0        | RO   | Hardware type, see DasPacket::ModuleType
- * RspSrc        | asynParamOctet  | 0        | RO   | Response source address
- * RspRouter     | asynParamOctet  | 0        | RO   | Response router address
- * RspDest       | asynParamOctet  | 0        | RO   | Response destination address
- * RspLen        | asynParamInt32  | 0        | RO   | Response length in bytes
- * RspDataLen    | asynParamInt32  | 0        | RO   | Response payload length in bytes
- * RspData       | asynParamInt32  | 0        | RO   | Response payload
  */
 class GenericModulePlugin : public BasePlugin {
     private: // variables

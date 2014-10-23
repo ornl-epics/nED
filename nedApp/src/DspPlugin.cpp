@@ -64,7 +64,7 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
         LOG_ERROR("Number of config params mismatch, expected %d but got %lu", NUM_DSPPLUGIN_CONFIGPARAMS, m_configParams.size());
     }
 
-    setIntegerParam(Type, DasPacket::MOD_TYPE_DSP);
+    setIntegerParam(HwType, DasPacket::MOD_TYPE_DSP);
     if (m_version == "v63") {
         setIntegerParam(Supported, 1);
     } else {
@@ -115,14 +115,14 @@ bool DspPlugin::rspReadVersion(const DasPacket *packet)
         return false;
     }
 
-    setIntegerParam(HardwareVer, version.hw_version);
-    setIntegerParam(HardwareRev, version.hw_revision);
+    setIntegerParam(HwVer, version.hw_version);
+    setIntegerParam(HwRev, version.hw_revision);
     snprintf(date, sizeof(date), "%04d/%02d/%02d", version.hw_year, version.hw_month, version.hw_day);
-    setStringParam(HardwareDate, date);
-    setIntegerParam(FirmwareVer, version.fw_version);
-    setIntegerParam(FirmwareRev, version.fw_revision);
+    setStringParam(HwDate, date);
+    setIntegerParam(FwVer, version.fw_version);
+    setIntegerParam(FwRev, version.fw_revision);
     snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FirmwareDate, date);
+    setStringParam(FwDate, date);
 
     callParamCallbacks();
 

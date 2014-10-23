@@ -20,12 +20,6 @@
  *
  * The plugin will discover all modules and remember them internally. asyn report
  * can be used to print details of all discovered details.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * Trigger       | asynParamInt32  | 0        | RW   | Trigger discovery
- * Output        | asynParamOctet  | Not init | RO   | Output text listing found modules
  */
 class DiscoverPlugin : public BasePlugin {
 

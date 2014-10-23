@@ -33,57 +33,13 @@ struct occ_handle;
  *
  * Another thread is created to periodically poll OCC status with two user
  * configurable intervals (basic vs extended status).
- *
- * Next table lists asyn parameters provided and can be used from EPICS PV infrastructure.
- * Some naming restrictions enforced by EPICS records apply:
- * - PV name length is limited to 28 characters in total, where the static prefix
- *   is BLXXX:Det:OccX: long, leaving 13 characters to asyn param name
- * - PV comment can be 28 characters long (text in brackets may be used to describe EPICS
- *   PV valid values)
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * Status        | asynParamInt32  | 0        | RO   | Status of OccPortDriver       (0=OK,1=buffer full,2=OCC error,3=Data corrupted)
- * Command       | asynParamInt32  | 0        | RW   | Issue OccPortDriver command   (0=no action,1=reset)
- * LastErr       | asynParamInt32  | 0        | RO   | Last error code returned by OCC API
- * BoardType     | asynParamInt32  | 0        | RO   | OCC board type                (1=SNS PCI-X,2=SNS PCIe,15=simulator)
- * BoardFwVer    | asynParamInt32  | 0        | RO   | OCC board firmware version
- * OpticsPresent | asynParamInt32  | 0        | RO   | Is optical cable present      (0=not present,1=present)
- * RxStalled     | asynParamInt32  | 0        | RO   | Incoming data stalled         (0=not stalled,1=OCC stalled,2=copy stalled,3=both stalled)
- * ErrCrc        | asynParamInt32  | 0        | RO   | Number of CRC errors detected by OCC
- * ErrLength     | asynParamInt32  | 0        | RO   | Number of length errors detected by OCC
- * ErrFrame      | asynParamInt32  | 0        | RO   | Number of frame errors detected by OCC
- * FpgaTemp      | asynParamFloat64| 0.0      | RO   | FPGA temperature in Celsius
- * FpgaCoreVolt  | asynParamFloat64| 0.0      | RO   | FPGA core voltage in Volts
- * FpgaAuxVolt   | asynParamFloat64| 0.0      | RO   | FPGA aux voltage in Volts
- * SfpTemp       | asynParamFloat64| 0.0      | RO   | SFP temperature in Celsius
- * SfpRxPower    | asynParamFloat64| 0.0      | RO   | SFP RX power in uW
- * SfpTxPower    | asynParamFloat64| 0.0      | RO   | SFP TX power in uW
- * SfpVccPower   | asynParamFloat64| 0.0      | RO   | SFP VCC power in Volts
- * SfpTxBiasCur  | asynParamFloat64| 0.0      | RO   | SFP TX bias current in uA
- * StatusInt     | asynParamInt32  | 5        | RW   | OCC status refresh interval in s
- * ExtStatusInt  | asynParamInt32  | 60       | RW   | OCC extended status refresh interval in s
- * DmaBufUsed    | asynParamInt32  | 0        | RO   | DMA memory used space
- * DmaBufSize    | asynParamInt32  | 0        | RO   | DMA memory size
- * CopyBufUsed   | asynParamInt32  | 0        | RO   | Virtual buffer used space
- * CopyBufSize   | asynParamInt32  | 0        | RO   | Virtual buffer size
- * DataRateOut   | asynParamInt32  | 0        | RO   | Data processing throughput in B/s
- * RxEn          | asynParamInt32  | 0        | RW   | Enable incoming data          (0=disable,1=enable)
- * RxEnRbv       | asynParamInt32  | 0        | RO   | Incoming data enabled         (0=disabled,1=enabled)
- * ErrPktEn      | asynParamInt32  | 0        | RW   | Error packets output switch   (0=disable,1=enable)
- * ErrPktEnRbv   | asynParamInt32  | 0        | RO   | Error packets enabled         (0=disabled,1=enabled)
- * AutoReset     | asynParamInt32  | 0        | RW   | Auto reset on error switch    (0=disable,1=enable)
- * RstCntBad     | asynParamInt32  | 0        | RO   | Num corrupted queue auto-resets
- * RstCntOvrflw  | asynParamInt32  | 0        | RO   | Num FIFO overflow auto-resets
- * RstCntDma     | asynParamInt32  | 0        | RO   | Num DMA full auto-resets
- * RstCndCopy    | asynParamInt32  | 0        | RO   | Num buffer full auto-resets
- * RstCntErr     | asynParamInt32  | 0        | RO   | Num OCC error auto-resets
  */
 class epicsShareFunc OccPortDriver : public asynPortDriver {
     private:
         /**
          * Valid statuses of the OccPortDriver and the OCC infrastructure.
          */
-        enum {
+        enum Status {
             STAT_OK             = 0,    //!< No error
             STAT_BUFFER_FULL    = 1,    //!< Receive buffer is full, acquisition was stopped
             STAT_OCC_ERROR      = 2,    //!< OCC error was detected
@@ -95,7 +51,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         /**
          * Stall events used to create a bitmask
          */
-        enum {
+        enum StallEvent {
             STALL_NONE          = 0,    //!< Not stalled
             STALL_DMA           = 1,    //!< DMA buffer stalled
             STALL_FIFO          = 2,    //!< Internal OCC FIFO overflowed
@@ -105,7 +61,8 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         /**
          * Recognized command values through Command parameter.
          */
-        enum {
+        enum Command {
+            CMD_NONE            = 0,    //!< No action
             CMD_RESET           = 1,    //!< Reset OCC device and internal state
         };
 
@@ -209,36 +166,36 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         int Status;
         int Command;
         int LastErr;
-        int BoardType;
-        int BoardFwVer;
-        int BoardFwDate;
-        int OpticsPresent;
+        int HwType;
+        int FwVer;
+        int FwDate;
+        int OptPres;
         int RxStalled;
         int FpgaTemp;
-        int FpgaCoreVolt;
-        int FpgaAuxVolt;
+        int FpgaCoreV;
+        int FpgaAuxV;
         int ErrCrc;
         int ErrLength;
         int ErrFrame;
         int SfpTemp;
         int SfpRxPower;
         int SfpTxPower;
-        int SfpVccPower;
-        int SfpTxBiasCur;
+        int SfpVccPow;
+        int SfpTxBiasC;
         int StatusInt;
-        int ExtStatusInt;
-        int DmaBufUsed;
-        int DmaBufSize;
-        int CopyBufUsed;
-        int CopyBufSize;
-        int DataRateOut;
+        int ExtStatInt;
+        int DmaUsed;
+        int DmaSize;
+        int BufUsed;
+        int BufSize;
+        int RxRate;
         int RxEn;
-        int RxEnRbv;
+        int RxEnRb;
         int ErrPktEn;
-        int ErrPktEnRbv;
+        int ErrPktEnRb;
         int AutoReset;
         int RstCntBad;
-        int RstCntOvrflw;
+        int RstCntOvr;
         int RstCntDma;
         int RstCntCopy;
         int RstCntErr;

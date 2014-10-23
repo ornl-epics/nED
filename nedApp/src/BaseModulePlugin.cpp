@@ -38,21 +38,21 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     m_verifySM.addState(ST_VERSION_OK,              SM_ACTION_ACK(DasPacket::CMD_DISCOVER),         ST_TYPE_VERSION_OK);
     m_verifySM.addState(ST_VERSION_OK,              SM_ACTION_ERR(DasPacket::CMD_DISCOVER),         ST_TYPE_ERR);
 
-    createParam("HardwareId",   asynParamOctet, &HardwareId);
-    createParam("CmdRsp",       asynParamInt32, &CmdRsp);
-    createParam("CmdReq",       asynParamInt32, &CmdReq);
-    createParam("HardwareDate", asynParamOctet, &HardwareDate);
-    createParam("HardwareVer",  asynParamInt32, &HardwareVer);
-    createParam("HardwareRev",  asynParamInt32, &HardwareRev);
-    createParam("FirmwareDate", asynParamOctet, &FirmwareDate);
-    createParam("FirmwareVer",  asynParamInt32, &FirmwareVer);
-    createParam("FirmwareRev",  asynParamInt32, &FirmwareRev);
-    createParam("Supported",    asynParamInt32, &Supported);
-    createParam("Verified",     asynParamInt32, &Verified);
-    createParam("Type",         asynParamInt32, &Type);
+    createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
+    createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasPacket::CommandType)
+    createParam("HwId",         asynParamOctet, &HwId);                     // READ - Connected module hardware id
+    createParam("HwType",       asynParamInt32, &HwType);                   // READ - Module type                    (see DasPacket::ModuleType)
+    createParam("HwDate",       asynParamOctet, &HwDate);                   // READ - Module hardware date
+    createParam("HwVer",        asynParamInt32, &HwVer);                    // READ - Module hardware version
+    createParam("HwRev",        asynParamInt32, &HwRev);                    // READ - Module hardware revision
+    createParam("FwDate",       asynParamOctet, &FwDate);                   // READ - Module firmware date
+    createParam("FwVer",        asynParamInt32, &FwVer);                    // READ - Module firmware version
+    createParam("FwRev",        asynParamInt32, &FwRev);                    // READ - Module firmware revision
+    createParam("Supported",    asynParamInt32, &Supported);                // READ - Is requested module version supported (0=not supported,1=supported)
+    createParam("Verified",     asynParamInt32, &Verified);                 // READ - Flag whether module type and version were verified
 
     std::string hardwareIp = addr2ip(m_hardwareId);
-    setStringParam(HardwareId, hardwareIp.c_str());
+    setStringParam(HwId, hardwareIp.c_str());
     setIntegerParam(CmdRsp, LAST_CMD_NONE);
     callParamCallbacks();
 }

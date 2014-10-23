@@ -20,17 +20,7 @@
  * automatically open single listening socket. There's no thread running to
  * check when the client actually connects, instead derived class should
  * periodically call connectClient() function.
- *
- * BaseSocketPlugin provides following asyn parameters:
- * asyn param    | asyn param type | init val | mode | Description
- * ------------- | --------------- | -------- | ---- | -----------
- * ListenIp      | asynParamOctet  | <empty>  | RW   | Hostname or IP address to listen to
- * ListenPort    | asynParamInt32  | 0        | RW   | Port number to listen to
- * ClientIp      | asynParamOctet  | <empty>  | RO   | IP of BASESOCKET client if connected, or empty string
- * TxCount       | asynParamInt32  | 0        | RO   | Number of packets sent to BASESOCKET
- * CheckClientDel| asynParamInt32  | 2        | RW   | Check client interval in seconds
  */
-
 class BaseSocketPlugin : public BasePlugin {
     private:
         int m_listenSock;           //!< Socket for incoming connections, -1 when not listening
@@ -165,8 +155,8 @@ class BaseSocketPlugin : public BasePlugin {
         int ListenIP;
         int ListenPort;
         int ClientIP;
-        int CheckClientDelay;
-        #define LAST_BASESOCKETPLUGIN_PARAM CheckClientDelay
+        int CheckInt;
+        #define LAST_BASESOCKETPLUGIN_PARAM CheckInt
 };
 
 #endif // BASESOCKET_PLUGIN_H

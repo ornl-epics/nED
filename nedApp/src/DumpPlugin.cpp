@@ -22,7 +22,7 @@ DumpPlugin::DumpPlugin(const char *portName, const char *dispatcherPortName, int
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_DUMPPLUGIN_PARAMS, 1, asynOctetMask)
     , m_fd(-1)
 {
-    createParam("FilePath",     asynParamOctet, &FilePath);
+    createParam("FilePath",     asynParamOctet, &FilePath); // WRITE - Path to file where to save all received data
 }
 
 DumpPlugin::~DumpPlugin()

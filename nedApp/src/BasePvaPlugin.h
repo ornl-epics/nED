@@ -30,10 +30,6 @@
  * There's no field in DasPacket that describes the payload. We rely on external
  * party to flag current mode through Mode parameter. Based on that appropriate
  * processData*() function is invoked.
- *
- * Available BasePvaPlugin parameters (in addition to ones from BasePlugin):
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
  */
 class BasePvaPlugin : public BasePlugin {
     public:
