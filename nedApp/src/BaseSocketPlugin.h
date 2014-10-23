@@ -35,7 +35,15 @@ class BaseSocketPlugin : public BasePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] blocking Should processing of callbacks block execution of caller thread or not.
+         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
+         * @param[in] numParams The number of parameters that the derived class supports.
+         * @param[in] maxAddr The maximum  number of asyn addr addresses this driver supports. 1 is minimum.
+         * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
+         * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
+         * @param[in] asynFlags Flags when creating the asyn port driver; includes ASYN_CANBLOCK and ASYN_MULTIDEVICE.
+         * @param[in] autoConnect The autoConnect flag for the asyn port driver.
+         * @param[in] priority The thread priority for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
+         * @param[in] stackSize The stack size for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          */
         BaseSocketPlugin(const char *portName, const char *dispatcherPortName, int blocking, int numParams=0,
                      int maxAddr=1, int interfaceMask=defaultInterfaceMask, int interruptMask=defaultInterruptMask,
@@ -63,7 +71,7 @@ class BaseSocketPlugin : public BasePlugin {
          *
          * @param[in] host Hostname or IP address.
          * @param[in] port Port number to listen on.
-         * @retunr true when configured, false otherwise.
+         * @return true when configured, false otherwise.
          */
         bool setupListeningSocket(const std::string &host, uint16_t port);
 
@@ -83,7 +91,6 @@ class BaseSocketPlugin : public BasePlugin {
          * Caller must hold a lock. When returned with true, m_clientSock is a valid
          * client id. Function updates CLIENT_IP parameter.
          *
-         * @param[out] clientHost When connected, dotted IP address of the client, followed by the port.
          * @return true if connected, false otherwise.
          */
         bool connectClient();

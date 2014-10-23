@@ -181,6 +181,8 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] behindDsp Is this module behind the DSP which transforms some of the packets?
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          * @param[in] numParams The number of parameters that the derived class supports.
+         * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
+         * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
         BaseModulePlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId,
                          bool behindDsp, int blocking=0, int numParams=0,
@@ -218,7 +220,7 @@ class BaseModulePlugin : public BasePlugin {
          * array of 4 byte unsigned integers. The length should be dividable by 2.
          *
          * @param[in] command A command of the packet to be sent out.
-         * @param[in] packet Payload to be sent out, can be NULL if length is also 0.
+         * @param[in] payload Payload to be sent out, can be NULL if length is also 0.
          * @param[in] length Payload length in bytes.
          */
         void sendToDispatcher(DasPacket::CommandType command, uint32_t *payload=0, uint32_t length=0);

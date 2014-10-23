@@ -165,7 +165,7 @@ class RocPlugin : public BaseModulePlugin {
          * HV module. HV module does not have its own hardware id,
          * instead the ROC board is used as a router.
          *
-         * @param[in] data String representing HV command, must include '\r'
+         * @param[in] data String representing HV command, must include CR (ASCII 13)
          * @param[in] length Length of the string
          */
         void reqHvCmd(const char *data, uint32_t length);

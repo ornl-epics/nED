@@ -11,8 +11,8 @@
 
 EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", string, "pvAccess PV record prefix", string);
 
-AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
-    : BasePvaPlugin(portName, dispatcherPortName, pvPrefix)
+AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName)
+    : BasePvaPlugin(portName, dispatcherPortName, pvName)
 {
     uint32_t maxNormalEventsPerPacket = (DasPacket::MaxLength/4) / 6;
 

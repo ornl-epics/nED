@@ -39,7 +39,6 @@ class BasePvaPlugin : public BasePlugin {
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] pvName Name for the EPICSv4 PV serving the data.
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
         BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName);
 
