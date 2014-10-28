@@ -36,11 +36,6 @@
  * ROC v5.4 reports wrong packet length in READ_CONFIG response for which
  * a workaround is to overload rspReadConfig() function to modify the
  * packet before letting base implementation do the rest.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * AcquireStat   | asynParamInt32  | 0        | RO   | Acquire status for v5.4
  */
 class RocPlugin : public BaseModulePlugin {
     public: // variables
@@ -144,7 +139,7 @@ class RocPlugin : public BaseModulePlugin {
          * Override START response handler.
          *
          * Implemented only for v5.4 and v5.5 to detect successful acquisition start
-         * and record it through AcquireStat parameter. Other ROC version have a dedicated
+         * and record it through Acquiring parameter. Other ROC version have a dedicated
          * status register for that.
          */
         bool rspStart(const DasPacket *packet);
@@ -153,7 +148,7 @@ class RocPlugin : public BaseModulePlugin {
          * Override STOP response handler.
          *
          * Implemented only for v5.4 and v5.5 to detect successful acquisition stop
-         * and record it through AcquireStat parameter. Other ROC version have a dedicated
+         * and record it through Acquiring parameter. Other ROC version have a dedicated
          * status register for that.
          */
         bool rspStop(const DasPacket *packet);
@@ -228,9 +223,9 @@ class RocPlugin : public BaseModulePlugin {
 
 
     protected:
-        #define FIRST_ROCPLUGIN_PARAM AcquireStat
-        int AcquireStat;
-        #define LAST_ROCPLUGIN_PARAM AcquireStat
+        #define FIRST_ROCPLUGIN_PARAM Acquiring
+        int Acquiring;
+        #define LAST_ROCPLUGIN_PARAM Acquiring
 };
 
 #endif // DSP_PLUGIN_H

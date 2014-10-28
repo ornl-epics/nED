@@ -15,9 +15,9 @@ if (!defined $mode) {
     exit 1;
 }
 switch($mode) {
-    case "status"    { $line_regex="createStatusParam *\\( *\"([a-zA-Z0-9_]+)\" *,.*\$"; }
-    case "counter"   { $line_regex="createCounterParam *\\( *\"([a-zA-Z0-9_]+)\" *,.*\$"; }
-    case "config"    { $line_regex="createConfigParam *\\( *\"([a-zA-Z0-9_]+)i\" *,.*\$"; }
+    case "status"    { $line_regex="createStatusParam *\\( *\"([a-zA-Z0-9_:]+)\" *,.*\$"; }
+    case "counter"   { $line_regex="createCounterParam *\\( *\"([a-zA-Z0-9_:]+)\" *,.*\$"; }
+    case "config"    { $line_regex="createConfigParam *\\( *\"([a-zA-Z0-9_:]+)i\" *,.*\$"; }
     else             { usage($0); exit 1; }
 }
 

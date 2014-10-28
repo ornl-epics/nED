@@ -77,12 +77,12 @@ record(longin, "$(P)FwVer")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))FwVer")
 }
-record(longin, "$(P)BoardFwDate")
+record(longin, "$(P)FwDate")
 {
     field(DESC, "OCC board firmware date")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BoardFwDate")
+    field(INP,  "@asyn($(PORT))FwDate")
 }
 record(bi, "$(P)OptPres")
 {

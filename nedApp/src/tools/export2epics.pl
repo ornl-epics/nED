@@ -4,14 +4,12 @@
 # createConfigParam("LvdsRxNoEr5", 'E', 0x0,  1, 16, 0); // LVDS ignore errors (0=discard erronous packet,1=keep all packets)
 # createStatusParam("UartByteErr", 0x0,  1, 29); // UART: Byte error              (0=no error,1=error)
 # The name and description are truncd to match EPICS string specifications
+#
+# Usage: export2epics.pl [-cfg_rbv=1] < InputFile.cpp > OutputFile.cpp"
 
-my $MAX_NAME_LEN      = 29 - length($name_prefix);
-my $MAX_DESC_LEN      = 29;
+my $MAX_NAME_LEN      = 10; # 28 chars total, worst case prefix BL99A:Det:roc245:
+my $MAX_DESC_LEN      = 28;
 
-if (!defined $name_prefix) {
-    print { STDERR } "Usage: $0 -name_prefix=<BLXXX:Det:RocYYY:> [-cfg_rbv=1]\n";
-    exit 1;
-}
 if (!defined $cfg_rbv || $cfg_rbv != 1) {
     $cfg_rbv = 0;
 }
@@ -171,8 +169,8 @@ sub longinlongout {
 # Extract matching lines from stdin
 foreach $line ( <STDIN> ) {
     chomp($line);
-    if ($line =~ m/createStatusParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/ ||
-        $line =~ m/createCounterParam *\( *"([a-zA-Z0-9_]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+    if ($line =~ m/createStatusParam *\( *"([a-zA-Z0-9_:]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/ ||
+        $line =~ m/createCounterParam *\( *"([a-zA-Z0-9_:]+)" *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
         my ($name,$offset,$width,$shift,$comment) = ($1,$2,$3,$4,$5);
         $comment =~ /^\s*([^\(]*)\(?(.*)\)?$/;
         my ($desc, $valstr) = ($1, $2);
@@ -188,7 +186,7 @@ foreach $line ( <STDIN> ) {
             longinlongout("longin", $name, $desc, $valstr);
         }
     }
-    if ($line =~ m/createConfigParam *\( *"([a-zA-Z0-9_]+)" *, *'([0-9A-F])' *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+    if ($line =~ m/createConfigParam *\( *"([a-zA-Z0-9_:]+)" *, *'([0-9A-F])' *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
         my ($name,$section,$offset,$width,$shift,$val,$comment) = ($1,$2,$3,$4,$5,$6,$7);
         $comment =~ /^\s*([^\(]*)\(?(.*)\)?$/;
         my ($desc, $valstr) = ($1, $2);

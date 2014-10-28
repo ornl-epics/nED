@@ -60,7 +60,7 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 1);
         createStatusParams_v54();
         createConfigParams_v54();
-        createParam("AcquireStat", asynParamInt32, &AcquireStat); // v5.4 doesn't support AcquireStat through registers, we simulate by receiving ACK on START
+        createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
     } else if (m_version == "v56") {
         setIntegerParam(Supported, 1);
         createStatusParams_v56();
@@ -231,7 +231,7 @@ bool RocPlugin::rspStart(const DasPacket *packet)
 {
     bool ack = BaseModulePlugin::rspStart(packet);
     if (m_version == "v54" || m_version == "v55") {
-        setIntegerParam(AcquireStat, (ack ? 1 : 0));
+        setIntegerParam(Acquiring, (ack ? 1 : 0));
         callParamCallbacks();
     }
     return ack;
@@ -241,7 +241,7 @@ bool RocPlugin::rspStop(const DasPacket *packet)
 {
     bool ack = BaseModulePlugin::rspStop(packet);
     if (m_version == "v54" || m_version == "v55") {
-        setIntegerParam(AcquireStat, (ack ? 0 : 1));
+        setIntegerParam(Acquiring, (ack ? 0 : 1));
         callParamCallbacks();
     }
     return ack;

@@ -25,6 +25,7 @@ record(stringin, "$(P)ClientIp")
     field(INP,  "@asyn($(PORT))ClientIp")
     field(SCAN, "I/O Intr")
     field(PINI, "YES")
+    field(VAL,  "")
 }
 record(longin, "$(P)TxCount")
 {
@@ -33,13 +34,13 @@ record(longin, "$(P)TxCount")
     field(VAL,  "0")
     field(SCAN, "I/O Intr")
 }
-record(longout, "$(P)CheckClientDel")
+record(longout, "$(P)CheckInt")
 {
     info(autosaveFields, "VAL")
     field(DESC, "Check client interval")
     field(EGU,  "seconds")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))CheckClientDel")
+    field(OUT,  "@asyn($(PORT))CheckInt")
     field(VAL,  "2")
     field(PINI, "YES")
 }

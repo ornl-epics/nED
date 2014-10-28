@@ -144,7 +144,7 @@ class BaseSocketPlugin : public BasePlugin {
          *
          * When this function is called, client connection is already established
          * and ready to use. There's periodic check for new client which is driven
-         * by the CheckClientDel parameter.
+         * by the CheckInt parameter.
          */
         virtual void clientConnected() {};
 

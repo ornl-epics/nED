@@ -197,11 +197,11 @@ record(mbbi, "$(P)Verified")
     field(EIVL, "5")
     field(EIST, "Type & version OK")
 }
-record(mbbi, "$(P)Type")
+record(mbbi, "$(P)HwType")
 {
     field(DESC, "Module type")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Type")
+    field(INP,  "@asyn($(PORT))HwType")
     field(SCAN, "Passive")
     field(PINI, "YES")
     field(ZRVL, "32")

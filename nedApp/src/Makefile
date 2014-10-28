@@ -110,8 +110,8 @@ doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
 	(cd latex/; make pdf > /dev/null)
 
 %.template: %.cpp
-	./tools/export2epics.pl -name_prefix=BL99b:xxxx: < $^ > ../Db/$@
-	./tools/export2epics.pl -name_prefix=BL99b:xxxx: -cfg_rbv=1 < $^ > ../Db/RB_$@
+	./tools/export2epics.pl            < $^ > ../Db/$@
+	./tools/export2epics.pl -cfg_rbv=1 < $^ > ../Db/RB_$@
 epicsdb: $($(PROD_NAME)_PVS:.cpp=.template)
 
 %.pvtt: %.cpp
