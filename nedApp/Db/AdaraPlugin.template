@@ -1,6 +1,7 @@
 include "BasePlugin.include"
 include "BaseSocketPlugin.include"
 
+# Upgrade BasePlugin::Enable PV
 record(bo, "$(P)Enable")
 {
     info(autosaveFields, "VAL")

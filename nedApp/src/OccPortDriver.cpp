@@ -45,11 +45,13 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("Status",           asynParamInt32,     &Status,        STAT_OK);   // READ - Status of OccPortDriver       (see OccPortDriver::Status)
     createParam("LastErr",          asynParamInt32,     &LastErr,       0);         // READ - Last error code returned by OCC API
     createParam("HwType",           asynParamInt32,     &HwType);                   // READ - OCC board type                (1=SNS PCI-X,2=SNS PCIe,15=simulator)
+    createParam("HwVer",            asynParamInt32,     &HwVer);                    // READ - OCC board hardware version
     createParam("FwVer",            asynParamInt32,     &FwVer);                    // READ - OCC board firmware version
     createParam("FwDate",           asynParamInt32,     &FwDate);                   // READ - OCC board firmware date
-    createParam("OptPres",          asynParamInt32,     &OptPres);                  // READ - Is optical cable present      (0=not present,1=present)
+    createParam("ConStatus",        asynParamInt32,     &ConStatus);                // READ - Optical connection status     (0=connected,1=no SFP,2=no cable,3=laser fault)
     createParam("RxStalled",        asynParamInt32,     &RxStalled,     STALL_NONE);// READ - Incoming data stalled         (see OccPortDriver::StallEvent)
     createParam("Command",          asynParamInt32,     &Command);                  // WRITE - Issue OccPortDriver command  (see OccPortDriver::Command)
+    createParam("FpgaSn",           asynParamOctet,     &FpgaSn);                   // READ - FPGA serial number in hex str
     createParam("FpgaTemp",         asynParamFloat64,   &FpgaTemp);                 // READ - FPGA temperature in Celsius
     createParam("FpgaCoreV",        asynParamFloat64,   &FpgaCoreV);                // READ - FPGA core voltage in Volts
     createParam("FpgaAuxV",         asynParamFloat64,   &FpgaAuxV);                 // READ - FPGA aux voltage in Volts
@@ -160,10 +162,15 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             setIntegerParam(LastErr, -ret);
             LOG_ERROR("Failed to query OCC status: %s(%d)", strerror(-ret), ret);
         } else {
+            char sn[20];
+            snprintf(sn, sizeof(sn), "%llu", static_cast<long long unsigned>(occstatus.fpga_serial_number));
+            setStringParam(FpgaSn,          sn);
+
             setIntegerParam(HwType,         occstatus.board);
+            setIntegerParam(HwVer,          occstatus.hardware_ver);
             setIntegerParam(FwVer,          occstatus.firmware_ver);
             setIntegerParam(FwDate,         occstatus.firmware_date);
-            setIntegerParam(OptPres,        occstatus.optical_signal);
+            setIntegerParam(ConStatus,      occstatus.optical_signal);
             setIntegerParam(RxEnRb,         occstatus.rx_enabled);
             setIntegerParam(ErrPktEnRb,     occstatus.err_packets_enabled);
             setDoubleParam(FpgaTemp,        occstatus.fpga_temp);
