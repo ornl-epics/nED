@@ -1,3 +1,5 @@
+include "BasePlugin.include"
+
 record(longin, "$(P)$(CNT)")
 {
    field(DTYP,  "asynInt32")

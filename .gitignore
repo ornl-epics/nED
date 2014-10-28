@@ -2,6 +2,8 @@ bin/
 db/
 dbd/
 include/
-envPaths
-*.dox
+lib/
+O.Common/
+O.linux-x86_64/
 *.log
+*~

@@ -109,15 +109,15 @@ doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
 	doxygen >/dev/null
 	(cd latex/; make pdf > /dev/null)
 
-%.template: %.cpp
+%.include: %.cpp
 	./tools/export2epics.pl            < $^ > ../Db/$@
 	./tools/export2epics.pl -cfg_rbv=1 < $^ > ../Db/RB_$@
-epicsdb: $($(PROD_NAME)_PVS:.cpp=.template)
+epicsdb: $($(PROD_NAME)_PVS:.cpp=.include)
 
 %.pvtt: %.cpp
-	./tools/export2pvtable.pl -mode=status  < $^ > ../../pvtable/$(@:.pvtt=_status.pvtt)
-	./tools/export2pvtable.pl -mode=counter < $^ > ../../pvtable/$(@:.pvtt=_counter.pvtt)
-	./tools/export2pvtable.pl -mode=config  < $^ > ../../pvtable/$(@:.pvtt=_config.pvtt)
+	./tools/export2pvtable.pl -mode=status  < $^ > ../../pvtable/$(@:.pvst=_status.pvst)
+	./tools/export2pvtable.pl -mode=counter < $^ > ../../pvtable/$(@:.pvst=_counter.pvst)
+	./tools/export2pvtable.pl -mode=config  < $^ > ../../pvtable/$(@:.pvst=_config.pvst)
 pvtables: $($(PROD_NAME)_PVS:.cpp=.pvtt)
 
 clean::

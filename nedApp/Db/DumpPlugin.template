@@ -1,3 +1,5 @@
+include "BasePlugin.include"
+
 record(stringout, "$(P)FilePath")
 {
    field(DTYP,  "asynOctetWrite")

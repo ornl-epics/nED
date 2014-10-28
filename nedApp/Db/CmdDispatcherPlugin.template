@@ -1,9 +1,7 @@
+include "BasePlugin.include"
+
 record(bo, "$(P)Enable")
 {
-   field(DTYP, "asynInt32")
-   field(OUT,  "@asyn($(PORT))Enable")
-   field(ZNAM, "No")
-   field(ONAM, "Yes")
    field(VAL,  "1")
    field(PINI, "YES")
 }

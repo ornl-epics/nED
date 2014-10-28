@@ -1,3 +1,5 @@
+include "BaseModulePlugin.include"
+
 record(mbbo, "$(P)ReqCmd")
 {
     field(DESC, "Issue command to module")

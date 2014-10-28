@@ -1,3 +1,5 @@
+include "BasePlugin.include"
+
 record(stringin, "$(P)Timestamp")
 {
     field(DTYP, "asynOctetRead")

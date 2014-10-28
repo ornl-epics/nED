@@ -1,3 +1,5 @@
+include "BasePlugin.include"
+
 record(bo, "$(P)Trigger")
 {
     field(DTYP, "asynInt32")

@@ -1,0 +1,2749 @@
+record(bi, "$(P)ErrParity")
+{
+    field(DESC, "LVDS parity error.")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no error")
+    field(ONAM, "error")
+}
+record(bi, "$(P)Configured")
+{
+    field(DESC, "Not configured")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Configured")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "configured")
+    field(ONAM, "not configured")
+}
+record(bi, "$(P)Discovered")
+{
+    field(DESC, "Configured")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Discovered")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "discovered")
+    field(ONAM, "not discovered")
+}
+record(bi, "$(P)SysrstBHi")
+{
+    field(DESC, "SYSRST_B Got HIGH")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))SysrstBHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)SysrstBLo")
+{
+    field(DESC, "SYSRST_B Got LOW")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))SysrstBLo")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)TxenBHigh")
+{
+    field(DESC, "TXEN_B Got HIGH")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TxenBHigh")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)TxenBLow")
+{
+    field(DESC, "TXEN_B Got LOW")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TxenBLow")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)TsyncHigh")
+{
+    field(DESC, "TSYNC Got HIGH")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TsyncHigh")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)TsyncLow")
+{
+    field(DESC, "TSYNC Got LOW")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TsyncLow")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)TclkHigh")
+{
+    field(DESC, "TCLK Got HIGH")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TclkHigh")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)TclkLow")
+{
+    field(DESC, "TCLK Got LOW")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TclkLow")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)HVStatus")
+{
+    field(DESC, "High Voltage Status bit")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))HVStatus")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not present")
+    field(ONAM, "present")
+}
+record(bi, "$(P)AutoCorr")
+{
+    field(DESC, "Auto correction enabled")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))AutoCorr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not enabled")
+    field(ONAM, "enabled")
+}
+record(bi, "$(P)Ch2:Event")
+{
+    field(DESC, "Chan2 got event")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:Event")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:DiscHi")
+{
+    field(DESC, "Chan2 disc high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:DiscHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "low")
+    field(ONAM, "high")
+}
+record(bi, "$(P)Ch2:FifFul")
+{
+    field(DESC, "Chan2 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:FifFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "full")
+}
+record(bi, "$(P)Ch2:CalcEr")
+{
+    field(DESC, "Chan2 calc out of range")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:CalcEr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:DenNeg")
+{
+    field(DESC, "Chan2 negative denom")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:DenNeg")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:CalcOv")
+{
+    field(DESC, "Chan2 calc overflow")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:CalcOv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no overflow")
+    field(ONAM, "overflow")
+}
+record(bi, "$(P)Ch1:GotEv")
+{
+    field(DESC, "Chan1 got event")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:GotEv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:DiscHi")
+{
+    field(DESC, "Chan1 disc high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:DiscHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "low")
+    field(ONAM, "high")
+}
+record(bi, "$(P)Ch1:FifFul")
+{
+    field(DESC, "Chan1 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:FifFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "full")
+}
+record(bi, "$(P)Ch1:CalcEr")
+{
+    field(DESC, "Chan1 calc out of range")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:CalcEr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:DenNeg")
+{
+    field(DESC, "Chan1 negative denom")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:DenNeg")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:CalcOv")
+{
+    field(DESC, "Chan1 calc overflow")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:CalcOv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no overflow")
+    field(ONAM, "overflow")
+}
+record(bi, "$(P)Ch4:GotEv")
+{
+    field(DESC, "Chan4 got event")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:GotEv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:DiscHi")
+{
+    field(DESC, "Chan4 disc high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:DiscHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "low")
+    field(ONAM, "high")
+}
+record(bi, "$(P)Ch4:FifFul")
+{
+    field(DESC, "Chan4 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:FifFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "full")
+}
+record(bi, "$(P)Ch4:CalcEr")
+{
+    field(DESC, "Chan4 calc out of range")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:CalcEr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:DenNeg")
+{
+    field(DESC, "Chan4 negative denom")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:DenNeg")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:CalcOv")
+{
+    field(DESC, "Chan4 calc overflow")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:CalcOv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no overflow")
+    field(ONAM, "overflow")
+}
+record(bi, "$(P)Ch3:GotEv")
+{
+    field(DESC, "Chan3 got event")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:GotEv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:DiscHi")
+{
+    field(DESC, "Chan3 disc high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:DiscHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "low")
+    field(ONAM, "high")
+}
+record(bi, "$(P)Ch3:FifFul")
+{
+    field(DESC, "Chan3 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:FifFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "full")
+}
+record(bi, "$(P)Ch3:CalcEr")
+{
+    field(DESC, "Chan3 calc out of range")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:CalcEr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:DenNeg")
+{
+    field(DESC, "Chan3 negative denom")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:DenNeg")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:CalcOv")
+{
+    field(DESC, "Chan3 calc overflow")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:CalcOv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no overflow")
+    field(ONAM, "overflow")
+}
+record(bi, "$(P)Ch6:GotEv")
+{
+    field(DESC, "Chan6 got event")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:GotEv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:DiscHi")
+{
+    field(DESC, "Chan6 disc high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:DiscHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "low")
+    field(ONAM, "high")
+}
+record(bi, "$(P)Ch6:FifFul")
+{
+    field(DESC, "Chan6 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:FifFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "full")
+}
+record(bi, "$(P)Ch6:CalcEr")
+{
+    field(DESC, "Chan6 calc out of range")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:CalcEr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:DenNeg")
+{
+    field(DESC, "Chan6 negative denom")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:DenNeg")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:CalcOv")
+{
+    field(DESC, "Chan6 calc overflow")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:CalcOv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no overflow")
+    field(ONAM, "overflow")
+}
+record(bi, "$(P)Ch5:GotEv")
+{
+    field(DESC, "Chan5 got event")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:GotEv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:DiscHi")
+{
+    field(DESC, "Chan5 disc high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:DiscHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "low")
+    field(ONAM, "high")
+}
+record(bi, "$(P)Ch5:FifFul")
+{
+    field(DESC, "Chan5 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:FifFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "full")
+}
+record(bi, "$(P)Ch5:CalcEr")
+{
+    field(DESC, "Chan5 calc out of range")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:CalcEr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:DenNeg")
+{
+    field(DESC, "Chan5 negative denom")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:DenNeg")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:CalcOv")
+{
+    field(DESC, "Chan5 calc overflow")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:CalcOv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no overflow")
+    field(ONAM, "overflow")
+}
+record(bi, "$(P)Ch8:GotEv")
+{
+    field(DESC, "Chan8 got event")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:GotEv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:DiscHi")
+{
+    field(DESC, "Chan8 disc high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:DiscHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "low")
+    field(ONAM, "high")
+}
+record(bi, "$(P)Ch8:FifFul")
+{
+    field(DESC, "Chan8 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:FifFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "full")
+}
+record(bi, "$(P)Ch8:CalcEr")
+{
+    field(DESC, "Chan8 calc out of range")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:CalcEr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:DenNeg")
+{
+    field(DESC, "Chan8 negative denom")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:DenNeg")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:CalcOv")
+{
+    field(DESC, "Chan8 calc overflow")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:CalcOv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no overflow")
+    field(ONAM, "overflow")
+}
+record(bi, "$(P)Ch7:GotEv")
+{
+    field(DESC, "Chan7 got event")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:GotEv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:DiscHi")
+{
+    field(DESC, "Chan7 disc high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:DiscHi")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "low")
+    field(ONAM, "high")
+}
+record(bi, "$(P)Ch7:FifFul")
+{
+    field(DESC, "Chan7 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:FifFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "full")
+}
+record(bi, "$(P)Ch7:CalcEr")
+{
+    field(DESC, "Chan7 calc out of range")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:CalcEr")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:DenNeg")
+{
+    field(DESC, "Chan7 negative denom")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:DenNeg")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:CalcOv")
+{
+    field(DESC, "Chan7 calc overflow")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:CalcOv")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no overflow")
+    field(ONAM, "overflow")
+}
+record(longin, "$(P)A1:BaseAvg")
+{
+    field(DESC, "A1 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))A1:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)B1:BaseAvg")
+{
+    field(DESC, "B1 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))B1:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)A2:BaseAvg")
+{
+    field(DESC, "A2 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))A2:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)B2:BaseAvg")
+{
+    field(DESC, "B2 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))B2:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)A3:BaseAvg")
+{
+    field(DESC, "A3 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))A3:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)B3:BaseAvg")
+{
+    field(DESC, "B3 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))B3:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)A4:BaseAvg")
+{
+    field(DESC, "A4 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))A4:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)B4:BaseAvg")
+{
+    field(DESC, "B4 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))B4:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)A5:BaseAvg")
+{
+    field(DESC, "A5 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))A5:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)B5:BaseAvg")
+{
+    field(DESC, "B5 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))B5:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)A6:BaseAvg")
+{
+    field(DESC, "A6 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))A6:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)B6:BaseAvg")
+{
+    field(DESC, "B6 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))B6:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)A7:BaseAvg")
+{
+    field(DESC, "A7 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))A7:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)B7:BaseAvg")
+{
+    field(DESC, "B7 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))B7:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)A8:BaseAvg")
+{
+    field(DESC, "A8 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))A8:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)B8:BaseAvg")
+{
+    field(DESC, "B8 baseline average")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))B8:BaseAvg")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch1:PosIdx")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 position index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:PosIdx")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch2:PosIdx")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 position index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:PosIdx")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "256")
+}
+record(longin, "$(P)Ch3:PosIdx")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 position index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:PosIdx")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "512")
+}
+record(longin, "$(P)Ch4:PosIdx")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 position index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:PosIdx")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "768")
+}
+record(longin, "$(P)Ch5:PosIdx")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 position index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:PosIdx")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1024")
+}
+record(longin, "$(P)Ch6:PosIdx")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 position index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:PosIdx")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1280")
+}
+record(longin, "$(P)Ch7:PosIdx")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 position index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:PosIdx")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1536")
+}
+record(longin, "$(P)Ch8:PosIdx")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 position index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:PosIdx")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1792")
+}
+record(longin, "$(P)Ch1:A:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch2:A:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch3:A:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch4:A:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch5:A:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch6:A:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch7:A:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch8:A:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch1:B:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch2:B:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch3:B:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch4:B:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch5:B:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch6:B:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch7:B:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch8:B:InOf")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B input offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:InOf")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch1:A:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch2:A:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch3:A:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch4:A:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch5:A:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch6:A:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch7:A:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch8:A:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch1:B:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch2:B:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch3:B:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch4:B:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch5:B:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch6:B:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch7:B:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch8:B:AdcO")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B ADC offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:AdcO")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch1:A:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch2:A:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch3:A:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch4:A:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch5:A:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch6:A:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch7:A:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch8:A:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch1:B:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch2:B:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch3:B:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch4:B:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch5:B:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch6:B:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch7:B:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch8:B:Thrs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:Thrs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch1:PosThr")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 positive threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:PosThr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch2:PosThr")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 positive threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:PosThr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch3:PosThr")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 positive threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:PosThr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch4:PosThr")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 positive threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:PosThr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch5:PosThr")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 positive threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:PosThr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch6:PosThr")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 positive threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:PosThr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch7:PosThr")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 positive threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:PosThr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch8:PosThr")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 positive threshold")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:PosThr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "400")
+}
+record(longin, "$(P)Ch1:A:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch2:A:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch3:A:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch4:A:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch5:A:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch6:A:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch7:A:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch8:A:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch1:B:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch2:B:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch3:B:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch4:B:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch5:B:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch6:B:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch7:B:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch8:B:FSca")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B full scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:FSca")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "10")
+}
+record(longin, "$(P)Ch1:A:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch2:A:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch3:A:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch4:A:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch5:A:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch6:A:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch7:A:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch8:A:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch1:B:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch2:B:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch3:B:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch4:B:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch5:B:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch6:B:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch7:B:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch8:B:GAdj")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B gain adjust")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:GAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch1:A:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch2:A:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch3:A:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch4:A:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch5:A:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch6:A:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch7:A:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch8:A:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch1:B:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch2:B:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch3:B:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch4:B:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch5:B:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch6:B:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch7:B:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch8:B:Scal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B scale")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:Scal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch1:A:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch2:A:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch3:A:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch4:A:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch5:A:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch6:A:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch7:A:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch8:A:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch1:B:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch2:B:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch3:B:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch4:B:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch5:B:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch6:B:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch7:B:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch8:B:Offs")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:Offs")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1600")
+}
+record(longin, "$(P)Ch1:ScaleF")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 scale factor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ScaleF")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch2:ScaleF")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 scale factor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ScaleF")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch3:ScaleF")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 scale factor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ScaleF")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch4:ScaleF")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 scale factor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ScaleF")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch5:ScaleF")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 scale factor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ScaleF")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch6:ScaleF")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 scale factor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ScaleF")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch7:ScaleF")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 scale factor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ScaleF")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch8:ScaleF")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 scale factor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ScaleF")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2048")
+}
+record(longin, "$(P)Ch1:A:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch2:A:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch3:A:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch4:A:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch5:A:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch6:A:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch7:A:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch8:A:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch1:B:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch2:B:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch3:B:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch4:B:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch5:B:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch6:B:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch7:B:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch8:B:BasV")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B baseline value")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:BasV")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)ConfigFill")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Config filler")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ConfigFill")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)Ch1:A:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch2:A:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch3:A:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch4:A:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch5:A:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch6:A:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch7:A:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch8:A:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch1:B:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch2:B:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch3:B:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch4:B:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch5:B:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch6:B:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch7:B:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch8:B:SaMi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B sample minimum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:SaMi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)Ch1:A:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 A sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:A:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch2:A:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 A sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:A:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch3:A:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 A sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:A:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch4:A:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 A sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:A:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch5:A:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 A sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:A:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch6:A:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 A sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:A:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch7:A:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 A sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:A:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch8:A:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 A sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:A:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch1:B:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 B sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:B:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch2:B:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 B sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:B:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch3:B:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 B sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:B:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch4:B:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 B sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:B:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch5:B:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 B sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:B:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch6:B:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 B sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:B:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch7:B:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 B sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:B:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch8:B:SaMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 B sample maximum")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:SaMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)Ch8:B:SlMa")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Maximum slope")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:B:SlMa")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(bi, "$(P)Ch1:En")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:En")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch2:En")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:En")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch3:En")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:En")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch4:En")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:En")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch5:En")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:En")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch6:En")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:En")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch7:En")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:En")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch8:En")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:En")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch1:VerbEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan1 verbose enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:VerbEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch2:VerbEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan2 verbose enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:VerbEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch3:VerbEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan3 verbose enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:VerbEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch4:VerbEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan4 verbose enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:VerbEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch5:VerbEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan5 verbose enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:VerbEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch6:VerbEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan6 verbose enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:VerbEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch7:VerbEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan7 verbose enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:VerbEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)Ch8:VerbEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Chan8 verbose enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:VerbEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(longin, "$(P)TimeVetoLo")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Timestamp veto low")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimeVetoLo")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)TimeVetoHi")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Timestamp veto high")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimeVetoHi")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(longin, "$(P)FakTrigDly")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Fake trigger delay")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))FakTrigDly")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "20000")
+}
+record(longin, "$(P)MinAdcVal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Minimum ADC")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))MinAdcVal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "100")
+}
+record(longin, "$(P)MaxAdcVal")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Maximum ADC")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))MaxAdcVal")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1000")
+}
+record(longin, "$(P)MinDisWidt")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Minimum discriminator width")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))MinDisWidt")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+}
+record(longin, "$(P)Sample1")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Sample 1 point [0:10]")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Sample1")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "2")
+}
+record(longin, "$(P)Sample2")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Sample 1 point [2:50]")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Sample2")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "14")
+}
+record(longin, "$(P)TsyncDelay")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "TSYNC delay")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TsyncDelay")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+}
+record(bi, "$(P)LvdsRate")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "LVDS output rate")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LvdsRate")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "20Mhz")
+    field(ONAM, "40Mhz")
+}
+record(bi, "$(P)AutoCorSam")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Auto correction sample mode")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))AutoCorSam")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "TSYNC")
+    field(ONAM, "fake trigger")
+}
+record(bi, "$(P)EdgeDetEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Edge detect enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))EdgeDetEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(mbbi, "$(P)MstDiscSel")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Master discriminator select")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))MstDiscSel")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "SUM discr")
+    field(ONVL, "1")
+    field(ONST, "A discr")
+    field(TWVL, "2")
+    field(TWST, "B discr")
+    field(THVL, "3")
+    field(THST, "all")
+}
+record(bi, "$(P)AcqEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "ROC enable acquisition")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))AcqEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)AutoCorrEn")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Auto correction mode")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))AutoCorrEn")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "enabled")
+    field(ONAM, "disabled")
+}
+record(bi, "$(P)HighResMod")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "High resolution mode")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))HighResMod")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "low res 0-127")
+    field(ONAM, "high res 0-255")
+}
+record(mbbi, "$(P)OutputMode")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Output mode")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))OutputMode")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "normal")
+    field(ONVL, "1")
+    field(ONST, "raw")
+    field(TWVL, "2")
+    field(TWST, "extended")
+}
+record(mbbi, "$(P)AcqMode")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Output mode")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))AcqMode")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "normal")
+    field(ONVL, "1")
+    field(ONST, "verbose")
+    field(TWVL, "2")
+    field(TWST, "fake trigger")
+}
+record(bi, "$(P)TxEnable")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "TX enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TxEnable")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "1")
+    field(ZNAM, "external")
+    field(ONAM, "always enabled")
+}
+record(bi, "$(P)TsyncSel")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "TSYNC select")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TsyncSel")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "external")
+    field(ONAM, "internal 60Hz")
+}
+record(bi, "$(P)TclkSel")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "TCLK select")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TclkSel")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "external")
+    field(ONAM, "internal 10MHz")
+}
+record(bi, "$(P)Reset")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Reset enable")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Reset")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
