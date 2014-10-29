@@ -13,6 +13,7 @@
 #include "BaseDispatcherPlugin.h"
 #include "DasPacketList.h"
 
+#include <limits>
 #include <vector>
 
 /**
@@ -43,6 +44,33 @@
 class PixelMapPlugin : public BaseDispatcherPlugin {
     private:
         /**
+         * Structure used for returning error counters from pixel mapping function.
+         * It's easier to parallelize and more effiecient than passing arguments
+         * by reference.
+         */
+        class PixelMapErrors {
+            public:
+                int32_t nErrBound;      //!< Pixel id has error bit set and the value could not be mapped
+                int32_t nErrOther;      //!< Pixel id has error bit set but could be mapped otherwise
+                int32_t nUnmapped;      //!< No mapping was found and pixel id error bit was set
+
+                PixelMapErrors()
+                    : nErrBound(0)
+                    , nErrOther(0)
+                    , nUnmapped(0)
+                {}
+
+                PixelMapErrors &operator+=(const PixelMapErrors &rhs)
+                {
+                    // Don't care about overflow here
+                    nErrBound += rhs.nErrBound;
+                    nErrOther += rhs.nErrOther;
+                    nUnmapped += rhs.nUnmapped;
+                    return *this;
+                }
+        };
+
+        /**
          * Possible errors
          */
         typedef enum {
@@ -50,7 +78,7 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
             MAP_ERR_NO_FILE     = 1, //!< Failed to find file
             MAP_ERR_PARSE       = 2, //!< Failed to parse file
             MAP_ERR_NO_MEM      = 3, //!< Failed to allocate internal buffer
-        } MapError;
+        } ImportError;
 
     public: // functions
         /**
@@ -90,7 +118,7 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          * @param[out] destPacket Copied packet with pixel ids mapped
          * @return Number of unmapped pixel ids.
          */
-        uint32_t packetMap(const DasPacket *srcPacket, DasPacket *destPacket);
+        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket);
 
         /**
          * Read mapping table from a file.
@@ -98,7 +126,7 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          * @param[in] filepath Full path to 3-column text file, one pixel id mapping per line
          * @return 0 on success or error code otherwise.
          */
-        MapError importPixelMapFile(const char *filepath);
+        ImportError importPixelMapFile(const char *filepath);
 
     private:
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
@@ -109,9 +137,11 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
 
     private: // asyn parameters
         #define FIRST_PIXELMAPPLUGIN_PARAM MapErr
-        int MapErr;         //!< Mapping error (see PixelMapPlugin::MapError)
+        int MapErr;         //!< Mapping error (see PixelMapPlugin::ImportError)
         int PassThru;       //!< Should the plugin do the pixel map conversion
-        int UnmapCount;     //!< Number of unmapped pixels
+        int CntUnmap;       //!< Number of unmapped pixels
+        int CntErrOthr;     //!< Number of generic error pixel ids detected
+        int CntErrBnd;      //!< Number of error pixel ids outside range detected
         int SplitCount;     //!< Total number of splited incoming packet lists
         #define LAST_PIXELMAPPLUGIN_PARAM SplitCount
 };
