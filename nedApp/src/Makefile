@@ -13,6 +13,7 @@ include $(TOP)/configure/CONFIG
 
 # The C/C++ bitfield ordering in structs is platform AND compiler dependant
 # 
+USR_CXXFLAGS += -DPIXMAP_PASSTHRU_UNMAPPED
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
 USR_CXXFLAGS += -std=c++0x
 # The temporary DWord alignment workaround in FPGA is to set bit 31 in the
