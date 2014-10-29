@@ -12,7 +12,8 @@
 #include "Log.h"
 
 #include <climits>
-#include <cstring>
+#include <fstream>
+#include <string>
 
 #define NUM_PIXELMAPPLUGIN_PARAMS ((int)(&LAST_PIXELMAPPLUGIN_PARAM - &FIRST_PIXELMAPPLUGIN_PARAM + 1))
 
@@ -162,7 +163,7 @@ uint32_t PixelMapPlugin::packetMap(const DasPacket *srcPacket, DasPacket *destPa
         } else {
 #ifdef PIXMAP_PASSTHRU_UNMAPPED
             destEvent->tof = srcEvent->tof;
-            destEvent->pixelid = srcEvent->pixelid;
+            destEvent->pixelid = srcEvent->pixelid | 0x80000000;
             destPacket->payload_length += sizeof(DasPacket::Event);
             destEvent++;
 #endif
@@ -176,31 +177,63 @@ uint32_t PixelMapPlugin::packetMap(const DasPacket *srcPacket, DasPacket *destPa
 
 PixelMapPlugin::MapError PixelMapPlugin::importPixelMapFile(const char *filepath)
 {
-    char line[128];
-    FILE *fp;
-    uint32_t rawPixelId, mapPixelId, bankId;
+    std::string line;
+    std::ifstream file(filepath);
+    uint32_t lineno = 0;
+    uint32_t raw, mapped, bank;
+    char trash[2];
 
-    m_map.clear();
-
-    fp = fopen(filepath, "r");
-    if (fp == 0) {
+    if (file.good() == false) {
         LOG_ERROR("Failed to open pixel map '%s' file", filepath);
         return MAP_ERR_NO_FILE;
     }
-    while (fgets(line, sizeof(line), fp) != NULL) {
-        if (sscanf(line, "%u %u %u", &rawPixelId, &mapPixelId, &bankId) == 3) {
-            if (m_map.size() != rawPixelId) {
-                LOG_ERROR("Cannot parse pixel map file - raw pixel id gap found");
-                m_map.clear();
-                break;
-            }
-            m_map.push_back(mapPixelId);
+
+    m_map.clear();
+
+    while (true) {
+        size_t pos;
+        lineno++;
+
+        getline(file, line);
+        if (file.fail())
+            break;
+
+        // Truncate comments
+        pos = line.find_first_of("#");
+        if (pos != std::string::npos)
+            line.resize(pos);
+
+        // Skip blank lines
+        pos = line.find_first_not_of(" \t");
+        if (pos == std::string::npos)
+            continue;
+
+        // Read all elements in line, but use only first two
+        if (sscanf(line.c_str(), "%u %u %u %1s\n", &raw, &mapped, &bank, trash) != 3) {
+            LOG_ERROR("Bad entry in pixel map '%s' file, line %d", filepath, lineno);
+            m_map.clear();
+            return MAP_ERR_PARSE;
+        }
+
+        // Fill gaps with invalid mappings
+        for (uint32_t i = m_map.size(); i < raw; i++) {
+            m_map.push_back(i | 0x80000000);
+        }
+
+        // Insert mapping at proper position
+        if (raw == m_map.size())
+            m_map.push_back(mapped);
+        else if (m_map[raw] == (raw | 0x80000000))
+            m_map[raw] = mapped;
+        else {
+            LOG_ERROR("Duplicate raw pixel id in pixel map '%s' file, line %d", filepath, lineno);
+            m_map.clear();
+            return MAP_ERR_PARSE;
         }
     }
-    fclose(fp);
 
-    if (m_map.size() == 0)
-        return MAP_ERR_PARSE;
+    // Shrink can be enabled if C++11 is used
+    //m_map.shrink_to_fit();
 
     return MAP_ERR_NONE;
 }
