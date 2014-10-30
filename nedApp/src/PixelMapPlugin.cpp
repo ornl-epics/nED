@@ -18,33 +18,38 @@
 
 #define PIXID_ERR       (1 << 31)
 #define PIXID_ERR_MAP   PIXID_ERR
-//#define PIXID_ERR_MAP   (1 << 27 | PIXID_ERR)
+//#define PIXID_ERR_MAP   (1 << 27 | PIXID_ERR) // TODO: Uncomment if the error pickels should be additionally flagged by this plugin
 
 EPICS_REGISTER_PLUGIN(PixelMapPlugin, 5, "Port name", string, "Dispatcher port name", string, "Blocking", int, "PixelMap file", string, "Buffer size", int);
 
 PixelMapPlugin::PixelMapPlugin(const char *portName, const char *dispatcherPortName, int blocking, const char *pixelMapFile, int bufSize)
     : BaseDispatcherPlugin(portName, dispatcherPortName, blocking, NUM_PIXELMAPPLUGIN_PARAMS)
+    , m_buffer(0)
+    , m_bufferSize(0)
 {
     ImportError err = MAP_ERR_NONE;
 
     if (bufSize > 0) {
         m_bufferSize = bufSize;
-        m_buffer = reinterpret_cast<uint8_t *>(malloc(m_bufferSize));
-        if (m_buffer == 0) {
-            m_bufferSize = 0;
-            err = MAP_ERR_NO_MEM;
-        }
+    } else {
+        m_bufferSize = 4*1024*1024;
+        LOG_ERROR("Invalid buffer size requested, setting default %u bytes", m_bufferSize);
+    }
+    m_buffer = reinterpret_cast<uint8_t *>(malloc(m_bufferSize));
+    if (m_buffer == 0) {
+        m_bufferSize = 0;
+        err = MAP_ERR_NO_MEM;
     }
 
     if (err == MAP_ERR_NONE)
         err = importPixelMapFile(pixelMapFile);
 
-    createParam("MapErr",       asynParamInt32, &MapErr,        err);
-    createParam("PassThru",     asynParamInt32, &PassThru,      0);
-    createParam("CntUnmap",     asynParamInt32, &CntUnmap,      0);
-    createParam("CntErrOthr",   asynParamInt32, &CntErrOthr,    0);
-    createParam("CntErrBnd",    asynParamInt32, &CntErrBnd,     0);
-    createParam("SplitCount",   asynParamInt32, &SplitCount,    0);
+    createParam("MapErr",       asynParamInt32, &MapErr,        err);   // Last mapping import error
+    createParam("PassThru",     asynParamInt32, &PassThru,      0);     // Skip remapping pixels
+    createParam("CntUnmap",     asynParamInt32, &CntUnmap,      0);     // Number of unmapped pixels
+    createParam("CntErrOthr",   asynParamInt32, &CntErrOthr,    0);     // Number of unknown-error pixels
+    createParam("CntErrOff",    asynParamInt32, &CntErrOff,     0);     // Number of unmapped-error pixels
+    createParam("CntSplit",     asynParamInt32, &CntSplit,      0);     // Number of packet train splits
     callParamCallbacks();
 }
 
@@ -62,13 +67,18 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     int nSplits = 0;
     PixelMapErrors errors;
 
+    if (m_buffer == 0) {
+        LOG_ERROR("No buffer allocated, skipping pixel mapping");
+        return;
+    }
+
     this->lock();
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
     getIntegerParam(CntUnmap,   &errors.nUnmapped);
     getIntegerParam(CntErrOthr, &errors.nErrOther);
-    getIntegerParam(CntErrBnd,  &errors.nErrBound);
-    getIntegerParam(SplitCount, &nSplits);
+    getIntegerParam(CntErrOff,  &errors.nErrBound);
+    getIntegerParam(CntSplit,   &nSplits);
     getIntegerParam(PassThru,   &passthru);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL || m_map.empty())
         passthru = 1;
@@ -140,10 +150,10 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     this->lock();
     setIntegerParam(RxCount,    nReceived        % std::numeric_limits<int32_t>::max());
     setIntegerParam(ProcCount,  nProcessed       % std::numeric_limits<int32_t>::max());
-    setIntegerParam(SplitCount, nSplits          % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntSplit,   nSplits          % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntUnmap,   errors.nUnmapped % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntErrOthr, errors.nErrOther % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntErrBnd,  errors.nErrBound % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntErrOff,  errors.nErrBound % std::numeric_limits<int32_t>::max());
     callParamCallbacks();
     this->unlock();
 }
@@ -156,7 +166,7 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPac
     (void)srcPacket->copyHeader(destPacket, srcPacket->length());
 
     uint32_t nEvents, nDestEvents;
-    DasPacket::Event *srcEvent= const_cast<DasPacket::Event *>(srcPacket->getEventData(&nEvents));
+    const DasPacket::Event *srcEvent= srcPacket->getEventData(&nEvents);
     DasPacket::Event *destEvent= const_cast<DasPacket::Event *>(destPacket->getEventData(&nDestEvents));
 
     // The below code was optimized for speed and is not as elegant as could be

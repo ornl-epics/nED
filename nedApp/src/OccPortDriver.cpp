@@ -443,6 +443,7 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
     uint32_t length;
     uint32_t consumed;
     DasPacketList packetsList;
+    uint32_t retryCounter = 0;
 
     // Initialize members used in helper function calculateDataRateOut()
     epicsTimeGetCurrent(&m_dataRateOutTime);
@@ -480,10 +481,29 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 
             // Nobody is using data anymore
             m_circularBuffer->consume(consumed);
-        } else if (length > DasPacket::MinLength) { // Corrupted data check
-            handleRecvError(-EBADMSG);
-            LOG_ERROR("Corrupted data in queue, aborting process thread");
-            break;
+
+            retryCounter = 0;
+
+        } else {
+            packetsList.release();
+
+            if (retryCounter < 5) {
+                // Increasingly sleep by 10us, first pass doesn't sleep
+                epicsThreadSleep(1e-5 * retryCounter++);
+                continue;
+            }
+
+            // OCC still doesn't have enough data, check what's going on
+            DasPacket *packet = reinterpret_cast<DasPacket *>(data);
+            if (packet->length() > DasPacket::MaxLength) {
+                handleRecvError(-EBADMSG);
+                LOG_ERROR("Possibly corrupted data in queue based on packet length, aborting process thread");
+                break;
+            }
+
+            // Maybe there just wasn't enough data - very likely this will loop forever
+            LOG_ERROR("Partial data from OCC, retrying in a while");
+            epicsThreadSleep(1e-3);
         }
     }
 }

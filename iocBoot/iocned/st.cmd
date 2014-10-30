@@ -33,7 +33,7 @@ dbLoadRecords("../../db/Occ.template","P=$(PREFIX)Det:occ1:,PORT=occ1")
 CmdDispatcherConfigure("cmd", "occ1")
 dbLoadRecords("../../db/CmdPlugin.template","P=$(PREFIX)Det:cmd:,PORT=cmd")
 
-PixelMapPluginConfigure("PixMap", "occ1", 1, "/tmp/test.pixelmap", 10000)
+PixelMapPluginConfigure("PixMap", "occ1", 1, "/tmp/test.pixelmap", 4194304)
 dbLoadRecords("../../db/PixelMapPlugin.template","P=$(PREFIX)Det:pm1:,PORT=PixMap")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:pm1:,PORT=PixMap")
 

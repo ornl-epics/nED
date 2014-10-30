@@ -32,14 +32,6 @@
  * far are sent to connected plugins. The SplitCount parameter is increased for
  * every split. Splitting batches has performance impact, ideally buffer is big
  * enough and no splits occur.
- *
- * Available PixelMapPlugin parameters (in addition to ones from BasePlugin):
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * MapErr        | asynParamInt32  | 0        | RO   | Last mapping error
- * PassThru      | asynParamInt32  | 0        | RW   | Skip remapping pixels
- * UnmapCount    | asynParamInt32  | 0        | RO   | Number of unmapped pixels
- * SplitCount    | asynParamInt32  | 0        | RO   | Number of splits occurred
  */
 class PixelMapPlugin : public BaseDispatcherPlugin {
     private:
@@ -141,9 +133,9 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         int PassThru;       //!< Should the plugin do the pixel map conversion
         int CntUnmap;       //!< Number of unmapped pixels
         int CntErrOthr;     //!< Number of generic error pixel ids detected
-        int CntErrBnd;      //!< Number of error pixel ids outside range detected
-        int SplitCount;     //!< Total number of splited incoming packet lists
-        #define LAST_PIXELMAPPLUGIN_PARAM SplitCount
+        int CntErrOff;      //!< Number of error pixel ids outside range detected
+        int CntSplit;       //!< Total number of splited incoming packet lists
+        #define LAST_PIXELMAPPLUGIN_PARAM CntSplit
 };
 
 #endif // PIXEL_MAP_PLUGIN_H
