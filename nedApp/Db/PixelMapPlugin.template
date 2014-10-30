@@ -3,9 +3,9 @@ record(bo, "$(P)Enable")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
 }
-record(mbbi, "$(P)MapError")
+record(mbbi, "$(P)ErrImport")
 {
-    field(DESC, "Last severe map error")
+    field(DESC, "Error importing file")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))MapError")
     field(SCAN, "I/O Intr")
@@ -30,11 +30,27 @@ record(bo, "$(P)PassThru")
     field(ZNAM, "Mapping enabled")
     field(ONAM, "Mapping disabled")
 }
-record(longin, "$(P)UnmapCount")
+record(longin, "$(P)CntErrOthr")
+{
+    field(DESC, "Number unknown error pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntErrOthr")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntErrBnd")
+{
+    field(DESC, "Num out-of-range error pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntErrBnd")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntUnmap")
 {
     field(DESC, "Number unmapped pixels")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))UnmapCount")
+    field(INP,  "@asyn($(PORT))CntUnmap")
     field(SCAN, "I/O Intr")
     field(PINI, "YES")
 }
