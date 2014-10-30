@@ -22,18 +22,18 @@ GenericModulePlugin::GenericModulePlugin(const char *portName, const char *dispa
     , m_hardwareId(0)
     , m_payloadLen(0)
 {
-    createParam("ReqDest",      asynParamOctet, &ReqDest);
-    createParam("ReqCmd",       asynParamInt32, &ReqCmd);
-    createParam("ReqIsDsp",     asynParamInt32, &ReqIsDsp);
-    createParam("RspCmd",       asynParamInt32, &RspCmd);
-    createParam("RspCmdAck",    asynParamInt32, &RspCmdAck);
-    createParam("RspHwType",    asynParamInt32, &RspHwType);
-    createParam("RspSrc",       asynParamOctet, &RspSrc);
-    createParam("RspRouter",    asynParamOctet, &RspRouter);
-    createParam("RspDest",      asynParamOctet, &RspDest);
-    createParam("RspLen",       asynParamInt32, &RspLen);
-    createParam("RspDataLen",   asynParamInt32, &RspDataLen);
-    createParam("RspData",      asynParamOctet, &RspData);
+    createParam("ReqDest",      asynParamOctet, &ReqDest);      // WRITE - Module address to communicate with
+    createParam("ReqCmd",       asynParamInt32, &ReqCmd);       // WRITE - Command to be sent to module
+    createParam("ReqIsDsp",     asynParamInt32, &ReqIsDsp);     // WRITE - Is the module we communicate with behinds the DSP, using LVDS link
+    createParam("RspCmd",       asynParamInt32, &RspCmd);       // READ - Response command (see DasPacket::CommandType)
+    createParam("RspCmdAck",    asynParamInt32, &RspCmdAck);    // READ - Response ACK/NACK
+    createParam("RspHwType",    asynParamInt32, &RspHwType);    // READ - Hardware type (see DasPacket::ModuleType)
+    createParam("RspSrc",       asynParamOctet, &RspSrc);       // READ - Response source address
+    createParam("RspRouter",    asynParamOctet, &RspRouter);    // READ - Response router address
+    createParam("RspDest",      asynParamOctet, &RspDest);      // READ - Response destination address
+    createParam("RspLen",       asynParamInt32, &RspLen);       // READ - Response length in bytes
+    createParam("RspDataLen",   asynParamInt32, &RspDataLen);   // READ - Response payload length in bytes
+    createParam("RspData",      asynParamOctet, &RspData);      // READ - Response payload
 
     callParamCallbacks();
 }

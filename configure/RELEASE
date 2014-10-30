@@ -19,13 +19,14 @@
 # Build settings that are NOT module paths should appear in a
 # CONFIG_SITE file.
 
-EPICS_BASE=/home/controls/epics/R3.14.12.2/base
-SUPPORT=/home/controls/epics/R3.14.12.2/support
-BASEV4=/home/controls/epics/basev4/master
+SUPPORT=/home/controls/epics
 
-ASYN=           $(SUPPORT)/asyn
-AUTOSAVE=       $(SUPPORT)/autosave
-STREAMDEVICE=   $(SUPPORT)/StreamDevice
-OCCLIB=         /home/controls/occ/lib
+ASYN=           $(SUPPORT)/asyn/master
+AUTOSAVE=       $(SUPPORT)/autosave/master
+STREAMDEVICE=   $(SUPPORT)/StreamDevice/master
+OCCLIB=         /home/controls/occ/master/lib
+
+EPICS_BASE=/home/controls/epics/base/master
+BASEV4=/home/controls/epics/basev4/master
 
 include $(BASEV4)/RELEASE.local

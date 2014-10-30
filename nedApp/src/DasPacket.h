@@ -90,6 +90,7 @@ struct DasPacket
             CMD_READ_VERSION            = 0x20, //!< Read module version
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
             CMD_READ_STATUS             = 0x22, //!< Read module status
+            CMD_READ_STATUS_COUNTERS    = 0x24, //!< Read module status counters
             CMD_WRITE_CONFIG            = 0x30, //!< Write module configuration
             RSP_NACK                    = 0x40, //!< NACK to the command, the command that is being acknowledged is in payload[0] or payload[1]
             RSP_ACK                     = 0x41, //!< ACK to the command, the command that is being acknowledged is in payload[0] or payload[1]
@@ -195,11 +196,11 @@ struct DasPacket
          *
          * @param[in] source address of the sender
          * @param[in] destination address
-         * @param[in] cmdinfo describing newly created command packet
+         * @param[in] command type for new packet
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createOcc(uint32_t source_, uint32_t destination_, CommandType command, uint32_t payload_length_, uint32_t *payload_ = 0);
+        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
          * Create DasPacket LVDS command (non DSPs)
@@ -215,11 +216,11 @@ struct DasPacket
          *
          * @param[in] source address of the sender
          * @param[in] destination address
-         * @param[in] cmdinfo describing newly created command packet
+         * @param[in] command type for new packet
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createLvds(uint32_t source_, uint32_t destination_, CommandType command, uint32_t payload_length_, uint32_t *payload_ = 0);
+        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
          * Check if packet is valid, like the alignment check, size check, etc.

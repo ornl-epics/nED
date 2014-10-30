@@ -34,9 +34,9 @@ class AcpcPvaPlugin : public BasePvaPlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
+         * @param[in] pvName Name for the EPICSv4 PV serving the data.
          */
-        AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix);
+        AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName);
 
         /**
          * Process incoming data as normal ACPC neutron data.

@@ -72,16 +72,6 @@
  * OCC command to the module and switches CmdRsp PV to waiting state.
  * Reading the CmdRsp PV immediately after writing CmdReq will
  * @b always give accurate last command status.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description
- * ------------- | --------------- | -------- | ---- | -----------
- * HwId          | asynParamInt32  | 0        | RO   | Connected module hardware id
- * CmdRsp        | asynParamInt32  | 0        | RO   | Last command response status   (see LastCommandResponse for valid values)
- * Command       | asynParamInt32  | 0        | RW   | Issue RocPlugin command        (see DasPacket::CommandType for valid values)
- * Supported     | asynParamInt32  | 0        | RO   | Flag whether module is supported
- * Verified      | asynParamInt32  | 0        | RO   | Flag whether module type and version were verified
- * Type          | asynParamInt32  | 0        | RO   | Module type                    (see DasPacket::ModuleType for valid values)
  */
 class BaseModulePlugin : public BasePlugin {
     public: // structures and defines
@@ -163,8 +153,10 @@ class BaseModulePlugin : public BasePlugin {
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
         uint32_t m_statusPayloadLength;                 //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
+        uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
         uint32_t m_configPayloadLength;                 //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParam()
         std::map<int, StatusParamDesc> m_statusParams;  //!< Map of exported status parameters
+        std::map<int, StatusParamDesc> m_counterParams; //!< Map of exported status counter parameters
         std::map<int, ConfigParamDesc> m_configParams;  //!< Map of exported config parameters
         StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
@@ -189,6 +181,8 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] behindDsp Is this module behind the DSP which transforms some of the packets?
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          * @param[in] numParams The number of parameters that the derived class supports.
+         * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
+         * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
         BaseModulePlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId,
                          bool behindDsp, int blocking=0, int numParams=0,
@@ -226,7 +220,7 @@ class BaseModulePlugin : public BasePlugin {
          * array of 4 byte unsigned integers. The length should be dividable by 2.
          *
          * @param[in] command A command of the packet to be sent out.
-         * @param[in] packet Payload to be sent out, can be NULL if length is also 0.
+         * @param[in] payload Payload to be sent out, can be NULL if length is also 0.
          * @param[in] length Payload length in bytes.
          */
         void sendToDispatcher(DasPacket::CommandType command, uint32_t *payload=0, uint32_t length=0);
@@ -310,6 +304,24 @@ class BaseModulePlugin : public BasePlugin {
          * @return true if packet was parsed and module version verified.
          */
         virtual bool rspReadStatus(const DasPacket *packet);
+
+        /**
+         * Called when read status counters request to the module should be made.
+         *
+         * Base implementation simply sends a READ_STATUS_COUNTERS command and sets up
+         * timeout callback.
+         */
+        virtual void reqReadStatusCounters();
+
+        /**
+         * Default handler for READ_STATUS_COUNTERS response.
+         *
+         * Read the packet payload and populate counters parameters.
+         *
+         * @param[in] packet with response to READ_STATUS_COUNTERS
+         * @return true if packet was parsed and module version verified.
+         */
+        virtual bool rspReadStatusCounters(const DasPacket *packet);
 
         /**
          * Called when read config request to the module should be made.
@@ -411,6 +423,13 @@ class BaseModulePlugin : public BasePlugin {
         void createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
 
         /**
+         * Create and register single integer status counter parameter.
+         *
+         * Status counters provide a way to diagnose communication problems.
+         */
+        void createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
+
+        /**
          * Create and register single integer config parameter.
          */
         void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
@@ -481,19 +500,17 @@ class BaseModulePlugin : public BasePlugin {
         #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
         int CmdReq;         //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
         int CmdRsp;         //!< Last command response status
-        int HardwareVer;    //!< Module hardware version
-        int HardwareRev;    //!< Module hardware revision
-        int HardwareDate;   //!< Module hardware date
-        int FirmwareVer;    //!< Module firmware version
-        int FirmwareRev;    //!< Module firmware revision
-        int FirmwareDate;   //!< Module firmware date
+        int HwId;           //!< Hw ID that this object is controlling
+        int HwType;         //!< Configured module type
+        int HwVer;          //!< Module hardware version
+        int HwRev;          //!< Module hardware revision
+        int HwDate;         //!< Module hardware date
+        int FwVer;          //!< Module firmware version
+        int FwRev;          //!< Module firmware revision
+        int FwDate;         //!< Module firmware date
         int Supported;      //!< Flag whether module is supported
         int Verified;       //!< Hardware id, version and type all verified
-        int Type;           //!< Configured module type
-    private:
-        int HardwareId;     //!< Hardware ID that this object is controlling
-        #define LAST_BASEMODULEPLUGIN_PARAM HardwareId
-
+        #define LAST_BASEMODULEPLUGIN_PARAM Verified
 };
 
 #endif // BASE_MODULE_PLUGIN_H

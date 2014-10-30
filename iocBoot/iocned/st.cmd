@@ -28,18 +28,16 @@ set_pass1_restoreFile("$(IOCNAME).sav")
 ## Load record instances
 epicsEnvSet("PREFIX", "BL99:")
 OccConfigure("occ1", "/dev/snsocb1", 40000000)
-dbLoadRecords("../../db/Occ.template","P=$(PREFIX)Det:occ1:,PORT=occ1")
+dbLoadRecords("../../db/OccPortDriver.db","P=$(PREFIX)Det:occ1:,PORT=occ1")
 
 CmdDispatcherConfigure("cmd", "occ1")
-dbLoadRecords("../../db/CmdPlugin.template","P=$(PREFIX)Det:cmd:,PORT=cmd")
+dbLoadRecords("../../db/CmdDispatcherPlugin.db","P=$(PREFIX)Det:cmd:,PORT=cmd")
 
 AdaraPluginConfigure("Adara1", "occ1", 1, 2)
-dbLoadRecords("../../db/AdaraPlugin.template","P=$(PREFIX)Det:adara1:,PORT=Adara1")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:adara1:,PORT=Adara1")
+dbLoadRecords("../../db/AdaraPlugin.db","P=$(PREFIX)Det:adara1:,PORT=Adara1")
 
 ProxyPluginConfigure("proxy1", "occ1")
-dbLoadRecords("../../db/BaseSocketPlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
+dbLoadRecords("../../db/SocketPlugin.db","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 
 RocPvaPluginConfigure("rocPva1", "occ1", "$(PREFIX)Det:rocpva1:Neutrons")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:rocpva1:,PORT=rocPva1")
@@ -47,48 +45,37 @@ dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:rocpva1:,PORT=rocPv
 #DspPluginConfigure("Dsp1", "$(OCC1)", "0x15FA76DF")
 
 DspPluginConfigure("Dsp1", "cmd", "21.250.118.223", "v63", 0)
-dbLoadRecords("../../db/DspPlugin.template","P=$(PREFIX)Det:dsp1:,PORT=Dsp1")
-dbLoadRecords("../../db/BaseModulePlugin.template","P=$(PREFIX)Det:dsp1:,PORT=Dsp1")
+dbLoadRecords("../../db/DspPlugin.db","P=$(PREFIX)Det:dsp1:,PORT=Dsp1")
 
 DiscoverPluginConfigure("Disc", "occ1")
-dbLoadRecords("../../db/DiscoverPlugin.template","P=$(PREFIX)Det:disc:,PORT=Disc")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:disc:,PORT=Disc")
+dbLoadRecords("../../db/DiscoverPlugin.db","P=$(PREFIX)Det:disc:,PORT=Disc")
 
 RocPluginConfigure("roc1", "cmd", "20.39.216.73", "v52", 0)
-#dbLoadRecords("../../db/ROCHV.db","P=$(PREFIX)Det:HV1,G=$(PREFIX)Det:HVG,PORT=roc1")
-dbLoadRecords("../../db/RocPlugin_v52.template","P=$(PREFIX)Det:roc1:,PORT=roc1")
-dbLoadRecords("../../db/BaseModulePlugin.template","P=$(PREFIX)Det:roc1:,PORT=roc1")
+dbLoadRecords("../../db/ROCHV.db","P=$(PREFIX)Det:HV1,G=$(PREFIX)Det:HVG,PORT=roc1")
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX)Det:roc1:,PORT=roc1")
 
 DumpPluginConfigure("dump", "occ1", 0)
-dbLoadRecords("../../db/DumpPlugin.template","P=$(PREFIX)Det:dump:,PORT=dump")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:dump:,PORT=dump")
+dbLoadRecords("../../db/DumpPlugin.db","P=$(PREFIX)Det:dump:,PORT=dump")
 
-StatPluginConfigure("stat1", "occ1", 0)
-dbLoadRecords("../../db/StatPlugin.db","P=$(PREFIX)Det:stat1:,PORT=stat1")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:stat1:,PORT=stat1")
+StatPluginConfigure("stat", "occ1", 0)
+dbLoadRecords("../../db/StatPlugin.db","P=$(PREFIX)Det:stat:,PORT=stat")
 
 RtdlPluginConfigure("rtdl", "occ1", 0)
-dbLoadRecords("../../db/RtdlPlugin.template","P=$(PREFIX)Det:rtdl:,PORT=rtdl")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:rtdl:,PORT=rtdl")
+dbLoadRecords("../../db/RtdlPlugin.db","P=$(PREFIX)Det:rtdl:,PORT=rtdl")
 
 FemPluginConfigure("fem1", "cmd", "0x603B0817", "10.0/5.0", 1)
-dbLoadRecords("../../db/FemPlugin.template","P=$(PREFIX)Det:fem1:,PORT=fem1")
-dbLoadRecords("../../db/BaseModulePlugin.template","P=$(PREFIX)Det:fem1:,PORT=fem1")
+dbLoadRecords("../../db/FemPlugin.db","P=$(PREFIX)Det:fem1:,PORT=fem1")
 
 AcpcFemPluginConfigure("fem2", "cmd", "20.128.234.122", "10.0/5.0", 0)
-dbLoadRecords("../../db/AcpcFemPlugin.template","P=$(PREFIX)Det:fem2:,PORT=fem2")
-dbLoadRecords("../../db/BaseModulePlugin.template","P=$(PREFIX)Det:fem2:,PORT=fem2")
+dbLoadRecords("../../db/AcpcFemPlugin.db","P=$(PREFIX)Det:fem2:,PORT=fem2")
 
 GenericModulePluginConfigure("gm", "cmd", 0)
-dbLoadRecords("../../db/GenericModulePlugin.template","P=$(PREFIX)Det:gm:,PORT=gm")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:gm:,PORT=gm")
+dbLoadRecords("../../db/GenericModulePlugin.db","P=$(PREFIX)Det:gm:,PORT=gm")
 
 FlatFieldPluginConfigure("ff", "occ1", 0)
-dbLoadRecords("../../db/FlatFieldPlugin.template","P=$(PREFIX)Det:ff:,PORT=ff")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:ff:,PORT=ff")
+dbLoadRecords("../../db/FlatFieldPlugin.db","P=$(PREFIX)Det:ff:,PORT=ff")
 
 AcpcPvaPluginConfigure("AcpcPva", "occ1", "$(PREFIX)Det:pva1:Neutrons")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:pva1:,PORT=AcpcPva")
 
 iocInit()
 

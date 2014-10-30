@@ -26,7 +26,7 @@
  * Registers any class creation function with EPICS.
  *
  * User must manually add support for registered class into nedSupport.dbd file. For
- * example, append the following line with <name> expanded:
+ * example, append the following line with \<name\> expanded:
  * registrar("\<name\>Register")
  *
  * @param[in] name Name of the function available from EPICS, that creates a new instance

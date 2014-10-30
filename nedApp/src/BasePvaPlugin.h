@@ -30,10 +30,6 @@
  * There's no field in DasPacket that describes the payload. We rely on external
  * party to flag current mode through Mode parameter. Based on that appropriate
  * processData*() function is invoked.
- *
- * Available BasePvaPlugin parameters (in addition to ones from BasePlugin):
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
  */
 class BasePvaPlugin : public BasePlugin {
     public:
@@ -43,7 +39,6 @@ class BasePvaPlugin : public BasePlugin {
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] pvName Name for the EPICSv4 PV serving the data.
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
         BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName);
 

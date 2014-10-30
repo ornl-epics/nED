@@ -48,11 +48,11 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortName, int
     m_pasynuser->userPvt = this;
     m_pasynuser->reason = reason;
 
-    createParam("Enable",       asynParamInt32,     &Enable); // Plugin does not receive any data until callbacks are enabled
-    createParam("ProcCount",    asynParamInt32,     &ProcCount, 0);
-    createParam("RxCount",      asynParamInt32,     &RxCount,   0);
-    createParam("TxCount",      asynParamInt32,     &TxCount,   0);
-    createParam("DataMode",     asynParamInt32,     &DataModeP, DATA_MODE_NORMAL);
+    createParam("Enable",       asynParamInt32,     &Enable);       // WRITE - Enable or disable plugin
+    createParam("ProcCount",    asynParamInt32,     &ProcCount, 0); // READ - Number processed packets
+    createParam("RxCount",      asynParamInt32,     &RxCount,   0); // READ - Number packets received from OCC
+    createParam("TxCount",      asynParamInt32,     &TxCount,   0); // READ - Number packets sent to OCC
+    createParam("DataMode",     asynParamInt32,     &DataModeP, DATA_MODE_NORMAL); // WRITE - Data format mode (see BasePlugin::DataMode)
 
     // Connect to dispatcher port permanently. Don't allow connecting to different port at runtime.
     // Callbacks need to be enabled separately in order to actually get triggered from dispatcher.
@@ -123,6 +123,14 @@ asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *in
     asynStatus status = asynPortDriver::createParam(name, type, index);
     if (status == asynSuccess && type == asynParamInt32)
         status = setIntegerParam(*index, initValue);
+    return status;
+}
+
+asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *index, const char *initValue)
+{
+    asynStatus status = asynPortDriver::createParam(name, type, index);
+    if (status == asynSuccess && type == asynParamInt32)
+        status = setStringParam(*index, initValue);
     return status;
 }
 

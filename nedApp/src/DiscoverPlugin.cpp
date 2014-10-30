@@ -22,9 +22,8 @@ DiscoverPlugin::DiscoverPlugin(const char *portName, const char *dispatcherPortN
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, 1, NUM_DISCOVERPLUGIN_PARAMS, 0,
                  BasePlugin::defaultInterfaceMask | asynOctetMask, BasePlugin::defaultInterruptMask | asynOctetMask)
 {
-    createParam("Trigger",  asynParamInt32, &Trigger);
-    createParam("Output",   asynParamOctet, &Output);
-    setStringParam(Output, "Not initialized");
+    createParam("Trigger",  asynParamInt32, &Trigger);                      // WRITE - Trigger discovery of modules
+    createParam("Output",   asynParamOctet, &Output, "Not initialized");    // READ - Modules found formatted in ASCII table
     callParamCallbacks();
 }
 

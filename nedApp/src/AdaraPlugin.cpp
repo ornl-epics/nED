@@ -46,10 +46,8 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
         m_dspSources.push_back(DspSource(0x0, i*2, i*2+1));
     }
 
-    createParam("BadPulseDrops",    asynParamInt32,     &BadPulseDrops);
-    createParam("BadDspDrops",      asynParamInt32,     &BadDspDrops);
-    setIntegerParam(BadPulseDrops,  0);
-    setIntegerParam(BadDspDrops,    0);
+    createParam("BadPulsCnt",   asynParamInt32, &BadPulsCnt, 0); // READ - Num dropped packets associated to already completed pulse
+    createParam("BadDspCnt",    asynParamInt32, &BadDspCnt,  0); // READ - Num dropped packets from unexpected DSP
     callParamCallbacks();
 }
 
@@ -166,8 +164,8 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
     setIntegerParam(TxCount,        m_nTransmitted);
     setIntegerParam(ProcCount,      m_nProcessed);
     setIntegerParam(RxCount,        m_nReceived);
-    setIntegerParam(BadPulseDrops,  m_nPacketsPrevPulse);
-    setIntegerParam(BadDspDrops,    m_nUnexpectedDspDrops);
+    setIntegerParam(BadPulsCnt,     m_nPacketsPrevPulse);
+    setIntegerParam(BadDspCnt,      m_nUnexpectedDspDrops);
     callParamCallbacks();
 }
 
@@ -176,7 +174,7 @@ float AdaraPlugin::checkClient()
     int heartbeatInt;
     epicsTimeStamp now;
 
-    getIntegerParam(CheckClientDelay, &heartbeatInt);
+    getIntegerParam(CheckInt, &heartbeatInt);
     epicsTimeGetCurrent(&now);
 
     if (isClientConnected() && epicsTimeDiffInSeconds(&now, &m_lastSentTimestamp) > heartbeatInt) {

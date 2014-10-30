@@ -1,3 +1,5 @@
+include "BasePlugin.include"
+
 record(stringin, "$(P)Timestamp")
 {
     field(DTYP, "asynOctetRead")
@@ -13,35 +15,35 @@ record(bi, "$(P)BadPulse")
     field(ONAM, "Yes")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)PulseFlavor")
+record(longin, "$(P)PulseFlav")
 {
     field(DESC, "Pulse flavor")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))PulseFlavor")
+    field(INP,  "@asyn($(PORT))PulseFlav")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)PulseCharge")
+record(longin, "$(P)PulseCharg")
 {
     field(DESC, "Pulse charge")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))PulseCharge")
+    field(INP,  "@asyn($(PORT))PulseCharg")
     field(EGU,  "C")
     field(SCAN, "I/O Intr")
 }
-record(bi, "$(P)BadVetoFrame")
+record(bi, "$(P)BadVetoFr")
 {
     field(DESC, "Bad veto frame indicator")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BadVetoFrame")
+    field(INP,  "@asyn($(PORT))BadVetoFr")
     field(ZNAM, "No")
     field(ONAM, "Yes")
     field(SCAN, "I/O Intr")
 }
-record(bi, "$(P)BadCycleFrame")
+record(bi, "$(P)BadCycleFr")
 {
     field(DESC, "Bad cycle frame indicator")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BadCycleFrame")
+    field(INP,  "@asyn($(PORT))BadCycleFr")
     field(ZNAM, "No")
     field(ONAM, "Yes")
     field(SCAN, "I/O Intr")
@@ -91,34 +93,34 @@ record(longin, "$(P)Cycle")
     field(INP,  "@asyn($(PORT))Cycle")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)IntraPulseTime")
+record(longin, "$(P)IntraPTime")
 {
     field(DESC, "Number of ns between reference pulses")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))IntraPulseTime")
+    field(INP,  "@asyn($(PORT))IntraPTime")
     field(EGU,  "ns")
     field(SCAN, "I/O Intr")
 }
-record(bi, "$(P)TofFullOffset")
+record(bi, "$(P)TofFullOff")
 {
     field(DESC, "TOF full offset enabled")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))TofFullOffset")
+    field(INP,  "@asyn($(PORT))TofFullOff")
     field(ZNAM, "Disabled")
     field(ONAM, "Enabled")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)FrameOffset")
+record(longin, "$(P)FrameOff")
 {
     field(DESC, "RTDL frame offset")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))FrameOffset")
+    field(INP,  "@asyn($(PORT))FrameOff")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)TofFixedOffset")
+record(longin, "$(P)TofFixOff")
 {
     field(DESC, "TOF fixed offset")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))TofFixedOffset")
+    field(INP,  "@asyn($(PORT))TofFixOff")
     field(SCAN, "I/O Intr")
 }

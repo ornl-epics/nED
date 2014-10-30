@@ -33,9 +33,6 @@ static const int asynStackSize     = 0;
 
 EPICS_REGISTER(Occ, OccPortDriver, 3, "Port name", string, "OCC device file", string, "Local buffer size", int);
 
-const int OccPortDriver::DEFAULT_BASIC_STATUS_INTERVAL = 5;     //!< How often to update frequent OCC status parameters
-const int OccPortDriver::DEFAULT_EXTENDED_STATUS_INTERVAL = 60; //!< How ofter to update less frequently changing OCC status parameters
-
 OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize)
     : asynPortDriver(portName, asynMaxAddr, NUM_OCCPORTDRIVER_PARAMS, asynInterfaceMask,
                      asynInterruptMask, asynFlags, asynAutoConnect, asynPriority, asynStackSize)
@@ -44,42 +41,43 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     int status;
 
     // Register params with asyn
-    createParam("Status",           asynParamInt32,     &Status,            STAT_OK);
-    createParam("LastErr",          asynParamInt32,     &LastErr,           0);
-    createParam("BoardType",        asynParamInt32,     &BoardType);
-    createParam("BoardFwVer",       asynParamInt32,     &BoardFwVer);
-    createParam("BoardFwDate",      asynParamInt32,     &BoardFwDate);
-    createParam("OpticsPresent",    asynParamInt32,     &OpticsPresent);
-    createParam("RxStalled",        asynParamInt32,     &RxStalled,         STALL_NONE);
-    createParam("Command",          asynParamInt32,     &Command);
-    createParam("FpgaTemp",         asynParamFloat64,   &FpgaTemp);
-    createParam("FpgaCoreVolt",     asynParamFloat64,   &FpgaCoreVolt);
-    createParam("FpgaAuxVolt",      asynParamFloat64,   &FpgaAuxVolt);
-    createParam("ErrCrc",           asynParamInt32,     &ErrCrc);
-    createParam("ErrLength",        asynParamInt32,     &ErrLength);
-    createParam("ErrFrame",         asynParamInt32,     &ErrFrame);
-    createParam("SfpTemp",          asynParamFloat64,   &SfpTemp);
-    createParam("SfpRxPower",       asynParamFloat64,   &SfpRxPower);
-    createParam("SfpTxPower",       asynParamFloat64,   &SfpTxPower);
-    createParam("SfpVccPower",      asynParamFloat64,   &SfpVccPower);
-    createParam("SfpTxBiasCur",     asynParamFloat64,   &SfpTxBiasCur);
-    createParam("StatusInt",        asynParamInt32,     &StatusInt,         DEFAULT_BASIC_STATUS_INTERVAL);
-    createParam("ExtStatusInt",     asynParamInt32,     &ExtStatusInt,      DEFAULT_EXTENDED_STATUS_INTERVAL);
-    createParam("DmaBufUsed",       asynParamInt32,     &DmaBufUsed);
-    createParam("DmaBufSize",       asynParamInt32,     &DmaBufSize);
-    createParam("CopyBufUsed",      asynParamInt32,     &CopyBufUsed);
-    createParam("CopyBufSize",      asynParamInt32,     &CopyBufSize);
-    createParam("DataRateOut",      asynParamInt32,     &DataRateOut);
-    createParam("RxEn",             asynParamInt32,     &RxEn);
-    createParam("RxEnRbv",          asynParamInt32,     &RxEnRbv);
-    createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);
-    createParam("ErrPktEnRbv",      asynParamInt32,     &ErrPktEnRbv);
-    createParam("AutoReset",        asynParamInt32,     &AutoReset,         0);
-    createParam("RstCntBad",        asynParamInt32,     &RstCntBad,         0);
-    createParam("RstCntOvrflw",     asynParamInt32,     &RstCntOvrflw,      0);
-    createParam("RstCntDma",        asynParamInt32,     &RstCntDma,         0);
-    createParam("RstCntCopy",       asynParamInt32,     &RstCntCopy,        0);
-    createParam("RstCntErr",        asynParamInt32,     &RstCntErr,         0);
+    //           0123456789
+    createParam("Status",           asynParamInt32,     &Status,        STAT_OK);   // READ - Status of OccPortDriver       (see OccPortDriver::Status)
+    createParam("LastErr",          asynParamInt32,     &LastErr,       0);         // READ - Last error code returned by OCC API
+    createParam("HwType",           asynParamInt32,     &HwType);                   // READ - OCC board type                (1=SNS PCI-X,2=SNS PCIe,15=simulator)
+    createParam("FwVer",            asynParamInt32,     &FwVer);                    // READ - OCC board firmware version
+    createParam("FwDate",           asynParamInt32,     &FwDate);                   // READ - OCC board firmware date
+    createParam("OptPres",          asynParamInt32,     &OptPres);                  // READ - Is optical cable present      (0=not present,1=present)
+    createParam("RxStalled",        asynParamInt32,     &RxStalled,     STALL_NONE);// READ - Incoming data stalled         (see OccPortDriver::StallEvent)
+    createParam("Command",          asynParamInt32,     &Command);                  // WRITE - Issue OccPortDriver command  (see OccPortDriver::Command)
+    createParam("FpgaTemp",         asynParamFloat64,   &FpgaTemp);                 // READ - FPGA temperature in Celsius
+    createParam("FpgaCoreV",        asynParamFloat64,   &FpgaCoreV);                // READ - FPGA core voltage in Volts
+    createParam("FpgaAuxV",         asynParamFloat64,   &FpgaAuxV);                 // READ - FPGA aux voltage in Volts
+    createParam("ErrCrc",           asynParamInt32,     &ErrCrc);                   // READ - Number of CRC errors detected by OCC
+    createParam("ErrLength",        asynParamInt32,     &ErrLength);                // READ - Number of length errors detected by OCC
+    createParam("ErrFrame",         asynParamInt32,     &ErrFrame);                 // READ - Number of frame errors detected by OCC
+    createParam("SfpTemp",          asynParamFloat64,   &SfpTemp);                  // READ - SFP temperature in Celsius
+    createParam("SfpRxPower",       asynParamFloat64,   &SfpRxPower);               // READ - SFP RX power in uW
+    createParam("SfpTxPower",       asynParamFloat64,   &SfpTxPower);               // READ - SFP TX power in uW
+    createParam("SfpVccPow",        asynParamFloat64,   &SfpVccPow);                // READ - SFP VCC power in Volts
+    createParam("SfpTxBiasC",       asynParamFloat64,   &SfpTxBiasC);               // READ - SFP TX bias current in uA
+    createParam("StatusInt",        asynParamInt32,     &StatusInt,     5);         // WRITE - OCC status refresh interval in s
+    createParam("ExtStatInt",       asynParamInt32,     &ExtStatInt,    60);        // WRITE - OCC extended status refresh interval in s
+    createParam("DmaUsed",          asynParamInt32,     &DmaUsed);                  // READ - DMA memory used space
+    createParam("DmaSize",          asynParamInt32,     &DmaSize);                  // READ - DMA memory size
+    createParam("BufUsed",          asynParamInt32,     &BufUsed);                  // READ - Virtual buffer used space
+    createParam("BufSize",          asynParamInt32,     &BufSize);                  // READ - Virtual buffer size
+    createParam("RxRate",           asynParamInt32,     &RxRate);                   // READ - Data processing throughput in B/s
+    createParam("RxEn",             asynParamInt32,     &RxEn);                     // WRITE - Enable incoming data          (0=disable,1=enable)
+    createParam("RxEnRb",           asynParamInt32,     &RxEnRb);                   // READ - Incoming data enabled         (0=disabled,1=enabled)
+    createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
+    createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
+    createParam("AutoReset",        asynParamInt32,     &AutoReset,     0);         // WRITE - Auto reset on error switch    (0=disable,1=enable)
+    createParam("RstCntBad",        asynParamInt32,     &RstCntBad,     0);         // READ - Num corrupted queue auto-resets
+    createParam("RstCntOvr",        asynParamInt32,     &RstCntOvr,     0);         // READ - Num FIFO overflow auto-resets
+    createParam("RstCntDma",        asynParamInt32,     &RstCntDma,     0);         // READ - Num DMA full auto-resets
+    createParam("RstCntBuf",        asynParamInt32,     &RstCntCopy,    0);         // READ - Num buffer full auto-resets
+    createParam("RstCntErr",        asynParamInt32,     &RstCntErr,     0);         // READ - Num OCC error auto-resets
 
     // Initialize OCC board
     status = occ_open(devfile, OCC_INTERFACE_OPTICAL, &m_occ);
@@ -162,28 +160,28 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             setIntegerParam(LastErr, -ret);
             LOG_ERROR("Failed to query OCC status: %s(%d)", strerror(-ret), ret);
         } else {
-            setIntegerParam(BoardType,      occstatus.board);
-            setIntegerParam(BoardFwVer,     occstatus.firmware_ver);
-            setIntegerParam(BoardFwDate,    occstatus.firmware_date);
-            setIntegerParam(OpticsPresent,  occstatus.optical_signal);
-            setIntegerParam(RxEnRbv,        occstatus.rx_enabled);
-            setIntegerParam(ErrPktEnRbv,    occstatus.err_packets_enabled);
+            setIntegerParam(HwType,         occstatus.board);
+            setIntegerParam(FwVer,          occstatus.firmware_ver);
+            setIntegerParam(FwDate,         occstatus.firmware_date);
+            setIntegerParam(OptPres,        occstatus.optical_signal);
+            setIntegerParam(RxEnRb,         occstatus.rx_enabled);
+            setIntegerParam(ErrPktEnRb,     occstatus.err_packets_enabled);
             setDoubleParam(FpgaTemp,        occstatus.fpga_temp);
-            setDoubleParam(FpgaCoreVolt,    occstatus.fpga_core_volt);
-            setDoubleParam(FpgaAuxVolt,     occstatus.fpga_aux_volt);
+            setDoubleParam(FpgaCoreV,       occstatus.fpga_core_volt);
+            setDoubleParam(FpgaAuxV,        occstatus.fpga_aux_volt);
             setIntegerParam(ErrCrc,         occstatus.err_crc);
             setIntegerParam(ErrLength,      occstatus.err_length);
             setIntegerParam(ErrFrame,       occstatus.err_frame);
             setDoubleParam(SfpTemp,         occstatus.sfp_temp);
             setDoubleParam(SfpRxPower,      occstatus.sfp_rx_power);
             setDoubleParam(SfpTxPower,      occstatus.sfp_tx_power);
-            setDoubleParam(SfpVccPower,     occstatus.sfp_vcc_power);
-            setDoubleParam(SfpTxBiasCur,    occstatus.sfp_tx_bias_cur);
+            setDoubleParam(SfpVccPow,       occstatus.sfp_vcc_power);
+            setDoubleParam(SfpTxBiasC,      occstatus.sfp_tx_bias_cur);
 
-            setIntegerParam(DmaBufUsed,     occstatus.dma_used);
-            setIntegerParam(DmaBufSize,     occstatus.dma_size);
-            setIntegerParam(CopyBufUsed,    m_circularBuffer->used());
-            setIntegerParam(CopyBufSize,    m_circularBuffer->size());
+            setIntegerParam(DmaUsed,        occstatus.dma_used);
+            setIntegerParam(DmaSize,        occstatus.dma_size);
+            setIntegerParam(BufUsed,        m_circularBuffer->used());
+            setIntegerParam(BufSize,        m_circularBuffer->size());
 
             if (occstatus.stalled)
                 setIntegerParam(RxStalled,  STALL_DMA);
@@ -199,9 +197,8 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             basic_status = true;
 
             // Determine refresh interval
-            if (getIntegerParam(StatusInt, &refreshPeriod) != asynSuccess)
-                refreshPeriod = DEFAULT_BASIC_STATUS_INTERVAL;
-            else if (refreshPeriod < 1) // prevent querying to often
+            getIntegerParam(StatusInt, &refreshPeriod);
+            if (refreshPeriod < 1) // prevent querying to often
                 refreshPeriod = 1;
         } else {
             // First run is completed and PINIed PVs are initialized and happy,
@@ -219,8 +216,7 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             epicsTimeGetCurrent(&now);
 
             this->lock();
-            if (getIntegerParam(ExtStatusInt, &refreshPeriod) != asynSuccess)
-                refreshPeriod = DEFAULT_EXTENDED_STATUS_INTERVAL;
+            getIntegerParam(ExtStatInt, &refreshPeriod);
             if (refreshPeriod < 1)
                 refreshPeriod = 1;
             this->unlock();
@@ -335,7 +331,7 @@ void OccPortDriver::calculateDataRateOut(uint32_t consumed)
         m_dataRateOutTime = now;
         m_dataRateOutCount = 0;
 
-        setIntegerParam(DataRateOut, throughput);
+        setIntegerParam(RxRate, throughput);
         callParamCallbacks();
     }
     this->unlock();
@@ -393,7 +389,7 @@ void OccPortDriver::handleRecvError(int ret)
     int resetParam = 0;
 
     this->lock();
-    setIntegerParam(DataRateOut, 0);
+    setIntegerParam(RxRate, 0);
 
     if (ret == -EBADMSG) {
         setIntegerParam(Status, STAT_BAD_DATA);
@@ -403,7 +399,7 @@ void OccPortDriver::handleRecvError(int ret)
         setIntegerParam(LastErr, EOVERFLOW);
         setIntegerParam(Status, STAT_BUFFER_FULL);
         setIntegerParam(RxStalled, STALL_FIFO);
-        resetParam = RstCntOvrflw;
+        resetParam = RstCntOvr;
 
     } else if (ret == -ENOSPC) { // OCC DMA full
         setIntegerParam(LastErr, ENOSPC);

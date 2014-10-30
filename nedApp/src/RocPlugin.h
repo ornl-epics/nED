@@ -36,11 +36,6 @@
  * ROC v5.4 reports wrong packet length in READ_CONFIG response for which
  * a workaround is to overload rspReadConfig() function to modify the
  * packet before letting base implementation do the rest.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * AcquireStat   | asynParamInt32  | 0        | RO   | Acquire status for v5.4
  */
 class RocPlugin : public BaseModulePlugin {
     public: // variables
@@ -144,7 +139,7 @@ class RocPlugin : public BaseModulePlugin {
          * Override START response handler.
          *
          * Implemented only for v5.4 and v5.5 to detect successful acquisition start
-         * and record it through AcquireStat parameter. Other ROC version have a dedicated
+         * and record it through Acquiring parameter. Other ROC version have a dedicated
          * status register for that.
          */
         bool rspStart(const DasPacket *packet);
@@ -153,7 +148,7 @@ class RocPlugin : public BaseModulePlugin {
          * Override STOP response handler.
          *
          * Implemented only for v5.4 and v5.5 to detect successful acquisition stop
-         * and record it through AcquireStat parameter. Other ROC version have a dedicated
+         * and record it through Acquiring parameter. Other ROC version have a dedicated
          * status register for that.
          */
         bool rspStop(const DasPacket *packet);
@@ -165,7 +160,7 @@ class RocPlugin : public BaseModulePlugin {
          * HV module. HV module does not have its own hardware id,
          * instead the ROC board is used as a router.
          *
-         * @param[in] data String representing HV command, must include '\r'
+         * @param[in] data String representing HV command, must include CR (ASCII 13)
          * @param[in] length Length of the string
          */
         void reqHvCmd(const char *data, uint32_t length);
@@ -211,11 +206,26 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all config ROC v5.4 parameters to be exposed to EPICS.
          */
         void createConfigParams_v54();
+        /**
+         * Create and register all status ROC v5.6 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v56();
+
+        /**
+         * Create and register all status counter ROC v5.6 parameters to be exposed to EPICS.
+         */
+        void createCounterParams_v56();
+
+        /**
+         * Create and register all config ROC v5.6 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v56();
+
 
     protected:
-        #define FIRST_ROCPLUGIN_PARAM AcquireStat
-        int AcquireStat;
-        #define LAST_ROCPLUGIN_PARAM AcquireStat
+        #define FIRST_ROCPLUGIN_PARAM Acquiring
+        int Acquiring;
+        #define LAST_ROCPLUGIN_PARAM Acquiring
 };
 
 #endif // DSP_PLUGIN_H

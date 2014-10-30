@@ -22,19 +22,19 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *dispatcherPortName, int
     , m_receivedCount(0)
     , m_processedCount(0)
 {
-    createParam("Timestamp",        asynParamOctet, &Timestamp);
-    createParam("BadPulse",         asynParamInt32, &BadPulse);
-    createParam("PulseFlavor",      asynParamInt32, &PulseFlavor);
-    createParam("PulseCharge",      asynParamInt32, &PulseCharge);
-    createParam("BadVetoFrame",     asynParamInt32, &BadVetoFrame);
-    createParam("BadCycleFrame",    asynParamInt32, &BadCycleFrame);
-    createParam("Tstat",            asynParamInt32, &Tstat);
-    createParam("Veto",             asynParamInt32, &Veto);
-    createParam("Cycle",            asynParamInt32, &Cycle);
-    createParam("IntraPulseTime",   asynParamInt32, &IntraPulseTime);
-    createParam("TofFullOffset",    asynParamInt32, &TofFullOffset);
-    createParam("FrameOffset",      asynParamInt32, &FrameOffset);
-    createParam("TofFixedOffset",   asynParamInt32, &TofFixedOffset);
+    createParam("Timestamp",        asynParamOctet, &Timestamp);    // READ - Timestamp string of last RTDL
+    createParam("BadPulse",         asynParamInt32, &BadPulse);     // READ - Bad pulse indicator (0=bad pulse, 1=good pulse)
+    createParam("PulseFlav",        asynParamInt32, &PulseFlav);    // READ - Pulse flavor
+    createParam("PulseCharg",       asynParamInt32, &PulseCharg);   // READ - Pulse charge
+    createParam("BadVetoFr",        asynParamInt32, &BadVetoFr);    // READ - Bad veto frame
+    createParam("BadCycleFr",       asynParamInt32, &BadCycleFr);   // READ - Bad cycle frame
+    createParam("Tstat",            asynParamInt32, &Tstat);        // READ - TSTAT
+    createParam("Veto",             asynParamInt32, &Veto);         // READ - Veto frame
+    createParam("Cycle",            asynParamInt32, &Cycle);        // READ - Cycle frame
+    createParam("IntraPTime",       asynParamInt32, &IntraPTime);   // READ - Number of ns between reference pulses
+    createParam("TofFullOff",       asynParamInt32, &TofFullOff);   // READ - TOF full offset
+    createParam("FrameOff",         asynParamInt32, &FrameOff);     // READ - Frame offset
+    createParam("TofFixOff",        asynParamInt32, &TofFixOff);    // READ - TOF fixed offset
 }
 
 void RtdlPlugin::processData(const DasPacketList * const packetList)
@@ -53,17 +53,17 @@ void RtdlPlugin::processData(const DasPacketList * const packetList)
 
             setStringParam(Timestamp,           rtdlTimeStr);
             setIntegerParam(BadPulse,           rtdl->bad_pulse);
-            setIntegerParam(PulseFlavor,        rtdl->pulse_flavor);
-            setIntegerParam(PulseCharge,        rtdl->pulse_charge);
-            setIntegerParam(BadVetoFrame,       rtdl->bad_veto_frame);
-            setIntegerParam(BadCycleFrame,      rtdl->bad_cycle_frame);
+            setIntegerParam(PulseFlav,          rtdl->pulse_flavor);
+            setIntegerParam(PulseCharg,         rtdl->pulse_charge);
+            setIntegerParam(BadVetoFr,          rtdl->bad_veto_frame);
+            setIntegerParam(BadCycleFr,         rtdl->bad_cycle_frame);
             setIntegerParam(Tstat,              rtdl->tstat);
             setIntegerParam(Veto,               rtdl->veto);
             setIntegerParam(Cycle,              rtdl->cycle);
-            setIntegerParam(IntraPulseTime,     rtdl->tsync_width * 100);
-            setIntegerParam(TofFullOffset,      rtdl->tof_full_offset);
-            setIntegerParam(FrameOffset,        rtdl->frame_offset);
-            setIntegerParam(TofFixedOffset,     rtdl->tof_fixed_offset);
+            setIntegerParam(IntraPTime,         rtdl->tsync_width * 100);
+            setIntegerParam(TofFullOff,         rtdl->tof_full_offset);
+            setIntegerParam(FrameOff,           rtdl->frame_offset);
+            setIntegerParam(TofFixOff,          rtdl->tof_fixed_offset);
 
             m_processedCount++;
         }

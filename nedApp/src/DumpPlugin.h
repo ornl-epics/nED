@@ -31,11 +31,6 @@
  * when the file is closed. It was observed to take a long time, but there's
  * not much we could do in that case. So the idea is not to wait for close
  * to complete.
- *
- * Available DumpPlugin parameters (in addition to ones from BasePlugin):
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * FilePath      | asynOctet       | ""       | RW   | Absolute file path to write to
  */
 class DumpPlugin : public BasePlugin {
     private: // variables

@@ -10,32 +10,32 @@ include $(TOP)/configure/CONFIG
 #----------------------------------------------------
 # Create and install (or just install) into <top>/db
 # databases, templates, substitutions like this
-DB += Occ.template
-DB += BasePlugin.template
-DB += BaseSocketPlugin.template
-DB += BaseModulePlugin.template
-DB += DiscoverPlugin.template
-DB += DspPlugin.template
-DB += FemPlugin.template
-DB += AcpcFemPlugin.template
-DB += RocPlugin_v51.template
-DB += RocPlugin_v52.template
-DB += RocPlugin_v54.template
-DB += RB_DspPlugin.template
-DB += RB_FemPlugin.template
-DB += RB_RocPlugin_v51.template
-DB += RB_RocPlugin_v52.template
-DB += RB_RocPlugin_v54.template
+DB += OccPortDriver.db
+DB += DiscoverPlugin.db
+DB += DspPlugin.db
+DB += FemPlugin.db
+DB += AcpcFemPlugin.db
+DB += RocPlugin_v51.db
+DB += RocPlugin_v52.db
+DB += RocPlugin_v54.db
+DB += RocPlugin_v56.db
+DB += RB_DspPlugin.db
+DB += RB_FemPlugin.db
+DB += RB_RocPlugin_v51.db
+DB += RB_RocPlugin_v52.db
+DB += RB_RocPlugin_v54.db
+DB += RB_RocPlugin_v56.db
 DB += RocHv.template
 DB += ROCHV.db
 DB += ROCHVSumBL16b.db
-DB += DumpPlugin.template
+DB += DumpPlugin.db
 DB += StatPlugin.db
-DB += RtdlPlugin.template
-DB += AdaraPlugin.template
-DB += CmdPlugin.template
-DB += GenericModulePlugin.template
-DB += FlatFieldPlugin.template
+DB += RtdlPlugin.db
+DB += AdaraPlugin.db
+DB += CmdDispatcherPlugin.db
+DB += GenericModulePlugin.db
+DB += FlatFieldPlugin.db
+DB += ProxyPlugin.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
