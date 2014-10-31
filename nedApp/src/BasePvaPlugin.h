@@ -61,25 +61,71 @@ class BasePvaPlugin : public BasePlugin {
          * Specialized plugins are advised to use one of more specific
          * functions.
          */
-        virtual void processData(const DasPacketList * const packetList);
+        void processData(const DasPacketList * const packetList);
 
         /**
-         * Process incoming data as normal detector data.
+         * Process incoming packet as normal detector data.
          */
-        virtual void processDataNormal(const DasPacketList * const packetList) {};
+        virtual void processNormalPacket(const DasPacket * const packet) {};
 
         /**
-         * Process incoming data as raw detector data.
+         * Process incoming packet as raw detector data.
          */
-        virtual void processDataRaw(const DasPacketList * const packetList) {};
+        virtual void processRawPacket(const DasPacket * const packet) {};
 
         /**
-         * Process incoming data as extended detector data.
+         * Process incoming packet as extended detector data.
          */
-        virtual void processDataExtended(const DasPacketList * const packetList) {};
+        virtual void processExtendedPacket(const DasPacket * const packet) {};
+
+        /**
+         * Post normal data.
+         *
+         * New pulse was detected based on RTDL timestamp and the data for
+         * previous pulse collected so far should be posted.
+         *
+         * @param[in] pulseTime Previous pulse timestamp for which data should be posted.
+         * @param[in] pulseCharge Previous pulse charge.
+         * @param[in] postSeq Id of the post, monotonically increases for every post
+         */
+        virtual void postNormalData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq) {};
+
+        /**
+         * Post raw data.
+         *
+         * New pulse was detected based on RTDL timestamp and the data for
+         * previous pulse collected so far should be posted.
+         *
+         * @param[in] pulseTime Previous pulse timestamp for which data should be posted.
+         * @param[in] pulseCharge Previous pulse charge.
+         * @param[in] postSeq Id of the post, monotonically increases for every post
+         */
+        virtual void postRawData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq) {};
+
+        /**
+         * Post extended data.
+         *
+         * New pulse was detected based on RTDL timestamp and the data for
+         * previous pulse collected so far should be posted.
+         *
+         * @param[in] pulseTime Previous pulse timestamp for which data should be posted.
+         * @param[in] pulseCharge Previous pulse charge.
+         * @param[in] postSeq Id of the post, monotonically increases for every post
+         */
+        virtual void postExtendedData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq) {};
 
     protected:
         PvaNeutronData::shared_pointer m_pvRecord;
+
+    private: // variables
+        uint32_t m_userTagCounter;
+        uint32_t m_nReceived;
+        uint32_t m_nProcessed;
+        epicsTimeStamp m_currentPulseTime;
+        uint32_t m_currentPulseCharge;
+
+    private: // functions
+        void postData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge);
 
     private: // asyn parameters
         #define FIRST_BASEPVAPLUGIN_PARAM 0

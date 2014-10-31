@@ -50,7 +50,23 @@ class AcpcPvaPlugin : public BasePvaPlugin {
          *   - photo sum x
          *   - photo sum y
          */
-        virtual void processDataNormal(const DasPacketList * const packetList);
+        void processNormalPacket(const DasPacket * const packet);
+
+        void postNormalData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq);
+
+    private:
+        /**
+         * A cache to store data until it's posted.
+         */
+        struct {
+            epics::pvData::PVUIntArray::svector time_of_flight;
+            epics::pvData::PVUIntArray::svector pixel;
+            epics::pvData::PVUIntArray::svector position_index;
+            epics::pvData::PVUIntArray::svector position_x;
+            epics::pvData::PVUIntArray::svector position_y;
+            epics::pvData::PVUIntArray::svector photo_sum_x;
+            epics::pvData::PVUIntArray::svector photo_sum_y;
+        } m_cache;
 };
 
 #endif // ACPC_PVA_PLUGIN_H

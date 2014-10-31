@@ -71,31 +71,6 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
          */
         static shared_pointer create(const std::string &recordName);
 
-        /**
-         * Start a transaction of updates.
-         *
-         * Any updates within the beginGroupPut() and endGroupPut() result in a
-         * single record update, that is a single monitor event on the client side.
-         * Writing to public members variables outside the transcaction will post
-         * individual changes immediately.
-         */
-        virtual void beginGroupPut();
-
-        /**
-         * Complete transaction and post updates.
-         */
-        virtual void endGroupPut();
-
-        /**
-         * Post current contents of the cache and clear it.
-         */
-        void postCachedUnlocked();
-
-        /**
-         * Lock entire PVrecord and post cached values.
-         */
-        void postCached();
-
     protected:
         /**
          * Private constructor.
