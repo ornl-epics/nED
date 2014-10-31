@@ -5,6 +5,7 @@ record(bo, "$(P)Enable")
 }
 record(mbbo, "$(P)DataMode")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Detectors data mode")
     field(DTYP, "Soft Channel")
     field(OUT,  "$(P)OutputMode")
@@ -56,6 +57,7 @@ record(fanout, "$(P)StatChange")
 }
 record(mbbo, "$(P)CmdReq")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Send command to module")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))CmdReq")

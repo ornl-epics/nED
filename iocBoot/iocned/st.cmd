@@ -25,6 +25,12 @@ save_restoreSet_SeqPeriodInSeconds(600)
 set_pass0_restoreFile("$(IOCNAME).sav")
 set_pass1_restoreFile("$(IOCNAME).sav")
 
+# Access Security
+# NOTE: All nED configuration and output records are writable only by BEAMLINE
+#       Uncomment and update next 2 lines to enable access security
+#asSetFilename("$(TOP)/../bl99-Det-nED/Db/bl7.acf")
+#asSetSubstitutions("P=BL99:CS")
+
 ## Load record instances
 epicsEnvSet("PREFIX", "BL99:")
 OccConfigure("occ1", "/dev/snsocb1", 40000000)

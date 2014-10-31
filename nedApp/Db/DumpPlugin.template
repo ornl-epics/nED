@@ -2,6 +2,7 @@ include "BasePlugin.include"
 
 record(stringout, "$(P)FilePath")
 {
-   field(DTYP,  "asynOctetWrite")
-   field(OUT,   "@asyn($(PORT))FilePath")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))FilePath")
 }
