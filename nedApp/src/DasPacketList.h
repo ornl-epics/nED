@@ -14,52 +14,35 @@
 
 #include <epicsEvent.h>
 #include <epicsMutex.h>
+#include <vector>
 
 /**
  * List of DAS Packets with reference counter
  *
- * This list points to the memory block with DAS packets. The memory block
- * length needs not be aligned with the packet. This class ensures that
- * all DAS packets returned by it are contiguous and complete. The last block
- * in the memory block might be partial DAS packet and will not be considered
- * by this class.
+ * The DasPacketList is a container of pointer to the DAS packets. Current
+ * implementation uses std::vector but any standard container could be used.
+ * Don't use std::vector indexed iterator (operator[]), possible future container
+ * replacement.
  *
  * The reference count keeps data pointed to by this object valid until
  * reference count drops to 0. At that point the data can be replaced with
  * new data but not earlier.
  */
-class DasPacketList
+class DasPacketList : public std::vector<const DasPacket *>
 {
     public:
         /**
-         * Constructor initialized internal structures.
+         * Constructor initializes internal structures.
          */
         DasPacketList();
-
-        /**
-         * Return first DAS packet in the list.
-         *
-         * @return First DAS packet or 0 if none.
-         */
-        const DasPacket *first() const;
-
-        /**
-         * Return next DAS packet in the list.
-         *
-         * @param[in] current Any valid packet previously returned from first() or next().
-         * @return Next DAS packet or 0 if none.
-         */
-        const DasPacket *next(const DasPacket *current) const;
 
         /**
          * Increase internal reference count.
          *
          * After making the reservation, data pointed to by this class
          * is guaranteed not to change until a release() is called.
-         *
-         * @return True if reservation was made, false if there's no data.
          */
-        bool reserve();
+        void reserve();
 
         /**
          * Decrease internal reference count and claim consumed data.
@@ -74,7 +57,7 @@ class DasPacketList
         void release();
 
         /**
-         * Reset the list with new OCC data.
+         * Point list to new OCC data.
          *
          * The reference count must be 0 for this function to succeed.
          * The function should only be used by producers, check
@@ -83,16 +66,23 @@ class DasPacketList
          *
          * @param[in] addr Pointer to the memory block where DAS packets data starts.
          * @param[in] length Memory block length in bytes.
-         * @return true when object points to new data, false if reference count is not 0.
+         * @return Number of bytes parsed as valid packet data
          */
-        bool reset(const uint8_t *addr, uint32_t length);
+        uint32_t reset(const uint8_t *addr, uint32_t length);
 
         /**
-         * Reset the list and put a single DasPacket in it.
+         * Point list to a single packet.
          *
          * This is a convinience wrapper function for the reset(const uint8_t*, uint32_t)
          */
         bool reset(const DasPacket * const packet);
+
+        /**
+         * Point list to the same data as original list.
+         *
+         * This is a convinience wrapper function for the reset(const uint8_t*, uint32_t)
+         */
+        void reset(const DasPacketList *original);
 
         /**
          * Wait for all consumers to release the object.
@@ -103,10 +93,6 @@ class DasPacketList
         void waitAllReleased() const;
 
     private:
-        const uint8_t *m_address;
-        uint32_t m_length;
-        uint32_t m_consumed;
-
         unsigned long m_refcount;
         mutable epicsMutex m_lock;
         mutable epicsEvent m_event;
@@ -116,7 +102,7 @@ class DasPacketList
          *
          * @return Return the same pointer or 0 on error.
          */
-        const DasPacket *_verifyPacket(const DasPacket *current) const;
+        const DasPacket *verifyPacket(const uint8_t *data, uint32_t dataLen) const;
 
         /**
          * Return true if reference count is 0, false otherwise.

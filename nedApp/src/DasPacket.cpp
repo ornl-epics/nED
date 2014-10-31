@@ -185,7 +185,7 @@ const DasPacket::RtdlHeader *DasPacket::getRtdlHeader() const
     return 0;
 };
 
-const uint32_t *DasPacket::getData(uint32_t *count) const
+const DasPacket::Event *DasPacket::getEventData(uint32_t *count) const
 {
     // DSP aggregates detectors data into data packets and the data is always at the start of payload
     const uint8_t *start = 0;
@@ -194,16 +194,15 @@ const uint32_t *DasPacket::getData(uint32_t *count) const
         start = reinterpret_cast<const uint8_t *>(payload);
         if (datainfo.rtdl_present)
             start += sizeof(RtdlHeader);
-        *count = (payload_length - (start - reinterpret_cast<const uint8_t*>(payload))) / 4;
+        *count = (payload_length - (start - reinterpret_cast<const uint8_t*>(payload)));
+        if (*count % 8 == 0) {
+            *count /= 8;
+        } else {
+            *count = 0;
+            start = 0;
+        }
     }
-    return reinterpret_cast<const uint32_t *>(start);
-}
-
-const DasPacket::Event *DasPacket::getEventData(uint32_t *count) const
-{
-    const uint32_t *data = DasPacket::getData(count);
-    *count /= sizeof(Event) / sizeof(uint32_t);
-    return reinterpret_cast<const Event *>(data);
+    return reinterpret_cast<const Event *>(start);
 }
 
 DasPacket::CommandType DasPacket::getResponseType() const
@@ -274,4 +273,21 @@ bool DasPacket::lvdsParity(int number)
         number >>= 1;
     }
     return temp;
+}
+
+bool DasPacket::copyHeader(DasPacket *dest, uint32_t destSize) const
+{
+    uint32_t copySize = sizeof(DasPacket);
+    uint32_t payload_length = 0;
+    if (getRtdlHeader() != 0) {
+        copySize += sizeof(RtdlHeader);
+        payload_length += sizeof(RtdlHeader);
+    }
+
+    if (destSize < copySize)
+        return false;
+
+    memcpy(dest, this, copySize);
+    dest->payload_length = payload_length;
+    return true;
 }

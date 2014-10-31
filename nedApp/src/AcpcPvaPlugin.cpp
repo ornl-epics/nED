@@ -46,7 +46,8 @@ void AcpcPvaPlugin::processDataNormal(const DasPacketList * const packetList)
     if (!m_pvRecord)
         return;
 
-    for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
+    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+        const DasPacket *packet = *it;
         const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
 
         // TODO: what about metadata? In tof,pixel format?
@@ -65,17 +66,17 @@ void AcpcPvaPlugin::processDataNormal(const DasPacketList * const packetList)
 
         // Data itself does not contain format information. Simple length
         // check is the best we can do.
-        uint32_t dataLength;
-        const struct AcpcNormalData *data = reinterpret_cast<const AcpcNormalData *>(packet->getData(&dataLength));
-        if (data == 0 || dataLength == 0)
+        uint32_t nEvents;
+        const struct AcpcNormalData *data = reinterpret_cast<const AcpcNormalData *>(packet->getEventData(&nEvents));
+        if (data == 0 || nEvents == 0)
             continue;
-        dataLength *= sizeof(uint32_t);
-        if (dataLength % sizeof(AcpcNormalData) != 0)
+        nEvents *= sizeof(DasPacket::Event);
+        if (nEvents % sizeof(AcpcNormalData) != 0)
             continue;
-        dataLength /= sizeof(AcpcNormalData);
+        nEvents /= sizeof(AcpcNormalData);
 
         // Go through events and append to cache
-        while (dataLength-- > 0) {
+        while (nEvents-- > 0) {
             m_pvRecord->cache.time_of_flight.push_back(data->time_of_flight);
             m_pvRecord->cache.position_index.push_back(data->position_index);
             m_pvRecord->cache.position_x.push_back(data->position_x);

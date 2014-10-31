@@ -20,9 +20,8 @@ static const int asynStackSize     = 0;
 EPICS_REGISTER_PLUGIN(CmdDispatcher, 2, "Port name", string, "Dispatcher port name", string);
 
 CmdDispatcher::CmdDispatcher(const char *portName, const char *connectPortName)
-    : BasePlugin(portName, connectPortName, REASON_OCCDATA, /*blocking=*/1, /*numparams=*/0,
-                 asynMaxAddr, asynInterfaceMask, asynInterruptMask, asynFlags, asynAutoConnect,
-                 asynPriority, asynStackSize)
+    : BaseDispatcherPlugin(portName, connectPortName, /*blocking=*/1, /*numparams=*/0,
+                           asynInterfaceMask, asynInterruptMask)
     , m_nReceived(0)
     , m_nProcessed(0)
 {
@@ -36,8 +35,10 @@ void CmdDispatcher::processDataUnlocked(const DasPacketList * const packetList)
     uint32_t nReceived = 0;
     uint32_t nProcessed = 0;
 
-    for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
-        nReceived++;
+    nReceived += packetList->size();
+
+    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+        const DasPacket *packet = *it;
 
         if (packet->isCommand() && packet->cmdinfo.command != DasPacket::CMD_RTDL && packet->cmdinfo.command != DasPacket::CMD_TSYNC) {
             if (first == 0)
@@ -69,25 +70,5 @@ void CmdDispatcher::sendToPlugins(const DasPacket *first, const DasPacket *last)
     uint32_t length = (reinterpret_cast<const uint8_t*>(last) - reinterpret_cast<const uint8_t*>(first)) + last->length();
 
     cmdList.reset(reinterpret_cast<const uint8_t*>(first), length);
-    doCallbacksGenericPointer(reinterpret_cast<void *>(&cmdList), REASON_OCCDATA, 0);
-    cmdList.release();
-    cmdList.waitAllReleased();
-}
-
-asynStatus CmdDispatcher::writeGenericPointer(asynUser *pasynUser, void *pointer)
-{
-    if (pasynUser->reason == REASON_OCCDATA) {
-        asynInterface *interface = pasynManager->findInterface(m_pasynuser, asynGenericPointerType, 1);
-        if (!interface) {
-            asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR,
-                      "BasePlugin::%s ERROR: Can't find %s interface on array port %s\n",
-                      __func__, asynGenericPointerType, m_dispatcherPortName.c_str());
-            return asynError;
-        }
-
-        asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-        void *ptr = reinterpret_cast<void *>(reinterpret_cast<DasPacketList *>(pointer));
-        asynGenericPointerInterface->write(interface->drvPvt, m_pasynuser, ptr);
-    }
-    return asynSuccess;
+    BaseDispatcherPlugin::sendToPlugins(&cmdList);
 }

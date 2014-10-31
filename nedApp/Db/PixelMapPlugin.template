@@ -1,0 +1,68 @@
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(mbbi, "$(P)ErrImport")
+{
+    field(DESC, "Error importing file")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))MapError")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "No error")
+    field(ONVL, "1")
+    field(ONST, "No pixelmap file")
+    field(TWVL, "2")
+    field(TWST, "File parse error")
+    field(THVL, "3")
+    field(THST, "Memory alloc err")
+}
+record(bo, "$(P)PassThru")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Disable pixel mapping")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PassThru")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "Mapping enabled")
+    field(ONAM, "Mapping disabled")
+}
+record(longin, "$(P)CntErrOthr")
+{
+    field(DESC, "Number unknown error pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntErrOthr")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntErrOff")
+{
+    field(DESC, "Num out-of-range error pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntErrOff")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntUnmap")
+{
+    field(DESC, "Number unmapped pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntUnmap")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntSplit")
+{
+    field(DESC, "Number of splits occurred")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntSplit")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}

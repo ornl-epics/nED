@@ -15,10 +15,11 @@ include $(TOP)/configure/CONFIG
 # 
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
 USR_CXXFLAGS += -std=c++0x
-# The temporary DWord alignment workaround in FPGA is to set bit 31 in the
-# packet header length.
-#USR_CXXFLAGS += -DDWORD_PADDING_WORKAROUND
-CXXFLAGS = -Wall -g -ggdb $(USR_CXXFLAGS)
+USR_CXXFLAGS += -fopenmp
+USR_LDFLAGS  += -fopenmp
+CXXFLAGS = -Wall $(USR_CXXFLAGS)
+CXXFLAGS += -g -ggdb
+#CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
 
 # Product
 PROD_NAME = ned
@@ -65,6 +66,7 @@ $(PROD_NAME)_SRCS  += BasePlugin.cpp
 $(PROD_NAME)_SRCS  += BaseSocketPlugin.cpp
 $(PROD_NAME)_SRCS  += ProxyPlugin.cpp
 $(PROD_NAME)_SRCS  += AdaraPlugin.cpp
+$(PROD_NAME)_SRCS  += BaseDispatcherPlugin.cpp
 $(PROD_NAME)_SRCS  += CmdDispatcher.cpp
 $(PROD_NAME)_SRCS  += BaseModulePlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin.cpp
@@ -84,6 +86,7 @@ $(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
+$(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 
 # These files contain descriptions of PVs that we use to generate template
 # files for EPICS database, Doxygen documentation and PVtable.
