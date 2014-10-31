@@ -167,10 +167,12 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         int Command;
         int LastErr;
         int HwType;
+        int HwVer;
         int FwVer;
         int FwDate;
-        int OptPres;
+        int ConStatus;
         int RxStalled;
+        int FpgaSn;
         int FpgaTemp;
         int FpgaCoreV;
         int FpgaAuxV;

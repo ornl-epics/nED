@@ -45,11 +45,13 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("Status",           asynParamInt32,     &Status,        STAT_OK);   // READ - Status of OccPortDriver       (see OccPortDriver::Status)
     createParam("LastErr",          asynParamInt32,     &LastErr,       0);         // READ - Last error code returned by OCC API
     createParam("HwType",           asynParamInt32,     &HwType);                   // READ - OCC board type                (1=SNS PCI-X,2=SNS PCIe,15=simulator)
+    createParam("HwVer",            asynParamInt32,     &HwVer);                    // READ - OCC board hardware version
     createParam("FwVer",            asynParamInt32,     &FwVer);                    // READ - OCC board firmware version
     createParam("FwDate",           asynParamInt32,     &FwDate);                   // READ - OCC board firmware date
-    createParam("OptPres",          asynParamInt32,     &OptPres);                  // READ - Is optical cable present      (0=not present,1=present)
+    createParam("ConStatus",        asynParamInt32,     &ConStatus);                // READ - Optical connection status     (0=connected,1=no SFP,2=no cable,3=laser fault)
     createParam("RxStalled",        asynParamInt32,     &RxStalled,     STALL_NONE);// READ - Incoming data stalled         (see OccPortDriver::StallEvent)
     createParam("Command",          asynParamInt32,     &Command);                  // WRITE - Issue OccPortDriver command  (see OccPortDriver::Command)
+    createParam("FpgaSn",           asynParamOctet,     &FpgaSn);                   // READ - FPGA serial number in hex str
     createParam("FpgaTemp",         asynParamFloat64,   &FpgaTemp);                 // READ - FPGA temperature in Celsius
     createParam("FpgaCoreV",        asynParamFloat64,   &FpgaCoreV);                // READ - FPGA core voltage in Volts
     createParam("FpgaAuxV",         asynParamFloat64,   &FpgaAuxV);                 // READ - FPGA aux voltage in Volts
@@ -160,10 +162,15 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             setIntegerParam(LastErr, -ret);
             LOG_ERROR("Failed to query OCC status: %s(%d)", strerror(-ret), ret);
         } else {
+            char sn[20];
+            snprintf(sn, sizeof(sn), "%llu", static_cast<long long unsigned>(occstatus.fpga_serial_number));
+            setStringParam(FpgaSn,          sn);
+
             setIntegerParam(HwType,         occstatus.board);
+            setIntegerParam(HwVer,          occstatus.hardware_ver);
             setIntegerParam(FwVer,          occstatus.firmware_ver);
             setIntegerParam(FwDate,         occstatus.firmware_date);
-            setIntegerParam(OptPres,        occstatus.optical_signal);
+            setIntegerParam(ConStatus,      occstatus.optical_signal);
             setIntegerParam(RxEnRb,         occstatus.rx_enabled);
             setIntegerParam(ErrPktEnRb,     occstatus.err_packets_enabled);
             setDoubleParam(FpgaTemp,        occstatus.fpga_temp);
@@ -292,18 +299,19 @@ asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer
     }
 
     if (pasynUser->reason == REASON_OCCDATA) {
-        DasPacketList *packets = reinterpret_cast<DasPacketList *>(pointer);
-        const DasPacket *packet = packets->first();
+        DasPacketList *packetList = reinterpret_cast<DasPacketList *>(pointer);
 
-        int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), packet->length());
-        if (ret != 0) {
-            setIntegerParam(LastErr, -ret);
-            setIntegerParam(Status, STAT_OCC_ERROR);
-            callParamCallbacks();
-            LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
-            return asynError;
+        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+            const DasPacket *packet = *it;
+            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), packet->length());
+            if (ret != 0) {
+                setIntegerParam(LastErr, -ret);
+                setIntegerParam(Status, STAT_OCC_ERROR);
+                callParamCallbacks();
+                LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
+                return asynError;
+            }
         }
-
     }
     return asynSuccess;
 }
@@ -437,8 +445,8 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
     void *data;
     uint32_t length;
     uint32_t consumed;
-    bool resetErrorRatelimit = false;
     DasPacketList packetsList;
+    uint32_t retryCounter = 0;
 
     // Initialize members used in helper function calculateDataRateOut()
     epicsTimeGetCurrent(&m_dataRateOutTime);
@@ -458,44 +466,47 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             break;
         }
 
-        if (!packetsList.reset(reinterpret_cast<uint8_t*>(data), length)) {
-            // This should not happen. If it does it's certainly a code error that needs to be fixed.
-            if (!resetErrorRatelimit) {
-                LOG_ERROR("PluginDriver:%s ERROR failed to reset DasPacketList\n", __func__);
-                resetErrorRatelimit = true;
+        consumed = packetsList.reset(reinterpret_cast<uint8_t*>(data), length);
+
+        if (packetsList.empty() == false) {
+            // Notify everybody about new data
+            sendToPlugins(REASON_OCCDATA, &packetsList);
+
+            // Plugins have been notified, hopefully they're all non-blocking.
+            // While waiting for threads to synchronize, we have some time.
+
+            // Calculate data processing throughput every second
+            calculateDataRateOut(consumed);
+
+            // Decrease reference counter and wait for everybody else to do the same
+            packetsList.release(); // reset() set it to 1
+            packetsList.waitAllReleased();
+
+            // Nobody is using data anymore
+            m_circularBuffer->consume(consumed);
+
+            retryCounter = 0;
+
+        } else {
+            packetsList.release();
+
+            if (retryCounter < 5) {
+                // Increasingly sleep by 10us, first pass doesn't sleep
+                epicsThreadSleep(1e-5 * retryCounter++);
+                continue;
             }
-            continue;
-        }
-        resetErrorRatelimit = false;
 
-        // Notify everybody about new data
-        sendToPlugins(REASON_OCCDATA, &packetsList);
+            // OCC still doesn't have enough data, check what's going on
+            DasPacket *packet = reinterpret_cast<DasPacket *>(data);
+            if (packet->length() > DasPacket::MaxLength) {
+                handleRecvError(-EBADMSG);
+                LOG_ERROR("Possibly corrupted data in queue based on packet length, aborting process thread");
+                break;
+            }
 
-        // Plugins have been notified, hopefully they're all non-blocking.
-        // While waiting, calculate how much data can be consumed from circular buffer.
-        for (const DasPacket *packet = packetsList.first(); packet != 0; packet = packetsList.next(packet)) {
-#ifdef DWORD_PADDING_WORKAROUND
-            consumed += packet->getAlignedLength();
-#else
-            consumed += packet->length();
-#endif
-        }
-
-        // Calculate data processing throughput every second
-        calculateDataRateOut(consumed);
-
-        // Decrease reference counter and wait for everybody else to do the same
-        packetsList.release(); // reset() set it to 1
-        packetsList.waitAllReleased();
-
-        // Nobody is using data anymore
-        m_circularBuffer->consume(consumed);
-
-        // Corrupted data check
-        if (consumed == 0 && length > DasPacket::MinLength) {
-            handleRecvError(-EBADMSG);
-            LOG_ERROR("Corrupted data in queue, aborting process thread");
-            break;
+            // Maybe there just wasn't enough data - very likely this will loop forever
+            LOG_ERROR("Partial data from OCC, retrying in a while");
+            epicsThreadSleep(1e-3);
         }
     }
 }

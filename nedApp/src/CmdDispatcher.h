@@ -10,7 +10,7 @@
 #ifndef CMD_DISPATCHER_H
 #define CMD_DISPATCHER_H
 
-#include "BasePlugin.h"
+#include "BaseDispatcherPlugin.h"
 
 /**
  * Plugin for receiving all packets but dispatching only commands to connected plugins.
@@ -29,7 +29,7 @@
  *
  * Plugin is always non-blocking, thus each instance creates a processing thread.
  */
-class CmdDispatcher : public BasePlugin {
+class CmdDispatcher : public BaseDispatcherPlugin {
     public:
         /**
          * Constructor
@@ -52,11 +52,6 @@ class CmdDispatcher : public BasePlugin {
          * @param[in] last Pointer to the address in memory of the last packet to be sent.
          */
         void sendToPlugins(const DasPacket *first, const DasPacket *last);
-
-        /**
-         * Overloaded method used when plugins send data to us.
-         */
-        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
 };
 
 #endif // CMD_DISPATCHER_H

@@ -36,6 +36,7 @@ DB += CmdDispatcherPlugin.db
 DB += GenericModulePlugin.db
 DB += FlatFieldPlugin.db
 DB += ProxyPlugin.db
+DB += PixelMapPlugin.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add

@@ -33,7 +33,6 @@ record(mbbo, "$(P)Command")
     field(ONVL, "1")
     field(ONST, "Reset")
 }
-
 record(mbbi, "$(P)LastErr")
 {
     field(DESC, "Last error returned from OCC library")
@@ -70,8 +69,23 @@ record(mbbi, "$(P)HwType")
     field(TWST, "SNS PCI Express")
     field(FFST, "Simulator")
 }
+record(stringin, "$(P)FpgaSn")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))FpgaSn")
+    field(PINI, "YES")
+}
+record(longin, "$(P)HwVer")
+{
+    info(archive, "Monitor, 00:01:00")
+    field(DESC, "OCC board hardware version")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))HwVer")
+}
 record(longin, "$(P)FwVer")
 {
+    info(archive, "Monitor, 00:01:00")
     field(DESC, "OCC board firmware version")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -79,20 +93,33 @@ record(longin, "$(P)FwVer")
 }
 record(longin, "$(P)FwDate")
 {
+    info(archive, "Monitor, 00:01:00")
     field(DESC, "OCC board firmware date")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))FwDate")
 }
-record(bi, "$(P)OptPres")
+record(mbbi, "$(P)ConStatus")
 {
-    field(DESC, "Is optical cable present")
+    info(archive, "Monitor, 00:01:00")
+    field(DESC, "Optical signal status")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))OptPres")
-    field(ZNAM, "No")
-    field(ONAM, "Yes")
+    field(INP,  "@asyn($(PORT))ConStatus")
     field(SCAN, "I/O Intr")
+    field(UNSV, "MINOR")
+    field(ZRVL, "0")
+    field(ZRST, "Connected")
+    field(ONSV, "NO ALARM")
+    field(ONVL, "1")
+    field(ONST, "No SFP")
+    field(ONSV, "MAJOR")
+    field(TWVL, "2")
+    field(TWST, "No cable")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Laser fault")
+    field(THSV, "MAJOR")
 }
 record(bo, "$(P)RxEn")
 {
@@ -136,6 +163,7 @@ record(bi, "$(P)ErrPktEnRb")
 }
 record(mbbi, "$(P)RxStalled")
 {
+    info(archive, "Monitor, 00:01:00")
     field(DESC, "Incoming data stalled")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))RxStalled")
@@ -156,6 +184,7 @@ record(mbbi, "$(P)RxStalled")
 }
 record(ai, "$(P)FpgaTemp")
 {
+    info(archive, "Scan, 00:01:00")
     field(DESC, "FPGA temperature")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))FpgaTemp")
@@ -193,6 +222,7 @@ record(ai, "$(P)FpgaAuxV")
 }
 record(ai, "$(P)SfpTemp")
 {
+    info(archive, "Scan, 00:01:00")
     field(DESC, "SFP temperature")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpTemp")
@@ -204,6 +234,7 @@ record(ai, "$(P)SfpTemp")
 }
 record(ai, "$(P)SfpRxPower")
 {
+    info(archive, "Scan, 00:10:00")
     field(DESC, "SFP RX power")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpRxPower")
@@ -215,6 +246,7 @@ record(ai, "$(P)SfpRxPower")
 }
 record(ai, "$(P)SfpTxPower")
 {
+    info(archive, "Scan, 00:10:00")
     field(DESC, "SFP TX power")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpTxPower")

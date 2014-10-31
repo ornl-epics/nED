@@ -62,8 +62,10 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
     if (getDataMode() != DATA_MODE_NORMAL)
         return;
 
-    for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
-        m_nReceived++;
+    m_nReceived += packetList->size();
+
+    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+        const DasPacket *packet = *it;
 
         // Don't even bother with packet inspection if there's noone interested
         if (connectClient() == false)

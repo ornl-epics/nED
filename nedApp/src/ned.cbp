@@ -47,6 +47,8 @@
 		<Unit filename="AdaraPlugin.cpp" />
 		<Unit filename="AdaraPlugin.h" />
 		<Unit filename="BaseCircularBuffer.h" />
+		<Unit filename="BaseDispatcherPlugin.cpp" />
+		<Unit filename="BaseDispatcherPlugin.h" />
 		<Unit filename="BaseModulePlugin.cpp" />
 		<Unit filename="BaseModulePlugin.h" />
 		<Unit filename="BasePlugin.cpp" />
@@ -82,6 +84,8 @@
 		<Unit filename="Log.h" />
 		<Unit filename="OccPortDriver.cpp" />
 		<Unit filename="OccPortDriver.h" />
+		<Unit filename="PixelMapPlugin.cpp" />
+		<Unit filename="PixelMapPlugin.h" />
 		<Unit filename="ProxyPlugin.cpp" />
 		<Unit filename="ProxyPlugin.h" />
 		<Unit filename="PvaNeutronData.cpp" />

@@ -48,8 +48,8 @@ void RocPvaPlugin::processDataNormal(const DasPacketList * const packetList)
 
     int goodPacketCount = 0;
 
-    for (const DasPacket *packet = packetList->first(); packet != 0;
-            packet = packetList->next(packet)) {
+    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+        const DasPacket *packet = *it;
         m_nReceived++;
 
 	const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
@@ -81,10 +81,10 @@ void RocPvaPlugin::processDataNormal(const DasPacketList * const packetList)
         // check is the best we can do.
         uint32_t dataLength;
         const struct NormalEvent *data = 
-            reinterpret_cast<const NormalEvent *>(packet->getData(&dataLength));
+            reinterpret_cast<const NormalEvent *>(packet->getEventData(&dataLength));
         if (data == 0 || dataLength == 0)
             continue;
-        dataLength *= sizeof(uint32_t);
+        dataLength *= sizeof(DasPacket::Event);
         if (dataLength % sizeof(NormalEvent) != 0)
             continue;
         dataLength /= sizeof(NormalEvent);
@@ -122,8 +122,8 @@ void RocPvaPlugin::processDataRaw(const DasPacketList * const packetList)
 
     int goodPacketCount = 0;
 
-    for (const DasPacket *packet = packetList->first(); packet != 0;
-            packet = packetList->next(packet)) {
+    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+        const DasPacket *packet = *it;
         m_nReceived++;
 
 	const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
@@ -155,10 +155,10 @@ void RocPvaPlugin::processDataRaw(const DasPacketList * const packetList)
         // check is the best we can do.
         uint32_t dataLength;
         const struct RawEvent *data = 
-            reinterpret_cast<const RawEvent *>(packet->getData(&dataLength));
+            reinterpret_cast<const RawEvent *>(packet->getEventData(&dataLength));
         if (data == 0 || dataLength == 0)
             continue;
-        dataLength *= sizeof(uint32_t);
+        dataLength *= sizeof(DasPacket::Event);
         if (dataLength % sizeof(RawEvent) != 0)
             continue;
         dataLength /= sizeof(RawEvent);

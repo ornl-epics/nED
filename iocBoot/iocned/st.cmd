@@ -33,11 +33,15 @@ dbLoadRecords("../../db/OccPortDriver.db","P=$(PREFIX)Det:occ1:,PORT=occ1")
 CmdDispatcherConfigure("cmd", "occ1")
 dbLoadRecords("../../db/CmdDispatcherPlugin.db","P=$(PREFIX)Det:cmd:,PORT=cmd")
 
+PixelMapPluginConfigure("PixMap", "occ1", 1, "/tmp/test.pixelmap", 4194304)
+dbLoadRecords("../../db/PixelMapPlugin.template","P=$(PREFIX)Det:pm1:,PORT=PixMap")
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:pm1:,PORT=PixMap")
+
 AdaraPluginConfigure("Adara1", "occ1", 1, 2)
 dbLoadRecords("../../db/AdaraPlugin.db","P=$(PREFIX)Det:adara1:,PORT=Adara1")
 
-ProxyPluginConfigure("proxy1", "occ1")
-dbLoadRecords("../../db/SocketPlugin.db","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
+ProxyPluginConfigure("proxy1", "PixMap")
+dbLoadRecords("../../db/ProxyPlugin.db","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 
 RocPvaPluginConfigure("rocPva1", "occ1", "$(PREFIX)Det:rocpva1:Neutrons")
 dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:rocpva1:,PORT=rocPva1")

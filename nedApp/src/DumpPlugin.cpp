@@ -37,8 +37,10 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
 
-    for (const DasPacket *packet = packetList->first(); packet != 0; packet = packetList->next(packet)) {
-        nReceived++;
+    nReceived += packetList->size();
+
+    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+        const DasPacket *packet = *it;
 
         if (m_fd == -1)
             continue;
