@@ -67,13 +67,8 @@ void AcpcPvaPlugin::processDataNormal(const DasPacketList * const packetList)
         // Data itself does not contain format information. Simple length
         // check is the best we can do.
         uint32_t nEvents;
-        const struct AcpcNormalData *data = reinterpret_cast<const AcpcNormalData *>(packet->getEventData(&nEvents));
-        if (data == 0 || nEvents == 0)
-            continue;
-        nEvents *= sizeof(DasPacket::Event);
-        if (nEvents % sizeof(AcpcNormalData) != 0)
-            continue;
-        nEvents /= sizeof(AcpcNormalData);
+        const struct AcpcNormalData *data = reinterpret_cast<const AcpcNormalData *>(packet->getData(&nEvents));
+        nEvents /= (sizeof(AcpcNormalData) / sizeof(uint32_t));
 
         // Go through events and append to cache
         while (nEvents-- > 0) {

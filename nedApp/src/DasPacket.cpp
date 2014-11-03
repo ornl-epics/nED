@@ -185,7 +185,7 @@ const DasPacket::RtdlHeader *DasPacket::getRtdlHeader() const
     return 0;
 };
 
-const DasPacket::Event *DasPacket::getEventData(uint32_t *count) const
+const uint32_t *DasPacket::getData(uint32_t *count) const
 {
     // DSP aggregates detectors data into data packets and the data is always at the start of payload
     const uint8_t *start = 0;
@@ -195,14 +195,9 @@ const DasPacket::Event *DasPacket::getEventData(uint32_t *count) const
         if (datainfo.rtdl_present)
             start += sizeof(RtdlHeader);
         *count = (payload_length - (start - reinterpret_cast<const uint8_t*>(payload)));
-        if (*count % 8 == 0) {
-            *count /= 8;
-        } else {
-            *count = 0;
-            start = 0;
-        }
+        *count /= sizeof(uint32_t);
     }
-    return reinterpret_cast<const Event *>(start);
+    return reinterpret_cast<const uint32_t *>(start);
 }
 
 DasPacket::CommandType DasPacket::getResponseType() const

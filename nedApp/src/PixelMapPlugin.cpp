@@ -166,8 +166,9 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPac
     (void)srcPacket->copyHeader(destPacket, srcPacket->length());
 
     uint32_t nEvents, nDestEvents;
-    const DasPacket::Event *srcEvent= srcPacket->getEventData(&nEvents);
-    DasPacket::Event *destEvent= const_cast<DasPacket::Event *>(destPacket->getEventData(&nDestEvents));
+    const DasPacket::Event *srcEvent= reinterpret_cast<const DasPacket::Event *>(srcPacket->getData(&nEvents));
+    DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(destPacket->getData(&nDestEvents));
+    nEvents /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
 
     // The below code was optimized for speed and is not as elegant as could be
     // otherwise. Bitfield, condition rearranging were both tried with worse results.
