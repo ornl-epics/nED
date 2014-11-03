@@ -43,7 +43,7 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
     }
-    return BasePlugin::writeInt32(pasynUser, value);
+    return BasePvaPlugin::writeInt32(pasynUser, value);
 }
 
 void AcpcPvaPlugin::processNormalPacket(const DasPacket * const packet)
