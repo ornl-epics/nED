@@ -34,7 +34,7 @@ set_pass1_restoreFile("$(IOCNAME).sav")
 ## Load record instances
 epicsEnvSet("PREFIX", "BL99:")
 OccConfigure("occ", "/dev/snsocb1", 40000000)
-dbLoadRecords("../../db/OccPortDriver.db","P=$(PREFIX)Det:occ:,PORT=occ1")
+dbLoadRecords("../../db/OccPortDriver.db","P=$(PREFIX)Det:occ:,PORT=occ")
 
 CmdDispatcherConfigure("cmd", "occ")
 dbLoadRecords("../../db/CmdDispatcherPlugin.db","P=$(PREFIX)Det:cmd:,PORT=cmd")

@@ -4,7 +4,7 @@
 #include "BasePvaPlugin.h"
 
 /**
- * Plugin that forwards Raw data to calibration software over EPICS v4.
+ * Plugin that forwards ROC data to software clients over EPICS v4.
  *
  * RocPlugin provides following asyn parameters:
  * asyn param    | asyn param type | init val | mode | Description
@@ -12,32 +12,110 @@
  */
 class RocPvaPlugin : public BasePvaPlugin {
     private:
-        uint64_t m_nTransmitted;    //!< Number of packets sent to BASESOCKET
-        uint64_t m_nProcessed;      //!< Number of processed packets
-        uint64_t m_nReceived;       //!< Number of packets received from dispatcher
+        /**
+         * A cache to store data until it's posted.
+         */
+        struct {
+            epics::pvData::PVUIntArray::svector time_of_flight;
+            epics::pvData::PVUIntArray::svector pixel;
+            epics::pvData::PVUIntArray::svector position_index;
+            epics::pvData::PVUIntArray::svector sample_a1;
+            epics::pvData::PVUIntArray::svector sample_b1;
+        } m_cache;
     public:
         /**
          * Constructor
 	     *
 	     * @param[in] portName            asyn port name.
-	     * @param[in] dispatcherPortName  Name of the dispatcher asyn port to connect to.
+	     * @param[in] dispatcherPortName  Name of the dispatcher asyn port to 
+         *                                  connect to.
 	     * @param[in] pvPrefix            Prefix for the PV Record
          */
-        RocPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix);
+        RocPvaPlugin(const char *portName, const char *dispatcherPortName, 
+            const char *pvPrefix);
 
-	/**
-         * Process incoming data as raw ACPC neutron data.
-         *
-	 * @param[in] packetList List of packets to be processed
+        /**
+         * Overloaded function to handle DataMode parameter.
          */
-        virtual void processDataRaw(const DasPacketList * const packetList);
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
-	/**
+	    /**
+         * Process incoming data as raw ACPC data.
+         *
+	     * @param[in] packet Packet to be processed
+         */
+        void processRawPacket(const DasPacket * const packet);
+
+        /**
+         * Static C callable wrapper for member function of the same name
+         */
+        static void processRawPacket(BasePvaPlugin *this_, const DasPacket *
+            const packet) {
+            reinterpret_cast<RocPvaPlugin *>(this_)->processRawPacket(packet);
+        }
+
+	    /**
          * Process incoming data as normal neutron data.
          *
-	 * @param[in] packetList List of packets to be processed
+	     * @param[in] packet Packet to be processed
          */
-        virtual void processDataNormal(const DasPacketList * const packetList);
-};
+        void processNormalPacket(const DasPacket * const packet);
+
+        /**
+         * Static C callable wrapper for member function of the same name
+         */
+        static void processNormalPacket(BasePvaPlugin *this_, const DasPacket *
+            const packet) {
+            reinterpret_cast<RocPvaPlugin *>
+                (this_)->processNormalPacket(packet);
+        }
+
+        /**
+         * Post data received (normal mode) and clear cache
+         *
+         * Cached data is posted as a single event to EPICSv4 PV.
+         * Caller must ensure plugin is locked while calling this function.
+         *
+         * @param[in] pulseTime     Timestamp of pulse to be posted.
+         * @param[in] pulseCharge   Pulse charge
+         * @param[in] pulseSeq      Pulse seq number, monotonically increasing
+         */
+        void postNormalData(const epicsTimeStamp &pulseTime, double pulseCharge,
+            uint32_t pulseSeq);
+
+        /**
+         * Static C callable wrapper for member function of the same name
+         */
+        static void postNormalData(BasePvaPlugin *this_, 
+            const epicsTimeStamp &pulseTime, double pulseCharge, 
+            uint32_t pulseSeq) {
+            reinterpret_cast<RocPvaPlugin *>(this_)->postNormalData(pulseTime, 
+                pulseCharge, pulseSeq);
+        }
+
+        /**
+         * Post data received (raw mode) and clear cache
+         *
+         * Cached data is posted as a single event to EPICSv4 PV.
+         * Caller must ensure plugin is locked while calling this function.
+         *
+         * @param[in] pulseTime     Timestamp of pulse to be posted.
+         * @param[in] pulseCharge   Pulse charge
+         * @param[in] pulseSeq      Pulse seq number, monotonically increasing
+         */
+        void postRawData(const epicsTimeStamp &pulseTime, double pulseCharge,
+            uint32_t pulseSeq);
+
+        /**
+         * Static C callable wrapper for member function of the same name
+         */
+        static void postRawData(BasePvaPlugin *this_, 
+            const epicsTimeStamp &pulseTime, double pulseCharge, 
+            uint32_t pulseSeq) {
+            reinterpret_cast<RocPvaPlugin *>(this_)->postRawData(pulseTime, 
+                pulseCharge, pulseSeq);
+        }
+      
+ };
 
 #endif // ROC_PVA_PLUGIN_H

@@ -1,4 +1,5 @@
 #include "RocPvaPlugin.h"
+#include "Log.h"
 
 EPICS_REGISTER_PLUGIN(RocPvaPlugin, 3, "port name", string, "dispatcher port", string, "raw_cal_data", string);
 
@@ -22,174 +23,118 @@ struct NormalEvent {
 
 RocPvaPlugin::RocPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
     : BasePvaPlugin(portName, dispatcherPortName, pvPrefix)
-    , m_nTransmitted(0)
-    , m_nProcessed(0)
-    , m_nReceived(0)
 {
     uint32_t maxNormalEventsPerPacket = (DasPacket::MaxLength/4) / 6;
 
     if (!!m_pvRecord) {
-        // Guestimate container size and force memory pre-allocation, will automatically extend if needed
-        m_pvRecord->cache.time_of_flight.reserve(maxNormalEventsPerPacket); // normal mode is the shortest => max counts in packet
-	m_pvRecord->cache.pixel.reserve(maxNormalEventsPerPacket);
-        m_pvRecord->cache.position_index.reserve(maxNormalEventsPerPacket);
-        m_pvRecord->cache.sample_a1.reserve(maxNormalEventsPerPacket);
-        m_pvRecord->cache.sample_b1.reserve(maxNormalEventsPerPacket);
+        // Guestimate container size and force memory pre-allocation, 
+        // will automatically extend if needed
+        m_cache.time_of_flight.reserve(maxNormalEventsPerPacket);
+	    m_cache.pixel.reserve(maxNormalEventsPerPacket);
+        m_cache.position_index.reserve(maxNormalEventsPerPacket);
+        m_cache.sample_a1.reserve(maxNormalEventsPerPacket);
+        m_cache.sample_b1.reserve(maxNormalEventsPerPacket);
     }
 }
 
-void RocPvaPlugin::processDataNormal(const DasPacketList * const packetList)
+asynStatus RocPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    static int userTagCounter=0;
-
-    // Sanity check, BasePvaPlugin should prevent it anyway
-    if (!m_pvRecord)
-        return;
-
-    int goodPacketCount = 0;
-
-    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-        const DasPacket *packet = *it;
-        m_nReceived++;
-
-	const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
-
-        // TODO: what about metadata? In tof,pixel format?
-        if (packet->isNeutronData() == false || rtdl == 0)
-            continue;
-
-        if (packet->isRtdl() && packet->isData())
-            continue;
-
-	m_nProcessed++;
-
-	// Extract timestamp and proton charge from RTDL
-        // RTDL should always be present when working with DSP-T
-        epics::pvData::TimeStamp time(rtdl->timestamp_sec, rtdl->timestamp_nsec);
-        if (time != m_pvRecord->cache.timeStamp) {
-            // new pulse detected, post any outstanding packets, go to next
-            if (goodPacketCount > 0) {
-             	m_pvRecord->cache.timeStamp.setUserTag(userTagCounter++);
-                m_pvRecord->postCached();
-                goodPacketCount = 0;
-            }
-            m_pvRecord->cache.timeStamp.put(rtdl->timestamp_sec, rtdl->timestamp_nsec);
-            m_pvRecord->cache.proton_charge = rtdl->charge;
+    if (pasynUser->reason == DataModeP) {
+        switch (value) {
+        case DATA_MODE_NORMAL:
+            setCallbacks(&RocPvaPlugin::processNormalPacket,
+                &RocPvaPlugin::postNormalData);
+            break;
+        case DATA_MODE_RAW:
+            setCallbacks(&RocPvaPlugin::processRawPacket,
+                &RocPvaPlugin::postRawData);
+            break;
+        case DATA_MODE_VERBOSE:
+            // TODO
+            break;
+        default:
+            LOG_ERROR("Ignoring invalid output mode %d", value);
+            return asynError;
         }
-
-	// Data itself does not contain format information. Simple length
-        // check is the best we can do.
-        uint32_t dataLength;
-        const struct NormalEvent *data = 
-            reinterpret_cast<const NormalEvent *>(packet->getEventData(&dataLength));
-        if (data == 0 || dataLength == 0)
-            continue;
-        dataLength *= sizeof(DasPacket::Event);
-        if (dataLength % sizeof(NormalEvent) != 0)
-            continue;
-        dataLength /= sizeof(NormalEvent);
-
-        // Go through events and append to cache
-        while (dataLength-- > 0) {
-            m_pvRecord->cache.time_of_flight.push_back(data->timeStamp);
-            m_pvRecord->cache.pixel.push_back(data->pixelID);
-            data++;
-        }
-
-        m_nTransmitted++;
-        goodPacketCount++;
     }
-
-    if (goodPacketCount > 0) {
-	m_pvRecord->cache.timeStamp.setUserTag(userTagCounter++);
-        m_pvRecord->postCached();
-    }
-
-    // Update parameters
-    setIntegerParam(TxCount,    m_nTransmitted);
-    setIntegerParam(ProcCount,  m_nProcessed);
-    setIntegerParam(RxCount,    m_nReceived);
-    callParamCallbacks();
+    return BasePlugin::writeInt32(pasynUser, value);
 }
 
-void RocPvaPlugin::processDataRaw(const DasPacketList * const packetList)
+void RocPvaPlugin::processNormalPacket(const DasPacket * const packet)
 {
-    static int userTagCounter=0;
-   
-    // Sanity check, BasePvaPlugin should prevent it anyway
-    if (!m_pvRecord)
-        return;
+    uint32_t nEvents;
+    const struct NormalEvent *data = 
+        reinterpret_cast<const NormalEvent *>(packet->getData(&nEvents));
+    nEvents /= sizeof(NormalEvent) / sizeof(uint32_t);
 
-    int goodPacketCount = 0;
-
-    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-        const DasPacket *packet = *it;
-        m_nReceived++;
-
-	const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
-
-        // TODO: what about metadata? In tof,pixel format?
-        if (packet->isNeutronData() == false || rtdl == 0)
-            continue;
-
-        if (packet->isRtdl() && packet->isData())
-            continue;
-
-	m_nProcessed++;
-
-	// Extract timestamp and proton charge from RTDL
-        // RTDL should always be present when working with DSP-T
-        epics::pvData::TimeStamp time(rtdl->timestamp_sec, rtdl->timestamp_nsec);
-        if (time != m_pvRecord->cache.timeStamp) {
-            // new pulse detected, post any outstanding packets, go to next
-            if (goodPacketCount > 0) {
-             	m_pvRecord->cache.timeStamp.setUserTag(userTagCounter++);
-                m_pvRecord->postCached();
-                goodPacketCount = 0;
-            }
-            m_pvRecord->cache.timeStamp.put(rtdl->timestamp_sec, rtdl->timestamp_nsec);
-            m_pvRecord->cache.proton_charge = rtdl->charge;
-        }
-
-	// Data itself does not contain format information. Simple length
-        // check is the best we can do.
-        uint32_t dataLength;
-        const struct RawEvent *data = 
-            reinterpret_cast<const RawEvent *>(packet->getEventData(&dataLength));
-        if (data == 0 || dataLength == 0)
-            continue;
-        dataLength *= sizeof(DasPacket::Event);
-        if (dataLength % sizeof(RawEvent) != 0)
-            continue;
-        dataLength /= sizeof(RawEvent);
-
-	/* Pull the least significant 16bits from sample1 and sample2 and 
-         * package them together as sample_a1; this combines the 1-A and 2-A
-         * samples.  Repeat for the B samples.  Append each event to cache.
-         */
-        while (dataLength-- > 0) {
-            m_pvRecord->cache.time_of_flight.push_back(data->time_of_flight);
-            m_pvRecord->cache.position_index.push_back(data->position_index);
-            m_pvRecord->cache.sample_a1.push_back(
-                (data->sample1&0xffff) | ((data->sample2&0xffff)<<16) );
-            m_pvRecord->cache.sample_b1.push_back(
-                ((data->sample1&0xffff0000) >> 16) | (data->sample2&0xffff0000));
-            data++;
-        }
-
-        m_nTransmitted++;
-        goodPacketCount++;
+    // Go through events and append to cache
+    while (nEvents-- > 0) {
+        m_cache.time_of_flight.push_back(data->timeStamp);
+        m_cache.pixel.push_back(data->pixelID);
+        data++;
     }
-
-    if (goodPacketCount > 0) {
-	m_pvRecord->cache.timeStamp.setUserTag(userTagCounter++);
-        m_pvRecord->postCached();
-    }
-
-    // Update parameters
-    setIntegerParam(TxCount,    m_nTransmitted);
-    setIntegerParam(ProcCount,  m_nProcessed);
-    setIntegerParam(RxCount,    m_nReceived);
-    callParamCallbacks();
 }
 
+void RocPvaPlugin::processRawPacket(const DasPacket * const packet)
+{
+    uint32_t nEvents;
+    const struct RawEvent *data = 
+        reinterpret_cast<const RawEvent *>(packet->getData(&nEvents));
+    nEvents /= sizeof(RawEvent) / sizeof(uint32_t);
+
+    /* Pull the least significant 16bits from sample1 and sample2 and 
+     * package them together as sample_a1; this combines the 1-A and 2-A
+     * samples.  Repeat for the B samples.  Append each event to cache.
+     */
+    while (nEvents-- > 0) {
+        m_cache.time_of_flight.push_back(data->time_of_flight);
+        m_cache.position_index.push_back(data->position_index);
+        m_cache.sample_a1.push_back(
+            (data->sample1&0xffff) | ((data->sample2&0xffff)<<16) );
+        m_cache.sample_b1.push_back(
+            ((data->sample1&0xffff0000) >> 16) | (data->sample2&0xffff0000));
+        data++;
+    }
+}
+
+void RocPvaPlugin::postNormalData(const epicsTimeStamp &pulseTime, 
+    double pulseCharge, uint32_t pulseSeq)
+{
+    if (!!m_pvRecord) {
+        epics::pvData::TimeStamp time(pulseTime.secPastEpoch, pulseTime.nsec, 
+            pulseSeq);
+        m_pvRecord->beginGroupPut();
+        m_pvRecord->timeStamp.set(time);
+        m_pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
+        m_pvRecord->pixel->replace(freeze(m_cache.pixel));
+        m_pvRecord->endGroupPut();
+    } else {
+        LOG_WARN("No PV record, skipping posting update");
+    }
+
+    m_cache.time_of_flight.clear();
+    m_cache.pixel.clear();
+}
+
+void RocPvaPlugin::postRawData(const epicsTimeStamp &pulseTime, 
+    double pulseCharge, uint32_t pulseSeq)
+{
+    if (!!m_pvRecord) {
+        epics::pvData::TimeStamp time(pulseTime.secPastEpoch, pulseTime.nsec, 
+            pulseSeq);
+        m_pvRecord->beginGroupPut();
+        m_pvRecord->timeStamp.set(time);
+        m_pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
+        m_pvRecord->position_index->replace(freeze(m_cache.position_index));
+        m_pvRecord->sample_a1->replace(freeze(m_cache.sample_a1));
+        m_pvRecord->sample_b1->replace(freeze(m_cache.sample_b1));
+        m_pvRecord->endGroupPut();
+    } else {
+        LOG_WARN("No PV record, skipping posting update");
+    }
+
+    m_cache.time_of_flight.clear();
+    m_cache.position_index.clear();
+    m_cache.sample_a1.clear();
+    m_cache.sample_b1.clear();
+}
