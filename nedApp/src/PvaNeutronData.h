@@ -40,22 +40,6 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr photo_sum_y;      //!< Photo sum Y
 
     public:
-        /**
-         * A cache to store data until it's posted.
-         */
-        struct {
-            epics::pvData::TimeStamp            timeStamp;
-            epics::pvData::PVUIntArray::svector time_of_flight;
-            double                              proton_charge;
-            epics::pvData::PVUIntArray::svector pixel;
-            epics::pvData::PVUIntArray::svector position_index;
-            epics::pvData::PVUIntArray::svector position_x;
-            epics::pvData::PVUIntArray::svector position_y;
-            epics::pvData::PVUIntArray::svector photo_sum_x;
-            epics::pvData::PVUIntArray::svector photo_sum_y;
-        } cache;
-
-    public:
         POINTER_DEFINITIONS(PvaNeutronData);
 
         /**

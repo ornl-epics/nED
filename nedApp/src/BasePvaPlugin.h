@@ -23,16 +23,30 @@
  * and is always available to the specialized plugin, or the plugin will be
  * disabled from start on regardless the attempt to enable it through PV.
  *
- * The base plugin also ensures a common output mode switching interface for
- * all specialized plugins.
- * Specialization plugins only need to implement one or many OCC data processing
- * functions to extract detector specific data and push it to m_pvRecord object.
- * There's no field in DasPacket that describes the payload. We rely on external
- * party to flag current mode through Mode parameter. Based on that appropriate
- * processData*() function is invoked.
+ * Derived classes should handle DataMode switching mode and set new callbacks
+ * to handle data. This is the most efficient way of packet processing data
+ * decoupled from packet detection.
  */
 class BasePvaPlugin : public BasePlugin {
     public:
+        /*
+         * C callback function to process packet data.
+         *
+         * @param[in] this_ Pointer to plugin instance (this).
+         * @param[in] packet Packet to be processed.
+         */
+        typedef void (*ProcessPacketCb)(BasePvaPlugin *this_, const DasPacket *packet);
+
+        /*
+         * C callback function to post all data collected since previous post.
+         *
+         * @param[in] this_ Pointer to plugin instance (this).
+         * @param[in] time Time of the pulse that we're sending data for.
+         * @param[in] charge Charge of the pulse that we're sending data for.
+         * @param[in] sequenceId Sequence ID of the posting.
+         */
+        typedef void (*PostDataCb)(BasePvaPlugin *, const epicsTimeStamp &time, double charge, uint32_t sequenceId);
+
         /**
          * Constructor
          *
@@ -58,74 +72,36 @@ class BasePvaPlugin : public BasePlugin {
         /**
          * Overloaded function to receive all OCC data.
          *
-         * Specialized plugins are advised to use one of more specific
-         * functions.
+         * Function filters out non-neutron packets and packets without valid RTDL
+         * header. It ensures all packet accounting. It delegates processing of
+         * packet to external function provided through callbacks. When new pulse
+         * is detected or when running out of data, a callback to post data is called.
          */
         void processData(const DasPacketList * const packetList);
 
         /**
-         * Process incoming packet as normal detector data.
-         */
-        virtual void processNormalPacket(const DasPacket * const packet) {};
-
-        /**
-         * Process incoming packet as raw detector data.
-         */
-        virtual void processRawPacket(const DasPacket * const packet) {};
-
-        /**
-         * Process incoming packet as extended detector data.
-         */
-        virtual void processExtendedPacket(const DasPacket * const packet) {};
-
-        /**
-         * Post normal data.
+         * Set callback functions for processing packet and posting data.
          *
-         * New pulse was detected based on RTDL timestamp and the data for
-         * previous pulse collected so far should be posted.
+         * Static C functions were selected for performance reasons. At
+         * least packet processing callback is invoked quite often and other
+         * implementations (virtual function, std::function are all slower).
          *
-         * @param[in] pulseTime Previous pulse timestamp for which data should be posted.
-         * @param[in] pulseCharge Previous pulse charge.
-         * @param[in] postSeq Id of the post, monotonically increases for every post
+         * @param[in] procCb Packet processing function
+         * @param[in] postCb Function to be called when PV update should be done.
          */
-        virtual void postNormalData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq) {};
-
-        /**
-         * Post raw data.
-         *
-         * New pulse was detected based on RTDL timestamp and the data for
-         * previous pulse collected so far should be posted.
-         *
-         * @param[in] pulseTime Previous pulse timestamp for which data should be posted.
-         * @param[in] pulseCharge Previous pulse charge.
-         * @param[in] postSeq Id of the post, monotonically increases for every post
-         */
-        virtual void postRawData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq) {};
-
-        /**
-         * Post extended data.
-         *
-         * New pulse was detected based on RTDL timestamp and the data for
-         * previous pulse collected so far should be posted.
-         *
-         * @param[in] pulseTime Previous pulse timestamp for which data should be posted.
-         * @param[in] pulseCharge Previous pulse charge.
-         * @param[in] postSeq Id of the post, monotonically increases for every post
-         */
-        virtual void postExtendedData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq) {};
+        void setCallbacks(ProcessPacketCb procCb, PostDataCb postCb);
 
     protected:
         PvaNeutronData::shared_pointer m_pvRecord;
 
-    private: // variables
-        uint32_t m_userTagCounter;
-        uint32_t m_nReceived;
-        uint32_t m_nProcessed;
-        epicsTimeStamp m_currentPulseTime;
-        uint32_t m_currentPulseCharge;
-
-    private: // functions
-        void postData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge);
+    private:
+        uint32_t m_nReceived;       //!< Number of packets received
+        uint32_t m_nProcessed;      //!< Number of data packets processed
+        epicsTimeStamp m_pulseTime; //!< Current pulse EPICS timestamp
+        double m_pulseCharge;       //!< Current pulse charge
+        uint32_t m_postSeq;         //!< Current post sequence id
+        ProcessPacketCb m_processPacketCb;  //!< Callback function ptr to process packet data
+        PostDataCb m_postDataCb;    //!< Callback function ptr to post data collected so far
 
     private: // asyn parameters
         #define FIRST_BASEPVAPLUGIN_PARAM 0

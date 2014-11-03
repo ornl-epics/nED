@@ -10,17 +10,17 @@
 #include "BasePvaPlugin.h"
 #include "Log.h"
 
-#include <limits>
-
 #define NUM_BASEPVAPLUGIN_PARAMS 0 // ((int)(&LAST_BASEPVAPLUGIN_PARAM - &FIRST_BASEPVAPLUGIN_PARAM + 1))
 
 BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, 0, NUM_BASEPVAPLUGIN_PARAMS)
-    , m_userTagCounter(0)
     , m_nReceived(0)
     , m_nProcessed(0)
-    , m_currentPulseTime(epicsTimeStamp({0, 0}))
-    , m_currentPulseCharge(0)
+    , m_pulseTime({0, 0})
+    , m_pulseCharge(0)
+    , m_postSeq(0)
+    , m_processPacketCb(0)
+    , m_postDataCb(0)
 {
     m_pvRecord = PvaNeutronData::create(pvName);
     if (!m_pvRecord)
@@ -47,13 +47,11 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
 {
     m_nReceived += packetList->size();
 
-    if (!!m_pvRecord) {
-        bool dataToPost = false;
+    if (!!m_pvRecord && m_processPacketCb != 0 && m_postDataCb != 0) {
+        bool hasData = false;
 
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
-
-            m_nReceived++;
 
             const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
 
@@ -63,55 +61,34 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
 
             // Extract timestamp and proton charge from RTDL
             // RTDL should always be present when working with DSP-T
-            epicsTimeStamp time = {rtdl->timestamp_sec, rtdl->timestamp_nsec};
-            if (epicsTimeNotEqual(&time, &m_currentPulseTime)) {
-                // new pulse detected, post any outstanding packets, go to next
-                if (dataToPost == true) {
-                    postData(m_currentPulseTime, m_currentPulseCharge);
-                    dataToPost = false;
+            epicsTimeStamp time = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
+            if (epicsTimeNotEqual(&time, &m_pulseTime)) {
+                if (hasData == true) {
+                    m_postDataCb(this, m_pulseTime, m_pulseCharge, m_postSeq++);
+                    hasData = false;
                 }
-                m_currentPulseTime = time;
-                m_currentPulseCharge = rtdl->charge;
+                m_pulseTime = { time.secPastEpoch, time.nsec };
+                m_pulseCharge = rtdl->charge;
             }
 
-            // Switch with virtual function is faster than std::function
-            switch (getDataMode()) {
-            case DATA_MODE_NORMAL:
-                processNormalPacket(packet);
-                break;
-            case DATA_MODE_RAW:
-                processRawPacket(packet);
-                break;
-            case DATA_MODE_EXTENDED:
-                processExtendedPacket(packet);
-                break;
-            }
+            m_processPacketCb(this, packet);
 
             m_nProcessed++;
-            dataToPost = true;
+            hasData = true;
         }
 
-        if (dataToPost > 0) {
-            postData(m_currentPulseTime, m_currentPulseCharge);
+        if (hasData) {
+            m_postDataCb(this, m_pulseTime, m_pulseCharge, m_postSeq++);
         }
     }
 
     // Update parameters
-    setIntegerParam(ProcCount,  m_nProcessed % std::numeric_limits<int32_t>::max());
-    setIntegerParam(RxCount,    m_nReceived  % std::numeric_limits<int32_t>::max());
+    setIntegerParam(ProcCount,  m_nProcessed);
+    setIntegerParam(RxCount,    m_nReceived);
     callParamCallbacks();
 }
 
-void BasePvaPlugin::postData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge) {
-    switch (getDataMode()) {
-    case DATA_MODE_NORMAL:
-        postNormalData(pulseTime, pulseCharge, m_userTagCounter++);
-        break;
-    case DATA_MODE_RAW:
-        postRawData(pulseTime, pulseCharge, m_userTagCounter++);
-        break;
-    case DATA_MODE_EXTENDED:
-        postExtendedData(pulseTime, pulseCharge, m_userTagCounter++);
-        break;
-    }
+void BasePvaPlugin::setCallbacks(ProcessPacketCb procCb, PostDataCb postCb) {
+    m_processPacketCb = procCb;
+    m_postDataCb = postCb;
 }

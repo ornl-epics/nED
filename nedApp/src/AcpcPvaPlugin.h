@@ -39,7 +39,14 @@ class AcpcPvaPlugin : public BasePvaPlugin {
         AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName);
 
         /**
-         * Process incoming data as normal ACPC neutron data.
+         * Overloaded function to handle DataMode parameter.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
+         * Process incoming packet as normal ACPC neutron data.
+         *
+         * Iterate through packet events and save their data to cache.
          *
          * Recent ACPC firmwares produce events data in normal mode as 6 4-byte
          * values:
@@ -52,7 +59,31 @@ class AcpcPvaPlugin : public BasePvaPlugin {
          */
         void processNormalPacket(const DasPacket * const packet);
 
-        void postNormalData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq);
+        /**
+         * Static C callable wrapper for member function of the same name.
+         */
+        static void processNormalPacket(BasePvaPlugin *this_, const DasPacket * const packet) {
+            reinterpret_cast<AcpcPvaPlugin *>(this_)->processNormalPacket(packet);
+        }
+
+        /**
+         * Post data received so far and clear cache
+         *
+         * Cached data is posted as a single update to EPICSv4 PV.
+         * Caller must ensure plugin is locked while calling this function.
+         *
+         * @param[in] pulseTime Timestamp of pulse to be posted.
+         * @param[in] pulseCharge Pulse charge
+         * @param[in] pulseSeq Pulse sequence number, monotonically increasing
+         */
+        void postNormalData(const epicsTimeStamp &pulseTime, double pulseCharge, uint32_t pulseSeq);
+
+        /**
+         * Static C callable wrapper for member function of the same name.
+         */
+        static void postNormalData(BasePvaPlugin *this_, const epicsTimeStamp &pulseTime, double pulseCharge, uint32_t pulseSeq) {
+            reinterpret_cast<AcpcPvaPlugin *>(this_)->postNormalData(pulseTime, pulseCharge, pulseSeq);
+        }
 
     private:
         /**

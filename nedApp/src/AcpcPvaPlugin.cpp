@@ -8,8 +8,9 @@
  */
 
 #include "AcpcPvaPlugin.h"
+#include "Log.h"
 
-EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", string, "pvAccess PV record prefix", string);
+EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", string, "PV name", string);
 
 AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName)
     : BasePvaPlugin(portName, dispatcherPortName, pvName)
@@ -26,10 +27,27 @@ AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortNam
     m_cache.photo_sum_y.reserve(maxNormalEventsPerPacket);
 }
 
+asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (pasynUser->reason == DataModeP) {
+        switch (value) {
+        case DATA_MODE_NORMAL:
+            setCallbacks(&AcpcPvaPlugin::processNormalPacket, &AcpcPvaPlugin::postNormalData);
+            break;
+        case DATA_MODE_RAW:
+        case DATA_MODE_VERBOSE:
+            // TODO
+            break;
+        default:
+            LOG_ERROR("Ignoring invalid output mode %d", value);
+            return asynError;
+        }
+    }
+    return BasePlugin::writeInt32(pasynUser, value);
+}
+
 void AcpcPvaPlugin::processNormalPacket(const DasPacket * const packet)
 {
-    // This function is assuming exclusive access to m_pvRecord.
-
     // Structure describing normal data from ACPC.
     struct AcpcNormalData {
         uint32_t time_of_flight;
@@ -40,18 +58,9 @@ void AcpcPvaPlugin::processNormalPacket(const DasPacket * const packet)
         uint32_t photo_sum_y;
     };
 
-    // Sanity check, BasePvaPlugin should prevent it anyway
-    if (!m_pvRecord)
-        return;
-
     uint32_t nEvents;
-    const struct AcpcNormalData *data = reinterpret_cast<const AcpcNormalData *>(packet->getEventData(&nEvents));
-    if (data == 0 || nEvents == 0)
-        return;
-    nEvents *= sizeof(DasPacket::Event);
-    if (nEvents % sizeof(AcpcNormalData) != 0)
-        return;
-    nEvents /= sizeof(AcpcNormalData);
+    const struct AcpcNormalData *data = reinterpret_cast<const AcpcNormalData *>(packet->getData(&nEvents));
+    nEvents /= sizeof(AcpcNormalData) / sizeof(uint32_t);
 
     // Go through events and append to cache
     while (nEvents-- > 0) {
@@ -65,20 +74,24 @@ void AcpcPvaPlugin::processNormalPacket(const DasPacket * const packet)
     }
 }
 
-void AcpcPvaPlugin::postNormalData(const epicsTimeStamp &pulseTime, uint32_t pulseCharge, uint32_t postSeq)
+void AcpcPvaPlugin::postNormalData(const epicsTimeStamp &pulseTime, double pulseCharge, uint32_t pulseSeq)
 {
-    epics::pvData::TimeStamp time(pulseTime.secPastEpoch, pulseTime.nsec, postSeq);
+    if (!!m_pvRecord) {
+        epics::pvData::TimeStamp time(pulseTime.secPastEpoch, pulseTime.nsec, pulseSeq);
 
-    m_pvRecord->beginGroupPut();
-    m_pvRecord->timeStamp.set(time);
-    m_pvRecord->proton_charge->put(pulseCharge);
-    m_pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
-    m_pvRecord->position_index->replace(freeze(m_cache.position_index));
-    m_pvRecord->position_x->replace(freeze(m_cache.position_x));
-    m_pvRecord->position_y->replace(freeze(m_cache.position_y));
-    m_pvRecord->photo_sum_x->replace(freeze(m_cache.photo_sum_x));
-    m_pvRecord->photo_sum_y->replace(freeze(m_cache.photo_sum_y));
-    m_pvRecord->endGroupPut();
+        m_pvRecord->beginGroupPut();
+        m_pvRecord->timeStamp.set(time);
+        m_pvRecord->proton_charge->putFrom(pulseCharge);
+        m_pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
+        m_pvRecord->position_index->replace(freeze(m_cache.position_index));
+        m_pvRecord->position_x->replace(freeze(m_cache.position_x));
+        m_pvRecord->position_y->replace(freeze(m_cache.position_y));
+        m_pvRecord->photo_sum_x->replace(freeze(m_cache.photo_sum_x));
+        m_pvRecord->photo_sum_y->replace(freeze(m_cache.photo_sum_y));
+        m_pvRecord->endGroupPut();
+    } else {
+        LOG_WARN("No PV record, skipping posting update");
+    }
 
     m_cache.time_of_flight.clear();
     m_cache.position_index.clear();

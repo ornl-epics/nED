@@ -21,7 +21,7 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
     epics::pvData::PVStructurePtr pvStructure = pvDataCreate->createPVStructure(
         fieldCreate->createFieldBuilder()
         ->add("timeStamp",      standardField->timeStamp())
-        ->add("proton_charge",  standardField->scalar(epics::pvData::pvDouble,    ""))
+        ->add("proton_charge",  epics::pvData::pvDouble)
         ->add("time_of_flight", standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("pixel",          standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_index", standardField->scalarArray(epics::pvData::pvUInt, ""))
