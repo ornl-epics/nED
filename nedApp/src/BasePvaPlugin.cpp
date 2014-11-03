@@ -14,6 +14,13 @@
 
 BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, 0, NUM_BASEPVAPLUGIN_PARAMS)
+    , m_nReceived(0)
+    , m_nProcessed(0)
+    , m_pulseTime({0, 0})
+    , m_pulseCharge(0)
+    , m_postSeq(0)
+    , m_processPacketCb(0)
+    , m_postDataCb(0)
 {
     m_pvRecord = PvaNeutronData::create(pvName);
     if (!m_pvRecord)
@@ -38,19 +45,50 @@ asynStatus BasePvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 void BasePvaPlugin::processData(const DasPacketList * const packetList)
 {
-    if (!!m_pvRecord) {
-        switch (getDataMode()) {
-        case DATA_MODE_NORMAL:
-            processDataNormal(packetList);
-            break;
-        case DATA_MODE_RAW:
-            processDataRaw(packetList);
-            break;
-        case DATA_MODE_EXTENDED:
-            processDataExtended(packetList);
-            break;
-        default:
-            break;
+    m_nReceived += packetList->size();
+
+    if (!!m_pvRecord && m_processPacketCb != 0 && m_postDataCb != 0) {
+        bool hasData = false;
+
+        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+            const DasPacket *packet = *it;
+
+            const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
+
+            // TODO: what about metadata? In tof,pixel format?
+            if (packet->isNeutronData() == false || rtdl == 0)
+                continue;
+
+            // Extract timestamp and proton charge from RTDL
+            // RTDL should always be present when working with DSP-T
+            epicsTimeStamp time = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
+            if (epicsTimeNotEqual(&time, &m_pulseTime)) {
+                if (hasData == true) {
+                    m_postDataCb(this, m_pulseTime, m_pulseCharge, m_postSeq++);
+                    hasData = false;
+                }
+                m_pulseTime = { time.secPastEpoch, time.nsec };
+                m_pulseCharge = rtdl->charge;
+            }
+
+            m_processPacketCb(this, packet);
+
+            m_nProcessed++;
+            hasData = true;
+        }
+
+        if (hasData) {
+            m_postDataCb(this, m_pulseTime, m_pulseCharge, m_postSeq++);
         }
     }
+
+    // Update parameters
+    setIntegerParam(ProcCount,  m_nProcessed);
+    setIntegerParam(RxCount,    m_nReceived);
+    callParamCallbacks();
+}
+
+void BasePvaPlugin::setCallbacks(ProcessPacketCb procCb, PostDataCb postCb) {
+    m_processPacketCb = procCb;
+    m_postDataCb = postCb;
 }

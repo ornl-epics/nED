@@ -99,7 +99,8 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
             const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
             if (rtdl != 0) {
                 uint32_t eventsCount;
-                const DasPacket::Event *events = packet->getEventData(&eventsCount);
+                const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(packet->getData(&eventsCount));
+                eventsCount /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
                 epicsTimeStamp currentTs = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
                 epicsTimeStamp prevTs;
                 SourceSequence *seq = findSourceSequence(packet->source, packet->isNeutronData());

@@ -1,6 +1,7 @@
 include "BasePlugin.include"
 
 record(waveform,"$(P)RefTable") {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Axis positions")
     field(DTYP, "asynInt32ArrayOut")
     field(INP,  "@asyn($(PORT))RefTable")

@@ -1,10 +1,12 @@
 record(stringout, "$(P)ListenIp")
 {
+    field(ASG,  "BEAMLINE")
     field(DTYP, "asynOctetWrite")
     field(OUT,  "@asyn($(PORT))ListenIp")
 }
 record(longout, "$(P)ListenPort")
 {
+    field(ASG,  "BEAMLINE")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))ListenPort")
     field(VAL,  "0")
@@ -18,6 +20,7 @@ record(stringin, "$(P)ClientIp")
 }
 record(longout, "$(P)CheckInt")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Check client interval")
     field(EGU,  "seconds")
     field(DTYP, "asynInt32")

@@ -2,6 +2,7 @@ include "BasePlugin.include"
 
 record(bo, "$(P)Trigger")
 {
+    field(ASG,  "BEAMLINE")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))Trigger")
     field(FLNK, "$(P)Output.PROC")

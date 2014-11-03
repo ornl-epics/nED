@@ -36,7 +36,7 @@ sub trunc {
 sub bibo {
     my $MAX_BO_xNAM_LEN = 20;
 
-    my ($type, $name, $desc, $valstr, $val, $autosave) = @_;
+    my ($type, $name, $desc, $valstr, $val, $infofields) = @_;
     $type = ( $type eq "bi" ? "bi" : "bo" );
     my $io = ( $type eq "bi" ? "INP" : "OUT" );
     $name = trunc($name, $MAX_NAME_LEN, $name, "name");
@@ -44,8 +44,11 @@ sub bibo {
 
     print ("record($type, \"\$(P)$name\")\n");
     print ("\{\n");
-    if (defined $autosave) {
+    if ($infofields =~ m/autosave/) {
         print ("    info(autosaveFields, \"VAL\")\n");
+    }
+    if ($infofields =~ m/access/) {
+        print ("    field(ASG, \"BEAMLINE\")\n");
     }
     print ("    field(DESC, \"$desc\")\n");
     print ("    field(DTYP, \"asynInt32\")\n");
@@ -83,7 +86,7 @@ sub mbbimbbo {
     my @vals = ("ZRVL","ONVL","TWVL","THVL","FRVL","FVVL","SXVL","SVVL","EIVL","NIVL","TEVL","ELVL","TVVL","TTVL","FTVL","FFVL");
     my @nams = ("ZRST","ONST","TWST","THST","FRST","FVST","SXST","SVST","EIST","NIST","TEST","ELST","TVST","TTST","FTST","FFST");
 
-    my ($type, $name, $desc, $valstr, $val, $autosave) = @_;
+    my ($type, $name, $desc, $valstr, $val, $infofields) = @_;
     $type = ( $type eq "mbbi" ? "mbbi" : "mbbo" );
     my $io = ( $type eq "mbbi" ? "INP" : "OUT" );
     $name = trunc($name, $MAX_NAME_LEN, $name, "name");
@@ -91,8 +94,11 @@ sub mbbimbbo {
 
     print ("record($type, \"\$(P)$name\")\n");
     print ("\{\n");
-    if (defined $autosave) {
+    if ($infofields =~ m/autosave/) {
         print ("    info(autosaveFields, \"VAL\")\n");
+    }
+    if ($infofields =~ m/access/) {
+        print ("    field(ASG, \"BEAMLINE\")\n");
     }
     print ("    field(DESC, \"$desc\")\n");
     print ("    field(DTYP, \"asynInt32\")\n");
@@ -126,7 +132,7 @@ sub mbbimbbo {
 # * val - default value, might be undefined
 # * autosave - when defined, make the record autosave-able
 sub longinlongout {
-    my ($type, $name, $desc, $valstr, $val, $autosave) = @_;
+    my ($type, $name, $desc, $valstr, $val, $infofields) = @_;
     $type = ( $type eq "longin" ? "longin" : "longout" );
     my $io = ( $type eq "longin" ? "INP" : "OUT" );
     $name = trunc($name, $MAX_NAME_LEN, $name, "name");
@@ -134,8 +140,11 @@ sub longinlongout {
 
     print ("record($type, \"\$(P)$name\")\n");
     print ("\{\n");
-    if (defined $autosave) {
+    if ($infofields =~ m/autosave/) {
         print ("    info(autosaveFields, \"VAL\")\n");
+    }
+    if ($infofields =~ m/access/) {
+        print ("    field(ASG,  \"BEAMLINE\")\n");
     }
     print ("    field(DESC, \"$desc\")\n");
     print ("    field(DTYP, \"asynInt32\")\n");
@@ -194,16 +203,16 @@ foreach $line ( <STDIN> ) {
 
         if ($valstr =~ /^range/) {
             my $type = ( $cfg_rbv == 1 ? "longin" : "longout" );
-            longinlongout($type, $name, $desc, $valstr, $val, "autosave");
+            longinlongout($type, $name, $desc, $valstr, $val, "autosave,access");
         } elsif ($width == 1) {
             my $type = ( $cfg_rbv == 1 ? "bi" : "bo" );
-            bibo($type, $name, $desc, $valstr, $val, "autosave");
+            bibo($type, $name, $desc, $valstr, $val, "autosave,access");
         } elsif ($width > 1 && $width < 15 && $valstr ne "") {
             my $type = ( $cfg_rbv == 1 ? "mbbi" : "mbbo" );
-            mbbimbbo($type, $name, $desc, $valstr, $val, "autosave");
+            mbbimbbo($type, $name, $desc, $valstr, $val, "autosave,access");
         } else {
             my $type = ( $cfg_rbv == 1 ? "longin" : "longout" );
-            longinlongout($type, $name, $desc, $valstr, $val, "autosave");
+            longinlongout($type, $name, $desc, $valstr, $val, "autosave,access");
         }
     }
 }

@@ -1,5 +1,6 @@
 record(bo, "$(P)Enable")
 {
+    field(ASG,  "BEAMLINE")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))Enable")
     field(ZNAM, "No")
@@ -31,6 +32,7 @@ record(longin, "$(P)TxCount")
 }
 record(mbbo, "$(P)DataMode")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Detectors data mode")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))DataMode")

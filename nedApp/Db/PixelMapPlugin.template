@@ -22,6 +22,7 @@ record(mbbi, "$(P)ErrImport")
 record(bo, "$(P)PassThru")
 {
     info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
     field(DESC, "Disable pixel mapping")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))PassThru")
