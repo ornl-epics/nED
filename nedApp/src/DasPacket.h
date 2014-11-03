@@ -273,18 +273,30 @@ struct DasPacket
         const RtdlHeader *getRtdlHeader() const;
 
         /**
-         * Return pointer to the data regardless of RtdlHeader included or not.
+         * Return pointer to packet payload data regardless of RtdlHeader included or not.
          *
-         * @param[out] count Number of 4-byte blocks in the returned memory.
+         * Function checks packet integrity and returns invalid address in case
+         * of any error. Caller should always check the return address or count
+         * parameter.
+         *
+         * @param[out] count Number of 4-byte blocks in the returned address or 0 on error.
+         * @return Starting address of the payload data or 0 on error.
          */
         const uint32_t *getData(uint32_t *count) const;
 
         /**
-         * Return pointer to DasPacket::Event data regardless of RtdlHeader included or not.
+         * Return pointer to packet payload data regardless of RtdlHeader included or not.
          *
-         * @param[out] count Number of Events in the returned memory.
+         * Function checks packet integrity and returns invalid address in case
+         * of any error. Caller should always check the return address or count
+         * parameter.
+         *
+         * @param[out] count Number of 4-byte dwords in returned address or 0 on error.
+         * @return Starting address of the payload data or 0 on error.
          */
-        const Event *getEventData(uint32_t *count) const;
+        uint32_t *getData(uint32_t *count) {
+            return const_cast<DasPacket *>(this)->getData(count);
+        }
 
         /**
          * Return the actual response type.
