@@ -87,49 +87,49 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh0Ful</name>
+            <name>$(P)Ch0:CntFul</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh1Ful</name>
+            <name>$(P)Ch1:CntFul</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh2Ful</name>
+            <name>$(P)Ch2:CntFul</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh3Ful</name>
+            <name>$(P)Ch3:CntFul</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh4Ful</name>
+            <name>$(P)Ch4:CntFul</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh5Ful</name>
+            <name>$(P)Ch5:CntFul</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh6Ful</name>
+            <name>$(P)Ch6:CntFul</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh7Ful</name>
+            <name>$(P)Ch7:CntFul</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -141,193 +141,193 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh0PosE</name>
+            <name>$(P)Ch0:CntPE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh1PosE</name>
+            <name>$(P)Ch1:CntPE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh2PosE</name>
+            <name>$(P)Ch2:CntPE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh3PosE</name>
+            <name>$(P)Ch3:CntPE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh4PosE</name>
+            <name>$(P)Ch4:CntPE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh5PosE</name>
+            <name>$(P)Ch5:CntPE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh6PosE</name>
+            <name>$(P)Ch6:CntPE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh7PosE</name>
+            <name>$(P)Ch7:CntPE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh0SumH</name>
+            <name>$(P)Ch0:CntSH</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh1SumH</name>
+            <name>$(P)Ch1:CntSH</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh2SumH</name>
+            <name>$(P)Ch2:CntSH</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh3SumH</name>
+            <name>$(P)Ch3:CntSH</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh4SumH</name>
+            <name>$(P)Ch4:CntSH</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh5SumH</name>
+            <name>$(P)Ch5:CntSH</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh6SumH</name>
+            <name>$(P)Ch6:CntSH</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh7SumH</name>
+            <name>$(P)Ch7:CntSH</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh0SumL</name>
+            <name>$(P)Ch0:CntSL</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh1SumL</name>
+            <name>$(P)Ch1:CntSL</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh2SumL</name>
+            <name>$(P)Ch2:CntSL</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh3SumL</name>
+            <name>$(P)Ch3:CntSL</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh4SumL</name>
+            <name>$(P)Ch4:CntSL</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh5SumL</name>
+            <name>$(P)Ch5:CntSL</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh6SumL</name>
+            <name>$(P)Ch6:CntSL</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh7SumL</name>
+            <name>$(P)Ch7:CntSL</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh0Rate</name>
+            <name>$(P)Ch0:Rate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh1Rate</name>
+            <name>$(P)Ch1:Rate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh2Rate</name>
+            <name>$(P)Ch2:Rate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh3Rate</name>
+            <name>$(P)Ch3:Rate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh4Rate</name>
+            <name>$(P)Ch4:Rate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh5Rate</name>
+            <name>$(P)Ch5:Rate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh6Rate</name>
+            <name>$(P)Ch6:Rate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CntCh7Rate</name>
+            <name>$(P)Ch7:Rate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
