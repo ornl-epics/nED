@@ -39,7 +39,14 @@ class AcpcPvaPlugin : public BasePvaPlugin {
         AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName);
 
         /**
-         * Process incoming data as normal ACPC neutron data.
+         * Overloaded function to handle DataMode parameter.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
+         * Process incoming packet as normal ACPC neutron data.
+         *
+         * Iterate through packet events and save their data to cache.
          *
          * Recent ACPC firmwares produce events data in normal mode as 6 4-byte
          * values:
@@ -50,7 +57,47 @@ class AcpcPvaPlugin : public BasePvaPlugin {
          *   - photo sum x
          *   - photo sum y
          */
-        virtual void processDataNormal(const DasPacketList * const packetList);
+        void processNormalPacket(const DasPacket * const packet);
+
+        /**
+         * Static C callable wrapper for member function of the same name.
+         */
+        static void processNormalPacket(BasePvaPlugin *this_, const DasPacket * const packet) {
+            reinterpret_cast<AcpcPvaPlugin *>(this_)->processNormalPacket(packet);
+        }
+
+        /**
+         * Post data received so far and clear cache
+         *
+         * Cached data is posted as a single update to EPICSv4 PV.
+         * Caller must ensure plugin is locked while calling this function.
+         *
+         * @param[in] pulseTime Timestamp of pulse to be posted.
+         * @param[in] pulseCharge Pulse charge
+         * @param[in] pulseSeq Pulse sequence number, monotonically increasing
+         */
+        void postNormalData(const epicsTimeStamp &pulseTime, double pulseCharge, uint32_t pulseSeq);
+
+        /**
+         * Static C callable wrapper for member function of the same name.
+         */
+        static void postNormalData(BasePvaPlugin *this_, const epicsTimeStamp &pulseTime, double pulseCharge, uint32_t pulseSeq) {
+            reinterpret_cast<AcpcPvaPlugin *>(this_)->postNormalData(pulseTime, pulseCharge, pulseSeq);
+        }
+
+    private:
+        /**
+         * A cache to store data until it's posted.
+         */
+        struct {
+            epics::pvData::PVUIntArray::svector time_of_flight;
+            epics::pvData::PVUIntArray::svector pixel;
+            epics::pvData::PVUIntArray::svector position_index;
+            epics::pvData::PVUIntArray::svector position_x;
+            epics::pvData::PVUIntArray::svector position_y;
+            epics::pvData::PVUIntArray::svector photo_sum_x;
+            epics::pvData::PVUIntArray::svector photo_sum_y;
+        } m_cache;
 };
 
 #endif // ACPC_PVA_PLUGIN_H

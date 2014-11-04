@@ -40,22 +40,6 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr photo_sum_y;      //!< Photo sum Y
 
     public:
-        /**
-         * A cache to store data until it's posted.
-         */
-        struct {
-            epics::pvData::TimeStamp            timeStamp;
-            epics::pvData::PVUIntArray::svector time_of_flight;
-            double                              proton_charge;
-            epics::pvData::PVUIntArray::svector pixel;
-            epics::pvData::PVUIntArray::svector position_index;
-            epics::pvData::PVUIntArray::svector position_x;
-            epics::pvData::PVUIntArray::svector position_y;
-            epics::pvData::PVUIntArray::svector photo_sum_x;
-            epics::pvData::PVUIntArray::svector photo_sum_y;
-        } cache;
-
-    public:
         POINTER_DEFINITIONS(PvaNeutronData);
 
         /**
@@ -70,31 +54,6 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
          * @return Shared pointer to the new object or invalid shared pointer.
          */
         static shared_pointer create(const std::string &recordName);
-
-        /**
-         * Start a transaction of updates.
-         *
-         * Any updates within the beginGroupPut() and endGroupPut() result in a
-         * single record update, that is a single monitor event on the client side.
-         * Writing to public members variables outside the transcaction will post
-         * individual changes immediately.
-         */
-        virtual void beginGroupPut();
-
-        /**
-         * Complete transaction and post updates.
-         */
-        virtual void endGroupPut();
-
-        /**
-         * Post current contents of the cache and clear it.
-         */
-        void postCachedUnlocked();
-
-        /**
-         * Lock entire PVrecord and post cached values.
-         */
-        void postCached();
 
     protected:
         /**

@@ -1,0 +1,8 @@
+include "BasePlugin.include"
+
+# Upgrade BasePlugin::Enable PV
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
