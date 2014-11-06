@@ -66,7 +66,7 @@ uint32_t DasPacketList::reset(const uint8_t *data, uint32_t dataLen)
                 // Calculate length only once
                 uint32_t packetLen = packet->length();
 
-                if (packetLen > dataLen)
+                if (packetLen > dataLen || packetLen == 0)
                     break;
 
                 dataLen  -= packetLen;

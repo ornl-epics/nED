@@ -68,7 +68,8 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
                     hasData = false;
                 }
                 m_pulseTime = { time.secPastEpoch, time.nsec };
-                m_pulseCharge = rtdl->charge;
+                // Convert charge from 10pC unsigned integer to C double
+                m_pulseCharge = static_cast<double>(rtdl->pulse_charge) * 10e-12;
             }
 
             m_processPacketCb(this, packet);
