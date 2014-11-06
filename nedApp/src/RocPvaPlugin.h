@@ -40,7 +40,7 @@ class RocPvaPlugin : public BasePvaPlugin {
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
 	    /**
-         * Process incoming data as raw ACPC data.
+         * Process incoming data as 'RAW' formatted data.
          *
 	     * @param[in] packet Packet to be processed
          */
@@ -52,6 +52,21 @@ class RocPvaPlugin : public BasePvaPlugin {
         static void processRawPacket(BasePvaPlugin *this_, const DasPacket *
             const packet) {
             reinterpret_cast<RocPvaPlugin *>(this_)->processRawPacket(packet);
+        }
+
+        /**
+         * Process incoming data as 'EXTENDED' formatted data.
+         *
+	     * @param[in] packet Packet to be processed
+         */
+        void processExtendedPacket(const DasPacket * const packet);
+
+        /**
+         * Static C callable wrapper for member function of the same name
+         */
+        static void processExtendedPacket(BasePvaPlugin *this_, const DasPacket *
+            const packet) {
+            reinterpret_cast<RocPvaPlugin *>(this_)->processExtendedPacket(packet);
         }
 
 	    /**
@@ -116,6 +131,29 @@ class RocPvaPlugin : public BasePvaPlugin {
                 pulseCharge, pulseSeq);
         }
       
+        /**
+         * Post data received (extended mode) and clear cache
+         *
+         * Cached data is posted as a single event to EPICSv4 PV.
+         * Caller must ensure plugin is locked while calling this function.
+         *
+         * @param[in] pulseTime     Timestamp of pulse to be posted.
+         * @param[in] pulseCharge   Pulse charge
+         * @param[in] pulseSeq      Pulse seq number, monotonically increasing
+         */
+        void postExtendedData(const epicsTimeStamp &pulseTime, double pulseCharge,
+            uint32_t pulseSeq);
+
+        /**
+         * Static C callable wrapper for member function of the same name
+         */
+        static void postExtendedData(BasePvaPlugin *this_, 
+            const epicsTimeStamp &pulseTime, double pulseCharge, 
+            uint32_t pulseSeq) {
+            reinterpret_cast<RocPvaPlugin *>(this_)->postExtendedData(pulseTime, 
+                pulseCharge, pulseSeq);
+        }
+
  };
 
 #endif // ROC_PVA_PLUGIN_H
