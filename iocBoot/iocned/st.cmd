@@ -52,16 +52,15 @@ dbLoadRecords("../../db/ProxyPlugin.db","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
 RocPvaPluginConfigure("rocPva1", "occ", "$(PREFIX)Det:rocpva1:Neutrons")
 dbLoadRecords("../../db/RocPvaPlugin.db","P=$(PREFIX)Det:rocpva1:,PORT=rocPva1")
 
-#DspPluginConfigure("Dsp1", "$(OCC1)", "0x15FA76DF")
-
-DspPluginConfigure("dsp", "cmd", "21.250.118.223", "v63", 0)
-dbLoadRecords("../../db/DspPlugin.db","P=$(PREFIX)Det:dsp:,PORT=dsp")
+#DspPluginConfigure("Dsp1", "occ", "0x15FA76DF")
+DspPluginConfigure("Dsp1", "cmd", "21.250.118.223", "v63", 0)
+dbLoadRecords("../../db/DspPlugin.db","P=$(PREFIX)Det:dsp1:,PORT=Dsp1")
 
 DiscoverPluginConfigure("Disc", "occ")
 dbLoadRecords("../../db/DiscoverPlugin.db","P=$(PREFIX)Det:disc:,PORT=Disc")
 
 RocPluginConfigure("roc1", "cmd", "20.39.216.73", "v52", 0)
-dbLoadRecords("../../db/ROCHV.db","P=$(PREFIX)Det:HV1,G=$(PREFIX)Det:HVG,PORT=roc1")
+#dbLoadRecords("../../db/ROCHV.db","P=$(PREFIX)Det:HV1,G=$(PREFIX)Det:HVG,PORT=roc1")
 dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX)Det:roc1:,PORT=roc1")
 
 DumpPluginConfigure("dump", "occ", 0)
@@ -85,7 +84,8 @@ dbLoadRecords("../../db/GenericModulePlugin.db","P=$(PREFIX)Det:gm:,PORT=gm")
 FlatFieldPluginConfigure("ff", "occ", 0)
 dbLoadRecords("../../db/FlatFieldPlugin.db","P=$(PREFIX)Det:ff:,PORT=ff")
 
-AcpcPvaPluginConfigure("AcpcPva", "occ", "$(PREFIX)Det:pva1:Neutrons")
+AcpcPvaPluginConfigure("AcpcPva", "occ", "$(PREFIX)Det:pva:Neutrons")
+dbLoadRecords("../../db/AcpcPvaPlugin.db","P=$(PREFIX)Det:pva:,PORT=AcpcPva")
 
 iocInit()
 
@@ -99,8 +99,7 @@ create_monitor_set("$(IOCNAME).req", 30)
 save_restoreShow(10)
 
 # Fanout record for init in HVROC.db instead of PINI mechanism
-
-epicsThreadSleep 1
+#epicsThreadSleep 1 
 #dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
 
 startPVAServer
