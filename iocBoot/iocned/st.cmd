@@ -103,6 +103,3 @@ save_restoreShow(10)
 #dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
 
 startPVAServer
-
-pvdbl
-
