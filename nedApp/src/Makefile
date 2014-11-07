@@ -114,8 +114,7 @@ doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
 	(cd latex/; make pdf > /dev/null)
 
 %.include: %.cpp
-	./tools/export2epics.pl            < $^ > ../Db/$@
-	./tools/export2epics.pl -cfg_rbv=1 < $^ > ../Db/RB_$@
+	./tools/export2epics.pl < $^ > ../Db/$@
 epicsdb: $($(PROD_NAME)_PVS:.cpp=.include)
 
 %.pvst: %.cpp

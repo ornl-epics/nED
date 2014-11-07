@@ -5,14 +5,22 @@
 # createStatusParam("UartByteErr", 0x0,  1, 29); // UART: Byte error              (0=no error,1=error)
 # The name and description are truncd to match EPICS string specifications
 #
-# Usage: export2epics.pl [-cfg_rbv=1] < InputFile.cpp > OutputFile.cpp"
+# asyn device support doesn't support bi-directional EPICS records. We use a trick
+# from Mark Rivers (http://www.aps.anl.gov/epics/tech-talk/2014/msg00057.php)
+# and create 3 additional records to support reading and writing to a single
+# record.
+#
+# Record names are limited to 10 characters. Based on given fixed prefix of 17
+# characters, there's 1 left which we use fo dynamicly created records:
+# - C for CALC record
+# - W for write out record
+# - R for read in record
+# - S for sync record
+#
+# Usage: export2epics.pl < InputFile.cpp > OutputFile.include"
 
 my $MAX_NAME_LEN      = 10; # 28 chars total, worst case prefix BL99A:Det:roc245:
 my $MAX_DESC_LEN      = 28;
-
-if (!defined $cfg_rbv || $cfg_rbv != 1) {
-    $cfg_rbv = 0;
-}
 
 sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };
 sub trunc {
@@ -24,43 +32,87 @@ sub trunc {
     return substr($str, 0, $max_len);
 }
 
-# Print bi or bo record
-# 
-# Params:
-# * type - <bi|bo>
-# * name - Record name, might get truncated
-# * desc - Record description, might get truncated
-# * valstr - Part of the comment inside the (), used to give fields a name
-# * val - default value, might be undefined
-# * autosave - when defined, make the record autosave-able
-sub bibo {
-    my $MAX_BO_xNAM_LEN = 20;
+sub _inout_common {
+    my ($type, $name, $desc, $valstr, $val) = @_;
+    $name = trunc($name, $MAX_NAME_LEN, $name, "name");
+    $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
 
-    my ($type, $name, $desc, $valstr, $val, $infofields) = @_;
-    $type = ( $type eq "bi" ? "bi" : "bo" );
-    my $io = ( $type eq "bi" ? "INP" : "OUT" );
+    my $intype = "";
+    if    ($type eq "bo")      { $intype = "bi"; }
+    elsif ($type eq "mbbo")    { $intype = "mbbi"; }
+    elsif ($type eq "longout") { $intype = "longin"; }
+    else { return; }
+
+    print ("record($type, \"\$(P)$name\")\n");
+    print ("\{\n");
+    print ("    info(autosaveFields, \"VAL\")\n");
+    print ("    field(ASG,  \"BEAMLINE\")\n");
+    print ("    field(DESC, \"$desc\")\n");
+    print ("    field(PINI, \"YES\")\n");
+    print ("    field(VAL,  \"$val\")\n");
+    print ("    field(OUT,  \"\$(P)${name}W PP\")\n");
+    if    ($type eq "bo")      { _bibo_val($name, $valstr); }
+    elsif ($type eq "mbbo")    { _mbbimbbo_val($name, $valstr); }
+    elsif ($type eq "longout") { _longinlongout_val($name, $valstr); }
+    print ("\}\n");
+
+    print ("record($type, \"\$(P)${name}W\")\n");
+    print ("\{\n");
+    print ("    field(ASG,  \"BEAMLINE\")\n");
+    print ("    field(DESC, \"$desc\")\n");
+    print ("    field(DTYP, \"asynInt32\")\n");
+    print ("    field(OUT,  \"\@asyn(\$(PORT))$name\")\n");
+    print ("    field(SDIS, \"\$(P)${name}S.PACT\")\n");
+    print ("    field(DISV, \"1\")\n");
+    if    ($type eq "bo")      { _bibo_val("${name}W", $valstr); }
+    elsif ($type eq "mbbo")    { _mbbimbbo_val("${name}W", $valstr); }
+    elsif ($type eq "longout") { _longinlongout_val("${name}W", $valstr); }
+    print ("\}\n");
+
+    print ("record($intype, \"\$(P)${name}R\")\n");
+    print ("\{\n");
+    print ("    field(DTYP, \"asynInt32\")\n");
+    print ("    field(DESC, \"$desc\")\n");
+    print ("    field(INP,  \"\@asyn(\$(PORT))$name\")\n");
+    print ("    field(SCAN, \"I/O Intr\")\n");
+    print ("    field(FLNK, \"\$(P)${name}S\")\n");
+    if    ($type eq "bo")      { _bibo_val("${name}R", $valstr); }
+    elsif ($type eq "mbbo")    { _mbbimbbo_val("${name}R", $valstr); }
+    elsif ($type eq "longout") { _longinlongout_val("${name}R", $valstr); }
+    print ("\}\n");
+
+    print ("record($type, \"\$(P)${name}S\")\n");
+    print ("\{\n");
+    print ("    field(DOL,  \"\$(P)${name}R NPP\")\n");
+    print ("    field(OMSL, \"closed_loop\")\n");
+    print ("    field(OUT,  \"\$(P)$name PP\")\n");
+    if    ($type eq "bo")      { _bibo_val("${name}S", $valstr); }
+    elsif ($type eq "mbbo")    { _mbbimbbo_val("${name}S", $valstr); }
+    elsif ($type eq "longout") { _longinlongout_val("${name}S", $valstr); }
+    print ("\}\n");
+}
+
+sub _in_common {
+    my ($type, $name, $desc, $valstr) = @_;
     $name = trunc($name, $MAX_NAME_LEN, $name, "name");
     $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
 
     print ("record($type, \"\$(P)$name\")\n");
     print ("\{\n");
-    if ($infofields =~ m/autosave/) {
-        print ("    info(autosaveFields, \"VAL\")\n");
-    }
-    if ($infofields =~ m/access/) {
-        print ("    field(ASG, \"BEAMLINE\")\n");
-    }
     print ("    field(DESC, \"$desc\")\n");
     print ("    field(DTYP, \"asynInt32\")\n");
-    print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
-    if ($type eq "bi") {
-        print ("    field(SCAN, \"I/O Intr\")\n");
-    } else {
-        print ("    field(PINI, \"YES\")\n");
-    }
-    if (defined $val) {
-        print ("    field(VAL,  \"$val\")\n");
-    }
+    print ("    field(INP,  \"\@asyn(\$(PORT))$name\")\n");
+    print ("    field(SCAN, \"I/O Intr\")\n");
+    if    ($type eq "bi")     { _bibo_val($name, $valstr); }
+    elsif ($type eq "mbbi")   { _mbbimbbo_val($name, $valstr); }
+    elsif ($type eq "longin") { _longinlongout_val($name, $valstr); }
+    print ("\}\n");
+}
+
+sub _bibo_val {
+    my $MAX_BO_xNAM_LEN = 20;
+
+    my ($name, $valstr) = @_;
     if ($valstr =~ m/([0-9]+) *= *([^,]+), *([0-9]+) *= *(.+)$/) {
         my ($zval,$znam,$oval,$onam) = ($1,$2,$3,$4);
         if ($zval != 0) { my $temp=$znam; $znam=$onam; $onam=$temp; }
@@ -69,48 +121,36 @@ sub bibo {
         print ("    field(ZNAM, \"$znam\")\n");
         print ("    field(ONAM, \"$onam\")\n");
     }
-    print ("\}\n");
 }
 
-# Print mbbi or mbbo record
+# Print bi record
 # 
 # Params:
-# * type - <mbbi|mbbo>
 # * name - Record name, might get truncated
 # * desc - Record description, might get truncated
 # * valstr - Part of the comment inside the (), used to give fields a name
-# * val - default value, might be undefined
-# * autosave - when defined, make the record autosave-able
-sub mbbimbbo {
+sub bi {
+    _in_common("bi", @_);
+}
+
+# Print bo record
+# 
+# Params:
+# * name - Record name, might get truncated
+# * desc - Record description, might get truncated
+# * valstr - Part of the comment inside the (), used to give fields a name
+# * val - Record default value, just for first time, should be maintained by autosave afterwards
+sub bo {
+    _inout_common("bo", @_);
+}
+
+sub _mbbimbbo_val {
     my $MAX_MBBO_xNAM_LEN = 16;
     my @vals = ("ZRVL","ONVL","TWVL","THVL","FRVL","FVVL","SXVL","SVVL","EIVL","NIVL","TEVL","ELVL","TVVL","TTVL","FTVL","FFVL");
     my @nams = ("ZRST","ONST","TWST","THST","FRST","FVST","SXST","SVST","EIST","NIST","TEST","ELST","TVST","TTST","FTST","FFST");
 
-    my ($type, $name, $desc, $valstr, $val, $infofields) = @_;
-    $type = ( $type eq "mbbi" ? "mbbi" : "mbbo" );
-    my $io = ( $type eq "mbbi" ? "INP" : "OUT" );
-    $name = trunc($name, $MAX_NAME_LEN, $name, "name");
-    $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
+    my ($name, $valstr) = @_;
 
-    print ("record($type, \"\$(P)$name\")\n");
-    print ("\{\n");
-    if ($infofields =~ m/autosave/) {
-        print ("    info(autosaveFields, \"VAL\")\n");
-    }
-    if ($infofields =~ m/access/) {
-        print ("    field(ASG, \"BEAMLINE\")\n");
-    }
-    print ("    field(DESC, \"$desc\")\n");
-    print ("    field(DTYP, \"asynInt32\")\n");
-    print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
-    if ($type eq "mbbi") {
-        print ("    field(SCAN, \"I/O Intr\")\n");
-    } else {
-        print ("    field(PINI, \"YES\")\n");
-    }
-    if (defined $val) {
-        print ("    field(VAL,  \"$val\")\n");
-    }
     my $i=0;
     foreach (split(',', $valstr)) {
         my ($xval,$xnam) = split(/=/, $_);
@@ -119,44 +159,32 @@ sub mbbimbbo {
         print ("    field($nams[$i], \"$xnam\")\n");
         $i++;
     }
-    print ("\}\n");
 }
 
-# Print longin or longout record
+# Print mbbi record
 # 
 # Params:
-# * type - <longin|longout>
 # * name - Record name, might get truncated
 # * desc - Record description, might get truncated
-# * valstr - Part of the comment inside the (), additional record instructions, like calc,prec,etc.
-# * val - default value, might be undefined
-# * autosave - when defined, make the record autosave-able
-sub longinlongout {
-    my ($type, $name, $desc, $valstr, $val, $infofields) = @_;
-    $type = ( $type eq "longin" ? "longin" : "longout" );
-    my $io = ( $type eq "longin" ? "INP" : "OUT" );
-    $name = trunc($name, $MAX_NAME_LEN, $name, "name");
-    $desc = trunc($desc, $MAX_DESC_LEN, $name, "DESC");
+# * valstr - Part of the comment inside the (), used to give fields a name
+sub mbbi {
+    _in_common("mbbi", @_);
+}
 
-    print ("record($type, \"\$(P)$name\")\n");
-    print ("\{\n");
-    if ($infofields =~ m/autosave/) {
-        print ("    info(autosaveFields, \"VAL\")\n");
-    }
-    if ($infofields =~ m/access/) {
-        print ("    field(ASG,  \"BEAMLINE\")\n");
-    }
-    print ("    field(DESC, \"$desc\")\n");
-    print ("    field(DTYP, \"asynInt32\")\n");
-    print ("    field($io,  \"\@asyn(\$(PORT))$name\")\n");
-    if ($type eq "longin") {
-        print ("    field(SCAN, \"I/O Intr\")\n");
-    } else {
-        print ("    field(PINI, \"YES\")\n");
-    }
-    if (defined $val) {
-        print ("    field(VAL,  \"$val\")\n");
-    }
+# Print mbbo record
+# 
+# Params:
+# * name - Record name, might get truncated
+# * desc - Record description, might get truncated
+# * valstr - Part of the comment inside the (), used to give fields a name
+# * val - Record default value, just for first time, should be maintained by autosave afterwards
+sub mbbo {
+    _inout_common("mbbo", @_);
+}
+
+sub _longinlongout_val {
+    my ($name, $valstr) = @_;
+
     if ($valstr =~ /calc:([^,]*)/) {
         print ("    field(FLNK, \"\$(P)${name}C\")\n");
         print ("\}\n");
@@ -172,7 +200,27 @@ sub longinlongout {
     if ($valstr =~ /unit:([^,]*)/) {
         print ("    field(EGU,  \"$1\")\n");
     }
-    print ("\}\n");
+}
+
+# Print longin record
+# 
+# Params:
+# * name - Record name, might get truncated
+# * desc - Record description, might get truncated
+# * valstr - Part of the comment inside the (), additional record instructions, like calc,prec,etc.
+sub longin {
+    _in_common("longin", @_);
+}
+
+# Print longout record
+# 
+# Params:
+# * name - Record name, might get truncated
+# * desc - Record description, might get truncated
+# * valstr - Part of the comment inside the (), additional record instructions, like calc,prec,etc.
+# * val - Record default value, just for first time, should be maintained by autosave afterwards
+sub longout {
+    _inout_common("longout", @_);
 }
 
 # Extract matching lines from stdin
@@ -186,33 +234,29 @@ foreach $line ( <STDIN> ) {
         $valstr =~ s/\)$//;
 
         if ($valstr =~ /^range/) {
-            longinlongout("longin", $name, $desc, $valstr);
-        } elsif ($width == 1) {
-            bibo("bi", $name, $desc, $valstr);
+            longin($name, $desc, $valstr);
+        } elsif ($width == 1 && $valstr ne "") {
+            bi($name, $desc, $valstr);
         } elsif ($width > 1 && $width < 15 && $valstr ne "") {
-            mbbimbbo("mbbi", $name, $desc, $valstr);
+            mbbi($name, $desc, $valstr);
         } else {
-            longinlongout("longin", $name, $desc, $valstr);
+            longin($name, $desc, $valstr);
         }
     }
-    if ($line =~ m/createConfigParam *\( *"([a-zA-Z0-9_:]+)" *, *'([0-9A-F])' *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
+    if ($line =~ m/createConfigParam *\( *"([a-zA-Z0-9_:]+)" *, *'([0-9A-F])' *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *(-?[0-9]+) *, *([0-9]+).*\/\/ *(.*)$/) {
         my ($name,$section,$offset,$width,$shift,$val,$comment) = ($1,$2,$3,$4,$5,$6,$7);
         $comment =~ /^\s*([^\(]*)\(?(.*)\)?$/;
         my ($desc, $valstr) = ($1, $2);
         $valstr =~ s/\)$//;
 
         if ($valstr =~ /^range/) {
-            my $type = ( $cfg_rbv == 1 ? "longin" : "longout" );
-            longinlongout($type, $name, $desc, $valstr, $val, "autosave,access");
-        } elsif ($width == 1) {
-            my $type = ( $cfg_rbv == 1 ? "bi" : "bo" );
-            bibo($type, $name, $desc, $valstr, $val, "autosave,access");
+            longout($name, $desc, $valstr, $val);
+        } elsif ($width == 1 && $valstr ne "") {
+            bo($name, $desc, $valstr, $val);
         } elsif ($width > 1 && $width < 15 && $valstr ne "") {
-            my $type = ( $cfg_rbv == 1 ? "mbbi" : "mbbo" );
-            mbbimbbo($type, $name, $desc, $valstr, $val, "autosave,access");
+            mbbo($name, $desc, $valstr, $val);
         } else {
-            my $type = ( $cfg_rbv == 1 ? "longin" : "longout" );
-            longinlongout($type, $name, $desc, $valstr, $val, "autosave,access");
+            longout($name, $desc, $valstr, $val);
         }
     }
 }
