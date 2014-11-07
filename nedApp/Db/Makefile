@@ -37,6 +37,8 @@ DB += GenericModulePlugin.db
 DB += FlatFieldPlugin.db
 DB += ProxyPlugin.db
 DB += PixelMapPlugin.db
+DB += RocPvaPlugin.db
+DB += AcpcPvaPlugin.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add

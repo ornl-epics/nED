@@ -19,7 +19,7 @@
 EPICS_REGISTER_PLUGIN(DumpPlugin, 3, "Port name", string, "Dispatcher port name", string, "Blocking", int);
 
 DumpPlugin::DumpPlugin(const char *portName, const char *dispatcherPortName, int blocking)
-    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_DUMPPLUGIN_PARAMS, 1, asynOctetMask)
+    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_DUMPPLUGIN_PARAMS, 1, asynOctetMask, asynOctetMask)
     , m_fd(-1)
 {
     createParam("FilePath",     asynParamOctet, &FilePath); // WRITE - Path to file where to save all received data

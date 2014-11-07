@@ -33,27 +33,19 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVDoublePtr    proton_charge;    //!< Pulse proton charge
         epics::pvData::PVUIntArrayPtr time_of_flight;   //!< Time of flight offest from pulse start
         epics::pvData::PVUIntArrayPtr pixel;            //!< Pixel ID
+        epics::pvData::PVUIntArrayPtr sample_a1;        //!< LPSD ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_a2;        //!< CROC ONLY: TimeRange samples
+        epics::pvData::PVUIntArrayPtr sample_a8;        //!< AROC/ACPC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_a19;       //!< BNLROC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_a48;       //!< ACPC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_b1;        //!< LPSD ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC/ACPC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_b12;       //!< AROC ONLY: Diagnostic values
         epics::pvData::PVUIntArrayPtr position_index;   //!< Position index mapping
         epics::pvData::PVUIntArrayPtr position_x;       //!< Position X
         epics::pvData::PVUIntArrayPtr position_y;       //!< Position Y
         epics::pvData::PVUIntArrayPtr photo_sum_x;      //!< Photo sum X
         epics::pvData::PVUIntArrayPtr photo_sum_y;      //!< Photo sum Y
-
-    public:
-        /**
-         * A cache to store data until it's posted.
-         */
-        struct {
-            epics::pvData::TimeStamp            timeStamp;
-            epics::pvData::PVUIntArray::svector time_of_flight;
-            double                              proton_charge;
-            epics::pvData::PVUIntArray::svector pixel;
-            epics::pvData::PVUIntArray::svector position_index;
-            epics::pvData::PVUIntArray::svector position_x;
-            epics::pvData::PVUIntArray::svector position_y;
-            epics::pvData::PVUIntArray::svector photo_sum_x;
-            epics::pvData::PVUIntArray::svector photo_sum_y;
-        } cache;
 
     public:
         POINTER_DEFINITIONS(PvaNeutronData);
@@ -70,31 +62,6 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
          * @return Shared pointer to the new object or invalid shared pointer.
          */
         static shared_pointer create(const std::string &recordName);
-
-        /**
-         * Start a transaction of updates.
-         *
-         * Any updates within the beginGroupPut() and endGroupPut() result in a
-         * single record update, that is a single monitor event on the client side.
-         * Writing to public members variables outside the transcaction will post
-         * individual changes immediately.
-         */
-        virtual void beginGroupPut();
-
-        /**
-         * Complete transaction and post updates.
-         */
-        virtual void endGroupPut();
-
-        /**
-         * Post current contents of the cache and clear it.
-         */
-        void postCachedUnlocked();
-
-        /**
-         * Lock entire PVrecord and post cached values.
-         */
-        void postCached();
 
     protected:
         /**

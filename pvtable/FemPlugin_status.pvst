@@ -3,691 +3,691 @@
     <pvlist>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2FifoFull</name>
+            <name>$(P)Ch2:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2StartErr</name>
+            <name>$(P)Ch2:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2NoStart</name>
+            <name>$(P)Ch2:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2Timeout</name>
+            <name>$(P)Ch2:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2LenLong</name>
+            <name>$(P)Ch2:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2LenShort</name>
+            <name>$(P)Ch2:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2DatCmdEr</name>
+            <name>$(P)Ch2:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2ParityEr</name>
+            <name>$(P)Ch2:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1FifoFull</name>
+            <name>$(P)Ch1:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1StartErr</name>
+            <name>$(P)Ch1:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1NoStart</name>
+            <name>$(P)Ch1:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1Timeout</name>
+            <name>$(P)Ch1:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1LenLong</name>
+            <name>$(P)Ch1:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1LenShort</name>
+            <name>$(P)Ch1:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1DatCmdEr</name>
+            <name>$(P)Ch1:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1ParityEr</name>
+            <name>$(P)Ch1:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4FifoFull</name>
+            <name>$(P)Ch4:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4StartErr</name>
+            <name>$(P)Ch4:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4NoStart</name>
+            <name>$(P)Ch4:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4Timeout</name>
+            <name>$(P)Ch4:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4LenLong</name>
+            <name>$(P)Ch4:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4LenShort</name>
+            <name>$(P)Ch4:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4DatCmdEr</name>
+            <name>$(P)Ch4:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4ParityEr</name>
+            <name>$(P)Ch4:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3FifoFull</name>
+            <name>$(P)Ch3:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3StartErr</name>
+            <name>$(P)Ch3:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3NoStart</name>
+            <name>$(P)Ch3:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3Timeout</name>
+            <name>$(P)Ch3:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3LenLong</name>
+            <name>$(P)Ch3:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3LenShort</name>
+            <name>$(P)Ch3:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3DatCmdEr</name>
+            <name>$(P)Ch3:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3ParityEr</name>
+            <name>$(P)Ch3:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6FifoFull</name>
+            <name>$(P)Ch6:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6StartErr</name>
+            <name>$(P)Ch6:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6NoStart</name>
+            <name>$(P)Ch6:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6Timeout</name>
+            <name>$(P)Ch6:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6LenLong</name>
+            <name>$(P)Ch6:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6LenShort</name>
+            <name>$(P)Ch6:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6DatCmdEr</name>
+            <name>$(P)Ch6:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6ParityEr</name>
+            <name>$(P)Ch6:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5FifoFull</name>
+            <name>$(P)Ch5:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5StartErr</name>
+            <name>$(P)Ch5:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5NoStart</name>
+            <name>$(P)Ch5:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5Timeout</name>
+            <name>$(P)Ch5:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5LenLong</name>
+            <name>$(P)Ch5:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5LenShort</name>
+            <name>$(P)Ch5:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5DatCmdEr</name>
+            <name>$(P)Ch5:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5ParityEr</name>
+            <name>$(P)Ch5:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8FifoFull</name>
+            <name>$(P)Ch8:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8StartErr</name>
+            <name>$(P)Ch8:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8NoStart</name>
+            <name>$(P)Ch8:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8Timeout</name>
+            <name>$(P)Ch8:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8LenLong</name>
+            <name>$(P)Ch8:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8LenShort</name>
+            <name>$(P)Ch8:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8DatCmdEr</name>
+            <name>$(P)Ch8:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8ParityEr</name>
+            <name>$(P)Ch8:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7FifoFull</name>
+            <name>$(P)Ch7:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7StartErr</name>
+            <name>$(P)Ch7:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7NoStart</name>
+            <name>$(P)Ch7:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7Timeout</name>
+            <name>$(P)Ch7:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7LenLong</name>
+            <name>$(P)Ch7:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7LenShort</name>
+            <name>$(P)Ch7:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7DatCmdEr</name>
+            <name>$(P)Ch7:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7ParityEr</name>
+            <name>$(P)Ch7:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10FifoFull</name>
+            <name>$(P)C10:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10StartEre</name>
+            <name>$(P)C10:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10NoStart</name>
+            <name>$(P)C10:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10Timeout</name>
+            <name>$(P)C10:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10LenLong</name>
+            <name>$(P)C10:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10LenShort</name>
+            <name>$(P)C10:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10DatCmdEr</name>
+            <name>$(P)C10:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10ParityEr</name>
+            <name>$(P)C10:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9FifoFull</name>
+            <name>$(P)Ch9:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9StartErr</name>
+            <name>$(P)Ch9:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9NoStart</name>
+            <name>$(P)Ch9:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9Timeout</name>
+            <name>$(P)Ch9:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9LenLong</name>
+            <name>$(P)Ch9:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9LenShort</name>
+            <name>$(P)Ch9:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9DatCmdEr</name>
+            <name>$(P)Ch9:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9ParityEr</name>
+            <name>$(P)Ch9:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)NacksFilterd</name>
+            <name>$(P)FltrNacks</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)NackFilterd</name>
+            <name>$(P)FltrNack</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)EepromError</name>
+            <name>$(P)ErrEeprom</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)HwMissing</name>
+            <name>$(P)ErrNoHw</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Unconfig</name>
+            <name>$(P)ErrUncfg</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ProgramErr</name>
+            <name>$(P)ErrProg</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CmdLenErr</name>
+            <name>$(P)ErrCmdLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)UnknownCmd</name>
+            <name>$(P)ErrBadCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlFifoFull</name>
+            <name>$(P)Ctr:ErrFif</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlStartErr</name>
+            <name>$(P)Ctr:ErrStr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlNoStart</name>
+            <name>$(P)Ctr:ErrNoS</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlTimeout</name>
+            <name>$(P)Ctr:ErrTim</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlLenLong</name>
+            <name>$(P)Ctr:ErrLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlLenShort</name>
+            <name>$(P)Ctr:ErrSho</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlDatCmdEr</name>
+            <name>$(P)Ctr:ErrCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlParityEr</name>
+            <name>$(P)Ctr:ErrPar</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)FilterdNacks</name>
+            <name>$(P)FltrdNacks</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8GotCmd</name>
+            <name>$(P)Ch8:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8GotData</name>
+            <name>$(P)Ch8:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7GotCmd</name>
+            <name>$(P)Ch7:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7GotData</name>
+            <name>$(P)Ch7:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6GotCmd</name>
+            <name>$(P)Ch6:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6GotData</name>
+            <name>$(P)Ch6:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5GotCmd</name>
+            <name>$(P)Ch5:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5GotData</name>
+            <name>$(P)Ch5:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4GotCmd</name>
+            <name>$(P)Ch4:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4GotData</name>
+            <name>$(P)Ch4:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3GotCmd</name>
+            <name>$(P)Ch3:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3GotData</name>
+            <name>$(P)Ch3:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2GotCmd</name>
+            <name>$(P)Ch2:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2GotData</name>
+            <name>$(P)Ch2:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1GotCmd</name>
+            <name>$(P)Ch1:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1GotData</name>
+            <name>$(P)Ch1:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)FilterdAcks</name>
+            <name>$(P)FiltrdAcks</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)AcquireStat</name>
+            <name>$(P)Acquiring</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -699,133 +699,133 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlGotCmd</name>
+            <name>$(P)Ctr:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CtrlGotData</name>
+            <name>$(P)Ctr:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10GotCmd</name>
+            <name>$(P)C10:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch10GotData</name>
+            <name>$(P)C10:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9GotCmd</name>
+            <name>$(P)Ch9:GotCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9GotData</name>
+            <name>$(P)Ch9:GotDat</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8FifCmd</name>
+            <name>$(P)Ch8:FifCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8FifoNE</name>
+            <name>$(P)Ch8:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7FifoAF</name>
+            <name>$(P)Ch7:FifoAF</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7FifoNE</name>
+            <name>$(P)Ch7:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6FifoAF</name>
+            <name>$(P)Ch6:FifoAF</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6FifoNE</name>
+            <name>$(P)Ch6:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5FifoAF</name>
+            <name>$(P)Ch5:FifoAF</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5FifoNE</name>
+            <name>$(P)Ch5:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4FifoAF</name>
+            <name>$(P)Ch4:FifoAF</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4FifoNE</name>
+            <name>$(P)Ch4:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3FifoAF</name>
+            <name>$(P)Ch3:FifoAF</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3FifoNE</name>
+            <name>$(P)Ch3:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2FifoAF</name>
+            <name>$(P)Ch2:FifoAF</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2FifoNE</name>
+            <name>$(P)Ch2:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1FifoAF</name>
+            <name>$(P)Ch1:FifoAF</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1FifoNE</name>
+            <name>$(P)Ch1:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -879,19 +879,19 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9FifoAF</name>
+            <name>$(P)Ch9:FifoAF</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9FifoNE</name>
+            <name>$(P)Ch9:FifoNE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)FilterdResp</name>
+            <name>$(P)FltrdRsps</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

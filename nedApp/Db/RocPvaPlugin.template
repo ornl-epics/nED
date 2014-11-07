@@ -1,0 +1,8 @@
+include "BasePlugin.include"
+include "BaseSocketPlugin.include"
+
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}

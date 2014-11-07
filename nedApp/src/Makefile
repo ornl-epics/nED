@@ -82,9 +82,11 @@ $(PROD_NAME)_SRCS  += DumpPlugin.cpp
 $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += GenericModulePlugin.cpp
+#$(PROD_NAME)_SRCS  += CalClientMain.cpp
 $(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
+$(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 
@@ -117,11 +119,11 @@ doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
 	./tools/export2epics.pl -cfg_rbv=1 < $^ > ../Db/RB_$@
 epicsdb: $($(PROD_NAME)_PVS:.cpp=.include)
 
-%.pvtt: %.cpp
-	./tools/export2pvtable.pl -mode=status  < $^ > ../../pvtable/$(@:.pvst=_status.pvst)
-	./tools/export2pvtable.pl -mode=counter < $^ > ../../pvtable/$(@:.pvst=_counter.pvst)
-	./tools/export2pvtable.pl -mode=config  < $^ > ../../pvtable/$(@:.pvst=_config.pvst)
-pvtables: $($(PROD_NAME)_PVS:.cpp=.pvtt)
+%.pvst: %.cpp
+	./tools/export2pvtable.pl -mode=status  -input_file=$^ -output_file=../../pvtable/$(@:.pvst=_status.pvst)
+	./tools/export2pvtable.pl -mode=counter -input_file=$^ -output_file=../../pvtable/$(@:.pvst=_counter.pvst)
+	./tools/export2pvtable.pl -mode=config  -input_file=$^ -output_file=../../pvtable/$(@:.pvst=_config.pvst)
+pvtables: $($(PROD_NAME)_PVS:.cpp=.pvst)
 
 clean::
 	rm -fR $($(PROD_NAME)_SRCS:.cpp=.dox) latex/ html/

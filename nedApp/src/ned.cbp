@@ -96,6 +96,8 @@
 		<Unit filename="RocPlugin_v52.cpp" />
 		<Unit filename="RocPlugin_v54.cpp" />
 		<Unit filename="RocPlugin_v56.cpp" />
+		<Unit filename="RocPvaPlugin.cpp" />
+		<Unit filename="RocPvaPlugin.h" />
 		<Unit filename="RtdlPlugin.cpp" />
 		<Unit filename="RtdlPlugin.h" />
 		<Unit filename="StatPlugin.cpp" />
