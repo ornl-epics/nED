@@ -10,6 +10,7 @@ include $(TOP)/configure/CONFIG
 #----------------------------------------------------
 # Create and install (or just install) into <top>/db
 # databases, templates, substitutions like this
+DB += nEDCommon.db
 DB += OccPortDriver.db
 DB += DiscoverPlugin.db
 DB += DspPlugin.db

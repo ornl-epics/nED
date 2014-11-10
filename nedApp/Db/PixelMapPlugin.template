@@ -67,3 +67,13 @@ record(longin, "$(P)CntSplit")
     field(VAL,  "0")
     field(PINI, "YES")
 }
+record(bo, "$(P)ResetCnt")
+{
+    field(DESC, "Reset counters")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ResetCnt")
+    field(ZRVL, "0")
+    field(ZRST, "None")
+    field(ONVL, "1")
+    field(ONST, "Reset")
+}

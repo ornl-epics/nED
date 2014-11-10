@@ -44,12 +44,12 @@ PixelMapPlugin::PixelMapPlugin(const char *portName, const char *dispatcherPortN
     if (err == MAP_ERR_NONE)
         err = importPixelMapFile(pixelMapFile);
 
-    createParam("MapErr",       asynParamInt32, &MapErr,        err);   // Last mapping import error
-    createParam("PassThru",     asynParamInt32, &PassThru,      0);     // Skip remapping pixels
-    createParam("CntUnmap",     asynParamInt32, &CntUnmap,      0);     // Number of unmapped pixels
-    createParam("CntErrOthr",   asynParamInt32, &CntErrOthr,    0);     // Number of unknown-error pixels
-    createParam("CntErrOff",    asynParamInt32, &CntErrOff,     0);     // Number of unmapped-error pixels
-    createParam("CntSplit",     asynParamInt32, &CntSplit,      0);     // Number of packet train splits
+    createParam("MapErr",       asynParamInt32, &MapErr,    err); // Last mapping import error
+    createParam("PassThru",     asynParamInt32, &PassThru,  0);   // Skip remapping pixels
+    createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels
+    createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
+    createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
+    createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
     callParamCallbacks();
 }
 
@@ -57,6 +57,20 @@ PixelMapPlugin::~PixelMapPlugin()
 {
     if (m_buffer != 0)
         free(m_buffer);
+}
+
+asynStatus PixelMapPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (pasynUser->reason == ResetCnt) {
+        if (value > 0) {
+            setIntegerParam(CntUnmap, 0);
+            setIntegerParam(CntError, 0);
+            setIntegerParam(CntSplit, 0);
+            callParamCallbacks();
+        }
+        return asynSuccess;
+    }
+    return BaseDispatcherPlugin::writeInt32(pasynUser, value);
 }
 
 void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
@@ -76,8 +90,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
     getIntegerParam(CntUnmap,   &errors.nUnmapped);
-    getIntegerParam(CntErrOthr, &errors.nErrOther);
-    getIntegerParam(CntErrOff,  &errors.nErrBound);
+    getIntegerParam(CntError,   &errors.nErrors);
     getIntegerParam(CntSplit,   &nSplits);
     getIntegerParam(PassThru,   &passthru);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL || m_map.empty())
@@ -148,12 +161,11 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     }
 
     this->lock();
-    setIntegerParam(RxCount,    nReceived        % std::numeric_limits<int32_t>::max());
-    setIntegerParam(ProcCount,  nProcessed       % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntSplit,   nSplits          % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntUnmap,   errors.nUnmapped % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntErrOthr, errors.nErrOther % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntErrOff,  errors.nErrBound % std::numeric_limits<int32_t>::max());
+    setIntegerParam(RxCount,    nReceived   % std::numeric_limits<int32_t>::max());
+    setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntUnmap,   errors.nUnmapped);
+    setIntegerParam(CntError,   errors.nErrors);
     callParamCallbacks();
     this->unlock();
 }
@@ -181,14 +193,7 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPac
             destEvent->pixelid = m_map[srcEvent->pixelid];
         } else if (srcEvent->pixelid & PIXID_ERR) { // Already tagged as error
             destEvent->pixelid = srcEvent->pixelid;
-
-            uint32_t pixelid = srcEvent->pixelid & ~PIXID_ERR;
-            if (pixelid < m_map.size() && m_map[pixelid] & PIXID_ERR_MAP) {
-                errors.nErrBound++;
-                destEvent->pixelid |= PIXID_ERR_MAP;
-            } else {
-                errors.nErrOther++;
-            }
+            errors.nErrors++;
         } else {
             destEvent->pixelid = srcEvent->pixelid | PIXID_ERR_MAP;
             errors.nUnmapped++;

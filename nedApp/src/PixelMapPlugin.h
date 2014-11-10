@@ -42,22 +42,25 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          */
         class PixelMapErrors {
             public:
-                int32_t nErrBound;      //!< Pixel id has error bit set and the value could not be mapped
-                int32_t nErrOther;      //!< Pixel id has error bit set but could be mapped otherwise
+                int32_t nErrors;        //!< Pixel id has error bit set and the value could not be mapped
                 int32_t nUnmapped;      //!< No mapping was found and pixel id error bit was set
 
                 PixelMapErrors()
-                    : nErrBound(0)
-                    , nErrOther(0)
+                    : nErrors(0)
                     , nUnmapped(0)
                 {}
 
                 PixelMapErrors &operator+=(const PixelMapErrors &rhs)
                 {
-                    // Don't care about overflow here
-                    nErrBound += rhs.nErrBound;
-                    nErrOther += rhs.nErrOther;
-                    nUnmapped += rhs.nUnmapped;
+                    // Prevent overflow, stop counting at INT32_MAX instead
+                    if (rhs.nErrors > std::numeric_limits<int32_t>::max() - nErrors)
+                        nErrors = std::numeric_limits<int32_t>::max();
+                    else
+                        nErrors += rhs.nErrors;
+                    if (rhs.nUnmapped > std::numeric_limits<int32_t>::max() - nUnmapped)
+                        nUnmapped = std::numeric_limits<int32_t>::max();
+                    else
+                        nUnmapped += rhs.nUnmapped;
                     return *this;
                 }
         };
@@ -91,6 +94,11 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          * Closes the dump file to make sure unsynced data gets flushed to filesystem.
          */
         ~PixelMapPlugin();
+
+        /**
+         * Overloaded function.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
          * Overloaded function to receive all OCC data.
@@ -132,10 +140,10 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         int MapErr;         //!< Mapping error (see PixelMapPlugin::ImportError)
         int PassThru;       //!< Should the plugin do the pixel map conversion
         int CntUnmap;       //!< Number of unmapped pixels
-        int CntErrOthr;     //!< Number of generic error pixel ids detected
-        int CntErrOff;      //!< Number of error pixel ids outside range detected
+        int CntError;       //!< Number of generic error pixel ids detected
         int CntSplit;       //!< Total number of splited incoming packet lists
-        #define LAST_PIXELMAPPLUGIN_PARAM CntSplit
+        int ResetCnt;       //!< Reset counters
+        #define LAST_PIXELMAPPLUGIN_PARAM ResetCnt
 };
 
 #endif // PIXEL_MAP_PLUGIN_H
