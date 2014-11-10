@@ -9881,7 +9881,9 @@ record(mbbo, "$(P)AcqMode")
     field(ONVL, "1")
     field(ONST, "verbose")
     field(TWVL, "2")
-    field(TWST, "fake trigger")
+    field(TWST, "reserved")
+    field(THVL, "3")
+    field(THST, "fake trigger")
 }
 record(mbbo, "$(P)AcqModeW")
 {
@@ -9896,7 +9898,9 @@ record(mbbo, "$(P)AcqModeW")
     field(ONVL, "1")
     field(ONST, "verbose")
     field(TWVL, "2")
-    field(TWST, "fake trigger")
+    field(TWST, "reserved")
+    field(THVL, "3")
+    field(THST, "fake trigger")
 }
 record(mbbi, "$(P)AcqModeR")
 {
@@ -9910,7 +9914,9 @@ record(mbbi, "$(P)AcqModeR")
     field(ONVL, "1")
     field(ONST, "verbose")
     field(TWVL, "2")
-    field(TWST, "fake trigger")
+    field(TWST, "reserved")
+    field(THVL, "3")
+    field(THST, "fake trigger")
 }
 record(mbbo, "$(P)AcqModeS")
 {
@@ -9922,7 +9928,9 @@ record(mbbo, "$(P)AcqModeS")
     field(ONVL, "1")
     field(ONST, "verbose")
     field(TWVL, "2")
-    field(TWST, "fake trigger")
+    field(TWST, "reserved")
+    field(THVL, "3")
+    field(THST, "fake trigger")
 }
 record(bo, "$(P)TxEnable")
 {
