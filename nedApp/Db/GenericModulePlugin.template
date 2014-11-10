@@ -174,3 +174,17 @@ record(waveform, "$(P)RspData")
     field(FTVL, "CHAR")
     field(NELM, "4096")
 }
+record(mbbo, "$(P)ByteGrp")
+{
+    field(DESC, "Byte grouping mode")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ByteGrp")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "2 bytes swapped")
+    field(ONVL, "1")
+    field(ONST, "2 bytes")
+    field(TWVL, "2")
+    field(TWST, "4 bytes")
+}
