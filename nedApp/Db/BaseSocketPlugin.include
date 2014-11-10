@@ -16,7 +16,6 @@ record(stringin, "$(P)ClientIp")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))ClientIp")
     field(SCAN, "I/O Intr")
-    field(PINI, "YES")
 }
 record(longout, "$(P)CheckInt")
 {

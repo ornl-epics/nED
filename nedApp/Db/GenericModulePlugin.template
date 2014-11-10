@@ -1,5 +1,4 @@
 include "BasePlugin.include"
-include "BaseModulePlugin.include"
 
 record(mbbo, "$(P)ReqCmd")
 {
@@ -55,7 +54,6 @@ record(mbbi, "$(P)RspHwType")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))RspHwType")
     field(SCAN, "I/O Intr")
-    field(PINI, "YES")
     field(ZRVL, "0")
     field(ZRST, "not provided")
     field(ONVL, "32")
