@@ -24,7 +24,9 @@
  * all pixel ids in normal event data when (not raw or extended).
  *
  * In addition to Enable switch provided by BasePlugin, PixelMap also provides
- * PassThru switch. When enabled, data will be passed thru intact.
+ * PassThru switch. When enabled, data will be passed thru intact. Pass thru
+ * mode is automatically enabled when DataMode is not 'normal'.
+ * There's a third switch for filtering out bad and unmapped, good or all events.
  *
  * Internally the plugin pre-allocates a buffer when constructed. When processing
  * received packets from OCC, the received batch might be bigger than the
@@ -75,6 +77,18 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
             MAP_ERR_NO_MEM      = 3, //!< Failed to allocate internal buffer
         } ImportError;
 
+        /**
+         * Possible mode for dealing with bad events.
+         *
+         * Note: it's a bitmask
+         */
+        typedef enum {
+            FILTER_NONE         = 0, //!< Don't filter events
+            FILTER_GOOD         = 1, //!< Filter out good events
+            FILTER_BAD          = 2, //!< Filter out bad events
+            FILTER_ALL          = 3, //!< Filter out all events
+        } FilterMode_t;
+
     public: // functions
         /**
          * Constructor
@@ -116,9 +130,10 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          *
          * @param[in] srcPacket Original packet from OCC
          * @param[out] destPacket Copied packet with pixel ids mapped
+         * @param[in] mode Event output mode switch.
          * @return Number of unmapped pixel ids.
          */
-        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket);
+        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket, FilterMode_t mode);
 
         /**
          * Read mapping table from a file.
@@ -143,7 +158,8 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         int CntError;       //!< Number of generic error pixel ids detected
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
-        #define LAST_PIXELMAPPLUGIN_PARAM ResetCnt
+        int FilterMode;     //!< Event filter mode (see PixelMapPlugin::FilterMode_t)
+        #define LAST_PIXELMAPPLUGIN_PARAM FilterMode
 };
 
 #endif // PIXEL_MAP_PLUGIN_H

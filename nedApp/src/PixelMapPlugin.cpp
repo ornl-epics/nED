@@ -50,6 +50,7 @@ PixelMapPlugin::PixelMapPlugin(const char *portName, const char *dispatcherPortN
     createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
+    createParam("FilterMode",   asynParamInt32, &FilterMode);     // Event filter mode (see PixelMapPlugin::FilterMode_t)
     callParamCallbacks();
 }
 
@@ -69,6 +70,11 @@ asynStatus PixelMapPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             callParamCallbacks();
         }
         return asynSuccess;
+    } else if (pasynUser->reason == FilterMode) {
+        if ((value & FILTER_ALL) != value) {
+            LOG_ERROR("Invalid FilterMode value '%d'", value);
+            return asynError;
+        }
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
 }
@@ -79,6 +85,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     int nProcessed = 0;
     int passthru = 0;
     int nSplits = 0;
+    int filterMode = FILTER_NONE;
     PixelMapErrors errors;
 
     if (m_buffer == 0) {
@@ -92,6 +99,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     getIntegerParam(CntUnmap,   &errors.nUnmapped);
     getIntegerParam(CntError,   &errors.nErrors);
     getIntegerParam(CntSplit,   &nSplits);
+    getIntegerParam(FilterMode, &filterMode);
     getIntegerParam(PassThru,   &passthru);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL || m_map.empty())
         passthru = 1;
@@ -109,6 +117,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
         m_packetList.release();
         m_packetList.waitAllReleased();
         m_packetList.clear();
+        nProcessed += packetList->size();
     } else {
         // Break single loop into two parts to have single point of sending data
         for (auto it = packetList->cbegin(); it != packetList->cend(); ) {
@@ -145,7 +154,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
 
                     // Do the pixel id mapping - this can be parallelized
                     #pragma omp task firstprivate(packet, newPacket) shared(errors)
-                    errors += packetMap(packet, newPacket);
+                    errors += packetMap(packet, newPacket, static_cast<FilterMode_t>(filterMode));
 
                     nProcessed++;
                 }
@@ -170,7 +179,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     this->unlock();
 }
 
-PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPacket, DasPacket *destPacket)
+PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPacket, DasPacket *destPacket, FilterMode_t mode)
 {
     PixelMapErrors errors;
 
@@ -181,28 +190,43 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPac
     const DasPacket::Event *srcEvent= reinterpret_cast<const DasPacket::Event *>(srcPacket->getData(&nEvents));
     DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(destPacket->getData(&nDestEvents));
     nEvents /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
+    nDestEvents = 0;
 
     // The below code was optimized for speed and is not as elegant as could be
     // otherwise. Bitfield, condition rearranging were both tried with worse results.
-    destPacket->payload_length += nEvents * sizeof(DasPacket::Event);
     while (nEvents-- > 0) {
 
         if (likely((srcEvent->pixelid & PIXID_ERR) == 0 && srcEvent->pixelid < m_map.size())) {
-            // Gaps in pixel map table resolve to error pixels,
-            // no need to care here
-            destEvent->pixelid = m_map[srcEvent->pixelid];
+            if (mode & ~FILTER_GOOD) {
+                // Gaps in pixel map table resolve to error pixels,
+                // no need to care here
+                destEvent->tof = srcEvent->tof;
+                destEvent->pixelid = m_map[srcEvent->pixelid];
+                destEvent++;
+                nDestEvents++;
+            }
         } else if (srcEvent->pixelid & PIXID_ERR) { // Already tagged as error
-            destEvent->pixelid = srcEvent->pixelid;
-            errors.nErrors++;
+            if (mode & ~FILTER_BAD) {
+                destEvent->tof = srcEvent->tof;
+                destEvent->pixelid = srcEvent->pixelid;
+                errors.nErrors++;
+                destEvent++;
+                nDestEvents++;
+            }
         } else {
-            destEvent->pixelid = srcEvent->pixelid | PIXID_ERR_MAP;
-            errors.nUnmapped++;
+            if (mode & ~FILTER_BAD) {
+                destEvent->tof = srcEvent->tof;
+                destEvent->pixelid = srcEvent->pixelid | PIXID_ERR_MAP;
+                errors.nUnmapped++;
+                destEvent++;
+                nDestEvents++;
+            }
         }
 
-        destEvent->tof = srcEvent->tof;
         srcEvent++;
-        destEvent++;
     }
+
+    destPacket->payload_length += nDestEvents * sizeof(DasPacket::Event);
 
     return errors;
 }
