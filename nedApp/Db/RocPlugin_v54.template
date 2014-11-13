@@ -12,3 +12,10 @@ record(bi, "$(P)Acquiring")
     field(ZNAM, "not acquiring")
     field(ONAM, "acquiring")
 }
+
+# Upgrade DataMode record with link to OutputMode
+record(mbbo, "$(P)DataMode")
+{
+    field(OUT,  "$(P)OutputMode")
+    field(FLNK, "$(P)OutputMode")
+}

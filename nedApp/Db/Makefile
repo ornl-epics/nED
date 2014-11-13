@@ -10,6 +10,7 @@ include $(TOP)/configure/CONFIG
 #----------------------------------------------------
 # Create and install (or just install) into <top>/db
 # databases, templates, substitutions like this
+DB += nEDCommon.db
 DB += OccPortDriver.db
 DB += DiscoverPlugin.db
 DB += DspPlugin.db
@@ -19,12 +20,6 @@ DB += RocPlugin_v51.db
 DB += RocPlugin_v52.db
 DB += RocPlugin_v54.db
 DB += RocPlugin_v56.db
-DB += RB_DspPlugin.db
-DB += RB_FemPlugin.db
-DB += RB_RocPlugin_v51.db
-DB += RB_RocPlugin_v52.db
-DB += RB_RocPlugin_v54.db
-DB += RB_RocPlugin_v56.db
 DB += RocHv.template
 DB += ROCHV.db
 DB += ROCHVSumBL16b.db

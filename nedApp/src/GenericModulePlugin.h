@@ -34,12 +34,22 @@
  */
 class GenericModulePlugin : public BasePlugin {
     private: // variables
+        /**
+         * Valid byte grouping modes.
+         */
+        enum ByteGroupingMode {
+            GROUP_2_BYTES_SWAPPED   = 0,
+            GROUP_2_BYTES           = 1,
+            GROUP_4_BYTES           = 2,
+        };
+
         static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask;
         static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask;
 
         uint32_t m_hardwareId;      //!< Currently set module address
         uint32_t m_payload[256];    //!< Last packet payload
         uint32_t m_payloadLen;      //!< Last packet payload length, in number of elements in m_payload
+        DasPacket::CommandType m_expectedResponse; //!< Used to filter our responses that we didn't request
 
     public: // structures and defines
         /**
@@ -98,7 +108,8 @@ class GenericModulePlugin : public BasePlugin {
         int RspLen;         //!< Response length in bytes
         int RspDataLen;     //!< Response payload length in bytes
         int RspData;        //!< Response payload
-        #define LAST_GENERICMODULEPLUGIN_PARAM RspData
+        int ByteGrp;        //!< How many byte to group
+        #define LAST_GENERICMODULEPLUGIN_PARAM ByteGrp
 };
 
 #endif // GENERIC_MODULE_PLUGIN_H

@@ -24,7 +24,9 @@
  * all pixel ids in normal event data when (not raw or extended).
  *
  * In addition to Enable switch provided by BasePlugin, PixelMap also provides
- * PassThru switch. When enabled, data will be passed thru intact.
+ * PassThru switch. When enabled, data will be passed thru intact. Pass thru
+ * mode is automatically enabled when DataMode is not 'normal'.
+ * There's a third switch for filtering out bad and unmapped, good or all events.
  *
  * Internally the plugin pre-allocates a buffer when constructed. When processing
  * received packets from OCC, the received batch might be bigger than the
@@ -42,22 +44,25 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          */
         class PixelMapErrors {
             public:
-                int32_t nErrBound;      //!< Pixel id has error bit set and the value could not be mapped
-                int32_t nErrOther;      //!< Pixel id has error bit set but could be mapped otherwise
+                int32_t nErrors;        //!< Pixel id has error bit set and the value could not be mapped
                 int32_t nUnmapped;      //!< No mapping was found and pixel id error bit was set
 
                 PixelMapErrors()
-                    : nErrBound(0)
-                    , nErrOther(0)
+                    : nErrors(0)
                     , nUnmapped(0)
                 {}
 
                 PixelMapErrors &operator+=(const PixelMapErrors &rhs)
                 {
-                    // Don't care about overflow here
-                    nErrBound += rhs.nErrBound;
-                    nErrOther += rhs.nErrOther;
-                    nUnmapped += rhs.nUnmapped;
+                    // Prevent overflow, stop counting at INT32_MAX instead
+                    if (rhs.nErrors > std::numeric_limits<int32_t>::max() - nErrors)
+                        nErrors = std::numeric_limits<int32_t>::max();
+                    else
+                        nErrors += rhs.nErrors;
+                    if (rhs.nUnmapped > std::numeric_limits<int32_t>::max() - nUnmapped)
+                        nUnmapped = std::numeric_limits<int32_t>::max();
+                    else
+                        nUnmapped += rhs.nUnmapped;
                     return *this;
                 }
         };
@@ -71,6 +76,18 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
             MAP_ERR_PARSE       = 2, //!< Failed to parse file
             MAP_ERR_NO_MEM      = 3, //!< Failed to allocate internal buffer
         } ImportError;
+
+        /**
+         * Possible mode for dealing with bad events.
+         *
+         * Note: it's a bitmask
+         */
+        typedef enum {
+            FILTER_NONE         = 0, //!< Don't filter events
+            FILTER_GOOD         = 1, //!< Filter out good events
+            FILTER_BAD          = 2, //!< Filter out bad events
+            FILTER_ALL          = 3, //!< Filter out all events
+        } FilterMode_t;
 
     public: // functions
         /**
@@ -93,6 +110,11 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         ~PixelMapPlugin();
 
         /**
+         * Overloaded function.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
          * Overloaded function to receive all OCC data.
          */
         void processDataUnlocked(const DasPacketList * const packetList);
@@ -108,9 +130,10 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          *
          * @param[in] srcPacket Original packet from OCC
          * @param[out] destPacket Copied packet with pixel ids mapped
+         * @param[in] mode Event output mode switch.
          * @return Number of unmapped pixel ids.
          */
-        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket);
+        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket, FilterMode_t mode);
 
         /**
          * Read mapping table from a file.
@@ -132,10 +155,11 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         int MapErr;         //!< Mapping error (see PixelMapPlugin::ImportError)
         int PassThru;       //!< Should the plugin do the pixel map conversion
         int CntUnmap;       //!< Number of unmapped pixels
-        int CntErrOthr;     //!< Number of generic error pixel ids detected
-        int CntErrOff;      //!< Number of error pixel ids outside range detected
+        int CntError;       //!< Number of generic error pixel ids detected
         int CntSplit;       //!< Total number of splited incoming packet lists
-        #define LAST_PIXELMAPPLUGIN_PARAM CntSplit
+        int ResetCnt;       //!< Reset counters
+        int FilterMode;     //!< Event filter mode (see PixelMapPlugin::FilterMode_t)
+        #define LAST_PIXELMAPPLUGIN_PARAM FilterMode
 };
 
 #endif // PIXEL_MAP_PLUGIN_H

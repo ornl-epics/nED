@@ -26,7 +26,6 @@ AUTOSAVE=       $(SUPPORT)/autosave/master
 STREAMDEVICE=   $(SUPPORT)/StreamDevice/master
 OCCLIB=         /home/controls/occ/master/lib
 
-#EPICS_BASE=/home/controls/prod/epics/base/rel3.14.12.4_20140619
 EPICS_BASE=/home/controls/epics/base/master
 BASEV4=/home/controls/epics/basev4/master
 

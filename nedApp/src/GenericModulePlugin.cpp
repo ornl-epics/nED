@@ -21,6 +21,7 @@ GenericModulePlugin::GenericModulePlugin(const char *portName, const char *dispa
                  defaultInterfaceMask, defaultInterruptMask)
     , m_hardwareId(0)
     , m_payloadLen(0)
+    , m_expectedResponse(static_cast<DasPacket::CommandType>(0))
 {
     createParam("ReqDest",      asynParamOctet, &ReqDest);      // WRITE - Module address to communicate with
     createParam("ReqCmd",       asynParamInt32, &ReqCmd);       // WRITE - Command to be sent to module
@@ -34,6 +35,7 @@ GenericModulePlugin::GenericModulePlugin(const char *portName, const char *dispa
     createParam("RspLen",       asynParamInt32, &RspLen);       // READ - Response length in bytes
     createParam("RspDataLen",   asynParamInt32, &RspDataLen);   // READ - Response payload length in bytes
     createParam("RspData",      asynParamOctet, &RspData);      // READ - Response payload
+    createParam("ByteGrp",      asynParamInt32, &ByteGrp);      // WRITE - Byte grouping mode
 
     callParamCallbacks();
 }
@@ -58,11 +60,29 @@ asynStatus GenericModulePlugin::writeOctet(asynUser *pasynUser, const char *valu
 asynStatus GenericModulePlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
 {
     if (pasynUser->reason == RspData) {
+        int byteGrp = GROUP_2_BYTES_SWAPPED;
+        getIntegerParam(ByteGrp, &byteGrp);
+
         *nActual = 0;
+
         for (uint32_t i = 0; i < m_payloadLen; i++) {
-            int len = snprintf(value, nChars, "0x%08X ", m_payload[i]);
+            int len;
+            uint32_t val = m_payload[i];
+            switch (byteGrp) {
+            case GROUP_2_BYTES:
+                len = snprintf(value, nChars, "%04X %04X ", (val >> 16) & 0xFFFF, val & 0xFFFF);
+                break;
+            case GROUP_4_BYTES:
+                len = snprintf(value, nChars, "%08X ", val);
+                break;
+            case GROUP_2_BYTES_SWAPPED:
+            default:
+                len = snprintf(value, nChars, "%04X %04X ", val & 0xFFFF, (val >> 16) & 0xFFFF);
+                break;
+            }
             if (len >= static_cast<int>(nChars) || len == -1)
                 break;
+
             nChars -= len;
             *nActual += len;
             value += len;
@@ -91,6 +111,8 @@ void GenericModulePlugin::request(const DasPacket::CommandType command)
     if (packet) {
         BasePlugin::sendToDispatcher(packet);
         delete packet;
+
+        m_expectedResponse = command;
 
         int nSent = 0;
         getIntegerParam(TxCount, &nSent);
@@ -138,7 +160,11 @@ void GenericModulePlugin::processData(const DasPacketList * const packetList)
 
 bool GenericModulePlugin::response(const DasPacket *packet)
 {
-    setIntegerParam(RspCmd,     packet->getResponseType());
+    DasPacket::CommandType responseCmd = packet->getResponseType();
+    if (m_expectedResponse != responseCmd)
+        return false;
+
+    setIntegerParam(RspCmd,     responseCmd);
     setIntegerParam(RspCmdAck,  (packet->cmdinfo.command == DasPacket::RSP_NACK || packet->cmdinfo.command == DasPacket::RSP_ACK) ? packet->cmdinfo.command : 0);
     setIntegerParam(RspHwType,  static_cast<int>(packet->cmdinfo.module_type));
     setStringParam(RspSrc,      BaseModulePlugin::addr2ip(packet->getSourceAddress()).c_str());

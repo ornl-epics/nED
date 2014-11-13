@@ -339,12 +339,12 @@ void DspPlugin::createConfigParams() {
     createConfigParam("Ch31:Delay", 'D', 0x47, 32,  0, 0); // Chan31 edge delay
 
     // LVDS & optical parameters
-    createConfigParam("Lvds0:En",   'E', 0x0,  1,  0, 1); // LVDS chan0 RX/TX enable       (0=disabled,1=enabled)
-    createConfigParam("Lvds1:En",   'E', 0x0,  1,  3, 0); // LVDS chan1 RX/TX enable       (0=disabled,1=enabled)
-    createConfigParam("Lvds2:En",   'E', 0x0,  1,  6, 0); // LVDS chan2 RX/TX enable       (0=disabled,1=enabled)
-    createConfigParam("Lvds3:En",   'E', 0x0,  1,  9, 0); // LVDS chan3 RX/TX enable       (0=disabled,1=enabled)
-    createConfigParam("Lvds4:En",   'E', 0x0,  1, 12, 0); // LVDS chan4 RX/TX enable       (0=disabled,1=enabled)
-    createConfigParam("Lvds5:En",   'E', 0x0,  1, 15, 0); // LVDS chan5 RX/TX enable       (0=disabled,1=enabled)
+    createConfigParam("Lvds0:Flow", 'E', 0x0,  1,  0, 1); // LVDS chan0 TXEN control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds1:Flow", 'E', 0x0,  1,  3, 0); // LVDS chan1 TXEN control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds2:Flow", 'E', 0x0,  1,  6, 0); // LVDS chan2 TXEX control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds3:Flow", 'E', 0x0,  1,  9, 0); // LVDS chan3 TXEX control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds4:Flow", 'E', 0x0,  1, 12, 0); // LVDS chan4 TXEX control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds5:Flow", 'E', 0x0,  1, 15, 0); // LVDS chan5 TXEX control       (0=flow control,1=no flow control)
     createConfigParam("Lvds0:IgnE", 'E', 0x0,  1,  1, 0); // LVDS chan0 ignore error pkts  (0=ignore,1=keep)
     createConfigParam("Lvds1:IgnE", 'E', 0x0,  1,  4, 0); // LVDS chan1 ignore error pkts  (0=ignore,1=keep)
     createConfigParam("Lvds2:IgnE", 'E', 0x0,  1,  7, 0); // LVDS chan2 ignore error pkts  (0=ignore,1=keep)

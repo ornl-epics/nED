@@ -82,7 +82,6 @@ $(PROD_NAME)_SRCS  += DumpPlugin.cpp
 $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += GenericModulePlugin.cpp
-#$(PROD_NAME)_SRCS  += CalClientMain.cpp
 $(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
@@ -115,8 +114,7 @@ doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
 	(cd latex/; make pdf > /dev/null)
 
 %.include: %.cpp
-	./tools/export2epics.pl            < $^ > ../Db/$@
-	./tools/export2epics.pl -cfg_rbv=1 < $^ > ../Db/RB_$@
+	./tools/export2epics.pl < $^ > ../Db/$@
 epicsdb: $($(PROD_NAME)_PVS:.cpp=.include)
 
 %.pvst: %.cpp

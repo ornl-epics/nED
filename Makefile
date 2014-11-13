@@ -14,4 +14,5 @@ iocBoot_DEPEND_DIRS += $(filter %App,$(DIRS))
 
 include $(TOP)/configure/RULES_TOP
 
-
+clean:
+	rm -fR db dbd
