@@ -75,6 +75,9 @@ assign statePV to "{PREFIX}:State";
 string prevStatePV;
 assign prevStatePV to "{PREFIX}:PrevState";
 
+int starting = 0;
+int stopping = 0;
+
 ss startStop {
    state init {
       entry {
@@ -187,15 +190,21 @@ ss startStop {
        entry {
           SENDSTATE(ready)
        }
-       when (globalStopEvent && globalStop == 1) {
+       when (starting) { 
+          SENDSTATE(starting)
+          i = -1
+       } state starting1
+       when (efTestAndClear(globalStopEvent) && globalStop == 1) {
           globalStart = 0;
           pvPut(globalStart, SYNC);
           SENDSTATE(tryStopping)
+          stopping = 1;
        } state tryStopping
-       when (globalStartEvent && globalStart == 1) {
+       when (efTestAndClear(globalStartEvent) && globalStart == 1) {
           globalStop = 0;
           pvPut(globalStop, SYNC);
           SENDSTATE(tryStarting)
+          starting = 1;
        } state tryStarting
        exit {
           i = -1;
@@ -205,21 +214,25 @@ ss startStop {
        option -e;
        entry {
           i = i+1;
+          strcpy(currentPV, deviceNames[i]);
+          pvPut(currentPV);
        }
        when (i >= NUMDEVICES) {
-       } state tryStarting1
+       } state check
        when (acquiring[i] == NOTACQUIRING) {
        } state tryStarting
        when() {
+          starting = 0;
           ourstate = mixed;
           pvPut(ourstatus);
        } state ready
     }
-    state tryStarting1 {
     state tryStopping {
        option -e;
        entry {
           i = i+1;
+          strcpy(currentPV, deviceNames[i]);
+          pvPut(currentPV);
        }
        when (i >= NUMDEVICES) {
           ourstatus = stopped;
@@ -261,68 +274,67 @@ ss startStop {
         when () {
         } state readyError
      }
-       
-       
-
-
-
-
-
-
-
-    state setup {
-       entry {
-          SENDSTATE(setup)
-          i=0;
-       }
-       when (acquiring[i]) == ACQUIRING) {
-          SENDSTATE(setup1)
-       } state setup1
-       when () {
-          SENDSTATE(setup2)
-       } state setup2
-    }
-    state setup1 {
+     state starting1 {
        option -e;
        entry {
-          i++;
+          i = i+1;
        }
-       when (i >= NUMDEVICES) { 
-          efset(acqStartFlag);
+       when (i >= NUMDEVICES) {
+          i = -1;
+       } state starting3
+       when () {
+          strcpy(currentPV, deviceNames[i]);
+          pvPut(currentPV);
+          cmdReq[i] = WRITECONFCMD;
+          pvPut(cmdReq[i], SYNC);
+          pvGet(cmdResp[i]);
+       } state starting2
+    }
+    state starting2 {
+       when (cmdRsp[i] == SUCCESSRSP) {
+       } state starting1
+       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
+             cmdRsp[i] == NORSP) { } state readyError
+       when(delay(0.2)) {
+          pvGet(cmdRsp[i]);
+       } state starting2
+     }
+     state starting3 {
+       option -e;
+       entry {
+          i = i+1;
+       }
+       when (i >= NUMDEVICES) {
        } state running
-       when (acquiring[i]) == ACQUIRING) {
-       } state setup1
        when () {
-       } state setupError
+          strcpy(currentPV, deviceNames[i]);
+          pvPut(currentPV);
+          cmdReq[i] = STARTAQCCMD;
+          pvPut(cmdReq[i], SYNC);
+          pvGet(cmdResp[i]);
+       } state starting4
     }
-    state setup2 {
-       option -e;
+    state starting4 {
+       when (cmdRsp[i] == SUCCESSRSP) {
+       } state starting3
+       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
+             cmdRsp[i] == NORSP) { } state readyError
+       when(delay(0.2)) {
+          pvGet(cmdRsp[i]);
+       } state starting4
+     }
+    state running {
        entry {
-          i++;
+          SENDSTATE(Running)
        }
-       when (i >= NUMDEVICES) { 
-          efset(noAcqStartFlag);
-       } state notRunning
-       when (acquiring[i]) == NOTACQUIRING) {
-       } state setup2
-       when () {
-       } state setupError
-    }
-    state setupError {
-       entry {
-          SENDSTATE(setupError)
-       }
-       when (efTestAndClear(stoppedFlag)) {
-       } state ready
-    }
-    state ready {
+       when (efTestAndClear(globalStopEvent) && globalStop == 1) {
+          globalStart = 0;
+          pvPut(globalStart, SYNC);
+          SENDSTATE(tryStopping)
+          stopping = 1;
+       } state tryStopping
+   }
+}       
+       
 
-
-
-
-    
-     
-         
-            
-           
 
