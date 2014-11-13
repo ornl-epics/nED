@@ -94,15 +94,21 @@ class DiscoverPlugin : public BasePlugin {
         void reqLvdsVersion(uint32_t hardwareId);
 
         /**
-         * Print discovered modules into a buffer
+         * Print discovered modules in human format
          */
         uint32_t formatOutput(char *buffer, uint32_t size);
+        
+        /**
+         * Print discovered modules in substitution format
+         */
+        uint32_t formatSubstitution(char *buffer, uint32_t size);
 
     private:
         #define FIRST_DISCOVERPLUGIN_PARAM Trigger
         int Trigger;            //!< Trigger discovery of modules
         int Output;
-        #define LAST_DISCOVERPLUGIN_PARAM Output
+        int Format;             //!< Output format
+        #define LAST_DISCOVERPLUGIN_PARAM Format
 };
 
 #endif // DISCOVER_PLUGIN_H

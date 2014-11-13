@@ -16,6 +16,17 @@ record(waveform, "$(P)Output")
     field(FTVL, "CHAR")
     field(NELM, "16192")
 }
+record(bo, "$(P)Format")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Format")
+    field(FLNK, "$(P)Output.PROC")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "Human")
+    field(ONAM, "Substitution")
+}
 # Upgrade record from BasePlugin
 record(longin, "$(P)ProcCount")
 {
