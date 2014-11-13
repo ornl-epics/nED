@@ -66,6 +66,8 @@
 		<Unit filename="DasPacket.h" />
 		<Unit filename="DasPacketList.cpp" />
 		<Unit filename="DasPacketList.h" />
+		<Unit filename="DebugPlugin.cpp" />
+		<Unit filename="DebugPlugin.h" />
 		<Unit filename="DiscoverPlugin.cpp" />
 		<Unit filename="DiscoverPlugin.h" />
 		<Unit filename="DmaCircularBuffer.cpp" />
@@ -82,8 +84,6 @@
 		<Unit filename="FemPlugin.h" />
 		<Unit filename="FemPlugin_v32.cpp" />
 		<Unit filename="Fifo.h" />
-		<Unit filename="GenericModulePlugin.cpp" />
-		<Unit filename="GenericModulePlugin.h" />
 		<Unit filename="Log.h" />
 		<Unit filename="OccPortDriver.cpp" />
 		<Unit filename="OccPortDriver.h" />

@@ -1,4 +1,4 @@
-/* GenericModulePlugin.cpp
+/* DebugPlugin.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -7,16 +7,17 @@
  * @author Klemen Vodopivec
  */
 
-#include "GenericModulePlugin.h"
+#include "BaseModulePlugin.h"
+#include "DebugPlugin.h"
 #include "Log.h"
 
 #include <algorithm>
 
-EPICS_REGISTER_PLUGIN(GenericModulePlugin, 2, "Port name", string, "Dispatcher port name", string);
+EPICS_REGISTER_PLUGIN(DebugPlugin, 2, "Port name", string, "Dispatcher port name", string);
 
 #define NUM_GENERICMODULEPLUGIN_PARAMS      ((int)(&LAST_GENERICMODULEPLUGIN_PARAM - &FIRST_GENERICMODULEPLUGIN_PARAM + 1))
 
-GenericModulePlugin::GenericModulePlugin(const char *portName, const char *dispatcherPortName, int blocking)
+DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, int blocking)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_GENERICMODULEPLUGIN_PARAMS, 1,
                  defaultInterfaceMask, defaultInterruptMask)
     , m_hardwareId(0)
@@ -40,7 +41,7 @@ GenericModulePlugin::GenericModulePlugin(const char *portName, const char *dispa
     callParamCallbacks();
 }
 
-asynStatus GenericModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+asynStatus DebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == ReqCmd) {
         // Allow any value from the client.
@@ -50,14 +51,14 @@ asynStatus GenericModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
-asynStatus GenericModulePlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+asynStatus DebugPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
 {
     if (pasynUser->reason == ReqDest)
         m_hardwareId = BaseModulePlugin::ip2addr(std::string(value, nChars));
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);;
 }
 
-asynStatus GenericModulePlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
+asynStatus DebugPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
 {
     if (pasynUser->reason == RspData) {
         int byteGrp = GROUP_2_BYTES_SWAPPED;
@@ -93,7 +94,7 @@ asynStatus GenericModulePlugin::readOctet(asynUser *pasynUser, char *value, size
     return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
 }
 
-void GenericModulePlugin::request(const DasPacket::CommandType command)
+void DebugPlugin::request(const DasPacket::CommandType command)
 {
     DasPacket *packet;
     int isDsp;
@@ -133,7 +134,7 @@ void GenericModulePlugin::request(const DasPacket::CommandType command)
     }
 }
 
-void GenericModulePlugin::processData(const DasPacketList * const packetList)
+void DebugPlugin::processData(const DasPacketList * const packetList)
 {
     int nReceived = 0;
     int nProcessed = 0;
@@ -158,7 +159,7 @@ void GenericModulePlugin::processData(const DasPacketList * const packetList)
     callParamCallbacks();
 }
 
-bool GenericModulePlugin::response(const DasPacket *packet)
+bool DebugPlugin::response(const DasPacket *packet)
 {
     DasPacket::CommandType responseCmd = packet->getResponseType();
     if (m_expectedResponse != responseCmd)

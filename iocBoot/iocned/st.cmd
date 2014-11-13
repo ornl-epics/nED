@@ -76,8 +76,8 @@ dbLoadRecords("../../db/FemPlugin_v32.db","P=$(PREFIX)fem1:,PORT=fem1")
 AcpcFemPluginConfigure("fem2", "cmd", "20.128.234.122", "v22", 0)
 dbLoadRecords("../../db/AcpcFemPlugin_v22.db","P=$(PREFIX)fem2:,PORT=fem2")
 
-GenericModulePluginConfigure("gm", "cmd", 0)
-dbLoadRecords("../../db/GenericModulePlugin.db","P=$(PREFIX)gm:,PORT=gm")
+DebugPluginConfigure("gm", "cmd", 0)
+dbLoadRecords("../../db/DebugPlugin.db","P=$(PREFIX)gm:,PORT=gm")
 
 FlatFieldPluginConfigure("ff", "occ", 0)
 dbLoadRecords("../../db/FlatFieldPlugin.db","P=$(PREFIX)ff:,PORT=ff")
