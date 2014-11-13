@@ -13,9 +13,9 @@ include $(TOP)/configure/CONFIG
 DB += nEDCommon.db
 DB += OccPortDriver.db
 DB += DiscoverPlugin.db
-DB += DspPlugin.db
-DB += FemPlugin.db
-DB += AcpcFemPlugin.db
+DB += DspPlugin_v63.db
+DB += FemPlugin_v32.db
+DB += AcpcFemPlugin_v22.db
 DB += RocPlugin_v51.db
 DB += RocPlugin_v52.db
 DB += RocPlugin_v54.db

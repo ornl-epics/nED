@@ -70,13 +70,16 @@ $(PROD_NAME)_SRCS  += BaseDispatcherPlugin.cpp
 $(PROD_NAME)_SRCS  += CmdDispatcher.cpp
 $(PROD_NAME)_SRCS  += BaseModulePlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin.cpp
+$(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
 $(PROD_NAME)_SRCS  += RocPlugin.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v56.cpp
 $(PROD_NAME)_SRCS  += FemPlugin.cpp
+$(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp
+$(PROD_NAME)_SRCS  += AcpcFemPlugin_v22.cpp
 $(PROD_NAME)_SRCS  += DiscoverPlugin.cpp
 $(PROD_NAME)_SRCS  += DumpPlugin.cpp
 $(PROD_NAME)_SRCS  += StatPlugin.cpp
@@ -91,14 +94,14 @@ $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 
 # These files contain descriptions of PVs that we use to generate template
 # files for EPICS database, Doxygen documentation and PVtable.
-$(PROD_NAME)_PVS   += DspPlugin.cpp
+$(PROD_NAME)_PVS   += DspPlugin_v63.cpp
 $(PROD_NAME)_PVS   += RocPlugin.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v51.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v52.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v54.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v56.cpp
-$(PROD_NAME)_PVS   += FemPlugin.cpp
-$(PROD_NAME)_PVS   += AcpcFemPlugin.cpp
+$(PROD_NAME)_PVS   += FemPlugin_v32.cpp
+$(PROD_NAME)_PVS   += AcpcFemPlugin_v22.cpp
 
 #===========================
 

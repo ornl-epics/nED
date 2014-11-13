@@ -14,16 +14,6 @@
 
 /**
  * Plugin for DSP module.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * HwDate        | asynOctet       | ""       | RO   | Hardware date as YYYY/MM/DD
- * HwVer         | asynParamInt32  | 0        | RO   | Hardware version
- * HwRev         | asynParamInt32  | 0        | RO   | Hardware revision
- * FwDate        | asynOctet       | ""       | RO   | Firmware date as YYYY/MM/DD
- * FwVer         | asynParamInt32  | 0        | RO   | Firmware version
- * FwRev         | asynParamInt32  | 0        | RO   | Firmware revision
  */
 class DspPlugin : public BaseModulePlugin {
     private: // structures and definitions
@@ -75,12 +65,12 @@ class DspPlugin : public BaseModulePlugin {
         /**
          * Create and register all configuration parameters to be exposed to EPICS.
          */
-        void createConfigParams();
+        void createConfigParams_v63();
 
         /**
          * Create and register all status parameters to be exposed to EPICS.
          */
-        void createStatusParams();
+        void createStatusParams_v63();
 };
 
 #endif // DSP_PLUGIN_H

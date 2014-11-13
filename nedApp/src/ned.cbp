@@ -42,6 +42,7 @@
 		</Compiler>
 		<Unit filename="AcpcFemPlugin.cpp" />
 		<Unit filename="AcpcFemPlugin.h" />
+		<Unit filename="AcpcFemPlugin_v22.cpp" />
 		<Unit filename="AcpcPvaPlugin.cpp" />
 		<Unit filename="AcpcPvaPlugin.h" />
 		<Unit filename="AdaraPlugin.cpp" />
@@ -73,11 +74,13 @@
 		<Unit filename="DmaCopier.h" />
 		<Unit filename="DspPlugin.cpp" />
 		<Unit filename="DspPlugin.h" />
+		<Unit filename="DspPlugin_v63.cpp" />
 		<Unit filename="DumpPlugin.cpp" />
 		<Unit filename="DumpPlugin.h" />
 		<Unit filename="EpicsRegister.h" />
 		<Unit filename="FemPlugin.cpp" />
 		<Unit filename="FemPlugin.h" />
+		<Unit filename="FemPlugin_v32.cpp" />
 		<Unit filename="Fifo.h" />
 		<Unit filename="GenericModulePlugin.cpp" />
 		<Unit filename="GenericModulePlugin.h" />

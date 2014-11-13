@@ -7,8 +7,10 @@
  * @author Klemen Vodopivec
  */
 
+#include "AcpcFemPlugin.h"
 #include "DiscoverPlugin.h"
 #include "DspPlugin.h"
+#include "FemPlugin.h"
 #include "Log.h"
 #include "RocPlugin.h"
 
@@ -97,8 +99,14 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
             uint32_t source = packet->getSourceAddress();
             if (m_discovered.find(source) != m_discovered.end()) {
                 switch (m_discovered[source].type) {
+                case DasPacket::MOD_TYPE_ACPCFEM:
+                    AcpcFemPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
                 case DasPacket::MOD_TYPE_DSP:
                     DspPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_FEM:
+                    FemPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
                 case DasPacket::MOD_TYPE_ROC:
                     RocPlugin::parseVersionRsp(packet, m_discovered[source].version);
