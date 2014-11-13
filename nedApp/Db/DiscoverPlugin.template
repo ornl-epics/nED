@@ -27,8 +27,19 @@ record(bo, "$(P)Format")
     field(ZNAM, "Human")
     field(ONAM, "Substitution")
 }
-# Upgrade record from BasePlugin
-record(longin, "$(P)ProcCount")
+record(longin, "$(P)Discovered")
 {
+    field(DESC, "Number of discovered detectors")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Discovered")
+    field(FLNK, "$(P)Output.PROC")
+}
+record(longin, "$(P)Verified")
+{
+    field(DESC, "Number of verified detectors")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Verified")
     field(FLNK, "$(P)Output.PROC")
 }

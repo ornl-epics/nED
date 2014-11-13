@@ -23,15 +23,21 @@ DiscoverPlugin::DiscoverPlugin(const char *portName, const char *dispatcherPortN
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, 1, NUM_DISCOVERPLUGIN_PARAMS, 0,
                  BasePlugin::defaultInterfaceMask | asynOctetMask, BasePlugin::defaultInterruptMask | asynOctetMask)
 {
-    createParam("Trigger",  asynParamInt32, &Trigger);  // WRITE - Trigger discovery of modules
-    createParam("Format",   asynParamInt32, &Format);   // READ - Modules found formatted in ASCII table
-    createParam("Output",   asynParamOctet, &Output, "Not initialized");    // READ - Modules found formatted in ASCII table
+    createParam("Trigger",      asynParamInt32, &Trigger);      // WRITE - Trigger discovery of modules
+    createParam("Format",       asynParamInt32, &Format);       // READ - Modules found formatted in ASCII table
+    createParam("Discovered",   asynParamInt32, &Discovered);   // READ - Modules found formatted in ASCII table
+    createParam("Verified",     asynParamInt32, &Verified);     // READ - Modules found formatted in ASCII table
+    createParam("Output",       asynParamOctet, &Output, "Not initialized");    // READ - Modules found formatted in ASCII table
     callParamCallbacks();
 }
 
 asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Trigger) {
+        setIntegerParam(Discovered, 0);
+        setIntegerParam(Verified, 0);
+        callParamCallbacks();
+        
         m_discovered.clear();
         reqDiscover(DasPacket::HWID_BROADCAST);
         return asynSuccess;
@@ -43,8 +49,12 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
 {
     int nReceived = 0;
     int nProcessed = 0;
-    getIntegerParam(RxCount,         &nReceived);
-    getIntegerParam(ProcCount,       &nProcessed);
+    int nDiscovered = 0;
+    int nVerified = 0;
+    getIntegerParam(RxCount,    &nReceived);
+    getIntegerParam(ProcCount,  &nProcessed);
+    getIntegerParam(Discovered, &nDiscovered);
+    getIntegerParam(Verified,   &nVerified);
 
     nReceived += packetList->size();
 
@@ -64,11 +74,14 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                 m_discovered[packet->source].type = DasPacket::MOD_TYPE_DSP;
                 reqVersion(packet->getSourceAddress());
 
+                nDiscovered++;
+            
                 // The global LVDS discover packet should address all modules connected
                 // through LVDS. For some unidentified reason, ROC boards connected directly
                 // to DSP don't respond, whereas ROCs behind FEM do.
                 // So we do P2P to each module.
                 for (uint32_t i=0; i<packet->payload_length/sizeof(uint32_t); i++) {
+                    nDiscovered++;
                     m_discovered[packet->payload[i]].parent = packet->getRouterAddress();
                     reqLvdsDiscover(packet->payload[i]);
                     reqLvdsVersion(packet->payload[i]);
@@ -94,12 +107,15 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                     break;
                 }
             }
+            nVerified++;
             nProcessed++;
         }
     }
 
-    setIntegerParam(RxCount,         nReceived);
-    setIntegerParam(ProcCount,       nProcessed);
+    setIntegerParam(RxCount,    nReceived);
+    setIntegerParam(ProcCount,  nProcessed);
+    setIntegerParam(Discovered, nDiscovered);
+    setIntegerParam(Verified,   nVerified);
     callParamCallbacks();
 }
 

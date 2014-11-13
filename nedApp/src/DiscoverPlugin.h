@@ -108,7 +108,9 @@ class DiscoverPlugin : public BasePlugin {
         int Trigger;            //!< Trigger discovery of modules
         int Output;
         int Format;             //!< Output format
-        #define LAST_DISCOVERPLUGIN_PARAM Format
+        int Discovered;         //!< Number of discovered modules
+        int Verified;           //!< Number of detectors with version verified
+        #define LAST_DISCOVERPLUGIN_PARAM Verified
 };
 
 #endif // DISCOVER_PLUGIN_H
