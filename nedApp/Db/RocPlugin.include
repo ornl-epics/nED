@@ -1,0 +1,6 @@
+# Upgrade DataMode record with link to OutputMode
+record(mbbo, "$(P)DataMode")
+{
+    field(OUT,  "$(P)OutputMode PP")
+}
+

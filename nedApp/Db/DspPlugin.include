@@ -1,0 +1,49 @@
+record(mbbo, "$(P)DataMode")
+{
+    field(FLNK, "$(P)DatSiz")
+}
+record(longout, "$(P)DatSiz") {
+    field(DESC, "Something")
+    field(DOL,  "$(P)DatSizSel.VAL PP")
+    field(OMSL, "closed_loop")
+    field(DTYP, "Soft Channel")
+    field(OUT,  "$(P)LvdsDatSiz PP")
+}
+record(sel, "$(P)DatSizSel")
+{
+    field(INPA, "$(P)RocDS.VAL PP")
+    field(INPB, "$(P)AcpcDS.VAL PP")
+    field(NVL,  "$(P)DatSizTyp.VAL PP")
+}
+record(mbbo, "$(P)DatSizTyp")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select detector type")
+    field(FLNK, "$(P)DatSiz")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "ROC")
+    field(ONVL, "1")
+    field(ONST, "ACPC")
+}
+record(sel, "$(P)RocDS")
+{
+    field(INPA, "4") # Normal mode
+    field(INPB, "8") # Raw mode
+    field(INPC, "10") # Extended mode
+    field(INPD, "10") # Verbose mode
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+record(sel, "$(P)AcpcDS")
+{
+    field(INPA, "12")
+    field(INPB, "16")
+    field(INPC, "12")
+    field(INPD, "12")
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}

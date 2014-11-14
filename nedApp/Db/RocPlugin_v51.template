@@ -1,10 +1,4 @@
 include "BasePlugin.include"
 include "BaseModulePlugin.include"
 include "RocPlugin_v51.include"
-
-# Upgrade DataMode record with link to OutputMode
-record(mbbo, "$(P)DataMode")
-{
-    field(OUT,  "$(P)OutputMode")
-    field(FLNK, "$(P)OutputMode")
-}
+include "RocPlugin.include"

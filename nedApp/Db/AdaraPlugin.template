@@ -7,6 +7,23 @@ record(bo, "$(P)Enable")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
 }
+# Upgrade BaseSocketPlugin::* PVs
+record(stringout, "$(P)ListenIp")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(longout, "$(P)ListenPort")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(longout, "$(P)CheckInt")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+
 record(longin, "$(P)BadPulsCnt")
 {
    field(DESC,  "Prev pulse dropped packets")
