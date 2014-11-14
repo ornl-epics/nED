@@ -78,6 +78,77 @@ assign prevStatePV to "{PREFIX}:PrevState";
 int starting = 0;
 int stopping = 0;
 
+#define ENTEROP(NAME, NEXT) {				\
+   state NAME {							\
+       when() {							\
+          i = 0;						\
+          strcpy(currentPV, deviceNames[i]);			\
+          pvPut(currentPV);					\
+       } state NEXT						\
+   }	
+#define MIDOP(NAME, COMMAND, NEXT) {				\
+       entry {							\
+          cmdReq[i] = COMMAND;					\
+          pvPut(cmdReq[i], SYNC);				\
+          SENDSTATE(NAME)					\
+          pvGet(cmdResp[i]);					\
+       }							\
+       when (cmdRsp[i] == SUCCESSRSP) {				\
+       } state NEXT						\
+       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\ 
+             cmdRsp[i] == NORSP) { } state readyError			\
+       when(delay(0.2)) {					\
+          pvGet(cmdRsp[i]);					\
+       } state NAME						\
+   }
+#define LASTOP(NAME, COMMAND, BACK, NEXT) {				\
+       entry {							\
+          cmdReq[i] = COMMAND;					\
+          pvPut(cmdReq[i], SYNC);				\
+          SENDSTATE(NAME)					\
+          pvGet(cmdResp[i]);					\
+       }							\
+       when (cmdRsp[i] == SUCCESSRSP && i < NUMDEVICES) {	\
+          i=i+1;						\
+          strcpy(currentPV, deviceNames[i]);			\
+          pvPut(currentPV);					\
+       } state BACK						\
+       when (cmdRsp[i] == SUCCESSRSP) {				\
+       } state NEXT						\
+       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\ 
+             cmdRsp[i] == NORSP) { } state readyError			\
+       when(delay(0.2)) {					\
+          pvGet(cmdRsp[i]);					\
+       } state NAME						\
+   }
+#define OPERATION(NAME, COMMAND, NEXT) 				\
+   state NAME {							\
+       entry {							\
+          i = 0;						\
+          strcpy(currentPV, deviceNames[i]);			\
+          pvPut(currentPV);					\
+          cmdReq[i] = COMD;					\
+          pvPut(cmdReq[i], SYNC);				\
+          SENDSTATE(NAME)					\
+          pvGet(cmdResp[i]);					\
+       }							\
+       when (cmdRsp[i] == SUCCESSRSP && i < NUMDEVICES) {	\
+          i=i+1;						\
+          strcpy(currentPV, deviceNames[i]);			\
+          pvPut(currentPV);					\
+          cmdReq[i] = COMD;					\
+          pvPut(cmdReq[i], SYNC);				\
+          pvGet(cmdResp[i]);					\
+       } state NAME						\
+       when (cmdRsp[i] == SUCCESSRSP) {				\
+       } state NEXT						\
+       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\ 
+             cmdRsp[i] == NORSP) { } state readyError			\
+       when(delay(0.2)) {					\
+          pvGet(cmdRsp[i]);					\
+       } state NAME						\
+   }
+
 ss startStop {
    state init {
       entry {
@@ -274,55 +345,27 @@ ss startStop {
         when () {
         } state readyError
      }
-     state starting1 {
-       option -e;
+     
+    ENTEROP(starting1, starting2)
+    MIDOP(starting2, WRITECONFCMD, starting4)
+    MIDOP(starting4, STARTACQCMD, starting5)
+    MIDOP(starting5, READSTATCMD, starting6)
+    state starting6 {
        entry {
-          i = i+1;
+          SENDSTATE(starting6)
+          pvGet(acquiring[i]);
        }
-       when (i >= NUMDEVICES) {
-          i = -1;
-       } state starting3
-       when () {
+       when(acquiring[i] == ACQUIRING && i < (NUMDEVICES - 1)) {
+          i = i+1;
           strcpy(currentPV, deviceNames[i]);
-          pvPut(currentPV);
-          cmdReq[i] = WRITECONFCMD;
-          pvPut(cmdReq[i], SYNC);
-          pvGet(cmdResp[i]);
+          pvPut(currentPV);	
        } state starting2
-    }
-    state starting2 {
-       when (cmdRsp[i] == SUCCESSRSP) {
-       } state starting1
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
-             cmdRsp[i] == NORSP) { } state readyError
-       when(delay(0.2)) {
-          pvGet(cmdRsp[i]);
-       } state starting2
-     }
-     state starting3 {
-       option -e;
-       entry {
-          i = i+1;
-       }
-       when (i >= NUMDEVICES) {
+       when(acquiring[i] == ACQUIRING) {
        } state running
        when () {
-          strcpy(currentPV, deviceNames[i]);
-          pvPut(currentPV);
-          cmdReq[i] = STARTAQCCMD;
-          pvPut(cmdReq[i], SYNC);
-          pvGet(cmdResp[i]);
-       } state starting4
+       } state readyError
     }
-    state starting4 {
-       when (cmdRsp[i] == SUCCESSRSP) {
-       } state starting3
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
-             cmdRsp[i] == NORSP) { } state readyError
-       when(delay(0.2)) {
-          pvGet(cmdRsp[i]);
-       } state starting4
-     }
+      
     state running {
        entry {
           SENDSTATE(Running)
@@ -336,5 +379,3 @@ ss startStop {
    }
 }       
        
-
-
