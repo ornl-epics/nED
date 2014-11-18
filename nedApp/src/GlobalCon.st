@@ -1,5 +1,7 @@
 program globalCon
 
+%%#include <string.h>
+
 #define RESETCMD	0
 #define DISCOVERCMD 	1
 #define READVERCMD 	2
@@ -27,17 +29,23 @@ program globalCon
 #define ACQUIRING	1
 
 
-# this is the beam Include file
+/*
+ this is the beam Include file
 
-# NUMDEVICES must match number of strings in init of deviceNames[]
-#define NUMDEVICES 1
+ NUMDEVICES must match number of strings in init of deviceNames[]
+*/
+#define NUMDEVICES 2
 
-# Each of these devices must be a BaseModulePlugin
+/*
+Each of these devices must be a BaseModulePlugin
 string deviceNames[NUMDEVICES] = { "BL99:Det:roc1" };
+*/
 
-#end beam include file
+string deviceNames[NUMDEVICES];
+/*
+end beam include file
+*/
 
-# declare an array of type t named n for later PV assignment and allocate memory
 #define PVARRAY(t,n) 		\
 	t n[NUMDEVICES];	\
 	assign n[0] to "";
@@ -45,26 +53,44 @@ string deviceNames[NUMDEVICES] = { "BL99:Det:roc1" };
 #define SENDSTATE(s)			\
         strcpy(prevStatePV, statePV);	\
         strcpy(statePV, #s);		\
-        pvPut(prevStatepv);		\
+        pvPut(prevStatePV);		\
         pvPut(statePV, SYNC);
+
+#define DECLEVENT(t,n,s)        \
+        t n;                    \
+        assign n to #s;         \
+        monitor n;              \
+        evflag n##Event;        \
+        sync n n##Event;        
+
         
 PVARRAY(int, cmdReq)
 PVARRAY(int, cmdRsp)
 PVARRAY(int, verified)
 PVARRAY(int, acquiring)
 
+DECLEVENT(int, globalStop, {GPREFIX}:Stop)
+DECLEVENT(int, globalStart, {GPREFIX}:Start)
+
 int globalCmd;
-assign globalCmd to "{GPREFIX}:CmdReq"
+assign globalCmd to "{GPREFIX}:CmdReq";
 
 int globalRsp;
-assign globalRsp to "{GPREFIX}:CmdRsp"
+assign globalRsp to "{GPREFIX}:CmdRsp";
 monitor globalRsp;
+
+int ourstatus;
+assign ourstatus to "{GPREFIX}:Status";
+
+#define MIXED 0
+#define STOPPED 1
+#define STARTED 2
 
 string currentPV;
 assign currentPV to "{PREFIX}:CurrentPV";
 
 int retrySeq;
-assign retrySeq to "{PREFIX}:RetrySeq"
+assign retrySeq to "{PREFIX}:RetrySeq";
 monitor retrySeq;
 evflag retrySeqEvent;
 sync retrySeq retrySeqEvent;
@@ -78,7 +104,10 @@ assign prevStatePV to "{PREFIX}:PrevState";
 int starting = 0;
 int stopping = 0;
 
-#define ENTEROP(NAME, NEXT) {				\
+int i;
+string namebuf;
+
+#define ENTEROP(NAME, NEXT) 				\
    state NAME {							\
        when() {							\
           i = 0;						\
@@ -86,27 +115,29 @@ int stopping = 0;
           pvPut(currentPV);					\
        } state NEXT						\
    }	
-#define MIDOP(NAME, COMMAND, NEXT) {				\
+#define MIDOP(NAME, COMMAND, NEXT) 				\
+   state NAME {							\
        entry {							\
           cmdReq[i] = COMMAND;					\
           pvPut(cmdReq[i], SYNC);				\
           SENDSTATE(NAME)					\
-          pvGet(cmdResp[i]);					\
+          pvGet(cmdRsp[i]);					\
        }							\
        when (cmdRsp[i] == SUCCESSRSP) {				\
        } state NEXT						\
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\ 
+       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { } state readyError			\
        when(delay(0.2)) {					\
           pvGet(cmdRsp[i]);					\
        } state NAME						\
    }
-#define LASTOP(NAME, COMMAND, BACK, NEXT) {				\
+#define LASTOP(NAME, COMMAND, BACK, NEXT) 				\
+   state NAME {							\
        entry {							\
           cmdReq[i] = COMMAND;					\
           pvPut(cmdReq[i], SYNC);				\
           SENDSTATE(NAME)					\
-          pvGet(cmdResp[i]);					\
+          pvGet(cmdRsp[i]);					\
        }							\
        when (cmdRsp[i] == SUCCESSRSP && i < NUMDEVICES) {	\
           i=i+1;						\
@@ -115,7 +146,7 @@ int stopping = 0;
        } state BACK						\
        when (cmdRsp[i] == SUCCESSRSP) {				\
        } state NEXT						\
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\ 
+       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { } state readyError			\
        when(delay(0.2)) {					\
           pvGet(cmdRsp[i]);					\
@@ -130,7 +161,7 @@ int stopping = 0;
           cmdReq[i] = COMD;					\
           pvPut(cmdReq[i], SYNC);				\
           SENDSTATE(NAME)					\
-          pvGet(cmdResp[i]);					\
+          pvGet(cmdRsp[i]);					\
        }							\
        when (cmdRsp[i] == SUCCESSRSP && i < NUMDEVICES) {	\
           i=i+1;						\
@@ -138,11 +169,11 @@ int stopping = 0;
           pvPut(currentPV);					\
           cmdReq[i] = COMD;					\
           pvPut(cmdReq[i], SYNC);				\
-          pvGet(cmdResp[i]);					\
+          pvGet(cmdRsp[i]);					\
        } state NAME						\
        when (cmdRsp[i] == SUCCESSRSP) {				\
        } state NEXT						\
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\ 
+       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { } state readyError			\
        when(delay(0.2)) {					\
           pvGet(cmdRsp[i]);					\
@@ -164,8 +195,9 @@ ss startStop {
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
             pvAssign(acquiring[i], namebuf);
+         }
        }
-       when (pvConnectCount() == pvAssignCount) {
+       when(pvConnectCount() == pvAssignCount()) {
        } state check
        when (delay(0.2)) {
        } state init
@@ -190,7 +222,7 @@ ss startStop {
        when(cmdRsp[i] == SUCCESSRSP) {
           cmdReq[i] = READVERCMD;
           pvPut(cmdReq[i], SYNC);
-          pvGet(cmdResp[i]);
+          pvGet(cmdRsp[i]);
        } state check3
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
              cmdRsp[i] == NORSP) { } state checkError
@@ -218,7 +250,7 @@ ss startStop {
        when(verified[i] == BOTHOKVER) {
           cmdReq[i] = READSTATCMD;
           pvPut(cmdReq[i], SYNC);
-          pvGet(cmdResp[i]);
+          pvGet(cmdRsp[i]);
        } state check5
        when() {
        } state checkError
@@ -253,7 +285,7 @@ ss startStop {
           SENDSTATE(checkError)
        }
        when (efTestAndClear(retrySeqEvent) && retrySeq == 1) {
-          retrySeq == 0;
+          retrySeq = 0;
           pvPut(retrySeq, SYNC);
        } state check1
     }
@@ -263,7 +295,7 @@ ss startStop {
        }
        when (starting) { 
           SENDSTATE(starting)
-          i = -1
+          i = -1;
        } state starting1
        when (efTestAndClear(globalStopEvent) && globalStop == 1) {
           globalStart = 0;
@@ -294,7 +326,7 @@ ss startStop {
        } state tryStarting
        when() {
           starting = 0;
-          ourstate = mixed;
+          ourstatus = MIXED;
           pvPut(ourstatus);
        } state ready
     }
@@ -306,7 +338,7 @@ ss startStop {
           pvPut(currentPV);
        }
        when (i >= NUMDEVICES) {
-          ourstatus = stopped;
+          ourstatus = STOPPED;
           pvPut(ourstatus);
        } state ready
        when (acquiring[i] == NOTACQUIRING) {
@@ -329,6 +361,15 @@ ss startStop {
           pvGet(cmdRsp[i]);
        } state tryStopping1
      }
+     state readyError {
+       entry {
+          SENDSTATE(readyError)
+       }
+       when (efTestAndClear(retrySeqEvent) && retrySeq == 1) {
+          retrySeq = 0;
+          pvPut(retrySeq, SYNC);
+       } state ready
+     } 
      state tryStopping2 {
        when (cmdRsp[i] == SUCCESSRSP) {
           pvGet(acquiring[i]);
@@ -340,7 +381,7 @@ ss startStop {
        } state tryStopping2
      }
      state tryStopping3 {
-        when(acquiring[i] == NOTAQUIRING) {
+        when(acquiring[i] == NOTACQUIRING) {
         } state tryStopping
         when () {
         } state readyError

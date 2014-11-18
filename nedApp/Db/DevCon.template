@@ -26,7 +26,12 @@ record(mbbi, "$(P):ResetRsp") {
    field(FVVL, "5")
    field(FVST, "Invalid")
 }
-
+#
+# Failed command string.  Used by all commands
+#
+record(string, "$(P):FailedCmd") {
+   field(DESC, "Failed command ")
+}
 
 record(busy, "$(P):Discover") {
    field(DESC, "Discover command")
