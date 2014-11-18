@@ -28,6 +28,11 @@ program globalCon
 #define NOTACQUIRING	0
 #define ACQUIRING	1
 
+#define LASTRESET	0
+#define LASTSTARTING	1
+#define LASTSTOPPING	2
+#define LASTCHECKING	3
+#define LASTWRITING	4
 
 /*
  this is the beam Include file
@@ -71,13 +76,11 @@ PVARRAY(int, acquiring)
 
 DECLEVENT(int, globalStop, {GPREFIX}:Stop)
 DECLEVENT(int, globalStart, {GPREFIX}:Start)
+DECLEVENT(int, globalCheck, {GPREFIX}:Check)
+DECLEVENT(int, globalWriteConf, {GPREFIX}:WriteConf)
 
-int globalCmd;
-assign globalCmd to "{GPREFIX}:CmdReq";
-
-int globalRsp;
-assign globalRsp to "{GPREFIX}:CmdRsp";
-monitor globalRsp;
+int cmdSucceeded[NUMDEVICES];
+int cmdFailed[NUMDEVICES];
 
 int ourstatus;
 assign ourstatus to "{GPREFIX}:Status";
@@ -101,86 +104,105 @@ assign statePV to "{PREFIX}:State";
 string prevStatePV;
 assign prevStatePV to "{PREFIX}:PrevState";
 
-int starting = 0;
-int stopping = 0;
+int lastRequest = 0;
+int requestFailed = 0;
 
 int i;
 string namebuf;
 
-#define ENTEROP(NAME, NEXT) 				\
-   state NAME {							\
+#define CMD_RSP(NAME, COMMAND, NEXT) 				\
+    state NAME {						\
        when() {							\
-          i = 0;						\
-          strcpy(currentPV, deviceNames[i]);			\
-          pvPut(currentPV);					\
-       } state NEXT						\
-   }	
-#define MIDOP(NAME, COMMAND, NEXT) 				\
-   state NAME {							\
-       entry {							\
-          cmdReq[i] = COMMAND;					\
-          pvPut(cmdReq[i], SYNC);				\
           SENDSTATE(NAME)					\
-          pvGet(cmdRsp[i]);					\
-       }							\
-       when (cmdRsp[i] == SUCCESSRSP) {				\
-       } state NEXT						\
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
-             cmdRsp[i] == NORSP) { } state readyError			\
-       when(delay(0.2)) {					\
-          pvGet(cmdRsp[i]);					\
-       } state NAME						\
-   }
-#define LASTOP(NAME, COMMAND, BACK, NEXT) 				\
-   state NAME {							\
+          i = -1;						\
+       } state NAME##2						\
+    }								\
+    state NAME##2 {						\
+       option -e;						\
        entry {							\
-          cmdReq[i] = COMMAND;					\
-          pvPut(cmdReq[i], SYNC);				\
-          SENDSTATE(NAME)					\
-          pvGet(cmdRsp[i]);					\
+          i++;							\
        }							\
-       when (cmdRsp[i] == SUCCESSRSP && i < NUMDEVICES) {	\
-          i=i+1;						\
-          strcpy(currentPV, deviceNames[i]);			\
-          pvPut(currentPV);					\
-       } state BACK						\
-       when (cmdRsp[i] == SUCCESSRSP) {				\
-       } state NEXT						\
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
-             cmdRsp[i] == NORSP) { } state readyError			\
-       when(delay(0.2)) {					\
-          pvGet(cmdRsp[i]);					\
-       } state NAME						\
-   }
-#define OPERATION(NAME, COMMAND, NEXT) 				\
-   state NAME {							\
+       when (i >= NUMDEVICES) { 				\
+       } state NAME##3						\
+       /*								\
+          Note that cmdSucceeded[i] means it worked in the previous 	\
+          attempt to initialize and cmdFailed[i] means something 	\
+          failed already in this attempt.  In either case, skip it.	\
+        */								\
+       when (cmdSucceeded[i] || cmdFailed[i]) 	{		\
+       } state NAME##2						\
+       when() {							\
+          cmdReq[i] = DISCOVERCMD;				\
+          pvPut(cmdReq[i], SYNC);				\
+       } state NAME##2						\
+    }								\
+    state NAME##3 {						\
+       when() {							\
+          i = -1;						\
+       } state NAME##4						\
+    }								\
+    state NAME##4 {						\
+       option -e;						\
        entry {							\
-          i = 0;						\
-          strcpy(currentPV, deviceNames[i]);			\
-          pvPut(currentPV);					\
-          cmdReq[i] = COMD;					\
-          pvPut(cmdReq[i], SYNC);				\
-          SENDSTATE(NAME)					\
-          pvGet(cmdRsp[i]);					\
-       }							\
-       when (cmdRsp[i] == SUCCESSRSP && i < NUMDEVICES) {	\
-          i=i+1;						\
-          strcpy(currentPV, deviceNames[i]);			\
-          pvPut(currentPV);					\
-          cmdReq[i] = COMD;					\
-          pvPut(cmdReq[i], SYNC);				\
-          pvGet(cmdRsp[i]);					\
-       } state NAME						\
-       when (cmdRsp[i] == SUCCESSRSP) {				\
+          i = i+1;						\
+       } 							\
+       when (i >= NUMDEVICES) { 				\
        } state NEXT						\
+       when (cmdSucceeded[i] || cmdFailed[i]) {			\
+       } state NAME##4						\
+       when () {						\
+          strcpy(currentPV, deviceNames[i]);			\
+          pvPut(currentPV,SYNC);				\
+       } state NAME##5						\
+    }								\
+    state NAME##5 {						\
+       when(cmdRsp[i] == SUCCESSRSP) {				\
+       } state NAME##4							\
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
-             cmdRsp[i] == NORSP) { } state readyError			\
-       when(delay(0.2)) {					\
-          pvGet(cmdRsp[i]);					\
-       } state NAME						\
-   }
+             cmdRsp[i] == NORSP) { 					\
+          cmdFailed[i] = 1;					\
+       } state NAME##4						\
+    }					
 
-ss startStop {
+#define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
+    state NAME {						\
+       when() {							\
+          SENDSTATE(NAME)					\
+          i = -1;						\
+       } state NAME##2						\
+    }								\
+    state NAME##2 {						\
+       option -e;						\
+       entry {							\
+          i++;							\
+       }							\
+       when (i >= NUMDEVICES) { 				\
+       } state NEXT						\
+       /*								\
+          Note that cmdSucceeded[i] means it worked in the previous 	\
+          attempt to initialize and cmdFailed[i] means something 	\
+          failed already in this attempt.  In either case, skip it.	\
+        */								\
+       when (cmdSucceeded[i] || cmdFailed[i]) {			\
+       } state NAME##2						\
+       when() {							\
+          pvGet(PVNAME[i], SYNC);				\
+          if (PVNAME[i] != DESIRED) cmdFailed[i] = 1;		\
+       } state NAME##2						\
+    }	
+
+#define CMD_WHEN(EVNAME, LASTNAME, NEXT) 			\
+       when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
+          EVNAME = 0;						\
+          pvPut(EVNAME, SYNC);					\
+          SENDSTATE(NEXT)					\
+          if (lastRequest != LASTNAME) 				\
+             for (i = 0; i< NUMDEVICES; i++)			\
+                cmdSucceeded[i] = 0;				\
+          lastRequest = LASTNAME;				\
+       } state NEXT
+
+ss globalControl {
    state init {
       entry {
          strcpy(statePV, "booted");
@@ -195,228 +217,43 @@ ss startStop {
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
             pvAssign(acquiring[i], namebuf);
+            cmdSucceeded[i] = 0;
+            cmdFailed[i] = 0;
          }
+         pvMonitor(acquiring);
+         pvMonitor(cmdRsp);
        }
        when(pvConnectCount() == pvAssignCount()) {
-       } state check
+          for (i=0; i<NUMDEVICES; i++) cmdFailed[i] = 0;
+          lastRequest = LASTCHECKING;
+       } state Discover
        when (delay(0.2)) {
        } state init
     }
-    state check {
-       entry {
-          SENDSTATE(check)
-       }
-       when() {
-          i = 0;
-          strcpy(currentPV, deviceNames[i]);
-          pvPut(currentPV,SYNC);
-       } state check1
-    }
-    state check1 {
-       entry {
-          SENDSTATE(check1)
-          cmdReq[i] = DISCOVERCMD;
-          pvPut(cmdReq[i], SYNC);
-          pvGet(cmdRsp[i]);
-       } 
-       when(cmdRsp[i] == SUCCESSRSP) {
-          cmdReq[i] = READVERCMD;
-          pvPut(cmdReq[i], SYNC);
-          pvGet(cmdRsp[i]);
-       } state check3
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
-             cmdRsp[i] == NORSP) { } state checkError
-       when(delay(0.2)) {
-          pvGet(cmdRsp[i]);
-       } state check1
-    }
-    state check3 {
-       entry {
-          SENDSTATE(check3)
-       }
-       when(cmdRsp[i] == SUCCESSRSP) {
-          pvGet(verified[i]);
-       } state check4
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
-             cmdRsp[i] == NORSP) { } state checkError
-       when(delay(0.2)) {
-          pvGet(cmdRsp[i]);
-       } state check3
-    }
-    state check4 {
-       entry {
-          SENDSTATE(check4)
-       }
-       when(verified[i] == BOTHOKVER) {
-          cmdReq[i] = READSTATCMD;
-          pvPut(cmdReq[i], SYNC);
-          pvGet(cmdRsp[i]);
-       } state check5
-       when() {
-       } state checkError
-    }
-    state check5 {
-       entry {
-          SENDSTATE(check5)
-       }
-       when (cmdRsp[i] == SUCCESSRSP) {
-          pvGet(acquiring[i]);
-       } state checkIncr
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
-             cmdRsp[i] == NORSP) { } state checkError
-       when(delay(0.2)) {
-          pvGet(cmdRsp[i]);
-       } state check5
-    }
-    state checkIncr {
-       entry {
-          i=i+1;
-       }
-       when (i< NUMDEVICES) {
-          strcpy(currentPV, deviceNames[i]);
-          pvPut(currentPV);
-       } state check1
-       when() {
-          pvMonitor(acquiring);
-       } state ready
-    }
-    state checkError {
-       entry {
-          SENDSTATE(checkError)
-       }
-       when (efTestAndClear(retrySeqEvent) && retrySeq == 1) {
-          retrySeq = 0;
-          pvPut(retrySeq, SYNC);
-       } state check1
-    }
+    CMD_RSP(Discover, DISCOVERCMD, ReadVersion)
+    CMD_RSP(ReadVersion, READVERCMD, CheckVerify)
+    TEST_PV(CheckVerify, verified, 8, ReadStatus)
+    CMD_RSP(ReadStatus, READSTATCMD, ready)
     state ready {
        entry {
+          for (i = 0; i< NUMDEVICES; i++)
+             if (cmdFailed[i]) {
+                cmdFailed[i] = 0;	/* ready for next use */
+                requestFailed = 1;
+             }
+             else
+             {
+                cmdSucceeded[i] = 1;	/* add succeeded device */
+             }
           SENDSTATE(ready)
        }
-       when (starting) { 
-          SENDSTATE(starting)
-          i = -1;
-       } state starting1
-       when (efTestAndClear(globalStopEvent) && globalStop == 1) {
-          globalStart = 0;
-          pvPut(globalStart, SYNC);
-          SENDSTATE(tryStopping)
-          stopping = 1;
-       } state tryStopping
-       when (efTestAndClear(globalStartEvent) && globalStart == 1) {
-          globalStop = 0;
-          pvPut(globalStop, SYNC);
-          SENDSTATE(tryStarting)
-          starting = 1;
-       } state tryStarting
-       exit {
-          i = -1;
-       }
+       CMD_WHEN(globalStop, LASTSTOPPING, tryStopping)
+       CMD_WHEN(globalStart, LASTSTARTING, tryStarting)
+       CMD_WHEN(globalWriteConf, LASTWRITING, tryWriting)
+       CMD_WHEN(globalCheck, LASTCHECKING, Discover)
     }
-    state tryStarting {
-       option -e;
-       entry {
-          i = i+1;
-          strcpy(currentPV, deviceNames[i]);
-          pvPut(currentPV);
-       }
-       when (i >= NUMDEVICES) {
-       } state check
-       when (acquiring[i] == NOTACQUIRING) {
-       } state tryStarting
-       when() {
-          starting = 0;
-          ourstatus = MIXED;
-          pvPut(ourstatus);
-       } state ready
-    }
-    state tryStopping {
-       option -e;
-       entry {
-          i = i+1;
-          strcpy(currentPV, deviceNames[i]);
-          pvPut(currentPV);
-       }
-       when (i >= NUMDEVICES) {
-          ourstatus = STOPPED;
-          pvPut(ourstatus);
-       } state ready
-       when (acquiring[i] == NOTACQUIRING) {
-       } state tryStopping
-       when (acquiring[i] == ACQUIRING) {
-          cmdReq[i] = STOPACQCMD;
-          pvPut(cmdReq[i], SYNC);
-          pvGet(cmdRsp[i]);
-       } state tryStopping1
-     }
-     state tryStopping1 {
-       when (cmdRsp[i] == SUCCESSRSP) {
-          cmdReq[i] = READSTATCMD;
-          pvPut(cmdReq[i], SYNC);
-          pvGet(cmdRsp[i]);
-       } state tryStopping2
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
-             cmdRsp[i] == NORSP) { } state readyError
-       when(delay(0.2)) {
-          pvGet(cmdRsp[i]);
-       } state tryStopping1
-     }
-     state readyError {
-       entry {
-          SENDSTATE(readyError)
-       }
-       when (efTestAndClear(retrySeqEvent) && retrySeq == 1) {
-          retrySeq = 0;
-          pvPut(retrySeq, SYNC);
-       } state ready
-     } 
-     state tryStopping2 {
-       when (cmdRsp[i] == SUCCESSRSP) {
-          pvGet(acquiring[i]);
-       } state tryStopping3
-       when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||
-             cmdRsp[i] == NORSP) { } state readyError
-       when(delay(0.2)) {
-          pvGet(cmdRsp[i]);
-       } state tryStopping2
-     }
-     state tryStopping3 {
-        when(acquiring[i] == NOTACQUIRING) {
-        } state tryStopping
-        when () {
-        } state readyError
-     }
-     
-    ENTEROP(starting1, starting2)
-    MIDOP(starting2, WRITECONFCMD, starting4)
-    MIDOP(starting4, STARTACQCMD, starting5)
-    MIDOP(starting5, READSTATCMD, starting6)
-    state starting6 {
-       entry {
-          SENDSTATE(starting6)
-          pvGet(acquiring[i]);
-       }
-       when(acquiring[i] == ACQUIRING && i < (NUMDEVICES - 1)) {
-          i = i+1;
-          strcpy(currentPV, deviceNames[i]);
-          pvPut(currentPV);	
-       } state starting2
-       when(acquiring[i] == ACQUIRING) {
-       } state running
-       when () {
-       } state readyError
-    }
-      
-    state running {
-       entry {
-          SENDSTATE(Running)
-       }
-       when (efTestAndClear(globalStopEvent) && globalStop == 1) {
-          globalStart = 0;
-          pvPut(globalStart, SYNC);
-          SENDSTATE(tryStopping)
-          stopping = 1;
-       } state tryStopping
-   }
+    CMD_RSP(tryStarting, STARTACQCMD, ReadStatus)
+    CMD_RSP(tryStopping, STOPACQCMD, ReadStatus)
+    CMD_RSP(tryWriting, WRITECONFCMD, ready)
 }       
        
