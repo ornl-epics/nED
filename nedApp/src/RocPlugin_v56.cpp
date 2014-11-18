@@ -626,4 +626,8 @@ void RocPlugin::createConfigParams_v56()
     createConfigParam("TsyncSel",   'F', 0x0,  1, 2,  0);     // TSYNC select                 (0=external,1=internal 60Hz)
     createConfigParam("TclkSel",    'F', 0x0,  1, 1,  0);     // TCLK select                  (0=external,1=internal 10MHz)
     createConfigParam("Reset",      'F', 0x0,  1, 0,  0);     // Reset enable                 (0=disable,1=enable)
+
+    createConfigParam("TstPatEn",   'F', 0x1,  1, 15, 0);     // Test pattern enable          (0=disable,1=enable)
+    createConfigParam("TstPatRate", 'F', 0x1,  3, 12, 0);     // Test pattern rate
+    createConfigParam("TstPatId",   'F', 0x1, 12, 0,  0);     // Test pattern id
 }
