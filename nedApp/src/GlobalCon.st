@@ -73,6 +73,7 @@ PVARRAY(int, cmdReq)
 PVARRAY(int, cmdRsp)
 PVARRAY(int, verified)
 PVARRAY(int, acquiring)
+PVARRAY(int, disabled)
 
 DECLEVENT(int, globalStop, {GPREFIX}:Stop)
 DECLEVENT(int, globalStart, {GPREFIX}:Start)
@@ -129,8 +130,8 @@ string namebuf;
           attempt to initialize and cmdFailed[i] means something 	\
           failed already in this attempt.  In either case, skip it.	\
         */								\
-       when (cmdSucceeded[i] || cmdFailed[i]) 	{		\
-       } state NAME##2						\
+       when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) 	{	\
+       } state NAME##2							\
        when() {							\
           cmdReq[i] = DISCOVERCMD;				\
           pvPut(cmdReq[i], SYNC);				\
@@ -183,7 +184,7 @@ string namebuf;
           attempt to initialize and cmdFailed[i] means something 	\
           failed already in this attempt.  In either case, skip it.	\
         */								\
-       when (cmdSucceeded[i] || cmdFailed[i]) {			\
+       when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) {		\
        } state NAME##2						\
        when() {							\
           pvGet(PVNAME[i], SYNC);				\
@@ -217,11 +218,14 @@ ss globalControl {
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
             pvAssign(acquiring[i], namebuf);
+            sprintf(namebuf, "%s:SeqDisable", deviceNames[i]);
+            pvAssign(disabled[i], namebuf);
             cmdSucceeded[i] = 0;
             cmdFailed[i] = 0;
          }
          pvMonitor(acquiring);
          pvMonitor(cmdRsp);
+         pvMonitor(disabled);
        }
        when(pvConnectCount() == pvAssignCount()) {
           for (i=0; i<NUMDEVICES; i++) cmdFailed[i] = 0;
