@@ -1,6 +1,11 @@
 # Upgrade DataMode record with link to OutputMode
 record(mbbo, "$(P)DataMode")
 {
+    field(FLNK, "$(P)DataModeL")
+}
+record(longout, "$(P)DataModeL")
+{
+    field(DOL,  "$(P)DataMode.RVAL NPP")
+    field(OMSL, "closed_loop")
     field(OUT,  "$(P)OutputMode PP")
 }
-

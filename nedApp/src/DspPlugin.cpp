@@ -57,10 +57,6 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
                        blocking, NUM_DSPPLUGIN_PARAMS + NUM_DSPPLUGIN_CONFIGPARAMS + NUM_DSPPLUGIN_CONFIGPARAMS)
     , m_version(version)
 {
-    if (m_configParams.size() != NUM_DSPPLUGIN_CONFIGPARAMS) {
-        LOG_ERROR("Number of config params mismatch, expected %d but got %lu", NUM_DSPPLUGIN_CONFIGPARAMS, m_configParams.size());
-    }
-
     setIntegerParam(HwType, DasPacket::MOD_TYPE_DSP);
     if (m_version == "v63") {
         createConfigParams_v63();

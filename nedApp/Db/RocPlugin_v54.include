@@ -7411,6 +7411,38 @@ record(longout, "$(P)MaxAdcValS")
     field(OMSL, "closed_loop")
     field(OUT,  "$(P)MaxAdcVal PP")
 }
+record(longout, "$(P)IntRelease")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Integrator releas pnt [-6:-1")
+    field(PINI, "YES")
+    field(VAL,  "-6")
+    field(OUT,  "$(P)IntReleaseW PP")
+}
+record(longout, "$(P)IntReleaseW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Integrator releas pnt [-6:-1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))IntRelease")
+    field(SDIS, "$(P)IntReleaseS.PACT")
+    field(DISV, "1")
+}
+record(longin, "$(P)IntReleaseR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Integrator releas pnt [-6:-1")
+    field(INP,  "@asyn($(PORT))IntRelease")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)IntReleaseS")
+}
+record(longout, "$(P)IntReleaseS")
+{
+    field(DOL,  "$(P)IntReleaseR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)IntRelease PP")
+}
 record(longout, "$(P)MinDisWidt")
 {
     info(autosaveFields, "VAL")
