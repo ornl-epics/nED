@@ -149,7 +149,7 @@ string namebuf;
        } 							\
        when (i >= NUMDEVICES) { 				\
        } state NEXT						\
-       when (cmdSucceeded[i] || cmdFailed[i]) {			\
+       when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##4						\
        when () {						\
           strcpy(currentPV, deviceNames[i]);			\
@@ -242,12 +242,14 @@ ss globalControl {
        entry {
           for (i = 0; i< NUMDEVICES; i++)
              if (cmdFailed[i]) {
-                cmdFailed[i] = 0;	/* ready for next use */
-                requestFailed = 1;
+                cmdFailed[i] = 0;		/* ready for next use */
+                if (!disabled[i])
+                   requestFailed = 1;
              }
              else
              {
-                cmdSucceeded[i] = 1;	/* add succeeded device */
+                if (!disabled[i])
+                    cmdSucceeded[i] = 1;	/* add succeeded device */
              }
           SENDSTATE(ready)
        }
