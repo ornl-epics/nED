@@ -260,7 +260,34 @@ string namebuf;
           if (PVNAME[i] != DESIRED) cmdFailed[i] = 1;		\
        } state NAME##2						\
     }	
-
+/*
+ * Macro to make an end-of-operation state.  This goes to the ready state
+ * when done. NAME is the entry name of the state and EVNAME is the PV name
+ * that invoked the state, ie, the EVNAME or the corresponding CMD_WHEN.
+ */
+#define OP_DONE(NAME, EVNAME) 						\
+   state NAME {								\
+      when() {								\
+          requestSucceeded = 1;						\
+          for (i = 0; i< numFound; i++) {				\
+             if (cmdFailed[i]) {					\
+                cmdFailed[i] = 0;	/* ready for next use */	\
+                if (!disabled[i]) {					\
+                   requestSucceeded = 0;				\
+                }							\
+             }								\
+             else							\
+             {								\
+                if (!disabled[i])					\
+                    cmdSucceeded[i] = 1;/* add succeeded device */	\
+             }								\
+          }								\
+          pvPut(requestSucceeded, SYNC);				\
+          EVNAME = 0;	/* release busy record */			\
+          pvPut(EVNAME, SYNC);						\
+          SENDSTATE(ready)						\
+      } state ready							\
+   }
 /* 
  * Macro to define a global operation request-monitor when clause. EVNAME is
  * the base name of the event (ie, the variable name), OP_NAME is the operation
