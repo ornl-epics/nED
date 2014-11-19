@@ -11,7 +11,6 @@ program globalCon
  */
 
 %%#include <string.h>
-%%#include <strings.h>		/* for rindex() */
 %%#include <seqGrep.h>
 
 /*
@@ -291,7 +290,7 @@ ss globalControl {
          numFound = seqGrep("mbbo", ".*[0-9]*:CmdReq", &deviceNames[0][0], 
                                                        MAXDEVICES);
          for (i=0; i<numFound; i++) {
-            *rindex(deviceNames[i], ':') = 0;
+            *strrchr(deviceNames[i], ':') = 0;
             sprintf(namebuf, "%s:CmdReq", deviceNames[i]);
             pvAssign(cmdReq[i], namebuf);
             sprintf(namebuf, "%s:CmdRsp", deviceNames[i]);
