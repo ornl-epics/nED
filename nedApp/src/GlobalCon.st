@@ -72,9 +72,9 @@ program globalCon
  * send a string indicating current state. No correspondence to "OP_" series 
  * above.  s is a string naming the state; not enumerated.
  */
-#define SENDSTATE(s)			\
+#define SENDSTATE(s) {			\
         strcpy(statePV, #s);		\
-        pvPut(statePV, SYNC);
+        pvPut(statePV, SYNC); }
 
 /*
  * Macro to declare and assign PV. t is the type, n the variable name, and 
@@ -134,8 +134,8 @@ DECL(string, currentPV, {PREFIX}:CurrentPV)
 DECL(string, statePV, {PREFIX}:State)
 
 /*
- * This indicates that no enabled devices that had not already succeeded in the
- * same operation previously failed to perform the operation this time. 
+ * ReqSucceeded will be set true when one or a series of attempts to perform 
+ * an operation succeeded for all devices
  */
 DECL(int, requestSucceeded ,{PREFIX}:ReqSucceeded)
 
