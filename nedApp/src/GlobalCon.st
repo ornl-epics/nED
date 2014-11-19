@@ -1,5 +1,15 @@
 program globalCon
 
+/*
+ * Global control sequencer for nED. Supports the operations of global stop,
+ * start, check, write config, and clear from soft control records. Global 
+ * success is indicated to the operator and the operation may be retried, in 
+ * which case it is performed only on those devices which failed before. This 
+ * accumulation behavior is reset when a different operation or the clear 
+ * operation is requested. Each device has a disable PV allowing it to be 
+ * skipped in non-clear operations.
+ */
+
 %%#include <string.h>
 %%#include <strings.h>		/* for rindex() */
 %%#include <seqGrep.h>
@@ -46,7 +56,7 @@ program globalCon
  * define previous state values used in sequencer to allow cumulative success
  * retrying of previous operation.
  */
-#define OP_RESET	0
+#define OP_CLEAR	0
 #define OP_START	1
 #define OP_STOP	 	2
 #define OP_CHECK	3
@@ -108,8 +118,10 @@ PVARRAY(int, acquiring)
 PVARRAY(int, disabled)
 
 /*
- * These are global request soft PVs
+ * These are global request soft PVs. Treated as "busy" records in that they
+ * are acted upon when set to "1" and reset when the operation completes.
  */
+DECLEVENT(int, globalClear, {GPREFIX}:Clear)
 DECLEVENT(int, globalStop, {GPREFIX}:Stop)
 DECLEVENT(int, globalStart, {GPREFIX}:Start)
 DECLEVENT(int, globalCheck, {GPREFIX}:Check)
@@ -122,10 +134,10 @@ DECL(string, currentPV, {PREFIX}:CurrentPV)
 DECL(string, statePV, {PREFIX}:State)
 
 /*
- * This flags lack of complete success on GUI. implementation incomplete. 
- * Should it be success rather than failure?
+ * This indicates that no enabled devices that had not already succeeded in the
+ * same operation previously failed to perform the operation this time. 
  */
-DECL(int, requestFailed ,{PREFIX}:ReqFailed)
+DECL(int, requestSucceeded ,{PREFIX}:ReqSucceeded)
 
 /*
  * Variables used by sequencer to keep track of success or failure of 
@@ -234,12 +246,12 @@ string namebuf;
        entry {							\
           i++;							\
        }							\
-       when (i >= numFound) { 				\
+       when (i >= numFound) { 					\
        } state NEXT						\
        /*								\
           Note that cmdSucceeded[i] means it worked in the previous 	\
-          attempt to initialize and cmdFailed[i] means something 	\
-          failed already in this attempt.  In either case, skip it.	\
+          attempt and cmdFailed[i] means something failed already in 	\
+          this attempt.  In either case, skip it.			\
         */								\
        when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) {		\
        } state NAME##2						\
@@ -295,7 +307,6 @@ ss globalControl {
          }
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
-          for (i=0; i<numFound; i++) cmdFailed[i] = 0;
           lastRequest = OP_CHECK;
        } state Discover
        when (delay(0.2)) {
@@ -307,12 +318,12 @@ ss globalControl {
     CMD_RSP(ReadStatus, READSTATCMD, ready)
     state ready {
        entry {
-          for (i = 0; i< numFound; i++)
+          requestSucceeded = 1;
+          for (i = 0; i< numFound; i++) {
              if (cmdFailed[i]) {
                 cmdFailed[i] = 0;		/* ready for next use */
                 if (!disabled[i]) {
-                   requestFailed = 1;
-                   pvPut(requestFailed, SYNC);
+                   requestSucceeded = 0;
                 }
              }
              else
@@ -320,15 +331,26 @@ ss globalControl {
                 if (!disabled[i])
                     cmdSucceeded[i] = 1;	/* add succeeded device */
              }
+          }
+          pvPut(requestSucceeded, SYNC);
           SENDSTATE(ready)
        }
        CMD_WHEN(globalStop, OP_STOP, tryStopping)
        CMD_WHEN(globalStart, OP_START, tryStarting)
        CMD_WHEN(globalWriteConf, OP_WRITE, tryWriting)
        CMD_WHEN(globalCheck, OP_CHECK, Discover)
+       CMD_WHEN(globalClear, OP_CLEAR, Clear)
     }
     CMD_RSP(tryStarting, STARTACQCMD, ReadStatus)
     CMD_RSP(tryStopping, STOPACQCMD, ReadStatus)
     CMD_RSP(tryWriting, WRITECONFCMD, ready)
+    state Clear {
+       when() {
+          for (i = 0; i< numFound; i++)	{
+                cmdSucceeded[i] = 1;	
+                cmdFailed[i] = 0;	
+          }
+       } state ready
+    }
 }       
        
