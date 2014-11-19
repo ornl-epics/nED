@@ -296,8 +296,6 @@ string namebuf;
  */
 #define CMD_WHEN(EVNAME, OP_NAME, NEXT) 			\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
-          EVNAME = 0;						\
-          pvPut(EVNAME, SYNC);					\
           SENDSTATE(NEXT)					\
           if (lastRequest != OP_NAME) 				\
              for (i = 0; i< numFound; i++)			\
@@ -341,43 +339,32 @@ ss globalControl {
     }
     CMD_RSP(Discover, DISCOVERCMD, ReadVersion)
     CMD_RSP(ReadVersion, READVERCMD, CheckVerify)
-    TEST_PV(CheckVerify, verified, 8, ReadStatus)
-    CMD_RSP(ReadStatus, READSTATCMD, ready)
+    TEST_PV(CheckVerify, verified, 8, CheckReadStatus)
+    CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
+    OP_DONE(DoneDiscover, globalCheck)
     state ready {
-       entry {
-          requestSucceeded = 1;
-          for (i = 0; i< numFound; i++) {
-             if (cmdFailed[i]) {
-                cmdFailed[i] = 0;		/* ready for next use */
-                if (!disabled[i]) {
-                   requestSucceeded = 0;
-                }
-             }
-             else
-             {
-                if (!disabled[i])
-                    cmdSucceeded[i] = 1;	/* add succeeded device */
-             }
-          }
-          pvPut(requestSucceeded, SYNC);
-          SENDSTATE(ready)
-       }
        CMD_WHEN(globalStop, OP_STOP, tryStopping)
        CMD_WHEN(globalStart, OP_START, tryStarting)
        CMD_WHEN(globalWriteConf, OP_WRITE, tryWriting)
        CMD_WHEN(globalCheck, OP_CHECK, Discover)
        CMD_WHEN(globalClear, OP_CLEAR, Clear)
     }
-    CMD_RSP(tryStarting, STARTACQCMD, ReadStatus)
-    CMD_RSP(tryStopping, STOPACQCMD, ReadStatus)
-    CMD_RSP(tryWriting, WRITECONFCMD, ready)
+    CMD_RSP(tryStarting, STARTACQCMD, StartReadStatus)
+    CMD_RSP(StartReadStatus, READSTATCMD, DoneStarting)
+    OP_DONE(DoneStarting, globalStart)
+    CMD_RSP(tryStopping, STOPACQCMD, StopReadStatus)
+    CMD_RSP(StopReadStatus, READSTATCMD, DoneStopping)
+    OP_DONE(DoneStopping, globalStop)
+    CMD_RSP(tryWriting, WRITECONFCMD, DoneWriting)
+    OP_DONE(DoneWriting, globalWriteConf)
     state Clear {
        when() {
           for (i = 0; i< numFound; i++)	{
                 cmdSucceeded[i] = 1;	
                 cmdFailed[i] = 0;	
           }
-       } state ready
+       } state DoneClear
     }
+    OP_DONE(DoneClear, globalClear)
 }       
        
