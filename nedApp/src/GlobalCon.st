@@ -4,6 +4,9 @@ program globalCon
 %%#include <strings.h>		/* for rindex() */
 %%#include <seqGrep.h>
 
+/*
+ * define valid values for CmdReq PVs
+ */
 #define RESETCMD	0
 #define DISCOVERCMD 	1
 #define READVERCMD 	2
@@ -14,12 +17,18 @@ program globalCon
 #define STOPACQCMD	7
 #define READCTRSCMD	8
 
+/*
+ * define valid values for CmdRsp PVs
+ */
 #define NORSP		0
 #define SUCCESSRSP	1
 #define WAITRESP	2
 #define TIMEOUTRSP	3
 #define ERRORRSP	4
 
+/*
+ * define valid values for Verified PVs
+ */
 #define NOTVER		0
 #define TYPEOKVER	1
 #define TYPEMISVER	2
@@ -27,33 +36,56 @@ program globalCon
 #define VERSMISVER	4
 #define BOTHOKVER	8
 
+/*
+ * define valid values for Acquiring PVs
+ */
 #define NOTACQUIRING	0
 #define ACQUIRING	1
 
-#define LASTRESET	0
-#define LASTSTARTING	1
-#define LASTSTOPPING	2
-#define LASTCHECKING	3
-#define LASTWRITING	4
+/*
+ * define previous state values used in sequencer to allow cumulative success
+ * retrying of previous operation.
+ */
+#define OP_RESET	0
+#define OP_START	1
+#define OP_STOP	 	2
+#define OP_CHECK	3
+#define OP_WRITE	4
 
-/* MAXDEVICES is for static mem allocation and must be higher than number of
-   devices expected.
+/* 
+ * MAXDEVICES is for static mem allocation and must be higher than number of
+ * devices expected.
  */
 #define MAXDEVICES 50	
-string deviceNames[MAXDEVICES];
 
-int numFound = 0;
+/*
+ * send a string indicating current state. No correspondence to "OP_" series 
+ * above.  s is a string naming the state; not enumerated.
+ */
+#define SENDSTATE(s)			\
+        strcpy(statePV, #s);		\
+        pvPut(statePV, SYNC);
 
+/*
+ * Macro to declare and assign PV. t is the type, n the variable name, and 
+ * s is the PV name.
+ */
+#define DECL(t,n,s)		\
+	t n;			\
+        assign n to #s;      
+
+/*
+ * Macro to declare an array of PVs and allocate memory for later runtime 
+ * assignment. t is the type and n the variable name.
+ */
 #define PVARRAY(t,n) 		\
 	t n[MAXDEVICES];	\
 	assign n[0] to "";
 
-#define SENDSTATE(s)			\
-        strcpy(prevStatePV, statePV);	\
-        strcpy(statePV, #s);		\
-        pvPut(prevStatePV);		\
-        pvPut(statePV, SYNC);
-
+/*
+ * Macro to declare a PV, assign, monitor, and link with an event flag. 
+ * t is the type, n the variable name, and s is the PV name.
+ */
 #define DECLEVENT(t,n,s)        \
         t n;                    \
         assign n to #s;         \
@@ -62,48 +94,74 @@ int numFound = 0;
         sync n n##Event;        
 
         
+/*
+ * These arrays correspond to groups of nED interface PVs, one per device
+ */
 PVARRAY(int, cmdReq)
 PVARRAY(int, cmdRsp)
 PVARRAY(int, verified)
 PVARRAY(int, acquiring)
+
+/*
+ * This is a group of soft PVs, one per device
+ */
 PVARRAY(int, disabled)
 
+/*
+ * These are global request soft PVs
+ */
 DECLEVENT(int, globalStop, {GPREFIX}:Stop)
 DECLEVENT(int, globalStart, {GPREFIX}:Start)
 DECLEVENT(int, globalCheck, {GPREFIX}:Check)
 DECLEVENT(int, globalWriteConf, {GPREFIX}:WriteConf)
 
+/*
+ * these are meant to indicate progress in sequencer operations on GUI
+ */
+DECL(string, currentPV, {PREFIX}:CurrentPV)
+DECL(string, statePV, {PREFIX}:State)
+
+/*
+ * This flags lack of complete success on GUI. implementation incomplete. 
+ * Should it be success rather than failure?
+ */
+DECL(int, requestFailed ,{PREFIX}:ReqFailed)
+
+/*
+ * Variables used by sequencer to keep track of success or failure of 
+ * individual device operations.
+ */
 int cmdSucceeded[MAXDEVICES];
 int cmdFailed[MAXDEVICES];
 
-int ourstatus;
-assign ourstatus to "{GPREFIX}:Status";
+/*
+ * List of devices found by looking for all :CmdReq PVs in IOC using seqGrep,
+ * then truncating at ":". numFound indicates how many found
+ */
+string deviceNames[MAXDEVICES];
+int numFound = 0;
 
-#define MIXED 0
-#define STOPPED 1
-#define STARTED 2
-
-string currentPV;
-assign currentPV to "{PREFIX}:CurrentPV";
-
-int retrySeq;
-assign retrySeq to "{PREFIX}:RetrySeq";
-monitor retrySeq;
-evflag retrySeqEvent;
-sync retrySeq retrySeqEvent;
-
-string statePV;
-assign statePV to "{PREFIX}:State";
-
-string prevStatePV;
-assign prevStatePV to "{PREFIX}:PrevState";
-
+/*
+ * variable used by sequencer to keep track of what the previous operation was
+ */
 int lastRequest = 0;
-int requestFailed = 0;
 
+/*
+ * common variables
+ */
 int i;
 string namebuf;
 
+/*
+ * Macros used in constructing state sets and states
+ */
+
+/*
+ * Macro to produce several states to iterate through all devices sending
+ * them all a command then waiting for responses from each of them. NAME is
+ * the name of the entry state, COMMAND is the CmdReq command to send, and 
+ * NEXT is the state to go to following completion.
+ */
 #define CMD_RSP(NAME, COMMAND, NEXT) 				\
     state NAME {						\
        when() {							\
@@ -158,6 +216,12 @@ string namebuf;
        } state NAME##4						\
     }					
 
+/*
+ * Macro to produce several states to iterate through all devices testing
+ * whether PV PVNAME is at state DESIRED. PV is assumed not to be monitored. 
+ * NAME is the name of the entry state and NEXT is the state to go to after
+ * completion.
+ */
 #define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
     state NAME {						\
        when() {							\
@@ -185,22 +249,29 @@ string namebuf;
        } state NAME##2						\
     }	
 
-#define CMD_WHEN(EVNAME, LASTNAME, NEXT) 			\
+/* 
+ * Macro to define a global operation request-monitor when clause. EVNAME is
+ * the base name of the event (ie, the variable name), OP_NAME is the operation
+ * code from the "OP_xxx" command defines above, and NEXT is the destination
+ * state to perform the operation.
+ */
+#define CMD_WHEN(EVNAME, OP_NAME, NEXT) 			\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
           EVNAME = 0;						\
           pvPut(EVNAME, SYNC);					\
           SENDSTATE(NEXT)					\
-          if (lastRequest != LASTNAME) 				\
+          if (lastRequest != OP_NAME) 				\
              for (i = 0; i< numFound; i++)			\
                 cmdSucceeded[i] = 0;				\
-          lastRequest = LASTNAME;				\
+          lastRequest = OP_NAME;				\
        } state NEXT
 
+/*
+ * Main state set.
+ */
 ss globalControl {
    state init {
       entry {
-         strcpy(statePV, "booted");
-         pvPut(statePV);
          SENDSTATE(init)
          numFound = seqGrep("mbbo", ".*[0-9]*:CmdReq", &deviceNames[0][0], 
                                                        MAXDEVICES);
@@ -225,7 +296,7 @@ ss globalControl {
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
           for (i=0; i<numFound; i++) cmdFailed[i] = 0;
-          lastRequest = LASTCHECKING;
+          lastRequest = OP_CHECK;
        } state Discover
        when (delay(0.2)) {
        } state init
@@ -239,8 +310,10 @@ ss globalControl {
           for (i = 0; i< numFound; i++)
              if (cmdFailed[i]) {
                 cmdFailed[i] = 0;		/* ready for next use */
-                if (!disabled[i])
+                if (!disabled[i]) {
                    requestFailed = 1;
+                   pvPut(requestFailed, SYNC);
+                }
              }
              else
              {
@@ -249,10 +322,10 @@ ss globalControl {
              }
           SENDSTATE(ready)
        }
-       CMD_WHEN(globalStop, LASTSTOPPING, tryStopping)
-       CMD_WHEN(globalStart, LASTSTARTING, tryStarting)
-       CMD_WHEN(globalWriteConf, LASTWRITING, tryWriting)
-       CMD_WHEN(globalCheck, LASTCHECKING, Discover)
+       CMD_WHEN(globalStop, OP_STOP, tryStopping)
+       CMD_WHEN(globalStart, OP_START, tryStarting)
+       CMD_WHEN(globalWriteConf, OP_WRITE, tryWriting)
+       CMD_WHEN(globalCheck, OP_CHECK, Discover)
     }
     CMD_RSP(tryStarting, STARTACQCMD, ReadStatus)
     CMD_RSP(tryStopping, STOPACQCMD, ReadStatus)
