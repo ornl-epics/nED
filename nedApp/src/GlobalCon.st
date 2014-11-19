@@ -178,58 +178,45 @@ string namebuf;
     state NAME {						\
        when() {							\
           SENDSTATE(NAME)					\
+          for (i = 0; i < numFound; i++) {			\
+             /*								\
+                Note that cmdSucceeded[i] means it worked in the 	\
+                previous attempt and cmdFailed[i] means something  	\
+                failed already in this attempt. In either case, skip it.\
+              */							\
+             if (!disabled[i] && !cmdSucceeded[i] && !cmdFailed[i]) {	\
+                cmdReq[i] = DISCOVERCMD;				\
+                pvPut(cmdReq[i], SYNC);				\
+             }							\
+          }							\
           i = -1;						\
-       } state NAME##2						\
+       } state NAME##1						\
     }								\
-    state NAME##2 {						\
-       option -e;						\
-       entry {							\
-          i++;							\
-       }							\
-       when (i >= numFound) { 				\
-       } state NAME##3						\
-       /*								\
-          Note that cmdSucceeded[i] means it worked in the previous 	\
-          attempt to initialize and cmdFailed[i] means something 	\
-          failed already in this attempt.  In either case, skip it.	\
-        */								\
-       when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) 	{	\
-       } state NAME##2							\
-       when() {							\
-          cmdReq[i] = DISCOVERCMD;				\
-          pvPut(cmdReq[i], SYNC);				\
-       } state NAME##2						\
-    }								\
-    state NAME##3 {						\
-       when() {							\
-          i = -1;						\
-       } state NAME##4						\
-    }								\
-    state NAME##4 {						\
+    state NAME##1 {						\
        option -e;						\
        entry {							\
           i = i+1;						\
        } 							\
-       when (i >= numFound) { 				\
+       when (i >= numFound) { 					\
        } state NEXT						\
        when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
-       } state NAME##4						\
+       } state NAME##1						\
        when () {						\
           strcpy(currentPV, deviceNames[i]);			\
           pvPut(currentPV,SYNC);				\
-       } state NAME##5						\
+       } state NAME##2						\
     }								\
-    state NAME##5 {						\
+    state NAME##2 {						\
        when(cmdRsp[i] == SUCCESSRSP) {				\
-       } state NAME##4							\
+       } state NAME##1							\
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { 					\
           cmdFailed[i] = 1;					\
-       } state NAME##4						\
+       } state NAME##1						\
     }					
 
 /*
- * Macro to produce several states to iterate through all devices testing
+ * Macro to produce a state to iterate through all devices testing
  * whether PV PVNAME is at state DESIRED. PV is assumed not to be monitored. 
  * NAME is the name of the entry state and NEXT is the state to go to after
  * completion.
@@ -238,28 +225,19 @@ string namebuf;
     state NAME {						\
        when() {							\
           SENDSTATE(NAME)					\
-          i = -1;						\
-       } state NAME##2						\
-    }								\
-    state NAME##2 {						\
-       option -e;						\
-       entry {							\
-          i++;							\
-       }							\
-       when (i >= numFound) { 					\
+          for (i = 0; i < numFound; i++) {			\
+             /*								\
+                Note that cmdSucceeded[i] means it worked in the 	\
+                previous attempt and cmdFailed[i] means something  	\
+                failed already in this attempt. In either case, skip it.\
+              */							\
+             if (!disabled[i] && !cmdSucceeded[i] && !cmdFailed[i]) {	\
+                pvGet(PVNAME[i], SYNC);					\
+                if (PVNAME[i] != DESIRED) cmdFailed[i] = 1;		\
+             }							\
+          }							\
        } state NEXT						\
-       /*								\
-          Note that cmdSucceeded[i] means it worked in the previous 	\
-          attempt and cmdFailed[i] means something failed already in 	\
-          this attempt.  In either case, skip it.			\
-        */								\
-       when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) {		\
-       } state NAME##2						\
-       when() {							\
-          pvGet(PVNAME[i], SYNC);				\
-          if (PVNAME[i] != DESIRED) cmdFailed[i] = 1;		\
-       } state NAME##2						\
-    }	
+    }
 /*
  * Macro to make an end-of-operation state.  This goes to the ready state
  * when done. NAME is the entry name of the state and EVNAME is the PV name
