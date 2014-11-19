@@ -8,6 +8,10 @@ program globalCon
  * accumulation behavior is reset when a different operation or the clear 
  * operation is requested. Each device has a disable PV allowing it to be 
  * skipped in non-clear operations.
+ * 
+ * The list of devices to operate on is obtained with seqGrep(), which looks
+ * at the EPICS database in the IOC memory. seqGrep() is part of the 
+ * pvMediator app.
  */
 
 %%#include <string.h>
@@ -134,9 +138,11 @@ DECL(string, statePV, {PREFIX}:State)
 
 /*
  * ReqSucceeded will be set true when one or a series of attempts to perform 
- * an operation succeeded for all devices
+ * an operation succeeded for all devices. pctSucceeded will give a 
+ * percentage of devices that succeeded.
  */
 DECL(int, requestSucceeded ,{PREFIX}:ReqSucceeded)
+DECL(float, pctSucceeded, {PREFIX}:PctSucceeded)
 
 /*
  * Variables used by sequencer to keep track of success or failure of 
@@ -144,6 +150,8 @@ DECL(int, requestSucceeded ,{PREFIX}:ReqSucceeded)
  */
 int cmdSucceeded[MAXDEVICES];
 int cmdFailed[MAXDEVICES];
+int numSucceeded = 0;
+int numEnabled = 0;
 
 /*
  * List of devices found by looking for all :CmdReq PVs in IOC using seqGrep,
@@ -251,15 +259,28 @@ string namebuf;
                 cmdFailed[i] = 0;	/* ready for next use */	\
                 if (!disabled[i]) {					\
                    requestSucceeded = 0;				\
+                   numEnabled++;					\
                 }							\
              }								\
              else							\
              {								\
-                if (!disabled[i])					\
-                    cmdSucceeded[i] = 1;/* add succeeded device */	\
+                if (!disabled[i]) {					\ 
+                   cmdSucceeded[i] = 1;/* add succeeded device */	\
+                   numSucceeded++;					\
+                   numEnabled++;					\
+                }							\
              }								\
           }								\
           pvPut(requestSucceeded, SYNC);				\
+          if (requestSucceeded) {					\
+             pctSucceeded = 100.0;					\
+          } else {							\
+             if (numEnabled == 0)					\
+                pctSucceeded = 0.0;					\
+             else							\
+                pctSucceeded = (100.0 * numSucceeded)/numEnabled;	\
+          }								\
+          pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME, SYNC);						\
           SENDSTATE(ready)						\
@@ -274,9 +295,12 @@ string namebuf;
 #define CMD_WHEN(EVNAME, OP_NAME, NEXT) 			\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
           SENDSTATE(NEXT)					\
-          if (lastRequest != OP_NAME) 				\
+          if (lastRequest != OP_NAME) {				\
              for (i = 0; i< numFound; i++)			\
                 cmdSucceeded[i] = 0;				\
+             numSucceeded = 0;					\
+             numEnabled = 0;					\
+          }							\
           lastRequest = OP_NAME;				\
        } state NEXT
 
