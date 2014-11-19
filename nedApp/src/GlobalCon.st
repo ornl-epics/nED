@@ -301,7 +301,6 @@ ss globalControl {
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
             pvAssign(acquiring[i], namebuf);
-            pvMonitor(acquiring[i]);
             sprintf(namebuf, "%s:SeqDisable", deviceNames[i]);
             pvAssign(disabled[i], namebuf);
             pvMonitor(disabled[i]);
