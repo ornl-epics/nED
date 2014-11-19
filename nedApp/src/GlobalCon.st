@@ -1,6 +1,8 @@
 program globalCon
 
 %%#include <string.h>
+%%#include <strings.h>		/* for rindex() */
+%%#include <seqGrep.h>
 
 #define RESETCMD	0
 #define DISCOVERCMD 	1
@@ -34,25 +36,16 @@ program globalCon
 #define LASTCHECKING	3
 #define LASTWRITING	4
 
-/*
- this is the beam Include file
+/* MAXDEVICES is for static mem allocation and must be higher than number of
+   devices expected.
+ */
+#define MAXDEVICES 50	
+string deviceNames[MAXDEVICES];
 
- NUMDEVICES must match number of strings in init of deviceNames[]
-*/
-#define NUMDEVICES 2
-
-/*
-Each of these devices must be a BaseModulePlugin
-string deviceNames[NUMDEVICES] = { "BL99:Det:roc1" };
-*/
-
-string deviceNames[NUMDEVICES];
-/*
-end beam include file
-*/
+int numFound = 0;
 
 #define PVARRAY(t,n) 		\
-	t n[NUMDEVICES];	\
+	t n[MAXDEVICES];	\
 	assign n[0] to "";
 
 #define SENDSTATE(s)			\
@@ -80,8 +73,8 @@ DECLEVENT(int, globalStart, {GPREFIX}:Start)
 DECLEVENT(int, globalCheck, {GPREFIX}:Check)
 DECLEVENT(int, globalWriteConf, {GPREFIX}:WriteConf)
 
-int cmdSucceeded[NUMDEVICES];
-int cmdFailed[NUMDEVICES];
+int cmdSucceeded[MAXDEVICES];
+int cmdFailed[MAXDEVICES];
 
 int ourstatus;
 assign ourstatus to "{GPREFIX}:Status";
@@ -123,7 +116,7 @@ string namebuf;
        entry {							\
           i++;							\
        }							\
-       when (i >= NUMDEVICES) { 				\
+       when (i >= numFound) { 				\
        } state NAME##3						\
        /*								\
           Note that cmdSucceeded[i] means it worked in the previous 	\
@@ -147,7 +140,7 @@ string namebuf;
        entry {							\
           i = i+1;						\
        } 							\
-       when (i >= NUMDEVICES) { 				\
+       when (i >= numFound) { 				\
        } state NEXT						\
        when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##4						\
@@ -177,7 +170,7 @@ string namebuf;
        entry {							\
           i++;							\
        }							\
-       when (i >= NUMDEVICES) { 				\
+       when (i >= numFound) { 				\
        } state NEXT						\
        /*								\
           Note that cmdSucceeded[i] means it worked in the previous 	\
@@ -198,7 +191,7 @@ string namebuf;
           pvPut(EVNAME, SYNC);					\
           SENDSTATE(NEXT)					\
           if (lastRequest != LASTNAME) 				\
-             for (i = 0; i< NUMDEVICES; i++)			\
+             for (i = 0; i< numFound; i++)			\
                 cmdSucceeded[i] = 0;				\
           lastRequest = LASTNAME;				\
        } state NEXT
@@ -209,26 +202,29 @@ ss globalControl {
          strcpy(statePV, "booted");
          pvPut(statePV);
          SENDSTATE(init)
-         for (i=0; i<NUMDEVICES; i++) {
+         numFound = seqGrep("mbbo", ".*[0-9]*:CmdReq", &deviceNames[0][0], 
+                                                       MAXDEVICES);
+         for (i=0; i<numFound; i++) {
+            *rindex(deviceNames[i], ':') = 0;
             sprintf(namebuf, "%s:CmdReq", deviceNames[i]);
             pvAssign(cmdReq[i], namebuf);
             sprintf(namebuf, "%s:CmdRsp", deviceNames[i]);
             pvAssign(cmdRsp[i], namebuf);
+            pvMonitor(cmdRsp[i]);
             sprintf(namebuf, "%s:Verified", deviceNames[i]);
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
             pvAssign(acquiring[i], namebuf);
+            pvMonitor(acquiring[i]);
             sprintf(namebuf, "%s:SeqDisable", deviceNames[i]);
             pvAssign(disabled[i], namebuf);
+            pvMonitor(disabled[i]);
             cmdSucceeded[i] = 0;
             cmdFailed[i] = 0;
          }
-         pvMonitor(acquiring);
-         pvMonitor(cmdRsp);
-         pvMonitor(disabled);
        }
-       when(pvConnectCount() == pvAssignCount()) {
-          for (i=0; i<NUMDEVICES; i++) cmdFailed[i] = 0;
+       when(numFound && pvConnectCount() == pvAssignCount()) {
+          for (i=0; i<numFound; i++) cmdFailed[i] = 0;
           lastRequest = LASTCHECKING;
        } state Discover
        when (delay(0.2)) {
@@ -240,7 +236,7 @@ ss globalControl {
     CMD_RSP(ReadStatus, READSTATCMD, ready)
     state ready {
        entry {
-          for (i = 0; i< NUMDEVICES; i++)
+          for (i = 0; i< numFound; i++)
              if (cmdFailed[i]) {
                 cmdFailed[i] = 0;		/* ready for next use */
                 if (!disabled[i])
