@@ -17,6 +17,8 @@ program globalCon
 %%#include <string.h>
 %%#include <seqGrep.h>
 
+option -c;	/* do not wait for PVs to connect */
+
 /*
  * define valid values for CmdReq PVs
  */
@@ -158,7 +160,10 @@ int numEnabled = 0;
  * then truncating at ":". numFound indicates how many found
  */
 string deviceNames[MAXDEVICES];
-int numFound = 0;
+string acqNames[MAXDEVICES];
+int numFound;
+int acqsFound;
+int acqsAssigned;
 
 /*
  * variable used by sequencer to keep track of what the previous operation was
@@ -169,6 +174,7 @@ int lastRequest = 0;
  * common variables
  */
 int i;
+int j;
 string namebuf;
 
 /*
@@ -233,12 +239,12 @@ string namebuf;
        when() {							\
           SENDSTATE(NAME)					\
           for (i = 0; i < numFound; i++) {			\
-             /*								\
-                Note that cmdSucceeded[i] means it worked in the 	\
-                previous attempt and cmdFailed[i] means something  	\
-                failed already in this attempt. In either case, skip it.\
+             /* 							\
+                Note that some PVs such as Acquiring are not present in \
+                all cases and then will not be assigned.		\
               */							\
-             if (!disabled[i] && !cmdSucceeded[i] && !cmdFailed[i]) {	\
+             if (!disabled[i] && !cmdSucceeded[i] && !cmdFailed[i] &&	\
+                       pvAssigned(PVNAME[i])) {				\
                 pvGet(PVNAME[i], SYNC);					\
                 if (PVNAME[i] != DESIRED) cmdFailed[i] = 1;		\
              }							\
@@ -264,7 +270,7 @@ string namebuf;
              }								\
              else							\
              {								\
-                if (!disabled[i]) {					\ 
+                if (!disabled[i]) {					\
                    cmdSucceeded[i] = 1;/* add succeeded device */	\
                    numSucceeded++;					\
                    numEnabled++;					\
@@ -323,18 +329,40 @@ ss globalControl {
             sprintf(namebuf, "%s:Verified", deviceNames[i]);
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
-            pvAssign(acquiring[i], namebuf);
-            sprintf(namebuf, "%s:SeqDisable", deviceNames[i]);
             pvAssign(disabled[i], namebuf);
             pvMonitor(disabled[i]);
             cmdSucceeded[i] = 0;
             cmdFailed[i] = 0;
          }
+         /* not all devices have the Acquiring PV */
+         acqsFound = seqGrep("bi", ".*[0-9]*:Acquiring", &acqNames[0][0], 
+                                                       MAXDEVICES);
+         for (i=0; i<acqsFound; i++) {
+            *strrchr(acqNames[i], ':') = 0;
+         }
+         i = 0; j = 0; acqsAssigned = 0;
+         while (j < acqsFound) {
+            while (i < numFound) {
+               if (!strcmp(acqNames[j], deviceNames[i])) {
+                  sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
+                  pvAssign(acquiring[i], namebuf);
+                  acqsAssigned++;
+                  i++;
+                  break;
+               }
+               i++;
+            }
+         }
+         if (acqsAssigned != acqsFound) 
+            printf("Warning: acqsFound = %d but acqsAssigned = %d\n", 
+                     acqsFound, acqsAssigned);
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
           lastRequest = OP_CHECK;
        } state Discover
-       when (delay(0.2)) {
+       when (delay(2)) {
+          printf("pvConnectCount = %ld but pvAssignCount = %ld\n",
+                  pvConnectCount(), pvAssignCount());
        } state init
     }
     CMD_RSP(Discover, DISCOVERCMD, ReadVersion)
