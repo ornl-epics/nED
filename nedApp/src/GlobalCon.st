@@ -122,7 +122,7 @@ PVARRAY(int, acquiring)
 /*
  * Groups of soft PVs, one per device
  */
-PVARRAY(int, disabled)
+PVARRAY(int, disable)
 PVARRAY(int, cmdSucceeded)
 
 /*
@@ -199,7 +199,7 @@ string namebuf;
                 previous attempt and cmdFailed[i] means something  	\
                 failed already in this attempt. In either case, skip it.\
               */							\
-             if (!disabled[i] && !cmdSucceeded[i] && !cmdFailed[i]) {	\
+             if (!disable[i] && !cmdSucceeded[i] && !cmdFailed[i]) {	\
                 cmdReq[i] = DISCOVERCMD;				\
                 pvPut(cmdReq[i], SYNC);				\
              }							\
@@ -214,10 +214,10 @@ string namebuf;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##1						\
        when () {						\
-          PVPUTSTR(currentDEV, deviceNames[i])			\
+          PVPUTSTR(currentDev, deviceNames[i])			\
        } state NAME##2						\
     }								\
     state NAME##2 {						\
@@ -244,7 +244,7 @@ string namebuf;
                 Note that some PVs such as Acquiring are not present in \
                 all cases and then will not be assigned.		\
               */							\
-             if (!disabled[i] && !cmdSucceeded[i] && !cmdFailed[i] &&	\
+             if (!disable[i] && !cmdSucceeded[i] && !cmdFailed[i] &&	\
                        pvAssigned(PVNAME[i])) {				\
                 pvGet(PVNAME[i], SYNC);					\
                 if (PVNAME[i] != DESIRED) cmdFailed[i] = 1;		\
@@ -264,14 +264,14 @@ string namebuf;
           for (i = 0; i< numFound; i++) {				\
              if (cmdFailed[i]) {					\
                 cmdFailed[i] = 0;	/* ready for next use */	\
-                if (!disabled[i]) {					\
+                if (!disable[i]) {					\
                    requestSucceeded = 0;				\
                    numEnabled++;					\
                 }							\
              }								\
              else							\
              {								\
-                if (!disabled[i]) {					\
+                if (!disable[i]) {					\
                    PVPUTNUM(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
                    numEnabled++;					\
@@ -330,8 +330,8 @@ ss globalControl {
             sprintf(namebuf, "%s:Verified", deviceNames[i]);
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
-            pvAssign(disabled[i], namebuf);
-            pvMonitor(disabled[i]);
+            pvAssign(disable[i], namebuf);
+            pvMonitor(disable[i]);
             sprintf(namebuf, "%s:cmdSucceeded", deviceNames[i]);
             pvAssign(cmdSucceeded[i], namebuf);
             PVPUTNUM(cmdSucceeded[i], 0)
