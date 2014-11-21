@@ -37,7 +37,7 @@ class FemPlugin : public BaseModulePlugin {
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
         FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
-        
+
         /**
          * Try to parse the FEM version response packet an populate the structure.
          *
@@ -57,20 +57,12 @@ class FemPlugin : public BaseModulePlugin {
         bool rspDiscover(const DasPacket *packet);
 
         /**
-         * Overrided READ_VERSION handler dispatches real work to one of rspReadVersion_*
+         * Overrided READ_VERSION handler to parse FEM version
          *
          * @param[in] packet with response to READ_VERSION
          * @return true if packet was parsed and module version verified.
          */
         bool rspReadVersion(const DasPacket *packet);
-
-        /**
-         * Handler for READ_VERSION response from FEM V10
-         *
-         * Populate hardware info parameters, like HwVer, HwRev, FwVer etc.
-         * @relates rspReadVersion
-         */
-        bool rspReadVersion_V10(const DasPacket *packet);
 
         /**
          * Create and register all status FEM V10 parameters to be exposed to EPICS.

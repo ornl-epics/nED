@@ -19,7 +19,7 @@
 #
 # Usage: export2epics.pl < InputFile.cpp > OutputFile.include"
 
-my $MAX_NAME_LEN      = 10; # 28 chars total, worst case prefix BL99A:Det:roc245:
+my $MAX_NAME_LEN      = 30; # Worst case prefix BL99A:Det:roc245:, total is 60
 my $MAX_DESC_LEN      = 28;
 
 sub  trim { my $s = shift; $s =~ s/^\s+|\s+$//g; return $s };

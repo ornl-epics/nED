@@ -95,7 +95,6 @@ $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 # These files contain descriptions of PVs that we use to generate template
 # files for EPICS database, Doxygen documentation and PVtable.
 $(PROD_NAME)_PVS   += DspPlugin_v63.cpp
-$(PROD_NAME)_PVS   += RocPlugin.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v51.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v52.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v54.cpp

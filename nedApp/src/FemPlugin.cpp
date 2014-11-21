@@ -17,16 +17,34 @@ EPICS_REGISTER_PLUGIN(FemPlugin, 5, "Port name", string, "Dispatcher port name",
 
 const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 250;
 
+struct RspReadVersion {
+#ifdef BITFIELD_LSB_FIRST
+    unsigned hw_revision:8;     // Board revision number
+    unsigned hw_version:8;      // Board version number
+    unsigned hw_year:16;        // Board year
+    unsigned hw_day:8;          // Board day
+    unsigned hw_month:8;        // Board month
+    unsigned fw_revision:8;     // Firmware revision number
+    unsigned fw_version:8;      // Firmware version number
+    unsigned fw_year:16;        // Firmware year
+    unsigned fw_day:8;          // Firmware day
+    unsigned fw_month:8;        // Firmware month
+#else
+#error Missing RspReadVersion declaration
+#endif // BITFIELD_LSB_FIRST
+};
+
 FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
     : BaseModulePlugin(portName, dispatcherPortName, hardwareId, true,
                        blocking, NUM_FEMPLUGIN_PARAMS + NUM_FEMPLUGIN_DYNPARAMS)
     , m_version(version)
 {
-    if (m_version == "v32") {
-// These has not been verified. Mapping was taken from dcomserver but the version could be wrong.
-//        createStatusParams_v32();
-//        createConfigParams_v32();
+    if (m_version == "v32" || m_version == "v34") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v32();
+        createConfigParams_v32();
     } else {
+        setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);
     }
 
@@ -41,43 +59,14 @@ bool FemPlugin::rspDiscover(const DasPacket *packet)
             packet->cmdinfo.module_type == DasPacket::MOD_TYPE_FEM);
 }
 
-bool FemPlugin::rspReadVersion(const DasPacket *packet)
-{
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    if (m_version == "v32") {
-        return rspReadVersion_V10(packet);
-    }
-    
-    return false;
-}
-
 bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
-    struct RspReadVersionV10 {
-#ifdef BITFIELD_LSB_FIRST
-        unsigned hw_revision:8;     // Board revision number
-        unsigned hw_version:8;      // Board version number
-        unsigned hw_year:16;        // Board year
-        unsigned hw_day:8;          // Board day
-        unsigned hw_month:8;        // Board month
-        unsigned fw_revision:8;     // Firmware revision number
-        unsigned fw_version:8;      // Firmware version number
-        unsigned fw_year:16;        // Firmware year
-        unsigned fw_day:8;          // Firmware day
-        unsigned fw_month:8;        // Firmware month
-#else
-#error Missing RspReadVersionV10 declaration
-#endif // BITFIELD_LSB_FIRST
-    };
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
 
-    const RspReadVersionV10 *response = reinterpret_cast<const RspReadVersionV10*>(packet->getPayload());
-
-    if (packet->getPayloadLength() != sizeof(RspReadVersionV10)) {
+    if (packet->getPayloadLength() != sizeof(RspReadVersion)) {
         return false;
     }
-    
+
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;
     version.hw_year     = response->hw_year;
@@ -91,16 +80,19 @@ bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
     return true;
 }
 
-bool FemPlugin::rspReadVersion_V10(const DasPacket *packet)
+bool FemPlugin::rspReadVersion(const DasPacket *packet)
 {
     char date[20];
-    
     BaseModulePlugin::Version version;
+
+    if (!BaseModulePlugin::rspReadVersion(packet))
+        return false;
+
     if (!parseVersionRsp(packet, version)) {
         LOG_ERROR("Received unexpected READ_VERSION response for this FEM type");
         return false;
     }
-    
+
     setIntegerParam(HwVer, version.hw_version);
     setIntegerParam(HwRev, version.hw_revision);
     snprintf(date, sizeof(date), "%04d/%02d/%02d", version.hw_year, version.hw_month, version.hw_day);
@@ -112,7 +104,5 @@ bool FemPlugin::rspReadVersion_V10(const DasPacket *packet)
 
     callParamCallbacks();
 
-    // TODO: check config & status parameters before re-enabling here
-    LOG_ERROR("Unsupported FEM version");
-    return false;
+    return true;
 }
