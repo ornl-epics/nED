@@ -56,7 +56,6 @@ SHARED_LIBRARIES = NO
 # Headers used by unit-tests
 INC += CircularBuffer.h
 
-$(PROD_NAME)_SRCS  += DevCon.st
 $(PROD_NAME)_SRCS  += GlobalCon.st
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp

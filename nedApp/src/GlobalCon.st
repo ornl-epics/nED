@@ -74,12 +74,15 @@ option -c;	/* do not wait for PVs to connect */
 #define MAXDEVICES 50	
 
 /*
+ * set PV n to numeric value v and put. 
+ */
+#define PVSEND(n,v) { n = v; pvPut(n); }	
+
+/*
  * send a string indicating current state. No correspondence to "OP_" series 
  * above.  s is a string naming the state; not enumerated.
  */
-#define SENDSTATE(s) {			\
-        strcpy(statePV, #s);		\
-        pvPut(statePV, SYNC); }
+#define SENDSTATE(s) {strcpy(statePV, #s); pvPut(statePV, SYNC); }
 
 /*
  * Macro to declare and assign PV. t is the type, n the variable name, and 
@@ -118,9 +121,10 @@ PVARRAY(int, verified)
 PVARRAY(int, acquiring)
 
 /*
- * This is a group of soft PVs, one per device
+ * Groups of soft PVs, one per device
  */
 PVARRAY(int, disabled)
+PVARRAY(int, cmdSucceeded)
 
 /*
  * These are global request soft PVs. Treated as "busy" records in that they
@@ -150,7 +154,6 @@ DECL(float, pctSucceeded, {PREFIX}:PctSucceeded)
  * Variables used by sequencer to keep track of success or failure of 
  * individual device operations.
  */
-int cmdSucceeded[MAXDEVICES];
 int cmdFailed[MAXDEVICES];
 int numSucceeded = 0;
 int numEnabled = 0;
@@ -271,7 +274,7 @@ string namebuf;
              else							\
              {								\
                 if (!disabled[i]) {					\
-                   cmdSucceeded[i] = 1;/* add succeeded device */	\
+                   PVSEND(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
                    numEnabled++;					\
                 }							\
@@ -303,7 +306,7 @@ string namebuf;
           SENDSTATE(NEXT)					\
           if (lastRequest != OP_NAME) {				\
              for (i = 0; i< numFound; i++)			\
-                cmdSucceeded[i] = 0;				\
+                PVSEND(cmdSucceeded[i], 0)			\
              numSucceeded = 0;					\
              numEnabled = 0;					\
           }							\
@@ -331,7 +334,9 @@ ss globalControl {
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
             pvAssign(disabled[i], namebuf);
             pvMonitor(disabled[i]);
-            cmdSucceeded[i] = 0;
+            sprintf(namebuf, "%s:cmdSucceeded", deviceNames[i]);
+            pvAssign(cmdSucceeded[i], namebuf);
+            PVSEND(cmdSucceeded[i], 0)
             cmdFailed[i] = 0;
          }
          /* not all devices have the Acquiring PV */
@@ -390,7 +395,7 @@ ss globalControl {
     state Clear {
        when() {
           for (i = 0; i< numFound; i++)	{
-                cmdSucceeded[i] = 1;	
+                PVSEND(cmdSucceeded[i],1)
                 cmdFailed[i] = 0;	
           }
        } state DoneClear
