@@ -76,13 +76,12 @@ option -c;	/* do not wait for PVs to connect */
 /*
  * set PV n to numeric value v and put. 
  */
-#define PVSEND(n,v) { n = v; pvPut(n); }	
+#define PVPUTNUM(n,v) { n = v; pvPut(n); }	
 
 /*
- * send a string indicating current state. No correspondence to "OP_" series 
- * above.  s is a string naming the state; not enumerated.
+ * set PV n to string value s and put.
  */
-#define SENDSTATE(s) {strcpy(statePV, #s); pvPut(statePV, SYNC); }
+#define PVPUTSTR(n,s) {strcpy(n, #s); pvPut(n); }
 
 /*
  * Macro to declare and assign PV. t is the type, n the variable name, and 
@@ -139,7 +138,7 @@ DECLEVENT(int, globalWriteConf, {GPREFIX}:WriteConf)
 /*
  * these are meant to indicate progress in sequencer operations on GUI
  */
-DECL(string, currentPV, {PREFIX}:CurrentPV)
+DECL(string, currentDev, {PREFIX}:CurrentPV)
 DECL(string, statePV, {PREFIX}:State)
 
 /*
@@ -193,7 +192,7 @@ string namebuf;
 #define CMD_RSP(NAME, COMMAND, NEXT) 				\
     state NAME {						\
        when() {							\
-          SENDSTATE(NAME)					\
+          PVPUTSTR(statePV,NAME)					\
           for (i = 0; i < numFound; i++) {			\
              /*								\
                 Note that cmdSucceeded[i] means it worked in the 	\
@@ -218,8 +217,7 @@ string namebuf;
        when (disabled[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##1						\
        when () {						\
-          strcpy(currentPV, deviceNames[i]);			\
-          pvPut(currentPV,SYNC);				\
+          PVPUTSTR(currentDEV, deviceNames[i])			\
        } state NAME##2						\
     }								\
     state NAME##2 {						\
@@ -240,7 +238,7 @@ string namebuf;
 #define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
     state NAME {						\
        when() {							\
-          SENDSTATE(NAME)					\
+          PVPUTSTR(statePV,NAME)					\
           for (i = 0; i < numFound; i++) {			\
              /* 							\
                 Note that some PVs such as Acquiring are not present in \
@@ -274,7 +272,7 @@ string namebuf;
              else							\
              {								\
                 if (!disabled[i]) {					\
-                   PVSEND(cmdSucceeded[i],1)				\
+                   PVPUTNUM(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
                    numEnabled++;					\
                 }							\
@@ -292,7 +290,7 @@ string namebuf;
           pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME, SYNC);						\
-          SENDSTATE(ready)						\
+          PVPUTSTR(statePV,ready)						\
       } state ready							\
    }
 /* 
@@ -303,10 +301,10 @@ string namebuf;
  */
 #define CMD_WHEN(EVNAME, OP_NAME, NEXT) 			\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
-          SENDSTATE(NEXT)					\
+          PVPUTSTR(statePV,NEXT)					\
           if (lastRequest != OP_NAME) {				\
              for (i = 0; i< numFound; i++)			\
-                PVSEND(cmdSucceeded[i], 0)			\
+                PVPUTNUM(cmdSucceeded[i], 0)			\
              numSucceeded = 0;					\
              numEnabled = 0;					\
           }							\
@@ -319,7 +317,7 @@ string namebuf;
 ss globalControl {
    state init {
       entry {
-         SENDSTATE(init)
+         PVPUTSTR(statePV,init)
          numFound = seqGrep("mbbo", ".*[0-9]*:CmdReq", &deviceNames[0][0], 
                                                        MAXDEVICES);
          for (i=0; i<numFound; i++) {
@@ -336,7 +334,7 @@ ss globalControl {
             pvMonitor(disabled[i]);
             sprintf(namebuf, "%s:cmdSucceeded", deviceNames[i]);
             pvAssign(cmdSucceeded[i], namebuf);
-            PVSEND(cmdSucceeded[i], 0)
+            PVPUTNUM(cmdSucceeded[i], 0)
             cmdFailed[i] = 0;
          }
          /* not all devices have the Acquiring PV */
@@ -395,7 +393,7 @@ ss globalControl {
     state Clear {
        when() {
           for (i = 0; i< numFound; i++)	{
-                PVSEND(cmdSucceeded[i],1)
+                PVPUTNUM(cmdSucceeded[i],1)
                 cmdFailed[i] = 0;	
           }
        } state DoneClear
