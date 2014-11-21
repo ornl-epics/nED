@@ -71,14 +71,14 @@ class AcpcFemPlugin : public BaseModulePlugin {
         bool rspReadVersion_V10(const DasPacket *packet);
 
         /**
-         * Create and register all status FEM V10 parameters to be exposed to EPICS.
+         * Create and register all status ACPC FEM parameters to be exposed to EPICS.
          */
-        void createStatusParams();
+        void createStatusParams_v22();
 
         /**
-         * Create and register all config FEM V10 parameters to be exposed to EPICS.
+         * Create and register all config ACPC FEM parameters to be exposed to EPICS.
          */
-        void createConfigParams();
+        void createConfigParams_v22();
 };
 
 #endif // ACPC_FEM_PLUGIN_H

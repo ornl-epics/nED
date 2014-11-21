@@ -2,9 +2,8 @@
 
 < envPaths
 
-epicsEnvSet("IOCNAME", "bl99-iocned")
-
-# StreamDevice
+epicsEnvSet("IOCNAME", "bl99-Det-nED")
+epicsEnvSet("PREFIX", "BL99:Det:")
 epicsEnvSet("STREAM_PROTOCOL_PATH", "../../protocol/")
 
 ## Register all support components
@@ -15,7 +14,7 @@ ned_registerRecordDeviceDriver(pdbbase)
 epicsEnvSet SAVE_DIR /home/controls/var/$(IOCNAME)
 system("install -m 777 -d $(SAVE_DIR)")
 save_restoreSet_Debug(0)
-save_restoreSet_status_prefix("BL99:IOCNAME:")
+save_restoreSet_status_prefix("$(PREFIX)")
 set_requestfile_path("$(SAVE_DIR)")
 set_savefile_path("$(SAVE_DIR)")
 save_restoreSet_NumSeqFiles(3)
@@ -32,60 +31,59 @@ set_pass1_restoreFile("$(IOCNAME).sav")
 #asSetSubstitutions("P=BL99:CS")
 
 ## Load record instances
-epicsEnvSet("PREFIX", "BL99:")
 OccConfigure("occ", "/dev/snsocb1", 40000000)
-dbLoadRecords("../../db/OccPortDriver.db","P=$(PREFIX)Det:occ:,PORT=occ")
+dbLoadRecords("../../db/OccPortDriver.db","P=$(PREFIX)occ:,PORT=occ")
 
 CmdDispatcherConfigure("cmd", "occ")
-dbLoadRecords("../../db/CmdDispatcherPlugin.db","P=$(PREFIX)Det:cmd:,PORT=cmd")
+dbLoadRecords("../../db/CmdDispatcherPlugin.db","P=$(PREFIX)cmd:,PORT=cmd")
 
 PixelMapPluginConfigure("PixMap", "occ", 1, "/tmp/test.pixelmap", 4194304)
-dbLoadRecords("../../db/PixelMapPlugin.template","P=$(PREFIX)Det:pm1:,PORT=PixMap")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)Det:pm1:,PORT=PixMap")
+dbLoadRecords("../../db/PixelMapPlugin.template","P=$(PREFIX)pm1:,PORT=PixMap")
+dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)pm1:,PORT=PixMap")
 
 AdaraPluginConfigure("Adara1", "occ", 1, 2)
-dbLoadRecords("../../db/AdaraPlugin.db","P=$(PREFIX)Det:adara1:,PORT=Adara1")
+dbLoadRecords("../../db/AdaraPlugin.db","P=$(PREFIX)adara1:,PORT=Adara1")
 
 ProxyPluginConfigure("proxy1", "PixMap")
-dbLoadRecords("../../db/ProxyPlugin.db","P=$(PREFIX)Det:proxy1:,PORT=proxy1")
+dbLoadRecords("../../db/ProxyPlugin.db","P=$(PREFIX)proxy1:,PORT=proxy1")
 
-RocPvaPluginConfigure("rocPva1", "occ", "$(PREFIX)Det:rocpva1:Neutrons")
-dbLoadRecords("../../db/RocPvaPlugin.db","P=$(PREFIX)Det:rocpva1:,PORT=rocPva1")
+RocPvaPluginConfigure("rocPva1", "occ", "$(PREFIX)rocpva1:Neutrons")
+dbLoadRecords("../../db/RocPvaPlugin.db","P=$(PREFIX)rocpva1:,PORT=rocPva1")
 
 #DspPluginConfigure("Dsp1", "occ", "0x15FA76DF")
 DspPluginConfigure("Dsp1", "cmd", "21.250.118.223", "v63", 0)
-dbLoadRecords("../../db/DspPlugin.db","P=$(PREFIX)Det:dsp1:,PORT=Dsp1")
+dbLoadRecords("../../db/DspPlugin_v63.db","P=$(PREFIX)dsp1:,PORT=Dsp1")
 
 DiscoverPluginConfigure("Disc", "occ")
-dbLoadRecords("../../db/DiscoverPlugin.db","P=$(PREFIX)Det:disc:,PORT=Disc")
+dbLoadRecords("../../db/DiscoverPlugin.db","P=$(PREFIX)disc:,PORT=Disc")
 
 RocPluginConfigure("roc1", "cmd", "20.39.216.73", "v52", 0)
-#dbLoadRecords("../../db/ROCHV.db","P=$(PREFIX)Det:HV1,G=$(PREFIX)Det:HVG,PORT=roc1")
-dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX)Det:roc1:,PORT=roc1")
+#dbLoadRecords("../../db/ROCHV.db","P=$(PREFIX)HV1,G=$(PREFIX)HVG,PORT=roc1")
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX)roc1:,PORT=roc1")
 
 DumpPluginConfigure("dump", "occ", 0)
-dbLoadRecords("../../db/DumpPlugin.db","P=$(PREFIX)Det:dump:,PORT=dump")
+dbLoadRecords("../../db/DumpPlugin.db","P=$(PREFIX)dump:,PORT=dump")
 
 StatPluginConfigure("stat", "occ", 0)
-dbLoadRecords("../../db/StatPlugin.db","P=$(PREFIX)Det:stat:,PORT=stat")
+dbLoadRecords("../../db/StatPlugin.db","P=$(PREFIX)stat:,PORT=stat")
 
 RtdlPluginConfigure("rtdl", "occ", 0)
-dbLoadRecords("../../db/RtdlPlugin.db","P=$(PREFIX)Det:rtdl:,PORT=rtdl")
+dbLoadRecords("../../db/RtdlPlugin.db","P=$(PREFIX)rtdl:,PORT=rtdl")
 
-FemPluginConfigure("fem1", "cmd", "0x603B0817", "10.0/5.0", 1)
-dbLoadRecords("../../db/FemPlugin.db","P=$(PREFIX)Det:fem1:,PORT=fem1")
+FemPluginConfigure("fem1", "cmd", "0x603B0817", "v22", 1)
+dbLoadRecords("../../db/FemPlugin_v32.db","P=$(PREFIX)fem1:,PORT=fem1")
 
-AcpcFemPluginConfigure("fem2", "cmd", "20.128.234.122", "10.0/5.0", 0)
-dbLoadRecords("../../db/AcpcFemPlugin.db","P=$(PREFIX)Det:fem2:,PORT=fem2")
+AcpcFemPluginConfigure("fem2", "cmd", "20.128.234.122", "v22", 0)
+dbLoadRecords("../../db/AcpcFemPlugin_v22.db","P=$(PREFIX)fem2:,PORT=fem2")
 
-GenericModulePluginConfigure("gm", "cmd", 0)
-dbLoadRecords("../../db/GenericModulePlugin.db","P=$(PREFIX)Det:gm:,PORT=gm")
+DebugPluginConfigure("gm", "cmd", 0)
+dbLoadRecords("../../db/DebugPlugin.db","P=$(PREFIX)gm:,PORT=gm")
 
 FlatFieldPluginConfigure("ff", "occ", 0)
-dbLoadRecords("../../db/FlatFieldPlugin.db","P=$(PREFIX)Det:ff:,PORT=ff")
+dbLoadRecords("../../db/FlatFieldPlugin.db","P=$(PREFIX)ff:,PORT=ff")
 
-AcpcPvaPluginConfigure("AcpcPva", "occ", "$(PREFIX)Det:pva:Neutrons")
-dbLoadRecords("../../db/AcpcPvaPlugin.db","P=$(PREFIX)Det:pva:,PORT=AcpcPva")
+AcpcPvaPluginConfigure("AcpcPva", "occ", "$(PREFIX)pva:Neutrons")
+dbLoadRecords("../../db/AcpcPvaPlugin.db","P=$(PREFIX)pva:,PORT=AcpcPva")
 
 iocInit()
 
@@ -100,6 +98,6 @@ save_restoreShow(10)
 
 # Fanout record for init in HVROC.db instead of PINI mechanism
 #epicsThreadSleep 1 
-#dbpf $(PREFIX)Det:HV1:InitProc.PROC 1
+#dbpf $(PREFIX)HV1:InitProc.PROC 1
 
 startPVAServer

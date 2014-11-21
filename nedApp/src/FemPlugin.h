@@ -14,15 +14,6 @@
 
 /**
  * Plugin for FEM module.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * HwDate        | asynOctet       | ""       | RO   | Hardware date as YYYY/MM/DD
- * HwVer         | asynParamInt32  | 0        | RO   | Hardware version
- * HwRev         | asynParamInt32  | 0        | RO   | Hardware revision
- * FwVer         | asynParamInt32  | 0        | RO   | Firmware version
- * FwRev         | asynParamInt32  | 0        | RO   | Firmware revision
  */
 class FemPlugin : public BaseModulePlugin {
     private: // structures and definitions
@@ -46,6 +37,15 @@ class FemPlugin : public BaseModulePlugin {
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
         FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
+        
+        /**
+         * Try to parse the FEM version response packet an populate the structure.
+         *
+         * @param[in] packet to be parsed
+         * @param[out] version structure to be populated
+         * @return true if succesful, false if version response packet could not be parsed.
+         */
+        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
 
     private: // functions
         /**
@@ -75,12 +75,12 @@ class FemPlugin : public BaseModulePlugin {
         /**
          * Create and register all status FEM V10 parameters to be exposed to EPICS.
          */
-        void createStatusParams_V10();
+        void createStatusParams_v32();
 
         /**
          * Create and register all config FEM V10 parameters to be exposed to EPICS.
          */
-        void createConfigParams_V10();
+        void createConfigParams_v32();
 };
 
 #endif // DSP_PLUGIN_H

@@ -32,6 +32,7 @@ record(longin, "$(P)TxCount")
 }
 record(mbbo, "$(P)DataMode")
 {
+    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Detectors data mode")
     field(DTYP, "asynInt32")
@@ -45,6 +46,5 @@ record(mbbo, "$(P)DataMode")
     field(TWVL, "2")
     field(TWST, "Extended")
     field(THVL, "3")
-    field(FRST, "Verbose")
-    field(FRVL, "4")
+    field(THST, "Verbose")
 }

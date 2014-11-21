@@ -1,4 +1,4 @@
-/* GenericModulePlugin.h
+/* DebugPlugin.h
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -7,10 +7,10 @@
  * @author Klemen Vodopivec
  */
 
-#ifndef GENERIC_MODULE_PLUGIN_H
-#define GENERIC_MODULE_PLUGIN_H
+#ifndef DEBUG_PLUGIN_H
+#define DEBUG_PLUGIN_H
 
-#include "BaseModulePlugin.h"
+#include "BasePlugin.h"
 
 #include <cstring>
 
@@ -32,7 +32,7 @@
  * User can send any 8 bit OCC command. The plugin does not check command value
  * and thus allows extensibility through EPICS database.
  */
-class GenericModulePlugin : public BasePlugin {
+class DebugPlugin : public BasePlugin {
     private: // variables
         /**
          * Valid byte grouping modes.
@@ -53,7 +53,7 @@ class GenericModulePlugin : public BasePlugin {
 
     public: // structures and defines
         /**
-         * Constructor for GenericModulePlugin
+         * Constructor for DebugPlugin
          *
          * Constructor will create and populate PVs with default values.
          *
@@ -61,7 +61,7 @@ class GenericModulePlugin : public BasePlugin {
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        GenericModulePlugin(const char *portName, const char *dispatcherPortName, int blocking=0);
+        DebugPlugin(const char *portName, const char *dispatcherPortName, int blocking=0);
 
         /**
          * Overloaded function to handle writing strings and byte arrays.
