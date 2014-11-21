@@ -19,7 +19,7 @@ BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortNam
     , m_pulseTime({0, 0})
     , m_pulseCharge(0)
     , m_postSeq(0)
-    , m_processPacketCb(0)
+    , m_processDataCb(0)
     , m_postDataCb(0)
 {
     m_pvRecord = PvaNeutronData::create(pvName);
@@ -47,16 +47,18 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
 {
     m_nReceived += packetList->size();
 
-    if (!!m_pvRecord && m_processPacketCb != 0 && m_postDataCb != 0) {
+    if (!!m_pvRecord && m_processDataCb != 0 && m_postDataCb != 0) {
         bool hasData = false;
 
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
+            uint32_t dataLen = 0;
 
             const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
+            const uint32_t *data = packet->getData(&dataLen);
 
             // TODO: what about metadata? In tof,pixel format?
-            if (packet->isNeutronData() == false || rtdl == 0)
+            if (packet->isNeutronData() == false || rtdl == 0 || dataLen == 0)
                 continue;
 
             // Extract timestamp and proton charge from RTDL
@@ -64,7 +66,7 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
             epicsTimeStamp time = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
             if (epicsTimeNotEqual(&time, &m_pulseTime)) {
                 if (hasData == true) {
-                    m_postDataCb(this, m_pulseTime, m_pulseCharge, m_postSeq++);
+                    postData();
                     hasData = false;
                 }
                 m_pulseTime = { time.secPastEpoch, time.nsec };
@@ -72,14 +74,14 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
                 m_pulseCharge = static_cast<double>(rtdl->pulse_charge) * 10e-12;
             }
 
-            m_processPacketCb(this, packet);
+            m_processDataCb(this, data, dataLen);
 
             m_nProcessed++;
             hasData = true;
         }
 
-        if (hasData) {
-            m_postDataCb(this, m_pulseTime, m_pulseCharge, m_postSeq++);
+        if (hasData == true) {
+            postData();
         }
     }
 
@@ -89,7 +91,21 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
     callParamCallbacks();
 }
 
-void BasePvaPlugin::setCallbacks(ProcessPacketCb procCb, PostDataCb postCb) {
-    m_processPacketCb = procCb;
+void BasePvaPlugin::postData()
+{
+    if (m_postDataCb && !!m_pvRecord) {
+        // EPICSv4 uses POSIX EPOCH, v3 uses EPICS EPOCH
+        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + m_pulseTime.secPastEpoch, m_pulseTime.nsec, m_postSeq++);
+
+        m_pvRecord->beginGroupPut();
+        m_pvRecord->timeStamp.set(time);
+        m_pvRecord->proton_charge->put(m_pulseCharge);
+        m_postDataCb(this, m_pvRecord);
+        m_pvRecord->endGroupPut();
+    }
+}
+
+void BasePvaPlugin::setCallbacks(ProcessDataCb procCb, PostDataCb postCb) {
+    m_processDataCb = procCb;
     m_postDataCb = postCb;
 }

@@ -33,19 +33,25 @@ class BasePvaPlugin : public BasePlugin {
          * C callback function to process packet data.
          *
          * @param[in] this_ Pointer to plugin instance (this).
-         * @param[in] packet Packet to be processed.
+         * @param[in] Pointer to the start of the data.
+         * @param[in] Size of the data in 4-bytes
          */
-        typedef void (*ProcessPacketCb)(BasePvaPlugin *this_, const DasPacket *packet);
+        typedef void (*ProcessDataCb)(BasePvaPlugin *this_, const uint32_t *data, uint32_t dataLen);
 
         /*
          * C callback function to post all data collected since previous post.
          *
+         * This calback defined by derived plugin is invoked when data needs
+         * to be pushed out. This happens when new pulse is detected or there's
+         * currently no more data available. The timeStamp and proton_charge
+         * attributes of Neutrons structure are already populated before the
+         * callback is invoked. Also the transaction on pvRecord has been
+         * started before the callback is invoked.
+         *
          * @param[in] this_ Pointer to plugin instance (this).
-         * @param[in] time Time of the pulse that we're sending data for.
-         * @param[in] charge Charge of the pulse that we're sending data for.
-         * @param[in] sequenceId Sequence ID of the posting.
+         * @param[in] pvRecord PV record to be updated
          */
-        typedef void (*PostDataCb)(BasePvaPlugin *, const epicsTimeStamp &time, double charge, uint32_t sequenceId);
+        typedef void (*PostDataCb)(BasePvaPlugin *, const PvaNeutronData::shared_pointer& pvRecord);
 
         /**
          * Constructor
@@ -86,13 +92,10 @@ class BasePvaPlugin : public BasePlugin {
          * least packet processing callback is invoked quite often and other
          * implementations (virtual function, std::function are all slower).
          *
-         * @param[in] procCb Packet processing function
+         * @param[in] procCb Packet data processing function
          * @param[in] postCb Function to be called when PV update should be done.
          */
-        void setCallbacks(ProcessPacketCb procCb, PostDataCb postCb);
-
-    protected:
-        PvaNeutronData::shared_pointer m_pvRecord;
+        void setCallbacks(ProcessDataCb procCb, PostDataCb postCb);
 
     private:
         uint32_t m_nReceived;       //!< Number of packets received
@@ -100,8 +103,14 @@ class BasePvaPlugin : public BasePlugin {
         epicsTimeStamp m_pulseTime; //!< Current pulse EPICS timestamp
         double m_pulseCharge;       //!< Current pulse charge
         uint32_t m_postSeq;         //!< Current post sequence id
-        ProcessPacketCb m_processPacketCb;  //!< Callback function ptr to process packet data
+        ProcessDataCb m_processDataCb; //!< Callback function ptr to process packet data
         PostDataCb m_postDataCb;    //!< Callback function ptr to post data collected so far
+        PvaNeutronData::shared_pointer m_pvRecord;
+
+        /**
+         * Invoke derived plugin callback to send data.
+         */
+        void postData();
 
     private: // asyn parameters
         #define FIRST_BASEPVAPLUGIN_PARAM 0

@@ -187,7 +187,9 @@ const DasPacket::RtdlHeader *DasPacket::getRtdlHeader() const
 
 const uint32_t *DasPacket::getData(uint32_t *count) const
 {
-    // DSP aggregates detectors data into data packets and the data is always at the start of payload
+    // DSP aggregates detectors data into data packets.
+    // DSP-T includes RTDL information in all data packets immediately
+    // after DAS header.
     const uint8_t *start = 0;
     *count = 0;
     if (!datainfo.is_command) {
@@ -198,6 +200,22 @@ const uint32_t *DasPacket::getData(uint32_t *count) const
         *count /= sizeof(uint32_t);
     }
     return reinterpret_cast<const uint32_t *>(start);
+}
+
+uint32_t DasPacket::getDataLength() const
+{
+    if (cmdinfo.is_command)
+        return 0;
+
+    uint32_t length = payload_length;
+    if (datainfo.rtdl_present) {
+        if (payload_length < sizeof(RtdlHeader))
+            return 0;
+
+        length -= sizeof(RtdlHeader);
+    }
+
+    return length;
 }
 
 DasPacket::CommandType DasPacket::getResponseType() const
