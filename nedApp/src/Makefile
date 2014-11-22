@@ -78,6 +78,8 @@ $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v56.cpp
 $(PROD_NAME)_SRCS  += FemPlugin.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
+$(PROD_NAME)_SRCS  += FemPlugin_v35.cpp
+$(PROD_NAME)_SRCS  += FemPlugin_v36.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin_v22.cpp
 $(PROD_NAME)_SRCS  += DiscoverPlugin.cpp
@@ -100,6 +102,8 @@ $(PROD_NAME)_PVS   += RocPlugin_v52.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v54.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v56.cpp
 $(PROD_NAME)_PVS   += FemPlugin_v32.cpp
+$(PROD_NAME)_PVS   += FemPlugin_v35.cpp
+$(PROD_NAME)_PVS   += FemPlugin_v36.cpp
 $(PROD_NAME)_PVS   += AcpcFemPlugin_v22.cpp
 
 #===========================

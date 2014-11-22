@@ -15,7 +15,7 @@
 
 EPICS_REGISTER_PLUGIN(FemPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 250;
+const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 290;
 
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
@@ -43,6 +43,16 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 1);
         createStatusParams_v32();
         createConfigParams_v32();
+    } else if (m_version == "v35") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v35();
+        createConfigParams_v35();
+/* TODO: FEM interface not yet finalized
+    } else if (m_version == "v36") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v36();
+        createConfigParams_v36();
+*/
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);
@@ -104,5 +114,14 @@ bool FemPlugin::rspReadVersion(const DasPacket *packet)
 
     callParamCallbacks();
 
-    return true;
+    if ((version.hw_version == 10 && version.hw_revision == 2) ||
+        (version.hw_version == 10 && version.hw_revision == 9)) {
+        char ver[10];
+        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
+        if (m_version == ver)
+            return true;
+    }
+
+    LOG_WARN("Unsupported ROC version");
+    return false;
 }

@@ -163,16 +163,10 @@ bool RocPlugin::rspReadVersion(const DasPacket *packet)
 
     callParamCallbacks();
 
-    if (version.hw_version == 5 && version.fw_version == 5) {
-        if (m_version == "v51" && version.fw_revision == 1)
-            return true;
-        if (m_version == "v52" && version.fw_revision == 2)
-            return true;
-        if (m_version == "v54" && version.fw_revision == 4)
-            return true;
-        if (m_version == "v55" && version.fw_revision == 5)
-            return true;
-        if (m_version == "v56" && version.fw_revision == 6)
+    if (version.hw_version == 5) {
+        char ver[10];
+        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
+        if (m_version == ver)
             return true;
     }
 
