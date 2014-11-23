@@ -3,11 +3,22 @@
 #
 
 # Two very dynamic status PVs. 
-record(stringin, "$(P)currentDev") {
+record(stringin, "$(P)CurrentDev") {
    field(DESC, "Device currently waiting")
 }
-record(stringin, "$(P)statePV") {
+record(stringin, "$(P)State") {
    field(DESC, "Indication of State")
+}
+
+# Two global status PVs.
+record(bi, "$(P)ReqSucceeded") {
+   field(DESC, "Request worked, all devices")
+   field(ONAM, "Succeeded")
+   field(ZNAM, "Not Really")
+}
+
+record(ai, "$(P)PctSucceeded") {
+   field(DESC, "% of devices that worked")
 }
 
 # Busy records for requesting command sequences
