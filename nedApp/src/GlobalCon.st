@@ -71,7 +71,7 @@ option -c;	/* do not wait for PVs to connect */
  * MAXDEVICES is for static mem allocation and must be higher than number of
  * devices expected.
  */
-#define MAXDEVICES 50	
+#define MAXDEVICES 10	
 
 /*
  * set PV n to numeric value v and put. 
@@ -129,25 +129,25 @@ PVARRAY(int, cmdSucceeded)
  * These are global request soft PVs. Treated as "busy" records in that they
  * are acted upon when set to "1" and reset when the operation completes.
  */
-DECLEVENT(int, globalClear, {GPREFIX}:Clear)
-DECLEVENT(int, globalStop, {GPREFIX}:Stop)
-DECLEVENT(int, globalStart, {GPREFIX}:Start)
-DECLEVENT(int, globalCheck, {GPREFIX}:Check)
-DECLEVENT(int, globalWriteConf, {GPREFIX}:WriteConf)
+DECLEVENT(int, globalClear, {GPREFIX}Clear)
+DECLEVENT(int, globalStop, {GPREFIX}Stop)
+DECLEVENT(int, globalStart, {GPREFIX}Start)
+DECLEVENT(int, globalCheck, {GPREFIX}Check)
+DECLEVENT(int, globalWriteConf, {GPREFIX}WriteConf)
 
 /*
  * these are meant to indicate progress in sequencer operations on GUI
  */
-DECL(string, currentDev, {PREFIX}:CurrentPV)
-DECL(string, statePV, {PREFIX}:State)
+DECL(string, currentDev, {GPREFIX}CurrentDev)
+DECL(string, statePV, {GPREFIX}State)
 
 /*
  * ReqSucceeded will be set true when one or a series of attempts to perform 
  * an operation succeeded for all devices. pctSucceeded will give a 
  * percentage of devices that succeeded.
  */
-DECL(int, requestSucceeded ,{PREFIX}:ReqSucceeded)
-DECL(float, pctSucceeded, {PREFIX}:PctSucceeded)
+DECL(int, requestSucceeded ,{GPREFIX}ReqSucceeded)
+DECL(float, pctSucceeded, {GPREFIX}PctSucceeded)
 
 /*
  * Variables used by sequencer to keep track of success or failure of 
@@ -217,7 +217,8 @@ string namebuf;
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##1						\
        when () {						\
-          PVPUTSTR(currentDev, deviceNames[i])			\
+          strcpy(currentDev, deviceNames[i]);			\
+          pvPut(currentDev);					\
        } state NAME##2						\
     }								\
     state NAME##2 {						\
@@ -289,7 +290,7 @@ string namebuf;
           }								\
           pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
-          pvPut(EVNAME, SYNC);						\
+          pvPut(EVNAME);						\
           PVPUTSTR(statePV,ready)						\
       } state ready							\
    }
@@ -318,7 +319,8 @@ ss globalControl {
    state init {
       entry {
          PVPUTSTR(statePV,init)
-         numFound = seqGrep("mbbo", ".*[0-9]*:CmdReq", &deviceNames[0][0], 
+         /* What we want here is to find the baseModulePlugin devices */
+         numFound = seqGrep("stringin", ".*:HwId", &deviceNames[0][0], 
                                                        MAXDEVICES);
          for (i=0; i<numFound; i++) {
             *strrchr(deviceNames[i], ':') = 0;
@@ -329,7 +331,7 @@ ss globalControl {
             pvMonitor(cmdRsp[i]);
             sprintf(namebuf, "%s:Verified", deviceNames[i]);
             pvAssign(verified[i], namebuf);
-            sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
+            sprintf(namebuf, "%s:disable", deviceNames[i]);
             pvAssign(disable[i], namebuf);
             pvMonitor(disable[i]);
             sprintf(namebuf, "%s:cmdSucceeded", deviceNames[i]);
@@ -338,7 +340,7 @@ ss globalControl {
             cmdFailed[i] = 0;
          }
          /* not all devices have the Acquiring PV */
-         acqsFound = seqGrep("bi", ".*[0-9]*:Acquiring", &acqNames[0][0], 
+         acqsFound = seqGrep("bi", ".*:Acquiring", &acqNames[0][0], 
                                                        MAXDEVICES);
          for (i=0; i<acqsFound; i++) {
             *strrchr(acqNames[i], ':') = 0;
@@ -355,6 +357,7 @@ ss globalControl {
                }
                i++;
             }
+            j++;
          }
          if (acqsAssigned != acqsFound) 
             printf("Warning: acqsFound = %d but acqsAssigned = %d\n", 
