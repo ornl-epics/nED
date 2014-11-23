@@ -200,7 +200,7 @@ string namebuf;
                 failed already in this attempt. In either case, skip it.\
               */							\
              if (!disable[i] && !cmdSucceeded[i] && !cmdFailed[i]) {	\
-                cmdReq[i] = DISCOVERCMD;				\
+                cmdReq[i] = COMMAND;				\
                 pvPut(cmdReq[i], SYNC);				\
              }							\
           }							\
@@ -223,9 +223,11 @@ string namebuf;
     }								\
     state NAME##2 {						\
        when(cmdRsp[i] == SUCCESSRSP) {				\
+          printf("state %s dev %d success = %d\n", #NAME, i, cmdRsp[i]);		\
        } state NAME##1							\
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { 					\
+          printf("state %s dev %d failure = %d\n", #NAME, i, cmdRsp[i]);		\
           cmdFailed[i] = 1;					\
        } state NAME##1						\
     }					
