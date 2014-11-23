@@ -1,12 +1,12 @@
 #
 # Per-device soft PVs for GlobalCon.st
 #
-record(bo, "$(P):disable") {
+record(bo, "$(P)disable") {
    field(DESC, "Disable global control seq")
    field(ONAM, "disabled")
    field(ZNAM, "enabled")
 }
-record(bi, "$(P):cmdSucceeded") {
+record(bi, "$(P)cmdSucceeded") {
    field(DESC, "success for cmd to device")
    field(ONAM, "Succeeded")
    field(ZNAM, "Failed")
