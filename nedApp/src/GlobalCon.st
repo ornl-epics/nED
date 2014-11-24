@@ -391,7 +391,7 @@ ss globalControl {
     OP_DONE(DoneStarting, globalStart)
     CMD_RSP(tryStopping, STOPACQCMD, StopReadStatus)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
-    TEST_PV(StopTestAcq, acquiring, 1, DoneStopping)
+    TEST_PV(StopTestAcq, acquiring, 0, DoneStopping)
     OP_DONE(DoneStopping, globalStop)
     CMD_RSP(tryWriting, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
