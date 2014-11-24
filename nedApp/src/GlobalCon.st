@@ -139,7 +139,6 @@ DECLEVENT(int, globalWriteConf, {GPREFIX}WriteConf)
 /*
  * these are meant to indicate progress in sequencer operations on GUI
  */
-DECL(string, currentDev, {GPREFIX}CurrentDev)
 DECL(string, statePV, {GPREFIX}State)
 
 /*
@@ -218,8 +217,6 @@ string namebuf;
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##1						\
        when () {						\
-          strcpy(currentDev, deviceNames[i]);			\
-          pvPut(currentDev);					\
        } state NAME##2						\
     }								\
     state NAME##2 {						\
@@ -261,7 +258,7 @@ string namebuf;
        } state NEXT						\
     }
 /*
- * Macro to make an end-of-operation state.  This goes to the ready state
+ * Macro to make an end-of-operation state.  This goes to the Ready state
  * when done. NAME is the entry name of the state and EVNAME is the PV name
  * that invoked the state, ie, the EVNAME or the corresponding CMD_WHEN.
  */
@@ -300,8 +297,8 @@ string namebuf;
           pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME);						\
-          PVPUTSTR(statePV,ready)						\
-      } state ready							\
+          PVPUTSTR(statePV,Ready)						\
+      } state Ready							\
    }
 /* 
  * Macro to define a global operation request-monitor when clause. EVNAME is
@@ -387,22 +384,22 @@ ss GlobalControl {
     TEST_PV(CheckVerify, verified, 8, CheckReadStatus)
     CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
     OP_DONE(DoneDiscover, globalCheck)
-    state ready {
-       CMD_WHEN(globalStop, OP_STOP, tryStopping)
-       CMD_WHEN(globalStart, OP_START, tryStarting)
-       CMD_WHEN(globalWriteConf, OP_WRITE, tryWriting)
+    state Ready {
+       CMD_WHEN(globalStop, OP_STOP, Stopping)
+       CMD_WHEN(globalStart, OP_START, Starting)
+       CMD_WHEN(globalWriteConf, OP_WRITE, WritingConf)
        CMD_WHEN(globalCheck, OP_CHECK, Discover)
        CMD_WHEN(globalClear, OP_CLEAR, Clear)
     }
-    CMD_RSP(tryStarting, STARTACQCMD, StartReadStatus)
+    CMD_RSP(Starting, STARTACQCMD, StartReadStatus)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
     TEST_PV(StartTestAcq, acquiring, 1, DoneStarting)
     OP_DONE(DoneStarting, globalStart)
-    CMD_RSP(tryStopping, STOPACQCMD, StopReadStatus)
+    CMD_RSP(Stopping, STOPACQCMD, StopReadStatus)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
     TEST_PV(StopTestAcq, acquiring, 0, DoneStopping)
     OP_DONE(DoneStopping, globalStop)
-    CMD_RSP(tryWriting, WRITECONFCMD, DoneWriting)
+    CMD_RSP(WritingConf, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
     state Clear {
        when() {

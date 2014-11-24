@@ -2,10 +2,6 @@
 # template file for PVs that are global to an instance of GlobalCon.st. 
 #
 
-# Two very dynamic status PVs. 
-record(stringin, "$(P)CurrentDev") {
-   field(DESC, "Device currently waiting")
-}
 record(stringin, "$(P)State") {
    field(DESC, "Indication of State")
 }
