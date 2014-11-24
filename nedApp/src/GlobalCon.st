@@ -1,4 +1,4 @@
-program globalCon
+program GlobalCon
 
 /*
  * Global control sequencer for nED. Supports the operations of global stop,
@@ -317,7 +317,7 @@ string namebuf;
 /*
  * Main state set.
  */
-ss globalControl {
+ss GlobalControl {
    state init {
       entry {
          PVPUTSTR(statePV,init)
