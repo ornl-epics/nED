@@ -340,13 +340,13 @@ ss GlobalControl {
             pvMonitor(cmdRsp[i]);
             sprintf(namebuf, "%s:Verified", deviceNames[i]);
             pvAssign(verified[i], namebuf);
-            sprintf(namebuf, "%s:disable", deviceNames[i]);
+            sprintf(namebuf, "%s:Disable", deviceNames[i]);
             pvAssign(disable[i], namebuf);
             pvMonitor(disable[i]);
-            sprintf(namebuf, "%s:cmdSucceeded", deviceNames[i]);
+            sprintf(namebuf, "%s:CmdSucceeded", deviceNames[i]);
             pvAssign(cmdSucceeded[i], namebuf);
             PVPUTNUM(cmdSucceeded[i], 0)
-            sprintf(namebuf, "%s:failMsg", deviceNames[i]);
+            sprintf(namebuf, "%s:FailMsg", deviceNames[i]);
             pvAssign(failMsg[i], namebuf);
             cmdFailed[i] = 0;
          }
@@ -377,7 +377,7 @@ ss GlobalControl {
        when(numFound && pvConnectCount() == pvAssignCount()) {
           lastRequest = OP_CHECK;
        } state Discover
-       when (delay(2)) {
+       when (delay(5)) {
           printf("pvConnectCount = %ld but pvAssignCount = %ld\n",
                   pvConnectCount(), pvAssignCount());
        } state init
