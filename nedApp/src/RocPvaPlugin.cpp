@@ -38,7 +38,7 @@ RocPvaPlugin::RocPvaPlugin(const char *portName, const char *dispatcherPortName,
     uint32_t maxNormalEventsPerPacket = (DasPacket::MaxLength/4) / 6;
 
     if (!!m_pvRecord) {
-        // Guestimate container size and force memory pre-allocation, 
+        // Guestimate container size and force memory pre-allocation,
         // will automatically extend if needed
         m_cache.time_of_flight.reserve(maxNormalEventsPerPacket);
 	    m_cache.pixel.reserve(maxNormalEventsPerPacket);
@@ -75,7 +75,7 @@ asynStatus RocPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 void RocPvaPlugin::processNormalPacket(const DasPacket * const packet)
 {
     uint32_t nEvents;
-    const struct NormalEvent *data = 
+    const struct NormalEvent *data =
         reinterpret_cast<const NormalEvent *>(packet->getData(&nEvents));
     nEvents /= sizeof(NormalEvent) / sizeof(uint32_t);
 
@@ -90,11 +90,11 @@ void RocPvaPlugin::processNormalPacket(const DasPacket * const packet)
 void RocPvaPlugin::processRawPacket(const DasPacket * const packet)
 {
     uint32_t nEvents;
-    const struct RawEvent *data = 
+    const struct RawEvent *data =
         reinterpret_cast<const RawEvent *>(packet->getData(&nEvents));
     nEvents /= sizeof(RawEvent) / sizeof(uint32_t);
 
-    /* Pull the least significant 16bits from sample1 and sample2 and 
+    /* Pull the least significant 16bits from sample1 and sample2 and
      * package them together as sample_a1; this combines the 1-A and 2-A
      * samples.  Repeat for the B samples.  Append each event to cache.
      */
@@ -112,11 +112,11 @@ void RocPvaPlugin::processRawPacket(const DasPacket * const packet)
 void RocPvaPlugin::processExtendedPacket(const DasPacket * const packet)
 {
     uint32_t nEvents;
-    const struct ExtendedEvent *data = 
+    const struct ExtendedEvent *data =
         reinterpret_cast<const ExtendedEvent *>(packet->getData(&nEvents));
     nEvents /= sizeof(ExtendedEvent) / sizeof(uint32_t);
 
-    /* Pull the least significant 16bits from sample1 and sample2 and 
+    /* Pull the least significant 16bits from sample1 and sample2 and
      * package them together as sample_a1; this combines the 1-A and 2-A
      * samples.  Repeat for the B samples.  Append each event to cache.
      */
@@ -133,14 +133,15 @@ void RocPvaPlugin::processExtendedPacket(const DasPacket * const packet)
 }
 
 
-void RocPvaPlugin::postNormalData(const epicsTimeStamp &pulseTime, 
+void RocPvaPlugin::postNormalData(const epicsTimeStamp &pulseTime,
     double pulseCharge, uint32_t pulseSeq)
 {
     if (!!m_pvRecord) {
-        epics::pvData::TimeStamp time(pulseTime.secPastEpoch, pulseTime.nsec, 
+        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + pulseTime.secPastEpoch, pulseTime.nsec,
             pulseSeq);
         m_pvRecord->beginGroupPut();
         m_pvRecord->timeStamp.set(time);
+        m_pvRecord->proton_charge->putFrom(pulseCharge);
         m_pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
         m_pvRecord->pixel->replace(freeze(m_cache.pixel));
         m_pvRecord->endGroupPut();
@@ -152,14 +153,15 @@ void RocPvaPlugin::postNormalData(const epicsTimeStamp &pulseTime,
     m_cache.pixel.clear();
 }
 
-void RocPvaPlugin::postRawData(const epicsTimeStamp &pulseTime, 
+void RocPvaPlugin::postRawData(const epicsTimeStamp &pulseTime,
     double pulseCharge, uint32_t pulseSeq)
 {
     if (!!m_pvRecord) {
-        epics::pvData::TimeStamp time(pulseTime.secPastEpoch, pulseTime.nsec, 
+        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + pulseTime.secPastEpoch, pulseTime.nsec,
             pulseSeq);
         m_pvRecord->beginGroupPut();
         m_pvRecord->timeStamp.set(time);
+        m_pvRecord->proton_charge->putFrom(pulseCharge);
         m_pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
         m_pvRecord->position_index->replace(freeze(m_cache.position_index));
         m_pvRecord->sample_a1->replace(freeze(m_cache.sample_a1));
@@ -175,14 +177,15 @@ void RocPvaPlugin::postRawData(const epicsTimeStamp &pulseTime,
     m_cache.sample_b1.clear();
 }
 
-void RocPvaPlugin::postExtendedData(const epicsTimeStamp &pulseTime, 
+void RocPvaPlugin::postExtendedData(const epicsTimeStamp &pulseTime,
     double pulseCharge, uint32_t pulseSeq)
 {
     if (!!m_pvRecord) {
-        epics::pvData::TimeStamp time(pulseTime.secPastEpoch, pulseTime.nsec, 
+        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + pulseTime.secPastEpoch, pulseTime.nsec,
             pulseSeq);
         m_pvRecord->beginGroupPut();
         m_pvRecord->timeStamp.set(time);
+        m_pvRecord->proton_charge->putFrom(pulseCharge);
         m_pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
         m_pvRecord->position_index->replace(freeze(m_cache.position_index));
         m_pvRecord->sample_a1->replace(freeze(m_cache.sample_a1));
