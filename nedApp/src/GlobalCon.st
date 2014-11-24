@@ -124,6 +124,7 @@ PVARRAY(int, acquiring)
  */
 PVARRAY(int, disable)
 PVARRAY(int, cmdSucceeded)
+PVARRAY(string, failMsg)
 
 /*
  * These are global request soft PVs. Treated as "busy" records in that they
@@ -223,12 +224,12 @@ string namebuf;
     }								\
     state NAME##2 {						\
        when(cmdRsp[i] == SUCCESSRSP) {				\
-          printf("state %s dev %d success = %d\n", #NAME, i, cmdRsp[i]);		\
        } state NAME##1							\
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { 					\
-          printf("state %s dev %d failure = %d\n", #NAME, i, cmdRsp[i]);		\
           cmdFailed[i] = 1;					\
+          sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
+          pvPut(failMsg[i]);					\
        } state NAME##1						\
     }					
 
@@ -250,7 +251,11 @@ string namebuf;
              if (!disable[i] && !cmdSucceeded[i] && !cmdFailed[i] &&	\
                        pvAssigned(PVNAME[i])) {				\
                 pvGet(PVNAME[i], SYNC);					\
-                if (PVNAME[i] != DESIRED) cmdFailed[i] = 1;		\
+                if (PVNAME[i] != DESIRED) {				\
+                   cmdFailed[i] = 1;					\
+                   sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
+                   pvPut(failMsg[i]);					\
+                }						\
              }							\
           }							\
        } state NEXT						\
@@ -274,6 +279,8 @@ string namebuf;
              }								\
              else							\
              {								\
+                failMsg[i][0] = 0;					\
+                pvPut(failMsg[i]);					\
                 if (!disable[i]) {					\
                    PVPUTNUM(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
@@ -339,6 +346,8 @@ ss GlobalControl {
             sprintf(namebuf, "%s:cmdSucceeded", deviceNames[i]);
             pvAssign(cmdSucceeded[i], namebuf);
             PVPUTNUM(cmdSucceeded[i], 0)
+            sprintf(namebuf, "%s:failMsg", deviceNames[i]);
+            pvAssign(failMsg[i], namebuf);
             cmdFailed[i] = 0;
          }
          /* not all devices have the Acquiring PV */
@@ -400,6 +409,8 @@ ss GlobalControl {
           for (i = 0; i< numFound; i++)	{
                 PVPUTNUM(cmdSucceeded[i],1)
                 cmdFailed[i] = 0;	
+                failMsg[i][0] = 0;
+                pvPut(failMsg[i]);
           }
        } state DoneClear
     }

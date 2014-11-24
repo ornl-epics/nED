@@ -11,3 +11,6 @@ record(bi, "$(P)cmdSucceeded") {
    field(ONAM, "Succeeded")
    field(ZNAM, "Failed")
 }
+record(stringin, "$(P)FailMsg") {
+   field(DESC, "Diagnostic output")
+}
