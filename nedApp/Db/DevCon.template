@@ -1,0 +1,203 @@
+#
+# These PVs are to drive sequencers which implement a simpler interface to the
+# commands
+# 
+record(busy, "$(P):Reset") {
+   field(DESC, "Reset command")
+   field(ONAM, "Reset")
+   field(ZNAM, "Ready")
+}
+#
+# The first 5 values are from the low-level response.  The Invalid response
+# is a sequencer rejection of the operation in the current state.
+#
+record(mbbi, "$(P):ResetRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+#
+# Failed command string.  Used by all commands
+#
+record(string, "$(P):FailedCmd") {
+   field(DESC, "Failed command ")
+}
+
+record(busy, "$(P):Discover") {
+   field(DESC, "Discover command")
+   field(ONAM, "Discover")
+   field(ZNAM, "Ready")
+}
+record(mbbi, "$(P):DiscoverRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+
+record(busy, "$(P):ReadVer") {
+   field(DESC, "ReadVer command")
+   field(ONAM, "ReadVer")
+   field(ZNAM, "Ready")
+}
+record(mbbi, "$(P):ReadVerRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+
+record(busy, "$(P):ReadStat") {
+   field(DESC, "ReadStat command")
+   field(ONAM, "ReadStat")
+   field(ZNAM, "Ready")
+}
+record(mbbi, "$(P):ReadStatRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+
+record(busy, "$(P):ReadConf") {
+   field(DESC, "ReadConf command")
+   field(ONAM, "ReadConf")
+   field(ZNAM, "Ready")
+}
+record(mbbi, "$(P):ReadConfRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+
+record(busy, "$(P):WriteConf") {
+   field(DESC, "WriteConf command")
+   field(ONAM, "WriteConf")
+   field(ZNAM, "Ready")
+}
+record(mbbi, "$(P):WriteConfRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+
+record(busy, "$(P):Start") {
+   field(DESC, "Start command")
+   field(ONAM, "Start")
+   field(ZNAM, "Ready")
+}
+record(mbbi, "$(P):StartRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+
+record(busy, "$(P):Stop") {
+   field(DESC, "Stop command")
+   field(ONAM, "Stop")
+   field(ZNAM, "Ready")
+}
+record(mbbi, "$(P):StopRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+
+record(busy, "$(P):ReadCtrs") {
+   field(DESC, "ReadCtrs command")
+   field(ONAM, "ReadCtrs")
+   field(ZNAM, "Ready")
+}
+record(mbbi, "$(P):ReadCtrsRsp") {
+   field(DESC, "Result PV")
+   field(ZRVL, "0")
+   field(ZRST, "None")
+   field(ONVL, "1")
+   field(ONST, "Success")
+   field(TWVL, "2")
+   field(TWST, "Wait")
+   field(THVL, "3")
+   field(THST, "Timeout")
+   field(FRVL, "4")
+   field(FRST, "Error")
+   field(FVVL, "5")
+   field(FVST, "Invalid")
+}
+

@@ -38,10 +38,12 @@ PROD_LIBS += asyn
 PROD_LIBS += occ
 PROD_LIBS += autosave
 PROD_LIBS += stream
+PROD_LIBS += pvMediator
 PROD_LIBS += pvDatabase
 PROD_LIBS += pvaSrv
 PROD_LIBS += pvAccess
 PROD_LIBS += pvData
+PROD_LIBS += seq
 PROD_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 PROD_SRCS  += ned_registerRecordDeviceDriver.cpp
@@ -54,6 +56,7 @@ SHARED_LIBRARIES = NO
 # Headers used by unit-tests
 INC += CircularBuffer.h
 
+$(PROD_NAME)_SRCS  += GlobalCon.st
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp
 $(PROD_NAME)_SRCS  += OccPortDriver.cpp
