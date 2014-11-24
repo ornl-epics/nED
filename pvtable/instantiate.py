@@ -27,7 +27,7 @@ def parse_st_cmd(filepath):
     """ Parse st.cmd file and extract plugin name, prefix and detector name from .db declarations """
     plugins = []
     epicsEnv = {}
-    re_plugin = re.compile("^dbLoadRecords.*\".*/([\w]+)\.db\".*P=([^,\"]*:(\w*):)")
+    re_plugin = re.compile("^dbLoadRecords.*\".*/([\w]+Plugin_v[0-9]+)\.db\".*P=(\$\([^\)]*\)(\w*):)")
     re_env    = re.compile("^epicsEnvSet[ \t\"\(]*([\w]+)[, \t\"\)]*([^\"\n]*)")
     with open(filepath, "r") as f:
         for line in f:
