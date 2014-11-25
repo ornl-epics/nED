@@ -630,4 +630,7 @@ void RocPlugin::createConfigParams_v56()
     createConfigParam("TstPatEn",   'F', 0x1,  1, 15, 0);     // Test pattern enable          (0=disable,1=enable)
     createConfigParam("TstPatRate", 'F', 0x1,  3, 12, 0);     // Test pattern rate
     createConfigParam("TstPatId",   'F', 0x1, 12, 0,  0);     // Test pattern id
+
+    createConfigParam("Dummy",      'F', 0x2, 16,  0, 0);
+
 }

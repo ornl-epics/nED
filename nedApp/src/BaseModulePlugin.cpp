@@ -15,6 +15,8 @@
 
 #define NUM_BASEMODULEPLUGIN_PARAMS ((int)(&LAST_BASEMODULEPLUGIN_PARAM - &FIRST_BASEMODULEPLUGIN_PARAM + 1))
 
+#define ROUND_UP(num, boundary)     ((num + boundary - 1) & ~(boundary - 1))
+
 const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 2.0;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId,
@@ -260,7 +262,6 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet)
         return false;
     }
 
-
     const uint32_t *payload = packet->getPayload();
     for (std::map<int, StatusParamDesc>::iterator it=m_statusParams.begin(); it != m_statusParams.end(); it++) {
         int offset = it->second.offset;
@@ -458,11 +459,11 @@ void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint
     desc.width = nBits;
     m_statusParams[index] = desc;
 
-    uint32_t length = offset +1;
+    uint32_t length = offset + 1;
     if (m_behindDsp && nBits > 16)
         length++;
     uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_statusPayloadLength = std::max(m_statusPayloadLength, length*wordsize);
+    m_statusPayloadLength = std::max(m_statusPayloadLength, ROUND_UP(length*wordsize, 4));
 }
 
 void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
@@ -483,7 +484,7 @@ void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uin
     if (m_behindDsp && nBits > 16)
         length++;
     uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_countersPayloadLength = std::max(m_countersPayloadLength, length*wordsize);
+    m_countersPayloadLength = std::max(m_countersPayloadLength, ROUND_UP(length*wordsize, 4));
 }
 
 void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
@@ -506,6 +507,7 @@ void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_
     uint32_t length = offset + 1;
     if (m_behindDsp && nBits > 16)
         length++;
+    // m_configPayloadLength is calculated *after* we create all sections
     m_configSectionSizes[section] = std::max(m_configSectionSizes[section], length);
 }
 
@@ -581,5 +583,5 @@ void BaseModulePlugin::recalculateConfigParams()
     // Calculate total required payload size in bytes
     m_configPayloadLength = m_configSectionOffsets['F'] + m_configSectionSizes['F'];
     int wordsize = (m_behindDsp ? 2 : 4);
-    m_configPayloadLength *= wordsize;
+    m_configPayloadLength = ROUND_UP(m_configPayloadLength * wordsize, 4);
 }
