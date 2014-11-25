@@ -177,14 +177,15 @@ int i;
 string namebuf;
 
 /*
- * Macros used in constructing state sets and states
+ * Macros used in constructing states and combinations of states
  */
-
 /*
- * Macro to produce several states to iterate through all devices sending
- * them all a command then waiting for responses from each of them. NAME is
- * the name of the entry state, COMMAND is the CmdReq command to send, and 
- * NEXT is the state to go to following completion.
+ * CMD_BEGIN() and CMD_END() are a pair of macros that together make two states
+ * that send COMMAND to all devices. The same NAME must be passed to each, and 
+ * NEXT should be the NAME passed to the RSP_BEGIN, RSP_END pair of macros,
+ * which should follow.  NEXT must differ from NAME. CMD_BEGIN is called first 
+ * and may be followed by any additional when() clauses before CMD_END is 
+ * called. See the macro definitions for CMD_RSP() and CMD_RSP_IFNOT() below.
  */
 #define CMD_BEGIN(NAME, NEXT) 					\
     state NAME {						\
@@ -202,13 +203,21 @@ string namebuf;
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##0	
 
-#define CMD_FIN(NAME, COMMAND)					\
+#define CMD_END(NAME, COMMAND)					\
        when() {							\
           cmdReq[i] = COMMAND;					\
           pvPut(cmdReq[i], SYNC);				\
        } state NAME##0						\
     }	
 
+/*
+ * RSP_BEGIN() and RSP_END() are a pair of macros that together make two states
+ * that check the responses of all devices to the last command. The same NAME 
+ * must be passed to each, and NEXT should be the next state. RSP_BEGIN is 
+ * called first and may be followed by any additional when() clauses before 
+ * RSP_END is called. See the macro definitions for CMD_RSP() and 
+ * CMD_RSP_IFNOT() below.
+ */
 #define RSP_BEGIN(NAME, NEXT)					\
     state NAME {						\
        when() {							\
@@ -226,7 +235,7 @@ string namebuf;
        } state NAME##0	
 
 
-#define RSP_FIN(NAME)						\
+#define RSP_END(NAME)						\
        when () {						\
        } state NAME##1						\
     }								\
@@ -241,29 +250,50 @@ string namebuf;
        } state NAME##0						\
     }					
 
+/*
+ * SKIP_WHEN() is meant to be inserted between CMD_BEGIN() and CMD_END() or
+ * between RSP_BEGIN() and RSP(END), or even between PV_TEST_BEGIN() 
+ * PV_TEST_END() (see below). NAME must the the same as the NAME in the 
+ * enclosing macros, and TYPE is meant to a hardware type from hwtypes[].
+ * The generated when() will skip the operation for that hardware type.
+ */
+
 #define SKIP_WHEN(NAME, TYPE) 					\
       when (0 == strcmp(hwtype[i], #TYPE)) {			\
       } state NAME##0
 
+/*
+ * In the beginning, there was CMD_RSP().  It now survives as a combination
+ * of the macros into which it was divided.
+ */
 #define CMD_RSP(CRNAME, COMMAND, CRNEXT)				\
     CMD_BEGIN(CRNAME, CRNAME##R)					\
-    CMD_FIN(CRNAME, COMMAND)						\
+    CMD_END(CRNAME, COMMAND)						\
     RSP_BEGIN(CRNAME##R, CRNEXT)					\
-    RSP_FIN(CRNAME##R)
+    RSP_END(CRNAME##R)
+
+/*
+ * Analog of CMD_RSP(), but with SKIP_WHEN() clauses for one type of hardware
+ * (HWTYPE) included.
+ */
 
 #define CMD_RSP_IFNOT(CRNAME, COMMAND, CRNEXT, HWTYPE)			\
     CMD_BEGIN(CRNAME, CRNAME##R)					\
     SKIP_WHEN(CRNAME, HWTYPE)						\
-    CMD_FIN(CRNAME, COMMAND)						\
+    CMD_END(CRNAME, COMMAND)						\
     RSP_BEGIN(CRNAME##R, CRNEXT)					\
     SKIP_WHEN(CRNAME##R, HWTYPE)					\
-    RSP_FIN(CRNAME##R)
+    RSP_END(CRNAME##R)
 
-/*
- * Macro to produce a state to iterate through all devices testing
- * whether PV PVNAME is at state DESIRED. PV is assumed not to be monitored. 
- * NAME is the name of the entry state and NEXT is the state to go to after
- * completion.
+/* 
+ * TEST_PV_BEGIN() and TEST_PV_END() are a pair of macros that produce two 
+ * states that iterate through all the devices, testing a PV for a desired
+ * numeric value.  NAME is the base name of the states and NEXT is the state
+ * to go to after the tests are complete. PVNAME is the name of the PV to 
+ * test and DESIRED is the desired value. TEST_PV_BEGIN() must be called first,
+ * followed if desired by any when() clauses desired and then TEST_PV_END(). 
+ * the two macros must share the same NAME.  See macro definitions for 
+ * TEST_PV() and TEST_PV_IFNOT() below.
  */
 #define TEST_PV_BEGIN(NAME, NEXT)				\
     state NAME {						\
@@ -292,10 +322,18 @@ string namebuf;
        } state NAME##0						\
     }	
 
+/* 
+ * In the beginning there was TEST_PV(); it survives as a combination of the
+ * macros into which it was divided.
+ */
 #define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
      TEST_PV_BEGIN(NAME, NEXT)					\
      TEST_PV_FIN(NAME, PVNAME, DESIRED)
 
+/*
+ * Analogous to TEST_PV(), but with when() clause added to skip on hardware
+ * type.
+ */
 #define TEST_PV_IFNOT(NAME, PVNAME, DESIRED, NEXT, HWTYPE)	\
      TEST_PV_BEGIN(NAME, NEXT)					\
      SKIP_WHEN(NAME, HWTYPE)					\
@@ -352,7 +390,7 @@ string namebuf;
  */
 #define CMD_WHEN(EVNAME, OP_NAME, NEXT) 			\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
-          PVPUTSTR(statePV,NEXT)					\
+          PVPUTSTR(statePV,NEXT)				\
           if (lastRequest != OP_NAME) {				\
              for (i = 0; i< numFound; i++)			\
                 PVPUTNUM(cmdSucceeded[i], 0)			\
@@ -415,6 +453,10 @@ ss GlobalControl {
        CMD_WHEN(globalCheck, OP_CHECK, Discover)
        CMD_WHEN(globalClear, OP_CLEAR, Clear)
     }
+    /* 
+     * not sure yet exactly how broken FEMs are, but know they do not respond 
+     * to start and stop commands.  May need to use more IFNOTs.
+     */
     CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus, FEM)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
     TEST_PV(StartTestAcq, acquiring, 1, DoneStarting)
