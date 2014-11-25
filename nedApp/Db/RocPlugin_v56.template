@@ -2,4 +2,5 @@ include "BasePlugin.include"
 include "BaseModulePlugin.include"
 include "RocPlugin_v56.include"
 include "RocPlugin.include"
+include "GlobalConD.include"
 

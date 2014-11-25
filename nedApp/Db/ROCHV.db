@@ -40,7 +40,7 @@ record(fanout, "$(P):InitProc1") {
 record(ai, "$(P):RampRate") {
    field(DTYP, "stream")
    field(DESC, "Readback ramp rate")
-   field(INP, "@ROCHV.proto getNum(RR) $(PORT) $(ADDR)")
+   field(INP, "@ROCHV.proto getNum(RR) $(PORT) 0")
    field(HOPR, "255")
    field(LOPR, "0")
    field(EGU, "ms/step")
@@ -51,7 +51,7 @@ record(ao, "$(P):RampRateSet") {
    field(DTYP, "stream")
    field(DESC, "Set ramp rate")
    field(ASG, "BEAMLINE")
-   field(OUT, "@ROCHV.proto setNum(SR) $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto setNum(SR) $(PORT) 0")
    field(EGU, "ms/step")
    field(HOPR, "255")
    field(DRVH, "255")
@@ -70,7 +70,7 @@ record(ao, "$(P):DACSet") {
    field(DTYP, "stream")
    field(ASG, "BEAMLINE")
    field(DESC, "Set DAC")
-   field(OUT, "@ROCHV.proto setNum(&) $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto setNum(&) $(PORT) 0")
    field(EGU, "Counts")
    field(HOPR, "4096")
    field(DRVH, "4096")
@@ -87,7 +87,7 @@ record(ao, "$(P):DACSet") {
 record(ai, "$(P):ReadADC") {
    field(DTYP, "stream")
    field(DESC, "Read raw voltage")
-   field(INP, "@ROCHV.proto getNum(RV) $(PORT) $(ADDR)")
+   field(INP, "@ROCHV.proto getNum(RV) $(PORT) 0")
    field(LOPR, 0)
    field(HOPR, 4096)
    field(EGU, "Counts")
@@ -152,7 +152,7 @@ record(bo, "$(P):OnOff") {
 record(calcout, "$(P):VoltCmd") {
    field(DTYP, "stream")
    field(DESC, "Requested voltage setpoint")
-   field(OUT, "@ROCHV.proto setNum(#) $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto setNum(#) $(PORT) 0")
    field(IVOA, "Don't drive outputs")
    field(CALC, "A?B:0")
    field(INPA, "$(P):OnOff CPP MS")
@@ -165,7 +165,7 @@ record(calcout, "$(P):VoltCmd") {
 record(ai, "$(P):Volt") {
    field(DTYP, "stream")
    field(DESC, "Readback in volts")
-   field(INP, "@ROCHV.proto getNum(LV) $(PORT) $(ADDR)")
+   field(INP, "@ROCHV.proto getNum(LV) $(PORT) 0")
    field(LOPR, "-100")
    field(HOPR, "2300")
    field(HSV, "MAJOR")
@@ -183,7 +183,7 @@ record(ai, "$(P):Volt") {
 #record(ai, "$(P):Current") {
 #   field(DTYP, "stream")
 #   field(DESC, "converted current Readback")
-#   field(INP, "@ROCHV.proto getNum(LC) $(PORT) $(ADDR))
+#   field(INP, "@ROCHV.proto getNum(LC) $(PORT) 0)
 #   field(EGU, "ma")
 #   field(SCAN, "1 second")
 #}
@@ -200,7 +200,7 @@ record(ai, "$(P):Volt") {
 #record(ai, "$(P):Curr") {
 #   field(DTYP, "stream")
 #   field(DESC, "Current Readback")
-#   field(INP, "@ROCHV.proto getNum(RC) $(PORT) $(ADDR)")
+#   field(INP, "@ROCHV.proto getNum(RC) $(PORT) 0")
 #   field(LINR, "SLOPE")
 #   field(PREC, "4")
 #   field(ESLO, "0.000322581")
@@ -218,7 +218,7 @@ record(ai, "$(P):Volt") {
 record(ai, "$(P):MaxV") {
    field(DTYP, "stream")
    field(DESC, "maximum voltage Readback")
-   field(INP, "@ROCHV.proto getNum(MV) $(PORT) $(ADDR)")
+   field(INP, "@ROCHV.proto getNum(MV) $(PORT) 0")
    field(EGU, "V")
 }
 
@@ -229,7 +229,7 @@ record(ao, "$(P):MaxVSet") {
    field(DTYP, "stream")
    field(DESC, "Requested voltage limit")
    field(ASG, "BEAMLINE")
-   field(OUT, "@ROCHV.proto setNum(M) $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto setNum(M) $(PORT) 0")
    field(DRVL, "0")
    field(LOPR, "0")
    field(DRVH, "2200")
@@ -258,7 +258,7 @@ record(bo, "$(P):Enable") {
 record(bo, "$(P):EnableHW") {
    field(DESC, "hardware enable/disable")
    field(DTYP, "stream")
-   field(OUT, "@ROCHV.proto sendBoCmd() $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto sendBoCmd() $(PORT) 0")
    field(ONAM, "8")
    field(ZNAM, "*")
    info(autosaveFields, "VAL")
@@ -271,7 +271,7 @@ record(bo, "$(P):ClearErr") {
    field(DESC, "Clear error code")
    field(ASG, "BEAMLINE")
    field(DTYP, "stream")
-   field(OUT, "@ROCHV.proto sendCmd(X) $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto sendCmd(X) $(PORT) 0")
    field(DOL, "1")
    field(ONAM, "Clear")
    field(ZNAM, "Clear")
@@ -280,7 +280,7 @@ record(bo, "$(P):ResetDAC") {
    field(DESC, "Yes reset the DAC")
    field(ASG, "BEAMLINE")
    field(DTYP, "stream")
-   field(OUT, "@ROCHV.proto sendCmd(X) $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto sendCmd(X) $(PORT) 0")
    field(DOL, "1")
    field(ONAM, "Reset")
    field(ZNAM, "Reset")
@@ -292,7 +292,7 @@ record(bo, "$(P):ResetDAC") {
 record(waveform, "$(P):ErrorInp") {
    field(DESC, "Input error byte")
    field(DTYP, "stream")
-   field(INP, "@ROCHV.proto getError() $(PORT) $(ADDR)")
+   field(INP, "@ROCHV.proto getError() $(PORT) 0")
    field(FTVL, "UCHAR")
    field(NELM, "2")
    field(FLNK, "$(P):ErrorBits")
@@ -321,7 +321,7 @@ record(asyn,"$(P):AsynRec")
 {
     field(DTYP,"asynRecordDevice")
     field(PORT,"$(PORT)")
-    field(ADDR,"$(ADDR)")
+    field(ADDR,"0")
     field(OMAX,"30")
     field(IMAX,"30")
 }
@@ -335,7 +335,7 @@ record(asyn,"$(P):AsynRec")
 record(ao, "$(P):DConvSet") {
    field(DTYP, "stream")
    field(ASG, "BEAMLINE")
-   field(OUT, "@ROCHV.proto setCalA(SD,$(P):DConvSet) $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto setCalA(SD,$(P):DConvSet) $(PORT) 0")
    field(FLNK, "$(P):DConvX")
 }
 record(ao, "$(P):DConvSetX") {
@@ -377,7 +377,7 @@ record(calc, "$(P):DSim") {
 #
 record(ai, "$(P):DConvX") {
    field(DTYP, "stream")
-   field(INP, "@ROCHV.proto getCalXYZ(CD,$(P):DConv) $(PORT) $(ADDR)")
+   field(INP, "@ROCHV.proto getCalXYZ(CD,$(P):DConv) $(PORT) 0")
    field(HOPR, "65535")
    field(LOPR, "0")
 }
@@ -399,7 +399,7 @@ record(ai, "$(P):DConvZ") {
 record(ao, "$(P):VConvSet") {
    field(ASG, "BEAMLINE")
    field(DTYP, "stream")
-   field(OUT, "@ROCHV.proto setCalA(SV,$(P):VConvSet) $(PORT) $(ADDR)")
+   field(OUT, "@ROCHV.proto setCalA(SV,$(P):VConvSet) $(PORT) 0")
    field(FLNK, "$(P):VConvX")
 }
 record(ao, "$(P):VConvSetX") {
@@ -441,7 +441,7 @@ record(calc, "$(P):VSim") {
 #
 record(ai, "$(P):VConvX") {
    field(DTYP, "stream")
-   field(INP, "@ROCHV.proto getCalXYZ(CV,$(P):VConv) $(PORT) $(ADDR)")
+   field(INP, "@ROCHV.proto getCalXYZ(CV,$(P):VConv) $(PORT) 0")
    field(HOPR, "65535")
    field(LOPR, "0")
 }

@@ -2,6 +2,7 @@ include "BasePlugin.include"
 include "BaseModulePlugin.include"
 include "RocPlugin_v54.include"
 include "RocPlugin.include"
+include "GlobalConD.include"
 
 # Acquiring record is not created automatically.
 record(bi, "$(P)Acquiring")
