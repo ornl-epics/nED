@@ -141,6 +141,7 @@ DECLEVENT(int, globalWriteConf, {GPREFIX}WriteConf)
  * these are meant to indicate progress in sequencer operations on GUI
  */
 DECL(string, statePV, {GPREFIX}State)
+DECL(string, prevReq, {GPREFIX}PrevState)
 
 /*
  * ReqSucceeded will be set true when one or a series of attempts to perform 
@@ -379,6 +380,7 @@ string namebuf;
           pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME);						\
+          PVPUTSTR(prevReq,statePV)					\
           PVPUTSTR(statePV,Ready)					\
       } state Ready							\
    }
