@@ -186,7 +186,7 @@ string namebuf;
  * the name of the entry state, COMMAND is the CmdReq command to send, and 
  * NEXT is the state to go to following completion.
  */
-#define CMD_RSP(NAME, COMMAND, NEXT) 				\
+#define CMD_BEGIN(NAME, NEXT) 					\
     state NAME {						\
        when() {							\
           i = -1;						\
@@ -198,16 +198,24 @@ string namebuf;
           i = i+1;						\
        } 							\
        when (i >= numFound) { 					\
-          i = -1;						\
-       } state NAME##1						\
+       } state NEXT					\
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
-       } state NAME##0						\
+       } state NAME##0	
+
+#define CMD_FIN(NAME, COMMAND)					\
        when() {							\
           cmdReq[i] = COMMAND;					\
           pvPut(cmdReq[i], SYNC);				\
        } state NAME##0						\
+    }	
+
+#define RSP_BEGIN(NAME, NEXT)					\
+    state NAME {						\
+       when() {							\
+          i = -1;						\
+       } state NAME##0						\
     }								\
-    state NAME##1 {						\
+    state NAME##0 {						\
        option -e;						\
        entry {							\
           i = i+1;						\
@@ -215,20 +223,33 @@ string namebuf;
        when (i >= numFound) { 					\
        } state NEXT						\
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
-       } state NAME##1						\
+       } state NAME##0	
+
+
+#define RSP_FIN(NAME)						\
        when () {						\
-       } state NAME##2						\
+       } state NAME##1						\
     }								\
-    state NAME##2 {						\
+    state NAME##1 {						\
        when(cmdRsp[i] == SUCCESSRSP) {				\
-       } state NAME##1							\
+       } state NAME##0							\
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { 					\
           cmdFailed[i] = 1;					\
           sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
           pvPut(failMsg[i]);					\
-       } state NAME##1						\
+       } state NAME##0						\
     }					
+
+#define SKIP_WHEN(NAME, TYPE) 					\
+      when (0 == strcmp(hwtype[i], #TYPE)) {			\
+      } state NAME##0
+
+#define CMD_RSP(CRNAME, COMMAND, CRNEXT)				\
+    CMD_BEGIN(CRNAME, CRNAME##R)					\
+    CMD_FIN(CRNAME, COMMAND)						\
+    RSP_BEGIN(CRNAME##R, CRNEXT)					\
+    RSP_FIN(CRNAME##R)
 
 /*
  * Macro to produce a state to iterate through all devices testing
@@ -236,7 +257,7 @@ string namebuf;
  * NAME is the name of the entry state and NEXT is the state to go to after
  * completion.
  */
-#define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
+#define TEST_PV_BEGIN(NAME, NEXT)				\
     state NAME {						\
        when() {							\
           i = -1;						\
@@ -248,10 +269,11 @@ string namebuf;
           i = i+1;						\
        } 							\
        when (i >= numFound) { 					\
-          i = -1;						\
        } state NEXT						\
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
-       } state NAME##0						\
+       } state NAME##0	
+
+#define TEST_PV_FIN(NAME, PVNAME, DESIRED)			\
        when() {							\
           pvGet(PVNAME[i], SYNC);				\
           if (PVNAME[i] != DESIRED) {				\
@@ -261,6 +283,10 @@ string namebuf;
           }							\
        } state NAME##0						\
     }	
+
+#define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
+     TEST_PV_BEGIN(NAME, NEXT)					\
+     TEST_PV_FIN(NAME, PVNAME, DESIRED)
 
 /*
  * Macro to make an end-of-operation state.  This goes to the Ready state
