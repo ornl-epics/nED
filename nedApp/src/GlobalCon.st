@@ -188,7 +188,6 @@ string namebuf;
 #define CMD_RSP(NAME, COMMAND, NEXT) 				\
     state NAME {						\
        when() {							\
-          PVPUTSTR(statePV,NAME)					\
           for (i = 0; i < numFound; i++) {			\
              /*								\
                 Note that cmdSucceeded[i] means it worked in the 	\
@@ -235,7 +234,6 @@ string namebuf;
 #define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
     state NAME {						\
        when() {							\
-          PVPUTSTR(statePV,NAME)					\
           for (i = 0; i < numFound; i++) {			\
              /* 							\
                 Note that some PVs such as Acquiring are not present in \
@@ -293,7 +291,7 @@ string namebuf;
           pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME);						\
-          PVPUTSTR(statePV,Ready)						\
+          PVPUTSTR(statePV,Ready)					\
       } state Ready							\
    }
 /* 
