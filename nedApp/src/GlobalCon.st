@@ -431,7 +431,7 @@ ss GlobalControl {
     }
     CMD_RSP(Discover, DISCOVERCMD, ReadVersion)
     CMD_RSP(ReadVersion, READVERCMD, CheckVerify)
-    TEST_PV(CheckVerify, verified, 8, CheckReadStatus)
+    TEST_PV(CheckVerify, verified, BOTHOKVER, CheckReadStatus)
     CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
     OP_DONE(DoneDiscover, globalCheck)
     state Ready {
@@ -447,11 +447,11 @@ ss GlobalControl {
      */
     CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus, FEM)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
-    TEST_PV(StartTestAcq, acquiring, 1, DoneStarting)
+    TEST_PV(StartTestAcq, acquiring, ACQUIRING, DoneStarting)
     OP_DONE(DoneStarting, globalStart)
     CMD_RSP_IFNOT(Stopping, STOPACQCMD, StopReadStatus, FEM)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
-    TEST_PV(StopTestAcq, acquiring, 0, DoneStopping)
+    TEST_PV(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping)
     OP_DONE(DoneStopping, globalStop)
     CMD_RSP(WritingConf, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
