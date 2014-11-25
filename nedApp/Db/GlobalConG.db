@@ -6,9 +6,15 @@ record(stringin, "$(P)State") {
    field(DESC, "Indication of State")
 }
 
+record(stringin, "$(P)PrevState") {
+   field(DESC, "Indication of Last State")
+}
+
 # Two global status PVs.
 record(bi, "$(P)ReqSucceeded") {
    field(DESC, "Request worked, all devices")
+   field(OSV, "NO_ALARM")
+   field(ZSV, "MAJOR")
    field(ONAM, "Succeeded")
    field(ZNAM, "Not Really")
 }
