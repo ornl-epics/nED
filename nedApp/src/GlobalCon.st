@@ -57,16 +57,6 @@ option -c;	/* do not wait for PVs to connect */
 #define NOTACQUIRING	0
 #define ACQUIRING	1
 
-/*
- * define previous state values used in sequencer to allow cumulative success
- * retrying of previous operation.
- */
-#define OP_CLEAR	0
-#define OP_START	1
-#define OP_STOP	 	2
-#define OP_CHECK	3
-#define OP_WRITE	4
-
 /* 
  * MAXDEVICES is for static mem allocation and must be higher than number of
  * devices expected.
@@ -138,10 +128,11 @@ DECLEVENT(int, globalCheck, {GPREFIX}Check)
 DECLEVENT(int, globalWriteConf, {GPREFIX}WriteConf)
 
 /*
- * these are meant to indicate progress in sequencer operations on GUI
+ * these are meant to indicate progress in sequencer operations on GUI.
+ * prevReq is used in the success accumulation algorithm.
  */
 DECL(string, statePV, {GPREFIX}State)
-DECL(string, prevReq, {GPREFIX}PrevState)
+DECL(string, prevReq, {GPREFIX}PrevReq)
 
 /*
  * ReqSucceeded will be set true when one or a series of attempts to perform 
@@ -160,16 +151,11 @@ int numSucceeded = 0;
 int numEnabled = 0;
 
 /*
- * List of devices found by looking for all :CmdReq PVs in IOC using seqGrep,
+ * List of devices found by looking for all :HwType PVs in IOC using seqGrep,
  * then truncating at ":". numFound indicates how many found
  */
 string deviceNames[MAXDEVICES];
 int numFound;
-
-/*
- * variable used by sequencer to keep track of what the previous operation was
- */
-int lastRequest = 0;
 
 /*
  * common variables
@@ -393,13 +379,12 @@ string namebuf;
 #define CMD_WHEN(EVNAME, OP_NAME, NEXT) 			\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
           PVPUTSTR(statePV,NEXT)				\
-          if (lastRequest != OP_NAME) {				\
+          if (strcmp(prevReq, #NEXT)) {				\
              for (i = 0; i< numFound; i++)			\
                 PVPUTNUM(cmdSucceeded[i], 0)			\
              numSucceeded = 0;					\
              numEnabled = 0;					\
           }							\
-          lastRequest = OP_NAME;				\
        } state NEXT
 
 /*
@@ -436,7 +421,8 @@ ss GlobalControl {
          }
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
-          lastRequest = OP_CHECK;
+          PVPUTSTR(prevReq,statePV)					\
+          PVPUTSTR(statePV,Discover)					\
        } state Discover
        when (delay(5)) {
           printf("pvConnectCount = %ld but pvAssignCount = %ld\n",

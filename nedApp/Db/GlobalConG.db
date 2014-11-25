@@ -6,8 +6,8 @@ record(stringin, "$(P)State") {
    field(DESC, "Indication of State")
 }
 
-record(stringin, "$(P)PrevState") {
-   field(DESC, "Indication of Last State")
+record(stringin, "$(P)PrevReq") {
+   field(DESC, "Indication of Request")
 }
 
 # Two global status PVs.
