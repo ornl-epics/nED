@@ -77,7 +77,7 @@ void AcpcPvaPlugin::processNormalPacket(const DasPacket * const packet)
 void AcpcPvaPlugin::postNormalData(const epicsTimeStamp &pulseTime, double pulseCharge, uint32_t pulseSeq)
 {
     if (!!m_pvRecord) {
-        epics::pvData::TimeStamp time(pulseTime.secPastEpoch, pulseTime.nsec, pulseSeq);
+        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + pulseTime.secPastEpoch, pulseTime.nsec, pulseSeq);
 
         m_pvRecord->beginGroupPut();
         m_pvRecord->timeStamp.set(time);
