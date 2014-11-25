@@ -189,19 +189,23 @@ string namebuf;
 #define CMD_RSP(NAME, COMMAND, NEXT) 				\
     state NAME {						\
        when() {							\
-          for (i = 0; i < numFound; i++) {			\
-             /*								\
-                Note that cmdSucceeded[i] means it worked in the 	\
-                previous attempt and cmdFailed[i] means something  	\
-                failed already in this attempt. In either case, skip it.\
-              */							\
-             if (!disable[i] && !cmdSucceeded[i] && !cmdFailed[i]) {	\
-                cmdReq[i] = COMMAND;				\
-                pvPut(cmdReq[i], SYNC);				\
-             }							\
-          }							\
+          i = -1;						\
+       } state NAME##0						\
+    }								\
+    state NAME##0 {						\
+       option -e;						\
+       entry {							\
+          i = i+1;						\
+       } 							\
+       when (i >= numFound) { 					\
           i = -1;						\
        } state NAME##1						\
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
+       } state NAME##0						\
+       when() {							\
+          cmdReq[i] = COMMAND;					\
+          pvPut(cmdReq[i], SYNC);				\
+       } state NAME##0						\
     }								\
     state NAME##1 {						\
        option -e;						\
@@ -235,23 +239,29 @@ string namebuf;
 #define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
     state NAME {						\
        when() {							\
-          for (i = 0; i < numFound; i++) {			\
-             /* 							\
-                Note that some PVs such as Acquiring are not present in \
-                all cases and then will not be assigned.		\
-              */							\
-             if (!disable[i] && !cmdSucceeded[i] && !cmdFailed[i] &&	\
-                       pvAssigned(PVNAME[i])) {				\
-                pvGet(PVNAME[i], SYNC);					\
-                if (PVNAME[i] != DESIRED) {				\
-                   cmdFailed[i] = 1;					\
-                   sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
-                   pvPut(failMsg[i]);					\
-                }						\
-             }							\
-          }							\
+          i = -1;						\
+       } state NAME##0						\
+    }								\
+    state NAME##0 {						\
+       option -e;						\
+       entry {							\
+          i = i+1;						\
+       } 							\
+       when (i >= numFound) { 					\
+          i = -1;						\
        } state NEXT						\
-    }
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
+       } state NAME##0						\
+       when() {							\
+          pvGet(PVNAME[i], SYNC);				\
+          if (PVNAME[i] != DESIRED) {				\
+             cmdFailed[i] = 1;					\
+             sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
+             pvPut(failMsg[i]);					\
+          }							\
+       } state NAME##0						\
+    }	
+
 /*
  * Macro to make an end-of-operation state.  This goes to the Ready state
  * when done. NAME is the entry name of the state and EVNAME is the PV name
