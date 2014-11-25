@@ -251,6 +251,14 @@ string namebuf;
     RSP_BEGIN(CRNAME##R, CRNEXT)					\
     RSP_FIN(CRNAME##R)
 
+#define CMD_RSP_IFNOT(CRNAME, COMMAND, CRNEXT, HWTYPE)			\
+    CMD_BEGIN(CRNAME, CRNAME##R)					\
+    SKIP_WHEN(CRNAME, HWTYPE)						\
+    CMD_FIN(CRNAME, COMMAND)						\
+    RSP_BEGIN(CRNAME##R, CRNEXT)					\
+    SKIP_WHEN(CRNAME##R, HWTYPE)					\
+    RSP_FIN(CRNAME##R)
+
 /*
  * Macro to produce a state to iterate through all devices testing
  * whether PV PVNAME is at state DESIRED. PV is assumed not to be monitored. 
@@ -286,6 +294,11 @@ string namebuf;
 
 #define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
      TEST_PV_BEGIN(NAME, NEXT)					\
+     TEST_PV_FIN(NAME, PVNAME, DESIRED)
+
+#define TEST_PV_IFNOT(NAME, PVNAME, DESIRED, NEXT, HWTYPE)	\
+     TEST_PV_BEGIN(NAME, NEXT)					\
+     SKIP_WHEN(NAME, HWTYPE)					\
      TEST_PV_FIN(NAME, PVNAME, DESIRED)
 
 /*
@@ -402,11 +415,11 @@ ss GlobalControl {
        CMD_WHEN(globalCheck, OP_CHECK, Discover)
        CMD_WHEN(globalClear, OP_CLEAR, Clear)
     }
-    CMD_RSP(Starting, STARTACQCMD, StartReadStatus)
+    CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus, FEM)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
     TEST_PV(StartTestAcq, acquiring, 1, DoneStarting)
     OP_DONE(DoneStarting, globalStart)
-    CMD_RSP(Stopping, STOPACQCMD, StopReadStatus)
+    CMD_RSP_IFNOT(Stopping, STOPACQCMD, StopReadStatus, FEM)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
     TEST_PV(StopTestAcq, acquiring, 0, DoneStopping)
     OP_DONE(DoneStopping, globalStop)
