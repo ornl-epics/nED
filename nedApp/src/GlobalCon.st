@@ -118,6 +118,7 @@ PVARRAY(int, cmdReq)
 PVARRAY(int, cmdRsp)
 PVARRAY(int, verified)
 PVARRAY(int, acquiring)
+PVARRAY(string, hwtype)
 
 /*
  * Groups of soft PVs, one per device
@@ -320,9 +321,10 @@ ss GlobalControl {
       entry {
          PVPUTSTR(statePV,init)
          /* What we want here is to find the baseModulePlugin devices */
-         numFound = seqGrep("stringin", ".*:HwId", &deviceNames[0][0], 
+         numFound = seqGrep("stringin", ".*:HwType", &deviceNames[0][0], 
                                                        MAXDEVICES);
          for (i=0; i<numFound; i++) {
+            pvAssign(hwtype[i], deviceNames[i]);
             *strrchr(deviceNames[i], ':') = 0;
             sprintf(namebuf, "%s:CmdReq", deviceNames[i]);
             pvAssign(cmdReq[i], namebuf);
