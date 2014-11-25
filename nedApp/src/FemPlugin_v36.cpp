@@ -129,7 +129,6 @@ void FemPlugin::createStatusParams_v36()
     createStatusParam("Ctrl:GotData",     0x8,  1,  4); // CTRL got data packet         (0=no,1=yes)
     createStatusParam("Ctrl:GotCmd",      0x8,  1,  5); // CTRL got command packet      (0=no,1=yes)
     createStatusParam("NewHwId",          0x8,  1,  6); // Found new hardware ID        (0=no,1=yes)
-    createStatusParam("Acquiring",        0x8,  1,  7); // Acquiring data               (0=not acquiring,1=acquiring)
     createStatusParam("CntFilteredAcks",  0x8,  8,  8); // Number Filtered ACKS
 
     createStatusParam("Ch1:FifoHasData",  0x9,  1,  0); // Chan1 FIFO not empty         (0=empty,1=has data)
@@ -161,8 +160,8 @@ void FemPlugin::createStatusParams_v36()
     createStatusParam("Tclk=0",           0xB,  1,  0); // LVDS input TCLK = 0          (0=no,1=yes)
     createStatusParam("Tclk=1",           0xB,  1,  1); // LVDS input TCLK = 1          (0=no,1=yes)
     createStatusParam("Tsync=0",          0xB,  1,  2); // LVDS input TSYNC = 0         (0=no,1=yes)
-    createStatusParam("Tsync=0",          0xB,  1,  3); // LVDS input TSYNC = 0         (0=no,1=yes)
-    createStatusParam("TxEn=0",           0xB,  1,  4); // LVDS input TXEN# = 1         (0=no,1=yes)
+    createStatusParam("Tsync=1",          0xB,  1,  3); // LVDS input TSYNC = 1         (0=no,1=yes)
+    createStatusParam("TxEn=0",           0xB,  1,  4); // LVDS input TXEN# = 0         (0=no,1=yes)
     createStatusParam("TxEn=1",           0xB,  2,  5); // LVDS input TXEN# = 1         (0=no,1=yes)
     createStatusParam("Sysrst=0",         0xB,  1,  6); // LVDS input Sysrst# = 0       (0=no,1=yes)
     createStatusParam("Sysrs1",           0xB,  1,  7); // LVDS input Sysrst# = 0       (0=no,1=yes)
@@ -221,112 +220,87 @@ void FemPlugin::createConfigParams_v36()
 
 void FemPlugin::createCounterParams_v36()
 {
-//     BLXXX:Det:RocXXX:| sig nam|                         | EPICS record description |
-    createCounterParam("Ch1:UpRxRate",    0x0, 32,  0); // Ch1 upstream RX rate
-    createCounterParam("Ch2:UpRxRate",    0x2, 32,  0); // Ch2 upstream RX rate
-    createCounterParam("Ch3:UpRxRate",    0x4, 32,  0); // Ch3 upstream RX rate
-    createCounterParam("Ch4:UpRxRate",    0x6, 32,  0); // Ch4 upstream RX rate
-    createCounterParam("Ch5:UpRxRate",    0x8, 32,  0); // Ch5 upstream RX rate
-    createCounterParam("Ch6:UpRxRate",    0xA, 32,  0); // Ch6 upstream RX rate
-    createCounterParam("Ch7:UpRxRate",    0xC, 32,  0); // Ch7 upstream RX rate
-    createCounterParam("Ch8:UpRxRate",    0xE, 32,  0); // Ch8 upstream RX rate
-    createCounterParam("Ch9:UpRxRate",   0x10, 32,  0); // Ch9 upstream RX rate
-    createCounterParam("Ch1:DownRxRate", 0x12, 32,  0); // Ch1 downstream RX rate
-    createCounterParam("Ch2:DownRxRate", 0x14, 32,  0); // Ch2 downstream RX rate
-    createCounterParam("Ch3:DownRxRate", 0x16, 32,  0); // Ch3 downstream RX rate
-    createCounterParam("Ch4:DownRxRate", 0x18, 32,  0); // Ch4 downstream RX rate
-    createCounterParam("Ch5:DownRxRate", 0x1A, 32,  0); // Ch5 downstream RX rate
-    createCounterParam("Ch6:DownRxRate", 0x1C, 32,  0); // Ch6 downstream RX rate
-    createCounterParam("Ch7:DownRxRate", 0x1E, 32,  0); // Ch7 downstream RX rate
-    createCounterParam("Ch8:DownRxRate", 0x20, 32,  0); // Ch8 downstream RX rate
-    createCounterParam("Ch9:DownRxRate", 0x22, 32,  0); // Ch9 downstream RX rate
-    createCounterParam("Ch1:UpTxRate",   0x24, 32,  0); // Ch1 upstream TX rate
-    createCounterParam("Ch2:UpTxRate",   0x26, 32,  0); // Ch2 upstream TX rate
-    createCounterParam("Ch3:UpTxRate",   0x28, 32,  0); // Ch3 upstream TX rate
-    createCounterParam("Ch4:UpTxRate",   0x2A, 32,  0); // Ch4 upstream TX rate
-    createCounterParam("Ch5:UpTxRate",   0x2C, 32,  0); // Ch5 upstream TX rate
-    createCounterParam("Ch6:UpTxRate",   0x2E, 32,  0); // Ch6 upstream TX rate
-    createCounterParam("Ch7:UpTxRate",   0x30, 32,  0); // Ch7 upstream TX rate
-    createCounterParam("Ch8:UpTxRate",   0x32, 32,  0); // Ch8 upstream TX rate
-    createCounterParam("Ch9:UpTxRate",   0x34, 32,  0); // Ch9 upstream TX rate
-    createCounterParam("Ch1:DownTxRate", 0x36, 32,  0); // Ch1 downstream TX rate
-    createCounterParam("Ch2:DownTxRate", 0x38, 32,  0); // Ch2 downstream TX rate
-    createCounterParam("Ch3:DownTxRate", 0x3A, 32,  0); // Ch3 downstream TX rate
-    createCounterParam("Ch4:DownTxRate", 0x3C, 32,  0); // Ch4 downstream TX rate
-    createCounterParam("Ch5:DownTxRate", 0x3E, 32,  0); // Ch5 downstream TX rate
-    createCounterParam("Ch6:DownTxRate", 0x40, 32,  0); // Ch6 downstream TX rate
-    createCounterParam("Ch7:DownTxRate", 0x42, 32,  0); // Ch7 downstream TX rate
-    createCounterParam("Ch8:DownTxRate", 0x44, 32,  0); // Ch8 downstream TX rate
-    createCounterParam("Ch9:DownTxRate", 0x46, 32,  0); // Ch9 downstream TX rate
+//     BLXXX:Det:RocXXX:| sig nam             |                   | EPICS record description |
+    createCounterParam("Ch1:UpRxRate",           0x0, 32,  0); // Ch1 upstream RX rate
+    createCounterParam("Ch2:UpRxRate",           0x2, 32,  0); // Ch2 upstream RX rate
+    createCounterParam("Ch3:UpRxRate",           0x4, 32,  0); // Ch3 upstream RX rate
+    createCounterParam("Ch4:UpRxRate",           0x6, 32,  0); // Ch4 upstream RX rate
+    createCounterParam("Ch5:UpRxRate",           0x8, 32,  0); // Ch5 upstream RX rate
+    createCounterParam("Ch6:UpRxRate",           0xA, 32,  0); // Ch6 upstream RX rate
+    createCounterParam("Ch7:UpRxRate",           0xC, 32,  0); // Ch7 upstream RX rate
+    createCounterParam("Ch8:UpRxRate",           0xE, 32,  0); // Ch8 upstream RX rate
+    createCounterParam("Ch9:UpRxRate",          0x10, 32,  0); // Ch9 upstream RX rate
+    createCounterParam("DownRxRate",            0x12, 32,  0); // Downstream RX rate
+    createCounterParam("UpTxRate",              0x14, 32,  0); // Upstream TX rate
 
-    createCounterParam("PllLocked",      0x47,  1,  8); // PLL Locked                   (0=not locked,1=locked)
-    createCounterParam("VccInt",         0x47,  1,  9); // VCC INT voltage status       (0=not ok,1=ok)
-    createCounterParam("VccAux",         0x47,  1, 10); // VCC AUX voltage status       (0=not ok,1=ok)
-    createCounterParam("VccAuxIo",       0x47,  1, 11); // VCC AUX IO voltage status    (0=not ok,1=ok)
-    createCounterParam("VccBram",        0x47,  1, 12); // VCC BRAM voltage status      (0=not ok,1=ok)
-    createCounterParam("MgtVccAux",      0x47,  1, 13); // MGT VCC AUX voltage status   (0=not ok,1=ok)
-    createCounterParam("MgtaVccAux",     0x47,  1, 14); // MGT VCC AUX voltage status   (0=not ok,1=ok)
-    createCounterParam("MgtaVtt",        0x47,  1, 15); // MGTA VTT voltage status      (0=not ok,1=ok)
+    createCounterParam("PllLocked",             0x16,  1,  8); // PLL Locked                   (0=not locked,1=locked)
+    createCounterParam("VccInt",                0x16,  1,  9); // VCC INT voltage status       (0=not ok,1=ok)
+    createCounterParam("VccAux",                0x16,  1, 10); // VCC AUX voltage status       (0=not ok,1=ok)
+    createCounterParam("VccAuxIo",              0x16,  1, 11); // VCC AUX IO voltage status    (0=not ok,1=ok)
+    createCounterParam("VccBram",               0x16,  1, 12); // VCC BRAM voltage status      (0=not ok,1=ok)
+    createCounterParam("MgtVccAux",             0x16,  1, 13); // MGT VCC AUX voltage status   (0=not ok,1=ok)
+    createCounterParam("MgtaVccAux",            0x16,  1, 14); // MGT VCC AUX voltage status   (0=not ok,1=ok)
+    createCounterParam("MgtaVtt",               0x16,  1, 15); // MGTA VTT voltage status      (0=not ok,1=ok)
 
-    createCounterParam("Ch1:UpParityCnt",0x48, 16,  0); // Ch1 upstream parity counter
-    createCounterParam("Ch2:UpParityCnt",0x49, 16,  0); // Ch2 upstream parity counter
-    createCounterParam("Ch3:UpParityCnt",0x4A, 16,  0); // Ch3 upstream parity counter
-    createCounterParam("Ch4:UpParityCnt",0x4B, 16,  0); // Ch4 upstream parity counter
-    createCounterParam("Ch5:UpParityCnt",0x4C, 16,  0); // Ch5 upstream parity counter
-    createCounterParam("Ch6:UpParityCnt",0x4D, 16,  0); // Ch6 upstream parity counter
-    createCounterParam("Ch7:UpParityCnt",0x4E, 16,  0); // Ch7 upstream parity counter
-    createCounterParam("Ch8:UpParityCnt",0x4F, 16,  0); // Ch8 upstream parity counter
-    createCounterParam("Ch9:UpParityCnt",0x50, 16,  0); // Ch9 upstream parity counter
+    createCounterParam("Ch1:UpRxParityCnt",     0x17, 16,  0); // Ch1 upstream parity counter
+    createCounterParam("Ch2:UpRxParityCnt",     0x18, 16,  0); // Ch2 upstream parity counter
+    createCounterParam("Ch3:UpRxParityCnt",     0x19, 16,  0); // Ch3 upstream parity counter
+    createCounterParam("Ch4:UpRxParityCnt",     0x1A, 16,  0); // Ch4 upstream parity counter
+    createCounterParam("Ch5:UpRxParityCnt",     0x1B, 16,  0); // Ch5 upstream parity counter
+    createCounterParam("Ch6:UpRxParityCnt",     0x1C, 16,  0); // Ch6 upstream parity counter
+    createCounterParam("Ch7:UpRxParityCnt",     0x1D, 16,  0); // Ch7 upstream parity counter
+    createCounterParam("Ch8:UpRxParityCnt",     0x1E, 16,  0); // Ch8 upstream parity counter
+    createCounterParam("Ch9:UpRxParityCnt",     0x1F, 16,  0); // Ch9 upstream parity counter
+    createCounterParam("DownRxParityCnt",       0x20, 16,  0); // Downstream RX parity count
 
-    createCounterParam("Ch1:DownParityCnt",0x51, 16,  0); // Ch1 downstream parity count
-    createCounterParam("Ch2:DownParityCnt",0x52, 16,  0); // Ch2 downstream parity count
-    createCounterParam("Ch3:DownParityCnt",0x53, 16,  0); // Ch3 downstream parity count
-    createCounterParam("Ch4:DownParityCnt",0x54, 16,  0); // Ch4 downstream parity count
-    createCounterParam("Ch5:DownParityCnt",0x55, 16,  0); // Ch5 downstream parity count
-    createCounterParam("Ch6:DownParityCnt",0x56, 16,  0); // Ch6 downstream parity count
-    createCounterParam("Ch7:DownParityCnt",0x57, 16,  0); // Ch7 downstream parity count
-    createCounterParam("Ch8:DownParityCnt",0x58, 16,  0); // Ch8 downstream parity count
-    createCounterParam("Ch9:DownParityCnt",0x59, 16,  0); // Ch9 downstream parity count
+    createCounterParam("DieTemp",               0x21, 12,  0); // On die temperature
+    createCounterParam("DieTempAlarm",          0x21,  1, 13); // On die temp alarm - high     (0=low,1=high)
+    createCounterParam("BoardTempAlarm",        0x21,  1, 14); // On board temp alarm - high   (0=low,1=high)
+    createCounterParam("BoardTemp",             0x22, 16,  0); // On board temperature
 
-    createCounterParam("DieTemp",        0x5A, 12,  0); // On die temperature
-    createCounterParam("DieTempAlarm",   0x5B,  1, 13); // On die temp alarm - high     (0=low,1=high)
-    createCounterParam("BoardTempAlarm", 0x5C,  1, 14); // On board temp alarm - high   (0=low,1=high)
-    createCounterParam("BoardTemp",      0x5D, 16,  0); // On board temperature
+    createCounterParam("Ch1:UpRxFifoOverCnt",   0x23,  8,  0); // Ch1 upstream RX overflow cnt
+    createCounterParam("Ch1:UpRxParserOverCnt", 0x23,  8,  8); // Ch1 upstream RX overflow cnt
+    createCounterParam("Ch2:UpRxFifoOverCnt",   0x24,  8,  0); // Ch2 upstream RX overflow cnt
+    createCounterParam("Ch2:UpRxParserOverCnt", 0x24,  8,  8); // Ch2 upstream RX overflow cnt
+    createCounterParam("Ch3:UpRxFifoOverCnt",   0x25,  8,  0); // Ch3 upstream RX overflow cnt
+    createCounterParam("Ch3:UpRxParserOverCnt", 0x25,  8,  8); // Ch3 upstream RX overflow cnt
+    createCounterParam("Ch4:UpRxFifoOverCnt",   0x26,  8,  0); // Ch4 upstream RX overflow cnt
+    createCounterParam("Ch4:UpRxParserOverCnt", 0x26,  8,  8); // Ch4 upstream RX overflow cnt
+    createCounterParam("Ch5:UpRxFifoOverCnt",   0x27,  8,  0); // Ch5 upstream RX overflow cnt
+    createCounterParam("Ch5:UpRxParserOverCnt", 0x27,  8,  8); // Ch5 upstream RX overflow cnt
+    createCounterParam("Ch6:UpRxFifoOverCnt",   0x28,  8,  0); // Ch6 upstream RX overflow cnt
+    createCounterParam("Ch6:UpRxParserOverCnt", 0x28,  8,  8); // Ch6 upstream RX overflow cnt
+    createCounterParam("Ch7:UpRxFifoOverCnt",   0x29,  8,  0); // Ch7 upstream RX overflow cnt
+    createCounterParam("Ch7:UpRxParserOverCnt", 0x29,  8,  8); // Ch7 upstream RX overflow cnt
+    createCounterParam("Ch8:UpRxFifoOverCnt",   0x2A,  8,  0); // Ch8 upstream RX overflow cnt
+    createCounterParam("Ch8:UpRxParserOverCnt", 0x2A,  8,  8); // Ch8 upstream RX overflow cnt
+    createCounterParam("Ch9:UpRxFifoOverCnt",   0x2B,  8,  0); // Ch9 upstream RX overflow cnt
+    createCounterParam("Ch9:UpRxParserOverCnt", 0x2B,  8,  8); // Ch9 upstream RX overflow cnt
 
-    createCounterParam("Ch1:UpRxOverflwCnt",   0x5E, 16,  0); // Ch1 upstream RX overflow cnt
-    createCounterParam("Ch2:UpRxOverflwCnt",   0x5F, 16,  0); // Ch2 upstream RX overflow cnt
-    createCounterParam("Ch3:UpRxOverflwCnt",   0x60, 16,  0); // Ch3 upstream RX overflow cnt
-    createCounterParam("Ch4:UpRxOverflwCnt",   0x61, 16,  0); // Ch4 upstream RX overflow cnt
-    createCounterParam("Ch5:UpRxOverflwCnt",   0x62, 16,  0); // Ch5 upstream RX overflow cnt
-    createCounterParam("Ch6:UpRxOverflwCnt",   0x63, 16,  0); // Ch6 upstream RX overflow cnt
-    createCounterParam("Ch7:UpRxOverflwCnt",   0x64, 16,  0); // Ch7 upstream RX overflow cnt
-    createCounterParam("Ch8:UpRxOverflwCnt",   0x65, 16,  0); // Ch8 upstream RX overflow cnt
-    createCounterParam("Ch9:UpRxOverflwCnt",   0x66, 16,  0); // Ch9 upstream RX overflow cnt
-    createCounterParam("Ch1:DownRxOverflwCnt", 0x67, 16,  0); // Ch1 downstrm RX overflow cnt
-    createCounterParam("Ch2:DownRxOverflwCnt", 0x68, 16,  0); // Ch2 downstrm RX overflow cnt
-    createCounterParam("Ch3:DownRxOverflwCnt", 0x69, 16,  0); // Ch3 downstrm RX overflow cnt
-    createCounterParam("Ch4:DownRxOverflwCnt", 0x6A, 16,  0); // Ch4 downstrm RX overflow cnt
-    createCounterParam("Ch5:DownRxOverflwCnt", 0x6B, 16,  0); // Ch5 downstrm RX overflow cnt
-    createCounterParam("Ch6:DownRxOverflwCnt", 0x6C, 16,  0); // Ch6 downstrm RX overflow cnt
-    createCounterParam("Ch7:DownRxOverflwCnt", 0x6D, 16,  0); // Ch7 downstrm RX overflow cnt
-    createCounterParam("Ch8:DownRxOverflwCnt", 0x6E, 16,  0); // Ch8 downstrm RX overflow cnt
-    createCounterParam("Ch9:DownRxOverflwCnt", 0x6F, 16,  0); // Ch9 downstrm RX overflow cnt
-    createCounterParam("Ch1:UpTxOverflwCnt",   0x70, 16,  0); // Ch1 upstream TX overflow cnt
-    createCounterParam("Ch2:UpTxOverflwCnt",   0x71, 16,  0); // Ch2 upstream TX overflow cnt
-    createCounterParam("Ch3:UpTxOverflwCnt",   0x72, 16,  0); // Ch3 upstream TX overflow cnt
-    createCounterParam("Ch4:UpTxOverflwCnt",   0x73, 16,  0); // Ch4 upstream TX overflow cnt
-    createCounterParam("Ch5:UpTxOverflwCnt",   0x74, 16,  0); // Ch5 upstream TX overflow cnt
-    createCounterParam("Ch6:UpTxOverflwCnt",   0x75, 16,  0); // Ch6 upstream TX overflow cnt
-    createCounterParam("Ch7:UpTxOverflwCnt",   0x76, 16,  0); // Ch7 upstream TX overflow cnt
-    createCounterParam("Ch8:UpTxOverflwCnt",   0x77, 16,  0); // Ch8 upstream TX overflow cnt
-    createCounterParam("Ch9:UpTxOverflwCnt",   0x78, 16,  0); // Ch9 upstream TX overflow cnt
-    createCounterParam("Ch1:DownTxOverflwCnt", 0x79, 16,  0); // Ch1 downstrm TX overflow cnt
-    createCounterParam("Ch2:DownTxOverflwCnt", 0x7A, 16,  0); // Ch2 downstrm TX overflow cnt
-    createCounterParam("Ch3:DownTxOverflwCnt", 0x7B, 16,  0); // Ch3 downstrm TX overflow cnt
-    createCounterParam("Ch4:DownTxOverflwCnt", 0x7C, 16,  0); // Ch4 downstrm TX overflow cnt
-    createCounterParam("Ch5:DownTxOverflwCnt", 0x7D, 16,  0); // Ch5 downstrm TX overflow cnt
-    createCounterParam("Ch6:DownTxOverflwCnt", 0x7E, 16,  0); // Ch6 downstrm TX overflow cnt
-    createCounterParam("Ch7:DownTxOverflwCnt", 0x7F, 16,  0); // Ch7 downstrm TX overflow cnt
-    createCounterParam("Ch8:DownTxOverflwCnt", 0x80, 16,  0); // Ch8 downstrm TX overflow cnt
-    createCounterParam("Ch9:DownTxOverflwCnt", 0x81, 16,  0); // Ch9 downstrm TX overflow cnt
+    createCounterParam("DownRxFifoOverCnt",     0x2C,  4,  0); // Downstream RX FIFO IN overfl
+    createCounterParam("DownRxDataOverCnt",     0x2C,  4,  4); // Downstream RX data overflow
+    createCounterParam("DownRxCmdOverCnt",      0x2C,  8,  8); // Downstream RX cmd IN overflo
+    createCounterParam("UpTxFifoOverCnt",       0x2D, 16,  0); // Upstream TX FIFO overflow
+    createCounterParam("DownTxFifoOverCnt",     0x2E, 16,  0); // Downstream TX FIFO overflow
+
+    createCounterParam("Ch1:UpFrameErrCnt",     0x2F, 16,  0); // Ch1 Upstream Frame Error cnt
+    createCounterParam("Ch2:UpFrameErrCnt",     0x30, 16,  0); // Ch2 Upstream Frame Error cnt
+    createCounterParam("Ch3:UpFrameErrCnt",     0x31, 16,  0); // Ch3 Upstream Frame Error cnt
+    createCounterParam("Ch4:UpFrameErrCnt",     0x32, 16,  0); // Ch4 Upstream Frame Error cnt
+    createCounterParam("Ch5:UpFrameErrCnt",     0x33, 16,  0); // Ch5 Upstream Frame Error cnt
+    createCounterParam("Ch6:UpFrameErrCnt",     0x34, 16,  0); // Ch6 Upstream Frame Error cnt
+    createCounterParam("Ch7:UpFrameErrCnt",     0x35, 16,  0); // Ch7 Upstream Frame Error cnt
+    createCounterParam("Ch8:UpFrameErrCnt",     0x36, 16,  0); // Ch8 Upstream Frame Error cnt
+    createCounterParam("Ch9:UpFrameErrCnt",     0x37, 16,  0); // Ch9 Upstream Frame Error cnt
+    createCounterParam("Ch1:UpLenErrCnt",       0x38, 16,  0); // Ch1 Upstream Length Error cn
+    createCounterParam("Ch2:UpLenErrCnt",       0x39, 16,  0); // Ch2 Upstream Length Error cn
+    createCounterParam("Ch3:UpLenErrCnt",       0x3A, 16,  0); // Ch3 Upstream Length Error cn
+    createCounterParam("Ch4:UpLenErrCnt",       0x3B, 16,  0); // Ch4 Upstream Length Error cn
+    createCounterParam("Ch5:UpLenErrCnt",       0x3C, 16,  0); // Ch5 Upstream Length Error cn
+    createCounterParam("Ch6:UpLenErrCnt",       0x3D, 16,  0); // Ch6 Upstream Length Error cn
+    createCounterParam("Ch7:UpLenErrCnt",       0x3E, 16,  0); // Ch7 Upstream Length Error cn
+    createCounterParam("Ch8:UpLenErrCnt",       0x3F, 16,  0); // Ch8 Upstream Length Error cn
+    createCounterParam("Ch9:UpLenErrCnt",       0x40, 16,  0); // Ch9 Upstream Length Error cn
+    createCounterParam("DownRxFrameErrCnt",     0x41, 16,  0); // Downstream RX Frame Error cn
+    createCounterParam("DownRxLenErrCnt",       0x42, 16,  0); // Downstream RX Length Error c
 }

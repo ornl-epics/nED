@@ -977,15 +977,6 @@ record(bi, "$(P)NewHwId")
     field(ZNAM, "no")
     field(ONAM, "yes")
 }
-record(bi, "$(P)Acquiring")
-{
-    field(DESC, "Acquiring data")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Acquiring")
-    field(SCAN, "I/O Intr")
-    field(ZNAM, "not acquiring")
-    field(ONAM, "acquiring")
-}
 record(longin, "$(P)CntFilteredAcks")
 {
     field(DESC, "Number Filtered ACKS")
@@ -2282,193 +2273,18 @@ record(longin, "$(P)Ch9:UpRxRate")
     field(INP,  "@asyn($(PORT))Ch9:UpRxRate")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch1:DownRxRate")
+record(longin, "$(P)DownRxRate")
 {
-    field(DESC, "Ch1 downstream RX rate")
+    field(DESC, "Downstream RX rate")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:DownRxRate")
+    field(INP,  "@asyn($(PORT))DownRxRate")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch2:DownRxRate")
+record(longin, "$(P)UpTxRate")
 {
-    field(DESC, "Ch2 downstream RX rate")
+    field(DESC, "Upstream TX rate")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:DownRxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch3:DownRxRate")
-{
-    field(DESC, "Ch3 downstream RX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:DownRxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch4:DownRxRate")
-{
-    field(DESC, "Ch4 downstream RX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:DownRxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch5:DownRxRate")
-{
-    field(DESC, "Ch5 downstream RX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:DownRxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch6:DownRxRate")
-{
-    field(DESC, "Ch6 downstream RX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:DownRxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch7:DownRxRate")
-{
-    field(DESC, "Ch7 downstream RX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:DownRxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch8:DownRxRate")
-{
-    field(DESC, "Ch8 downstream RX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:DownRxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch9:DownRxRate")
-{
-    field(DESC, "Ch9 downstream RX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:DownRxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch1:UpTxRate")
-{
-    field(DESC, "Ch1 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch2:UpTxRate")
-{
-    field(DESC, "Ch2 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch3:UpTxRate")
-{
-    field(DESC, "Ch3 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch4:UpTxRate")
-{
-    field(DESC, "Ch4 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch5:UpTxRate")
-{
-    field(DESC, "Ch5 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch6:UpTxRate")
-{
-    field(DESC, "Ch6 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch7:UpTxRate")
-{
-    field(DESC, "Ch7 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch8:UpTxRate")
-{
-    field(DESC, "Ch8 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch9:UpTxRate")
-{
-    field(DESC, "Ch9 upstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:UpTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch1:DownTxRate")
-{
-    field(DESC, "Ch1 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:DownTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch2:DownTxRate")
-{
-    field(DESC, "Ch2 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:DownTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch3:DownTxRate")
-{
-    field(DESC, "Ch3 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:DownTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch4:DownTxRate")
-{
-    field(DESC, "Ch4 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:DownTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch5:DownTxRate")
-{
-    field(DESC, "Ch5 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:DownTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch6:DownTxRate")
-{
-    field(DESC, "Ch6 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:DownTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch7:DownTxRate")
-{
-    field(DESC, "Ch7 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:DownTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch8:DownTxRate")
-{
-    field(DESC, "Ch8 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:DownTxRate")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch9:DownTxRate")
-{
-    field(DESC, "Ch9 downstream TX rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:DownTxRate")
+    field(INP,  "@asyn($(PORT))UpTxRate")
     field(SCAN, "I/O Intr")
 }
 record(bi, "$(P)PllLocked")
@@ -2543,130 +2359,74 @@ record(bi, "$(P)MgtaVtt")
     field(ZNAM, "not ok")
     field(ONAM, "ok")
 }
-record(longin, "$(P)Ch1:UpParityCnt")
+record(longin, "$(P)Ch1:UpRxParityCnt")
 {
     field(DESC, "Ch1 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch1:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch2:UpParityCnt")
+record(longin, "$(P)Ch2:UpRxParityCnt")
 {
     field(DESC, "Ch2 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch2:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch3:UpParityCnt")
+record(longin, "$(P)Ch3:UpRxParityCnt")
 {
     field(DESC, "Ch3 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch3:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch4:UpParityCnt")
+record(longin, "$(P)Ch4:UpRxParityCnt")
 {
     field(DESC, "Ch4 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch4:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch5:UpParityCnt")
+record(longin, "$(P)Ch5:UpRxParityCnt")
 {
     field(DESC, "Ch5 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch5:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch6:UpParityCnt")
+record(longin, "$(P)Ch6:UpRxParityCnt")
 {
     field(DESC, "Ch6 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch6:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch7:UpParityCnt")
+record(longin, "$(P)Ch7:UpRxParityCnt")
 {
     field(DESC, "Ch7 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch7:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch8:UpParityCnt")
+record(longin, "$(P)Ch8:UpRxParityCnt")
 {
     field(DESC, "Ch8 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch8:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch9:UpParityCnt")
+record(longin, "$(P)Ch9:UpRxParityCnt")
 {
     field(DESC, "Ch9 upstream parity counter")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:UpParityCnt")
+    field(INP,  "@asyn($(PORT))Ch9:UpRxParityCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch1:DownParityCnt")
+record(longin, "$(P)DownRxParityCnt")
 {
-    field(DESC, "Ch1 downstream parity count")
+    field(DESC, "Downstream RX parity count")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:DownParityCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch2:DownParityCnt")
-{
-    field(DESC, "Ch2 downstream parity count")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:DownParityCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch3:DownParityCnt")
-{
-    field(DESC, "Ch3 downstream parity count")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:DownParityCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch4:DownParityCnt")
-{
-    field(DESC, "Ch4 downstream parity count")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:DownParityCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch5:DownParityCnt")
-{
-    field(DESC, "Ch5 downstream parity count")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:DownParityCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch6:DownParityCnt")
-{
-    field(DESC, "Ch6 downstream parity count")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:DownParityCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch7:DownParityCnt")
-{
-    field(DESC, "Ch7 downstream parity count")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:DownParityCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch8:DownParityCnt")
-{
-    field(DESC, "Ch8 downstream parity count")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:DownParityCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch9:DownParityCnt")
-{
-    field(DESC, "Ch9 downstream parity count")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:DownParityCnt")
+    field(INP,  "@asyn($(PORT))DownRxParityCnt")
     field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)DieTemp")
@@ -2701,255 +2461,304 @@ record(longin, "$(P)BoardTemp")
     field(INP,  "@asyn($(PORT))BoardTemp")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch1:UpRxOverflwCnt")
+record(longin, "$(P)Ch1:UpRxFifoOverCnt")
 {
     field(DESC, "Ch1 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch1:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch2:UpRxOverflwCnt")
+record(longin, "$(P)Ch1:UpRxParserOverCnt")
+{
+    field(DESC, "Ch1 upstream RX overflow cnt")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:UpRxParserOverCnt")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch2:UpRxFifoOverCnt")
 {
     field(DESC, "Ch2 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch2:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch3:UpRxOverflwCnt")
+record(longin, "$(P)Ch2:UpRxParserOverCnt")
+{
+    field(DESC, "Ch2 upstream RX overflow cnt")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:UpRxParserOverCnt")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch3:UpRxFifoOverCnt")
 {
     field(DESC, "Ch3 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch3:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch4:UpRxOverflwCnt")
+record(longin, "$(P)Ch3:UpRxParserOverCnt")
+{
+    field(DESC, "Ch3 upstream RX overflow cnt")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:UpRxParserOverCnt")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch4:UpRxFifoOverCnt")
 {
     field(DESC, "Ch4 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch4:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch5:UpRxOverflwCnt")
+record(longin, "$(P)Ch4:UpRxParserOverCnt")
+{
+    field(DESC, "Ch4 upstream RX overflow cnt")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:UpRxParserOverCnt")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch5:UpRxFifoOverCnt")
 {
     field(DESC, "Ch5 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch5:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch6:UpRxOverflwCnt")
+record(longin, "$(P)Ch5:UpRxParserOverCnt")
+{
+    field(DESC, "Ch5 upstream RX overflow cnt")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:UpRxParserOverCnt")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch6:UpRxFifoOverCnt")
 {
     field(DESC, "Ch6 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch6:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch7:UpRxOverflwCnt")
+record(longin, "$(P)Ch6:UpRxParserOverCnt")
+{
+    field(DESC, "Ch6 upstream RX overflow cnt")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:UpRxParserOverCnt")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch7:UpRxFifoOverCnt")
 {
     field(DESC, "Ch7 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch7:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch8:UpRxOverflwCnt")
+record(longin, "$(P)Ch7:UpRxParserOverCnt")
+{
+    field(DESC, "Ch7 upstream RX overflow cnt")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:UpRxParserOverCnt")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch8:UpRxFifoOverCnt")
 {
     field(DESC, "Ch8 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch8:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch9:UpRxOverflwCnt")
+record(longin, "$(P)Ch8:UpRxParserOverCnt")
+{
+    field(DESC, "Ch8 upstream RX overflow cnt")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:UpRxParserOverCnt")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Ch9:UpRxFifoOverCnt")
 {
     field(DESC, "Ch9 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:UpRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch9:UpRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch1:DownRxOverflwCnt")
+record(longin, "$(P)Ch9:UpRxParserOverCnt")
 {
-    field(DESC, "Ch1 downstrm RX overflow cnt")
+    field(DESC, "Ch9 upstream RX overflow cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch9:UpRxParserOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch2:DownRxOverflwCnt")
+record(longin, "$(P)DownRxFifoOverCnt")
 {
-    field(DESC, "Ch2 downstrm RX overflow cnt")
+    field(DESC, "Downstream RX FIFO IN overfl")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))DownRxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch3:DownRxOverflwCnt")
+record(longin, "$(P)DownRxDataOverCnt")
 {
-    field(DESC, "Ch3 downstrm RX overflow cnt")
+    field(DESC, "Downstream RX data overflow")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))DownRxDataOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch4:DownRxOverflwCnt")
+record(longin, "$(P)DownRxCmdOverCnt")
 {
-    field(DESC, "Ch4 downstrm RX overflow cnt")
+    field(DESC, "Downstream RX cmd IN overflo")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))DownRxCmdOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch5:DownRxOverflwCnt")
+record(longin, "$(P)UpTxFifoOverCnt")
 {
-    field(DESC, "Ch5 downstrm RX overflow cnt")
+    field(DESC, "Upstream TX FIFO overflow")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))UpTxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch6:DownRxOverflwCnt")
+record(longin, "$(P)DownTxFifoOverCnt")
 {
-    field(DESC, "Ch6 downstrm RX overflow cnt")
+    field(DESC, "Downstream TX FIFO overflow")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))DownTxFifoOverCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch7:DownRxOverflwCnt")
+record(longin, "$(P)Ch1:UpFrameErrCnt")
 {
-    field(DESC, "Ch7 downstrm RX overflow cnt")
+    field(DESC, "Ch1 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch1:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch8:DownRxOverflwCnt")
+record(longin, "$(P)Ch2:UpFrameErrCnt")
 {
-    field(DESC, "Ch8 downstrm RX overflow cnt")
+    field(DESC, "Ch2 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch2:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch9:DownRxOverflwCnt")
+record(longin, "$(P)Ch3:UpFrameErrCnt")
 {
-    field(DESC, "Ch9 downstrm RX overflow cnt")
+    field(DESC, "Ch3 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:DownRxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch3:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch1:UpTxOverflwCnt")
+record(longin, "$(P)Ch4:UpFrameErrCnt")
 {
-    field(DESC, "Ch1 upstream TX overflow cnt")
+    field(DESC, "Ch4 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch4:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch2:UpTxOverflwCnt")
+record(longin, "$(P)Ch5:UpFrameErrCnt")
 {
-    field(DESC, "Ch2 upstream TX overflow cnt")
+    field(DESC, "Ch5 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch5:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch3:UpTxOverflwCnt")
+record(longin, "$(P)Ch6:UpFrameErrCnt")
 {
-    field(DESC, "Ch3 upstream TX overflow cnt")
+    field(DESC, "Ch6 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch6:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch4:UpTxOverflwCnt")
+record(longin, "$(P)Ch7:UpFrameErrCnt")
 {
-    field(DESC, "Ch4 upstream TX overflow cnt")
+    field(DESC, "Ch7 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch7:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch5:UpTxOverflwCnt")
+record(longin, "$(P)Ch8:UpFrameErrCnt")
 {
-    field(DESC, "Ch5 upstream TX overflow cnt")
+    field(DESC, "Ch8 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch8:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch6:UpTxOverflwCnt")
+record(longin, "$(P)Ch9:UpFrameErrCnt")
 {
-    field(DESC, "Ch6 upstream TX overflow cnt")
+    field(DESC, "Ch9 Upstream Frame Error cnt")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch9:UpFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch7:UpTxOverflwCnt")
+record(longin, "$(P)Ch1:UpLenErrCnt")
 {
-    field(DESC, "Ch7 upstream TX overflow cnt")
+    field(DESC, "Ch1 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch1:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch8:UpTxOverflwCnt")
+record(longin, "$(P)Ch2:UpLenErrCnt")
 {
-    field(DESC, "Ch8 upstream TX overflow cnt")
+    field(DESC, "Ch2 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch2:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch9:UpTxOverflwCnt")
+record(longin, "$(P)Ch3:UpLenErrCnt")
 {
-    field(DESC, "Ch9 upstream TX overflow cnt")
+    field(DESC, "Ch3 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:UpTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch3:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch1:DownTxOverflwCnt")
+record(longin, "$(P)Ch4:UpLenErrCnt")
 {
-    field(DESC, "Ch1 downstrm TX overflow cnt")
+    field(DESC, "Ch4 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch1:DownTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch4:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch2:DownTxOverflwCnt")
+record(longin, "$(P)Ch5:UpLenErrCnt")
 {
-    field(DESC, "Ch2 downstrm TX overflow cnt")
+    field(DESC, "Ch5 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch2:DownTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch5:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch3:DownTxOverflwCnt")
+record(longin, "$(P)Ch6:UpLenErrCnt")
 {
-    field(DESC, "Ch3 downstrm TX overflow cnt")
+    field(DESC, "Ch6 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch3:DownTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch6:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch4:DownTxOverflwCnt")
+record(longin, "$(P)Ch7:UpLenErrCnt")
 {
-    field(DESC, "Ch4 downstrm TX overflow cnt")
+    field(DESC, "Ch7 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch4:DownTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch7:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch5:DownTxOverflwCnt")
+record(longin, "$(P)Ch8:UpLenErrCnt")
 {
-    field(DESC, "Ch5 downstrm TX overflow cnt")
+    field(DESC, "Ch8 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch5:DownTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch8:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch6:DownTxOverflwCnt")
+record(longin, "$(P)Ch9:UpLenErrCnt")
 {
-    field(DESC, "Ch6 downstrm TX overflow cnt")
+    field(DESC, "Ch9 Upstream Length Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch6:DownTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))Ch9:UpLenErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch7:DownTxOverflwCnt")
+record(longin, "$(P)DownRxFrameErrCnt")
 {
-    field(DESC, "Ch7 downstrm TX overflow cnt")
+    field(DESC, "Downstream RX Frame Error cn")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch7:DownTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))DownRxFrameErrCnt")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Ch8:DownTxOverflwCnt")
+record(longin, "$(P)DownRxLenErrCnt")
 {
-    field(DESC, "Ch8 downstrm TX overflow cnt")
+    field(DESC, "Downstream RX Length Error c")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch8:DownTxOverflwCnt")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)Ch9:DownTxOverflwCnt")
-{
-    field(DESC, "Ch9 downstrm TX overflow cnt")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Ch9:DownTxOverflwCnt")
+    field(INP,  "@asyn($(PORT))DownRxLenErrCnt")
     field(SCAN, "I/O Intr")
 }

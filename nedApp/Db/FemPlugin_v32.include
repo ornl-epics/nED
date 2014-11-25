@@ -1067,15 +1067,6 @@ record(bi, "$(P)NewHwId")
     field(ZNAM, "no")
     field(ONAM, "yes")
 }
-record(bi, "$(P)Acquiring")
-{
-    field(DESC, "Acquiring data")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Acquiring")
-    field(SCAN, "I/O Intr")
-    field(ZNAM, "not acquiring")
-    field(ONAM, "acquiring")
-}
 record(longin, "$(P)CntFilteredAcks")
 {
     field(DESC, "Number Filtered ACKS")

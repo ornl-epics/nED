@@ -57,163 +57,13 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:DownRxRate</name>
+            <name>$(P)DownRxRate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:DownRxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch3:DownRxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch4:DownRxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch5:DownRxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch6:DownRxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch7:DownRxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch8:DownRxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch9:DownRxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch1:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch2:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch3:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch4:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch5:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch6:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch7:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch8:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch9:UpTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch1:DownTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch2:DownTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch3:DownTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch4:DownTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch5:DownTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch6:DownTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch7:DownTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch8:DownTxRate</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch9:DownTxRate</name>
+            <name>$(P)UpTxRate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -267,109 +117,61 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:UpParityCnt</name>
+            <name>$(P)Ch1:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:UpParityCnt</name>
+            <name>$(P)Ch2:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:UpParityCnt</name>
+            <name>$(P)Ch3:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:UpParityCnt</name>
+            <name>$(P)Ch4:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:UpParityCnt</name>
+            <name>$(P)Ch5:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:UpParityCnt</name>
+            <name>$(P)Ch6:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:UpParityCnt</name>
+            <name>$(P)Ch7:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:UpParityCnt</name>
+            <name>$(P)Ch8:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9:UpParityCnt</name>
+            <name>$(P)Ch9:UpRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:DownParityCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch2:DownParityCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch3:DownParityCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch4:DownParityCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch5:DownParityCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch6:DownParityCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch7:DownParityCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch8:DownParityCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch9:DownParityCnt</name>
+            <name>$(P)DownRxParityCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -399,217 +201,259 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:UpRxOverflwCnt</name>
+            <name>$(P)Ch1:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:UpRxOverflwCnt</name>
+            <name>$(P)Ch1:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:UpRxOverflwCnt</name>
+            <name>$(P)Ch2:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:UpRxOverflwCnt</name>
+            <name>$(P)Ch2:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:UpRxOverflwCnt</name>
+            <name>$(P)Ch3:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:UpRxOverflwCnt</name>
+            <name>$(P)Ch3:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:UpRxOverflwCnt</name>
+            <name>$(P)Ch4:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:UpRxOverflwCnt</name>
+            <name>$(P)Ch4:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9:UpRxOverflwCnt</name>
+            <name>$(P)Ch5:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:DownRxOverflwCnt</name>
+            <name>$(P)Ch5:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:DownRxOverflwCnt</name>
+            <name>$(P)Ch6:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:DownRxOverflwCnt</name>
+            <name>$(P)Ch6:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:DownRxOverflwCnt</name>
+            <name>$(P)Ch7:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:DownRxOverflwCnt</name>
+            <name>$(P)Ch7:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:DownRxOverflwCnt</name>
+            <name>$(P)Ch8:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:DownRxOverflwCnt</name>
+            <name>$(P)Ch8:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:DownRxOverflwCnt</name>
+            <name>$(P)Ch9:UpRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9:DownRxOverflwCnt</name>
+            <name>$(P)Ch9:UpRxParserOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:UpTxOverflwCnt</name>
+            <name>$(P)DownRxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:UpTxOverflwCnt</name>
+            <name>$(P)DownRxDataOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:UpTxOverflwCnt</name>
+            <name>$(P)DownRxCmdOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:UpTxOverflwCnt</name>
+            <name>$(P)UpTxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:UpTxOverflwCnt</name>
+            <name>$(P)DownTxFifoOverCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:UpTxOverflwCnt</name>
+            <name>$(P)Ch1:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:UpTxOverflwCnt</name>
+            <name>$(P)Ch2:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:UpTxOverflwCnt</name>
+            <name>$(P)Ch3:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9:UpTxOverflwCnt</name>
+            <name>$(P)Ch4:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:DownTxOverflwCnt</name>
+            <name>$(P)Ch5:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:DownTxOverflwCnt</name>
+            <name>$(P)Ch6:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:DownTxOverflwCnt</name>
+            <name>$(P)Ch7:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:DownTxOverflwCnt</name>
+            <name>$(P)Ch8:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:DownTxOverflwCnt</name>
+            <name>$(P)Ch9:UpFrameErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:DownTxOverflwCnt</name>
+            <name>$(P)Ch1:UpLenErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:DownTxOverflwCnt</name>
+            <name>$(P)Ch2:UpLenErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:DownTxOverflwCnt</name>
+            <name>$(P)Ch3:UpLenErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch9:DownTxOverflwCnt</name>
+            <name>$(P)Ch4:UpLenErrCnt</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch5:UpLenErrCnt</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:UpLenErrCnt</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch7:UpLenErrCnt</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch8:UpLenErrCnt</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch9:UpLenErrCnt</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)DownRxFrameErrCnt</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)DownRxLenErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

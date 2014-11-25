@@ -657,12 +657,6 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Acquiring</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
             <name>$(P)CntFilteredAcks</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>

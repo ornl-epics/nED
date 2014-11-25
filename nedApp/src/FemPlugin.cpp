@@ -47,16 +47,17 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 1);
         createStatusParams_v35();
         createConfigParams_v35();
-/* TODO: FEM interface not yet finalized
     } else if (m_version == "v36") {
         setIntegerParam(Supported, 1);
         createStatusParams_v36();
         createConfigParams_v36();
-*/
+        createCounterParams_v36();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);
     }
+
+    setIntegerParam(HwType, DasPacket::MOD_TYPE_FEM);
 
     LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
 
@@ -79,10 +80,10 @@ bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
 
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;
-    version.hw_year     = response->hw_year;
-    version.hw_month    = HEX_BYTE_TO_DEC(response->hw_year >> 8) * 100 + HEX_BYTE_TO_DEC(response->hw_year);
+    version.hw_year     = HEX_BYTE_TO_DEC(response->hw_year >> 8) * 100 + HEX_BYTE_TO_DEC(response->hw_year);
+    version.hw_month    = HEX_BYTE_TO_DEC(response->fw_month);
     version.hw_day      = HEX_BYTE_TO_DEC(response->hw_day);
-    version.fw_version  = HEX_BYTE_TO_DEC(response->fw_version);
+    version.fw_version  = response->fw_version;
     version.fw_revision = response->fw_revision;
     version.fw_year     = HEX_BYTE_TO_DEC(response->fw_year >> 8) * 100 + HEX_BYTE_TO_DEC(response->fw_year);
     version.fw_month    = HEX_BYTE_TO_DEC(response->fw_month);
