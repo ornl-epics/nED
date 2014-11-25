@@ -1,4 +1,4 @@
-program globalCon
+program GlobalCon
 
 /*
  * Global control sequencer for nED. Supports the operations of global stop,
@@ -71,7 +71,7 @@ option -c;	/* do not wait for PVs to connect */
  * MAXDEVICES is for static mem allocation and must be higher than number of
  * devices expected.
  */
-#define MAXDEVICES 50	
+#define MAXDEVICES 10	
 
 /*
  * set PV n to numeric value v and put. 
@@ -124,30 +124,30 @@ PVARRAY(int, acquiring)
  */
 PVARRAY(int, disable)
 PVARRAY(int, cmdSucceeded)
+PVARRAY(string, failMsg)
 
 /*
  * These are global request soft PVs. Treated as "busy" records in that they
  * are acted upon when set to "1" and reset when the operation completes.
  */
-DECLEVENT(int, globalClear, {GPREFIX}:Clear)
-DECLEVENT(int, globalStop, {GPREFIX}:Stop)
-DECLEVENT(int, globalStart, {GPREFIX}:Start)
-DECLEVENT(int, globalCheck, {GPREFIX}:Check)
-DECLEVENT(int, globalWriteConf, {GPREFIX}:WriteConf)
+DECLEVENT(int, globalClear, {GPREFIX}Clear)
+DECLEVENT(int, globalStop, {GPREFIX}Stop)
+DECLEVENT(int, globalStart, {GPREFIX}Start)
+DECLEVENT(int, globalCheck, {GPREFIX}Check)
+DECLEVENT(int, globalWriteConf, {GPREFIX}WriteConf)
 
 /*
  * these are meant to indicate progress in sequencer operations on GUI
  */
-DECL(string, currentDev, {PREFIX}:CurrentPV)
-DECL(string, statePV, {PREFIX}:State)
+DECL(string, statePV, {GPREFIX}State)
 
 /*
  * ReqSucceeded will be set true when one or a series of attempts to perform 
  * an operation succeeded for all devices. pctSucceeded will give a 
  * percentage of devices that succeeded.
  */
-DECL(int, requestSucceeded ,{PREFIX}:ReqSucceeded)
-DECL(float, pctSucceeded, {PREFIX}:PctSucceeded)
+DECL(int, requestSucceeded ,{GPREFIX}ReqSucceeded)
+DECL(float, pctSucceeded, {GPREFIX}PctSucceeded)
 
 /*
  * Variables used by sequencer to keep track of success or failure of 
@@ -200,7 +200,7 @@ string namebuf;
                 failed already in this attempt. In either case, skip it.\
               */							\
              if (!disable[i] && !cmdSucceeded[i] && !cmdFailed[i]) {	\
-                cmdReq[i] = DISCOVERCMD;				\
+                cmdReq[i] = COMMAND;				\
                 pvPut(cmdReq[i], SYNC);				\
              }							\
           }							\
@@ -217,7 +217,6 @@ string namebuf;
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##1						\
        when () {						\
-          PVPUTSTR(currentDev, deviceNames[i])			\
        } state NAME##2						\
     }								\
     state NAME##2 {						\
@@ -226,6 +225,8 @@ string namebuf;
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { 					\
           cmdFailed[i] = 1;					\
+          sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
+          pvPut(failMsg[i]);					\
        } state NAME##1						\
     }					
 
@@ -247,13 +248,17 @@ string namebuf;
              if (!disable[i] && !cmdSucceeded[i] && !cmdFailed[i] &&	\
                        pvAssigned(PVNAME[i])) {				\
                 pvGet(PVNAME[i], SYNC);					\
-                if (PVNAME[i] != DESIRED) cmdFailed[i] = 1;		\
+                if (PVNAME[i] != DESIRED) {				\
+                   cmdFailed[i] = 1;					\
+                   sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
+                   pvPut(failMsg[i]);					\
+                }						\
              }							\
           }							\
        } state NEXT						\
     }
 /*
- * Macro to make an end-of-operation state.  This goes to the ready state
+ * Macro to make an end-of-operation state.  This goes to the Ready state
  * when done. NAME is the entry name of the state and EVNAME is the PV name
  * that invoked the state, ie, the EVNAME or the corresponding CMD_WHEN.
  */
@@ -271,6 +276,8 @@ string namebuf;
              }								\
              else							\
              {								\
+                failMsg[i][0] = 0;					\
+                pvPut(failMsg[i]);					\
                 if (!disable[i]) {					\
                    PVPUTNUM(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
@@ -289,9 +296,9 @@ string namebuf;
           }								\
           pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
-          pvPut(EVNAME, SYNC);						\
-          PVPUTSTR(statePV,ready)						\
-      } state ready							\
+          pvPut(EVNAME);						\
+          PVPUTSTR(statePV,Ready)						\
+      } state Ready							\
    }
 /* 
  * Macro to define a global operation request-monitor when clause. EVNAME is
@@ -314,11 +321,12 @@ string namebuf;
 /*
  * Main state set.
  */
-ss globalControl {
+ss GlobalControl {
    state init {
       entry {
          PVPUTSTR(statePV,init)
-         numFound = seqGrep("mbbo", ".*[0-9]*:CmdReq", &deviceNames[0][0], 
+         /* What we want here is to find the baseModulePlugin devices */
+         numFound = seqGrep("stringin", ".*:HwId", &deviceNames[0][0], 
                                                        MAXDEVICES);
          for (i=0; i<numFound; i++) {
             *strrchr(deviceNames[i], ':') = 0;
@@ -329,16 +337,18 @@ ss globalControl {
             pvMonitor(cmdRsp[i]);
             sprintf(namebuf, "%s:Verified", deviceNames[i]);
             pvAssign(verified[i], namebuf);
-            sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
+            sprintf(namebuf, "%s:Disable", deviceNames[i]);
             pvAssign(disable[i], namebuf);
             pvMonitor(disable[i]);
-            sprintf(namebuf, "%s:cmdSucceeded", deviceNames[i]);
+            sprintf(namebuf, "%s:CmdSucceeded", deviceNames[i]);
             pvAssign(cmdSucceeded[i], namebuf);
             PVPUTNUM(cmdSucceeded[i], 0)
+            sprintf(namebuf, "%s:FailMsg", deviceNames[i]);
+            pvAssign(failMsg[i], namebuf);
             cmdFailed[i] = 0;
          }
          /* not all devices have the Acquiring PV */
-         acqsFound = seqGrep("bi", ".*[0-9]*:Acquiring", &acqNames[0][0], 
+         acqsFound = seqGrep("bi", ".*:Acquiring", &acqNames[0][0], 
                                                        MAXDEVICES);
          for (i=0; i<acqsFound; i++) {
             *strrchr(acqNames[i], ':') = 0;
@@ -355,6 +365,7 @@ ss globalControl {
                }
                i++;
             }
+            j++;
          }
          if (acqsAssigned != acqsFound) 
             printf("Warning: acqsFound = %d but acqsAssigned = %d\n", 
@@ -363,7 +374,7 @@ ss globalControl {
        when(numFound && pvConnectCount() == pvAssignCount()) {
           lastRequest = OP_CHECK;
        } state Discover
-       when (delay(2)) {
+       when (delay(5)) {
           printf("pvConnectCount = %ld but pvAssignCount = %ld\n",
                   pvConnectCount(), pvAssignCount());
        } state init
@@ -373,28 +384,30 @@ ss globalControl {
     TEST_PV(CheckVerify, verified, 8, CheckReadStatus)
     CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
     OP_DONE(DoneDiscover, globalCheck)
-    state ready {
-       CMD_WHEN(globalStop, OP_STOP, tryStopping)
-       CMD_WHEN(globalStart, OP_START, tryStarting)
-       CMD_WHEN(globalWriteConf, OP_WRITE, tryWriting)
+    state Ready {
+       CMD_WHEN(globalStop, OP_STOP, Stopping)
+       CMD_WHEN(globalStart, OP_START, Starting)
+       CMD_WHEN(globalWriteConf, OP_WRITE, WritingConf)
        CMD_WHEN(globalCheck, OP_CHECK, Discover)
        CMD_WHEN(globalClear, OP_CLEAR, Clear)
     }
-    CMD_RSP(tryStarting, STARTACQCMD, StartReadStatus)
+    CMD_RSP(Starting, STARTACQCMD, StartReadStatus)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
     TEST_PV(StartTestAcq, acquiring, 1, DoneStarting)
     OP_DONE(DoneStarting, globalStart)
-    CMD_RSP(tryStopping, STOPACQCMD, StopReadStatus)
+    CMD_RSP(Stopping, STOPACQCMD, StopReadStatus)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
-    TEST_PV(StopTestAcq, acquiring, 1, DoneStopping)
+    TEST_PV(StopTestAcq, acquiring, 0, DoneStopping)
     OP_DONE(DoneStopping, globalStop)
-    CMD_RSP(tryWriting, WRITECONFCMD, DoneWriting)
+    CMD_RSP(WritingConf, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
     state Clear {
        when() {
           for (i = 0; i< numFound; i++)	{
                 PVPUTNUM(cmdSucceeded[i],1)
                 cmdFailed[i] = 0;	
+                failMsg[i][0] = 0;
+                pvPut(failMsg[i]);
           }
        } state DoneClear
     }
