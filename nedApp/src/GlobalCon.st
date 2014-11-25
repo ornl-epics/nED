@@ -162,10 +162,7 @@ int numEnabled = 0;
  * then truncating at ":". numFound indicates how many found
  */
 string deviceNames[MAXDEVICES];
-string acqNames[MAXDEVICES];
 int numFound;
-int acqsFound;
-int acqsAssigned;
 
 /*
  * variable used by sequencer to keep track of what the previous operation was
@@ -176,7 +173,6 @@ int lastRequest = 0;
  * common variables
  */
 int i;
-int j;
 string namebuf;
 
 /*
@@ -337,6 +333,8 @@ ss GlobalControl {
             pvMonitor(cmdRsp[i]);
             sprintf(namebuf, "%s:Verified", deviceNames[i]);
             pvAssign(verified[i], namebuf);
+            sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
+            pvAssign(acquiring[i], namebuf);
             sprintf(namebuf, "%s:Disable", deviceNames[i]);
             pvAssign(disable[i], namebuf);
             pvMonitor(disable[i]);
@@ -347,29 +345,6 @@ ss GlobalControl {
             pvAssign(failMsg[i], namebuf);
             cmdFailed[i] = 0;
          }
-         /* not all devices have the Acquiring PV */
-         acqsFound = seqGrep("bi", ".*:Acquiring", &acqNames[0][0], 
-                                                       MAXDEVICES);
-         for (i=0; i<acqsFound; i++) {
-            *strrchr(acqNames[i], ':') = 0;
-         }
-         i = 0; j = 0; acqsAssigned = 0;
-         while (j < acqsFound) {
-            while (i < numFound) {
-               if (!strcmp(acqNames[j], deviceNames[i])) {
-                  sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
-                  pvAssign(acquiring[i], namebuf);
-                  acqsAssigned++;
-                  i++;
-                  break;
-               }
-               i++;
-            }
-            j++;
-         }
-         if (acqsAssigned != acqsFound) 
-            printf("Warning: acqsFound = %d but acqsAssigned = %d\n", 
-                     acqsFound, acqsAssigned);
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
           lastRequest = OP_CHECK;
