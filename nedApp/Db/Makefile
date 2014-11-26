@@ -36,6 +36,8 @@ DB += ProxyPlugin.db
 DB += PixelMapPlugin.db
 DB += RocPvaPlugin.db
 DB += AcpcPvaPlugin.db
+DB += GlobalConD.template
+DB += GlobalConG.template
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
