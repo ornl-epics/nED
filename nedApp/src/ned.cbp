@@ -62,6 +62,7 @@
 		<Unit filename="CircularBuffer.h" />
 		<Unit filename="CmdDispatcher.cpp" />
 		<Unit filename="CmdDispatcher.h" />
+		<Unit filename="Common.h" />
 		<Unit filename="DasPacket.cpp" />
 		<Unit filename="DasPacket.h" />
 		<Unit filename="DasPacketList.cpp" />
@@ -83,8 +84,6 @@
 		<Unit filename="FemPlugin.cpp" />
 		<Unit filename="FemPlugin.h" />
 		<Unit filename="FemPlugin_v32.cpp" />
-		<Unit filename="FemPlugin_v35.cpp" />
-		<Unit filename="FemPlugin_v36.cpp" />
 		<Unit filename="Fifo.h" />
 		<Unit filename="Log.h" />
 		<Unit filename="OccPortDriver.cpp" />
