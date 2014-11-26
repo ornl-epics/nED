@@ -210,6 +210,13 @@ struct DasPacket
          * the package as expected by modules. LVDS is 21-bit
          * bus and the protocol itself uses 5 control bits. There's 16 bits for data.
          *
+         * The payload must be 4-byte aligned memory block, but the payload_length
+         * can be 2 bytes less than the memory length. The payload_length
+         * is put in the packet header, the transmit unit is 4 bytes. Code that
+         * transmits data to OCC takes length from the packet header and aligns
+         * it up to 4-byte boundary. Received packets are always 4-byte aligned,
+         * courtesy of DSP.
+         *
          * This functions re-formats payload data into LVDS data, taking care
          * of protocol flags and packing it into OCC packet. The result
          * is the packet about twice the size of the original payload.

@@ -8,14 +8,13 @@
  */
 
 #include "BaseModulePlugin.h"
+#include "Common.h"
 #include "Log.h"
 
 #include <osiSock.h>
 #include <string.h>
 
 #define NUM_BASEMODULEPLUGIN_PARAMS ((int)(&LAST_BASEMODULEPLUGIN_PARAM - &FIRST_BASEMODULEPLUGIN_PARAM + 1))
-
-#define ROUND_UP(num, boundary)     ((num + boundary - 1) & ~(boundary - 1))
 
 const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 2.0;
 
@@ -257,13 +256,15 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet)
         return false;
     }
 
-    if (packet->getPayloadLength() != m_statusPayloadLength) {
-        LOG_ERROR("Received wrong READ_STATUS response based on length; received %u, expected %u", packet->getPayloadLength(), m_statusPayloadLength);
+    if (packet->getPayloadLength() != ALIGN_UP(m_statusPayloadLength, 4)) {
+        LOG_ERROR("Received wrong READ_STATUS response based on length; "
+                  "received %u, expected %u",
+                  packet->getPayloadLength(), ALIGN_UP(m_statusPayloadLength, 4));
         return false;
     }
 
     const uint32_t *payload = packet->getPayload();
-    for (std::map<int, StatusParamDesc>::iterator it=m_statusParams.begin(); it != m_statusParams.end(); it++) {
+    for (auto it=m_statusParams.begin(); it != m_statusParams.end(); it++) {
         int offset = it->second.offset;
         int shift = it->second.shift;
         if (m_behindDsp) {
@@ -294,8 +295,10 @@ bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
         return false;
     }
 
-    if (packet->getPayloadLength() != m_countersPayloadLength) {
-        LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; received %u, expected %u", packet->getPayloadLength(), m_countersPayloadLength);
+    if (packet->getPayloadLength() != ALIGN_UP(m_countersPayloadLength, 4)) {
+        LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; "
+                  "received %u, expected %u",
+                  packet->getPayloadLength(), ALIGN_UP(m_countersPayloadLength, 4));
         return false;
     }
 
@@ -334,13 +337,15 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet)
     if (m_configPayloadLength == 0)
         recalculateConfigParams();
 
-    if (packet->getPayloadLength() != m_configPayloadLength) {
-        LOG_ERROR("Received wrong READ_CONFIG response based on length; received %uB, expected %uB", packet->getPayloadLength(), m_configPayloadLength);
+    if (packet->getPayloadLength() != ALIGN_UP(m_configPayloadLength, 4)) {
+        LOG_ERROR("Received wrong READ_CONFIG response based on length; "
+                  "received %uB, expected %uB",
+                  packet->getPayloadLength(), ALIGN_UP(m_configPayloadLength, 4));
         return false;
     }
 
     const uint32_t *payload = packet->getPayload();
-    for (std::map<int, ConfigParamDesc>::iterator it=m_configParams.begin(); it != m_configParams.end(); it++) {
+    for (auto it=m_configParams.begin(); it != m_configParams.end(); it++) {
         int offset = m_configSectionOffsets[it->second.section] + it->second.offset;
         int shift = it->second.shift;
         if (m_behindDsp) {
@@ -363,12 +368,12 @@ void BaseModulePlugin::reqWriteConfig()
     if (m_configPayloadLength == 0)
         recalculateConfigParams();
 
-    uint32_t length = ((m_configPayloadLength + 3) & ~3) / 4;
+    uint32_t length = ALIGN_UP(m_configPayloadLength, 4) / 4;
     uint32_t data[length];
     for (uint32_t i=0; i<length; i++)
         data[i] = 0;
 
-    for (std::map<int, struct ConfigParamDesc>::iterator it=m_configParams.begin(); it != m_configParams.end(); it++) {
+    for (auto it=m_configParams.begin(); it != m_configParams.end(); it++) {
         uint32_t offset = m_configSectionOffsets[it->second.section] + it->second.offset;
         uint32_t mask = (0x1ULL << it->second.width) - 1;
         int shift = it->second.shift;
@@ -402,7 +407,7 @@ void BaseModulePlugin::reqWriteConfig()
         }
     }
 
-    sendToDispatcher(DasPacket::CMD_WRITE_CONFIG, data, length*4);
+    sendToDispatcher(DasPacket::CMD_WRITE_CONFIG, data, m_configPayloadLength);
     scheduleTimeoutCallback(DasPacket::CMD_WRITE_CONFIG, NO_RESPONSE_TIMEOUT);
 }
 
@@ -463,7 +468,7 @@ void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint
     if (m_behindDsp && nBits > 16)
         length++;
     uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_statusPayloadLength = std::max(m_statusPayloadLength, ROUND_UP(length*wordsize, 4));
+    m_statusPayloadLength = std::max(m_statusPayloadLength, length*wordsize);
 }
 
 void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
@@ -484,7 +489,7 @@ void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uin
     if (m_behindDsp && nBits > 16)
         length++;
     uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_countersPayloadLength = std::max(m_countersPayloadLength, ROUND_UP(length*wordsize, 4));
+    m_countersPayloadLength = std::max(m_countersPayloadLength, length*wordsize);
 }
 
 void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
@@ -583,5 +588,5 @@ void BaseModulePlugin::recalculateConfigParams()
     // Calculate total required payload size in bytes
     m_configPayloadLength = m_configSectionOffsets['F'] + m_configSectionSizes['F'];
     int wordsize = (m_behindDsp ? 2 : 4);
-    m_configPayloadLength = ROUND_UP(m_configPayloadLength * wordsize, 4);
+    m_configPayloadLength = m_configPayloadLength * wordsize;
 }
