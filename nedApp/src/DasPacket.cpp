@@ -8,6 +8,7 @@
  */
 
 #include "DasPacket.h"
+#include "Common.h"
 
 #include <stdexcept>
 #include <string.h>
@@ -55,10 +56,9 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
 
     memset(&cmdinfo, 0, sizeof(cmdinfo));
 
-    uint32_t aligned_length = (payload_length + 3) & ~3; // 4-byte aligned data required
+    // Real payload is put in the DasPacket header
     uint32_t real_payload_length;
-
-    real_payload_length = (payload_length + 3) & ~3; // 4-byte aligned data
+    real_payload_length = ALIGN_UP(payload_length, 2); // 2-byte aligned data for LVDS stuff
     real_payload_length *= 2; // 32 bits are devided into two dwords
     real_payload_length += (destination != HWID_BROADCAST ? 2*sizeof(uint32_t) : 0); // First 2 dwords of the payload represent LVDS address for non-global commands
 
@@ -66,7 +66,7 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
     cmdinfo.is_passthru = true;
     cmdinfo.command = command;
 
-    void *addr = malloc(sizeof(DasPacket) + real_payload_length);
+    void *addr = malloc(sizeof(DasPacket) + ALIGN_UP(real_payload_length, 4));
     if (addr) {
         uint32_t offset = 0;
 
@@ -93,7 +93,8 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
         // Split each 32 bits from the payload into two 16 bit parts and put them into separate dwords;
         // lower 16 bits into first dword, upper 16 bits into second dword
         // Add LVDS parity check to each word
-        for (uint32_t i=0; i<aligned_length/4; i++) {
+        // Process 4-byte aligned data first, than optional 2-bytes at the end
+        for (uint32_t i=0; i<payload_length/4; i++) {
             packet->payload[offset] = payload[i] & 0xFFFF;
             packet->payload[offset] |= lvdsParity(packet->payload[offset]) << 16;
             offset++;
@@ -101,14 +102,17 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
             packet->payload[offset] |= lvdsParity(packet->payload[offset]) << 16;
             offset++;
         }
+        if (payload_length % 4 != 0) {
+            uint32_t i = payload_length / 4;
+            packet->payload[offset] = payload[i] & 0xFFFF;
+            packet->payload[offset] |= lvdsParity(packet->payload[offset]) << 16;
+            offset++;
+            packet->payload[offset] = 0;
+            // don't increment offset
+        }
 
         // Finalize LVDS packet - last dword must have the stop flag
         if (offset > 0) {
-            // When message is not word-aligned, the last word is not valid
-            // and must be taken out.
-            if (payload_length < aligned_length)
-                packet->payload[--offset] = 0;
-
             offset--;
             packet->payload[offset] |= (0x1 << 17); // Last word flag...
             packet->payload[offset] ^= (0x1 << 16); // ... which flips parity
@@ -127,8 +131,12 @@ bool DasPacket::isValid() const
 
 uint32_t DasPacket::length() const
 {
+    // All incoming packets are 4-byte aligned by DSP
+    // Outgoing commands for LVDS modules might be 2-byte aligned
     uint32_t packet_length = sizeof(DasPacket) + payload_length;
-    if (packet_length != ((packet_length + 3 ) & ~3))
+    if (packet_length != ALIGN_UP(packet_length, 4))
+        packet_length = 0;
+    else if (cmdinfo.is_command && cmdinfo.is_passthru && !cmdinfo.is_response && packet_length != ALIGN_UP(packet_length, 2))
         packet_length = 0;
     return packet_length;
 }
