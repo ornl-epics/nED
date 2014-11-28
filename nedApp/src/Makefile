@@ -115,13 +115,6 @@ include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
 
-%.dox: %.cpp
-	./tools/export2doxy.pl -input_file=$^ -output_file=$@
-
-doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
-	doxygen >/dev/null
-	(cd latex/; make pdf > /dev/null)
-
 %.include: %.cpp
 	./tools/export2epics.pl < $^ > ../Db/$@
 epicsdb: $($(PROD_NAME)_PVS:.cpp=.include)
