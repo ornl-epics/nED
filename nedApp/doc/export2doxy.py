@@ -39,10 +39,11 @@ re_desc    = re.compile("^\s*\/\/\s*([^\(]*)(\(.*\))?$")
 def parse_desc(text):
     desc = ""
     values = ""
+    type = ""
     if text:
         m = re_desc.search(text)
         if m:
-            desc = m.group(1)
+            desc = m.group(1).strip(" \r\n\t")
             if m.group(2):
                 values = m.group(2).strip(" \r\n\t()")
         
@@ -57,11 +58,20 @@ def parse_cpp(filename):
         for line in f:
             m = re_params.search(line)
             if m:
-                desc, values = parse_desc(m.group(4))
+                desc, values = parse_desc(m.group(5))
+                type = m.group(2)
+                if desc.startswith('READ'):
+                    type += " (READ)"
+                    desc = desc.replace('READ - ', '')
+                elif desc.startswith('WRITE'):
+                    type += " (WRITE)"
+                    desc = desc.replace('WRITE - ', '')
+                else:
+                    type = m.group(2)
                 params.append({
                     'name': m.group(1),
-                    'type': m.group(2) + " " + m.group(1),
-                    'init_value': m.group(3),
+                    'type': type,
+                    'init_value': m.group(4),
                     'desc': desc,
                     'allowed_values': values
                 })
