@@ -3,6 +3,8 @@
 
 EPICS_REGISTER_PLUGIN(RocPvaPlugin, 3, "port name", string, "dispatcher port", string, "raw_cal_data", string);
 
+const uint32_t RocPvaPlugin::CACHE_SIZE = 32*1024;
+
 /**
  * Structure representing RAW mode data packet
  */
@@ -40,11 +42,11 @@ RocPvaPlugin::RocPvaPlugin(const char *portName, const char *dispatcherPortName,
     if (!!m_pvRecord) {
         // Guestimate container size and force memory pre-allocation,
         // will automatically extend if needed
-        m_cache.time_of_flight.reserve(maxNormalEventsPerPacket);
-	    m_cache.pixel.reserve(maxNormalEventsPerPacket);
-        m_cache.position_index.reserve(maxNormalEventsPerPacket);
-        m_cache.sample_a1.reserve(maxNormalEventsPerPacket);
-        m_cache.sample_b1.reserve(maxNormalEventsPerPacket);
+        m_cache.time_of_flight.reserve(CACHE_SIZE);
+        m_cache.pixel.reserve(CACHE_SIZE);
+        m_cache.position_index.reserve(CACHE_SIZE);
+        m_cache.sample_a1.reserve(CACHE_SIZE);
+        m_cache.sample_b1.reserve(CACHE_SIZE);
     }
 }
 
@@ -151,6 +153,10 @@ void RocPvaPlugin::postNormalData(const epicsTimeStamp &pulseTime,
 
     m_cache.time_of_flight.clear();
     m_cache.pixel.clear();
+    // Clear resets the internal buffer, reduce gradual memory
+    // reallocation by pre-allocating
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.pixel.reserve(CACHE_SIZE);
 }
 
 void RocPvaPlugin::postRawData(const epicsTimeStamp &pulseTime,

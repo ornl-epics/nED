@@ -22,16 +22,21 @@ class RocPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVUIntArray::svector sample_a1;
             epics::pvData::PVUIntArray::svector sample_b1;
         } m_cache;
+
+        /**
+         * Number of elements in each cache array.
+         */
+        static const uint32_t CACHE_SIZE;
     public:
         /**
          * Constructor
 	     *
 	     * @param[in] portName            asyn port name.
-	     * @param[in] dispatcherPortName  Name of the dispatcher asyn port to 
+	     * @param[in] dispatcherPortName  Name of the dispatcher asyn port to
          *                                  connect to.
 	     * @param[in] pvPrefix            Prefix for the PV Record
          */
-        RocPvaPlugin(const char *portName, const char *dispatcherPortName, 
+        RocPvaPlugin(const char *portName, const char *dispatcherPortName,
             const char *pvPrefix);
 
         /**
@@ -101,10 +106,10 @@ class RocPvaPlugin : public BasePvaPlugin {
         /**
          * Static C callable wrapper for member function of the same name
          */
-        static void postNormalData(BasePvaPlugin *this_, 
-            const epicsTimeStamp &pulseTime, double pulseCharge, 
+        static void postNormalData(BasePvaPlugin *this_,
+            const epicsTimeStamp &pulseTime, double pulseCharge,
             uint32_t pulseSeq) {
-            reinterpret_cast<RocPvaPlugin *>(this_)->postNormalData(pulseTime, 
+            reinterpret_cast<RocPvaPlugin *>(this_)->postNormalData(pulseTime,
                 pulseCharge, pulseSeq);
         }
 
@@ -124,13 +129,13 @@ class RocPvaPlugin : public BasePvaPlugin {
         /**
          * Static C callable wrapper for member function of the same name
          */
-        static void postRawData(BasePvaPlugin *this_, 
-            const epicsTimeStamp &pulseTime, double pulseCharge, 
+        static void postRawData(BasePvaPlugin *this_,
+            const epicsTimeStamp &pulseTime, double pulseCharge,
             uint32_t pulseSeq) {
-            reinterpret_cast<RocPvaPlugin *>(this_)->postRawData(pulseTime, 
+            reinterpret_cast<RocPvaPlugin *>(this_)->postRawData(pulseTime,
                 pulseCharge, pulseSeq);
         }
-      
+
         /**
          * Post data received (extended mode) and clear cache
          *
@@ -147,10 +152,10 @@ class RocPvaPlugin : public BasePvaPlugin {
         /**
          * Static C callable wrapper for member function of the same name
          */
-        static void postExtendedData(BasePvaPlugin *this_, 
-            const epicsTimeStamp &pulseTime, double pulseCharge, 
+        static void postExtendedData(BasePvaPlugin *this_,
+            const epicsTimeStamp &pulseTime, double pulseCharge,
             uint32_t pulseSeq) {
-            reinterpret_cast<RocPvaPlugin *>(this_)->postExtendedData(pulseTime, 
+            reinterpret_cast<RocPvaPlugin *>(this_)->postExtendedData(pulseTime,
                 pulseCharge, pulseSeq);
         }
 
