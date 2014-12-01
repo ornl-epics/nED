@@ -302,7 +302,7 @@ struct DasPacket
          * @return Starting address of the payload data or 0 on error.
          */
         uint32_t *getData(uint32_t *count) {
-            return const_cast<DasPacket *>(this)->getData(count);
+            return const_cast<uint32_t *>(const_cast<const DasPacket *>(this)->getData(count));
         }
 
         /**
