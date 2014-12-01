@@ -57,13 +57,13 @@ class AcpcPvaPlugin : public BasePvaPlugin {
          *   - photo sum x
          *   - photo sum y
          */
-        void processNormalPacket(const DasPacket * const packet);
+        void processNormalData(const uint32_t *data, uint32_t count);
 
         /**
          * Static C callable wrapper for member function of the same name.
          */
-        static void processNormalPacket(BasePvaPlugin *this_, const DasPacket * const packet) {
-            reinterpret_cast<AcpcPvaPlugin *>(this_)->processNormalPacket(packet);
+        static void processNormalData(BasePvaPlugin *this_, const uint32_t *data, uint32_t count) {
+            reinterpret_cast<AcpcPvaPlugin *>(this_)->processNormalData(data, count);
         }
 
         /**
@@ -76,13 +76,13 @@ class AcpcPvaPlugin : public BasePvaPlugin {
          * @param[in] pulseCharge Pulse charge
          * @param[in] pulseSeq Pulse sequence number, monotonically increasing
          */
-        void postNormalData(const epicsTimeStamp &pulseTime, double pulseCharge, uint32_t pulseSeq);
+        void postNormalData(const PvaNeutronData::shared_pointer& pvRecord);
 
         /**
          * Static C callable wrapper for member function of the same name.
          */
-        static void postNormalData(BasePvaPlugin *this_, const epicsTimeStamp &pulseTime, double pulseCharge, uint32_t pulseSeq) {
-            reinterpret_cast<AcpcPvaPlugin *>(this_)->postNormalData(pulseTime, pulseCharge, pulseSeq);
+        static void postNormalData(BasePvaPlugin *this_, const PvaNeutronData::shared_pointer& pvRecord) {
+            reinterpret_cast<AcpcPvaPlugin *>(this_)->postNormalData(pvRecord);
         }
 
     private:
