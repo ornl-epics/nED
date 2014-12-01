@@ -46,6 +46,8 @@ RocPvaPlugin::RocPvaPlugin(const char *portName, const char *dispatcherPortName,
         m_cache.sample_a1.reserve(maxNormalEventsPerPacket);
         m_cache.sample_b1.reserve(maxNormalEventsPerPacket);
     }
+
+    setCallbacks(&RocPvaPlugin::processNormalPacket, &RocPvaPlugin::postNormalData);
 }
 
 asynStatus RocPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
