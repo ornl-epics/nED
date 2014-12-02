@@ -94,6 +94,8 @@
 		<Unit filename="PixelMapPlugin.h" />
 		<Unit filename="ProxyPlugin.cpp" />
 		<Unit filename="ProxyPlugin.h" />
+		<Unit filename="PvaMetaData.cpp" />
+		<Unit filename="PvaMetaData.h" />
 		<Unit filename="PvaNeutronData.cpp" />
 		<Unit filename="PvaNeutronData.h" />
 		<Unit filename="RocPlugin.cpp" />

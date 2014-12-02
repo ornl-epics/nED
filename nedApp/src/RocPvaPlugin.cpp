@@ -1,7 +1,7 @@
 #include "RocPvaPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(RocPvaPlugin, 3, "port name", string, "dispatcher port", string, "raw_cal_data", string);
+EPICS_REGISTER_PLUGIN(RocPvaPlugin, 3, "port name", string, "dispatcher port", string, "PV prefix", string);
 
 const uint32_t RocPvaPlugin::CACHE_SIZE = 32*1024;
 
@@ -34,14 +34,16 @@ struct ExtendedEvent {
     uint32_t pixelID;
 };
 
-RocPvaPlugin::RocPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName)
-    : BasePvaPlugin(portName, dispatcherPortName, pvName)
+RocPvaPlugin::RocPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
+    : BasePvaPlugin(portName, dispatcherPortName, pvPrefix)
 {
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.pixel.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
     m_cache.sample_a1.reserve(CACHE_SIZE);
     m_cache.sample_b1.reserve(CACHE_SIZE);
+    m_cache.meta_time_of_flight.reserve(CACHE_SIZE);
+    m_cache.meta_pixel.reserve(CACHE_SIZE);
 
     setCallbacks(&RocPvaPlugin::processNormalData, &RocPvaPlugin::postNormalData);
 }
@@ -51,16 +53,13 @@ asynStatus RocPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == DataModeP) {
         switch (value) {
         case DATA_MODE_NORMAL:
-            setCallbacks(&RocPvaPlugin::processNormalData,
-                &RocPvaPlugin::postNormalData);
+            setCallbacks(&RocPvaPlugin::processNormalData, &RocPvaPlugin::postNormalData);
             break;
         case DATA_MODE_RAW:
-            setCallbacks(&RocPvaPlugin::processRawData,
-                &RocPvaPlugin::postRawData);
+            setCallbacks(&RocPvaPlugin::processRawData, &RocPvaPlugin::postRawData);
             break;
         case DATA_MODE_EXTENDED:
-            setCallbacks(&RocPvaPlugin::processExtendedData,
-                &RocPvaPlugin::postExtendedData);
+            setCallbacks(&RocPvaPlugin::processExtendedData, &RocPvaPlugin::postExtendedData);
             break;
         default:
             LOG_ERROR("Ignoring invalid output mode %d", value);
@@ -124,33 +123,37 @@ void RocPvaPlugin::processExtendedData(const uint32_t *data, uint32_t count)
     }
 }
 
+void RocPvaPlugin::processMetaData(const uint32_t *data, uint32_t count)
+{
+    uint32_t nEvents = count / (sizeof(NormalEvent) / sizeof(uint32_t));
+    const NormalEvent *events = reinterpret_cast<const NormalEvent *>(data);
+
+    // Go through events and append to cache
+    while (nEvents-- > 0) {
+        m_cache.meta_time_of_flight.push_back(events->timeStamp);
+        m_cache.meta_pixel.push_back(events->pixelID);
+        events++;
+    }
+}
 
 void RocPvaPlugin::postNormalData(const PvaNeutronData::shared_pointer& pvRecord)
 {
-    pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
-    pvRecord->pixel->replace(freeze(m_cache.pixel));
+    m_pvNeutrons->time_of_flight->replace(freeze(m_cache.time_of_flight));
+    m_pvNeutrons->pixel->replace(freeze(m_cache.pixel));
 
-    m_cache.time_of_flight.clear();
-    m_cache.pixel.clear();
-    // Clear resets the internal buffer, reduce gradual memory
-    // reallocation by pre-allocating
+    // Reduce gradual memory reallocation by pre-allocating instead of clear()
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.pixel.reserve(CACHE_SIZE);
 }
 
 void RocPvaPlugin::postRawData(const PvaNeutronData::shared_pointer& pvRecord)
 {
-    pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
-    pvRecord->position_index->replace(freeze(m_cache.position_index));
-    pvRecord->sample_a1->replace(freeze(m_cache.sample_a1));
-    pvRecord->sample_b1->replace(freeze(m_cache.sample_b1));
+    m_pvNeutrons->time_of_flight->replace(freeze(m_cache.time_of_flight));
+    m_pvNeutrons->position_index->replace(freeze(m_cache.position_index));
+    m_pvNeutrons->sample_a1->replace(freeze(m_cache.sample_a1));
+    m_pvNeutrons->sample_b1->replace(freeze(m_cache.sample_b1));
 
-    m_cache.time_of_flight.clear();
-    m_cache.position_index.clear();
-    m_cache.sample_a1.clear();
-    m_cache.sample_b1.clear();
-    // Clear resets the internal buffer, reduce gradual memory
-    // reallocation by pre-allocating
+    // Reduce gradual memory reallocation by pre-allocating instead of clear()
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
     m_cache.sample_a1.reserve(CACHE_SIZE);
@@ -159,23 +162,28 @@ void RocPvaPlugin::postRawData(const PvaNeutronData::shared_pointer& pvRecord)
 
 void RocPvaPlugin::postExtendedData(const PvaNeutronData::shared_pointer& pvRecord)
 {
-    pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
-    pvRecord->position_index->replace(freeze(m_cache.position_index));
-    pvRecord->sample_a1->replace(freeze(m_cache.sample_a1));
-    pvRecord->sample_b1->replace(freeze(m_cache.sample_b1));
-    pvRecord->pixel->replace(freeze(m_cache.pixel));
-    pvRecord->endGroupPut();
+    m_pvNeutrons->time_of_flight->replace(freeze(m_cache.time_of_flight));
+    m_pvNeutrons->position_index->replace(freeze(m_cache.position_index));
+    m_pvNeutrons->sample_a1->replace(freeze(m_cache.sample_a1));
+    m_pvNeutrons->sample_b1->replace(freeze(m_cache.sample_b1));
+    m_pvNeutrons->pixel->replace(freeze(m_cache.pixel));
 
-    m_cache.time_of_flight.clear();
-    m_cache.position_index.clear();
-    m_cache.sample_a1.clear();
-    m_cache.sample_b1.clear();
-    m_cache.pixel.clear();
-    // Clear resets the internal buffer, reduce gradual memory
-    // reallocation by pre-allocating
+    // Reduce gradual memory reallocation by pre-allocating instead of clear()
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
     m_cache.sample_a1.reserve(CACHE_SIZE);
     m_cache.sample_b1.reserve(CACHE_SIZE);
     m_cache.pixel.reserve(CACHE_SIZE);
 }
+
+void RocPvaPlugin::postMetaData()
+{
+    if (m_cache.meta_time_of_flight.size() > 0) {
+        m_pvMetadata->time_of_flight->replace(freeze(m_cache.meta_time_of_flight));
+        m_pvMetadata->pixel->replace(freeze(m_cache.meta_pixel));
+    }
+
+    m_cache.meta_time_of_flight.clear();
+    m_cache.meta_pixel.clear();
+    m_cache.meta_time_of_flight.reserve(CACHE_SIZE);
+    m_cache.meta_pixel.reserve(CACHE_SIZE);}

@@ -10,21 +10,18 @@
 #include "AcpcPvaPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", string, "PV name", string);
+EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", string, "PV prefix", string);
+const uint32_t AcpcPvaPlugin::CACHE_SIZE = 32*1024;
 
-AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName)
-    : BasePvaPlugin(portName, dispatcherPortName, pvName)
+AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
+    : BasePvaPlugin(portName, dispatcherPortName, pvPrefix)
 {
-    // normal mode is the shortest => max counts in packet
-    uint32_t maxNormalEventsPerPacket = (DasPacket::MaxLength/4) / 6;
-
-    // Guestimate container size and force memory pre-allocation, will automatically extend if needed
-    m_cache.time_of_flight.reserve(maxNormalEventsPerPacket);
-    m_cache.position_index.reserve(maxNormalEventsPerPacket);
-    m_cache.position_x.reserve(maxNormalEventsPerPacket);
-    m_cache.position_y.reserve(maxNormalEventsPerPacket);
-    m_cache.photo_sum_x.reserve(maxNormalEventsPerPacket);
-    m_cache.photo_sum_y.reserve(maxNormalEventsPerPacket);
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.position_index.reserve(CACHE_SIZE);
+    m_cache.position_x.reserve(CACHE_SIZE);
+    m_cache.position_y.reserve(CACHE_SIZE);
+    m_cache.photo_sum_x.reserve(CACHE_SIZE);
+    m_cache.photo_sum_y.reserve(CACHE_SIZE);
 }
 
 asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -82,10 +79,11 @@ void AcpcPvaPlugin::postNormalData(const PvaNeutronData::shared_pointer& pvRecor
     pvRecord->photo_sum_x->replace(freeze(m_cache.photo_sum_x));
     pvRecord->photo_sum_y->replace(freeze(m_cache.photo_sum_y));
 
-    m_cache.time_of_flight.clear();
-    m_cache.position_index.clear();
-    m_cache.position_x.clear();
-    m_cache.position_y.clear();
-    m_cache.photo_sum_x.clear();
-    m_cache.photo_sum_y.clear();
+    // Reduce gradual memory reallocation by pre-allocating instead of clear()
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.position_index.reserve(CACHE_SIZE);
+    m_cache.position_x.reserve(CACHE_SIZE);
+    m_cache.position_y.reserve(CACHE_SIZE);
+    m_cache.photo_sum_x.reserve(CACHE_SIZE);
+    m_cache.photo_sum_y.reserve(CACHE_SIZE);
 }

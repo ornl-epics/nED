@@ -34,9 +34,9 @@ class AcpcPvaPlugin : public BasePvaPlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] pvName Name for the EPICSv4 PV serving the data.
+         * @param[in] pvPrefix Prefix for the PV Record
          */
-        AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName);
+        AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix);
 
         /**
          * Overloaded function to handle DataMode parameter.
@@ -98,6 +98,11 @@ class AcpcPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVUIntArray::svector photo_sum_x;
             epics::pvData::PVUIntArray::svector photo_sum_y;
         } m_cache;
+
+        /**
+         * Number of elements in each cache array.
+         */
+        static const uint32_t CACHE_SIZE;
 };
 
 #endif // ACPC_PVA_PLUGIN_H
