@@ -23,7 +23,7 @@ BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortNam
     , m_pulseTime({0, 0})
     , m_pulseCharge(0)
     , m_postSeq(0)
-    , m_processNeutronCb(0)
+    , m_processNeutronsCb(0)
     , m_postNeutronsCb(0)
 {
     m_pvNeutrons = PvaNeutronData::create(pvPrefix + PV_NEUTRONS);
@@ -92,8 +92,8 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
         if (packet->isMetaData()) {
             processMetaData(data, dataLen);
             haveMetadata = true;
-        } else if (m_processNeutronCb) {
-            m_processNeutronCb(this, data, dataLen);
+        } else if (m_processNeutronsCb) {
+            m_processNeutronsCb(this, data, dataLen);
             haveNeutrons = true;
         }
 
@@ -128,8 +128,8 @@ void BasePvaPlugin::postData(bool postNeutrons, bool postMetadata)
         m_pvMetadata->beginGroupPut();
         m_pvMetadata->timeStamp.set(time);
         m_pvMetadata->proton_charge->put(m_pulseCharge);
-        m_pvNeutrons->time_of_flight->replace(freeze(m_cacheMeta.time_of_flight));
-        m_pvNeutrons->pixel->replace(freeze(m_cacheMeta.pixel));
+        m_pvMetadata->time_of_flight->replace(freeze(m_cacheMeta.time_of_flight));
+        m_pvMetadata->pixel->replace(freeze(m_cacheMeta.pixel));
         m_pvMetadata->endGroupPut();
 
         // Reduce gradual memory reallocation by pre-allocating instead of clear()
@@ -152,6 +152,6 @@ void BasePvaPlugin::processMetaData(const uint32_t *data, uint32_t count)
 }
 
 void BasePvaPlugin::setCallbacks(ProcessDataCb procCb, PostDataCb postCb) {
-    m_processNeutronCb = procCb;
+    m_processNeutronsCb = procCb;
     m_postNeutronsCb = postCb;
 }
