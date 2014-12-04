@@ -14,6 +14,7 @@ DB += nEDCommon.db
 DB += OccPortDriver.db
 DB += DiscoverPlugin.db
 DB += DspPlugin_v63.db
+DB += DspPlugin_v64.db
 DB += FemPlugin_v32.db
 DB += FemPlugin_v35.db
 DB += FemPlugin_v36.db
