@@ -60,7 +60,7 @@ void AcpcPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
 
     // Go through events and append to cache
     while (nEvents-- > 0) {
-        m_cache.time_of_flight.push_back(events->time_of_flight);
+        m_cache.time_of_flight.push_back(events->time_of_flight & 0x000FFFFF);
         m_cache.position_index.push_back(events->position_index);
         m_cache.position_x.push_back(events->position_x);
         m_cache.position_y.push_back(events->position_y);

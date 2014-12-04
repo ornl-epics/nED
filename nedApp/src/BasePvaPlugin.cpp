@@ -22,7 +22,8 @@ BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortNam
     , m_nProcessed(0)
     , m_pulseTime({0, 0})
     , m_pulseCharge(0)
-    , m_postSeq(0)
+    , m_neutronsPostSeq(0)
+    , m_metadataPostSeq(0)
     , m_processNeutronsCb(0)
     , m_postNeutronsCb(0)
 {
@@ -92,12 +93,12 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
         if (packet->isMetaData()) {
             processMetaData(data, dataLen);
             haveMetadata = true;
-        } else if (m_processNeutronsCb) {
+            m_nProcessed++;
+        } else if (packet->isNeutronData() && m_processNeutronsCb) {
             m_processNeutronsCb(this, data, dataLen);
             haveNeutrons = true;
+            m_nProcessed++;
         }
-
-        m_nProcessed++;
     }
 
     postData(haveNeutrons, haveMetadata);
@@ -110,9 +111,14 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
 
 void BasePvaPlugin::postData(bool postNeutrons, bool postMetadata)
 {
+    // 32 bit sequence number is good for around 18 months.
+    // (based 5mio events/s, IRQ coallescing = 40, max OCC packet size = 3600B)
+    // In worst case client will skip one packet on rollover and than recover
+    // the sequence.
+
     if (postNeutrons && m_postNeutronsCb) {
         // EPICSv4 uses POSIX EPOCH, v3 uses EPICS EPOCH
-        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + m_pulseTime.secPastEpoch, m_pulseTime.nsec, m_postSeq++);
+        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + m_pulseTime.secPastEpoch, m_pulseTime.nsec, m_neutronsPostSeq++);
 
         m_pvNeutrons->beginGroupPut();
         m_pvNeutrons->timeStamp.set(time);
@@ -123,7 +129,7 @@ void BasePvaPlugin::postData(bool postNeutrons, bool postMetadata)
 
     if (postMetadata) {
         // EPICSv4 uses POSIX EPOCH, v3 uses EPICS EPOCH
-        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + m_pulseTime.secPastEpoch, m_pulseTime.nsec, m_postSeq++);
+        epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + m_pulseTime.secPastEpoch, m_pulseTime.nsec, m_metadataPostSeq++);
 
         m_pvMetadata->beginGroupPut();
         m_pvMetadata->timeStamp.set(time);
@@ -145,7 +151,8 @@ void BasePvaPlugin::processMetaData(const uint32_t *data, uint32_t count)
 
     // Go through events and append to cache
     while (nEvents-- > 0) {
-        m_cacheMeta.time_of_flight.push_back(events->tof);
+        // Only lower 20 bits of TOF are relevant
+        m_cacheMeta.time_of_flight.push_back(events->tof & 0x000FFFFF);
         m_cacheMeta.pixel.push_back(events->pixelid);
         events++;
     }

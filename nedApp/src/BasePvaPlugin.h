@@ -115,7 +115,8 @@ class BasePvaPlugin : public BasePlugin {
         uint32_t m_nProcessed;      //!< Number of data packets processed
         epicsTimeStamp m_pulseTime; //!< Current pulse EPICS timestamp
         double m_pulseCharge;       //!< Current pulse charge
-        uint32_t m_postSeq;         //!< Current post sequence id
+        uint32_t m_neutronsPostSeq; //!< Current post sequence id for neutrons
+        uint32_t m_metadataPostSeq; //!< Current post sequence id for metadata
         ProcessDataCb m_processNeutronsCb; //!< Callback function ptr to process neutron packet data
         PostDataCb m_postNeutronsCb;//!< Callback function ptr to post data collected so far
 

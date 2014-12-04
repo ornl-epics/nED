@@ -92,7 +92,7 @@ void RocPvaPlugin::processRawData(const uint32_t *data, uint32_t count)
      * samples.  Repeat for the B samples.  Append each event to cache.
      */
     while (nEvents-- > 0) {
-        m_cache.time_of_flight.push_back(events->time_of_flight);
+        m_cache.time_of_flight.push_back(events->time_of_flight & 0x000FFFFF);
         m_cache.position_index.push_back(events->position_index);
         m_cache.sample_a1.push_back(
             (events->sample1&0xffff) | ((events->sample2&0xffff)<<16) );
@@ -112,7 +112,7 @@ void RocPvaPlugin::processExtendedData(const uint32_t *data, uint32_t count)
      * samples.  Repeat for the B samples.  Append each event to cache.
      */
     while (nEvents-- > 0) {
-        m_cache.time_of_flight.push_back(events->time_of_flight);
+        m_cache.time_of_flight.push_back(events->time_of_flight & 0x000FFFFF);
         m_cache.position_index.push_back(events->position_index);
         m_cache.sample_a1.push_back(
             (events->sample1&0xffff) | ((events->sample2&0xffff)<<16) );
@@ -130,7 +130,7 @@ void RocPvaPlugin::processMetaData(const uint32_t *data, uint32_t count)
 
     // Go through events and append to cache
     while (nEvents-- > 0) {
-        m_cache.meta_time_of_flight.push_back(events->timeStamp);
+        m_cache.meta_time_of_flight.push_back(events->timeStamp & 0x000FFFFF );
         m_cache.meta_pixel.push_back(events->pixelID);
         events++;
     }
@@ -186,4 +186,5 @@ void RocPvaPlugin::postMetaData()
     m_cache.meta_time_of_flight.clear();
     m_cache.meta_pixel.clear();
     m_cache.meta_time_of_flight.reserve(CACHE_SIZE);
-    m_cache.meta_pixel.reserve(CACHE_SIZE);}
+    m_cache.meta_pixel.reserve(CACHE_SIZE);
+}
