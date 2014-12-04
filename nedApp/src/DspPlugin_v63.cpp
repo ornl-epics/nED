@@ -321,10 +321,10 @@ void DspPlugin::createStatusParams_v63()
     createStatusParam("TxFifoFull",    0x0,  1,  5); // LVDS TxFIFO went full        (0=not full,1=full)
     createStatusParam("CmdErr",        0x0,  1,  6); // LVDS command error           (0=no error,1=error)
     createStatusParam("EepromInit",    0x0,  1,  7); // EEPROM initialization status (0=not ok,1=ok)
-    createStatusParam("OptA:TxStat",   0x0,  5, 16);
-    createStatusParam("OptA:TxOut",    0x0,  2, 22);
-    createStatusParam("OptB:TxStat",   0x0,  5, 24);
-    createStatusParam("OptB:TxOut",    0x0,  2, 30);
+    createStatusParam("OptA:TxStat",   0x0,  5, 16); // Optical port A TX status
+    createStatusParam("OptA:TxOut",    0x0,  2, 22); // Optical port A TX output
+    createStatusParam("OptB:TxStat",   0x0,  5, 24); // Optical port B TX status
+    createStatusParam("OptB:TxOut",    0x0,  2, 30); // Optical port B TX output
 
     createStatusParam("OptA:ErrRxCnt", 0x1,  8,  0); // RX A errors count
     createStatusParam("OptA:ErrFlags", 0x1, 13,  8); // Error flags                  (8=packet timeout,9=SOF/address sw,10=EOF/address sw,11=SOF/hdr sw,12=EOF/hdr sw,13=SOF/payload sw,14=EOF/payload sw,15=SOF/CRC switch,16=EOF/CRC switch,17=CRC low word,18=CRC high word,19=pri FIFO al full,20=sec FIFO al full)
