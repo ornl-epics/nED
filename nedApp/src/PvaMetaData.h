@@ -1,4 +1,4 @@
-/* PvaNeutronData.h
+/* PvaMetaData.h
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -7,44 +7,31 @@
  * @author Klemen Vodopivec
  */
 
-#ifndef PVA_NEUTRON_DATA_H
-#define PVA_NEUTRON_DATA_H
+#ifndef PVA_META_DATA_H
+#define PVA_META_DATA_H
 
 #include <pv/pvDatabase.h>
 #include <pv/pvTimeStamp.h>
 #include <pv/standardPVField.h>
 
 /**
- * Common EPICSv4 structure for (almost) all detector data.
+ * EPICSv4 structure for meta data.
  *
  * Structure extends EPICSv4 PVrecord which means it's responsible for sending
  * data to the clients.
  */
-class PvaNeutronData : public epics::pvDatabase::PVRecord {
+class PvaMetaData : public epics::pvDatabase::PVRecord {
     public: // Pointers in to the PV records' data structure
         epics::pvData::PVTimeStamp    timeStamp;        //!< Pulses' absolute EPICS timestamp, in sec.nsec since January 1, 1990
         epics::pvData::PVDoublePtr    proton_charge;    //!< Pulse proton charge
         epics::pvData::PVUIntArrayPtr time_of_flight;   //!< Time of flight offest from pulse start
         epics::pvData::PVUIntArrayPtr pixel;            //!< Pixel ID
-        epics::pvData::PVUIntArrayPtr sample_a1;        //!< LPSD ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_a2;        //!< CROC ONLY: TimeRange samples
-        epics::pvData::PVUIntArrayPtr sample_a8;        //!< AROC/ACPC ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_a19;       //!< BNLROC ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_a48;       //!< ACPC ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_b1;        //!< LPSD ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC/ACPC ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_b12;       //!< AROC ONLY: Diagnostic values
-        epics::pvData::PVUIntArrayPtr position_index;   //!< Position index mapping
-        epics::pvData::PVUIntArrayPtr position_x;       //!< Position X
-        epics::pvData::PVUIntArrayPtr position_y;       //!< Position Y
-        epics::pvData::PVUIntArrayPtr photo_sum_x;      //!< Photo sum X
-        epics::pvData::PVUIntArrayPtr photo_sum_y;      //!< Photo sum Y
 
     public:
-        POINTER_DEFINITIONS(PvaNeutronData);
+        POINTER_DEFINITIONS(PvaMetaData);
 
         /**
-         * Create an instance of PvaNeutronData::shared_pointer object.
+         * Create an instance of PvaMetaData::shared_pointer object.
          *
          * The function first creates a pvStructure object and passes it to
          * private constructor to obtain object instance. It then initializes
@@ -64,10 +51,10 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
          * class, there's a helper create() function and the constructor is
          * made private.
          */
-        PvaNeutronData(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure);
+        PvaMetaData(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure);
 
     private:
         bool init();
 };
 
-#endif // PVA_NEUTRON_DATA_H
+#endif // PVA_META_DATA_H

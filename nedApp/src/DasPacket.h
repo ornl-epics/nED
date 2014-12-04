@@ -109,6 +109,21 @@ struct DasPacket
             CMD_READ_STATUS             = 0x22, //!< Read module status
             CMD_READ_STATUS_COUNTERS    = 0x24, //!< Read module status counters
             CMD_WRITE_CONFIG            = 0x30, //!< Write module configuration
+            CMD_WRITE_CONFIG_1          = 0x31, //!< Write module configuration section 1
+            CMD_WRITE_CONFIG_2          = 0x32, //!< Write module configuration section 2
+            CMD_WRITE_CONFIG_3          = 0x33, //!< Write module configuration section 3
+            CMD_WRITE_CONFIG_4          = 0x34, //!< Write module configuration section 4
+            CMD_WRITE_CONFIG_5          = 0x35, //!< Write module configuration section 5
+            CMD_WRITE_CONFIG_6          = 0x36, //!< Write module configuration section 6
+            CMD_WRITE_CONFIG_7          = 0x37, //!< Write module configuration section 7
+            CMD_WRITE_CONFIG_8          = 0x38, //!< Write module configuration section 8
+            CMD_WRITE_CONFIG_9          = 0x39, //!< Write module configuration section 9
+            CMD_WRITE_CONFIG_A          = 0x3A, //!< Write module configuration section A
+            CMD_WRITE_CONFIG_B          = 0x3B, //!< Write module configuration section B
+            CMD_WRITE_CONFIG_C          = 0x3C, //!< Write module configuration section C
+            CMD_WRITE_CONFIG_D          = 0x3D, //!< Write module configuration section D
+            CMD_WRITE_CONFIG_E          = 0x3E, //!< Write module configuration section E
+            CMD_WRITE_CONFIG_F          = 0x3F, //!< Write module configuration section F
             RSP_NACK                    = 0x40, //!< NACK to the command, the command that is being acknowledged is in payload[0] or payload[1]
             RSP_ACK                     = 0x41, //!< ACK to the command, the command that is being acknowledged is in payload[0] or payload[1]
             BAD_PACKET                  = 0x42, //!< Bad packet
@@ -169,7 +184,7 @@ struct DasPacket
             unsigned only_neutron_data:1;   //!< Only neutron data, if 0 some metadata is included
             unsigned rtdl_present:1;        //!< Is RTDL 6-words data included right after the header? Should be always 1 for newer DSPs
             unsigned unused4:1;             //!< Always zero?
-            unsigned format_code:3;         //!< Format code
+            unsigned format_code:3;         //!< Format code, 000 for neutron data, 111 for RTDL data packet
             unsigned subpacket_count:16;    //!< Subpacket counter
             unsigned unused24_27:4;         //!< Not used, should be all 0
             unsigned last_subpacket:1;      //!< Is this the last subpacket?
@@ -297,32 +312,6 @@ struct DasPacket
         const RtdlHeader *getRtdlHeader() const;
 
         /**
-         * Return pointer to packet payload data regardless of RtdlHeader included or not.
-         *
-         * Function checks packet integrity and returns invalid address in case
-         * of any error. Caller should always check the return address or count
-         * parameter.
-         *
-         * @param[out] count Number of 4-byte blocks in the returned address or 0 on error.
-         * @return Starting address of the payload data or 0 on error.
-         */
-        const uint32_t *getData(uint32_t *count) const;
-
-        /**
-         * Return pointer to packet payload data regardless of RtdlHeader included or not.
-         *
-         * Function checks packet integrity and returns invalid address in case
-         * of any error. Caller should always check the return address or count
-         * parameter.
-         *
-         * @param[out] count Number of 4-byte dwords in returned address or 0 on error.
-         * @return Starting address of the payload data or 0 on error.
-         */
-        uint32_t *getData(uint32_t *count) {
-            return const_cast<DasPacket *>(this)->getData(count);
-        }
-
-        /**
          * Return the actual response type.
          *
          * Response packet command field does not always contain the response
@@ -359,6 +348,13 @@ struct DasPacket
         /**
          * Return address to the actual packet payload.
          *
+         * The packet payload is all data after the protocol header.
+         * Protocol header is 24 bytes long. For modules behind DSP there's
+         * optional 4 or 8 bytes of data describing the sub-module address
+         * and response type.
+         * Everything else is considered payload, including the RTDL information
+         * provided by DSP-T in data packets.
+         *
          * The response packets behind the DSP contain their address in the
          * first 4-bytes of the payload. The real payload is thus shifted for
          * 4 bytes. This only applies to the command responses as the data
@@ -380,9 +376,49 @@ struct DasPacket
          *
          * @see getPayload
          * @see getSourceAddress
-         * @return Returns number of the actual payload.
+         * @return Returns length of the packet payload in bytes.
          */
         uint32_t getPayloadLength() const;
+
+
+        /**
+         * Return pointer to packet payload data regardless of RtdlHeader included or not.
+         *
+         * Data packets always originate from DSP. DSP aggregates data from all
+         * sub-modules into data packets. There is never LVDS header information
+         * in data packets. But there is always RTDL header when data packets
+         * are created by DSP-T.
+         *
+         * Function checks packet integrity and returns invalid address in case
+         * of any error. Caller should always check the return address or count
+         * parameter.
+         *
+         * @param[out] count Number of 4-byte blocks in the returned address or 0 on error.
+         * @return Starting address of the payload data or 0 on error.
+         */
+        const uint32_t *getData(uint32_t *count) const;
+
+        /**
+         * Return pointer to packet payload data regardless of RtdlHeader included or not.
+         *
+         * Function checks packet integrity and returns invalid address in case
+         * of any error. Caller should always check the return address or count
+         * parameter.
+         *
+         * @param[out] count Number of 4-byte dwords in returned address or 0 on error.
+         * @return Starting address of the payload data or 0 on error.
+         */
+        uint32_t *getData(uint32_t *count) {
+            return const_cast<uint32_t *>(const_cast<const DasPacket *>(this)->getData(count));
+        }
+
+        /**
+         * Return the length of real packet data, excluding RTDL information.
+         *
+         * @see getData
+         * @return Returns length of the packet data in bytes.
+         */
+        uint32_t getDataLength() const;
 
         /**
          * Copy header and RTDL header of this container to another one.

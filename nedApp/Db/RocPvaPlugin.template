@@ -1,5 +1,4 @@
 include "BasePlugin.include"
-include "BaseSocketPlugin.include"
 
 record(bo, "$(P)Enable")
 {

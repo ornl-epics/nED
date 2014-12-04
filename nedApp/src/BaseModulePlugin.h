@@ -84,6 +84,7 @@ class BaseModulePlugin : public BasePlugin {
             LAST_CMD_WAIT           = 2,    //!< Waiting for last command response
             LAST_CMD_TIMEOUT        = 3,    //!< Did not receive response for the last command
             LAST_CMD_ERROR          = 4,    //!< Error processing last command response
+            LAST_CMD_SKIPPED        = 5,    //!< Command was not issued
         };
 
         /**
@@ -256,8 +257,10 @@ class BaseModulePlugin : public BasePlugin {
          *
          * Base implementation simply sends a DISCOVER command and sets up
          * timeout callback.
+         *
+         * @return Response to wait for.
          */
-        virtual void reqDiscover();
+        virtual DasPacket::CommandType reqDiscover();
 
         /**
          * Default handler for DISCOVER response.
@@ -274,8 +277,10 @@ class BaseModulePlugin : public BasePlugin {
          *
          * Base implementation simply sends a READ_VERSION command and sets up
          * timeout callback.
+         *
+         * @return Response to wait for.
          */
-        virtual void reqReadVersion();
+        virtual DasPacket::CommandType reqReadVersion();
 
         /**
          * Default handler for READ_VERSION response.
@@ -292,8 +297,10 @@ class BaseModulePlugin : public BasePlugin {
          *
          * Base implementation simply sends a READ_STATUS command and sets up
          * timeout callback.
+         *
+         * @return Response to wait for.
          */
-        virtual void reqReadStatus();
+        virtual DasPacket::CommandType reqReadStatus();
 
         /**
          * Default handler for READ_STATUS response.
@@ -310,8 +317,10 @@ class BaseModulePlugin : public BasePlugin {
          *
          * Base implementation simply sends a READ_STATUS_COUNTERS command and sets up
          * timeout callback.
+         *
+         * @return Response to wait for.
          */
-        virtual void reqReadStatusCounters();
+        virtual DasPacket::CommandType reqReadStatusCounters();
 
         /**
          * Default handler for READ_STATUS_COUNTERS response.
@@ -328,8 +337,10 @@ class BaseModulePlugin : public BasePlugin {
          *
          * Base implementation simply sends a READ_CONFIG command and sets up
          * timeout callback.
+         *
+         * @return Response to wait for.
          */
-        virtual void reqReadConfig();
+        virtual DasPacket::CommandType reqReadConfig();
 
         /**
          * Default handler for READ_CONFIG response.
@@ -354,8 +365,10 @@ class BaseModulePlugin : public BasePlugin {
          * already locked.
          *
          * This function is asynchronous and does not wait for response.
+         *
+         * @return Response to wait for.
          */
-        virtual void reqWriteConfig();
+        virtual DasPacket::CommandType reqWriteConfig();
 
         /**
          * Default handler for READ_CONFIG response.
@@ -373,8 +386,10 @@ class BaseModulePlugin : public BasePlugin {
          * Send START command to module.
          *
          * This function is asynchronous and does not wait for response.
+         *
+         * @return Response to wait for.
          */
-        virtual void reqStart();
+        virtual DasPacket::CommandType reqStart();
 
         /**
          * Default handler for START response.
@@ -389,8 +404,10 @@ class BaseModulePlugin : public BasePlugin {
          * Send STOP command to module.
          *
          * This function is asynchronous and does not wait for response.
+         *
+         * @return Response to wait for.
          */
-        virtual void reqStop();
+        virtual DasPacket::CommandType reqStop();
 
         /**
          * Default handler for STOP response.
@@ -510,7 +527,8 @@ class BaseModulePlugin : public BasePlugin {
         int FwDate;         //!< Module firmware date
         int Supported;      //!< Flag whether module is supported
         int Verified;       //!< Hardware id, version and type all verified
-        #define LAST_BASEMODULEPLUGIN_PARAM Verified
+        int CfgSection;     //!< Selected configuration section to be written
+        #define LAST_BASEMODULEPLUGIN_PARAM CfgSection
 };
 
 #endif // BASE_MODULE_PLUGIN_H

@@ -388,6 +388,7 @@ void OccPortDriver::reset() {
     // Flag resetting mode, status thread will recover
     this->lock();
     setIntegerParam(Status, STAT_OK);
+    setIntegerParam(RxStalled, STALL_NONE);
     callParamCallbacks();
     this->unlock();
 }

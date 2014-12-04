@@ -23,10 +23,8 @@
  * mapping table. This plugins reads such table from pixel map file and corrects
  * all pixel ids in normal event data when (not raw or extended).
  *
- * In addition to Enable switch provided by BasePlugin, PixelMap also provides
- * PassThru switch. When enabled, data will be passed thru intact. Pass thru
- * mode is automatically enabled when DataMode is not 'normal'.
- * There's a third switch for filtering out bad and unmapped, good or all events.
+ * In addition to Enable switch provided by BasePlugin, pass thru mode can be
+ * selected using the MapMode parameter with value 0.
  *
  * Internally the plugin pre-allocates a buffer when constructed. When processing
  * received packets from OCC, the received batch might be bigger than the
@@ -83,11 +81,11 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          * Note: it's a bitmask
          */
         typedef enum {
-            FILTER_NONE         = 0, //!< Don't filter events
-            FILTER_GOOD         = 1, //!< Filter out good events
-            FILTER_BAD          = 2, //!< Filter out bad events
-            FILTER_ALL          = 3, //!< Filter out all events
-        } FilterMode_t;
+            MAP_NONE            = 0, //!< Don't map any events - passthru
+            MAP_GOOD            = 1, //!< Map only good events
+            MAP_BAD             = 2, //!< Map only bad events
+            MAP_ALL             = 3, //!< Map all events
+        } MapMode_t;
 
     public: // functions
         /**
@@ -133,7 +131,7 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          * @param[in] mode Event output mode switch.
          * @return Number of unmapped pixel ids.
          */
-        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket, FilterMode_t mode);
+        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket, MapMode_t mode);
 
         /**
          * Read mapping table from a file.
@@ -151,15 +149,14 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         std::vector<uint32_t> m_map; //!< Pixel mapping, index is raw pixel id, value is translated pixel id
 
     private: // asyn parameters
-        #define FIRST_PIXELMAPPLUGIN_PARAM MapErr
-        int MapErr;         //!< Mapping error (see PixelMapPlugin::ImportError)
-        int PassThru;       //!< Should the plugin do the pixel map conversion
+        #define FIRST_PIXELMAPPLUGIN_PARAM ErrImport
+        int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
         int CntUnmap;       //!< Number of unmapped pixels
         int CntError;       //!< Number of generic error pixel ids detected
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
-        int FilterMode;     //!< Event filter mode (see PixelMapPlugin::FilterMode_t)
-        #define LAST_PIXELMAPPLUGIN_PARAM FilterMode
+        int MapMode;        //!< Event mapping mode (see PixelMapPlugin::MapMode_t)
+        #define LAST_PIXELMAPPLUGIN_PARAM MapMode
 };
 
 #endif // PIXEL_MAP_PLUGIN_H
