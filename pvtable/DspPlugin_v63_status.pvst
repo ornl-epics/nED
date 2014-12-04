@@ -15,31 +15,31 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ProgramErr</name>
+            <name>$(P)ErrProgram</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)PktLenErr</name>
+            <name>$(P)ErrLength</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrBadCmd</name>
+            <name>$(P)ErrCmdBad</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsTxFul</name>
+            <name>$(P)TxFifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsCmdErr</name>
+            <name>$(P)CmdErr</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -75,19 +75,19 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptA:ErrCn</name>
+            <name>$(P)OptA:ErrRxCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptA:ErrFl</name>
+            <name>$(P)OptA:ErrFlags</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptA:Good</name>
+            <name>$(P)OptA:LastGood</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -147,19 +147,19 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptB:ErrCn</name>
+            <name>$(P)OptB:ErrRxCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptB:ErrFl</name>
+            <name>$(P)OptB:ErrFlags</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptB:Good</name>
+            <name>$(P)OptB:LastGood</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -219,60 +219,6 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch0:RxFlg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch0:RxStat</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch0:RxData</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch0:RxAF</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch0:RxParD</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch0:RxParF</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch0:ExtEn</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch0:ParsEn</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch0:ErrCnt</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
             <name>$(P)Ch1:RxFlg</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
@@ -327,7 +273,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:RxFlg</name>
+            <name>$(P)Ch2:RxFlags</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -381,7 +327,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:RxFlg</name>
+            <name>$(P)Ch3:RxFlags</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -435,7 +381,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:RxFlg</name>
+            <name>$(P)Ch4:RxFlags</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -489,7 +435,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:RxFlg</name>
+            <name>$(P)Ch5:RxFlags</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -538,6 +484,60 @@
         <pv>
             <selected>false</selected>
             <name>$(P)Ch5:ErrCnt</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:RxFlags</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:RxStat</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:RxData</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:RxAF</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:RxParD</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:RxParF</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:ExtEn</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:ParsEn</name>
+            <tolerance>0.01</tolerance>
+            <saved_value>0</saved_value>
+        </pv>
+        <pv>
+            <selected>false</selected>
+            <name>$(P)Ch6:ErrCnt</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -621,13 +621,13 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ClkThrMin</name>
+            <name>$(P)ClkMinDelay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ClkThrMax</name>
+            <name>$(P)ClkMaxDelay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

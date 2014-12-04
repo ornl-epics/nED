@@ -9,49 +9,49 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Chop0:Dly</name>
+            <name>$(P)Chop0:Delay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Chop1:Dly</name>
+            <name>$(P)Chop1:Delay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Chop2:Dly</name>
+            <name>$(P)Chop2:Delay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Chop3:Dly</name>
+            <name>$(P)Chop3:Delay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Chop4:Dly</name>
+            <name>$(P)Chop4:Delay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Chop5:Dly</name>
+            <name>$(P)Chop5:Delay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Chop6:Dly</name>
+            <name>$(P)Chop6:Delay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Chop7:Dly</name>
+            <name>$(P)Chop7:Delay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -105,19 +105,19 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopDutyCy</name>
+            <name>$(P)ChopDutyCycle</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopMaxPer</name>
+            <name>$(P)ChopMaxPeriod</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopFixOff</name>
+            <name>$(P)ChopFixOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -279,79 +279,79 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopTrefTr</name>
+            <name>$(P)ChopTrefTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopTrefFr</name>
+            <name>$(P)ChopTrefFreq</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopRtdlOf</name>
+            <name>$(P)ChopRtdlOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopTrefEv</name>
+            <name>$(P)ChopTrefEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopHystML</name>
+            <name>$(P)ChopHystMinLow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopHystMH</name>
+            <name>$(P)ChopHystMinHi</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopFreqCn</name>
+            <name>$(P)ChopFreqCntCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopFreqCy</name>
+            <name>$(P)ChopFreqCycle</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ChopSweep</name>
+            <name>$(P)ChopSweepEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)STsyncDelM</name>
+            <name>$(P)STsyncDelMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)STsyncDelA</name>
+            <name>$(P)STsyncDelAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)STsyncFraA</name>
+            <name>$(P)STsyncFractAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TimeHiFake</name>
+            <name>$(P)FakeTimeHigh</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1125,157 +1125,157 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds0:Flow</name>
+            <name>$(P)Ch1:Flow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds1:Flow</name>
+            <name>$(P)Ch2:Flow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds2:Flow</name>
+            <name>$(P)Ch3:Flow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds3:Flow</name>
+            <name>$(P)Ch4:Flow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds4:Flow</name>
+            <name>$(P)Ch5:Flow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds5:Flow</name>
+            <name>$(P)Ch6:Flow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds0:IgnE</name>
+            <name>$(P)Ch1:IgnE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds1:IgnE</name>
+            <name>$(P)Ch2:IgnE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds2:IgnE</name>
+            <name>$(P)Ch3:IgnE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds3:IgnE</name>
+            <name>$(P)Ch4:IgnE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds4:IgnE</name>
+            <name>$(P)Ch5:IgnE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds5:IgnE</name>
+            <name>$(P)Ch6:IgnE</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds0:Dis</name>
+            <name>$(P)Ch1:Dis</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds1:Dis</name>
+            <name>$(P)Ch2:Dis</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds2:Dis</name>
+            <name>$(P)Ch3:Dis</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds3:Dis</name>
+            <name>$(P)Ch4:Dis</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds4:Dis</name>
+            <name>$(P)Ch5:Dis</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds5:Dis</name>
+            <name>$(P)Ch6:Dis</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsCmdMod</name>
+            <name>$(P)LvdsCmdMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsDatMod</name>
+            <name>$(P)LvdsDataMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsDatSiz</name>
+            <name>$(P)LvdsDataSize</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsPowCtr</name>
+            <name>$(P)LvdsPowerCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsPowRst</name>
+            <name>$(P)LvdsPowerRst</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsFltAll</name>
+            <name>$(P)LvdsFilterAll</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsFltCmd</name>
+            <name>$(P)LvdsFilterCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsFltCmM</name>
+            <name>$(P)LvdsFilterMask</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1287,13 +1287,13 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsTxTcCt</name>
+            <name>$(P)LvdsTxTclk</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsTsMode</name>
+            <name>$(P)LvdsTsyncMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1305,19 +1305,19 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsSysrCt</name>
+            <name>$(P)LvdsSysrstCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsTxenCt</name>
+            <name>$(P)LvdsTxenCttrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsOutClk</name>
+            <name>$(P)LvdsOutClck</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1329,49 +1329,49 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds0:WLen</name>
+            <name>$(P)Ch1:WordLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds1:WLen</name>
+            <name>$(P)Ch2:WordLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds2:WLen</name>
+            <name>$(P)Ch3:WordLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds3:WLen</name>
+            <name>$(P)Ch4:WordLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds4:WLen</name>
+            <name>$(P)Ch5:WordLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds5:WLen</name>
+            <name>$(P)Ch6:WordLen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsClkMar</name>
+            <name>$(P)LvdsClkMargin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsTstPat</name>
+            <name>$(P)LvdsTstPattern</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1383,37 +1383,37 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds0:SrcC</name>
+            <name>$(P)Ch1:SrcCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds1:SrcC</name>
+            <name>$(P)Ch2:SrcCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds2:SrcC</name>
+            <name>$(P)Ch3:SrcCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds3:SrcC</name>
+            <name>$(P)Ch4:SrcCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds4:SrcC</name>
+            <name>$(P)Ch5:SrcCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Lvds5:SrcC</name>
+            <name>$(P)Ch6:SrcCtrl</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1425,37 +1425,37 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsTsGen</name>
+            <name>$(P)LvdsTsyncGen</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsTsDel</name>
+            <name>$(P)LvdsTsyncDelay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsTsWid</name>
+            <name>$(P)LvdsTsyncWidth</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptA:Cross</name>
+            <name>$(P)OptA:CrossA</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptB:Cross</name>
+            <name>$(P)OptB:CrossB</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptA:TxMod</name>
+            <name>$(P)OptA:TxMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1467,13 +1467,13 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptA:FltCm</name>
+            <name>$(P)OptA:FilterCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptB:TxMod</name>
+            <name>$(P)OptB:TxMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1485,7 +1485,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptB:FltCm</name>
+            <name>$(P)OptB:FilterCmd</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1509,7 +1509,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptTxDelCt</name>
+            <name>$(P)OptTxDelayC</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1521,7 +1521,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)OptNeuEop</name>
+            <name>$(P)OptNeutronEop</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1551,7 +1551,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysStrtMod</name>
+            <name>$(P)SysStartMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1581,7 +1581,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysRtdlMod</name>
+            <name>$(P)SysRtdlMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1599,31 +1599,31 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysTofOfEn</name>
+            <name>$(P)SysTofOffsetEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysFifSync</name>
+            <name>$(P)SysFifoSync</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysRtdlDat</name>
+            <name>$(P)SysRtdlData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysFixRtdl</name>
+            <name>$(P)SysFixRtdlEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysBadPkt</name>
+            <name>$(P)SysBadPktEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

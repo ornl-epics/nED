@@ -74,11 +74,6 @@ class AcpcFemPlugin : public BaseModulePlugin {
          * Create and register all status ACPC FEM parameters to be exposed to EPICS.
          */
         void createStatusParams_v22();
-
-        /**
-         * Create and register all config ACPC FEM parameters to be exposed to EPICS.
-         */
-        void createConfigParams_v22();
 };
 
 #endif // ACPC_FEM_PLUGIN_H
