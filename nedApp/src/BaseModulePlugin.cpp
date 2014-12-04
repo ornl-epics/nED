@@ -431,7 +431,7 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig()
         int value = 0;
         uint32_t offset = it->second.offset;
 
-        if (cfgSection == 0) {
+        if (cfgSection == '0') {
             offset += m_configSectionOffsets[it->second.section];
         } else if (cfgSection != it->second.section) {
             continue;

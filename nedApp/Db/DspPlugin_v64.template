@@ -1,0 +1,4 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "DspPlugin_v64.include"
+include "DspPlugin.include"

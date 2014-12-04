@@ -1,4 +1,4 @@
-/* DspPlugin_v63.cpp
+/* DspPlugin_v64.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -9,7 +9,7 @@
 
 #include "DspPlugin.h"
 
-void DspPlugin::createConfigParams_v63() {
+void DspPlugin::createConfigParams_v64() {
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
     createConfigParam("PixIdOff",       'B', 0x0,  32,  0, 0); // Pixel id offset
 
@@ -308,9 +308,14 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("SysFixRtdlEn",   'F', 0x0,  1, 19, 1); // Correct RTDL information     (0=disable,1=enable)
     createConfigParam("SysBadPktEn",    'F', 0x0,  1, 30, 0); // Send bad packets             (0=disable,1=enable)
     createConfigParam("SysReset",       'F', 0x0,  1, 31, 0); // Force system reset           (0=disable,1=enable)
+
+    createConfigParam("TestPatternId",  'F', 0x1, 12, 0,  0); // Test pattern id
+    createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // pattern enable               (0=disable,1=enable)
+    createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern rate
+
 }
 
-void DspPlugin::createStatusParams_v63()
+void DspPlugin::createStatusParams_v64()
 {
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured,1=configured)

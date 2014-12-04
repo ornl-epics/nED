@@ -74,6 +74,7 @@ $(PROD_NAME)_SRCS  += CmdDispatcher.cpp
 $(PROD_NAME)_SRCS  += BaseModulePlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
+$(PROD_NAME)_SRCS  += DspPlugin_v64.cpp
 $(PROD_NAME)_SRCS  += RocPlugin.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
@@ -101,6 +102,7 @@ $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 # These files contain descriptions of PVs that we use to generate template
 # files for EPICS database, Doxygen documentation and PVtable.
 $(PROD_NAME)_PVS   += DspPlugin_v63.cpp
+$(PROD_NAME)_PVS   += DspPlugin_v64.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v51.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v52.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v54.cpp
@@ -115,13 +117,6 @@ $(PROD_NAME)_PVS   += AcpcFemPlugin_v22.cpp
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
-
-%.dox: %.cpp
-	./tools/export2doxy.pl -input_file=$^ -output_file=$@
-
-doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
-	doxygen >/dev/null
-	(cd latex/; make pdf > /dev/null)
 
 %.include: %.cpp
 	./tools/export2epics.pl < $^ > ../Db/$@

@@ -2250,38 +2250,6 @@ record(bo, "$(P)TestPatternEnS")
     field(ZNAM, "disable")
     field(ONAM, "enable")
 }
-record(longout, "$(P)TestPatternRate")
-{
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Test pattern rate")
-    field(PINI, "YES")
-    field(VAL,  "0")
-    field(OUT,  "$(P)TestPatternRateW PP")
-}
-record(longout, "$(P)TestPatternRateW")
-{
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Test pattern rate")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))TestPatternRate")
-    field(SDIS, "$(P)TestPatternRateS.PACT")
-    field(DISV, "1")
-}
-record(longin, "$(P)TestPatternRateR")
-{
-    field(DTYP, "asynInt32")
-    field(DESC, "Test pattern rate")
-    field(INP,  "@asyn($(PORT))TestPatternRate")
-    field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)TestPatternRateS")
-}
-record(longout, "$(P)TestPatternRateS")
-{
-    field(DOL,  "$(P)TestPatternRateR NPP")
-    field(OMSL, "closed_loop")
-    field(OUT,  "$(P)TestPatternRate PP")
-}
 record(longout, "$(P)TestPatternId")
 {
     info(autosaveFields, "VAL")
@@ -2313,6 +2281,38 @@ record(longout, "$(P)TestPatternIdS")
     field(DOL,  "$(P)TestPatternIdR NPP")
     field(OMSL, "closed_loop")
     field(OUT,  "$(P)TestPatternId PP")
+}
+record(longout, "$(P)TestPatternRate")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Test pattern rate")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TestPatternRateW PP")
+}
+record(longout, "$(P)TestPatternRateW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Test pattern rate")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TestPatternRate")
+    field(SDIS, "$(P)TestPatternRateS.PACT")
+    field(DISV, "1")
+}
+record(longin, "$(P)TestPatternRateR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Test pattern rate")
+    field(INP,  "@asyn($(PORT))TestPatternRate")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TestPatternRateS")
+}
+record(longout, "$(P)TestPatternRateS")
+{
+    field(DOL,  "$(P)TestPatternRateR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TestPatternRate PP")
 }
 record(longin, "$(P)Ch1:UpRxRate")
 {

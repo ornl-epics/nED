@@ -11918,6 +11918,110 @@ record(bo, "$(P)SysResetS")
     field(ZNAM, "disable")
     field(ONAM, "enable")
 }
+record(longout, "$(P)TestPatternId")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Test pattern id")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TestPatternIdW PP")
+}
+record(longout, "$(P)TestPatternIdW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Test pattern id")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TestPatternId")
+    field(SDIS, "$(P)TestPatternIdS.PACT")
+    field(DISV, "1")
+}
+record(longin, "$(P)TestPatternIdR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Test pattern id")
+    field(INP,  "@asyn($(PORT))TestPatternId")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TestPatternIdS")
+}
+record(longout, "$(P)TestPatternIdS")
+{
+    field(DOL,  "$(P)TestPatternIdR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TestPatternId PP")
+}
+record(bo, "$(P)TestPatternEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "pattern enable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TestPatternEnW PP")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)TestPatternEnW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "pattern enable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TestPatternEn")
+    field(SDIS, "$(P)TestPatternEnS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)TestPatternEnR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "pattern enable")
+    field(INP,  "@asyn($(PORT))TestPatternEn")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TestPatternEnS")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)TestPatternEnS")
+{
+    field(DOL,  "$(P)TestPatternEnR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TestPatternEn PP")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(longout, "$(P)TestPatternRate")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Test pattern rate")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TestPatternRateW PP")
+}
+record(longout, "$(P)TestPatternRateW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Test pattern rate")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TestPatternRate")
+    field(SDIS, "$(P)TestPatternRateS.PACT")
+    field(DISV, "1")
+}
+record(longin, "$(P)TestPatternRateR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Test pattern rate")
+    field(INP,  "@asyn($(PORT))TestPatternRate")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TestPatternRateS")
+}
+record(longout, "$(P)TestPatternRateS")
+{
+    field(DOL,  "$(P)TestPatternRateR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TestPatternRate PP")
+}
 record(bi, "$(P)Configured")
 {
     field(DESC, "Configured")

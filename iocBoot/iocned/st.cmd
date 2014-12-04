@@ -30,6 +30,8 @@ set_pass1_restoreFile("$(IOCNAME).sav")
 #asSetFilename("$(TOP)/../bl99-Det-nED/Db/bl7.acf")
 #asSetSubstitutions("P=BL99:CS")
 
+dbLoadRecords("../../db/nEDCommon.db","P=$(PREFIX)")
+
 ## Load record instances
 OccConfigure("occ", "/dev/snsocb1", 40000000)
 dbLoadRecords("../../db/OccPortDriver.db","P=$(PREFIX)occ:,PORT=occ")
@@ -39,7 +41,6 @@ dbLoadRecords("../../db/CmdDispatcherPlugin.db","P=$(PREFIX)cmd:,PORT=cmd")
 
 PixelMapPluginConfigure("PixMap", "occ", 1, "/tmp/test.pixelmap", 4194304)
 dbLoadRecords("../../db/PixelMapPlugin.template","P=$(PREFIX)pm1:,PORT=PixMap")
-dbLoadRecords("../../db/BasePlugin.template","P=$(PREFIX)pm1:,PORT=PixMap")
 
 AdaraPluginConfigure("Adara1", "occ", 1, 2)
 dbLoadRecords("../../db/AdaraPlugin.db","P=$(PREFIX)adara1:,PORT=Adara1")

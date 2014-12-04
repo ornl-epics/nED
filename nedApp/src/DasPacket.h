@@ -15,6 +15,23 @@
 /**
  * Class representing a DAS packet.
  *
+ * DasPacket is a container for data transfered over OCC link. It's a structure
+ * representing one DAS packet. DAS packet is dynamic in size and the actual
+ * length is defined by the header. Header is the first 6 4-byte entities and
+ * defines the rest of the data. Packet size is limited by DSP to around
+ * 3624 bytes and is always 4-byte aligned. When actual payload does not align
+ * on 4-byte boundary, data is padded. The length header parameter always
+ * defines the actual size of the packet.
+ *
+ * Packets are received from DSP through OCC board. They can be distinguished
+ * into two groups, data and commands packets. When DSP receives data from
+ * submodules, it merges data from many submodules into data packets of payload
+ * size max 3600 bytes. Commands and responses are treated as command packets
+ * and their flow is described with next picture.
+ *
+ * @image html OCC_protocol_packing.png
+ * @image latex OCC_protocol_packing.png width=6in
+ *
  * Don't introduce any virtual functions here as this will break allocating
  * objects from OCC buffer.
  */
