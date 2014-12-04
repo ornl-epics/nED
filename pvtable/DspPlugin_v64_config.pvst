@@ -1635,13 +1635,13 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TestPatternEn</name>
+            <name>$(P)TestPatternId</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TestPatternId</name>
+            <name>$(P)TestPatternEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

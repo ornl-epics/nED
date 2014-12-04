@@ -309,9 +309,9 @@ void DspPlugin::createConfigParams_v64() {
     createConfigParam("SysBadPktEn",    'F', 0x0,  1, 30, 0); // Send bad packets             (0=disable,1=enable)
     createConfigParam("SysReset",       'F', 0x0,  1, 31, 0); // Force system reset           (0=disable,1=enable)
 
-    createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // pattern enable               (0=disable,1=enable)
     createConfigParam("TestPatternId",  'F', 0x1, 12, 0,  0); // Test pattern id
-    createConfigParam("TestPatternRate",'F', 0x1,  3, 12, 0); // Test pattern rate
+    createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // pattern enable               (0=disable,1=enable)
+    createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern rate
 
 }
 

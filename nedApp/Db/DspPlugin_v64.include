@@ -11918,6 +11918,38 @@ record(bo, "$(P)SysResetS")
     field(ZNAM, "disable")
     field(ONAM, "enable")
 }
+record(longout, "$(P)TestPatternId")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Test pattern id")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TestPatternIdW PP")
+}
+record(longout, "$(P)TestPatternIdW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Test pattern id")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TestPatternId")
+    field(SDIS, "$(P)TestPatternIdS.PACT")
+    field(DISV, "1")
+}
+record(longin, "$(P)TestPatternIdR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Test pattern id")
+    field(INP,  "@asyn($(PORT))TestPatternId")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TestPatternIdS")
+}
+record(longout, "$(P)TestPatternIdS")
+{
+    field(DOL,  "$(P)TestPatternIdR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TestPatternId PP")
+}
 record(bo, "$(P)TestPatternEn")
 {
     info(autosaveFields, "VAL")
@@ -11957,38 +11989,6 @@ record(bo, "$(P)TestPatternEnS")
     field(OUT,  "$(P)TestPatternEn PP")
     field(ZNAM, "disable")
     field(ONAM, "enable")
-}
-record(longout, "$(P)TestPatternId")
-{
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Test pattern id")
-    field(PINI, "YES")
-    field(VAL,  "0")
-    field(OUT,  "$(P)TestPatternIdW PP")
-}
-record(longout, "$(P)TestPatternIdW")
-{
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Test pattern id")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))TestPatternId")
-    field(SDIS, "$(P)TestPatternIdS.PACT")
-    field(DISV, "1")
-}
-record(longin, "$(P)TestPatternIdR")
-{
-    field(DTYP, "asynInt32")
-    field(DESC, "Test pattern id")
-    field(INP,  "@asyn($(PORT))TestPatternId")
-    field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)TestPatternIdS")
-}
-record(longout, "$(P)TestPatternIdS")
-{
-    field(DOL,  "$(P)TestPatternIdR NPP")
-    field(OMSL, "closed_loop")
-    field(OUT,  "$(P)TestPatternId PP")
 }
 record(longout, "$(P)TestPatternRate")
 {
