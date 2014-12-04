@@ -218,8 +218,8 @@ void FemPlugin::createConfigParams_v36()
     createConfigParam("VerbDisc",        'F', 0x0,  1, 15, 0);  // Verbose discover             (0=disable,1=enable)
 
     createConfigParam("TestPatternEn",   'F', 0x1,  1, 15, 0);  // Test pattern enable          (0=disable,1=enable)
-    createConfigParam("TestPatternRate", 'F', 0x1,  3, 12, 0);  // Test pattern rate
     createConfigParam("TestPatternId",   'F', 0x1, 12,  0, 0);  // Test pattern id
+    createConfigParam("TestPatternRate", 'F', 0x2, 16,  0, 0);  // Test pattern rate
 }
 
 void FemPlugin::createCounterParams_v36()

@@ -231,115 +231,115 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AutoAdjEn</name>
+            <name>$(P)Ch1:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AutoAdjTrig</name>
+            <name>$(P)Ch1:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AutoAdjSample</name>
+            <name>$(P)Ch1:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AutoAdjSlope</name>
+            <name>$(P)Ch1:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AutoAdjOffset</name>
+            <name>$(P)Ch1:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AutoAdjSlope1</name>
+            <name>$(P)Ch1:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AutoAdjOverflow</name>
+            <name>$(P)Ch1:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:InputOffset</name>
+            <name>$(P)Ch1:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AdcOffset</name>
+            <name>$(P)Ch1:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AdcOffset</name>
+            <name>$(P)Ch1:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AutoAdjEn</name>
+            <name>$(P)Ch1:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AutoAdjTrig</name>
+            <name>$(P)Ch1:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AutoAdjSample</name>
+            <name>$(P)Ch1:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AutoAdjSlope</name>
+            <name>$(P)Ch1:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AutoAdjOffset</name>
+            <name>$(P)Ch1:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AutoAdjSlope1</name>
+            <name>$(P)Ch1:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AutoAdjOverflow</name>
+            <name>$(P)Ch1:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:InputOffset</name>
+            <name>$(P)Ch1:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:InputOffset</name>
+            <name>$(P)Ch2:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -393,61 +393,61 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AdcOffset</name>
+            <name>$(P)Ch2:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AutoAdjEn</name>
+            <name>$(P)Ch2:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AutoAdjTrig</name>
+            <name>$(P)Ch2:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AutoAdjSample</name>
+            <name>$(P)Ch2:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AutoAdjSlope</name>
+            <name>$(P)Ch2:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AutoAdjOffset</name>
+            <name>$(P)Ch2:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AutoAdjSlope1</name>
+            <name>$(P)Ch2:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AutoAdjOverflow</name>
+            <name>$(P)Ch2:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:InputOffset</name>
+            <name>$(P)Ch2:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AdcOffset</name>
+            <name>$(P)Ch2:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -501,157 +501,157 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AutoAdjEn</name>
+            <name>$(P)Ch2:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AutoAdjTrig</name>
+            <name>$(P)Ch2:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AutoAdjSample</name>
+            <name>$(P)Ch2:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AutoAdjSlope</name>
+            <name>$(P)Ch2:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AutoAdjOffset</name>
+            <name>$(P)Ch2:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AutoAdjSlope1</name>
+            <name>$(P)Ch2:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AutoAdjOverflow</name>
+            <name>$(P)Ch2:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AutoAdjEn</name>
+            <name>$(P)Ch3:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AutoAdjTrig</name>
+            <name>$(P)Ch3:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AutoAdjSample</name>
+            <name>$(P)Ch3:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AutoAdjSlope</name>
+            <name>$(P)Ch3:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AutoAdjOffset</name>
+            <name>$(P)Ch3:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AutoAdjSlope1</name>
+            <name>$(P)Ch3:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AutoAdjOverflow</name>
+            <name>$(P)Ch3:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:InputOffset</name>
+            <name>$(P)Ch3:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AdcOffs</name>
+            <name>$(P)Ch3:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AdcOffs</name>
+            <name>$(P)Ch3:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AutoAdjEn</name>
+            <name>$(P)Ch3:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AutoAdjTrig</name>
+            <name>$(P)Ch3:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AutoAdjSample</name>
+            <name>$(P)Ch3:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AutoAdjSlope</name>
+            <name>$(P)Ch3:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AutoAdjOffset</name>
+            <name>$(P)Ch3:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AutoAdjSlope1</name>
+            <name>$(P)Ch3:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AutoAdjOverflow</name>
+            <name>$(P)Ch3:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:InputOffset</name>
+            <name>$(P)Ch3:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:InputOffset</name>
+            <name>$(P)Ch4:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -705,61 +705,61 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AdcOffs</name>
+            <name>$(P)Ch4:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AutoAdjEn</name>
+            <name>$(P)Ch4:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AutoAdjTrig</name>
+            <name>$(P)Ch4:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AutoAdjSample</name>
+            <name>$(P)Ch4:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AutoAdjSlope</name>
+            <name>$(P)Ch4:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AutoAdjOffset</name>
+            <name>$(P)Ch4:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AutoAdjSlope1</name>
+            <name>$(P)Ch4:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AutoAdjOverflow</name>
+            <name>$(P)Ch4:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:InputOffset</name>
+            <name>$(P)Ch4:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AdcOffs</name>
+            <name>$(P)Ch4:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -813,157 +813,157 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AutoAdjEn</name>
+            <name>$(P)Ch4:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AutoAdjTrig</name>
+            <name>$(P)Ch4:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AutoAdjSample</name>
+            <name>$(P)Ch4:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AutoAdjSlope</name>
+            <name>$(P)Ch4:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AutoAdjOffset</name>
+            <name>$(P)Ch4:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AutoAdjSlope1</name>
+            <name>$(P)Ch4:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AutoAdjOverflow</name>
+            <name>$(P)Ch4:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AutoAdjEn</name>
+            <name>$(P)Ch5:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AutoAdjTrig</name>
+            <name>$(P)Ch5:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AutoAdjSample</name>
+            <name>$(P)Ch5:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AutoAdjSlope</name>
+            <name>$(P)Ch5:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AutoAdjOffset</name>
+            <name>$(P)Ch5:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AutoAdjSlope1</name>
+            <name>$(P)Ch5:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AutoAdjOverflow</name>
+            <name>$(P)Ch5:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:InputOffset</name>
+            <name>$(P)Ch5:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AdcOffs</name>
+            <name>$(P)Ch5:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AdcOffs</name>
+            <name>$(P)Ch5:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AutoAdjEn</name>
+            <name>$(P)Ch5:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AutoAdjTrig</name>
+            <name>$(P)Ch5:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AutoAdjSample</name>
+            <name>$(P)Ch5:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AutoAdjSlope</name>
+            <name>$(P)Ch5:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AutoAdjOffset</name>
+            <name>$(P)Ch5:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AutoAdjSlope1</name>
+            <name>$(P)Ch5:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AutoAdjOverflow</name>
+            <name>$(P)Ch5:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:InputOffset</name>
+            <name>$(P)Ch5:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:InputOffset</name>
+            <name>$(P)Ch6:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1017,61 +1017,61 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AdcOffs</name>
+            <name>$(P)Ch6:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AutoAdjEn</name>
+            <name>$(P)Ch6:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AutoAdjTrig</name>
+            <name>$(P)Ch6:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AutoAdjSample</name>
+            <name>$(P)Ch6:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AutoAdjSlope</name>
+            <name>$(P)Ch6:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AutoAdjOffset</name>
+            <name>$(P)Ch6:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AutoAdjSlope1</name>
+            <name>$(P)Ch6:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AutoAdjOverflow</name>
+            <name>$(P)Ch6:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:InputOffset</name>
+            <name>$(P)Ch6:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AdcOffs</name>
+            <name>$(P)Ch6:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1125,157 +1125,157 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AutoAdjEn</name>
+            <name>$(P)Ch6:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AutoAdjTrig</name>
+            <name>$(P)Ch6:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AutoAdjSample</name>
+            <name>$(P)Ch6:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AutoAdjSlope</name>
+            <name>$(P)Ch6:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AutoAdjOffset</name>
+            <name>$(P)Ch6:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AutoAdjSlope1</name>
+            <name>$(P)Ch6:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AutoAdjOverflow</name>
+            <name>$(P)Ch6:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AutoAdjEn</name>
+            <name>$(P)Ch7:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AutoAdjTrig</name>
+            <name>$(P)Ch7:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AutoAdjSample</name>
+            <name>$(P)Ch7:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AutoAdjSlope</name>
+            <name>$(P)Ch7:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AutoAdjOffset</name>
+            <name>$(P)Ch7:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AutoAdjSlope1</name>
+            <name>$(P)Ch7:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AutoAdjOverflow</name>
+            <name>$(P)Ch7:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:InputOffset</name>
+            <name>$(P)Ch7:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AdcOffs</name>
+            <name>$(P)Ch7:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AdcOffs</name>
+            <name>$(P)Ch7:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AutoAdjEn</name>
+            <name>$(P)Ch7:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AutoAdjTrig</name>
+            <name>$(P)Ch7:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AutoAdjSample</name>
+            <name>$(P)Ch7:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AutoAdjSlope</name>
+            <name>$(P)Ch7:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AutoAdjOffset</name>
+            <name>$(P)Ch7:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AutoAdjSlope1</name>
+            <name>$(P)Ch7:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AutoAdjOverflow</name>
+            <name>$(P)Ch7:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:InputOffset</name>
+            <name>$(P)Ch7:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:InputOffset</name>
+            <name>$(P)Ch8:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1329,61 +1329,61 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AdcOffs</name>
+            <name>$(P)Ch8:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AutoAdjEn</name>
+            <name>$(P)Ch8:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AutoAdjTrig</name>
+            <name>$(P)Ch8:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AutoAdjSample</name>
+            <name>$(P)Ch8:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AutoAdjSlope</name>
+            <name>$(P)Ch8:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AutoAdjOffset</name>
+            <name>$(P)Ch8:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AutoAdjSlope1</name>
+            <name>$(P)Ch8:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AutoAdjOverflow</name>
+            <name>$(P)Ch8:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:InputOffset</name>
+            <name>$(P)Ch8:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AdcOffs</name>
+            <name>$(P)Ch8:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1437,43 +1437,43 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AutoAdjEn</name>
+            <name>$(P)Ch8:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AutoAdjTrig</name>
+            <name>$(P)Ch8:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AutoAdjSample</name>
+            <name>$(P)Ch8:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AutoAdjSlope</name>
+            <name>$(P)Ch8:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AutoAdjOffset</name>
+            <name>$(P)Ch8:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AutoAdjSlope1</name>
+            <name>$(P)Ch8:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AutoAdjOverflow</name>
+            <name>$(P)Ch8:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
