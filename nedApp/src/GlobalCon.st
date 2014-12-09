@@ -298,7 +298,7 @@ string namebuf;
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##0	
 
-#define TEST_PV_FIN(NAME, PVNAME, DESIRED)			\
+#define TEST_PV_END(NAME, PVNAME, DESIRED)			\
        when() {							\
           pvGet(PVNAME[i], SYNC);				\
           if (PVNAME[i] != DESIRED) {				\
@@ -315,7 +315,7 @@ string namebuf;
  */
 #define TEST_PV(NAME, PVNAME, DESIRED, NEXT)			\
      TEST_PV_BEGIN(NAME, NEXT)					\
-     TEST_PV_FIN(NAME, PVNAME, DESIRED)
+     TEST_PV_END(NAME, PVNAME, DESIRED)
 
 /*
  * Analogous to TEST_PV(), but with when() clause added to skip on hardware
@@ -324,7 +324,7 @@ string namebuf;
 #define TEST_PV_IFNOT(NAME, PVNAME, DESIRED, NEXT, HWTYPE)	\
      TEST_PV_BEGIN(NAME, NEXT)					\
      SKIP_WHEN(NAME, HWTYPE)					\
-     TEST_PV_FIN(NAME, PVNAME, DESIRED)
+     TEST_PV_END(NAME, PVNAME, DESIRED)
 
 /*
  * Macro to make an end-of-operation state.  This goes to the Ready state
