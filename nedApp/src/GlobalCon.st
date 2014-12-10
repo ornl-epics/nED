@@ -394,12 +394,14 @@ ss GlobalControl {
    state init {
       entry {
          PVPUTSTR(statePV,init)
-         /* What we want here is to find the baseModulePlugin devices */
-         numFound = seqGrep("stringin", ".*:HwType", &deviceNames[0][0], 
+         /* find set of devices we are interested in */
+         numFound = seqGrep("stringin", ".*:FailMsg", &deviceNames[0][0], 
                                                        MAXDEVICES);
          for (i=0; i<numFound; i++) {
-            pvAssign(hwtype[i], deviceNames[i]);
+            pvAssign(failMsg[i], deviceNames[i]);
             *strrchr(deviceNames[i], ':') = 0;
+            sprintf(namebuf, "%s:HwType", deviceNames[i]);
+            pvAssign(hwtype[i], namebuf);
             sprintf(namebuf, "%s:CmdReq", deviceNames[i]);
             pvAssign(cmdReq[i], namebuf);
             sprintf(namebuf, "%s:CmdRsp", deviceNames[i]);
