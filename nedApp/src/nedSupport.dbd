@@ -4,7 +4,7 @@ include "asyn.dbd"
 include "PVAClientRegister.dbd"
 include "PVAServerRegister.dbd"
 include "registerChannelProviderLocal.dbd"
-include "dbPv.dbd"
+#include "dbPv.dbd"
 registrar("OccRegister")
 registrar("CmdDispatcherRegister")
 registrar("DiscoverPluginRegister")
@@ -22,4 +22,4 @@ registrar("RocPvaPluginRegister")
 registrar("FlatFieldPluginRegister")
 registrar("AcpcPvaPluginRegister")
 registrar("PixelMapPluginRegister")
-registrar("GlobalConRegistrar")
+#registrar("GlobalConRegistrar")
