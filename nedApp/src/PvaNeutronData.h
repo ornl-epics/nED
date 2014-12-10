@@ -17,15 +17,8 @@
 /**
  * Common EPICSv4 structure for (almost) all detector data.
  *
- * The structure combines data from all detectors in normal, raw and extended
- * mode. Record gets updated by updating public members in single or group mode.
- *
- * Structure is also an EPICSv4 PVrecord which means it's responsible for sending
- * data to the clients. The PvaNeutronData tries to hide most dirty work away by
- * providing two modes of operation:
- *   - using cache and sending cache contents atomically
- *   - embedding variable updates inside transaction, when transaction is closed
- *     data gets send to clients
+ * Structure extends EPICSv4 PVrecord which means it's responsible for sending
+ * data to the clients.
  */
 class PvaNeutronData : public epics::pvDatabase::PVRecord {
     public: // Pointers in to the PV records' data structure

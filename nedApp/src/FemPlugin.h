@@ -37,7 +37,7 @@ class FemPlugin : public BaseModulePlugin {
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
         FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
-        
+
         /**
          * Try to parse the FEM version response packet an populate the structure.
          *
@@ -57,7 +57,7 @@ class FemPlugin : public BaseModulePlugin {
         bool rspDiscover(const DasPacket *packet);
 
         /**
-         * Overrided READ_VERSION handler dispatches real work to one of rspReadVersion_*
+         * Overrided READ_VERSION handler to parse FEM version
          *
          * @param[in] packet with response to READ_VERSION
          * @return true if packet was parsed and module version verified.
@@ -65,22 +65,40 @@ class FemPlugin : public BaseModulePlugin {
         bool rspReadVersion(const DasPacket *packet);
 
         /**
-         * Handler for READ_VERSION response from FEM V10
-         *
-         * Populate hardware info parameters, like HwVer, HwRev, FwVer etc.
-         * @relates rspReadVersion
-         */
-        bool rspReadVersion_V10(const DasPacket *packet);
-
-        /**
-         * Create and register all status FEM V10 parameters to be exposed to EPICS.
+         * Create and register all status FEM10 parameters to be exposed to EPICS.
          */
         void createStatusParams_v32();
 
         /**
-         * Create and register all config FEM V10 parameters to be exposed to EPICS.
+         * Create and register all config FEM10 parameters to be exposed to EPICS.
          */
         void createConfigParams_v32();
+
+        /**
+         * Create and register all status FEM9 v35 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v35();
+
+        /**
+         * Create and register all config FEM9 v35 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v35();
+
+
+        /**
+         * Create and register all status FEM9 v36 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v36();
+
+        /**
+         * Create and register all config FEM9 v36 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v36();
+
+        /**
+         * Create and register all counter FEM9 v36 parameters to be exposed to EPICS.
+         */
+        void createCounterParams_v36();
 };
 
 #endif // DSP_PLUGIN_H

@@ -7,6 +7,7 @@
  * @author Klemen Vodopivec
  */
 
+#include "Common.h"
 #include "OccPortDriver.h"
 #include "DmaCircularBuffer.h"
 #include "DmaCopier.h"
@@ -303,7 +304,7 @@ asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer
 
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
-            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), packet->length());
+            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->length(), 4));
             if (ret != 0) {
                 setIntegerParam(LastErr, -ret);
                 setIntegerParam(Status, STAT_OCC_ERROR);
@@ -387,6 +388,7 @@ void OccPortDriver::reset() {
     // Flag resetting mode, status thread will recover
     this->lock();
     setIntegerParam(Status, STAT_OK);
+    setIntegerParam(RxStalled, STALL_NONE);
     callParamCallbacks();
     this->unlock();
 }

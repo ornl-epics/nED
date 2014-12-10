@@ -28,12 +28,14 @@ record(longin, "$(P)PulseFlav")
     field(INP,  "@asyn($(PORT))PulseFlav")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)PulseCharg")
+record(ai, "$(P)PulseCharg")
 {
     field(DESC, "Pulse charge")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))PulseCharg")
     field(EGU,  "C")
+    field(PREC, "12")
+    field(ASLO, "0.00000000001")
     field(SCAN, "I/O Intr")
 }
 record(bi, "$(P)BadVetoFr")

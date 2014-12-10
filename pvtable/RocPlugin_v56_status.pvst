@@ -3,31 +3,31 @@
     <pvlist>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrUartByt</name>
+            <name>$(P)ErrUartByte</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrUartPar</name>
+            <name>$(P)ErrUartParity</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrProg</name>
+            <name>$(P)ErrProgramming</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrCmdLen</name>
+            <name>$(P)ErrCmdLength</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrBadCmd</name>
+            <name>$(P)ErrCmdBad</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -39,13 +39,13 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrFifFul</name>
+            <name>$(P)ErrFifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrStart</name>
+            <name>$(P)ErrPreStart</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -69,7 +69,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrDataTyp</name>
+            <name>$(P)ErrType</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -81,55 +81,55 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)LvdsVerDet</name>
+            <name>$(P)LvdsVerify</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)IntFifoFul</name>
+            <name>$(P)IntFifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)IntFifoEmp</name>
+            <name>$(P)IntFifoEmpty</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CalcBadFin</name>
+            <name>$(P)CalcBadFinal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CalcBadEff</name>
+            <name>$(P)CalcBadEffect</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CalcBadOvr</name>
+            <name>$(P)CalcBadOverlow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)CalcBadCnt</name>
+            <name>$(P)CalcBadCount</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)DataFifoFu</name>
+            <name>$(P)DataFifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)DataFifoEm</name>
+            <name>$(P)DataFifoEmpty</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -165,19 +165,19 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)RisEdgeA</name>
+            <name>$(P)RiseEdgeA</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysrstBHi</name>
+            <name>$(P)SysrstBHigh</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysrstBLo</name>
+            <name>$(P)SysrstBLow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -219,127 +219,127 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)RisEdgeSum</name>
+            <name>$(P)RiseEdgeSum</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)RisEdgeB</name>
+            <name>$(P)RiseEdgeB</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:En</name>
+            <name>$(P)Ch1:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:Samp</name>
+            <name>$(P)Ch1:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:SL</name>
+            <name>$(P)Ch1:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:SlL</name>
+            <name>$(P)Ch1:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:OffL</name>
+            <name>$(P)Ch1:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:SlLi</name>
+            <name>$(P)Ch1:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:Ovr</name>
+            <name>$(P)Ch1:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:Slop</name>
+            <name>$(P)Ch1:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:Off</name>
+            <name>$(P)Ch1:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:Off</name>
+            <name>$(P)Ch1:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:En</name>
+            <name>$(P)Ch1:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:Samp</name>
+            <name>$(P)Ch1:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:SL</name>
+            <name>$(P)Ch1:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:SlL</name>
+            <name>$(P)Ch1:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:OffL</name>
+            <name>$(P)Ch1:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:SlLi</name>
+            <name>$(P)Ch1:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:Ovr</name>
+            <name>$(P)Ch1:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:Slop</name>
+            <name>$(P)Ch1:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:Slop</name>
+            <name>$(P)Ch2:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -357,97 +357,97 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:MDEv</name>
+            <name>$(P)Ch1:MultiDiscEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:Ev</name>
+            <name>$(P)Ch1:Event</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:FifFul</name>
+            <name>$(P)Ch1:FifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:FifAFF</name>
+            <name>$(P)Ch1:FifoAlmostFullD</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:FifAF</name>
+            <name>$(P)Ch1:FifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:Data</name>
+            <name>$(P)Ch1:HasData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:Off</name>
+            <name>$(P)Ch2:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:En</name>
+            <name>$(P)Ch2:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:Samp</name>
+            <name>$(P)Ch2:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:SL</name>
+            <name>$(P)Ch2:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:SlL</name>
+            <name>$(P)Ch2:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:OffL</name>
+            <name>$(P)Ch2:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:SlLi</name>
+            <name>$(P)Ch2:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:Ovr</name>
+            <name>$(P)Ch2:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:Slop</name>
+            <name>$(P)Ch2:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:Off</name>
+            <name>$(P)Ch2:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -465,193 +465,193 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:MDEv</name>
+            <name>$(P)Ch2:MultiDiscEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:Ev</name>
+            <name>$(P)Ch2:Event</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:FifFul</name>
+            <name>$(P)Ch2:FifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:FifAFF</name>
+            <name>$(P)Ch2:FifoAlmostFullD</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:FifAF</name>
+            <name>$(P)Ch2:FifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:Data</name>
+            <name>$(P)Ch2:HasData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:En</name>
+            <name>$(P)Ch2:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:Samp</name>
+            <name>$(P)Ch2:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:SL</name>
+            <name>$(P)Ch2:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:SlL</name>
+            <name>$(P)Ch2:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:OffL</name>
+            <name>$(P)Ch2:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:SlLi</name>
+            <name>$(P)Ch2:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:Ovr</name>
+            <name>$(P)Ch2:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:En</name>
+            <name>$(P)Ch3:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:Samp</name>
+            <name>$(P)Ch3:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:SL</name>
+            <name>$(P)Ch3:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:SlL</name>
+            <name>$(P)Ch3:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:OffL</name>
+            <name>$(P)Ch3:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:SlLi</name>
+            <name>$(P)Ch3:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:Ovr</name>
+            <name>$(P)Ch3:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:Slop</name>
+            <name>$(P)Ch3:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:Off</name>
+            <name>$(P)Ch3:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:Off</name>
+            <name>$(P)Ch3:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:En</name>
+            <name>$(P)Ch3:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:Samp</name>
+            <name>$(P)Ch3:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:SL</name>
+            <name>$(P)Ch3:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:SlL</name>
+            <name>$(P)Ch3:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:OffL</name>
+            <name>$(P)Ch3:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:SlLi</name>
+            <name>$(P)Ch3:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:Ovr</name>
+            <name>$(P)Ch3:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:Slop</name>
+            <name>$(P)Ch3:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:Slop</name>
+            <name>$(P)Ch4:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -669,97 +669,97 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:MDEv</name>
+            <name>$(P)Ch3:MultiDiscEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:Ev</name>
+            <name>$(P)Ch3:Event</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:FifFul</name>
+            <name>$(P)Ch3:FifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:FifAFF</name>
+            <name>$(P)Ch3:FifoAlmostFullD</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:FifAmF</name>
+            <name>$(P)Ch3:FifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:Data</name>
+            <name>$(P)Ch3:HasData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:Off</name>
+            <name>$(P)Ch4:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:En</name>
+            <name>$(P)Ch4:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:Samp</name>
+            <name>$(P)Ch4:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:SL</name>
+            <name>$(P)Ch4:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:SlL</name>
+            <name>$(P)Ch4:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:OffL</name>
+            <name>$(P)Ch4:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:SlLi</name>
+            <name>$(P)Ch4:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:Ovr</name>
+            <name>$(P)Ch4:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:Slop</name>
+            <name>$(P)Ch4:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:Off</name>
+            <name>$(P)Ch4:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -777,193 +777,193 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:MDEv</name>
+            <name>$(P)Ch4:MultiDiscEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:Ev</name>
+            <name>$(P)Ch4:Event</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:FifFul</name>
+            <name>$(P)Ch4:FifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:FifAFF</name>
+            <name>$(P)Ch4:FifoAlmostFullD</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:FifAmF</name>
+            <name>$(P)Ch4:FifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:Data</name>
+            <name>$(P)Ch4:HasData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:En</name>
+            <name>$(P)Ch4:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:Samp</name>
+            <name>$(P)Ch4:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:SL</name>
+            <name>$(P)Ch4:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:SlL</name>
+            <name>$(P)Ch4:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:OffL</name>
+            <name>$(P)Ch4:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:SlLi</name>
+            <name>$(P)Ch4:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:B:Ovr</name>
+            <name>$(P)Ch4:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:En</name>
+            <name>$(P)Ch5:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:Samp</name>
+            <name>$(P)Ch5:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:SL</name>
+            <name>$(P)Ch5:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:SlL</name>
+            <name>$(P)Ch5:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:OffL</name>
+            <name>$(P)Ch5:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:SlLi</name>
+            <name>$(P)Ch5:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:Ovr</name>
+            <name>$(P)Ch5:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:Slop</name>
+            <name>$(P)Ch5:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:Off</name>
+            <name>$(P)Ch5:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:A:Off</name>
+            <name>$(P)Ch5:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:En</name>
+            <name>$(P)Ch5:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:Samp</name>
+            <name>$(P)Ch5:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:SL</name>
+            <name>$(P)Ch5:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:SlL</name>
+            <name>$(P)Ch5:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:OffL</name>
+            <name>$(P)Ch5:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:SlLi</name>
+            <name>$(P)Ch5:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:Ovr</name>
+            <name>$(P)Ch5:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:B:Slop</name>
+            <name>$(P)Ch5:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:Slop</name>
+            <name>$(P)Ch6:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -981,97 +981,97 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:MDEv</name>
+            <name>$(P)Ch5:MultiDiscEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:Ev</name>
+            <name>$(P)Ch5:Event</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:FifFul</name>
+            <name>$(P)Ch5:FifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:FifAFF</name>
+            <name>$(P)Ch5:FifoAlmostFullD</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:FifAmF</name>
+            <name>$(P)Ch5:FifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:Data</name>
+            <name>$(P)Ch5:HasData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:Off</name>
+            <name>$(P)Ch6:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:En</name>
+            <name>$(P)Ch6:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:Samp</name>
+            <name>$(P)Ch6:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:SL</name>
+            <name>$(P)Ch6:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:SlL</name>
+            <name>$(P)Ch6:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:OffL</name>
+            <name>$(P)Ch6:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:SlLi</name>
+            <name>$(P)Ch6:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:A:Ovr</name>
+            <name>$(P)Ch6:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:Slop</name>
+            <name>$(P)Ch6:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:Off</name>
+            <name>$(P)Ch6:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1089,193 +1089,193 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:MDEv</name>
+            <name>$(P)Ch6:MultiDiscEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:Ev</name>
+            <name>$(P)Ch6:Event</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:FifFul</name>
+            <name>$(P)Ch6:FifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:FifAFF</name>
+            <name>$(P)Ch6:FifoAlmostFullD</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:FifAmF</name>
+            <name>$(P)Ch6:FifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:Data</name>
+            <name>$(P)Ch6:HasData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:En</name>
+            <name>$(P)Ch6:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:Samp</name>
+            <name>$(P)Ch6:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:SL</name>
+            <name>$(P)Ch6:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:SlL</name>
+            <name>$(P)Ch6:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:OffL</name>
+            <name>$(P)Ch6:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:SlLi</name>
+            <name>$(P)Ch6:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:B:Ovr</name>
+            <name>$(P)Ch6:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:En</name>
+            <name>$(P)Ch7:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:Samp</name>
+            <name>$(P)Ch7:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:SL</name>
+            <name>$(P)Ch7:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:SlL</name>
+            <name>$(P)Ch7:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:OffL</name>
+            <name>$(P)Ch7:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:SlLi</name>
+            <name>$(P)Ch7:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:Ovr</name>
+            <name>$(P)Ch7:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:Slop</name>
+            <name>$(P)Ch7:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:A:Off</name>
+            <name>$(P)Ch7:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:Off</name>
+            <name>$(P)Ch7:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:En</name>
+            <name>$(P)Ch7:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:Samp</name>
+            <name>$(P)Ch7:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:SL</name>
+            <name>$(P)Ch7:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:SlL</name>
+            <name>$(P)Ch7:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:OffL</name>
+            <name>$(P)Ch7:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:SlLi</name>
+            <name>$(P)Ch7:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:Ovr</name>
+            <name>$(P)Ch7:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:B:Slop</name>
+            <name>$(P)Ch7:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:Slop</name>
+            <name>$(P)Ch8:A:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1293,97 +1293,97 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:MDEv</name>
+            <name>$(P)Ch7:MultiDiscEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:Ev</name>
+            <name>$(P)Ch7:Event</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:FifFul</name>
+            <name>$(P)Ch7:FifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:FifAFF</name>
+            <name>$(P)Ch7:FifoAlmostFullD</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:FifAmF</name>
+            <name>$(P)Ch7:FifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:Data</name>
+            <name>$(P)Ch7:HasData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:Off</name>
+            <name>$(P)Ch8:A:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:En</name>
+            <name>$(P)Ch8:A:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:Samp</name>
+            <name>$(P)Ch8:A:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:SL</name>
+            <name>$(P)Ch8:A:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:SlL</name>
+            <name>$(P)Ch8:A:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:OffL</name>
+            <name>$(P)Ch8:A:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:SlLi</name>
+            <name>$(P)Ch8:A:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:A:Ovr</name>
+            <name>$(P)Ch8:A:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:Slop</name>
+            <name>$(P)Ch8:B:InputOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:Off</name>
+            <name>$(P)Ch8:B:AdcOffsetVal</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1401,79 +1401,79 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:MDEv</name>
+            <name>$(P)Ch8:MultiDiscEvent</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:Ev</name>
+            <name>$(P)Ch8:Event</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:FifFul</name>
+            <name>$(P)Ch8:FifoFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:FifAFF</name>
+            <name>$(P)Ch8:FifoAlmostFullD</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:FifAmF</name>
+            <name>$(P)Ch8:FifoAlmostFull</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:Data</name>
+            <name>$(P)Ch8:HasData</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:En</name>
+            <name>$(P)Ch8:B:AutoAdjEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:Samp</name>
+            <name>$(P)Ch8:B:AutoAdjTrig</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:SL</name>
+            <name>$(P)Ch8:B:AutoAdjSample</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:SlL</name>
+            <name>$(P)Ch8:B:AutoAdjSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:OffL</name>
+            <name>$(P)Ch8:B:AutoAdjOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:SlLi</name>
+            <name>$(P)Ch8:B:AutoAdjSlope1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:B:Ovr</name>
+            <name>$(P)Ch8:B:AutoAdjOverflow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

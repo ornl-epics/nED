@@ -1,0 +1,11 @@
+# FEMs don't support START/STOP command, they're always acquiring in that sense.
+# Since they don't provide the Acquiring param and generic screen relies on that,
+# let's fake it to be always enabled.
+record(bi, "$(P)Acquiring")
+{
+    field(DESC, "Acquiring data")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(ZNAM, "not acquiring")
+    field(ONAM, "acquiring")
+}

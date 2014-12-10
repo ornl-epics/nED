@@ -8,6 +8,7 @@
  */
 
 #include "BaseModulePlugin.h"
+#include "Common.h"
 #include "Log.h"
 
 #include <osiSock.h>
@@ -50,6 +51,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("FwRev",        asynParamInt32, &FwRev);                    // READ - Module firmware revision
     createParam("Supported",    asynParamInt32, &Supported);                // READ - Is requested module version supported (0=not supported,1=supported)
     createParam("Verified",     asynParamInt32, &Verified);                 // READ - Flag whether module type and version were verified
+    createParam("CfgSection",   asynParamInt32, &CfgSection, '0');          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
 
     std::string hardwareIp = addr2ip(m_hardwareId);
     setStringParam(HwId, hardwareIp.c_str());
@@ -68,37 +70,57 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
 
+        setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+        callParamCallbacks();
+
         switch (value) {
         case DasPacket::CMD_DISCOVER:
-            reqDiscover();
+            m_waitingResponse = reqDiscover();
             break;
         case DasPacket::CMD_READ_VERSION:
-            reqReadVersion();
+            m_waitingResponse = reqReadVersion();
             break;
         case DasPacket::CMD_READ_STATUS:
-            reqReadStatus();
+            m_waitingResponse = reqReadStatus();
             break;
         case DasPacket::CMD_READ_STATUS_COUNTERS:
-            reqReadStatusCounters();
+            m_waitingResponse = reqReadStatusCounters();
             break;
         case DasPacket::CMD_READ_CONFIG:
-            reqReadConfig();
+            m_waitingResponse = reqReadConfig();
             break;
         case DasPacket::CMD_WRITE_CONFIG:
-            reqWriteConfig();
+            m_waitingResponse = reqWriteConfig();
             break;
         case DasPacket::CMD_START:
-            reqStart();
+            m_waitingResponse = reqStart();
             break;
         case DasPacket::CMD_STOP:
-            reqStop();
+            m_waitingResponse = reqStop();
             break;
         default:
+            setIntegerParam(CmdRsp, LAST_CMD_ERROR);
+            callParamCallbacks();
             LOG_WARN("Unrecognized '%d' command", SM_ACTION_CMD(value));
             return asynError;
         }
-        m_waitingResponse = static_cast<DasPacket::CommandType>(value);
-        setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+
+        if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
+            scheduleTimeoutCallback(m_waitingResponse, NO_RESPONSE_TIMEOUT);
+            setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+        } else {
+            setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
+        }
+        callParamCallbacks();
+
+        return asynSuccess;
+    }
+    if (pasynUser->reason == CfgSection) {
+        if (value < '0' || value > 'F' || (value > '9' && value < 'A')) {
+            LOG_ERROR("Invalid configuration section %d", value);
+            return asynError;
+        }
+        setIntegerParam(CfgSection, value);
         callParamCallbacks();
         return asynSuccess;
     }
@@ -194,6 +216,21 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
         ack = rspReadStatusCounters(packet);
         break;
     case DasPacket::CMD_WRITE_CONFIG:
+    case DasPacket::CMD_WRITE_CONFIG_1:
+    case DasPacket::CMD_WRITE_CONFIG_2:
+    case DasPacket::CMD_WRITE_CONFIG_3:
+    case DasPacket::CMD_WRITE_CONFIG_4:
+    case DasPacket::CMD_WRITE_CONFIG_5:
+    case DasPacket::CMD_WRITE_CONFIG_6:
+    case DasPacket::CMD_WRITE_CONFIG_7:
+    case DasPacket::CMD_WRITE_CONFIG_8:
+    case DasPacket::CMD_WRITE_CONFIG_9:
+    case DasPacket::CMD_WRITE_CONFIG_A:
+    case DasPacket::CMD_WRITE_CONFIG_B:
+    case DasPacket::CMD_WRITE_CONFIG_C:
+    case DasPacket::CMD_WRITE_CONFIG_D:
+    case DasPacket::CMD_WRITE_CONFIG_E:
+    case DasPacket::CMD_WRITE_CONFIG_F:
         ack = rspWriteConfig(packet);
         break;
     case DasPacket::CMD_START:
@@ -212,10 +249,10 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     return true;
 }
 
-void BaseModulePlugin::reqDiscover()
+DasPacket::CommandType BaseModulePlugin::reqDiscover()
 {
     sendToDispatcher(DasPacket::CMD_DISCOVER);
-    scheduleTimeoutCallback(DasPacket::CMD_DISCOVER, NO_RESPONSE_TIMEOUT);
+    return DasPacket::CMD_DISCOVER;
 }
 
 bool BaseModulePlugin::rspDiscover(const DasPacket *packet)
@@ -227,10 +264,10 @@ bool BaseModulePlugin::rspDiscover(const DasPacket *packet)
     return true;
 }
 
-void BaseModulePlugin::reqReadVersion()
+DasPacket::CommandType BaseModulePlugin::reqReadVersion()
 {
     sendToDispatcher(DasPacket::CMD_READ_VERSION);
-    scheduleTimeoutCallback(DasPacket::CMD_READ_VERSION, NO_RESPONSE_TIMEOUT);
+    return DasPacket::CMD_READ_VERSION;
 }
 
 bool BaseModulePlugin::rspReadVersion(const DasPacket *packet)
@@ -242,10 +279,10 @@ bool BaseModulePlugin::rspReadVersion(const DasPacket *packet)
     return true;
 }
 
-void BaseModulePlugin::reqReadStatus()
+DasPacket::CommandType BaseModulePlugin::reqReadStatus()
 {
     sendToDispatcher(DasPacket::CMD_READ_STATUS);
-    scheduleTimeoutCallback(DasPacket::CMD_READ_STATUS, NO_RESPONSE_TIMEOUT);
+    return DasPacket::CMD_READ_STATUS;
 }
 
 bool BaseModulePlugin::rspReadStatus(const DasPacket *packet)
@@ -255,14 +292,15 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet)
         return false;
     }
 
-    if (packet->getPayloadLength() != m_statusPayloadLength) {
-        LOG_ERROR("Received wrong READ_STATUS response based on length; received %u, expected %u", packet->getPayloadLength(), m_statusPayloadLength);
+    if (packet->getPayloadLength() != ALIGN_UP(m_statusPayloadLength, 4)) {
+        LOG_ERROR("Received wrong READ_STATUS response based on length; "
+                  "received %u, expected %u",
+                  packet->getPayloadLength(), ALIGN_UP(m_statusPayloadLength, 4));
         return false;
     }
 
-
     const uint32_t *payload = packet->getPayload();
-    for (std::map<int, StatusParamDesc>::iterator it=m_statusParams.begin(); it != m_statusParams.end(); it++) {
+    for (auto it=m_statusParams.begin(); it != m_statusParams.end(); it++) {
         int offset = it->second.offset;
         int shift = it->second.shift;
         if (m_behindDsp) {
@@ -280,10 +318,10 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet)
     return true;
 }
 
-void BaseModulePlugin::reqReadStatusCounters()
+DasPacket::CommandType BaseModulePlugin::reqReadStatusCounters()
 {
     sendToDispatcher(DasPacket::CMD_READ_STATUS_COUNTERS);
-    scheduleTimeoutCallback(DasPacket::CMD_READ_STATUS_COUNTERS, NO_RESPONSE_TIMEOUT);
+    return DasPacket::CMD_READ_STATUS_COUNTERS;
 }
 
 bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
@@ -293,8 +331,10 @@ bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
         return false;
     }
 
-    if (packet->getPayloadLength() != m_countersPayloadLength) {
-        LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; received %u, expected %u", packet->getPayloadLength(), m_countersPayloadLength);
+    if (packet->getPayloadLength() != ALIGN_UP(m_countersPayloadLength, 4)) {
+        LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; "
+                  "received %u, expected %u",
+                  packet->getPayloadLength(), ALIGN_UP(m_countersPayloadLength, 4));
         return false;
     }
 
@@ -317,10 +357,10 @@ bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
     return true;
 }
 
-void BaseModulePlugin::reqReadConfig()
+DasPacket::CommandType BaseModulePlugin::reqReadConfig()
 {
     sendToDispatcher(DasPacket::CMD_READ_CONFIG);
-    scheduleTimeoutCallback(DasPacket::CMD_READ_CONFIG, NO_RESPONSE_TIMEOUT);
+    return DasPacket::CMD_READ_CONFIG;
 }
 
 bool BaseModulePlugin::rspReadConfig(const DasPacket *packet)
@@ -333,13 +373,15 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet)
     if (m_configPayloadLength == 0)
         recalculateConfigParams();
 
-    if (packet->getPayloadLength() != m_configPayloadLength) {
-        LOG_ERROR("Received wrong READ_CONFIG response based on length; received %uB, expected %uB", packet->getPayloadLength(), m_configPayloadLength);
+    if (packet->getPayloadLength() != ALIGN_UP(m_configPayloadLength, 4)) {
+        LOG_ERROR("Received wrong READ_CONFIG response based on length; "
+                  "received %uB, expected %uB",
+                  packet->getPayloadLength(), ALIGN_UP(m_configPayloadLength, 4));
         return false;
     }
 
     const uint32_t *payload = packet->getPayload();
-    for (std::map<int, ConfigParamDesc>::iterator it=m_configParams.begin(); it != m_configParams.end(); it++) {
+    for (auto it=m_configParams.begin(); it != m_configParams.end(); it++) {
         int offset = m_configSectionOffsets[it->second.section] + it->second.offset;
         int shift = it->second.shift;
         if (m_behindDsp) {
@@ -357,26 +399,48 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet)
     return true;
 }
 
-void BaseModulePlugin::reqWriteConfig()
+DasPacket::CommandType BaseModulePlugin::reqWriteConfig()
 {
+    int cfgSection = 0;
+    getIntegerParam(CfgSection, &cfgSection);
+
     if (m_configPayloadLength == 0)
         recalculateConfigParams();
 
-    uint32_t length = ((m_configPayloadLength + 3) & ~3) / 4;
-    uint32_t data[length];
-    for (uint32_t i=0; i<length; i++)
-        data[i] = 0;
+    uint32_t payloadLength;
+    if (cfgSection == '0') {
+        payloadLength = m_configPayloadLength;
+    } else {
+        payloadLength = m_configSectionSizes[cfgSection];
+    }
 
-    for (std::map<int, struct ConfigParamDesc>::iterator it=m_configParams.begin(); it != m_configParams.end(); it++) {
-        uint32_t offset = m_configSectionOffsets[it->second.section] + it->second.offset;
+    // Skip empty sections
+    if (payloadLength == 0) {
+        return static_cast<DasPacket::CommandType>(0);
+    }
+
+    uint32_t length = ALIGN_UP(payloadLength, 4) / 4;
+    uint32_t data[length];
+    for (uint32_t i=0; i<length; i++) {
+        data[i] = 0;
+    }
+
+    for (auto it=m_configParams.begin(); it != m_configParams.end(); it++) {
         uint32_t mask = (0x1ULL << it->second.width) - 1;
         int shift = it->second.shift;
         int value = 0;
+        uint32_t offset = it->second.offset;
+
+        if (cfgSection == '0') {
+            offset += m_configSectionOffsets[it->second.section];
+        } else if (cfgSection != it->second.section) {
+            continue;
+        }
 
         if (getIntegerParam(it->first, &value) != asynSuccess) {
             // This should not happen. It's certainly error when creating and parameters.
             LOG_ERROR("Failed to get parameter %s value", getParamName(it->first));
-            return;
+            return static_cast<DasPacket::CommandType>(0);
         }
         if (static_cast<int>(value & mask) != value) {
             // This should not happen. It's certainly error when setting new value for parameter
@@ -401,8 +465,29 @@ void BaseModulePlugin::reqWriteConfig()
         }
     }
 
-    sendToDispatcher(DasPacket::CMD_WRITE_CONFIG, data, length*4);
-    scheduleTimeoutCallback(DasPacket::CMD_WRITE_CONFIG, NO_RESPONSE_TIMEOUT);
+    DasPacket::CommandType rsp;
+    switch (cfgSection) {
+        case '0': rsp = DasPacket::CMD_WRITE_CONFIG;   break;
+        case '1': rsp = DasPacket::CMD_WRITE_CONFIG_1; break;
+        case '2': rsp = DasPacket::CMD_WRITE_CONFIG_2; break;
+        case '3': rsp = DasPacket::CMD_WRITE_CONFIG_3; break;
+        case '4': rsp = DasPacket::CMD_WRITE_CONFIG_4; break;
+        case '5': rsp = DasPacket::CMD_WRITE_CONFIG_5; break;
+        case '6': rsp = DasPacket::CMD_WRITE_CONFIG_6; break;
+        case '7': rsp = DasPacket::CMD_WRITE_CONFIG_7; break;
+        case '8': rsp = DasPacket::CMD_WRITE_CONFIG_8; break;
+        case '9': rsp = DasPacket::CMD_WRITE_CONFIG_9; break;
+        case 'A': rsp = DasPacket::CMD_WRITE_CONFIG_A; break;
+        case 'B': rsp = DasPacket::CMD_WRITE_CONFIG_B; break;
+        case 'C': rsp = DasPacket::CMD_WRITE_CONFIG_C; break;
+        case 'D': rsp = DasPacket::CMD_WRITE_CONFIG_D; break;
+        case 'E': rsp = DasPacket::CMD_WRITE_CONFIG_E; break;
+        case 'F': rsp = DasPacket::CMD_WRITE_CONFIG_F; break;
+        default:
+            return static_cast<DasPacket::CommandType>(0);
+    }
+    sendToDispatcher(rsp, data, payloadLength);
+    return rsp;
 }
 
 bool BaseModulePlugin::rspWriteConfig(const DasPacket *packet)
@@ -414,10 +499,10 @@ bool BaseModulePlugin::rspWriteConfig(const DasPacket *packet)
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
-void BaseModulePlugin::reqStart()
+DasPacket::CommandType BaseModulePlugin::reqStart()
 {
     sendToDispatcher(DasPacket::CMD_START);
-    scheduleTimeoutCallback(DasPacket::CMD_START, NO_RESPONSE_TIMEOUT);
+    return DasPacket::CMD_START;
 }
 
 bool BaseModulePlugin::rspStart(const DasPacket *packet)
@@ -429,10 +514,10 @@ bool BaseModulePlugin::rspStart(const DasPacket *packet)
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
-void BaseModulePlugin::reqStop()
+DasPacket::CommandType BaseModulePlugin::reqStop()
 {
     sendToDispatcher(DasPacket::CMD_STOP);
-    scheduleTimeoutCallback(DasPacket::CMD_STOP, NO_RESPONSE_TIMEOUT);
+    return DasPacket::CMD_STOP;
 }
 
 bool BaseModulePlugin::rspStop(const DasPacket *packet)
@@ -458,7 +543,7 @@ void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint
     desc.width = nBits;
     m_statusParams[index] = desc;
 
-    uint32_t length = offset +1;
+    uint32_t length = offset + 1;
     if (m_behindDsp && nBits > 16)
         length++;
     uint32_t wordsize = (m_behindDsp ? 2 : 4);
@@ -506,6 +591,7 @@ void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_
     uint32_t length = offset + 1;
     if (m_behindDsp && nBits > 16)
         length++;
+    // m_configPayloadLength is calculated *after* we create all sections
     m_configSectionSizes[section] = std::max(m_configSectionSizes[section], length);
 }
 
@@ -581,5 +667,5 @@ void BaseModulePlugin::recalculateConfigParams()
     // Calculate total required payload size in bytes
     m_configPayloadLength = m_configSectionOffsets['F'] + m_configSectionSizes['F'];
     int wordsize = (m_behindDsp ? 2 : 4);
-    m_configPayloadLength *= wordsize;
+    m_configPayloadLength = m_configPayloadLength * wordsize;
 }

@@ -41,7 +41,6 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
     , m_version(version)
 {
     createStatusParams_v22();
-    createConfigParams_v22();
 
     setIntegerParam(HwType, DasPacket::MOD_TYPE_ACPCFEM);
     setIntegerParam(Supported, 1);

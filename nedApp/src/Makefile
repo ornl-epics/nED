@@ -15,11 +15,11 @@ include $(TOP)/configure/CONFIG
 # 
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
 USR_CXXFLAGS += -std=c++0x
-USR_CXXFLAGS += -fopenmp
-USR_LDFLAGS  += -fopenmp
+#USR_CXXFLAGS += -fopenmp
+#USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)
-CXXFLAGS += -g -ggdb
-#CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
+#CXXFLAGS += -g -ggdb
+CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
 
 # Product
 PROD_NAME = ned
@@ -43,7 +43,7 @@ PROD_LIBS += pvDatabase
 PROD_LIBS += pvaSrv
 PROD_LIBS += pvAccess
 PROD_LIBS += pvData
-PROD_LIBS += seq
+#PROD_LIBS += seq
 PROD_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 PROD_SRCS  += ned_registerRecordDeviceDriver.cpp
@@ -56,7 +56,7 @@ SHARED_LIBRARIES = NO
 # Headers used by unit-tests
 INC += CircularBuffer.h
 
-$(PROD_NAME)_SRCS  += GlobalCon.st
+#$(PROD_NAME)_SRCS  += GlobalCon.st
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp
 $(PROD_NAME)_SRCS  += OccPortDriver.cpp
@@ -74,6 +74,7 @@ $(PROD_NAME)_SRCS  += CmdDispatcher.cpp
 $(PROD_NAME)_SRCS  += BaseModulePlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
+$(PROD_NAME)_SRCS  += DspPlugin_v64.cpp
 $(PROD_NAME)_SRCS  += RocPlugin.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
@@ -81,6 +82,8 @@ $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v56.cpp
 $(PROD_NAME)_SRCS  += FemPlugin.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
+$(PROD_NAME)_SRCS  += FemPlugin_v35.cpp
+$(PROD_NAME)_SRCS  += FemPlugin_v36.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin_v22.cpp
 $(PROD_NAME)_SRCS  += DiscoverPlugin.cpp
@@ -93,17 +96,20 @@ $(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
+$(PROD_NAME)_SRCS  += PvaMetaData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 
 # These files contain descriptions of PVs that we use to generate template
 # files for EPICS database, Doxygen documentation and PVtable.
 $(PROD_NAME)_PVS   += DspPlugin_v63.cpp
-$(PROD_NAME)_PVS   += RocPlugin.cpp
+$(PROD_NAME)_PVS   += DspPlugin_v64.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v51.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v52.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v54.cpp
 $(PROD_NAME)_PVS   += RocPlugin_v56.cpp
 $(PROD_NAME)_PVS   += FemPlugin_v32.cpp
+$(PROD_NAME)_PVS   += FemPlugin_v35.cpp
+$(PROD_NAME)_PVS   += FemPlugin_v36.cpp
 $(PROD_NAME)_PVS   += AcpcFemPlugin_v22.cpp
 
 #===========================
@@ -111,13 +117,6 @@ $(PROD_NAME)_PVS   += AcpcFemPlugin_v22.cpp
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
-
-%.dox: %.cpp
-	./tools/export2doxy.pl -input_file=$^ -output_file=$@
-
-doc: Doxyfile $($(PROD_NAME)_SRCS:.cpp=.dox)
-	doxygen >/dev/null
-	(cd latex/; make pdf > /dev/null)
 
 %.include: %.cpp
 	./tools/export2epics.pl < $^ > ../Db/$@

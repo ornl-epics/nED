@@ -1,0 +1,2212 @@
+record(bi, "$(P)Ch1:ErrParity")
+{
+    field(DESC, "Chan1 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:ErrType")
+{
+    field(DESC, "Chan1 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:ErrShortPkt")
+{
+    field(DESC, "Chan1 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:ErrLength")
+{
+    field(DESC, "Chan1 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:ErrTimeout")
+{
+    field(DESC, "Chan1 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:ErrNoStart")
+{
+    field(DESC, "Chan1 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:ErrPreStart")
+{
+    field(DESC, "Chan1 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:ErrFifoFull")
+{
+    field(DESC, "Chan1 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:ErrParity")
+{
+    field(DESC, "Chan2 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:ErrType")
+{
+    field(DESC, "Chan2 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:ErrShortPkt")
+{
+    field(DESC, "Chan2 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:ErrLength")
+{
+    field(DESC, "Chan2 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:ErrTimeout")
+{
+    field(DESC, "Chan2 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:ErrNoStart")
+{
+    field(DESC, "Chan2 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:ErrPreStart")
+{
+    field(DESC, "Chan2 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:ErrFifoFull")
+{
+    field(DESC, "Chan2 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:ErrParity")
+{
+    field(DESC, "Chan3 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:ErrType")
+{
+    field(DESC, "Chan3 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:ErrShortPkt")
+{
+    field(DESC, "Chan3 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:ErrLength")
+{
+    field(DESC, "Chan3 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:ErrTimeout")
+{
+    field(DESC, "Chan3 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:ErrNoStart")
+{
+    field(DESC, "Chan3 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:ErrPreStart")
+{
+    field(DESC, "Chan3 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:ErrFifoFull")
+{
+    field(DESC, "Chan3 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:ErrParity")
+{
+    field(DESC, "Chan4 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:ErrType")
+{
+    field(DESC, "Chan4 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:ErrShortPkt")
+{
+    field(DESC, "Chan4 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:ErrLength")
+{
+    field(DESC, "Chan4 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:ErrTimeout")
+{
+    field(DESC, "Chan4 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:ErrNoStart")
+{
+    field(DESC, "Chan4 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:ErrPreStart")
+{
+    field(DESC, "Chan4 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:ErrFifoFull")
+{
+    field(DESC, "Chan4 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:ErrParity")
+{
+    field(DESC, "Chan5 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:ErrType")
+{
+    field(DESC, "Chan5 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:ErrShortPkt")
+{
+    field(DESC, "Chan5 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:ErrLength")
+{
+    field(DESC, "Chan5 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:ErrTimeout")
+{
+    field(DESC, "Chan5 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:ErrNoStart")
+{
+    field(DESC, "Chan5 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:ErrPreStart")
+{
+    field(DESC, "Chan5 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:ErrFifoFull")
+{
+    field(DESC, "Chan5 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:ErrParity")
+{
+    field(DESC, "Chan6 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:ErrType")
+{
+    field(DESC, "Chan6 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:ErrShortPkt")
+{
+    field(DESC, "Chan6 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:ErrLength")
+{
+    field(DESC, "Chan6 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:ErrTimeout")
+{
+    field(DESC, "Chan6 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:ErrNoStart")
+{
+    field(DESC, "Chan6 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:ErrPreStart")
+{
+    field(DESC, "Chan6 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:ErrFifoFull")
+{
+    field(DESC, "Chan6 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:ErrParity")
+{
+    field(DESC, "Chan7 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:ErrType")
+{
+    field(DESC, "Chan7 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:ErrShortPkt")
+{
+    field(DESC, "Chan7 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:ErrLength")
+{
+    field(DESC, "Chan7 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:ErrTimeout")
+{
+    field(DESC, "Chan7 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:ErrNoStart")
+{
+    field(DESC, "Chan7 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:ErrPreStart")
+{
+    field(DESC, "Chan7 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:ErrFifoFull")
+{
+    field(DESC, "Chan7 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:ErrParity")
+{
+    field(DESC, "Chan8 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:ErrType")
+{
+    field(DESC, "Chan8 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:ErrShortPkt")
+{
+    field(DESC, "Chan8 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:ErrLength")
+{
+    field(DESC, "Chan8 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:ErrTimeout")
+{
+    field(DESC, "Chan8 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:ErrNoStart")
+{
+    field(DESC, "Chan8 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:ErrPreStart")
+{
+    field(DESC, "Chan8 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:ErrFifoFull")
+{
+    field(DESC, "Chan8 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:ErrParity")
+{
+    field(DESC, "Chan9 parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:ErrType")
+{
+    field(DESC, "Chan9 packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:ErrShortPkt")
+{
+    field(DESC, "Chan9 short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:ErrLength")
+{
+    field(DESC, "Chan9 long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:ErrTimeout")
+{
+    field(DESC, "Chan9 timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:ErrNoStart")
+{
+    field(DESC, "Chan9 no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:ErrPreStart")
+{
+    field(DESC, "Chan9 START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:ErrFifoFull")
+{
+    field(DESC, "Chan9 FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:ErrParity")
+{
+    field(DESC, "CTRL parity error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:ErrParity")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:ErrType")
+{
+    field(DESC, "CTRL packet type error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:ErrType")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:ErrShortPkt")
+{
+    field(DESC, "CTRL short packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:ErrShortPkt")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:ErrLength")
+{
+    field(DESC, "CTRL long packet error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:ErrLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:ErrTimeout")
+{
+    field(DESC, "CTRL timeout")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:ErrTimeout")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:ErrNoStart")
+{
+    field(DESC, "CTRL no START")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:ErrNoStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:ErrPreStart")
+{
+    field(DESC, "CTRL START before STOP")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:ErrPreStart")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:ErrFifoFull")
+{
+    field(DESC, "CTRL FIFO full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:ErrFifoFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)ErrBadCmd")
+{
+    field(DESC, "Unknown command")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrBadCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no error")
+    field(ONAM, "error")
+}
+record(bi, "$(P)ErrPacketLength")
+{
+    field(DESC, "Packet length error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrPacketLength")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no error")
+    field(ONAM, "error")
+}
+record(bi, "$(P)ErrProgramming")
+{
+    field(DESC, "Programming error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrProgramming")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no error")
+    field(ONAM, "error")
+}
+record(bi, "$(P)ErrConfigured")
+{
+    field(DESC, "Unconfigured")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrConfigured")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "configured")
+    field(ONAM, "not configured")
+}
+record(bi, "$(P)ErrNoHwId")
+{
+    field(DESC, "Missing hardware")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrNoHwId")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not missing")
+    field(ONAM, "missing")
+}
+record(bi, "$(P)ErrEeprom")
+{
+    field(DESC, "EEPROM error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrEeprom")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no error")
+    field(ONAM, "error")
+}
+record(bi, "$(P)ErrStatusFilter")
+{
+    field(DESC, "Status Filter Error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrStatusFilter")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(longin, "$(P)CntFilteredNacks")
+{
+    field(DESC, "Number of filtered NACKS")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntFilteredNacks")
+    field(SCAN, "I/O Intr")
+}
+record(bi, "$(P)Ch1:GotData")
+{
+    field(DESC, "Chan1 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch1:GotCmd")
+{
+    field(DESC, "Chan1 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:GotData")
+{
+    field(DESC, "Chan2 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch2:GotCmd")
+{
+    field(DESC, "Chan2 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:GotData")
+{
+    field(DESC, "Chan3 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch3:GotCmd")
+{
+    field(DESC, "Chan3 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:GotData")
+{
+    field(DESC, "Chan4 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch4:GotCmd")
+{
+    field(DESC, "Chan4 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:GotData")
+{
+    field(DESC, "Chan5 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch5:GotCmd")
+{
+    field(DESC, "Chan5 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:GotData")
+{
+    field(DESC, "Chan6 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch6:GotCmd")
+{
+    field(DESC, "Chan6 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:GotData")
+{
+    field(DESC, "Chan7 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch7:GotCmd")
+{
+    field(DESC, "Chan7 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:GotData")
+{
+    field(DESC, "Chan8 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch8:GotCmd")
+{
+    field(DESC, "Chan8 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:GotData")
+{
+    field(DESC, "Chan9 got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ch9:GotCmd")
+{
+    field(DESC, "Chan9 got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:GotData")
+{
+    field(DESC, "CTRL got data packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:GotData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)Ctrl:GotCmd")
+{
+    field(DESC, "CTRL got command packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:GotCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)NewHwId")
+{
+    field(DESC, "Found new hardware ID")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))NewHwId")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(longin, "$(P)CntFilteredAcks")
+{
+    field(DESC, "Number Filtered ACKS")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntFilteredAcks")
+    field(SCAN, "I/O Intr")
+}
+record(bi, "$(P)Ch1:FifoHasData")
+{
+    field(DESC, "Chan1 FIFO not empty")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch1:FifoAlmostFul")
+{
+    field(DESC, "Chan1 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch1:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ch2:FifoHasData")
+{
+    field(DESC, "Chan2 FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch2:FifoAlmostFul")
+{
+    field(DESC, "Chan2 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch2:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ch3:FifoHasData")
+{
+    field(DESC, "Chan3 FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch3:FifoAlmostFul")
+{
+    field(DESC, "Chan3 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch3:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ch4:FifoHasData")
+{
+    field(DESC, "Chan4 FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch4:FifoAlmostFul")
+{
+    field(DESC, "Chan4 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch4:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ch5:FifoHasData")
+{
+    field(DESC, "Chan5 FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch5:FifoAlmostFul")
+{
+    field(DESC, "Chan5 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch5:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ch6:FifoHasData")
+{
+    field(DESC, "Chan6 FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch6:FifoAlmostFul")
+{
+    field(DESC, "Chan6 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch6:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ch7:FifoHasData")
+{
+    field(DESC, "Chan7 FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch7:FifoAlmostFul")
+{
+    field(DESC, "Chan7 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch7:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ch8:FifoHasData")
+{
+    field(DESC, "Chan8 FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch8:FifCmd")
+{
+    field(DESC, "Chan8 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch8:FifCmd")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ch9:FifoHasData")
+{
+    field(DESC, "Chan9 FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ch9:FifoAlmostFul")
+{
+    field(DESC, "Chan9 FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ch9:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Ctrl:FifoHasData")
+{
+    field(DESC, "CTRL FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:FifoHasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)Ctrl:FifoAlmostFul")
+{
+    field(DESC, "CTRL FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Ctrl:FifoAlmostFul")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)CmdOut:HasData")
+{
+    field(DESC, "CMD output FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CmdOut:HasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)CmdOut:AlmostFull")
+{
+    field(DESC, "CMD output FIFO almost full")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CmdOut:AlmostFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)CmdInt:HasData")
+{
+    field(DESC, "CMD out iface FIFO has data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CmdInt:HasData")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "empty")
+    field(ONAM, "has data")
+}
+record(bi, "$(P)CmdInt:AlmostFull")
+{
+    field(DESC, "CMD out iface FIFO almost f")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CmdInt:AlmostFull")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not full")
+    field(ONAM, "almost full")
+}
+record(bi, "$(P)Sysrs1")
+{
+    field(DESC, "LVDS input Sysrst# = 0")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Sysrs1")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(longin, "$(P)CntFilteredCmds")
+{
+    field(DESC, "N filtered command packets")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntFilteredCmds")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)EepromStatus")
+{
+    field(DESC, "EEPROM status - not used")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))EepromStatus")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)CntHwIds")
+{
+    field(DESC, "Num of Hardware IDs detected")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntHwIds")
+    field(SCAN, "I/O Intr")
+}
+record(bi, "$(P)LvdsVerifyReady")
+{
+    field(DESC, "LVDS verify ready")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LvdsVerifyReady")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not ready")
+    field(ONAM, "ready")
+}
+record(longin, "$(P)EepromCode")
+{
+    field(DESC, "EEPROM code")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))EepromCode")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)LvdsDebug0")
+{
+    field(DESC, "LVDS Debug [15:0]")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LvdsDebug0")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)LvdsDebug1")
+{
+    field(DESC, "LVDS Debug [31:16]")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LvdsDebug1")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)LvdsDebug2")
+{
+    field(DESC, "LVDS Debug [43:32]")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LvdsDebug2")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)LvdsDebugCntrl")
+{
+    field(DESC, "LVDS Debug Control Index")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LvdsDebugCntrl")
+    field(SCAN, "I/O Intr")
+}
+record(mbbo, "$(P)ResetCtrl")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset control")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)ResetCtrlW PP")
+    field(ZRVL, "0")
+    field(ZRST, "not used")
+    field(ONVL, "1")
+    field(ONST, "not used")
+    field(TWVL, "2")
+    field(TWST, "from LVDS")
+    field(THVL, "3")
+    field(THST, "from optic")
+}
+record(mbbo, "$(P)ResetCtrlW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset control")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetCtrl")
+    field(SDIS, "$(P)ResetCtrlS.PACT")
+    field(DISV, "1")
+    field(ZRVL, "0")
+    field(ZRST, "not used")
+    field(ONVL, "1")
+    field(ONST, "not used")
+    field(TWVL, "2")
+    field(TWST, "from LVDS")
+    field(THVL, "3")
+    field(THST, "from optic")
+}
+record(mbbi, "$(P)ResetCtrlR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Reset control")
+    field(INP,  "@asyn($(PORT))ResetCtrl")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)ResetCtrlS")
+    field(ZRVL, "0")
+    field(ZRST, "not used")
+    field(ONVL, "1")
+    field(ONST, "not used")
+    field(TWVL, "2")
+    field(TWST, "from LVDS")
+    field(THVL, "3")
+    field(THST, "from optic")
+}
+record(mbbo, "$(P)ResetCtrlS")
+{
+    field(DOL,  "$(P)ResetCtrlR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)ResetCtrl PP")
+    field(ZRVL, "0")
+    field(ZRST, "not used")
+    field(ONVL, "1")
+    field(ONST, "not used")
+    field(TWVL, "2")
+    field(TWST, "from LVDS")
+    field(THVL, "3")
+    field(THST, "from optic")
+}
+record(mbbo, "$(P)TclkCtrl")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TCLK control")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TclkCtrlW PP")
+    field(ZRVL, "0")
+    field(ZRST, "TCLK")
+    field(ONVL, "1")
+    field(ONST, "TCLK")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbo, "$(P)TclkCtrlW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TCLK control")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TclkCtrl")
+    field(SDIS, "$(P)TclkCtrlS.PACT")
+    field(DISV, "1")
+    field(ZRVL, "0")
+    field(ZRST, "TCLK")
+    field(ONVL, "1")
+    field(ONST, "TCLK")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbi, "$(P)TclkCtrlR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "TCLK control")
+    field(INP,  "@asyn($(PORT))TclkCtrl")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TclkCtrlS")
+    field(ZRVL, "0")
+    field(ZRST, "TCLK")
+    field(ONVL, "1")
+    field(ONST, "TCLK")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbo, "$(P)TclkCtrlS")
+{
+    field(DOL,  "$(P)TclkCtrlR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TclkCtrl PP")
+    field(ZRVL, "0")
+    field(ZRST, "TCLK")
+    field(ONVL, "1")
+    field(ONST, "TCLK")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbo, "$(P)TsyncCtrl")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TSYNC control")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TsyncCtrlW PP")
+    field(ZRVL, "0")
+    field(ZRST, "from polariry")
+    field(ONVL, "1")
+    field(ONST, "from TSYNC width")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbo, "$(P)TsyncCtrlW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TSYNC control")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TsyncCtrl")
+    field(SDIS, "$(P)TsyncCtrlS.PACT")
+    field(DISV, "1")
+    field(ZRVL, "0")
+    field(ZRST, "from polariry")
+    field(ONVL, "1")
+    field(ONST, "from TSYNC width")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbi, "$(P)TsyncCtrlR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "TSYNC control")
+    field(INP,  "@asyn($(PORT))TsyncCtrl")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TsyncCtrlS")
+    field(ZRVL, "0")
+    field(ZRST, "from polariry")
+    field(ONVL, "1")
+    field(ONST, "from TSYNC width")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbo, "$(P)TsyncCtrlS")
+{
+    field(DOL,  "$(P)TsyncCtrlR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TsyncCtrl PP")
+    field(ZRVL, "0")
+    field(ZRST, "from polariry")
+    field(ONVL, "1")
+    field(ONST, "from TSYNC width")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbo, "$(P)TxenCtrl")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TXEN control")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TxenCtrlW PP")
+    field(ZRVL, "0")
+    field(ZRST, "TXEN")
+    field(ONVL, "1")
+    field(ONST, "TXEN")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbo, "$(P)TxenCtrlW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TXEN control")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TxenCtrl")
+    field(SDIS, "$(P)TxenCtrlS.PACT")
+    field(DISV, "1")
+    field(ZRVL, "0")
+    field(ZRST, "TXEN")
+    field(ONVL, "1")
+    field(ONST, "TXEN")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbi, "$(P)TxenCtrlR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "TXEN control")
+    field(INP,  "@asyn($(PORT))TxenCtrl")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TxenCtrlS")
+    field(ZRVL, "0")
+    field(ZRST, "TXEN")
+    field(ONVL, "1")
+    field(ONST, "TXEN")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(mbbo, "$(P)TxenCtrlS")
+{
+    field(DOL,  "$(P)TxenCtrlR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TxenCtrl PP")
+    field(ZRVL, "0")
+    field(ZRST, "TXEN")
+    field(ONVL, "1")
+    field(ONST, "TXEN")
+    field(TWVL, "2")
+    field(TWST, "always 0")
+    field(THVL, "3")
+    field(THST, "always 1")
+}
+record(bo, "$(P)LvdsMonitorEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "LVDS debug monitor")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)LvdsMonitorEnW PP")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)LvdsMonitorEnW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "LVDS debug monitor")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))LvdsMonitorEn")
+    field(SDIS, "$(P)LvdsMonitorEnS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)LvdsMonitorEnR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "LVDS debug monitor")
+    field(INP,  "@asyn($(PORT))LvdsMonitorEn")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)LvdsMonitorEnS")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)LvdsMonitorEnS")
+{
+    field(DOL,  "$(P)LvdsMonitorEnR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LvdsMonitorEn PP")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)ResetMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset mode")
+    field(PINI, "YES")
+    field(VAL,  "1")
+    field(OUT,  "$(P)ResetModeW PP")
+    field(ZNAM, "internal")
+    field(ONAM, "external")
+}
+record(bo, "$(P)ResetModeW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset mode")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetMode")
+    field(SDIS, "$(P)ResetModeS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "internal")
+    field(ONAM, "external")
+}
+record(bi, "$(P)ResetModeR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Reset mode")
+    field(INP,  "@asyn($(PORT))ResetMode")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)ResetModeS")
+    field(ZNAM, "internal")
+    field(ONAM, "external")
+}
+record(bo, "$(P)ResetModeS")
+{
+    field(DOL,  "$(P)ResetModeR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)ResetMode PP")
+    field(ZNAM, "internal")
+    field(ONAM, "external")
+}
+record(bo, "$(P)TclkMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TCLK mode")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TclkModeW PP")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)TclkModeW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TCLK mode")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TclkMode")
+    field(SDIS, "$(P)TclkModeS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bi, "$(P)TclkModeR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "TCLK mode")
+    field(INP,  "@asyn($(PORT))TclkMode")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TclkModeS")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)TclkModeS")
+{
+    field(DOL,  "$(P)TclkModeR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TclkMode PP")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)TsyncMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TSYNC mode")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TsyncModeW PP")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)TsyncModeW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TSYNC mode")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TsyncMode")
+    field(SDIS, "$(P)TsyncModeS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bi, "$(P)TsyncModeR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "TSYNC mode")
+    field(INP,  "@asyn($(PORT))TsyncMode")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TsyncModeS")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)TsyncModeS")
+{
+    field(DOL,  "$(P)TsyncModeR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TsyncMode PP")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)TxenMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TXEN mode")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TxenModeW PP")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)TxenModeW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TXEN mode")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TxenMode")
+    field(SDIS, "$(P)TxenModeS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bi, "$(P)TxenModeR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "TXEN mode")
+    field(INP,  "@asyn($(PORT))TxenMode")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TxenModeS")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)TxenModeS")
+{
+    field(DOL,  "$(P)TxenModeR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TxenMode PP")
+    field(ZNAM, "external")
+    field(ONAM, "internal")
+}
+record(bo, "$(P)Ch1:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan1 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch1:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch1:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan1 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch1:Disable")
+    field(SDIS, "$(P)Ch1:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch1:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan1 disable")
+    field(INP,  "@asyn($(PORT))Ch1:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch1:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch1:DisableS")
+{
+    field(DOL,  "$(P)Ch1:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch1:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch2:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan2 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch2:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch2:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan2 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch2:Disable")
+    field(SDIS, "$(P)Ch2:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch2:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan2 disable")
+    field(INP,  "@asyn($(PORT))Ch2:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch2:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch2:DisableS")
+{
+    field(DOL,  "$(P)Ch2:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch2:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch3:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan3 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch3:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch3:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan3 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch3:Disable")
+    field(SDIS, "$(P)Ch3:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch3:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan3 disable")
+    field(INP,  "@asyn($(PORT))Ch3:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch3:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch3:DisableS")
+{
+    field(DOL,  "$(P)Ch3:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch3:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch4:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan4 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch4:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch4:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan4 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch4:Disable")
+    field(SDIS, "$(P)Ch4:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch4:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan4 disable")
+    field(INP,  "@asyn($(PORT))Ch4:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch4:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch4:DisableS")
+{
+    field(DOL,  "$(P)Ch4:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch4:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch5:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan5 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch5:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch5:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan5 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch5:Disable")
+    field(SDIS, "$(P)Ch5:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch5:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan5 disable")
+    field(INP,  "@asyn($(PORT))Ch5:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch5:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch5:DisableS")
+{
+    field(DOL,  "$(P)Ch5:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch5:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch6:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan6 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch6:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch6:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan6 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch6:Disable")
+    field(SDIS, "$(P)Ch6:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch6:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan6 disable")
+    field(INP,  "@asyn($(PORT))Ch6:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch6:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch6:DisableS")
+{
+    field(DOL,  "$(P)Ch6:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch6:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch7:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan7 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch7:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch7:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan7 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch7:Disable")
+    field(SDIS, "$(P)Ch7:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch7:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan7 disable")
+    field(INP,  "@asyn($(PORT))Ch7:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch7:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch7:DisableS")
+{
+    field(DOL,  "$(P)Ch7:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch7:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch8:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan8 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch8:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch8:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan8 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch8:Disable")
+    field(SDIS, "$(P)Ch8:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch8:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan8 disable")
+    field(INP,  "@asyn($(PORT))Ch8:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch8:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch8:DisableS")
+{
+    field(DOL,  "$(P)Ch8:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch8:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch9:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan9 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch9:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch9:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan9 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch9:Disable")
+    field(SDIS, "$(P)Ch9:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch9:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan9 disable")
+    field(INP,  "@asyn($(PORT))Ch9:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch9:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch9:DisableS")
+{
+    field(DOL,  "$(P)Ch9:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch9:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch10:Disable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan10 disable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)Ch10:DisableW PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch10:DisableW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Chan10 disable")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Ch10:Disable")
+    field(SDIS, "$(P)Ch10:DisableS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bi, "$(P)Ch10:DisableR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Chan10 disable")
+    field(INP,  "@asyn($(PORT))Ch10:Disable")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Ch10:DisableS")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)Ch10:DisableS")
+{
+    field(DOL,  "$(P)Ch10:DisableR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)Ch10:Disable PP")
+    field(ZNAM, "enable")
+    field(ONAM, "disable")
+}
+record(bo, "$(P)VerbResponse")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Verbose command response")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)VerbResponseW PP")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)VerbResponseW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Verbose command response")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))VerbResponse")
+    field(SDIS, "$(P)VerbResponseS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)VerbResponseR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Verbose command response")
+    field(INP,  "@asyn($(PORT))VerbResponse")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)VerbResponseS")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)VerbResponseS")
+{
+    field(DOL,  "$(P)VerbResponseR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)VerbResponse PP")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)VerbDisc")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Verbose discover")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)VerbDiscW PP")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)VerbDiscW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Verbose discover")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))VerbDisc")
+    field(SDIS, "$(P)VerbDiscS.PACT")
+    field(DISV, "1")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bi, "$(P)VerbDiscR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Verbose discover")
+    field(INP,  "@asyn($(PORT))VerbDisc")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)VerbDiscS")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)VerbDiscS")
+{
+    field(DOL,  "$(P)VerbDiscR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)VerbDisc PP")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
