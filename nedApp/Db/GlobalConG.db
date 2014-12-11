@@ -10,6 +10,10 @@ record(stringin, "$(P)PrevReq") {
    field(DESC, "Indication of Request")
 }
 
+record(ai, "$(P)NumFound") {
+   field(DESC, "Number of devices found")
+}
+
 # Two global status PVs.
 record(bi, "$(P)ReqSucceeded") {
    field(DESC, "Request worked, all devices")

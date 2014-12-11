@@ -156,7 +156,7 @@ int numEnabled = 0;
  * then truncating at ":". numFound indicates how many found
  */
 string deviceNames[MAXDEVICES];
-int numFound;
+DECL(int, numFound, {GPREFIX}NumFound)
 
 /*
  * common variables
@@ -398,6 +398,7 @@ ss GlobalControl {
          /* find set of devices we are interested in */
          numFound = seqGrep("stringin", ".*:FailMsg", &deviceNames[0][0], 
                                                        MAXDEVICES);
+         pvPut(numFound);
          for (i=0; i<numFound; i++) {
             pvAssign(failMsg[i], deviceNames[i]);
             *strrchr(deviceNames[i], ':') = 0;
