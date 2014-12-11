@@ -403,6 +403,7 @@ ss GlobalControl {
             *strrchr(deviceNames[i], ':') = 0;
             sprintf(namebuf, "%s:HwType", deviceNames[i]);
             pvAssign(hwtype[i], namebuf);
+            pvGet(hwtype[i]);
             sprintf(namebuf, "%s:CmdReq", deviceNames[i]);
             pvAssign(cmdReq[i], namebuf);
             sprintf(namebuf, "%s:CmdRsp", deviceNames[i]);
