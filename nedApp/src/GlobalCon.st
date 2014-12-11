@@ -452,11 +452,11 @@ ss GlobalControl {
      */
     CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus, FEM)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
-    TEST_PV(StartTestAcq, acquiring, ACQUIRING, DoneStarting)
+    TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting, FEM)
     OP_DONE(DoneStarting, globalStart)
     CMD_RSP_IFNOT(Stopping, STOPACQCMD, StopReadStatus, FEM)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
-    TEST_PV(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping)
+    TEST_PV_IFNOT(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping, FEM)
     OP_DONE(DoneStopping, globalStop)
     CMD_RSP(WritingConf, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
