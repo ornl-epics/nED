@@ -431,8 +431,8 @@ ss GlobalControl {
           PVPUTSTR(statePV,Discover)					\
        } state Discover
        when (delay(5)) {
-          printf("pvConnectCount = %ld but pvAssignCount = %ld\n",
-                  pvConnectCount(), pvAssignCount());
+          printf("pvConnectCount = %ld pvAssignCount = %ld numFound = %d\n",
+                  pvConnectCount(), pvAssignCount(), numFound);
        } state init
     }
     CMD_RSP(Discover, DISCOVERCMD, ReadVersion)
