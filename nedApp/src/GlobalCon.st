@@ -70,6 +70,7 @@ option -c;	/* do not wait for PVs to connect */
 
 /*
  * set PV n to string value s and put.
+   s is assumed to be a string, need not be quoted 
  */
 #define PVPUTSTR(n,s) {strcpy(n, #s); pvPut(n); }
 
@@ -366,7 +367,7 @@ string namebuf;
           pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME);						\
-          PVPUTSTR(prevReq,statePV)					\
+          strcpy(prevReq, statePV); pvPut(prevReq);			\
           PVPUTSTR(statePV,Ready)					\
       } state Ready							\
    }
@@ -424,6 +425,7 @@ ss GlobalControl {
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
           PVPUTSTR(prevReq,statePV)					\
+          strcpy(prevReq, statePV); pvPut(prevReq);			\
           PVPUTSTR(statePV,Discover)					\
        } state Discover
        when (delay(5)) {
