@@ -61,7 +61,7 @@ option -c;	/* do not wait for PVs to connect */
  * MAXDEVICES is for static mem allocation and must be higher than number of
  * devices expected.
  */
-#define MAXDEVICES 10	
+#define MAXDEVICES 100	
 
 /*
  * set PV n to numeric value v and put. 
@@ -232,7 +232,12 @@ string namebuf;
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { 					\
           cmdFailed[i] = 1;					\
-          sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
+          sprintf(failMsg[i], "Failed %s %d", #NAME, cmdRsp[i]);	\
+          pvPut(failMsg[i]);					\
+       } state NAME##0						\
+       when (delay(3.0)) {					\
+          cmdFailed[i] = 1;					\
+          sprintf(failMsg[i], "Timeout %s %d", #NAME, cmdRsp[i]);	\
           pvPut(failMsg[i]);					\
        } state NAME##0						\
     }					
