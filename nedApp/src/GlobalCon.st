@@ -70,6 +70,7 @@ option -c;	/* do not wait for PVs to connect */
 
 /*
  * set PV n to string value s and put.
+   s is assumed to be a string, need not be quoted 
  */
 #define PVPUTSTR(n,s) {strcpy(n, #s); pvPut(n); }
 
@@ -155,7 +156,7 @@ int numEnabled = 0;
  * then truncating at ":". numFound indicates how many found
  */
 string deviceNames[MAXDEVICES];
-int numFound;
+DECL(int, numFound, {GPREFIX}NumFound)
 
 /*
  * common variables
@@ -371,7 +372,7 @@ string namebuf;
           pvPut(pctSucceeded, SYNC);					\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME);						\
-          PVPUTSTR(prevReq,statePV)					\
+          strcpy(prevReq, statePV); pvPut(prevReq);			\
           PVPUTSTR(statePV,Ready)					\
       } state Ready							\
    }
@@ -399,12 +400,16 @@ ss GlobalControl {
    state init {
       entry {
          PVPUTSTR(statePV,init)
-         /* What we want here is to find the baseModulePlugin devices */
-         numFound = seqGrep("stringin", ".*:HwType", &deviceNames[0][0], 
+         /* find set of devices we are interested in */
+         numFound = seqGrep("stringin", ".*:FailMsg", &deviceNames[0][0], 
                                                        MAXDEVICES);
+         pvPut(numFound);
          for (i=0; i<numFound; i++) {
-            pvAssign(hwtype[i], deviceNames[i]);
+            pvAssign(failMsg[i], deviceNames[i]);
             *strrchr(deviceNames[i], ':') = 0;
+            sprintf(namebuf, "%s:HwType", deviceNames[i]);
+            pvAssign(hwtype[i], namebuf);
+            pvGet(hwtype[i]);
             sprintf(namebuf, "%s:CmdReq", deviceNames[i]);
             pvAssign(cmdReq[i], namebuf);
             sprintf(namebuf, "%s:CmdRsp", deviceNames[i]);
@@ -427,11 +432,12 @@ ss GlobalControl {
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
           PVPUTSTR(prevReq,statePV)					\
+          strcpy(prevReq, statePV); pvPut(prevReq);			\
           PVPUTSTR(statePV,Discover)					\
        } state Discover
        when (delay(5)) {
-          printf("pvConnectCount = %ld but pvAssignCount = %ld\n",
-                  pvConnectCount(), pvAssignCount());
+          printf("pvConnectCount = %ld pvAssignCount = %ld numFound = %d\n",
+                  pvConnectCount(), pvAssignCount(), numFound);
        } state init
     }
     CMD_RSP(Discover, DISCOVERCMD, ReadVersion)
@@ -452,11 +458,11 @@ ss GlobalControl {
      */
     CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus, FEM)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
-    TEST_PV(StartTestAcq, acquiring, ACQUIRING, DoneStarting)
+    TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting, FEM)
     OP_DONE(DoneStarting, globalStart)
     CMD_RSP_IFNOT(Stopping, STOPACQCMD, StopReadStatus, FEM)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
-    TEST_PV(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping)
+    TEST_PV_IFNOT(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping, FEM)
     OP_DONE(DoneStopping, globalStop)
     CMD_RSP(WritingConf, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
