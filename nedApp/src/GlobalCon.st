@@ -162,6 +162,7 @@ DECL(int, numFound, {GPREFIX}NumFound)
  * common variables
  */
 int i;
+int timedout;
 string namebuf;
 
 /*
@@ -209,7 +210,7 @@ string namebuf;
 #define RSP_BEGIN(NAME, NEXT)					\
     state NAME {						\
        when() {							\
-          i = -1;						\
+          i = -1; timedout = 0;					\
        } state NAME##0						\
     }								\
     state NAME##0 {						\
@@ -236,10 +237,16 @@ string namebuf;
           sprintf(failMsg[i], "Failed %s %d", #NAME, cmdRsp[i]);	\
           pvPut(failMsg[i]);					\
        } state NAME##0						\
+       when (timedout) {					\
+          cmdFailed[i] = 1;					\
+          sprintf(failMsg[i], "Timeout %s %d", #NAME, cmdRsp[i]);	\
+          pvPut(failMsg[i]);					\
+       } state NAME##0						\
        when (delay(3.0)) {					\
           cmdFailed[i] = 1;					\
           sprintf(failMsg[i], "Timeout %s %d", #NAME, cmdRsp[i]);	\
           pvPut(failMsg[i]);					\
+          timedout = 1;						\
        } state NAME##0						\
     }					
 
