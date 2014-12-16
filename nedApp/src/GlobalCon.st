@@ -57,6 +57,7 @@ option -c;	/* do not wait for PVs to connect */
 #define NOTACQUIRING	0
 #define ACQUIRING	1
 
+#define PVSEVROK	0
 /* 
  * MAXDEVICES is for static mem allocation and must be higher than number of
  * devices expected.
@@ -164,6 +165,7 @@ DECL(int, numFound, {GPREFIX}NumFound)
 int i;
 int timedout;
 string namebuf;
+int severity;
 
 /*
  * Macros used in constructing states and combinations of states
@@ -188,7 +190,7 @@ string namebuf;
           i = i+1;						\
        } 							\
        when (i >= numFound) { 					\
-       } state NEXT					\
+       } state NEXT						\
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##0	
 
@@ -196,9 +198,15 @@ string namebuf;
        when() {							\
           cmdReq[i] = COMMAND;					\
           pvPut(cmdReq[i], SYNC);				\
+          severity = pvSeverity(cmdReq[i]);			\
+          if (severity != PVSEVROK) {				\
+             cmdFailed[i] = 1;					\
+             sprintf(failMsg[i], "Failed %s PV sev %d", 	\
+                                  #NAME, severity);		\
+             pvPut(failMsg[i]);					\
+          }							\
        } state NAME##0						\
     }	
-
 /*
  * RSP_BEGIN() and RSP_END() are a pair of macros that together make two states
  * that check the responses of all devices to the last command. The same NAME 
