@@ -179,7 +179,8 @@ std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &
     std::shared_ptr<Timer> timer(new Timer(true));
     if (timer) {
         std::function<float(void)> timerCb = std::bind(&BasePlugin::timerExpire, this, timer, callback);
-        timer->schedule(timerCb, delay);
+        if (!timer->schedule(timerCb, delay)) 
+           LOG_WARN("Failed to schedule callback");
     }
     return timer;
 }

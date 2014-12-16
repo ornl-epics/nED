@@ -106,7 +106,9 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         }
 
         if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
-            scheduleTimeoutCallback(m_waitingResponse, NO_RESPONSE_TIMEOUT);
+            if (!scheduleTimeoutCallback(m_waitingResponse, 
+                                         NO_RESPONSE_TIMEOUT))
+               LOG_WARN("Failed to schedule CmdRsp timeout callback");
             setIntegerParam(CmdRsp, LAST_CMD_WAIT);
         } else {
             setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
