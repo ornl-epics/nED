@@ -1,0 +1,123 @@
+DspPluginConfigure("dsp2", "cmd2", "21.162.47.161", "v63", 0)
+dbLoadRecords("../../db/DspPlugin.db","P=$(PREFIX,undefined)dsp2:,PORT=dsp2")
+
+FemPluginConfigure("fem7", "cmd2", "0.55.228.186", "v00", 0)
+dbLoadRecords("../../db/FemPlugin_v00.db","P=$(PREFIX,undefined)fem1:,PORT=fem1")
+
+FemPluginConfigure("fem8", "cmd2", "21.190.216.248", "v00", 0)
+dbLoadRecords("../../db/FemPlugin_v00.db","P=$(PREFIX,undefined)fem2:,PORT=fem2")
+
+FemPluginConfigure("fem9", "cmd2", "21.190.220.68", "v00", 0)
+dbLoadRecords("../../db/FemPlugin_v00.db","P=$(PREFIX,undefined)fem3:,PORT=fem3")
+
+FemPluginConfigure("fem10", "cmd2", "21.190.231.15", "v00", 0)
+dbLoadRecords("../../db/FemPlugin_v00.db","P=$(PREFIX,undefined)fem4:,PORT=fem4")
+
+FemPluginConfigure("fem11", "cmd2", "21.190.237.196", "v00", 0)
+dbLoadRecords("../../db/FemPlugin_v00.db","P=$(PREFIX,undefined)fem5:,PORT=fem5")
+
+FemPluginConfigure("fem12", "cmd2", "21.191.11.141", "v00", 0)
+dbLoadRecords("../../db/FemPlugin_v00.db","P=$(PREFIX,undefined)fem6:,PORT=fem6")
+
+RocPluginConfigure("roc35", "cmd2", "21.217.194.157", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc35:,PORT=roc35")
+
+RocPluginConfigure("roc36", "cmd2", "21.217.196.225", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc36:,PORT=roc36")
+
+RocPluginConfigure("roc37", "cmd2", "21.217.197.104", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc37:,PORT=roc37")
+
+RocPluginConfigure("roc38", "cmd2", "21.217.205.145", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc38:,PORT=roc38")
+
+RocPluginConfigure("roc39", "cmd2", "21.217.207.64", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc39:,PORT=roc39")
+
+RocPluginConfigure("roc40", "cmd2", "21.217.208.198", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc40:,PORT=roc40")
+
+RocPluginConfigure("roc41", "cmd2", "21.217.210.159", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc41:,PORT=roc41")
+
+RocPluginConfigure("roc42", "cmd2", "21.217.211.7", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc42:,PORT=roc42")
+
+RocPluginConfigure("roc43", "cmd2", "21.217.213.163", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc43:,PORT=roc43")
+
+RocPluginConfigure("roc44", "cmd2", "21.217.217.67", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc44:,PORT=roc44")
+
+RocPluginConfigure("roc45", "cmd2", "21.217.217.255", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc45:,PORT=roc45")
+
+RocPluginConfigure("roc46", "cmd2", "21.217.219.240", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc46:,PORT=roc46")
+
+RocPluginConfigure("roc47", "cmd2", "21.217.221.40", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc47:,PORT=roc47")
+
+RocPluginConfigure("roc48", "cmd2", "21.217.226.219", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc48:,PORT=roc48")
+
+RocPluginConfigure("roc49", "cmd2", "21.217.228.38", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc49:,PORT=roc49")
+
+RocPluginConfigure("roc50", "cmd2", "21.217.237.41", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc50:,PORT=roc50")
+
+RocPluginConfigure("roc51", "cmd2", "21.217.243.113", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc51:,PORT=roc51")
+
+RocPluginConfigure("roc52", "cmd2", "21.217.243.128", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc52:,PORT=roc52")
+
+RocPluginConfigure("roc53", "cmd2", "21.217.251.81", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc53:,PORT=roc53")
+
+RocPluginConfigure("roc54", "cmd2", "21.217.252.148", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc54:,PORT=roc54")
+
+RocPluginConfigure("roc55", "cmd2", "21.217.254.203", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc55:,PORT=roc55")
+
+RocPluginConfigure("roc56", "cmd2", "21.218.1.121", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc56:,PORT=roc56")
+
+RocPluginConfigure("roc57", "cmd2", "21.218.2.164", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc57:,PORT=roc57")
+
+RocPluginConfigure("roc58", "cmd2", "21.218.2.166", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc58:,PORT=roc58")
+
+RocPluginConfigure("roc59", "cmd2", "21.218.4.242", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc59:,PORT=roc59")
+
+RocPluginConfigure("roc60", "cmd2", "21.218.12.241", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc60:,PORT=roc60")
+
+RocPluginConfigure("roc61", "cmd2", "21.218.20.227", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc61:,PORT=roc61")
+
+RocPluginConfigure("roc62", "cmd2", "21.218.32.48", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc62:,PORT=roc62")
+
+RocPluginConfigure("roc63", "cmd2", "21.218.32.67", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc63:,PORT=roc63")
+
+RocPluginConfigure("roc64", "cmd2", "21.218.39.128", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc64:,PORT=roc64")
+
+RocPluginConfigure("roc65", "cmd2", "21.218.41.35", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc65:,PORT=roc65")
+
+RocPluginConfigure("roc66", "cmd2", "21.218.47.103", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc66:,PORT=roc66")
+
+RocPluginConfigure("roc67", "cmd2", "21.218.48.251", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc67:,PORT=roc67")
+
+RocPluginConfigure("roc68", "cmd2", "21.218.51.16", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc68:,PORT=roc68")
+

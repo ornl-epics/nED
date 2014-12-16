@@ -1,0 +1,3 @@
+$(PLUGIN)Configure("$(ID)", "<port>", "$(IP)", "v$(VER)", 0)
+dbLoadRecords("../../db/$(PLUGIN)_v$(VER).db","P=$(PREFIX)$(ID):,PORT=$(ID)")
+
