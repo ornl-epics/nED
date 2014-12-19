@@ -220,7 +220,26 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all config ROC v5.6 parameters to be exposed to EPICS.
          */
         void createConfigParams_v56();
+        
+	/**
+         * Create and register all status ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v57();
 
+	/**
+         * Create and register all status counter ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createCounterParams_v57();
+        
+	/**
+         * Create and register all config ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v57();
+
+        /**
+         * Create and register all config ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createConfigExParams_v57();
 
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring
