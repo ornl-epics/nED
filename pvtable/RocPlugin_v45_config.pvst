@@ -3,469 +3,409 @@
     <pvlist>
         <pv>
             <selected>false</selected>
-            <name>$(P)ErrParity</name>
+            <name>$(P)Ch1:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Configured</name>
+            <name>$(P)Ch2:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Discovered</name>
+            <name>$(P)Ch3:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysrstBHigh</name>
+            <name>$(P)Ch4:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)SysrstBLow</name>
+            <name>$(P)Ch5:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TxenBHigh</name>
+            <name>$(P)Ch6:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TxenBLow</name>
+            <name>$(P)Ch7:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TsyncHigh</name>
+            <name>$(P)Ch8:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TsyncLow</name>
+            <name>$(P)Ch1:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TclkHigh</name>
+            <name>$(P)Ch2:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TclkLow</name>
+            <name>$(P)Ch3:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)HVStatus</name>
+            <name>$(P)Ch4:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)AutoCorrection</name>
+            <name>$(P)Ch5:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:Event</name>
+            <name>$(P)Ch6:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:DiscHigh</name>
+            <name>$(P)Ch7:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:FifoFull</name>
+            <name>$(P)Ch8:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:CalcErr</name>
+            <name>$(P)Ch1:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:NegDenom</name>
+            <name>$(P)Ch2:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:CalcOverflow</name>
+            <name>$(P)Ch3:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:Event</name>
+            <name>$(P)Ch4:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:DiscHigh</name>
+            <name>$(P)Ch5:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:FifoFull</name>
+            <name>$(P)Ch6:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:CalcErr</name>
+            <name>$(P)Ch7:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:NegDenom</name>
+            <name>$(P)Ch8:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:CalcOverflow</name>
+            <name>$(P)Ch1:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:Event</name>
+            <name>$(P)Ch2:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:DiscHigh</name>
+            <name>$(P)Ch3:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:FifoFull</name>
+            <name>$(P)Ch4:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:CalcErr</name>
+            <name>$(P)Ch5:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:NegDenom</name>
+            <name>$(P)Ch6:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:CalcOverflow</name>
+            <name>$(P)Ch7:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:Event</name>
+            <name>$(P)Ch8:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:DiscHigh</name>
+            <name>$(P)Ch1:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:FifoFull</name>
+            <name>$(P)Ch2:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:CalcErr</name>
+            <name>$(P)Ch3:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:NegDenom</name>
+            <name>$(P)Ch4:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:CalcOverflow</name>
+            <name>$(P)Ch5:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:Event</name>
+            <name>$(P)Ch6:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:DiscHigh</name>
+            <name>$(P)Ch7:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:FifoFull</name>
+            <name>$(P)Ch8:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:CalcErr</name>
+            <name>$(P)Ch1:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:NegDenom</name>
+            <name>$(P)Ch2:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:CalcOverflow</name>
+            <name>$(P)Ch3:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:Event</name>
+            <name>$(P)Ch4:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:DiscHigh</name>
+            <name>$(P)Ch5:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:FifoFull</name>
+            <name>$(P)Ch6:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:CalcErr</name>
+            <name>$(P)Ch7:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:NegDenom</name>
+            <name>$(P)Ch8:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:CalcOverflow</name>
+            <name>$(P)Ch1:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:Event</name>
+            <name>$(P)Ch2:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:DiscHigh</name>
+            <name>$(P)Ch3:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:FifoFull</name>
+            <name>$(P)Ch4:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:CalcErr</name>
+            <name>$(P)Ch5:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:NegDenom</name>
+            <name>$(P)Ch6:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:CalcOverflow</name>
+            <name>$(P)Ch7:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:Event</name>
+            <name>$(P)Ch8:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:DiscHigh</name>
+            <name>$(P)TimeVetoLow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:FifoFull</name>
+            <name>$(P)TimeVetoHigh</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:CalcErr</name>
+            <name>$(P)FakeTrigDelay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:NegDenom</name>
+            <name>$(P)LvdsRate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:CalcOverflow</name>
+            <name>$(P)HighResMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:A:BaseAvg</name>
+            <name>$(P)TxEnable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:B:BaseAvg</name>
+            <name>$(P)OutputMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:A:BaseAvg</name>
+            <name>$(P)AcquireEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:B:BaseAvg</name>
+            <name>$(P)TsyncSelect</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:A:BaseAvg</name>
+            <name>$(P)TclkSelect</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:B:BaseAvg</name>
+            <name>$(P)Reset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:A:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch4:B:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch5:A:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch5:B:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch6:A:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch6:B:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch7:A:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch8:B:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch8:A:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)Ch8:B:BaseAvg</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>$(P)StatFill</name>
+            <name>$(P)AcquireMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

@@ -1203,7 +1203,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:SlopeMax</name>
+            <name>$(P)MaximumSlope</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

@@ -628,5 +628,5 @@ void RocPlugin::createConfigParams_v56()
 
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
-    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate [10MHz/(rate+1)]
+    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate [10MHz]
 }

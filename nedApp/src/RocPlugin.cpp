@@ -49,7 +49,7 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
     , m_version(version)
 {
     if (0) {
-    } else if (m_version == "v45") {
+    } else if (m_version == "v45" || m_version == "v44") {
         setIntegerParam(Supported, 1);
         createStatusParams_v45();
         createConfigParams_v45();
