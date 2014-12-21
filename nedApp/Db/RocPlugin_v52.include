@@ -8548,37 +8548,37 @@ record(longout, "$(P)Ch8:B:SampleMaxS")
     field(OMSL, "closed_loop")
     field(OUT,  "$(P)Ch8:B:SampleMax PP")
 }
-record(longout, "$(P)Ch8B:SlopeMax")
+record(longout, "$(P)Ch8:B:SlopeMax")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Maximum slope")
     field(PINI, "YES")
     field(VAL,  "0")
-    field(OUT,  "$(P)Ch8B:SlopeMaxW PP")
+    field(OUT,  "$(P)Ch8:B:SlopeMaxW PP")
 }
-record(longout, "$(P)Ch8B:SlopeMaxW")
+record(longout, "$(P)Ch8:B:SlopeMaxW")
 {
     field(ASG,  "BEAMLINE")
     field(DESC, "Maximum slope")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))Ch8B:SlopeMax")
-    field(SDIS, "$(P)Ch8B:SlopeMaxS.PACT")
+    field(OUT,  "@asyn($(PORT))Ch8:B:SlopeMax")
+    field(SDIS, "$(P)Ch8:B:SlopeMaxS.PACT")
     field(DISV, "1")
 }
-record(longin, "$(P)Ch8B:SlopeMaxR")
+record(longin, "$(P)Ch8:B:SlopeMaxR")
 {
     field(DTYP, "asynInt32")
     field(DESC, "Maximum slope")
-    field(INP,  "@asyn($(PORT))Ch8B:SlopeMax")
+    field(INP,  "@asyn($(PORT))Ch8:B:SlopeMax")
     field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)Ch8B:SlopeMaxS")
+    field(FLNK, "$(P)Ch8:B:SlopeMaxS")
 }
-record(longout, "$(P)Ch8B:SlopeMaxS")
+record(longout, "$(P)Ch8:B:SlopeMaxS")
 {
-    field(DOL,  "$(P)Ch8B:SlopeMaxR NPP")
+    field(DOL,  "$(P)Ch8:B:SlopeMaxR NPP")
     field(OMSL, "closed_loop")
-    field(OUT,  "$(P)Ch8B:SlopeMax PP")
+    field(OUT,  "$(P)Ch8:B:SlopeMax PP")
 }
 record(bo, "$(P)Ch1:Enable")
 {
