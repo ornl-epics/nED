@@ -83,8 +83,8 @@ def main():
         print "ERROR: Can not find beamline prefix, must specify one with -b option"
         parse.print_help()
         sys.exit(1)
-    if bl_prefix[-1] != ":":
-        bl_prefix.append(":")
+#    if bl_prefix[-1] != ":":
+#        bl_prefix.append(":")
 
     plugins = parse_st_cmd_plugins(st_cmd, bl_prefix)
 
