@@ -23,7 +23,6 @@ DB += RocPlugin_v51.db
 DB += RocPlugin_v52.db
 DB += RocPlugin_v54.db
 DB += RocPlugin_v56.db
-DB += RocPlugin_v57.db
 DB += RocHv.template
 DB += ROCHV.db
 DB += ROCHVSumBL16b.db

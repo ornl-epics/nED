@@ -259,20 +259,4 @@ foreach $line ( <STDIN> ) {
             longout($name, $desc, $valstr, $val);
         }
     }
-    if ($line =~ m/createConfigParamEx *\( *"([a-zA-Z0-9_:]+)" *, *'([0-9A-F])' *, *([0-9a-fA-FxX]+) *, *([0-9]+) *, *([0-9]+) *, *(-?[0-9]+).*\/\/ *(.*)$/) {
-        my ($name,$section,$offset,$width,$shift,$val,$comment) = ($1,$2,$3,$4,$5,$6,$7);
-        $comment =~ /^\s*([^\(]*)\(?(.*)\)?$/;
-        my ($desc, $valstr) = ($1, $2);
-        $valstr =~ s/\)$//;
-
-        if ($valstr =~ /^range/) {
-            longout($name, $desc, $valstr, $val);
-        } elsif ($width == 1 && $valstr ne "") {
-            bo($name, $desc, $valstr, $val);
-        } elsif ($width > 1 && $width < 15 && $valstr ne "") {
-            mbbo($name, $desc, $valstr, $val);
-        } else {
-            longout($name, $desc, $valstr, $val);
-        }
-   }
 }

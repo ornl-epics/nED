@@ -156,11 +156,9 @@ class BaseModulePlugin : public BasePlugin {
         uint32_t m_statusPayloadLength;                 //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
         uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
         uint32_t m_configPayloadLength;                 //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParam()
-        uint32_t m_configPayloadLengthEx;               //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParamEx()
         std::map<int, StatusParamDesc> m_statusParams;  //!< Map of exported status parameters
         std::map<int, StatusParamDesc> m_counterParams; //!< Map of exported status counter parameters
         std::map<int, ConfigParamDesc> m_configParams;  //!< Map of exported config parameters
-        std::map<int, ConfigParamDesc> m_configParamsEx;  //!< Map of exported config parameters
         StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
 
@@ -168,8 +166,6 @@ class BaseModulePlugin : public BasePlugin {
         bool m_behindDsp;
         std::map<char, uint32_t> m_configSectionSizes;  //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
         std::map<char, uint32_t> m_configSectionOffsets;//!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
-        std::map<char, uint32_t> m_configSectionSizesEx;  //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
-        std::map<char, uint32_t> m_configSectionOffsetsEx;//!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
         std::shared_ptr<Timer> m_timeoutTimer;          //!< Currently running timer for response timeout handling
 
     public: // functions
@@ -345,7 +341,6 @@ class BaseModulePlugin : public BasePlugin {
          * @return Response to wait for.
          */
         virtual DasPacket::CommandType reqReadConfig();
-        virtual DasPacket::CommandType reqReadConfigEx();
 
         /**
          * Default handler for READ_CONFIG response.
@@ -356,7 +351,6 @@ class BaseModulePlugin : public BasePlugin {
          * @return true if packet was parsed and module version verified.
          */
         virtual bool rspReadConfig(const DasPacket *packet);
-        virtual bool rspReadConfigEx(const DasPacket *packet);
 
         /**
          * Construct WRITE_CONFIG payload and send it to module.
@@ -375,7 +369,6 @@ class BaseModulePlugin : public BasePlugin {
          * @return Response to wait for.
          */
         virtual DasPacket::CommandType reqWriteConfig();
-        virtual DasPacket::CommandType reqWriteConfigEx();
 
         /**
          * Default handler for READ_CONFIG response.
@@ -388,7 +381,6 @@ class BaseModulePlugin : public BasePlugin {
          * @retval false Timeout has occurred and response is invalid.
          */
         virtual bool rspWriteConfig(const DasPacket *packet);
-        virtual bool rspWriteConfigEx(const DasPacket *packet);
 
         /**
          * Send START command to module.
@@ -458,7 +450,6 @@ class BaseModulePlugin : public BasePlugin {
          * Create and register single integer config parameter.
          */
         void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
-        void createConfigParamEx(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
 
         /**
          * Convert IP or hex string into 4 byte hardware address.
@@ -521,7 +512,6 @@ class BaseModulePlugin : public BasePlugin {
          * Trigger calculating the configuration parameter offsets.
          */
         void recalculateConfigParams();
-        void recalculateConfigParamsEx();
 
     protected:
         #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
