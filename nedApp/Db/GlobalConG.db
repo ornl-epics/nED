@@ -14,9 +14,9 @@ record(ai, "$(P)NumFound") {
    field(DESC, "Number of devices found")
 }
 
-# Two global status PVs.
+# Global status PVs.
 record(bi, "$(P)ReqSucceeded") {
-   field(DESC, "Request worked, all devices")
+   field(DESC, "Request worked, criterion% devices")
    field(OSV, "NO_ALARM")
    field(ZSV, "MAJOR")
    field(ONAM, "Succeeded")
@@ -27,6 +27,15 @@ record(ai, "$(P)PctSucceeded") {
    field(DESC, "% of devices that worked")
    field(PREC, "1")
    field(EGU, "%")
+}
+
+record(ao, "$(P)PctCriterion") {
+   field(DESC, "% of devices needed for success ")
+   field(PREC, "1")
+   field(PINI, "YES")
+   field(DOL, "100.0")
+   field(EGU, "%")
+   info(autosaveFields, "VAL")
 }
 
 # Busy records for requesting command sequences

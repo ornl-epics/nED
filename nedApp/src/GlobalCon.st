@@ -40,6 +40,8 @@ option -c;	/* do not wait for PVs to connect */
 #define WAITRESP	2
 #define TIMEOUTRSP	3
 #define ERRORRSP	4
+#define SKIPPEDRSP	5
+
 
 /*
  * define valid values for Verified PVs
@@ -138,11 +140,12 @@ DECL(string, prevReq, {GPREFIX}PrevReq)
 
 /*
  * ReqSucceeded will be set true when one or a series of attempts to perform 
- * an operation succeeded for all devices. pctSucceeded will give a 
- * percentage of devices that succeeded.
+ * an operation succeeded for the percentage of devices (pctSucceeded) 
+ * specified by pctCriterion. 
  */
 DECL(int, requestSucceeded ,{GPREFIX}ReqSucceeded)
 DECL(float, pctSucceeded, {GPREFIX}PctSucceeded)
+DECL(float, pctCriterion, {GPREFIX}PctCriterion)
 
 /*
  * Variables used by sequencer to keep track of success or failure of 
@@ -355,40 +358,31 @@ int severity;
 #define OP_DONE(NAME, EVNAME) 						\
    state NAME {								\
       when() {								\
-          requestSucceeded = 1;						\
           for (i = 0; i< numFound; i++) {				\
-             if (cmdFailed[i]) {					\
-                cmdFailed[i] = 0;	/* ready for next use */	\
-                if (!disable[i]) {					\
-                   requestSucceeded = 0;				\
-                   numEnabled++;					\
-                }							\
-             }								\
-             else							\
-             {								\
-                failMsg[i][0] = 0;					\
-                pvPut(failMsg[i]);					\
-                if (!disable[i]) {					\
+             if (!disable[i]) {						\
+                numEnabled++;						\
+                if (cmdFailed[i]) {					\
+                   cmdFailed[i] = 0;	/* ready for next use */	\
+                } else {						\
+                   failMsg[i][0] = 0;					\
+                   pvPut(failMsg[i]);					\
                    PVPUTNUM(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
-                   numEnabled++;					\
                 }							\
-             }								\
+             }		   						\
           }								\
-          pvPut(requestSucceeded, SYNC);				\
-          if (requestSucceeded) {					\
-             pctSucceeded = 100.0;					\
-          } else {							\
-             if (numEnabled == 0)					\
-                pctSucceeded = 0.0;					\
-             else							\
-                pctSucceeded = (100.0 * numSucceeded)/numEnabled;	\
-          }								\
-          pvPut(pctSucceeded, SYNC);					\
-          EVNAME = 0;	/* release busy record */			\
-          pvPut(EVNAME);						\
+          if (numEnabled == 0)						\
+             pctSucceeded = 0.0;					\
+          else 								\
+             pctSucceeded = (100.0 * numSucceeded)/numEnabled;		\
+          pvPut(pctSucceeded);						\
+          pvGet(pctCriterion);						\
+          requestSucceeded = (pctSucceeded >= pctCriterion)? 1 : 0;	\
+          pvPut(requestSucceeded,SYNC);					\
           strcpy(prevReq, statePV); pvPut(prevReq);			\
           PVPUTSTR(statePV,Ready)					\
+          EVNAME = 0;	/* release busy record */			\
+          pvPut(EVNAME);						\
       } state Ready							\
    }
 /* 
