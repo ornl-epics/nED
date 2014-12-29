@@ -51,289 +51,289 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:InOffset</name>
+            <name>$(P)Ch1:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:InOffset</name>
+            <name>$(P)Ch2:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:InOffset</name>
+            <name>$(P)Ch3:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:InOffset</name>
+            <name>$(P)Ch4:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:InOffset</name>
+            <name>$(P)Ch5:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:InOffset</name>
+            <name>$(P)Ch6:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:InOffset</name>
+            <name>$(P)Ch7:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:InOffset</name>
+            <name>$(P)Ch8:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:InOffset</name>
+            <name>$(P)Ch1:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:InOffset</name>
+            <name>$(P)Ch2:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:InOffset</name>
+            <name>$(P)Ch3:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:InOffset</name>
+            <name>$(P)Ch4:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:InOffset</name>
+            <name>$(P)Ch5:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:InOffset</name>
+            <name>$(P)Ch6:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:InOffset</name>
+            <name>$(P)Ch7:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:InOffset</name>
+            <name>$(P)Ch8:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:AdcOffset</name>
+            <name>$(P)Ch1:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:AdcOffset</name>
+            <name>$(P)Ch2:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:AdcOffset</name>
+            <name>$(P)Ch3:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:AdcOffset</name>
+            <name>$(P)Ch4:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:AdcOffset</name>
+            <name>$(P)Ch5:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:AdcOffset</name>
+            <name>$(P)Ch6:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:AdcOffset</name>
+            <name>$(P)Ch7:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:AdcOffset</name>
+            <name>$(P)Ch8:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:AdcOffset</name>
+            <name>$(P)Ch1:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:AdcOffset</name>
+            <name>$(P)Ch2:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:AdcOffset</name>
+            <name>$(P)Ch3:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:AdcOffset</name>
+            <name>$(P)Ch4:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:AdcOffset</name>
+            <name>$(P)Ch5:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:AdcOffset</name>
+            <name>$(P)Ch6:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:AdcOffset</name>
+            <name>$(P)Ch7:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:AdcOffset</name>
+            <name>$(P)Ch8:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:Threshold</name>
+            <name>$(P)Ch1:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:Threshold</name>
+            <name>$(P)Ch2:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:Threshold</name>
+            <name>$(P)Ch3:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:Threshold</name>
+            <name>$(P)Ch4:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:Threshold</name>
+            <name>$(P)Ch5:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:Threshold</name>
+            <name>$(P)Ch6:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:Threshold</name>
+            <name>$(P)Ch7:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:Threshold</name>
+            <name>$(P)Ch8:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:Threshold</name>
+            <name>$(P)Ch1:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:Threshold</name>
+            <name>$(P)Ch2:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:Threshold</name>
+            <name>$(P)Ch3:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:Threshold</name>
+            <name>$(P)Ch4:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:Threshold</name>
+            <name>$(P)Ch5:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:Threshold</name>
+            <name>$(P)Ch6:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:Threshold</name>
+            <name>$(P)Ch7:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:Threshold</name>
+            <name>$(P)Ch8:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -387,529 +387,529 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:FullScale</name>
+            <name>$(P)Ch1:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:FullScale</name>
+            <name>$(P)Ch2:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:FullScale</name>
+            <name>$(P)Ch3:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:FullScale</name>
+            <name>$(P)Ch4:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:FullScale</name>
+            <name>$(P)Ch5:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:FullScale</name>
+            <name>$(P)Ch6:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:FullScale</name>
+            <name>$(P)Ch7:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:FullScale</name>
+            <name>$(P)Ch8:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:FullScale</name>
+            <name>$(P)Ch1:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:FullScale</name>
+            <name>$(P)Ch2:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:FullScale</name>
+            <name>$(P)Ch3:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:FullScale</name>
+            <name>$(P)Ch4:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:FullScale</name>
+            <name>$(P)Ch5:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:FullScale</name>
+            <name>$(P)Ch6:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:FullScale</name>
+            <name>$(P)Ch7:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:FullScale</name>
+            <name>$(P)Ch8:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:GainAdj</name>
+            <name>$(P)Ch1:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:GainAdj</name>
+            <name>$(P)Ch2:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:GainAdj</name>
+            <name>$(P)Ch3:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:GainAdj</name>
+            <name>$(P)Ch4:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:GainAdj</name>
+            <name>$(P)Ch5:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:GainAdj</name>
+            <name>$(P)Ch6:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:GainAdj</name>
+            <name>$(P)Ch7:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:GainAdj</name>
+            <name>$(P)Ch8:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:GainAdj</name>
+            <name>$(P)Ch1:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:GainAdj</name>
+            <name>$(P)Ch2:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:GainAdj</name>
+            <name>$(P)Ch3:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:GainAdj</name>
+            <name>$(P)Ch4:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:GainAdj</name>
+            <name>$(P)Ch5:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:GainAdj</name>
+            <name>$(P)Ch6:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:GainAdj</name>
+            <name>$(P)Ch7:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:GainAdj</name>
+            <name>$(P)Ch8:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:Scale</name>
+            <name>$(P)Ch1:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:Scale</name>
+            <name>$(P)Ch2:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:Scale</name>
+            <name>$(P)Ch3:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:Scale</name>
+            <name>$(P)Ch4:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:Scale</name>
+            <name>$(P)Ch5:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:Scale</name>
+            <name>$(P)Ch6:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:Scale</name>
+            <name>$(P)Ch7:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:Scale</name>
+            <name>$(P)Ch8:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:Scale</name>
+            <name>$(P)Ch1:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:Scale</name>
+            <name>$(P)Ch2:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:Scale</name>
+            <name>$(P)Ch3:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:Scale</name>
+            <name>$(P)Ch4:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:Scale</name>
+            <name>$(P)Ch5:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:Scale</name>
+            <name>$(P)Ch6:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:Scale</name>
+            <name>$(P)Ch7:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:Scale</name>
+            <name>$(P)Ch8:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:Offset</name>
+            <name>$(P)Ch1:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:Offset</name>
+            <name>$(P)Ch2:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:Offset</name>
+            <name>$(P)Ch3:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:Offset</name>
+            <name>$(P)Ch4:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:Offset</name>
+            <name>$(P)Ch5:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:Offset</name>
+            <name>$(P)Ch6:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:Offset</name>
+            <name>$(P)Ch7:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:Offset</name>
+            <name>$(P)Ch8:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:Offset</name>
+            <name>$(P)Ch1:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:Offset</name>
+            <name>$(P)Ch2:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:Offset</name>
+            <name>$(P)Ch3:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:Offset</name>
+            <name>$(P)Ch4:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:Offset</name>
+            <name>$(P)Ch5:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:Offset</name>
+            <name>$(P)Ch6:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:Offset</name>
+            <name>$(P)Ch7:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:Offset</name>
+            <name>$(P)Ch8:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1:ScaleFactor</name>
+            <name>$(P)Ch1:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2:ScaleFactor</name>
+            <name>$(P)Ch2:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3:ScaleFactor</name>
+            <name>$(P)Ch3:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4:ScaleFactor</name>
+            <name>$(P)Ch4:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5:ScaleFactor</name>
+            <name>$(P)Ch5:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6:ScaleFactor</name>
+            <name>$(P)Ch6:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7:ScaleFactor</name>
+            <name>$(P)Ch7:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8:ScaleFactor</name>
+            <name>$(P)Ch8:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:Baseline</name>
+            <name>$(P)Ch1:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:Baseline</name>
+            <name>$(P)Ch2:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:Baseline</name>
+            <name>$(P)Ch3:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:Baseline</name>
+            <name>$(P)Ch4:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:Baseline</name>
+            <name>$(P)Ch5:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:Baseline</name>
+            <name>$(P)Ch6:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:Baseline</name>
+            <name>$(P)Ch7:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:Baseline</name>
+            <name>$(P)Ch8:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:Baseline</name>
+            <name>$(P)Ch1:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:Baseline</name>
+            <name>$(P)Ch2:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:Baseline</name>
+            <name>$(P)Ch3:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:Baseline</name>
+            <name>$(P)Ch4:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:Baseline</name>
+            <name>$(P)Ch5:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:Baseline</name>
+            <name>$(P)Ch6:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:Baseline</name>
+            <name>$(P)Ch7:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:Baseline</name>
+            <name>$(P)Ch8:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -921,199 +921,199 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:SampleMin</name>
+            <name>$(P)Ch1:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:SampleMin</name>
+            <name>$(P)Ch2:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:SampleMin</name>
+            <name>$(P)Ch3:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:SampleMin</name>
+            <name>$(P)Ch4:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:SampleMin</name>
+            <name>$(P)Ch5:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:SampleMin</name>
+            <name>$(P)Ch6:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:SampleMin</name>
+            <name>$(P)Ch7:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:SampleMin</name>
+            <name>$(P)Ch8:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:SampleMin</name>
+            <name>$(P)Ch1:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:SampleMin</name>
+            <name>$(P)Ch2:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:SampleMin</name>
+            <name>$(P)Ch3:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:SampleMin</name>
+            <name>$(P)Ch4:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:SampleMin</name>
+            <name>$(P)Ch5:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:SampleMin</name>
+            <name>$(P)Ch6:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:SampleMin</name>
+            <name>$(P)Ch7:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:SampleMin</name>
+            <name>$(P)Ch8:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1A:SampleMax</name>
+            <name>$(P)Ch1:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2A:SampleMax</name>
+            <name>$(P)Ch2:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3A:SampleMax</name>
+            <name>$(P)Ch3:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4A:SampleMax</name>
+            <name>$(P)Ch4:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5A:SampleMax</name>
+            <name>$(P)Ch5:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6A:SampleMax</name>
+            <name>$(P)Ch6:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7A:SampleMax</name>
+            <name>$(P)Ch7:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8A:SampleMax</name>
+            <name>$(P)Ch8:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch1B:SampleMax</name>
+            <name>$(P)Ch1:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch2B:SampleMax</name>
+            <name>$(P)Ch2:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch3B:SampleMax</name>
+            <name>$(P)Ch3:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch4B:SampleMax</name>
+            <name>$(P)Ch4:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch5B:SampleMax</name>
+            <name>$(P)Ch5:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch6B:SampleMax</name>
+            <name>$(P)Ch6:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch7B:SampleMax</name>
+            <name>$(P)Ch7:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:SampleMax</name>
+            <name>$(P)Ch8:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)Ch8B:SlopeMax</name>
+            <name>$(P)Ch8:B:SlopeMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1281,7 +1281,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)AutoCorrSam</name>
+            <name>$(P)AutoCorrectMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1293,19 +1293,19 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)MastDiscSel</name>
+            <name>$(P)MastDiscrimMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)EnableAcq</name>
+            <name>$(P)AcquireEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)AutoCorrEn</name>
+            <name>$(P)AutoCorrection</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1323,7 +1323,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)AcqMode</name>
+            <name>$(P)AcquireMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
@@ -1335,13 +1335,13 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TsyncSel</name>
+            <name>$(P)TsyncSelect</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)TclkSel</name>
+            <name>$(P)TclkSelect</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>

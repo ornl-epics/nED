@@ -75,7 +75,7 @@
         </pv>
         <pv>
             <selected>false</selected>
-            <name>$(P)AutoCorrection</name>
+            <name>$(P)AutoCorrectSts</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
