@@ -156,8 +156,7 @@ int numSucceeded = 0;
 int numEnabled = 0;
 
 /*
- * List of devices found by looking for all :HwType PVs in IOC using seqGrep,
- * then truncating at ":". numFound indicates how many found
+ * List of devices found in IOC using seqGrep. numFound indicates number found.
  */
 string deviceNames[MAXDEVICES];
 DECL(int, numFound, {GPREFIX}NumFound)
