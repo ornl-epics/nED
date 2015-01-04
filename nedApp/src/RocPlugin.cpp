@@ -71,6 +71,11 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         createStatusParams_v56();
         createCounterParams_v56();
         createConfigParams_v56();
+    } else if (m_version == "v57") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v57();
+        createCounterParams_v57();
+        createConfigParams_v57();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);

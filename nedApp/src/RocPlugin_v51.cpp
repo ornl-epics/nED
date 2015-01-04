@@ -511,7 +511,7 @@ void RocPlugin::createConfigParams_v51()
     createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // Chan7 B sample maximum
     createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // Chan8 B sample maximum
 
-    createConfigParam("Ch8:B:SlopeMax",   'D', 0x20, 12, 0, 0);     // Maximum slope
+    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope
 
     createConfigParam("Ch1:Enable",       'E', 0x0,  1,  0, 1);     // Chan1 enable                  (0=disable,1=enable)
     createConfigParam("Ch2:Enable",       'E', 0x0,  1,  1, 1);     // Chan2 enable                  (0=disable,1=enable)

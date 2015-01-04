@@ -31,7 +31,8 @@
  * * ROC hw=5.2 fw=5.2 as v52
  * * ROC hw=5.2 fw=5.4 as v54
  * * ROC hw=5.2 fw=5.5 as v55 (via v54 plugin)
- * * ROC hw=5.2 fw=5.6 as v56
+ * * ROC hw=5.2 fw=5.6 as v56 (TODO: consider refactor into v52 plugin)
+ * * ROC hw=5.2 fw=5.6 as v57 (TODO: consider refactor into v55/v54 plugin)
  *
  * In general firmware versions differ in status or configuration
  * parameters they provide. Those are available in individual files
@@ -43,6 +44,8 @@
  * packet before letting base implementation do the rest.  This is fixed in ROC v5.5
  *
  * ROC v5.6 is a variant of v5.2 that adds 3 extra registers to control pattern generator.
+ *
+ * ROC v5.7 is a variant of v5.5 that adds 3 extra registers to control pattern generator.
  */
 class RocPlugin : public BaseModulePlugin {
     public: // variables
@@ -185,12 +188,12 @@ class RocPlugin : public BaseModulePlugin {
         bool rspHvCmd(const DasPacket *packet);
 
         /**
-         * Create and register all status ROC v5.1 parameters to be exposed to EPICS.
+         * Create and register all status ROC v4.4/v4.5 parameters to be exposed to EPICS.
          */
         void createStatusParams_v45();
 
         /**
-         * Create and register all config ROC v5.1 parameters to be exposed to EPICS.
+         * Create and register all config ROC v4.4/v4.5 parameters to be exposed to EPICS.
          */
         void createConfigParams_v45();
 
@@ -215,12 +218,12 @@ class RocPlugin : public BaseModulePlugin {
         void createConfigParams_v52();
 
         /**
-         * Create and register all status ROC v5.4 parameters to be exposed to EPICS.
+         * Create and register all status ROC v5.4/v5.5 parameters to be exposed to EPICS.
          */
         void createStatusParams_v54();
 
         /**
-         * Create and register all config ROC v5.4 parameters to be exposed to EPICS.
+         * Create and register all config ROC v5.4/v5.5 parameters to be exposed to EPICS.
          */
         void createConfigParams_v54();
 
@@ -239,6 +242,20 @@ class RocPlugin : public BaseModulePlugin {
          */
         void createConfigParams_v56();
 
+        /**
+         * Create and register all status ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v57();
+
+        /**
+         * Create and register all status counter ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createCounterParams_v57();
+
+        /**
+         * Create and register all config ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v57();
 
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring

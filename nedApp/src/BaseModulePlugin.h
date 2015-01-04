@@ -323,6 +323,16 @@ class BaseModulePlugin : public BasePlugin {
         virtual DasPacket::CommandType reqReadStatusCounters();
 
         /**
+         * Called when reset status counters request to the module should be made.
+         *
+         * Base implementation simply sends a RESET_STATUS_COUNTERS command and sets up
+         * timeout callback.
+         *
+         * @return Response to wait for.
+         */
+        virtual DasPacket::CommandType reqResetStatusCounters();
+
+        /**
          * Default handler for READ_STATUS_COUNTERS response.
          *
          * Read the packet payload and populate counters parameters.
@@ -331,6 +341,15 @@ class BaseModulePlugin : public BasePlugin {
          * @return true if packet was parsed and module version verified.
          */
         virtual bool rspReadStatusCounters(const DasPacket *packet);
+
+        /**
+         * Default handler for RESET_STATUS_COUNTERS response.
+         *
+         * @param[in] packet with response to READ_STATUS_COUNTERS
+         * @retval true Timeout has not yet occurred
+         * @retval false Timeout has occurred and response is invalid.
+         */
+        virtual bool rspResetStatusCounters(const DasPacket *packet);
 
         /**
          * Called when read config request to the module should be made.

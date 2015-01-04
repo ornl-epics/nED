@@ -3,1477 +3,1375 @@
     <pvlist>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:UartByteErr</name>
+            <name>$(P)Ch1:PositionIdx</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:UartParErr</name>
+            <name>$(P)Ch2:PositionIdx</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:ProgramErr</name>
+            <name>$(P)Ch3:PositionIdx</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:CmdLenErr</name>
+            <name>$(P)Ch4:PositionIdx</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:UnknownCmd</name>
+            <name>$(P)Ch5:PositionIdx</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:NoTsync</name>
+            <name>$(P)Ch6:PositionIdx</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:LvdsFifoFul</name>
+            <name>$(P)Ch7:PositionIdx</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:LvdsStartEr</name>
+            <name>$(P)Ch8:PositionIdx</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:LvdsNoStart</name>
+            <name>$(P)Ch1:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:LvdsTimeout</name>
+            <name>$(P)Ch2:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:LvdsLenErr</name>
+            <name>$(P)Ch3:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:LvdsTypeErr</name>
+            <name>$(P)Ch4:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:LvdsParErr</name>
+            <name>$(P)Ch5:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:LvdsVerDet</name>
+            <name>$(P)Ch6:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:IntFifoFull</name>
+            <name>$(P)Ch7:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:IntFifoEmp</name>
+            <name>$(P)Ch8:A:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:CalcBadFin</name>
+            <name>$(P)Ch1:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:CalcBadEff</name>
+            <name>$(P)Ch2:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:CalcBadOver</name>
+            <name>$(P)Ch3:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:CalcBadCnt</name>
+            <name>$(P)Ch4:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:DataFifoFul</name>
+            <name>$(P)Ch5:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:DataFifoEmp</name>
+            <name>$(P)Ch6:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:HVStatus</name>
+            <name>$(P)Ch7:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:CalcActive</name>
+            <name>$(P)Ch8:B:InOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:AcquireStat</name>
+            <name>$(P)Ch1:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Discovered</name>
+            <name>$(P)Ch2:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Configured</name>
+            <name>$(P)Ch3:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:RisEdgeA</name>
+            <name>$(P)Ch4:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:SysrstBHigh</name>
+            <name>$(P)Ch5:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:SysrstBLow</name>
+            <name>$(P)Ch6:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:TxenBHigh</name>
+            <name>$(P)Ch7:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:TxenBLow</name>
+            <name>$(P)Ch8:A:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:TsyncHigh</name>
+            <name>$(P)Ch1:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:TsyncLow</name>
+            <name>$(P)Ch2:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:TclkHigh</name>
+            <name>$(P)Ch3:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:TclkLow</name>
+            <name>$(P)Ch4:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:RisEdgeSum</name>
+            <name>$(P)Ch5:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:RisEdgeB</name>
+            <name>$(P)Ch6:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1AAdjEn</name>
+            <name>$(P)Ch7:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1AAdjTrig</name>
+            <name>$(P)Ch8:B:AdcOffset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1AAdjSamL</name>
+            <name>$(P)Ch1:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1ASlopLim</name>
+            <name>$(P)Ch2:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1AOffLim</name>
+            <name>$(P)Ch3:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1ASlopLi1</name>
+            <name>$(P)Ch4:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1AOverflw</name>
+            <name>$(P)Ch5:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1ASlope</name>
+            <name>$(P)Ch6:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BAdcOffs</name>
+            <name>$(P)Ch7:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1AAdcOffs</name>
+            <name>$(P)Ch8:A:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BAdjEn</name>
+            <name>$(P)Ch1:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BAdjTrig</name>
+            <name>$(P)Ch2:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BAdjSamL</name>
+            <name>$(P)Ch3:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BSlopLim</name>
+            <name>$(P)Ch4:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BOffLim</name>
+            <name>$(P)Ch5:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BSlopLi1</name>
+            <name>$(P)Ch6:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BOverflw</name>
+            <name>$(P)Ch7:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1BSlope</name>
+            <name>$(P)Ch8:B:Threshold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2ASlope</name>
+            <name>$(P)Ch1:PosThresold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1AdcMax</name>
+            <name>$(P)Ch2:PosThresold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1AdcMin</name>
+            <name>$(P)Ch3:PosThresold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1MDEv</name>
+            <name>$(P)Ch4:PosThresold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1Ev</name>
+            <name>$(P)Ch5:PosThresold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1FifFul</name>
+            <name>$(P)Ch6:PosThresold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1FifAmFF</name>
+            <name>$(P)Ch7:PosThresold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1FifAmFul</name>
+            <name>$(P)Ch8:PosThresold</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch1NotEmpty</name>
+            <name>$(P)Ch1:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2AAdcOffs</name>
+            <name>$(P)Ch2:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2AAdjEn</name>
+            <name>$(P)Ch3:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2AAdjTrig</name>
+            <name>$(P)Ch4:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2AAdjSamL</name>
+            <name>$(P)Ch5:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2ASlopLim</name>
+            <name>$(P)Ch6:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2AOffLim</name>
+            <name>$(P)Ch7:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2ASlopLi1</name>
+            <name>$(P)Ch8:A:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2AOverflw</name>
+            <name>$(P)Ch1:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BSlope</name>
+            <name>$(P)Ch2:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BAdcOffs</name>
+            <name>$(P)Ch3:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2AdcMax</name>
+            <name>$(P)Ch4:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2AdcMin</name>
+            <name>$(P)Ch5:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2MDEv</name>
+            <name>$(P)Ch6:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2Ev</name>
+            <name>$(P)Ch7:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2FifFul</name>
+            <name>$(P)Ch8:B:FullScale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2FifAmFF</name>
+            <name>$(P)Ch1:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2FifAmFul</name>
+            <name>$(P)Ch2:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2NotEmpty</name>
+            <name>$(P)Ch3:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BAdjEn</name>
+            <name>$(P)Ch4:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BAdjTrig</name>
+            <name>$(P)Ch5:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BAdjSamL</name>
+            <name>$(P)Ch6:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BSlopLim</name>
+            <name>$(P)Ch7:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BOffLim</name>
+            <name>$(P)Ch8:A:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BSlopLi1</name>
+            <name>$(P)Ch1:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch2BOverflw</name>
+            <name>$(P)Ch2:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3AAdjEn</name>
+            <name>$(P)Ch3:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3AAdjTrig</name>
+            <name>$(P)Ch4:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3AAdjSamL</name>
+            <name>$(P)Ch5:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3ASlopLim</name>
+            <name>$(P)Ch6:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3AOffLim</name>
+            <name>$(P)Ch7:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3ASlopLi1</name>
+            <name>$(P)Ch8:B:GainAdj</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3AOverflw</name>
+            <name>$(P)Ch1:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3ASlope</name>
+            <name>$(P)Ch2:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3AAdcOffs</name>
+            <name>$(P)Ch3:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BAdcOffs</name>
+            <name>$(P)Ch4:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BAdjEn</name>
+            <name>$(P)Ch5:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BAdjTrig</name>
+            <name>$(P)Ch6:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BAdjSamL</name>
+            <name>$(P)Ch7:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BSlopLim</name>
+            <name>$(P)Ch8:A:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BOffLim</name>
+            <name>$(P)Ch1:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BSlopLi1</name>
+            <name>$(P)Ch2:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BOverflw</name>
+            <name>$(P)Ch3:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3BSlope</name>
+            <name>$(P)Ch4:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4ASlope</name>
+            <name>$(P)Ch5:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3AdcMax</name>
+            <name>$(P)Ch6:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3AdcMin</name>
+            <name>$(P)Ch7:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3MDEv</name>
+            <name>$(P)Ch8:B:Scale</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3Ev</name>
+            <name>$(P)Ch1:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3FifFul</name>
+            <name>$(P)Ch2:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3FifAmFF</name>
+            <name>$(P)Ch3:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3FifAmFul</name>
+            <name>$(P)Ch4:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch3NotEmpty</name>
+            <name>$(P)Ch5:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4AAdcOffs</name>
+            <name>$(P)Ch6:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4AAdjEn</name>
+            <name>$(P)Ch7:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4AAdjTrig</name>
+            <name>$(P)Ch8:A:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4AAdjSamL</name>
+            <name>$(P)Ch1:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4ASlopLim</name>
+            <name>$(P)Ch2:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4AOffLim</name>
+            <name>$(P)Ch3:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4ASlopLi1</name>
+            <name>$(P)Ch4:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4AOverflw</name>
+            <name>$(P)Ch5:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BSlope</name>
+            <name>$(P)Ch6:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BAdcOffs</name>
+            <name>$(P)Ch7:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4AdcMax</name>
+            <name>$(P)Ch8:B:Offset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4AdcMin</name>
+            <name>$(P)Ch1:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4MDEv</name>
+            <name>$(P)Ch2:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4Ev</name>
+            <name>$(P)Ch3:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4FifFul</name>
+            <name>$(P)Ch4:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4FifAmFF</name>
+            <name>$(P)Ch5:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4FifAmFul</name>
+            <name>$(P)Ch6:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4NotEmpty</name>
+            <name>$(P)Ch7:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BAdjEn</name>
+            <name>$(P)Ch8:ScaleFact</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BAdjTrig</name>
+            <name>$(P)Ch1:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BAdjSamL</name>
+            <name>$(P)Ch2:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BSlopLim</name>
+            <name>$(P)Ch3:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BOffLim</name>
+            <name>$(P)Ch4:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BSlopLi1</name>
+            <name>$(P)Ch5:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch4BOverflw</name>
+            <name>$(P)Ch6:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5AAdjEn</name>
+            <name>$(P)Ch7:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5AAdjTrig</name>
+            <name>$(P)Ch8:A:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5AAdjSamL</name>
+            <name>$(P)Ch1:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5ASlopLim</name>
+            <name>$(P)Ch2:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5AOffLim</name>
+            <name>$(P)Ch3:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5ASlopLi1</name>
+            <name>$(P)Ch4:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5AOverflw</name>
+            <name>$(P)Ch5:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5ASlope</name>
+            <name>$(P)Ch6:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BAdcOffs</name>
+            <name>$(P)Ch7:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5AAdcOffs</name>
+            <name>$(P)Ch8:B:Baseline</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BAdjEn</name>
+            <name>$(P)ConfigFiller</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BAdjTrig</name>
+            <name>$(P)Ch1:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BAdjSamL</name>
+            <name>$(P)Ch2:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BSlopLim</name>
+            <name>$(P)Ch3:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BOffLim</name>
+            <name>$(P)Ch4:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BSlopLi1</name>
+            <name>$(P)Ch5:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BOverflw</name>
+            <name>$(P)Ch6:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5BSlope</name>
+            <name>$(P)Ch7:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6ASlope</name>
+            <name>$(P)Ch8:A:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5AdcMax</name>
+            <name>$(P)Ch1:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5AdcMin</name>
+            <name>$(P)Ch2:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5MDEv</name>
+            <name>$(P)Ch3:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5Ev</name>
+            <name>$(P)Ch4:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5FifFul</name>
+            <name>$(P)Ch5:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5FifAmFF</name>
+            <name>$(P)Ch6:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5FifAmFul</name>
+            <name>$(P)Ch7:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch5NotEmpty</name>
+            <name>$(P)Ch8:B:SampleMin</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6AAdcOffs</name>
+            <name>$(P)Ch1:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6AAdjEn</name>
+            <name>$(P)Ch2:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6AAdjTrig</name>
+            <name>$(P)Ch3:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6AAdjSamL</name>
+            <name>$(P)Ch4:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6ASlopLim</name>
+            <name>$(P)Ch5:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6AOffLim</name>
+            <name>$(P)Ch6:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6ASlopLi1</name>
+            <name>$(P)Ch7:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6AOverflw</name>
+            <name>$(P)Ch8:A:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BSlope</name>
+            <name>$(P)Ch1:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BAdcOffs</name>
+            <name>$(P)Ch2:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6AdcMax</name>
+            <name>$(P)Ch3:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6AdcMin</name>
+            <name>$(P)Ch4:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6MDEv</name>
+            <name>$(P)Ch5:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6Ev</name>
+            <name>$(P)Ch6:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6FifFul</name>
+            <name>$(P)Ch7:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6FifAmFF</name>
+            <name>$(P)Ch8:B:SampleMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6FifAmFul</name>
+            <name>$(P)Ch8:B:SlopeMax</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6NotEmpty</name>
+            <name>$(P)Ch1:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BAdjEn</name>
+            <name>$(P)Ch2:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BAdjTrig</name>
+            <name>$(P)Ch3:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BAdjSamL</name>
+            <name>$(P)Ch4:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BSlopLim</name>
+            <name>$(P)Ch5:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BOffLim</name>
+            <name>$(P)Ch6:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BSlopLi1</name>
+            <name>$(P)Ch7:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch6BOverflw</name>
+            <name>$(P)Ch8:Enable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7AAdjEn</name>
+            <name>$(P)Ch1:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7AAdjTrig</name>
+            <name>$(P)Ch2:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7AAdjSamL</name>
+            <name>$(P)Ch3:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7ASlopLim</name>
+            <name>$(P)Ch4:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7AOffLim</name>
+            <name>$(P)Ch5:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7ASlopLi1</name>
+            <name>$(P)Ch6:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7AOverflw</name>
+            <name>$(P)Ch7:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7ASlope</name>
+            <name>$(P)Ch8:VerboseEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7AAdcOffs</name>
+            <name>$(P)TimeVetoLow</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BAdcOffs</name>
+            <name>$(P)TimeVetoHigh</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BAdjEn</name>
+            <name>$(P)FakeTrigDelay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BAdjTrig</name>
+            <name>$(P)MinAdc</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BAdjSamL</name>
+            <name>$(P)MaxAdc</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BSlopLim</name>
+            <name>$(P)IntRelease</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BOffLim</name>
+            <name>$(P)MinDiscrimWidth</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BSlopLi1</name>
+            <name>$(P)Sample1</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BOverflw</name>
+            <name>$(P)Sample2</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7BSlope</name>
+            <name>$(P)TsyncDelay</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8ASlope</name>
+            <name>$(P)LvdsRate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7AdcMax</name>
+            <name>$(P)AutoCorrectMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7AdcMin</name>
+            <name>$(P)EdgeDetecEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7MDEv</name>
+            <name>$(P)MastDiscrimMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7Ev</name>
+            <name>$(P)AcquireEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7FifFul</name>
+            <name>$(P)AutoCorrection</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7FifAmFF</name>
+            <name>$(P)HighResMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7FifAmFul</name>
+            <name>$(P)OutputMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch7NotEmpty</name>
+            <name>$(P)AcquireMode</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8AAdcOffs</name>
+            <name>$(P)TxEnable</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8AAdjEn</name>
+            <name>$(P)TsyncSelect</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8AAdjTrig</name>
+            <name>$(P)TclkSelect</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8AAdjSamL</name>
+            <name>$(P)Reset</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8ASlopLim</name>
+            <name>$(P)TestPatternAltEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8AOffLim</name>
+            <name>$(P)TestPatternEn</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8ASlopLi1</name>
+            <name>$(P)TestPatternId</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
         <pv>
             <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8AOverflw</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BSlope</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BAdcOffs</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8AdcMax</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8AdcMin</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8MDEv</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8Ev</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8FifFul</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8FifAmFF</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8FifAmFul</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8NotEmpty</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BAdjEn</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BAdjTrig</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BAdjSamL</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BSlopLim</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BOffLim</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BSlopLi1</name>
-            <tolerance>0.01</tolerance>
-            <saved_value>0</saved_value>
-        </pv>
-        <pv>
-            <selected>false</selected>
-            <name>BL99:Det:roc11:Ch8BOverflw</name>
+            <name>$(P)TestPatternRate</name>
             <tolerance>0.01</tolerance>
             <saved_value>0</saved_value>
         </pv>
