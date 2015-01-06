@@ -62,6 +62,8 @@ record(mbbo, "$(P)CmdReq")
     field(SVST, "Stop acquisition")
     field(EIVL, "36")
     field(EIST, "Read counters")
+    field(NIVL, "37")
+    field(NIST, "Reset counters")
 }
 record(stringin, "$(P)HwDate")
 {

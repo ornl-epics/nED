@@ -10580,7 +10580,9 @@ record(mbbo, "$(P)AcquireMode")
     field(ONVL, "1")
     field(ONST, "verbose")
     field(TWVL, "2")
-    field(TWST, "fake trigger")
+    field(TWST, "fake data")
+    field(THVL, "3")
+    field(THST, "fake trigger")
 }
 record(mbbo, "$(P)AcquireModeW")
 {
@@ -10595,7 +10597,9 @@ record(mbbo, "$(P)AcquireModeW")
     field(ONVL, "1")
     field(ONST, "verbose")
     field(TWVL, "2")
-    field(TWST, "fake trigger")
+    field(TWST, "fake data")
+    field(THVL, "3")
+    field(THST, "fake trigger")
 }
 record(mbbi, "$(P)AcquireModeR")
 {
@@ -10609,7 +10613,9 @@ record(mbbi, "$(P)AcquireModeR")
     field(ONVL, "1")
     field(ONST, "verbose")
     field(TWVL, "2")
-    field(TWST, "fake trigger")
+    field(TWST, "fake data")
+    field(THVL, "3")
+    field(THST, "fake trigger")
 }
 record(mbbo, "$(P)AcquireModeS")
 {
@@ -10621,7 +10627,9 @@ record(mbbo, "$(P)AcquireModeS")
     field(ONVL, "1")
     field(ONST, "verbose")
     field(TWVL, "2")
-    field(TWST, "fake trigger")
+    field(TWST, "fake data")
+    field(THVL, "3")
+    field(THST, "fake trigger")
 }
 record(bo, "$(P)TxEnable")
 {

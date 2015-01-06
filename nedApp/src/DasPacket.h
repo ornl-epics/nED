@@ -108,6 +108,7 @@ struct DasPacket
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
             CMD_READ_STATUS             = 0x22, //!< Read module status
             CMD_READ_STATUS_COUNTERS    = 0x24, //!< Read module status counters
+            CMD_RESET_STATUS_COUNTERS   = 0x25, //!< Reset module status counters
             CMD_WRITE_CONFIG            = 0x30, //!< Write module configuration
             CMD_WRITE_CONFIG_1          = 0x31, //!< Write module configuration section 1
             CMD_WRITE_CONFIG_2          = 0x32, //!< Write module configuration section 2
