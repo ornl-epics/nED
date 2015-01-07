@@ -17,9 +17,8 @@
  * The ROC 5.7 firmware is identical to ROC 5.5 except that it adds support for
  * Test Pattern Generator write and read commands, command to read Status counters
  * and rate meters, and a command to reset status counters.
- * 
+ *
  */
-
 
 void RocPlugin::createStatusParams_v57()
 {
@@ -37,7 +36,7 @@ void RocPlugin::createStatusParams_v57()
     createStatusParam("TclkLow",          0x0,  1,  0); // TCLK Got LOW                  (0=no,1=yes)
 
     createStatusParam("HVStatus",         0x1,  1,  1); // High Voltage Status bit       (0=not present,1=present)
-    createStatusParam("AutoCorrectSts",   0x1,  1,  0); // Auto correction enabled       (0=disabled,1=enabled)
+    createStatusParam("AutoCorrection",   0x1,  1,  0); // Auto correction enabled       (0=disabled,1=enabled)
 
     createStatusParam("Ch2:Event",        0x2,  1, 13); // Chan2 got event               (0=no,1=yes)
     createStatusParam("Ch2:DiscHigh",     0x2,  1, 12); // Chan2 disc high               (0=low,1=high)
@@ -95,22 +94,22 @@ void RocPlugin::createStatusParams_v57()
     createStatusParam("Ch7:NegDenom",     0x5,  1,  1); // Chan7 negative denom          (0=no,1=yes)
     createStatusParam("Ch7:CalcOverflow", 0x5,  1,  0); // Chan7 calc overflow           (0=no overflow,1=overflow)
 
-    createStatusParam("A1BaseAvg",        0x6, 15,  0); // A1 baseline average
-    createStatusParam("B1BaseAvg",        0x7, 15,  0); // B1 baseline average
-    createStatusParam("A2BaseAvg",        0x8, 15,  0); // A2 baseline average
-    createStatusParam("B2BaseAvg",        0x9, 15,  0); // B2 baseline average
-    createStatusParam("A3BaseAvg",        0xA, 15,  0); // A3 baseline average
-    createStatusParam("B3BaseAvg",        0xB, 15,  0); // B3 baseline average
-    createStatusParam("A4BaseAvg",        0xC, 15,  0); // A4 baseline average
-    createStatusParam("B4BaseAvg",        0xD, 15,  0); // B4 baseline average
-    createStatusParam("A5BaseAvg",        0xE, 15,  0); // A5 baseline average
-    createStatusParam("B5BaseAvg",        0xF, 15,  0); // B5 baseline average
-    createStatusParam("A6BaseAvg",        0x10,15,  0); // A6 baseline average
-    createStatusParam("B6BaseAvg",        0x11,15,  0); // B6 baseline average
-    createStatusParam("A7BaseAvg",        0x12,15,  0); // A7 baseline average
-    createStatusParam("B7BaseAvg",        0x13,15,  0); // B7 baseline average
-    createStatusParam("A8BaseAvg",        0x14,15,  0); // A8 baseline average
-    createStatusParam("B8BaseAvg",        0x15,15,  0); // B8 baseline average
+    createStatusParam("Ch1:A:BaseAvg",    0x6, 15,  0); // A1 baseline average
+    createStatusParam("Ch1:B:BaseAvg",    0x7, 15,  0); // B1 baseline average
+    createStatusParam("Ch2:A:BaseAvg",    0x8, 15,  0); // A2 baseline average
+    createStatusParam("Ch2:B:BaseAvg",    0x9, 15,  0); // B2 baseline average
+    createStatusParam("Ch3:A:BaseAvg",    0xA, 15,  0); // A3 baseline average
+    createStatusParam("Ch3:B:BaseAvg",    0xB, 15,  0); // B3 baseline average
+    createStatusParam("Ch4:A:BaseAvg",    0xC, 15,  0); // A4 baseline average
+    createStatusParam("Ch4:B:BaseAvg",    0xD, 15,  0); // B4 baseline average
+    createStatusParam("Ch5:A:BaseAvg",    0xE, 15,  0); // A5 baseline average
+    createStatusParam("Ch5:B:BaseAvg",    0xF, 15,  0); // B5 baseline average
+    createStatusParam("Ch6:A:BaseAvg",    0x10,15,  0); // A6 baseline average
+    createStatusParam("Ch6:B:BaseAvg",    0x11,15,  0); // B6 baseline average
+    createStatusParam("Ch7:A:BaseAvg",    0x12,15,  0); // A7 baseline average
+    createStatusParam("Ch7:B:BaseAvg",    0x13,15,  0); // B7 baseline average
+    createStatusParam("Ch8:A:BaseAvg",    0x14,15,  0); // A8 baseline average
+    createStatusParam("Ch8:B:BaseAvg",    0x15,15,  0); // B8 baseline average
 
     // ROC lies about the length of the packet. It returns 44 bytes of valid
     // data but the packet length is 64 bytes => 20 bytes or 10 registers
@@ -149,21 +148,19 @@ void RocPlugin::createCounterParams_v57()
     createCounterParam("Ch6:CntRate",      0x1A, 16,  0); // Ch6 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
     createCounterParam("Ch7:CntRate",      0x1B, 16,  0); // Ch7 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
     createCounterParam("CntOutRate",       0x1C, 16,  0); // Total outrate counter (calc:1000*A/52.4288,unit:counts/s,prec:0)
-}   
+}
 
 void RocPlugin::createConfigParams_v57()
 {
-    // TODO: minor changes between v52 and v54, but are not yet addressed
-
 //    BLXXX:Det:RocXXX:| sig nam |                                    | EPICS record description  | (bi and mbbi description)
-    createConfigParam("Ch1:PositionIdx", '1', 0x0,  32, 0, 0);     // Chan1 position index
-    createConfigParam("Ch2:PositionIdx", '1', 0x2,  32, 0, 256);   // Chan2 position index
-    createConfigParam("Ch3:PositionIdx", '1', 0x4,  32, 0, 512);   // Chan3 position index
-    createConfigParam("Ch4:PositionIdx", '1', 0x6,  32, 0, 768);   // Chan4 position index
-    createConfigParam("Ch5:PositionIdx", '1', 0x8,  32, 0, 1024);  // Chan5 position index
-    createConfigParam("Ch6:PositionIdx", '1', 0xA,  32, 0, 1280);  // Chan6 position index
-    createConfigParam("Ch7:PositionIdx", '1', 0xC,  32, 0, 1536);  // Chan7 position index
-    createConfigParam("Ch8:PositionIdx", '1', 0xE,  32, 0, 1792);  // Chan8 position index
+    createConfigParam("Ch1:PositionIdx",  '1', 0x0,  32, 0, 0);     // Chan1 position index
+    createConfigParam("Ch2:PositionIdx",  '1', 0x2,  32, 0, 256);   // Chan2 position index
+    createConfigParam("Ch3:PositionIdx",  '1', 0x4,  32, 0, 512);   // Chan3 position index
+    createConfigParam("Ch4:PositionIdx",  '1', 0x6,  32, 0, 768);   // Chan4 position index
+    createConfigParam("Ch5:PositionIdx",  '1', 0x8,  32, 0, 1024);  // Chan5 position index
+    createConfigParam("Ch6:PositionIdx",  '1', 0xA,  32, 0, 1280);  // Chan6 position index
+    createConfigParam("Ch7:PositionIdx",  '1', 0xC,  32, 0, 1536);  // Chan7 position index
+    createConfigParam("Ch8:PositionIdx",  '1', 0xE,  32, 0, 1792);  // Chan8 position index
 
     createConfigParam("Ch1:A:InOffset",   '2', 0x0,  12, 0, 100);   // Chan1 A input offset
     createConfigParam("Ch2:A:InOffset",   '2', 0x1,  12, 0, 100);   // Chan2 A input offset
@@ -216,14 +213,14 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch7:B:Threshold",  '2', 0x2E, 12, 0, 400);   // Chan7 B threshold
     createConfigParam("Ch8:B:Threshold",  '2', 0x2F, 12, 0, 400);   // Chan8 B threshold
 
-    createConfigParam("Ch1:PosThresold", '2', 0x30, 12, 0, 400);   // Chan1 positive threshold
-    createConfigParam("Ch2:PosThresold", '2', 0x31, 12, 0, 400);   // Chan2 positive threshold
-    createConfigParam("Ch3:PosThresold", '2', 0x32, 12, 0, 400);   // Chan3 positive threshold
-    createConfigParam("Ch4:PosThresold", '2', 0x33, 12, 0, 400);   // Chan4 positive threshold
-    createConfigParam("Ch5:PosThresold", '2', 0x34, 12, 0, 400);   // Chan5 positive threshold
-    createConfigParam("Ch6:PosThresold", '2', 0x35, 12, 0, 400);   // Chan6 positive threshold
-    createConfigParam("Ch7:PosThresold", '2', 0x36, 12, 0, 400);   // Chan7 positive threshold
-    createConfigParam("Ch8:PosThresold", '2', 0x37, 12, 0, 400);   // Chan8 positive threshold
+    createConfigParam("Ch1:PosThreshold", '2', 0x30, 12, 0, 400);   // Chan1 positive threshold
+    createConfigParam("Ch2:PosThreshold", '2', 0x31, 12, 0, 400);   // Chan2 positive threshold
+    createConfigParam("Ch3:PosThreshold", '2', 0x32, 12, 0, 400);   // Chan3 positive threshold
+    createConfigParam("Ch4:PosThreshold", '2', 0x33, 12, 0, 400);   // Chan4 positive threshold
+    createConfigParam("Ch5:PosThreshold", '2', 0x34, 12, 0, 400);   // Chan5 positive threshold
+    createConfigParam("Ch6:PosThreshold", '2', 0x35, 12, 0, 400);   // Chan6 positive threshold
+    createConfigParam("Ch7:PosThreshold", '2', 0x36, 12, 0, 400);   // Chan7 positive threshold
+    createConfigParam("Ch8:PosThreshold", '2', 0x37, 12, 0, 400);   // Chan8 positive threshold
     createConfigParam("Ch1:A:FullScale",  '2', 0x38, 12, 0, 10);    // Chan1 A full scale
     createConfigParam("Ch2:A:FullScale",  '2', 0x39, 12, 0, 10);    // Chan2 A full scale
     createConfigParam("Ch3:A:FullScale",  '2', 0x3A, 12, 0, 10);    // Chan3 A full scale
@@ -257,7 +254,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch5:B:GainAdj",    '2', 0x54, 12, 0, 0);     // Chan5 B gain adjust
     createConfigParam("Ch6:B:GainAdj",    '2', 0x55, 12, 0, 0);     // Chan6 B gain adjust
     createConfigParam("Ch7:B:GainAdj",    '2', 0x56, 12, 0, 0);     // Chan7 B gain adjust
-    createConfigParam("Ch8:B:GainAdj",    '2', 0x57, 12, 0, 0);     // Chan8 B gain adjust:
+    createConfigParam("Ch8:B:GainAdj",    '2', 0x57, 12, 0, 0);     // Chan8 B gain adjust
 
     createConfigParam("Ch1:A:Scale",      '3', 0x0,  12, 0, 2048);  // Chan1 A scale
     createConfigParam("Ch2:A:Scale",      '3', 0x1,  12, 0, 2048);  // Chan2 A scale
@@ -293,14 +290,14 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch7:B:Offset",     '3', 0x1E, 12, 0, 1600);  // Chan7 B offset
     createConfigParam("Ch8:B:Offset",     '3', 0x1F, 12, 0, 1600);  // Chan8 B offset
 
-    createConfigParam("Ch1:ScaleFact",   '4', 0x0,  12, 0, 2048);  // Chan1 scale factor
-    createConfigParam("Ch2:ScaleFact",   '4', 0x1,  12, 0, 2048);  // Chan2 scale factor
-    createConfigParam("Ch3:ScaleFact",   '4', 0x2,  12, 0, 2048);  // Chan3 scale factor
-    createConfigParam("Ch4:ScaleFact",   '4', 0x3,  12, 0, 2048);  // Chan4 scale factor
-    createConfigParam("Ch5:ScaleFact",   '4', 0x4,  12, 0, 2048);  // Chan5 scale factor
-    createConfigParam("Ch6:ScaleFact",   '4', 0x5,  12, 0, 2048);  // Chan6 scale factor
-    createConfigParam("Ch7:ScaleFact",   '4', 0x6,  12, 0, 2048);  // Chan7 scale factor
-    createConfigParam("Ch8:ScaleFact",   '4', 0x7,  12, 0, 2048);  // Chan8 scale factor
+    createConfigParam("Ch1:ScaleFact",    '4', 0x0,  12, 0, 2048);  // Chan1 scale factor
+    createConfigParam("Ch2:ScaleFact",    '4', 0x1,  12, 0, 2048);  // Chan2 scale factor
+    createConfigParam("Ch3:ScaleFact",    '4', 0x2,  12, 0, 2048);  // Chan3 scale factor
+    createConfigParam("Ch4:ScaleFact",    '4', 0x3,  12, 0, 2048);  // Chan4 scale factor
+    createConfigParam("Ch5:ScaleFact",    '4', 0x4,  12, 0, 2048);  // Chan5 scale factor
+    createConfigParam("Ch6:ScaleFact",    '4', 0x5,  12, 0, 2048);  // Chan6 scale factor
+    createConfigParam("Ch7:ScaleFact",    '4', 0x6,  12, 0, 2048);  // Chan7 scale factor
+    createConfigParam("Ch8:ScaleFact",    '4', 0x7,  12, 0, 2048);  // Chan8 scale factor
 
     createConfigParam("Ch1:A:Baseline",   'C', 0x0,  12, 0, 100);   // Chan1 A baseline value
     createConfigParam("Ch2:A:Baseline",   'C', 0x1,  12, 0, 100);   // Chan2 A baseline value
@@ -320,7 +317,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch8:B:Baseline",   'C', 0xF,  12, 0, 100);   // Chan8 B baseline value
 
     // There's an unused part of C section in v5.4 C:0x10 - C:0x1F
-    createConfigParam("ConfigFiller",  'C', 0x1F, 16, 0, 0);     // Config filler
+    createConfigParam("ConfigFiller",     'C', 0x1F, 16, 0, 0);     // Config filler
 
     createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 100);   // Chan1 A sample minimum
     createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 100);   // Chan2 A sample minimum
@@ -356,52 +353,56 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // Chan7 B sample maximum
     createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // Chan8 B sample maximum
 
-    createConfigParam("Ch8:B:SlopeMax",   'D', 0x20, 12, 0, 0);     // Maximum slope
+    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope
 
-    createConfigParam("Ch1:Enable",      'E', 0x0,  1,  0, 1);     // Chan1 enable                  (0=disable,1=enable)
-    createConfigParam("Ch2:Enable",      'E', 0x0,  1,  1, 1);     // Chan2 enable                  (0=disable,1=enable)
-    createConfigParam("Ch3:Enable",      'E', 0x0,  1,  2, 1);     // Chan3 enable                  (0=disable,1=enable)
-    createConfigParam("Ch4:Enable",      'E', 0x0,  1,  3, 1);     // Chan4 enable                  (0=disable,1=enable)
-    createConfigParam("Ch5:Enable",      'E', 0x0,  1,  4, 1);     // Chan5 enable                  (0=disable,1=enable)
-    createConfigParam("Ch6:Enable",      'E', 0x0,  1,  5, 1);     // Chan6 enable                  (0=disable,1=enable)
-    createConfigParam("Ch7:Enable",      'E', 0x0,  1,  6, 1);     // Chan7 enable                  (0=disable,1=enable)
-    createConfigParam("Ch8:Enable",      'E', 0x0,  1,  7, 1);     // Chan8 enable                  (0=disable,1=enable)
+    createConfigParam("Ch1:Enable",       'E', 0x0,  1,  0, 1);     // Chan1 enable                  (0=disable,1=enable)
+    createConfigParam("Ch2:Enable",       'E', 0x0,  1,  1, 1);     // Chan2 enable                  (0=disable,1=enable)
+    createConfigParam("Ch3:Enable",       'E', 0x0,  1,  2, 1);     // Chan3 enable                  (0=disable,1=enable)
+    createConfigParam("Ch4:Enable",       'E', 0x0,  1,  3, 1);     // Chan4 enable                  (0=disable,1=enable)
+    createConfigParam("Ch5:Enable",       'E', 0x0,  1,  4, 1);     // Chan5 enable                  (0=disable,1=enable)
+    createConfigParam("Ch6:Enable",       'E', 0x0,  1,  5, 1);     // Chan6 enable                  (0=disable,1=enable)
+    createConfigParam("Ch7:Enable",       'E', 0x0,  1,  6, 1);     // Chan7 enable                  (0=disable,1=enable)
+    createConfigParam("Ch8:Enable",       'E', 0x0,  1,  7, 1);     // Chan8 enable                  (0=disable,1=enable)
 
-    createConfigParam("Ch1:VerboseEn",   'E', 0x0,  1,  8, 0);     // Chan1 verbose enable          (0=disable,1=enable)
-    createConfigParam("Ch2:VerboseEn",   'E', 0x0,  1,  9, 0);     // Chan2 verbose enable          (0=disable,1=enable)
-    createConfigParam("Ch3:VerboseEn",   'E', 0x0,  1, 10, 0);     // Chan3 verbose enable          (0=disable,1=enable)
-    createConfigParam("Ch4:VerboseEn",   'E', 0x0,  1, 11, 0);     // Chan4 verbose enable          (0=disable,1=enable)
-    createConfigParam("Ch5:VerboseEn",   'E', 0x0,  1, 12, 0);     // Chan5 verbose enable          (0=disable,1=enable)
-    createConfigParam("Ch6:VerboseEn",   'E', 0x0,  1, 13, 0);     // Chan6 verbose enable          (0=disable,1=enable)
-    createConfigParam("Ch7:VerboseEn",   'E', 0x0,  1, 14, 0);     // Chan7 verbose enable          (0=disable,1=enable)
-    createConfigParam("Ch8:VerboseEn",   'E', 0x0,  1, 15, 0);     // Chan8 verbose enable          (0=disable,1=enable)
+    createConfigParam("Ch1:VerboseEn",    'E', 0x0,  1,  8, 0);     // Chan1 verbose enable          (0=disable,1=enable)
+    createConfigParam("Ch2:VerboseEn",    'E', 0x0,  1,  9, 0);     // Chan2 verbose enable          (0=disable,1=enable)
+    createConfigParam("Ch3:VerboseEn",    'E', 0x0,  1, 10, 0);     // Chan3 verbose enable          (0=disable,1=enable)
+    createConfigParam("Ch4:VerboseEn",    'E', 0x0,  1, 11, 0);     // Chan4 verbose enable          (0=disable,1=enable)
+    createConfigParam("Ch5:VerboseEn",    'E', 0x0,  1, 12, 0);     // Chan5 verbose enable          (0=disable,1=enable)
+    createConfigParam("Ch6:VerboseEn",    'E', 0x0,  1, 13, 0);     // Chan6 verbose enable          (0=disable,1=enable)
+    createConfigParam("Ch7:VerboseEn",    'E', 0x0,  1, 14, 0);     // Chan7 verbose enable          (0=disable,1=enable)
+    createConfigParam("Ch8:VerboseEn",    'E', 0x0,  1, 15, 0);     // Chan8 verbose enable          (0=disable,1=enable)
 
-    createConfigParam("TimeVetoLow",     'E', 0x1,  32, 0, 0);     // Timestamp veto low
-    createConfigParam("TimeVetoHigh",    'E', 0x3,  32, 0, 0);     // Timestamp veto high
-    createConfigParam("FakeTrigDelay",   'E', 0x5,  16, 0, 20000); // Fake trigger delay
-    createConfigParam("MinAdc",          'E', 0x6,  16, 0, 100);   // Minimum ADC
-    createConfigParam("MaxAdc",          'E', 0x7,  16, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",      'E', 0x8,  16, 0, -6);    // Integrator release point
-    createConfigParam("MinDiscrimWidth", 'E', 0x9,  12, 0, 1);     // Minimum discriminator width
-    createConfigParam("Sample1",         'E', 0xA,  4,  0, 2);     // Sample 1 point [0:10]
-    createConfigParam("Sample2",         'E', 0xB,  6,  0, 14);    // Sample 1 point [2:50]
-    createConfigParam("TsyncDelay",      'E', 0xC,  32, 0, 0);     // TSYNC delay
+    createConfigParam("TimeVetoLow",      'E', 0x1,  32, 0, 0);     // Timestamp veto low
+    createConfigParam("TimeVetoHigh",     'E', 0x3,  32, 0, 0);     // Timestamp veto high
+    createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
+    createConfigParam("MinAdc",           'E', 0x6,  16, 0, 100);   // Minimum ADC
+    createConfigParam("MaxAdc",           'E', 0x7,  16, 0, 1000);  // Maximum ADC
+    createConfigParam("IntRelease",       'E', 0x8,  16, 0, -6);    // Integrator release point
+    createConfigParam("MinDiscrimWidth",  'E', 0x9,  12, 0, 1);     // Minimum discriminator width
+    createConfigParam("Sample1",          'E', 0xA,  4,  0, 2);     // Sample 1 point [0:10]
+    createConfigParam("Sample2",          'E', 0xB,  6,  0, 14);    // Sample 1 point [2:50]
+    createConfigParam("TsyncDelay",       'E', 0xC,  32, 0, 0);     // TSYNC delay
 
-    createConfigParam("LvdsRate",        'F', 0x0,  1, 15, 1);     // LVDS output rate              (0=20Mhz,1=40Mhz)
-    createConfigParam("AutoCorrectMode", 'F', 0x0,  1, 14, 0);     // Auto correction sample mode   (0=TSYNC,1=fake trigger)
-    createConfigParam("EdgeDetecEn",     'F', 0x0,  1, 13, 1);     // Edge detect enable            (0=disable,1=enable)
-    createConfigParam("MastDiscrimMode", 'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
-    createConfigParam("AcquireEn",       'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
-    createConfigParam("AutoCorrection",  'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
-    createConfigParam("HighResMode",     'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
-    createConfigParam("OutputMode",      'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
-    createConfigParam("AcquireMode",     'F', 0x0,  2, 4,  0);     // Output mode                   (0=normal,1=verbose,2=fake trigger)
-    createConfigParam("TxEnable",        'F', 0x0,  1, 3,  1);     // TX enable                     (0=external,1=always enabled)
-    createConfigParam("TsyncSelect",     'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
-    createConfigParam("TclkSelect",      'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
-    createConfigParam("Reset",           'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
-    createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);    // Test pattern alt enable      (0=disable,1=enable)
-    createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);    // Test pattern enable          (0=disable,1=enable)
-    createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);    // Test pattern id
-    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);    // Test pattern rate
+    createConfigParam("LvdsRate",         'F', 0x0,  1, 15, 1);     // LVDS output rate              (0=20Mhz,1=40Mhz)
+    createConfigParam("AutoCorrectMode",  'F', 0x0,  1, 14, 0);     // Auto correction sample mode   (0=TSYNC,1=fake trigger)
+    createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // Edge detect enable            (0=disable,1=enable)
+    createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
+    createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
+    createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
+    createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
+    createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
+    createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
+    createConfigParam("TxEnable",         'F', 0x0,  1, 3,  1);     // TX enable                     (0=external,1=always enabled)
+    createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
+    createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
+    createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
+    // @todo: I protest the addition of 'TestPatternAltEn' when the test pattern module is intended to be standard
+    //        across all modules.  Currently, this v5.7 ROC firmware is the only one with an 'alternate' pattern selection.
+    //        Given that there are 2 additional bits available in this register, we should design the firmware appropriately
+    //        for all forseeable use-cases.  This is the first *challenge* to the agreed-upon API.
+    createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Test pattern alt enable       (0=disable,1=enable)
+    createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
+    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate
 }

@@ -48,7 +48,12 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
                        NUM_ROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
     , m_version(version)
 {
-    if (m_version == "v51") {
+    if (0) {
+    } else if (m_version == "v45" || m_version == "v44") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v45();
+        createConfigParams_v45();
+    } else if (m_version == "v51") {
         setIntegerParam(Supported, 1);
         createStatusParams_v51();
         createConfigParams_v51();

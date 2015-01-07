@@ -35,6 +35,7 @@ DB += FemPlugin_v32.db
 DB += FemPlugin_v35.db
 DB += FemPlugin_v36.db
 DB += AcpcFemPlugin_v22.db
+DB += RocPlugin_v45.db
 DB += RocPlugin_v51.db
 DB += RocPlugin_v52.db
 DB += RocPlugin_v54.db
@@ -56,6 +57,7 @@ FemPlugin_v32.template: FemPlugin_v32.include
 FemPlugin_v35.template: FemPlugin_v35.include
 FemPlugin_v36.template: FemPlugin_v36.include
 AcpcFemPlugin_v22.template: AcpcFemPlugin_v22.include
+RocPlugin_v45.template: RocPlugin_v45.include
 RocPlugin_v51.template: RocPlugin_v51.include
 RocPlugin_v52.template: RocPlugin_v52.include
 RocPlugin_v54.template: RocPlugin_v54.include
