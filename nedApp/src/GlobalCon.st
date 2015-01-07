@@ -148,6 +148,11 @@ DECL(float, pctSucceeded, {GPREFIX}PctSucceeded)
 DECL(float, pctCriterion, {GPREFIX}PctCriterion)
 
 /*
+ * for benefit of run control, a single bit
+ */
+DECL(int, running, {GPREFIX}Running)
+
+/*
  * Variables used by sequencer to keep track of success or failure of 
  * individual device operations.
  */
@@ -384,9 +389,12 @@ int severity;
           requestSucceeded = (pctSucceeded >= pctCriterion)? 1 : 0;	\
           pvPut(requestSucceeded,SYNC);					\
           strcpy(prevReq, statePV); pvPut(prevReq);			\
-          PVPUTSTR(statePV,Ready)					\
+          running = (strcmp(prevReq, "Starting") == 0 && 		\
+                                  requestSucceeded == 1);		\
+          pvPut(running, SYNC);						\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME);						\
+          PVPUTSTR(statePV,Ready)					\
       } state Ready							\
    }
 /* 
@@ -395,14 +403,12 @@ int severity;
  * code from the "OP_xxx" command defines above, and NEXT is the destination
  * state to perform the operation.
  */
-#define CMD_WHEN(EVNAME, OP_NAME, NEXT) 			\
+#define CMD_WHEN(EVNAME, NEXT) 			\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
           PVPUTSTR(statePV,NEXT)				\
           if (strcmp(prevReq, #NEXT)) {				\
              for (i = 0; i< numFound; i++)			\
                 PVPUTNUM(cmdSucceeded[i], 0)			\
-             numSucceeded = 0;					\
-             numEnabled = 0;					\
           }							\
        } state NEXT
 
@@ -459,11 +465,11 @@ ss GlobalControl {
     CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
     OP_DONE(DoneDiscover, globalCheck)
     state Ready {
-       CMD_WHEN(globalStop, OP_STOP, Stopping)
-       CMD_WHEN(globalStart, OP_START, Starting)
-       CMD_WHEN(globalWriteConf, OP_WRITE, WritingConf)
-       CMD_WHEN(globalCheck, OP_CHECK, Discover)
-       CMD_WHEN(globalClear, OP_CLEAR, Clear)
+       CMD_WHEN(globalStop, Stopping)
+       CMD_WHEN(globalStart, Starting)
+       CMD_WHEN(globalWriteConf, WritingConf)
+       CMD_WHEN(globalCheck, Discover)
+       CMD_WHEN(globalClear, Clear)
     }
     /* 
      * not sure yet exactly how broken FEMs are, but know they do not respond 
