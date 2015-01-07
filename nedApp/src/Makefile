@@ -102,18 +102,18 @@ $(PROD_NAME)_SRCS  += PvaMetaData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 
 # These files contain descriptions of PVs that we use to generate template
-# files for EPICS database, Doxygen documentation and PVtable.
-$(PROD_NAME)_PVS   += DspPlugin_v63.cpp
-$(PROD_NAME)_PVS   += DspPlugin_v64.cpp
-$(PROD_NAME)_PVS   += RocPlugin_v51.cpp
-$(PROD_NAME)_PVS   += RocPlugin_v52.cpp
-$(PROD_NAME)_PVS   += RocPlugin_v54.cpp
-$(PROD_NAME)_PVS   += RocPlugin_v56.cpp
-$(PROD_NAME)_PVS   += RocPlugin_v57.cpp
-$(PROD_NAME)_PVS   += FemPlugin_v32.cpp
-$(PROD_NAME)_PVS   += FemPlugin_v35.cpp
-$(PROD_NAME)_PVS   += FemPlugin_v36.cpp
-$(PROD_NAME)_PVS   += AcpcFemPlugin_v22.cpp
+# files for EPICS database.
+$(PROD_NAME)_DB    += DspPlugin_v63.cpp
+$(PROD_NAME)_DB    += DspPlugin_v64.cpp
+$(PROD_NAME)_DB    += RocPlugin_v51.cpp
+$(PROD_NAME)_DB    += RocPlugin_v52.cpp
+$(PROD_NAME)_DB    += RocPlugin_v54.cpp
+$(PROD_NAME)_DB    += RocPlugin_v56.cpp
+$(PROD_NAME)_DB    += RocPlugin_v57.cpp
+$(PROD_NAME)_DB    += FemPlugin_v32.cpp
+$(PROD_NAME)_DB    += FemPlugin_v35.cpp
+$(PROD_NAME)_DB    += FemPlugin_v36.cpp
+$(PROD_NAME)_DB    += AcpcFemPlugin_v22.cpp
 
 #===========================
 
@@ -123,13 +123,7 @@ include $(TOP)/configure/RULES
 
 %.include: %.cpp
 	./tools/export2epics.pl < $^ > ../Db/$@
-epicsdb: $($(PROD_NAME)_PVS:.cpp=.include)
-
-%.pvst: %.cpp
-	./tools/export2pvtable.pl -mode=status  -input_file=$^ -output_file=../../pvtable/$(@:.pvst=_status.pvst)
-	./tools/export2pvtable.pl -mode=counter -input_file=$^ -output_file=../../pvtable/$(@:.pvst=_counter.pvst)
-	./tools/export2pvtable.pl -mode=config  -input_file=$^ -output_file=../../pvtable/$(@:.pvst=_config.pvst)
-pvtables: $($(PROD_NAME)_PVS:.cpp=.pvst)
+epicsdb: $($(PROD_NAME)_DB:.cpp=.include)
 
 clean::
 	rm -fR $($(PROD_NAME)_SRCS:.cpp=.dox) latex/ html/
