@@ -171,7 +171,7 @@ record(ai, "$(P):Volt") {
    field(HSV, "MAJOR")
    field(LSV, "MAJOR")
    field(EGU, "V")
-   field(SCAN, "1 second")
+   field(SCAN, "5 second")
    info(autosaveFields, "HIGH LOW")
 }
 

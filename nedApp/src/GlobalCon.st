@@ -40,6 +40,8 @@ option -c;	/* do not wait for PVs to connect */
 #define WAITRESP	2
 #define TIMEOUTRSP	3
 #define ERRORRSP	4
+#define SKIPPEDRSP	5
+
 
 /*
  * define valid values for Verified PVs
@@ -57,6 +59,7 @@ option -c;	/* do not wait for PVs to connect */
 #define NOTACQUIRING	0
 #define ACQUIRING	1
 
+#define PVSEVROK	0
 /* 
  * MAXDEVICES is for static mem allocation and must be higher than number of
  * devices expected.
@@ -137,11 +140,12 @@ DECL(string, prevReq, {GPREFIX}PrevReq)
 
 /*
  * ReqSucceeded will be set true when one or a series of attempts to perform 
- * an operation succeeded for all devices. pctSucceeded will give a 
- * percentage of devices that succeeded.
+ * an operation succeeded for the percentage of devices (pctSucceeded) 
+ * specified by pctCriterion. 
  */
 DECL(int, requestSucceeded ,{GPREFIX}ReqSucceeded)
 DECL(float, pctSucceeded, {GPREFIX}PctSucceeded)
+DECL(float, pctCriterion, {GPREFIX}PctCriterion)
 
 /*
  * Variables used by sequencer to keep track of success or failure of 
@@ -164,6 +168,7 @@ DECL(int, numFound, {GPREFIX}NumFound)
 int i;
 int timedout;
 string namebuf;
+int severity;
 
 /*
  * Macros used in constructing states and combinations of states
@@ -188,7 +193,7 @@ string namebuf;
           i = i+1;						\
        } 							\
        when (i >= numFound) { 					\
-       } state NEXT					\
+       } state NEXT						\
        when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
        } state NAME##0	
 
@@ -196,9 +201,15 @@ string namebuf;
        when() {							\
           cmdReq[i] = COMMAND;					\
           pvPut(cmdReq[i], SYNC);				\
+          severity = pvSeverity(cmdReq[i]);			\
+          if (severity != PVSEVROK) {				\
+             cmdFailed[i] = 1;					\
+             sprintf(failMsg[i], "Failed %s PV sev %d", 	\
+                                  #NAME, severity);		\
+             pvPut(failMsg[i]);					\
+          }							\
        } state NAME##0						\
     }	
-
 /*
  * RSP_BEGIN() and RSP_END() are a pair of macros that together make two states
  * that check the responses of all devices to the last command. The same NAME 
@@ -273,16 +284,18 @@ string namebuf;
     RSP_END(CRNAME##R)
 
 /*
- * Analog of CMD_RSP(), but with SKIP_WHEN() clauses for one type of hardware
- * (HWTYPE) included.
+ * Analog of CMD_RSP(), but with SKIP_WHEN() clauses for types of hardware 
+ * that do not support start and stop
  */
 
-#define CMD_RSP_IFNOT(CRNAME, COMMAND, CRNEXT, HWTYPE)			\
+#define CMD_RSP_IFNOT(CRNAME, COMMAND, CRNEXT)				\
     CMD_BEGIN(CRNAME, CRNAME##R)					\
-    SKIP_WHEN(CRNAME, HWTYPE)						\
+    SKIP_WHEN(CRNAME, FEM)						\
+    SKIP_WHEN(CRNAME, ACPC FEM)						\
     CMD_END(CRNAME, COMMAND)						\
     RSP_BEGIN(CRNAME##R, CRNEXT)					\
-    SKIP_WHEN(CRNAME##R, HWTYPE)					\
+    SKIP_WHEN(CRNAME##R, FEM)						\
+    SKIP_WHEN(CRNAME##R, ACPC FEM)					\
     RSP_END(CRNAME##R)
 
 /* 
@@ -332,11 +345,12 @@ string namebuf;
 
 /*
  * Analogous to TEST_PV(), but with when() clause added to skip on hardware
- * type.
+ * type for types that dont support start and stop.
  */
-#define TEST_PV_IFNOT(NAME, PVNAME, DESIRED, NEXT, HWTYPE)	\
+#define TEST_PV_IFNOT(NAME, PVNAME, DESIRED, NEXT)		\
      TEST_PV_BEGIN(NAME, NEXT)					\
-     SKIP_WHEN(NAME, HWTYPE)					\
+     SKIP_WHEN(NAME, FEM)					\
+     SKIP_WHEN(NAME, ACPC FEM)					\
      TEST_PV_END(NAME, PVNAME, DESIRED)
 
 /*
@@ -347,40 +361,32 @@ string namebuf;
 #define OP_DONE(NAME, EVNAME) 						\
    state NAME {								\
       when() {								\
-          requestSucceeded = 1;						\
+          numSucceeded = 0; numEnabled = 0;				\
           for (i = 0; i< numFound; i++) {				\
-             if (cmdFailed[i]) {					\
-                cmdFailed[i] = 0;	/* ready for next use */	\
-                if (!disable[i]) {					\
-                   requestSucceeded = 0;				\
-                   numEnabled++;					\
-                }							\
-             }								\
-             else							\
-             {								\
-                failMsg[i][0] = 0;					\
-                pvPut(failMsg[i]);					\
-                if (!disable[i]) {					\
+             if (!disable[i]) {						\
+                numEnabled++;						\
+                if (cmdFailed[i]) {					\
+                   cmdFailed[i] = 0;	/* ready for next use */	\
+                } else {						\
+                   failMsg[i][0] = 0;					\
+                   pvPut(failMsg[i]);					\
                    PVPUTNUM(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
-                   numEnabled++;					\
                 }							\
-             }								\
+             }		   						\
           }								\
-          pvPut(requestSucceeded, SYNC);				\
-          if (requestSucceeded) {					\
-             pctSucceeded = 100.0;					\
-          } else {							\
-             if (numEnabled == 0)					\
-                pctSucceeded = 0.0;					\
-             else							\
-                pctSucceeded = (100.0 * numSucceeded)/numEnabled;	\
-          }								\
-          pvPut(pctSucceeded, SYNC);					\
-          EVNAME = 0;	/* release busy record */			\
-          pvPut(EVNAME);						\
+          if (numEnabled == 0)						\
+             pctSucceeded = 0.0;					\
+          else 								\
+             pctSucceeded = (100.0 * numSucceeded)/numEnabled;		\
+          pvPut(pctSucceeded);						\
+          pvGet(pctCriterion);						\
+          requestSucceeded = (pctSucceeded >= pctCriterion)? 1 : 0;	\
+          pvPut(requestSucceeded,SYNC);					\
           strcpy(prevReq, statePV); pvPut(prevReq);			\
           PVPUTSTR(statePV,Ready)					\
+          EVNAME = 0;	/* release busy record */			\
+          pvPut(EVNAME);						\
       } state Ready							\
    }
 /* 
@@ -463,13 +469,13 @@ ss GlobalControl {
      * not sure yet exactly how broken FEMs are, but know they do not respond 
      * to start and stop commands.  May need to use more IFNOTs.
      */
-    CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus, FEM)
+    CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
-    TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting, FEM)
+    TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting)
     OP_DONE(DoneStarting, globalStart)
-    CMD_RSP_IFNOT(Stopping, STOPACQCMD, StopReadStatus, FEM)
+    CMD_RSP_IFNOT(Stopping, STOPACQCMD, StopReadStatus)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
-    TEST_PV_IFNOT(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping, FEM)
+    TEST_PV_IFNOT(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping)
     OP_DONE(DoneStopping, globalStop)
     CMD_RSP(WritingConf, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
