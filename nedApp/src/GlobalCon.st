@@ -113,6 +113,7 @@ PVARRAY(int, cmdRsp)
 PVARRAY(int, verified)
 PVARRAY(int, acquiring)
 PVARRAY(string, hwtype)
+PVARRAY(int, cfgSection)
 
 /*
  * Groups of soft PVs, one per device
@@ -426,6 +427,9 @@ ss GlobalControl {
          for (i=0; i<numFound; i++) {
             pvAssign(failMsg[i], deviceNames[i]);
             *strrchr(deviceNames[i], ':') = 0;
+            sprintf(namebuf, "%s:CfgSection", deviceNames[i]);
+            pvAssign(cfgSection[i], namebuf);
+            cfgSection[i] = 0;	/* should be and stay that way: Full config */
             sprintf(namebuf, "%s:HwType", deviceNames[i]);
             pvAssign(hwtype[i], namebuf);
             pvGet(hwtype[i]);
@@ -483,7 +487,16 @@ ss GlobalControl {
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
     TEST_PV_IFNOT(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping)
     OP_DONE(DoneStopping, globalStop)
-    CMD_RSP(WritingConf, WRITECONFCMD, DoneWriting)
+    state WritingConf {
+       when() {
+          for (i = 0; i< numFound; i++) {	
+             if (!disable[i]) {			
+                cfgSection[i]= 0; pvPut(cfgSection[i], SYNC);		
+             }
+          }
+       } state DoWriting
+    }
+    CMD_RSP(DoWriting, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
     state Clear {
        when() {
