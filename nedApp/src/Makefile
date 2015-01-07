@@ -101,29 +101,8 @@ $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
 $(PROD_NAME)_SRCS  += PvaMetaData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 
-# These files contain descriptions of PVs that we use to generate template
-# files for EPICS database.
-$(PROD_NAME)_DB    += DspPlugin_v63.cpp
-$(PROD_NAME)_DB    += DspPlugin_v64.cpp
-$(PROD_NAME)_DB    += RocPlugin_v51.cpp
-$(PROD_NAME)_DB    += RocPlugin_v52.cpp
-$(PROD_NAME)_DB    += RocPlugin_v54.cpp
-$(PROD_NAME)_DB    += RocPlugin_v56.cpp
-$(PROD_NAME)_DB    += RocPlugin_v57.cpp
-$(PROD_NAME)_DB    += FemPlugin_v32.cpp
-$(PROD_NAME)_DB    += FemPlugin_v35.cpp
-$(PROD_NAME)_DB    += FemPlugin_v36.cpp
-$(PROD_NAME)_DB    += AcpcFemPlugin_v22.cpp
-
 #===========================
 
 include $(TOP)/configure/RULES
 #----------------------------------------
 #  ADD RULES AFTER THIS LINE
-
-%.include: %.cpp
-	./tools/export2epics.pl < $^ > ../Db/$@
-epicsdb: $($(PROD_NAME)_DB:.cpp=.include)
-
-clean::
-	rm -fR $($(PROD_NAME)_SRCS:.cpp=.dox) latex/ html/
