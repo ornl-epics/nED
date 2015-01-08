@@ -34,7 +34,7 @@ from optparse import OptionParser
 
 __version__ = "0.2.0"
 
-DEFAULT_NED_DIR = "/home/controls/nED/master"
+DEFAULT_NED_DIR = "/home/controls/epics/nED/master"
 PVTABLE_DIR_TMPL = "/home/controls/<beamline>/opi/pvtable/<iocname>/"
 
 def parse_st_cmd_env(st_cmd_filepath):
@@ -48,7 +48,7 @@ def parse_st_cmd_env(st_cmd_filepath):
                 env[match.group(1)] = match.group(2)
     return env
 
-def parse_st_cmd_plugins(st_cmd_filepath, bl_prefix):
+def parse_st_cmd_plugins(st_cmd_filepath, bl_prefix, verbose):
     """ Parse st.cmd file and extract plugin name, pv prefix and device name
         from .db declarations """
     plugins = []
@@ -57,9 +57,11 @@ def parse_st_cmd_plugins(st_cmd_filepath, bl_prefix):
     re_include = re.compile("^< *(\S*)")
 
     # First parse the st.cmd, remember any included files
+    if verbose:
+        print "Parsing '{0}' for macros and device plugins".format(st_cmd_filepath)
     with open(st_cmd_filepath, "r") as f:
         for line in f:
-            match = re_plugin.search(line)
+            match = re_plugin.search(line.replace(",undefined", ""))
             if match:
                 prefix = match.group(2).replace("$(PREFIX)", bl_prefix)
                 plugins.append({ 'name': match.group(1),
@@ -74,9 +76,11 @@ def parse_st_cmd_plugins(st_cmd_filepath, bl_prefix):
     # Now process include files the same way
     basedir = os.path.dirname(st_cmd_filepath)
     for include in includes:
+        if verbose:
+            print "Parsing '{0}' for device plugins".format(include)
         with open(os.path.join(basedir, include), "r") as f:
             for line in f:
-                match = re_plugin.search(line)
+                match = re_plugin.search(line.replace(",undefined", ""))
                 if match:
                     prefix = match.group(2).replace("$(PREFIX)", bl_prefix)
                     plugins.append({ 'name': match.group(1),
@@ -117,8 +121,8 @@ def write_pvs_file(outpath, pv_prefix, vars):
 
         for var in vars:
             outfile.write("        <pv>\n")
-            outfile.write("            <name>{0}{1}</name>\n".format(pv_prefix, var))
             outfile.write("            <selected>false</selected>\n")
+            outfile.write("            <name>{0}{1}</name>\n".format(pv_prefix, var))
             outfile.write("        </pv>\n")
 
         outfile.write("    </pvlist>\n")
@@ -205,7 +209,11 @@ def main():
             print "ERROR: Can't detect nED root directory, use -n parameter to specify it"
             sys.exit(1)
 
-    plugins = parse_st_cmd_plugins(st_cmd, bl_prefix)
+    plugins = parse_st_cmd_plugins(st_cmd, bl_prefix, options.verbose)
+    if not plugins:
+        print "No device plugins found in '{0}'".format(st_cmd)
+    elif options.verbose:
+        print "Found {0} device plugins".format(len(plugins))
 
     for plugin in plugins:
 
