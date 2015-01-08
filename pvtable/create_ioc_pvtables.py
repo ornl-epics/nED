@@ -94,9 +94,9 @@ vars_cache = dict()
 def parse_src_file(path, mode):
 
     types = {
-      'status':  re.compile("createStatusParam *\( *\"([\w:]+)\" *,"),
-      'counter': re.compile("createCounterParam *\( *\"([\w:]+)\" *,"),
-      'config':  re.compile("createConfigParam *\( *\"([\w:]+)\" *,")
+      'status':  re.compile("createStatusParam\s*\(\s*\"([\w:]+)\"\s*,"),
+      'counter': re.compile("createCounterParam\s*\(\s*\"([\w:]+)\"\s*,"),
+      'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\".*,\s*(\S+)\s*\);.*")
     }
 
     if path not in vars_cache:
@@ -108,7 +108,10 @@ def parse_src_file(path, mode):
                 for type,regex in types.items():
                     match = regex.search(line)
                     if match:
-                        vars_cache[path][type].append(match.group(1))
+                        val = 0
+                        if type == "config":
+                            val = match.group(2)
+                        vars_cache[path][type].append({ 'name': match.group(1), 'val': val })
 
     return vars_cache[path][mode]
 
@@ -122,7 +125,9 @@ def write_pvs_file(outpath, pv_prefix, vars):
         for var in vars:
             outfile.write("        <pv>\n")
             outfile.write("            <selected>false</selected>\n")
-            outfile.write("            <name>{0}{1}</name>\n".format(pv_prefix, var))
+            outfile.write("            <name>{0}{1}</name>\n".format(pv_prefix, var["name"]))
+            outfile.write("            <tolerance>1</tolerance>\n")
+            outfile.write("            <saved_value>{0}</saved_value>\n".format(var["val"]))
             outfile.write("        </pv>\n")
 
         outfile.write("    </pvlist>\n")
