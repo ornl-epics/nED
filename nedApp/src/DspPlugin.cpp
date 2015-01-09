@@ -65,6 +65,7 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
     } else if (m_version == "v64") {
         createConfigParams_v64();
         createStatusParams_v64();
+        createCounterParams_v64();
         setIntegerParam(Supported, 1);
     } else {
         setIntegerParam(Supported, 0);
