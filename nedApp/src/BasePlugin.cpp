@@ -129,7 +129,7 @@ asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *in
 asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *index, const char *initValue)
 {
     asynStatus status = asynPortDriver::createParam(name, type, index);
-    if (status == asynSuccess && type == asynParamInt32)
+    if (status == asynSuccess && type == asynParamOctet)
         status = setStringParam(*index, initValue);
     return status;
 }

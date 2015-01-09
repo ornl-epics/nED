@@ -66,7 +66,7 @@ asynStatus RocPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
     }
-    return BasePlugin::writeInt32(pasynUser, value);
+    return BasePvaPlugin::writeInt32(pasynUser, value);
 }
 
 void RocPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)

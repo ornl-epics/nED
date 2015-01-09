@@ -74,7 +74,7 @@ class BasePvaPlugin : public BasePlugin {
          * Intercept Enable parameter to disallow enabling the plugin if
          * pvRecord initialization failed.
          */
-        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+        virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
          * Overloaded function to receive all OCC data.
@@ -117,6 +117,8 @@ class BasePvaPlugin : public BasePlugin {
         double m_pulseCharge;       //!< Current pulse charge
         uint32_t m_neutronsPostSeq; //!< Current post sequence id for neutrons
         uint32_t m_metadataPostSeq; //!< Current post sequence id for metadata
+        bool m_neutronsEn;          //!< Enable exporting Neutrons PV
+        bool m_metadataEn;          //!< Enable exporting Metadata PV
         ProcessDataCb m_processNeutronsCb; //!< Callback function ptr to process neutron packet data
         PostDataCb m_postNeutronsCb;//!< Callback function ptr to post data collected so far
 
@@ -150,9 +152,23 @@ class BasePvaPlugin : public BasePlugin {
          */
         static const std::string PV_METADATA;
 
+        /**
+         * asynPortDriver interface mask used.
+         */
+        static const int interfaceMask;
+
+        /**
+         * asynPortDriver interrupt mask used.
+         */
+        static const int interruptMask;
+
     private: // asyn parameters
-        #define FIRST_BASEPVAPLUGIN_PARAM 0
-        #define LAST_BASEPVAPLUGIN_PARAM 0
+        #define FIRST_BASEPVAPLUGIN_PARAM PvNeutronsName
+        int PvNeutronsName;
+        int PvMetadataName;
+        int PvNeutronsEn;
+        int PvMetadataEn;
+        #define LAST_BASEPVAPLUGIN_PARAM PvMetadataEn
 };
 
 #endif // BASE_PVA_PLUGIN_H

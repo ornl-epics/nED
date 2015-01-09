@@ -1,7 +1,2 @@
 include "BasePlugin.include"
-
-record(bo, "$(P)Enable")
-{
-    info(autosaveFields, "VAL")
-    field(PINI, "YES")
-}
+include "BasePvaPlugin.include"
