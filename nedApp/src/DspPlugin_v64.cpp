@@ -133,19 +133,19 @@ void DspPlugin::createConfigParams_v64() {
     createConfigParam("Ch16:PixId",     'D', 0x12, 32,  0, 0x50000020); // Chan16 edge pixel id
     createConfigParam("Ch17:PixId",     'D', 0x13, 32,  0, 0x50000022); // Chan17 edge pixel id
     createConfigParam("Ch18:PixId",     'D', 0x14, 32,  0, 0x50000024); // Chan18 edge pixel id
-    createConfigParam("Ch19:PixId",     'D', 0x15, 32,  0, 0x500000026); // Chan19 edge pixel id
-    createConfigParam("Ch20:PixId",     'D', 0x16, 32,  0, 0x500000028); // Chan20 edge pixel id
-    createConfigParam("Ch21:PixId",     'D', 0x17, 32,  0, 0x50000002a); // Chan21 edge pixel id
-    createConfigParam("Ch22:PixId",     'D', 0x18, 32,  0, 0x50000002c); // Chan22 edge pixel id
-    createConfigParam("Ch23:PixId",     'D', 0x19, 32,  0, 0x50000002e); // Chan23 edge pixel id
-    createConfigParam("Ch24:PixId",     'D', 0x1A, 32,  0, 0x500000030); // Chan24 edge pixel id
-    createConfigParam("Ch25:PixId",     'D', 0x1B, 32,  0, 0x500000032); // Chan25 edge pixel id
-    createConfigParam("Ch26:PixId",     'D', 0x1C, 32,  0, 0x500000034); // Chan26 edge pixel id
-    createConfigParam("Ch27:PixId",     'D', 0x1D, 32,  0, 0x500000036); // Chan27 edge pixel id
-    createConfigParam("Ch28:PixId",     'D', 0x1E, 32,  0, 0x500000038); // Chan28 edge pixel id
-    createConfigParam("Ch29:PixId",     'D', 0x1F, 32,  0, 0x50000003a); // Chan29 edge pixel id
-    createConfigParam("Ch30:PixId",     'D', 0x20, 32,  0, 0x50000003c); // Chan30 edge pixel id
-    createConfigParam("Ch31:PixId",     'D', 0x21, 32,  0, 0x50000003e); // Chan31 edge pixel id
+    createConfigParam("Ch19:PixId",     'D', 0x15, 32,  0, 0x50000026); // Chan19 edge pixel id
+    createConfigParam("Ch20:PixId",     'D', 0x16, 32,  0, 0x50000028); // Chan20 edge pixel id
+    createConfigParam("Ch21:PixId",     'D', 0x17, 32,  0, 0x5000002a); // Chan21 edge pixel id
+    createConfigParam("Ch22:PixId",     'D', 0x18, 32,  0, 0x5000002c); // Chan22 edge pixel id
+    createConfigParam("Ch23:PixId",     'D', 0x19, 32,  0, 0x5000002e); // Chan23 edge pixel id
+    createConfigParam("Ch24:PixId",     'D', 0x1A, 32,  0, 0x50000030); // Chan24 edge pixel id
+    createConfigParam("Ch25:PixId",     'D', 0x1B, 32,  0, 0x50000032); // Chan25 edge pixel id
+    createConfigParam("Ch26:PixId",     'D', 0x1C, 32,  0, 0x50000034); // Chan26 edge pixel id
+    createConfigParam("Ch27:PixId",     'D', 0x1D, 32,  0, 0x50000036); // Chan27 edge pixel id
+    createConfigParam("Ch28:PixId",     'D', 0x1E, 32,  0, 0x50000038); // Chan28 edge pixel id
+    createConfigParam("Ch29:PixId",     'D', 0x1F, 32,  0, 0x5000003a); // Chan29 edge pixel id
+    createConfigParam("Ch30:PixId",     'D', 0x20, 32,  0, 0x5000003c); // Chan30 edge pixel id
+    createConfigParam("Ch31:PixId",     'D', 0x21, 32,  0, 0x5000003e); // Chan31 edge pixel id
 
     createConfigParam("Ch0:Cycle",      'D', 0x22,  5,  0, 0); // Chan0 edge cycle number adj
     createConfigParam("Ch1:Cycle",      'D', 0x22,  5,  5, 0); // Chan1 edge cycle number adj
@@ -313,6 +313,89 @@ void DspPlugin::createConfigParams_v64() {
     createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // pattern enable               (0=disable,1=enable)
     createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern rate
 
+}
+
+void DspPlugin::createCounterParams_v64()
+{
+//      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
+    createCounterParam("PktLenErrCnt",    0x0, 16,  0); // TBD
+    createCounterParam("SCounters:1",     0x0, 16,  0); // ZERO
+    createCounterParam("BadCmdCnt",       0x0, 16,  0); // Number of unrecognized commands
+    createCounterParam("BadCmdLvdsCnt",   0x0, 16,  0); // LVDS CMD parsing errors
+    createCounterParam("LvdsFifoAFCnt",   0x0, 16,  0); // LVDS Tx FIFO Almost Full 
+    createCounterParam("SCounters:5",     0x0, 16,  0); // ZERO 
+    createCounterParam("OptALosCnt",      0x0, 16,  0); // TBD
+    createCounterParam("OptATxFaultCnt",  0x0, 16,  0); // TBD
+    createCounterParam("OptAComFailCnt",  0x0, 16,  0); // TBD
+    createCounterParam("OptBComFailCnt",  0x0, 16,  0); // TBD
+    createCounterParam("OptBLosCnt",      0x0, 16,  0); // TBD
+    createCounterParam("OptBTxFaultCnt",  0x0, 16,  0); // TBD
+    createCounterParam("OptAFrameErrCnt", 0x0, 16,  0); // TBD
+    createCounterParam("OptACRCErrCnt",   0x0, 16,  0); // CRC low word
+    createCounterParam("OptAFifoFfAfCnt", 0x0, 16,  0); // TBD
+    createCounterParam("OptAStkAfCnt",    0x0, 16,  0); // TBD
+    createCounterParam("OptASeFifoFAfCnt",0x0, 16,  0); // TBD
+    createCounterParam("OptAPktFlagsCnt", 0x0, 16,  0); // TBD
+    createCounterParam("OptBFrameErrCnt", 0x0, 16,  0); // TBD
+    createCounterParam("OptBCRCErrCnt",   0x0, 16,  0); // CRC low word
+    createCounterParam("OptBSeFifoFAfCnt",0x0, 16,  0); // TBD
+    createCounterParam("OptBStkAfCnt",    0x0, 16,  0); // TBD
+    createCounterParam("OptBSeFifoFAfCnt",0x0, 16,  0); // TBD
+    createCounterParam("OptBPktFlagsCnt", 0x0, 16,  0); // TBD
+    createCounterParam("Ch1LkParityErCnt",0x0, 16,  0); // Even parity error on incoming packet
+    createCounterParam("Ch1LkFrameErCnt", 0x0, 16,  0); // Composite framing errors
+    createCounterParam("Ch1LkIDTFfCnt",   0x0, 16,  0); // External IDT FIFO is full 
+    createCounterParam("Ch1LkExtAfCnt",   0x0, 16,  0); // External FIFO AF
+    createCounterParam("Ch1LkPckprsAfCnt",0x0, 16,  0); // Channel-link packet parser FIFO AF
+    createCounterParam("Ch1LkTBDCnt",     0x0, 16,  0); // ZERO
+    createCounterParam("Ch2LkParityErCnt",0x0, 16,  0); // Even parity error on incoming packet
+    createCounterParam("Ch2LkFrameErCnt", 0x0, 16,  0); // Composite framing errors
+    createCounterParam("Ch2LkIDTFfCnt",   0x0, 16,  0); // External IDT FIFO is full 
+    createCounterParam("Ch2LkExtAfCnt",   0x0, 16,  0); // External FIFO AF
+    createCounterParam("Ch2LkPckprsAfCnt",0x0, 16,  0); // Channel-link packet parser FIFO AF
+    createCounterParam("Ch2LkTBDCnt",     0x0, 16,  0); // ZERO
+    createCounterParam("Ch3LkParityErCnt",0x0, 16,  0); // Even parity error on incoming packet
+    createCounterParam("Ch3LkFrameErCnt", 0x0, 16,  0); // Composite framing errors
+    createCounterParam("Ch3LkIDTFfCnt",   0x0, 16,  0); // External IDT FIFO is full 
+    createCounterParam("Ch3LkExtAfCnt",   0x0, 16,  0); // External FIFO AF
+    createCounterParam("Ch3LkPckprsAfCnt",0x0, 16,  0); // Channel-link packet parser FIFO AF
+    createCounterParam("Ch3LkTBDCnt",     0x0, 16,  0); // ZERO
+    createCounterParam("Ch4LkParityErCnt",0x0, 16,  0); // Even parity error on incoming packet
+    createCounterParam("Ch4LkFrameErCnt", 0x0, 16,  0); // Composite framing errors
+    createCounterParam("Ch4LkIDTFfCnt",   0x0, 16,  0); // External IDT FIFO is full 
+    createCounterParam("Ch4LkExtAfCnt",   0x0, 16,  0); // External FIFO AF
+    createCounterParam("Ch4LkPckprsAfCnt",0x0, 16,  0); // Channel-link packet parser FIFO AF
+    createCounterParam("Ch4LkTBDCnt",     0x0, 16,  0); // ZERO
+    createCounterParam("Ch5LkParityErCnt",0x0, 16,  0); // Even parity error on incoming packet
+    createCounterParam("Ch5LkFrameErCnt", 0x0, 16,  0); // Composite framing errors
+    createCounterParam("Ch5LkIDTFfCnt",   0x0, 16,  0); // External IDT FIFO is full 
+    createCounterParam("Ch5LkExtAfCnt",   0x0, 16,  0); // External FIFO AF
+    createCounterParam("Ch5LkPckprsAfCnt",0x0, 16,  0); // Channel-link packet parser FIFO AF
+    createCounterParam("Ch5LkTBDCnt",     0x0, 16,  0); // ZERO
+    createCounterParam("Ch6LkParityErCnt",0x0, 16,  0); // Even parity error on incoming packet
+    createCounterParam("Ch6LkFrameErCnt", 0x0, 16,  0); // Composite framing errors
+    createCounterParam("Ch6LkIDTFfCnt",   0x0, 16,  0); // External IDT FIFO is full 
+    createCounterParam("Ch6LkExtAfCnt",   0x0, 16,  0); // External FIFO AF
+    createCounterParam("Ch6LkPckprsAfCnt",0x0, 16,  0); // Channel-link packet parser FIFO AF
+    createCounterParam("Ch6LkTBDCnt",     0x0, 16,  0); // ZERO
+    createCounterParam("SorterFifoAfCnt", 0x0, 16,  0); // Sorter Command FIFO almost full
+    createCounterParam("CmdFifoAfCnt",    0x0, 16,  0); // Channel link command reader FIFO AF
+    createCounterParam("MD1EdgcapAfCnt",  0x0, 16,  0); // Metadata Event FIFO Subgroup 0
+    createCounterParam("MD2EdgcapAfCnt",  0x0, 16,  0); // Metadata Event FIFO Subgroup 1
+    createCounterParam("MD3EdgcapAfCnt",  0x0, 16,  0); // Metadata Event FIFO Subgroup 2
+    createCounterParam("MD4EdgcapAfCnt",  0x0, 16,  0); // Metadata Event FIFO Subgroup 3
+    createCounterParam("MDPckFifoAfCnt",  0x0, 16,  0); // Metadata Packet FIFO AF
+    createCounterParam("MDSpareTBDCnt",   0x0, 16,  0); // ZERO
+    createCounterParam("NEvPSFifoAfCnt",  0x0, 16,  0); // Neutron event processor sorter AF
+    createCounterParam("NEvPL1FifoAfCnt", 0x0, 16,  0); // Level 1 dff_af
+    createCounterParam("NEvPL1WcAFCnt",   0x0, 16,  0); // Level 1 dff_wcnt_af
+    createCounterParam("MEvPSFifoAfCnt",  0x0, 16,  0); // Sorter fifo_af
+    createCounterParam("MEvPL1FifoAfCnt", 0x0, 16,  0); // Level 1 dff_af
+    createCounterParam("MEvPL1WcAFCnt",   0x0, 16,  0); // Level 1 dff_wcnt_af
+    createCounterParam("EvPL2AfCnt",      0x0, 16,  0); // Level 2 dff_af
+    createCounterParam("EvPL2WcAfCnt",    0x0, 16,  0); // Level 2 dff_wcnt_af
+    createCounterParam("X7676",           0x0, 16,  0); // x"7676"
+    createCounterParam("X7777",           0x0, 16,  0); // x"7777"
 }
 
 void DspPlugin::createStatusParams_v64()
