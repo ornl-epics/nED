@@ -1,3 +1,12 @@
+record(bi, "$(P)Acquiring")
+{
+    field(DESC, "Acquiring data")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Acquiring")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not acquiring")
+    field(ONAM, "acquiring")
+}
 record(bi, "$(P)ErrParity")
 {
     field(DESC, "LVDS parity error.")

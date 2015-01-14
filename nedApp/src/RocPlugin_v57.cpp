@@ -23,6 +23,7 @@
 void RocPlugin::createStatusParams_v57()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                         | EPICS record description  | (bi and mbbi description)
+    createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring data                (0=not acquiring,1=acquiring)
     createStatusParam("ErrParity",        0x0,  1, 10); // LVDS parity error.            (0=no error,1=error)
     createStatusParam("Configured",       0x0,  1,  9); // Not configured                (0=configured,1=not configured)
     createStatusParam("Discovered",       0x0,  1,  8); // Configured                    (0=discovered,1=not discovered)
