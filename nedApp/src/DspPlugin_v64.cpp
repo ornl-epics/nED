@@ -319,11 +319,11 @@ void DspPlugin::createCounterParams_v64()
 {
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createCounterParam("PktLenErrCnt",     0x0, 16,  0); // TBD
-    createCounterParam("SCounters:1",      0x0, 16, 16); // ZERO
+    createCounterParam("SCntrs:1",         0x0, 16, 16); // ZERO
     createCounterParam("BadCmdCnt",        0x1, 16,  0); // Number of unrecognized commands
     createCounterParam("BadCmdLvdsCnt",    0x1, 16, 16); // LVDS CMD parsing errors
     createCounterParam("LvdsFifoAFCnt",    0x2, 16,  0); // LVDS Tx FIFO Almost Full 
-    createCounterParam("SCounters:5",      0x2, 16, 16); // ZERO 
+    createCounterParam("SCntrs:5",         0x2, 16, 16); // ZERO 
     createCounterParam("OptA:LosCnt",      0x3, 16,  0); // TBD
     createCounterParam("OptA:TxFltCnt",    0x3, 16, 16); // TBD
     createCounterParam("OptA:ComFailCnt",  0x4, 16,  0); // TBD
@@ -341,43 +341,43 @@ void DspPlugin::createCounterParams_v64()
     createCounterParam("OptB:FfAfCnt",     0xA, 16,  0); // TBD
     createCounterParam("OptB:StkAfCnt",    0xA, 16, 16); // TBD
     createCounterParam("OptB:SecFAfCnt",   0xB, 16,  0); // TBD
-    createCounterParam("OptB:PktFlagsCnt", 0xB, 16, 16); // TBD
+    createCounterParam("OptB:PktFlagCnt",  0xB, 16, 16); // TBD
     createCounterParam("Ch1:LParityErCnt", 0xC, 16,  0); // Even parity error on incoming packet
     createCounterParam("Ch1:LFrameErCnt",  0xC, 16, 16); // Composite framing errors
     createCounterParam("Ch1:LIDTFfCnt",    0xD, 16,  0); // External IDT FIFO is full 
     createCounterParam("Ch1:LExtAfCnt",    0xD, 16, 16); // External FIFO AF
     createCounterParam("Ch1:LPpAfCnt",     0xE, 16,  0); // Channel-link packet parser FIFO AF
-    createCounterParam("Ch1:LTBDCnt",      0xE, 16, 16); // ZERO
+    createCounterParam("Ch1:LSCntrs:29",   0xE, 16, 16); // ZERO
     createCounterParam("Ch2:LParityErCnt", 0xF, 16,  0); // Even parity error on incoming packet
     createCounterParam("Ch2:LFrameErCnt",  0xF, 16, 16); // Composite framing errors
     createCounterParam("Ch2:LIDTFfCnt",    0x10, 16,  0); // External IDT FIFO is full 
     createCounterParam("Ch2:LExtAfCnt",    0x10, 16, 16); // External FIFO AF
     createCounterParam("Ch2:LPpAfCnt",     0x11, 16,  0); // Channel-link packet parser FIFO AF
-    createCounterParam("Ch2:LTBDCnt",      0x11, 16, 16); // ZERO
+    createCounterParam("Ch2:LSCntrs:35",   0x11, 16, 16); // ZERO
     createCounterParam("Ch3:LParityErCnt", 0x12, 16,  0); // Even parity error on incoming packet
     createCounterParam("Ch3:LFrameErCnt",  0x12, 16, 16); // Composite framing errors
     createCounterParam("Ch3:LIDTFfCnt",    0x13, 16,  0); // External IDT FIFO is full 
     createCounterParam("Ch3:LExtAfCnt",    0x13, 16, 16); // External FIFO AF
     createCounterParam("Ch3:LPpAfCnt",     0x14, 16,  0); // Channel-link packet parser FIFO AF
-    createCounterParam("Ch3:LTBDCnt",      0x14, 16, 16); // ZERO
+    createCounterParam("Ch3:LSCntrs:41",   0x14, 16, 16); // ZERO
     createCounterParam("Ch4:LParityErCnt", 0x15, 16,  0); // Even parity error on incoming packet
     createCounterParam("Ch4:LFrameErCnt",  0x15, 16, 16); // Composite framing errors
     createCounterParam("Ch4:LIDTFfCnt",    0x16, 16,  0); // External IDT FIFO is full 
     createCounterParam("Ch4:LExtAfCnt",    0x16, 16, 16); // External FIFO AF
     createCounterParam("Ch4:LPpAfCnt",     0x17, 16,  0); // Channel-link packet parser FIFO AF
-    createCounterParam("Ch4:LTBDCnt",      0x17, 16, 16); // ZERO
+    createCounterParam("Ch4:LSCntrs:47",   0x17, 16, 16); // ZERO
     createCounterParam("Ch5:LParityErCnt", 0x18, 16,  0); // Even parity error on incoming packet
     createCounterParam("Ch5:LFrameErCnt",  0x18, 16, 16); // Composite framing errors
     createCounterParam("Ch5:LIDTFfCnt",    0x19, 16,  0); // External IDT FIFO is full 
     createCounterParam("Ch5:LExtAfCnt",    0x19, 16, 16); // External FIFO AF
     createCounterParam("Ch5:LPpAfCnt",     0x1A, 16,  0); // Channel-link packet parser FIFO AF
-    createCounterParam("Ch5:LTBDCnt",      0x1A, 16, 16); // ZERO
+    createCounterParam("Ch5:LSCntrs:53",   0x1A, 16, 16); // ZERO
     createCounterParam("Ch6:LParityErCnt", 0x1B, 16,  0); // Even parity error on incoming packet
     createCounterParam("Ch6:LFrameErCnt",  0x1B, 16, 16); // Composite framing errors
     createCounterParam("Ch6:LIDTFfCnt",    0x1C, 16,  0); // External IDT FIFO is full 
     createCounterParam("Ch6:LExtAfCnt",    0x1C, 16, 16); // External FIFO AF
     createCounterParam("Ch6:LPpAfCnt",     0x1D, 16,  0); // Channel-link packet parser FIFO AF
-    createCounterParam("Ch6:LTBDCnt",      0x1D, 16, 16); // ZERO
+    createCounterParam("Ch6:LSCntrs:59",   0x1D, 16, 16); // ZERO
     createCounterParam("SorterAfCnt",      0x1E, 16,  0); // Sorter Command FIFO almost full
     createCounterParam("ChLCmdRdAfCnt",    0x1E, 16, 16); // Channel link command reader FIFO AF
     createCounterParam("MD1:EdgeAfCnt",    0x1F, 16,  0); // Metadata Event FIFO Subgroup 0
@@ -385,7 +385,7 @@ void DspPlugin::createCounterParams_v64()
     createCounterParam("MD3:EdgeAfCnt",    0x20, 16,  0); // Metadata Event FIFO Subgroup 2
     createCounterParam("MD4:EdgeAfCnt",    0x20, 16, 16); // Metadata Event FIFO Subgroup 3
     createCounterParam("MDPckAfCnt",       0x21, 16,  0); // Metadata Packet FIFO AF
-    createCounterParam("MDSpareTBDCnt",    0x21, 16, 16); // ZERO
+    createCounterParam("SCntrs:67",        0x21, 16, 16); // ZERO
     createCounterParam("NEvPSAfCnt",       0x22, 16,  0); // Neutron event processor sorter AF
     createCounterParam("NEvPL1AfCnt",      0x22, 16, 16); // Level 1 dff_af
     createCounterParam("NEvPL1WcAFCnt",    0x23, 16,  0); // Level 1 dff_wcnt_af
@@ -394,8 +394,8 @@ void DspPlugin::createCounterParams_v64()
     createCounterParam("MEvPL1WcAFCnt",    0x24, 16, 16); // Level 1 dff_wcnt_af
     createCounterParam("EvPL2AfCnt",       0x25, 16,  0); // Level 2 dff_af
     createCounterParam("EvPL2WcAfCnt",     0x25, 16, 16); // Level 2 dff_wcnt_af
-    createCounterParam("Fixed0676",        0x26, 16,  0); // x7676
-    createCounterParam("Fixed0777",        0x26, 16, 16); // x7777
+    createCounterParam("SCntrs:76",        0x26, 16,  0); // x7676
+    createCounterParam("SCntrs:77",        0x26, 16, 16); // x7777
 }
 
 void DspPlugin::createStatusParams_v64()
