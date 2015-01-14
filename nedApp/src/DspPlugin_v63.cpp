@@ -34,7 +34,8 @@ void DspPlugin::createConfigParams_v63() {
 
     createConfigParam("ChopDutyCycle",  'C', 0x9,  32,  0, 83400); // N*100ns ref pulse high
     createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // N*100ns master/ref delay
-    createConfigParam("ChopFixOffset",  'C', 0xB,  32,  0, 0); // Chopper TOF fixed offset       - todo: make proper record links to chopper ioc
+    // @TODO: make proper record links to chopper ioc
+    createConfigParam("ChopFixOffset",  'C', 0xB,  32,  0, 0); // Chopper TOF fixed offset
 
     createConfigParam("ChopFr6",        'C', 0xC,   8,  0, 4); // RTDL Frame 6
     createConfigParam("ChopFr7",        'C', 0xC,   8,  8, 5); // RTDL Frame 7
@@ -133,19 +134,19 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("Ch16:PixId",     'D', 0x12, 32,  0, 0x50000020); // Chan16 edge pixel id
     createConfigParam("Ch17:PixId",     'D', 0x13, 32,  0, 0x50000022); // Chan17 edge pixel id
     createConfigParam("Ch18:PixId",     'D', 0x14, 32,  0, 0x50000024); // Chan18 edge pixel id
-    createConfigParam("Ch19:PixId",     'D', 0x15, 32,  0, 0x500000026); // Chan19 edge pixel id
-    createConfigParam("Ch20:PixId",     'D', 0x16, 32,  0, 0x500000028); // Chan20 edge pixel id
-    createConfigParam("Ch21:PixId",     'D', 0x17, 32,  0, 0x50000002a); // Chan21 edge pixel id
-    createConfigParam("Ch22:PixId",     'D', 0x18, 32,  0, 0x50000002c); // Chan22 edge pixel id
-    createConfigParam("Ch23:PixId",     'D', 0x19, 32,  0, 0x50000002e); // Chan23 edge pixel id
-    createConfigParam("Ch24:PixId",     'D', 0x1A, 32,  0, 0x500000030); // Chan24 edge pixel id
-    createConfigParam("Ch25:PixId",     'D', 0x1B, 32,  0, 0x500000032); // Chan25 edge pixel id
-    createConfigParam("Ch26:PixId",     'D', 0x1C, 32,  0, 0x500000034); // Chan26 edge pixel id
-    createConfigParam("Ch27:PixId",     'D', 0x1D, 32,  0, 0x500000036); // Chan27 edge pixel id
-    createConfigParam("Ch28:PixId",     'D', 0x1E, 32,  0, 0x500000038); // Chan28 edge pixel id
-    createConfigParam("Ch29:PixId",     'D', 0x1F, 32,  0, 0x50000003a); // Chan29 edge pixel id
-    createConfigParam("Ch30:PixId",     'D', 0x20, 32,  0, 0x50000003c); // Chan30 edge pixel id
-    createConfigParam("Ch31:PixId",     'D', 0x21, 32,  0, 0x50000003e); // Chan31 edge pixel id
+    createConfigParam("Ch19:PixId",     'D', 0x15, 32,  0, 0x50000026); // Chan19 edge pixel id
+    createConfigParam("Ch20:PixId",     'D', 0x16, 32,  0, 0x50000028); // Chan20 edge pixel id
+    createConfigParam("Ch21:PixId",     'D', 0x17, 32,  0, 0x5000002a); // Chan21 edge pixel id
+    createConfigParam("Ch22:PixId",     'D', 0x18, 32,  0, 0x5000002c); // Chan22 edge pixel id
+    createConfigParam("Ch23:PixId",     'D', 0x19, 32,  0, 0x5000002e); // Chan23 edge pixel id
+    createConfigParam("Ch24:PixId",     'D', 0x1A, 32,  0, 0x50000030); // Chan24 edge pixel id
+    createConfigParam("Ch25:PixId",     'D', 0x1B, 32,  0, 0x50000032); // Chan25 edge pixel id
+    createConfigParam("Ch26:PixId",     'D', 0x1C, 32,  0, 0x50000034); // Chan26 edge pixel id
+    createConfigParam("Ch27:PixId",     'D', 0x1D, 32,  0, 0x50000036); // Chan27 edge pixel id
+    createConfigParam("Ch28:PixId",     'D', 0x1E, 32,  0, 0x50000038); // Chan28 edge pixel id
+    createConfigParam("Ch29:PixId",     'D', 0x1F, 32,  0, 0x5000003a); // Chan29 edge pixel id
+    createConfigParam("Ch30:PixId",     'D', 0x20, 32,  0, 0x5000003c); // Chan30 edge pixel id
+    createConfigParam("Ch31:PixId",     'D', 0x21, 32,  0, 0x5000003e); // Chan31 edge pixel id
 
     createConfigParam("Ch0:Cycle",      'D', 0x22,  5,  0, 0); // Chan0 edge cycle number adj
     createConfigParam("Ch1:Cycle",      'D', 0x22,  5,  5, 0); // Chan1 edge cycle number adj
@@ -236,7 +237,7 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("LvdsDataMode",   'E', 0x0,  1, 19, 0); // LVDS data parser mode         (0=as data,1=as command)
     createConfigParam("LvdsDataSize",   'E', 0x0,  8, 20, 4); // LVDS data pkt num words
     createConfigParam("LvdsPowerCtrl",  'E', 0x0,  1, 28, 1); // Power Down during reset       (0=power down,1=power up)
-    createConfigParam("LvdsPowerRst",   'E', 0x0,  1, 29, 1); // Execite power down sequence   (0=execute,1=bypass)
+    createConfigParam("LvdsPowerRst",   'E', 0x0,  1, 29, 1); // Execute power down sequence   (0=execute,1=bypass)
     createConfigParam("LvdsFilterAll",  'E', 0x0,  2, 30, 0); // Filter all commands
 
     createConfigParam("LvdsFilterCmd",  'E', 0x1, 16,  0, 0); // LVDS command to filter
@@ -269,9 +270,9 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("Ch6:SrcCtrl",    'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
     createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB[0])
 
-    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 166660); // LVDS TSYNC generation divisor   - 40MHz/this value to obtain TSYNC period
-    createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor            - 106.25MHz/this value
-    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor            - 10MHz/this value
+    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 166660); // LVDS TSYNC generate divisor (166660=240Hz, 666800=60Hz, 800000=50Hz, 1333200=30Hz)
+    createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor     (0=10ns, 1=20ns, 106=1us, 1060=10us, 106250=1ms)
+    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (83330=8.3ms, 10=1us, 10000=1ms)
 
     createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
     createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 0); // Crossbar Switch Pass ctrl B  (1=Send to trans A,2=send to trans B)
@@ -283,7 +284,7 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("OptB:FilterCmd", 'E', 0x8,  2, 13, 0); // Optical TX B Command Filter
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
     createConfigParam("OptBlankEn",     'E', 0x8,  1, 17, 0); // Optical empty data frame CRC (0=no blank frame, 1=add blank frame)
-    createConfigParam("OptTxDelay",     'E', 0x8,  7, 24, 3); // Optical packet send delay           - Number of 313ns cycles to wait between DSP packet transmissions
+    createConfigParam("OptTxDelay",     'E', 0x8,  7, 24, 3); // Optical packet send delay    (0=0ns, 1=313ns, 3=1us, 100=31.3us)
     createConfigParam("OptTxDelayC",    'E', 0x8,  1, 31, 1); // Optical packet send delay ct (0=use OPT_TX_DELAY,1=prev word count)
 
     createConfigParam("OptMaxSize",     'E', 0x9, 16,  0, 16111); // Optical packet max dwords

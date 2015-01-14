@@ -617,7 +617,7 @@ void RocPlugin::createConfigParams_v56()
     createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // Edge detect enable            (0=disable,1=enable)
     createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
     createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
-    createConfigParam("AutoCorrection",   'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
+    createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
@@ -627,6 +627,7 @@ void RocPlugin::createConfigParams_v56()
     createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
 
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternDebug", 'F', 0x1,  3, 12, 0);     // Engineering Use only
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
-    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate [10MHz]
+    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=610Hz, 39999=1KHz, 19999=2KHz, 7999=5KHz, 3999=10KHz, 1599=25KHz, 799=50KHz, 399=100KHz, 49=800KHz, 39=1MHz, 19=2MHz, 7=5MHz. 3=10MHz, 0=40MHz)
 }

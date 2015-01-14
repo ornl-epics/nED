@@ -218,8 +218,9 @@ void FemPlugin::createConfigParams_v36()
     createConfigParam("VerbDisc",        'F', 0x0,  1, 15, 0);  // Verbose discover             (0=disable,1=enable)
 
     createConfigParam("TestPatternEn",   'F', 0x1,  1, 15, 0);  // Test pattern enable          (0=disable,1=enable)
+    createConfigParam("TestPatternDebug",'F', 0x1,  3, 12, 0);  // Engineering Use only
     createConfigParam("TestPatternId",   'F', 0x1, 12,  0, 0);  // Test pattern id
-    createConfigParam("TestPatternRate", 'F', 0x2, 16,  0, 0);  // Test pattern rate
+    createConfigParam("TestPatternRate", 'F', 0x2, 16,  0, 0);  // Test pattern rate            (65535=610Hz, 39999=1KHz, 19999=2KHz, 7999=5KHz, 3999=10KHz, 1599=25KHz, 799=50KHz, 399=100KHz, 49=800KHz, 39=1MHz, 19=2MHz, 7=5MHz. 3=10MHz, 0=40MHz)
 }
 
 void FemPlugin::createCounterParams_v36()

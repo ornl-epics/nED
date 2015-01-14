@@ -354,7 +354,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // Chan7 B sample maximum
     createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // Chan8 B sample maximum
 
-    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope
+    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope [autocorrect]
 
     createConfigParam("Ch1:Enable",       'E', 0x0,  1,  0, 1);     // Chan1 enable                  (0=disable,1=enable)
     createConfigParam("Ch2:Enable",       'E', 0x0,  1,  1, 1);     // Chan2 enable                  (0=disable,1=enable)
@@ -398,12 +398,9 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
     createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
     createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
-    // @todo: I protest the addition of 'TestPatternAltEn' when the test pattern module is intended to be standard
-    //        across all modules.  Currently, this v5.7 ROC firmware is the only one with an 'alternate' pattern selection.
-    //        Given that there are 2 additional bits available in this register, we should design the firmware appropriately
-    //        for all forseeable use-cases.  This is the first *challenge* to the agreed-upon API.
-    createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Test pattern alt enable       (0=disable,1=enable)
+
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternDebug", 'F', 0x1,  3, 12, 0);     // Engineering Use only
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
-    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate
+    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=610Hz, 39999=1KHz, 19999=2KHz, 7999=5KHz, 3999=10KHz, 1599=25KHz, 799=50KHz, 399=100KHz, 49=800KHz, 39=1MHz, 19=2MHz, 7=5MHz. 3=10MHz, 0=40MHz)
 }
