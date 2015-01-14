@@ -76,6 +76,7 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         createStatusParams_v57();
         createCounterParams_v57();
         createConfigParams_v57();
+        createParam("Acquiring", asynParamInt32, &Acquiring); // @FIXME: currently v5.7 doesn't support Acquiring through registers, we simulate by receiving ACK on START
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);
@@ -234,7 +235,7 @@ bool RocPlugin::rspReadConfig(const DasPacket *packet)
 bool RocPlugin::rspStart(const DasPacket *packet)
 {
     bool ack = BaseModulePlugin::rspStart(packet);
-    if (m_version == "v54" || m_version == "v55") {
+    if (m_version == "v54" || m_version == "v55" || m_version == "v57") {   // @FIXME: v57 is temporary
         setIntegerParam(Acquiring, (ack ? 1 : 0));
         callParamCallbacks();
     }
@@ -244,7 +245,7 @@ bool RocPlugin::rspStart(const DasPacket *packet)
 bool RocPlugin::rspStop(const DasPacket *packet)
 {
     bool ack = BaseModulePlugin::rspStop(packet);
-    if (m_version == "v54" || m_version == "v55") {
+    if (m_version == "v54" || m_version == "v55" || m_version == "v57") {   // @FIXME: v57 is temporary
         setIntegerParam(Acquiring, (ack ? 0 : 1));
         callParamCallbacks();
     }

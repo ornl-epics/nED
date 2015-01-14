@@ -108,7 +108,7 @@ void RocPlugin::createStatusParams_v54()
     createStatusParam("Ch6:A:BaseAvg",    0x10,15,  0); // A6 baseline average
     createStatusParam("Ch6:B:BaseAvg",    0x11,15,  0); // B6 baseline average
     createStatusParam("Ch7:A:BaseAvg",    0x12,15,  0); // A7 baseline average
-    createStatusParam("Ch8:B:BaseAvg",    0x13,15,  0); // B7 baseline average
+    createStatusParam("Ch7:B:BaseAvg",    0x13,15,  0); // B7 baseline average
     createStatusParam("Ch8:A:BaseAvg",    0x14,15,  0); // A8 baseline average
     createStatusParam("Ch8:B:BaseAvg",    0x15,15,  0); // B8 baseline average
 
@@ -358,7 +358,7 @@ void RocPlugin::createConfigParams_v54()
     createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // Edge detect enable            (0=disable,1=enable)
     createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
     createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
-    createConfigParam("AutoCorrection",   'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
+    createConfigParam("AutoCorrect",      'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)

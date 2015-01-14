@@ -107,7 +107,7 @@ void RocPlugin::createStatusParams_v57()
     createStatusParam("Ch6:A:BaseAvg",    0x10,15,  0); // A6 baseline average
     createStatusParam("Ch6:B:BaseAvg",    0x11,15,  0); // B6 baseline average
     createStatusParam("Ch7:A:BaseAvg",    0x12,15,  0); // A7 baseline average
-    createStatusParam("Ch8:B:BaseAvg",    0x13,15,  0); // B7 baseline average
+    createStatusParam("Ch7:B:BaseAvg",    0x13,15,  0); // B7 baseline average
     createStatusParam("Ch8:A:BaseAvg",    0x14,15,  0); // A8 baseline average
     createStatusParam("Ch8:B:BaseAvg",    0x15,15,  0); // B8 baseline average
 
@@ -353,7 +353,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // Chan7 B sample maximum
     createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // Chan8 B sample maximum
 
-    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope
+    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope [autocorrect]
 
     createConfigParam("Ch1:Enable",       'E', 0x0,  1,  0, 1);     // Chan1 enable                  (0=disable,1=enable)
     createConfigParam("Ch2:Enable",       'E', 0x0,  1,  1, 1);     // Chan2 enable                  (0=disable,1=enable)
@@ -389,7 +389,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // Edge detect enable            (0=disable,1=enable)
     createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
     createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
-    createConfigParam("AutoCorrection",   'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
+    createConfigParam("AutoCorrect",      'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
@@ -397,12 +397,9 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
     createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
     createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
-    // @todo: I protest the addition of 'TestPatternAltEn' when the test pattern module is intended to be standard
-    //        across all modules.  Currently, this v5.7 ROC firmware is the only one with an 'alternate' pattern selection.
-    //        Given that there are 2 additional bits available in this register, we should design the firmware appropriately
-    //        for all forseeable use-cases.  This is the first *challenge* to the agreed-upon API.
-    createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Test pattern alt enable       (0=disable,1=enable)
+
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternDebug", 'F', 0x1,  3, 12, 0);     // Engineering Use only
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
-    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate
+    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate [10MHz]
 }

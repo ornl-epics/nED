@@ -2250,6 +2250,38 @@ record(bo, "$(P)TestPatternEnS")
     field(ZNAM, "disable")
     field(ONAM, "enable")
 }
+record(longout, "$(P)TestPatternDebug")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Engineering Use only")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)TestPatternDebugW PP")
+}
+record(longout, "$(P)TestPatternDebugW")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Engineering Use only")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TestPatternDebug")
+    field(SDIS, "$(P)TestPatternDebugS.PACT")
+    field(DISV, "1")
+}
+record(longin, "$(P)TestPatternDebugR")
+{
+    field(DTYP, "asynInt32")
+    field(DESC, "Engineering Use only")
+    field(INP,  "@asyn($(PORT))TestPatternDebug")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)TestPatternDebugS")
+}
+record(longout, "$(P)TestPatternDebugS")
+{
+    field(DOL,  "$(P)TestPatternDebugR NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)TestPatternDebug PP")
+}
 record(longout, "$(P)TestPatternId")
 {
     info(autosaveFields, "VAL")
@@ -2286,7 +2318,7 @@ record(longout, "$(P)TestPatternRate")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
-    field(DESC, "Test pattern rate")
+    field(DESC, "Test pattern rate [10MHz]")
     field(PINI, "YES")
     field(VAL,  "0")
     field(OUT,  "$(P)TestPatternRateW PP")
@@ -2294,7 +2326,7 @@ record(longout, "$(P)TestPatternRate")
 record(longout, "$(P)TestPatternRateW")
 {
     field(ASG,  "BEAMLINE")
-    field(DESC, "Test pattern rate")
+    field(DESC, "Test pattern rate [10MHz]")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))TestPatternRate")
     field(SDIS, "$(P)TestPatternRateS.PACT")
@@ -2303,7 +2335,7 @@ record(longout, "$(P)TestPatternRateW")
 record(longin, "$(P)TestPatternRateR")
 {
     field(DTYP, "asynInt32")
-    field(DESC, "Test pattern rate")
+    field(DESC, "Test pattern rate [10MHz]")
     field(INP,  "@asyn($(PORT))TestPatternRate")
     field(SCAN, "I/O Intr")
     field(FLNK, "$(P)TestPatternRateS")

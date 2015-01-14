@@ -34,7 +34,8 @@ void DspPlugin::createConfigParams_v63() {
 
     createConfigParam("ChopDutyCycle",  'C', 0x9,  32,  0, 83400); // N*100ns ref pulse high
     createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // N*100ns master/ref delay
-    createConfigParam("ChopFixOffset",  'C', 0xB,  32,  0, 0); // Chopper TOF fixed offset       - todo: make proper record links to chopper ioc
+    // @TODO: make proper record links to chopper ioc
+    createConfigParam("ChopFixOffset",  'C', 0xB,  32,  0, 0); // Chopper TOF fixed offset
 
     createConfigParam("ChopFr6",        'C', 0xC,   8,  0, 4); // RTDL Frame 6
     createConfigParam("ChopFr7",        'C', 0xC,   8,  8, 5); // RTDL Frame 7
@@ -269,9 +270,9 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("Ch6:SrcCtrl",    'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
     createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 0); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB[0])
 
-    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 20000); // LVDS TSYNC generation divisor   - 40MHz/this value to obtain TSYNC period
-    createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor            - 106.25MHz/this value
-    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 0); // LVDS TSYNC width divisor            - 10MHz/this value
+    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 20000); // LVDS TSYNC generate divisor
+    createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor
+    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 0); // LVDS TSYNC width divisor
 
     createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 0); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
     createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 0); // Crossbar Switch Pass ctrl B  (1=Send to trans A,2=send to trans B)
@@ -283,7 +284,7 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("OptB:FilterCmd", 'E', 0x8,  2, 13, 0); // Optical TX B Command Filter
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
     createConfigParam("OptBlankEn",     'E', 0x8,  1, 17, 0); // Optical empty data frame CRC (0=no blank frame, 1=add blank frame)
-    createConfigParam("OptTxDelay",     'E', 0x8,  7, 24, 3); // Optical packet send delay           - Number of 313ns cycles to wait between DSP packet transmissions
+    createConfigParam("OptTxDelay",     'E', 0x8,  7, 24, 3); // Optical packet send delay
     createConfigParam("OptTxDelayC",    'E', 0x8,  1, 31, 1); // Optical packet send delay ct (0=use OPT_TX_DELAY,1=prev word count)
 
     createConfigParam("OptMaxSize",     'E', 0x9, 16,  0, 16111); // Optical packet max dwords
