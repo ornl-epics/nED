@@ -63,7 +63,7 @@ def parse_st_cmd_plugins(st_cmd_filepath, bl_prefix, verbose):
         for line in f:
             match = re_plugin.search(line.replace(",undefined", ""))
             if match:
-                prefix = match.group(2).replace("$(PREFIX)", bl_prefix)
+                prefix = match.group(2).replace("$(PREFIX)", bl_prefix).replace(bl_prefix + ":", bl_prefix)
                 plugins.append({ 'name': match.group(1),
                                  'pv_prefix': prefix,
                                  'device': match.group(3)
