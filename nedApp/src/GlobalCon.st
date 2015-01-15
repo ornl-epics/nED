@@ -126,6 +126,8 @@ PVARRAY(string, failMsg)
  * These are global request soft PVs. Treated as "busy" records in that they
  * are acted upon when set to "1" and reset when the operation completes.
  */
+DECLEVENT(int, globalEnable, {GPREFIX}Enable)
+DECLEVENT(int, globalDisable, {GPREFIX}Disable)
 DECLEVENT(int, globalStop, {GPREFIX}Stop)
 DECLEVENT(int, globalStart, {GPREFIX}Start)
 DECLEVENT(int, globalCheck, {GPREFIX}Check)
@@ -177,6 +179,17 @@ int severity;
 /*
  * Macros used in constructing states and combinations of states
  */
+/*
+ * SET_DISABLES used for setting all modules enabled or disabled
+ */
+#define SET_DISABLES(NAME, VAL) 			\
+    state NAME {					\
+       when() {						\
+          for (i = 0; i< numFound; i++) {		\
+             disable[i] = VAL; pvPut(disable[i]);	\
+          }						\
+       } state Ready					\
+    }  							\
 /*
  * CMD_BEGIN() and CMD_END() are a pair of macros that together make two states
  * that send COMMAND to all devices. The same NAME must be passed to each, and 
@@ -452,9 +465,9 @@ ss GlobalControl {
          }
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
-          PVPUTSTR(prevReq,statePV)					\
-          strcpy(prevReq, statePV); pvPut(prevReq);			\
-          PVPUTSTR(statePV,Discover)					\
+          PVPUTSTR(prevReq,statePV)	
+          strcpy(prevReq, statePV); pvPut(prevReq);
+          PVPUTSTR(statePV,Discover)	
        } state Discover
        when (delay(5)) {
           printf("pvConnectCount = %ld pvAssignCount = %ld numFound = %d\n",
@@ -467,15 +480,15 @@ ss GlobalControl {
     CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
     OP_DONE(DoneDiscover, globalCheck)
     state Ready {
+       CMD_WHEN(globalEnable, Enabling)
+       CMD_WHEN(globalEnable, Disabling)
        CMD_WHEN(globalStop, Stopping)
        CMD_WHEN(globalStart, Starting)
        CMD_WHEN(globalWriteConf, WritingConf)
        CMD_WHEN(globalCheck, Discover)
-    }
-    /* 
-     * not sure yet exactly how broken FEMs are, but know they do not respond 
-     * to start and stop commands.  May need to use more IFNOTs.
-     */
+    }		
+    SET_DISABLES(Enabling, 0)
+    SET_DISABLES(Disabling, 1)
     CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
     TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting)
