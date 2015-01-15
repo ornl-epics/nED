@@ -45,6 +45,7 @@ PROD_LIBS += pvAccess
 PROD_LIBS += pvData
 PROD_LIBS += seq
 PROD_LIBS += $(EPICS_BASE_IOC_LIBS)
+PROD_LIBS += calc
 
 PROD_SRCS  += ned_registerRecordDeviceDriver.cpp
 PROD_SRCS  += main.cpp
