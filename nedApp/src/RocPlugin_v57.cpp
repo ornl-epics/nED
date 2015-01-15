@@ -1,4 +1,4 @@
-/* RocPlugin_v54.cpp
+/* RocPlugin_v57.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -10,20 +10,20 @@
 #include "RocPlugin.h"
 
 /**
- * @file RocPlugin_v54.cpp
+ * @file RocPlugin_v57.cpp
  *
- * ROC 5.4/5.5 parameters
+ * ROC 5.7 parameters
  *
- * ROC 5.4 firmware seems to be an update of 5.2, adding baseline support.
- * The status registers are all different though, unfortunately the AcquireStatus
- * register is no longer available. There are other quirks as well. The version
- * response includes additional 'vendor' information. The READ_CONFIG response
- * reports bad packet length - v5.5 fixes that.
+ * The ROC 5.7 firmware is identical to ROC 5.5 except that it adds support for
+ * Test Pattern Generator write and read commands, command to read Status counters
+ * and rate meters, and a command to reset status counters.
+ *
  */
 
-void RocPlugin::createStatusParams_v54()
+void RocPlugin::createStatusParams_v57()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                         | EPICS record description  | (bi and mbbi description)
+    createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring mode.               (0=not acquiring,1=acquiring)
     createStatusParam("ErrParity",        0x0,  1, 10); // LVDS parity error.            (0=no error,1=error)
     createStatusParam("Configured",       0x0,  1,  9); // Not configured                (0=configured,1=not configured)
     createStatusParam("Discovered",       0x0,  1,  8); // Configured                    (0=discovered,1=not discovered)
@@ -118,9 +118,42 @@ void RocPlugin::createStatusParams_v54()
     createStatusParam("StatFill",         0x1F,15,  0);
 }
 
-void RocPlugin::createConfigParams_v54()
+void RocPlugin::createCounterParams_v57()
 {
-//    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
+    createCounterParam("CntParity",        0x0, 16,  0); // LVDS parity error counter
+    createCounterParam("CntUartParity",    0x1, 16,  0); // UART parity error counter
+    createCounterParam("CntUartByte",      0x2, 16,  0); // UART byte error counter
+    createCounterParam("CntMissClk",       0x3, 16,  0); // Link RX clock missing cnt
+    createCounterParam("Ch0:CntFifoFull",  0x4, 16,  0); // Ch0 ADC FIFO full counter
+    createCounterParam("Ch1:CntFifoFull",  0x5, 16,  0); // Ch1 ADC FIFO full counter
+    createCounterParam("Ch2:CntFifoFull",  0x6, 16,  0); // Ch2 ADC FIFO full counter
+    createCounterParam("Ch3:CntFifoFull",  0x7, 16,  0); // Ch3 ADC FIFO full counter
+    createCounterParam("Ch4:CntFifoFull",  0x8, 16,  0); // Ch4 ADC FIFO full counter
+    createCounterParam("Ch5:CntFifoFull",  0x9, 16,  0); // Ch5 ADC FIFO full counter
+    createCounterParam("Ch6:CntFifoFull",  0xA, 16,  0); // Ch6 ADC FIFO full counter
+    createCounterParam("Ch7:CntFifoFull",  0xB, 16,  0); // Ch7 ADC FIFO full counter
+    createCounterParam("Ch0:CntDiscSum",   0xC, 16,  0); // Ch0 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch1:CntDiscSum",   0xD, 16,  0); // Ch1 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch2:CntDiscSum",   0xE, 16,  0); // Ch2 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:CntDiscSum",   0xF, 16,  0); // Ch3 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:CntDiscSum",   0x10, 16,  0); // Ch4 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:CntDiscSum",   0x11, 16,  0); // Ch5 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:CntDiscSum",   0x12, 16,  0); // Ch6 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:CntDiscSum",   0x13, 16,  0); // Ch7 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch0:CntRate",      0x14, 16,  0); // Ch0 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch1:CntRate",      0x15, 16,  0); // Ch1 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch2:CntRate",      0x16, 16,  0); // Ch2 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:CntRate",      0x17, 16,  0); // Ch3 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:CntRate",      0x18, 16,  0); // Ch4 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:CntRate",      0x19, 16,  0); // Ch5 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:CntRate",      0x1A, 16,  0); // Ch6 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:CntRate",      0x1B, 16,  0); // Ch7 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntOutRate",       0x1C, 16,  0); // Total outrate counter (calc:1000*A/52.4288,unit:counts/s,prec:0)
+}
+
+void RocPlugin::createConfigParams_v57()
+{
+//    BLXXX:Det:RocXXX:| sig nam |                                    | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:PositionIdx",  '1', 0x0,  32, 0, 0);     // Chan1 position index
     createConfigParam("Ch2:PositionIdx",  '1', 0x2,  32, 0, 256);   // Chan2 position index
     createConfigParam("Ch3:PositionIdx",  '1', 0x4,  32, 0, 512);   // Chan3 position index
@@ -258,7 +291,6 @@ void RocPlugin::createConfigParams_v54()
     createConfigParam("Ch7:B:Offset",     '3', 0x1E, 12, 0, 1600);  // Chan7 B offset
     createConfigParam("Ch8:B:Offset",     '3', 0x1F, 12, 0, 1600);  // Chan8 B offset
 
-    // @todo: the other plug-ins had 'ScaleFact' so I normalized it here, but 'ScaleFactor' is preferred
     createConfigParam("Ch1:ScaleFact",    '4', 0x0,  12, 0, 2048);  // Chan1 scale factor
     createConfigParam("Ch2:ScaleFact",    '4', 0x1,  12, 0, 2048);  // Chan2 scale factor
     createConfigParam("Ch3:ScaleFact",    '4', 0x2,  12, 0, 2048);  // Chan3 scale factor
@@ -366,4 +398,9 @@ void RocPlugin::createConfigParams_v54()
     createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
     createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
     createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
+
+    createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternDebug", 'F', 0x1,  3, 12, 0);     // Engineering Use only
+    createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
+    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
 }

@@ -15,12 +15,20 @@ record(ai, "$(P)NumFound") {
 }
 
 # Global status PVs.
+record(bi, "$(P)Running") {
+   field(DESC, "Last op start and succeeded")
+   field(OSV, "NO_ALARM")
+   field(ZSV, "MAJOR")
+   field(ONAM, "Yes")
+   field(ZNAM, "No")
+}
+
 record(bi, "$(P)ReqSucceeded") {
    field(DESC, "Request worked, criterion% devices")
    field(OSV, "NO_ALARM")
    field(ZSV, "MAJOR")
-   field(ONAM, "Succeeded")
-   field(ZNAM, "Not Really")
+   field(ONAM, "Yes")
+   field(ZNAM, "No")
 }
 
 record(ai, "$(P)PctSucceeded") {

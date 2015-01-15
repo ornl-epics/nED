@@ -86,6 +86,9 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         case DasPacket::CMD_READ_STATUS_COUNTERS:
             m_waitingResponse = reqReadStatusCounters();
             break;
+        case DasPacket::CMD_RESET_STATUS_COUNTERS:
+            m_waitingResponse = reqResetStatusCounters();
+            break;
         case DasPacket::CMD_READ_CONFIG:
             m_waitingResponse = reqReadConfig();
             break;
@@ -217,6 +220,9 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     case DasPacket::CMD_READ_STATUS_COUNTERS:
         ack = rspReadStatusCounters(packet);
         break;
+    case DasPacket::CMD_RESET_STATUS_COUNTERS:
+        ack = rspResetStatusCounters(packet);
+        break;
     case DasPacket::CMD_WRITE_CONFIG:
     case DasPacket::CMD_WRITE_CONFIG_1:
     case DasPacket::CMD_WRITE_CONFIG_2:
@@ -324,6 +330,21 @@ DasPacket::CommandType BaseModulePlugin::reqReadStatusCounters()
 {
     sendToDispatcher(DasPacket::CMD_READ_STATUS_COUNTERS);
     return DasPacket::CMD_READ_STATUS_COUNTERS;
+}
+
+DasPacket::CommandType BaseModulePlugin::reqResetStatusCounters()
+{
+    sendToDispatcher(DasPacket::CMD_RESET_STATUS_COUNTERS);
+    return DasPacket::CMD_RESET_STATUS_COUNTERS;
+}
+
+bool BaseModulePlugin::rspResetStatusCounters(const DasPacket *packet)
+{
+    if (!cancelTimeoutCallback()) {
+        LOG_WARN("Received RESET_STATUS response after timeout");
+        return false;
+    }
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
 bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)

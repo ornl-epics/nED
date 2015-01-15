@@ -16,7 +16,7 @@
 
 EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 600;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
 const float    RocPlugin::NO_RESPONSE_TIMEOUT           = 1.0;
 
 /**
@@ -48,7 +48,12 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
                        NUM_ROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
     , m_version(version)
 {
-    if (m_version == "v51") {
+    if (0) {
+    } else if (m_version == "v45" || m_version == "v44") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v45();
+        createConfigParams_v45();
+    } else if (m_version == "v51") {
         setIntegerParam(Supported, 1);
         createStatusParams_v51();
         createConfigParams_v51();
@@ -66,6 +71,11 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         createStatusParams_v56();
         createCounterParams_v56();
         createConfigParams_v56();
+    } else if (m_version == "v57") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v57();
+        createCounterParams_v57();
+        createConfigParams_v57();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);

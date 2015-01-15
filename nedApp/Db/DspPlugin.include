@@ -1,26 +1,26 @@
 record(mbbo, "$(P)DataMode")
 {
-    field(FLNK, "$(P)DatSiz")
+    field(FLNK, "$(P)DataSize")
 }
-record(longout, "$(P)DatSiz") {
+record(longout, "$(P)DataSize") {
     field(DESC, "Something")
-    field(DOL,  "$(P)DatSizSel.VAL PP")
+    field(DOL,  "$(P)DataSizeSel.VAL PP")
     field(OMSL, "closed_loop")
     field(DTYP, "Soft Channel")
-    field(OUT,  "$(P)LvdsDatSiz PP")
+    field(OUT,  "$(P)LvdsDataSize PP")
 }
-record(sel, "$(P)DatSizSel")
+record(sel, "$(P)DataSizeSel")
 {
     field(INPA, "$(P)RocDS.VAL PP")
     field(INPB, "$(P)AcpcDS.VAL PP")
-    field(NVL,  "$(P)DatSizTyp.VAL PP")
+    field(NVL,  "$(P)DataSizeTyp.VAL PP")
 }
-record(mbbo, "$(P)DatSizTyp")
+record(mbbo, "$(P)DataSizeTyp")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Select detector type")
-    field(FLNK, "$(P)DatSiz")
+    field(FLNK, "$(P)DataSize")
     field(SCAN, "Passive")
     field(PINI, "YES")
     field(VAL,  "0")

@@ -10,24 +10,31 @@
 #include "BasePvaPlugin.h"
 #include "Log.h"
 
-#define NUM_BASEPVAPLUGIN_PARAMS 0 // ((int)(&LAST_BASEPVAPLUGIN_PARAM - &FIRST_BASEPVAPLUGIN_PARAM + 1))
+#define NUM_BASEPVAPLUGIN_PARAMS ((int)(&LAST_BASEPVAPLUGIN_PARAM - &FIRST_BASEPVAPLUGIN_PARAM + 1))
 
 const uint32_t BasePvaPlugin::CACHE_SIZE = 32*1024;
 const std::string BasePvaPlugin::PV_NEUTRONS("Neutrons");
 const std::string BasePvaPlugin::PV_METADATA("Metadata");
 
+const int BasePvaPlugin::interfaceMask = asynOctetMask | BasePlugin::defaultInterfaceMask;
+const int BasePvaPlugin::interruptMask = asynOctetMask | BasePlugin::defaultInterfaceMask;
+
 BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
-    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, 0, NUM_BASEPVAPLUGIN_PARAMS)
+    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, 0, NUM_BASEPVAPLUGIN_PARAMS, 0,
+                 interfaceMask, interruptMask)
     , m_nReceived(0)
     , m_nProcessed(0)
     , m_pulseTime({0, 0})
     , m_pulseCharge(0)
     , m_neutronsPostSeq(0)
     , m_metadataPostSeq(0)
+    , m_neutronsEn(true)
+    , m_metadataEn(true)
     , m_processNeutronsCb(0)
     , m_postNeutronsCb(0)
 {
-    m_pvNeutrons = PvaNeutronData::create(pvPrefix + PV_NEUTRONS);
+    std::string pvNameNeutrons = pvPrefix + PV_NEUTRONS;
+    m_pvNeutrons = PvaNeutronData::create(pvNameNeutrons);
     if (!m_pvNeutrons)
         LOG_ERROR("Cannot create PVA record '%s%s'", pvPrefix, PV_NEUTRONS.c_str());
     else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_pvNeutrons) == false) {
@@ -35,13 +42,20 @@ BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortNam
         m_pvNeutrons.reset();
     }
 
-    m_pvMetadata = PvaNeutronData::create(pvPrefix + PV_METADATA);
+    std::string pvNameMetadata = pvPrefix + PV_METADATA;
+    m_pvMetadata = PvaNeutronData::create(pvNameMetadata);
     if (!m_pvMetadata)
         LOG_ERROR("Cannot create PVA record '%s%s'", pvPrefix, PV_METADATA.c_str());
     else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_pvMetadata) == false) {
         LOG_ERROR("Cannot register PVA record '%s%s'", pvPrefix, PV_METADATA.c_str());
         m_pvNeutrons.reset();
     }
+
+    createParam("PvNeutronsName", asynParamOctet, &PvNeutronsName, pvNameNeutrons.c_str()); // READ - Name of Neutrons PV
+    createParam("PvMetadataName", asynParamOctet, &PvMetadataName, pvNameMetadata.c_str()); // READ - Name of Metadata PV
+    createParam("PvNeutronsEn",   asynParamInt32, &PvNeutronsEn, 1);                        // WRITE - Enable exporting Neutrons PV
+    createParam("PvMetadataEn",   asynParamInt32, &PvMetadataEn, 1);                        // WRITE - Enable exporting Metadata PV
+    callParamCallbacks();
 }
 
 BasePvaPlugin::~BasePvaPlugin()
@@ -54,6 +68,10 @@ asynStatus BasePvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             LOG_ERROR("Can't enable plugin, PV records not initialized");
             return asynError;
         }
+    } else if (pasynUser->reason == PvNeutronsEn) {
+        m_neutronsEn = (value > 0);
+    } else if (pasynUser->reason == PvMetadataEn) {
+        m_metadataEn = (value > 0);
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }
@@ -90,11 +108,11 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
             m_pulseCharge = static_cast<double>(rtdl->pulse_charge * 10) * 10e-12;
         }
 
-        if (packet->isMetaData()) {
+        if (packet->isMetaData() && m_metadataEn) {
             processMetaData(data, dataLen);
             haveMetadata = true;
             m_nProcessed++;
-        } else if (packet->isNeutronData() && m_processNeutronsCb) {
+        } else if (packet->isNeutronData() && m_processNeutronsCb && m_neutronsEn) {
             m_processNeutronsCb(this, data, dataLen);
             haveNeutrons = true;
             m_nProcessed++;

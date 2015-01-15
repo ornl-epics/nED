@@ -113,6 +113,7 @@ PVARRAY(int, cmdRsp)
 PVARRAY(int, verified)
 PVARRAY(int, acquiring)
 PVARRAY(string, hwtype)
+PVARRAY(int, cfgSection)
 
 /*
  * Groups of soft PVs, one per device
@@ -146,6 +147,11 @@ DECL(string, prevReq, {GPREFIX}PrevReq)
 DECL(int, requestSucceeded ,{GPREFIX}ReqSucceeded)
 DECL(float, pctSucceeded, {GPREFIX}PctSucceeded)
 DECL(float, pctCriterion, {GPREFIX}PctCriterion)
+
+/*
+ * for benefit of run control, a single bit
+ */
+DECL(int, running, {GPREFIX}Running)
 
 /*
  * Variables used by sequencer to keep track of success or failure of 
@@ -283,16 +289,18 @@ int severity;
     RSP_END(CRNAME##R)
 
 /*
- * Analog of CMD_RSP(), but with SKIP_WHEN() clauses for one type of hardware
- * (HWTYPE) included.
+ * Analog of CMD_RSP(), but with SKIP_WHEN() clauses for types of hardware 
+ * that do not support start and stop
  */
 
-#define CMD_RSP_IFNOT(CRNAME, COMMAND, CRNEXT, HWTYPE)			\
+#define CMD_RSP_IFNOT(CRNAME, COMMAND, CRNEXT)				\
     CMD_BEGIN(CRNAME, CRNAME##R)					\
-    SKIP_WHEN(CRNAME, HWTYPE)						\
+    SKIP_WHEN(CRNAME, FEM)						\
+    SKIP_WHEN(CRNAME, ACPC FEM)						\
     CMD_END(CRNAME, COMMAND)						\
     RSP_BEGIN(CRNAME##R, CRNEXT)					\
-    SKIP_WHEN(CRNAME##R, HWTYPE)					\
+    SKIP_WHEN(CRNAME##R, FEM)						\
+    SKIP_WHEN(CRNAME##R, ACPC FEM)					\
     RSP_END(CRNAME##R)
 
 /* 
@@ -342,11 +350,12 @@ int severity;
 
 /*
  * Analogous to TEST_PV(), but with when() clause added to skip on hardware
- * type.
+ * type for types that dont support start and stop.
  */
-#define TEST_PV_IFNOT(NAME, PVNAME, DESIRED, NEXT, HWTYPE)	\
+#define TEST_PV_IFNOT(NAME, PVNAME, DESIRED, NEXT)		\
      TEST_PV_BEGIN(NAME, NEXT)					\
-     SKIP_WHEN(NAME, HWTYPE)					\
+     SKIP_WHEN(NAME, FEM)					\
+     SKIP_WHEN(NAME, ACPC FEM)					\
      TEST_PV_END(NAME, PVNAME, DESIRED)
 
 /*
@@ -357,6 +366,7 @@ int severity;
 #define OP_DONE(NAME, EVNAME) 						\
    state NAME {								\
       when() {								\
+          numSucceeded = 0; numEnabled = 0;				\
           for (i = 0; i< numFound; i++) {				\
              if (!disable[i]) {						\
                 numEnabled++;						\
@@ -379,9 +389,12 @@ int severity;
           requestSucceeded = (pctSucceeded >= pctCriterion)? 1 : 0;	\
           pvPut(requestSucceeded,SYNC);					\
           strcpy(prevReq, statePV); pvPut(prevReq);			\
-          PVPUTSTR(statePV,Ready)					\
+          running = (strcmp(prevReq, "Starting") == 0 && 		\
+                                  requestSucceeded == 1);		\
+          pvPut(running, SYNC);						\
           EVNAME = 0;	/* release busy record */			\
           pvPut(EVNAME);						\
+          PVPUTSTR(statePV,Ready)					\
       } state Ready							\
    }
 /* 
@@ -390,14 +403,12 @@ int severity;
  * code from the "OP_xxx" command defines above, and NEXT is the destination
  * state to perform the operation.
  */
-#define CMD_WHEN(EVNAME, OP_NAME, NEXT) 			\
+#define CMD_WHEN(EVNAME, NEXT) 			\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
           PVPUTSTR(statePV,NEXT)				\
           if (strcmp(prevReq, #NEXT)) {				\
              for (i = 0; i< numFound; i++)			\
                 PVPUTNUM(cmdSucceeded[i], 0)			\
-             numSucceeded = 0;					\
-             numEnabled = 0;					\
           }							\
        } state NEXT
 
@@ -415,6 +426,9 @@ ss GlobalControl {
          for (i=0; i<numFound; i++) {
             pvAssign(failMsg[i], deviceNames[i]);
             *strrchr(deviceNames[i], ':') = 0;
+            sprintf(namebuf, "%s:CfgSection", deviceNames[i]);
+            pvAssign(cfgSection[i], namebuf);
+            cfgSection[i] = 0;	/* should be and stay that way: Full config */
             sprintf(namebuf, "%s:HwType", deviceNames[i]);
             pvAssign(hwtype[i], namebuf);
             pvGet(hwtype[i]);
@@ -454,25 +468,34 @@ ss GlobalControl {
     CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
     OP_DONE(DoneDiscover, globalCheck)
     state Ready {
-       CMD_WHEN(globalStop, OP_STOP, Stopping)
-       CMD_WHEN(globalStart, OP_START, Starting)
-       CMD_WHEN(globalWriteConf, OP_WRITE, WritingConf)
-       CMD_WHEN(globalCheck, OP_CHECK, Discover)
-       CMD_WHEN(globalClear, OP_CLEAR, Clear)
+       CMD_WHEN(globalStop, Stopping)
+       CMD_WHEN(globalStart, Starting)
+       CMD_WHEN(globalWriteConf, WritingConf)
+       CMD_WHEN(globalCheck, Discover)
+       CMD_WHEN(globalClear, Clear)
     }
     /* 
      * not sure yet exactly how broken FEMs are, but know they do not respond 
      * to start and stop commands.  May need to use more IFNOTs.
      */
-    CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus, FEM)
+    CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
-    TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting, FEM)
+    TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting)
     OP_DONE(DoneStarting, globalStart)
-    CMD_RSP_IFNOT(Stopping, STOPACQCMD, StopReadStatus, FEM)
+    CMD_RSP_IFNOT(Stopping, STOPACQCMD, StopReadStatus)
     CMD_RSP(StopReadStatus, READSTATCMD, StopTestAcq)
-    TEST_PV_IFNOT(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping, FEM)
+    TEST_PV_IFNOT(StopTestAcq, acquiring, NOTACQUIRING, DoneStopping)
     OP_DONE(DoneStopping, globalStop)
-    CMD_RSP(WritingConf, WRITECONFCMD, DoneWriting)
+    state WritingConf {
+       when() {
+          for (i = 0; i< numFound; i++) {	
+             if (!disable[i]) {			
+                cfgSection[i]= 0; pvPut(cfgSection[i], SYNC);		
+             }
+          }
+       } state DoWriting
+    }
+    CMD_RSP(DoWriting, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
     state Clear {
        when() {
