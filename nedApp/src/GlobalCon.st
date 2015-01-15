@@ -126,7 +126,6 @@ PVARRAY(string, failMsg)
  * These are global request soft PVs. Treated as "busy" records in that they
  * are acted upon when set to "1" and reset when the operation completes.
  */
-DECLEVENT(int, globalClear, {GPREFIX}Clear)
 DECLEVENT(int, globalStop, {GPREFIX}Stop)
 DECLEVENT(int, globalStart, {GPREFIX}Start)
 DECLEVENT(int, globalCheck, {GPREFIX}Check)
@@ -199,7 +198,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
+       when (disable[i] || cmdFailed[i]) {	\
        } state NAME##0	
 
 #define CMD_END(NAME, COMMAND)					\
@@ -236,7 +235,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
+       when (disable[i] || cmdFailed[i]) {	\
        } state NAME##0	
 
 
@@ -326,7 +325,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
+       when (disable[i] || cmdFailed[i]) {	\
        } state NAME##0	
 
 #define TEST_PV_END(NAME, PVNAME, DESIRED)			\
@@ -472,7 +471,6 @@ ss GlobalControl {
        CMD_WHEN(globalStart, Starting)
        CMD_WHEN(globalWriteConf, WritingConf)
        CMD_WHEN(globalCheck, Discover)
-       CMD_WHEN(globalClear, Clear)
     }
     /* 
      * not sure yet exactly how broken FEMs are, but know they do not respond 
@@ -497,16 +495,5 @@ ss GlobalControl {
     }
     CMD_RSP(DoWriting, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
-    state Clear {
-       when() {
-          for (i = 0; i< numFound; i++)	{
-                PVPUTNUM(cmdSucceeded[i],1)
-                cmdFailed[i] = 0;	
-                failMsg[i][0] = 0;
-                pvPut(failMsg[i]);
-          }
-       } state DoneClear
-    }
-    OP_DONE(DoneClear, globalClear)
 }       
        
