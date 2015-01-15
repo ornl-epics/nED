@@ -313,7 +313,7 @@ void DspPlugin::createConfigParams_v64() {
     createConfigParam("TestPatternId",  'F', 0x1, 12, 0,  0); // Test pattern id
     createConfigParam("TestPatternDebug",'F',0x1,  3, 12, 0); // Engineering Use only
     createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // pattern enable               (0=disable,1=enable)
-    createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern rate            (10624999=10Hz, 1062499=100Hz, 106249=1KHz, 53125=2KHz, 21250=5KHz, 10625=10KHz, 4250=25KHz, 2124=50KHz, 1063=100KHz, 133=800KHz, 106=1MHz, 53=2MHz, 21=5MHz, 11=10MHz, 4=21MHz, 0=106MHz)
+    createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern rate            (65535=400 ev/s,13280=2 Kev/s,5311=5 Kev/s,2655=10 Kev/s,1061=25 Kev/s,530=50 Kev/s,264=100 Kev/s,32=800 Kev/s,25=1 Mev/s,12=2 Mev/s,4=5 Mev/s,1=10 Mev/s,0=26 Mev/s)
 
 }
 
