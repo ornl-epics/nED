@@ -1,6 +1,6 @@
 include "BasePlugin.include"
 include "BaseModulePlugin.include"
-include "AcpcFemPlugin_v22.include"
+include "AcpcFemPlugin_v22.generated"
 include "GlobalConD.include"
 
 # Upgrade DataMode record with link to OutputMode
