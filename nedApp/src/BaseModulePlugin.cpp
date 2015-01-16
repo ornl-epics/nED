@@ -434,7 +434,8 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig()
     if (cfgSection == '0') {
         payloadLength = m_configPayloadLength;
     } else {
-        payloadLength = m_configSectionSizes[cfgSection];
+        int wordsize = (m_behindDsp ? 2 : 4);
+        payloadLength = m_configSectionSizes[cfgSection] * wordsize;
     }
 
     // Skip empty sections
@@ -476,6 +477,7 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig()
             offset /= 2;
         }
 
+LOG_ERROR("offset=%d length=%d", offset, length);
         if (offset >= length) {
             // Unlikely, but rather sure than sorry
             LOG_ERROR("Parameter %s offset out of range", getParamName(it->first));
