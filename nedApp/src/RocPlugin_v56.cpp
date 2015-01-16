@@ -306,22 +306,23 @@ void RocPlugin::createStatusParams_v56()
 
 void RocPlugin::createCounterParams_v56()
 {
-    createCounterParam("CntParity",         0x0, 16,  0); // LVDS parity error counter
-    createCounterParam("CntType",           0x1, 16,  0); // LVDS data type error counter
-    createCounterParam("CntLength",         0x2, 16,  0); // LVDS length error counter
-    createCounterParam("CntTimeout",        0x3, 16,  0); // LVDS timeout counter
-    createCounterParam("CntNoStart",        0x4, 16,  0); // LVDS no start error counter
-    createCounterParam("CntPreStart",       0x5, 16,  0); // LVDS start before stop cnt
-    createCounterParam("CntFifoFull",       0x6, 16,  0); // LVDS FIFO full error counter
-    createCounterParam("CntNoTsync",        0x7, 16,  0); // Timestamp overflow counter
-    createCounterParam("CntCmdBad",         0x8, 16,  0); // Unknown command counter
-    createCounterParam("CntCmdLength",      0x9, 16,  0); // Command length error counter
-    createCounterParam("CntProgramming",    0xA, 16,  0); // Write cnfg disallowed cnt
-    createCounterParam("CntUartParity",     0xB, 16,  0); // UART parity error counter
-    createCounterParam("CntUartByte",       0xC, 16,  0); // UART byte error counter
-    createCounterParam("CntDataAlmostFull", 0xD, 16,  0); // Data almost full counter
-    createCounterParam("Ch0:CntFifoFull",   0xE, 16,  0); // Ch0 ADC FIFO full counter
-    createCounterParam("Ch1:CntFifoFull",   0xF, 16,  0); // Ch1 ADC FIFO full counter
+//     BLXXX:Det:RocXXX:| sig name       |                    | EPICS record description  | (bi and mbbi description)
+    createCounterParam("CntParity",          0x0, 16,  0); // LVDS parity error counter
+    createCounterParam("CntType",            0x1, 16,  0); // LVDS data type error counter
+    createCounterParam("CntLength",          0x2, 16,  0); // LVDS length error counter
+    createCounterParam("CntTimeout",         0x3, 16,  0); // LVDS timeout counter
+    createCounterParam("CntNoStart",         0x4, 16,  0); // LVDS no start error counter
+    createCounterParam("CntPreStart",        0x5, 16,  0); // LVDS start before stop cnt
+    createCounterParam("CntFifoFull",        0x6, 16,  0); // LVDS FIFO full error counter
+    createCounterParam("CntNoTsync",         0x7, 16,  0); // Timestamp overflow counter
+    createCounterParam("CntCmdBad",          0x8, 16,  0); // Unknown command counter
+    createCounterParam("CntCmdLength",       0x9, 16,  0); // Command length error counter
+    createCounterParam("CntProgramming",     0xA, 16,  0); // Write cnfg disallowed cnt
+    createCounterParam("CntUartParity",      0xB, 16,  0); // UART parity error counter
+    createCounterParam("CntUartByte",        0xC, 16,  0); // UART byte error counter
+    createCounterParam("CntDataAlmostFull" , 0xD, 16,  0); // Data almost full counter
+    createCounterParam("Ch0:CntFifoFull",    0xE, 16,  0); // Ch0 ADC FIFO full counter
+    createCounterParam("Ch1:CntFifoFull",    0xF, 16,  0); // Ch1 ADC FIFO full counter
     createCounterParam("Ch2:CntFifoFull",   0x10, 16,  0); // Ch2 ADC FIFO full counter
     createCounterParam("Ch3:CntFifoFull",   0x11, 16,  0); // Ch3 ADC FIFO full counter
     createCounterParam("Ch4:CntFifoFull",   0x12, 16,  0); // Ch4 ADC FIFO full counter
@@ -329,39 +330,39 @@ void RocPlugin::createCounterParams_v56()
     createCounterParam("Ch6:CntFifoFull",   0x14, 16,  0); // Ch6 ADC FIFO full counter
     createCounterParam("Ch7:CntFifoFull",   0x15, 16,  0); // Ch7 ADC FIFO full counter
     createCounterParam("CntMissClk",        0x16, 16,  0); // Link RX clock missing cnt
-    createCounterParam("Ch0:CntPosEdge",    0x17, 16,  0); // Ch0 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch1:CntPosEdge",    0x18, 16,  0); // Ch1 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch2:CntPosEdge",    0x19, 16,  0); // Ch2 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch3:CntPosEdge",    0x1A, 16,  0); // Ch3 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch4:CntPosEdge",    0x1B, 16,  0); // Ch4 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch5:CntPosEdge",    0x1C, 16,  0); // Ch5 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch6:CntPosEdge",    0x1D, 16,  0); // Ch6 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch7:CntPosEdge",    0x1E, 16,  0); // Ch7 positive edge counter     (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch0:CntSumHigh",    0x1F, 16,  0); // Ch0 SUM high counter          (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch1:CntSumHigh",    0x20, 16,  0); // Ch1 SUM high counter          (calc:1000*A/52.4288,unit:counts/s,prec:0)
-    createCounterParam("Ch2:CntSumHigh",    0x21, 16,  0); // Ch2 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch3:CntSumHigh",    0x22, 16,  0); // Ch3 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch4:CntSumHigh",    0x23, 16,  0); // Ch4 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch5:CntSumHigh",    0x24, 16,  0); // Ch5 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch6:CntSumHigh",    0x25, 16,  0); // Ch6 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch7:CntSumHigh",    0x26, 16,  0); // Ch7 SUM high counter          (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch0:CntSumLow",     0x27, 16,  0); // Ch0 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch1:CntSumLow",     0x28, 16,  0); // Ch1 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch2:CntSumLow",     0x29, 16,  0); // Ch2 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch3:CntSumLow",     0x2A, 16,  0); // Ch3 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch4:CntSumLow",     0x2B, 16,  0); // Ch4 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch5:CntSumLow",     0x2C, 16,  0); // Ch5 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch6:CntSumLow",     0x2D, 16,  0); // Ch6 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch7:CntSumLow",     0x2E, 16,  0); // Ch7 SUM low counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch0:CntRate",       0x2F, 16,  0); // Ch0 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch1:CntRate",       0x30, 16,  0); // Ch1 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch2:CntRate",       0x31, 16,  0); // Ch2 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch3:CntRate",       0x32, 16,  0); // Ch3 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch4:CntRate",       0x33, 16,  0); // Ch4 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch5:CntRate",       0x34, 16,  0); // Ch5 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch6:CntRate",       0x35, 16,  0); // Ch6 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch7:CntRate",       0x36, 16,  0); // Ch7 outrate counter           (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("CntOutRate",        0x37, 16,  0); // Total outrate counter         (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch0:RatePosEdge",   0x17, 16,  0); // Ch0 positive edge rate      (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch1:RatePosEdge",   0x18, 16,  0); // Ch1 positive edge rate      (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch2:RatePosEdge",   0x19, 16,  0); // Ch2 positive edge rate      (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch3:RatePosEdge",   0x1A, 16,  0); // Ch3 positive edge rate      (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch4:RatePosEdge",   0x1B, 16,  0); // Ch4 positive edge rate      (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch5:RatePosEdge",   0x1C, 16,  0); // Ch5 positive edge rate      (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch6:RatePosEdge",   0x1D, 16,  0); // Ch6 positive edge rate      (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch7:RatePosEdge",   0x1E, 16,  0); // Ch7 positive edge rate      (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch0:RateSumHigh",   0x1F, 16,  0); // Ch0 SUM high rate           (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch1:RateSumHigh",   0x20, 16,  0); // Ch1 SUM high rate           (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("Ch2:RateSumHigh",   0x21, 16,  0); // Ch2 SUM high rate           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:RateSumHigh",   0x22, 16,  0); // Ch3 SUM high rate           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:RateSumHigh",   0x23, 16,  0); // Ch4 SUM high rate           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:RateSumHigh",   0x24, 16,  0); // Ch5 SUM high rate           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:RateSumHigh",   0x25, 16,  0); // Ch6 SUM high rate           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:RateSumHigh",   0x26, 16,  0); // Ch7 SUM high rate           (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch0:RateSumLow",    0x27, 16,  0); // Ch0 SUM low rate            (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch1:RateSumLow",    0x28, 16,  0); // Ch1 SUM low rate            (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch2:RateSumLow",    0x29, 16,  0); // Ch2 SUM low rate            (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:RateSumLow",    0x2A, 16,  0); // Ch3 SUM low rate            (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:RateSumLow",    0x2B, 16,  0); // Ch4 SUM low rate            (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:RateSumLow",    0x2C, 16,  0); // Ch5 SUM low rate            (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:RateSumLow",    0x2D, 16,  0); // Ch6 SUM low rate            (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:RateSumLow",    0x2E, 16,  0); // Ch7 SUM low rate            (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch0:RateOut",       0x2F, 16,  0); // Ch0 outrate                 (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch1:RateOut",       0x30, 16,  0); // Ch1 outrate                 (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch2:RateOut",       0x31, 16,  0); // Ch2 outrate                 (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:RateOut",       0x32, 16,  0); // Ch3 outrate                 (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:RateOut",       0x33, 16,  0); // Ch4 outrate                 (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:RateOut",       0x34, 16,  0); // Ch5 outrate                 (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:RateOut",       0x35, 16,  0); // Ch6 outrate                 (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:RateOut",       0x36, 16,  0); // Ch7 outrate                 (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("RateOut",           0x37, 16,  0); // Total outrate               (calc:1000*A/52.4288,unit:counts/s,prec:0)
 }
 
 void RocPlugin::createConfigParams_v56()
