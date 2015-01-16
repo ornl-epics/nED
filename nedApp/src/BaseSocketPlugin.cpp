@@ -109,6 +109,7 @@ asynStatus BaseSocketPlugin::writeOctet(asynUser *pasynUser, const char *value, 
         int port;
         char prevValue[128];
         std::string host(value, nChars);
+        *nActual = nChars;
 
         status = getStringParam(ListenIP, sizeof(prevValue), prevValue);
         if (status == asynSuccess && strncmp(prevValue, value, sizeof(prevValue)) == 0)
@@ -119,7 +120,6 @@ asynStatus BaseSocketPlugin::writeOctet(asynUser *pasynUser, const char *value, 
             LOG_ERROR("Error setting ListenIP parameter");
             return status;
         }
-        *nActual = nChars;
 
         status = getIntegerParam(ListenPort, &port);
         if (status != asynSuccess) {
