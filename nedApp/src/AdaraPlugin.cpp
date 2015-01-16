@@ -210,7 +210,10 @@ void AdaraPlugin::clientConnected()
         outpacket[idx++] = it->metadataSeq.sourceId;
     }
 
-    (void)send(outpacket, sizeof(uint32_t)*idx);
+// TODO: SMS can survive without the list, but it's sensitive about inactive sources
+//       Temporarily disable sending list until more controlled way is introduced.
+//       According to Jeeem, SMS han survive without it.
+//    (void)send(outpacket, sizeof(uint32_t)*idx);
 }
 
 AdaraPlugin::SourceSequence* AdaraPlugin::findSourceSequence(uint32_t dspId, bool neutron)
