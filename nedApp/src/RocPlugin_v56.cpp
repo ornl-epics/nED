@@ -607,7 +607,7 @@ void RocPlugin::createConfigParams_v56()
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
     createConfigParam("MinAdc",           'E', 0x6,  16, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  16, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",       'E', 0x8,  16, 0, -6);    // Integrator release point
+    createConfigParam("IntRelease",       'E', 0x8,  16, 0, 65530); // Integrator release point
     createConfigParam("MinDiscrimWidth",  'E', 0x9,  12, 0, 1);     // Minimum discriminator width
     createConfigParam("Sample1",          'E', 0xA,  4,  0, 2);     // Sample 1 point [0:10]
     createConfigParam("Sample2",          'E', 0xB,  6,  0, 14);    // Sample 1 point [2:50]
