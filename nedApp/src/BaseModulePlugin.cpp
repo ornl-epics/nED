@@ -477,7 +477,6 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig()
             offset /= 2;
         }
 
-LOG_ERROR("offset=%d length=%d", offset, length);
         if (offset >= length) {
             // Unlikely, but rather sure than sorry
             LOG_ERROR("Parameter %s offset out of range", getParamName(it->first));
