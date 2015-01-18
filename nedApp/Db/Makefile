@@ -51,18 +51,18 @@ include $(TOP)/configure/RULES
 #  ADD RULES AFTER THIS LINE
 #
 
-DspPlugin_v63.template: DspPlugin_v63.include
-DspPlugin_v64.template: DspPlugin_v64.include
-FemPlugin_v32.template: FemPlugin_v32.include
-FemPlugin_v35.template: FemPlugin_v35.include
-FemPlugin_v36.template: FemPlugin_v36.include
-AcpcFemPlugin_v22.template: AcpcFemPlugin_v22.include
-RocPlugin_v45.template: RocPlugin_v45.include
-RocPlugin_v51.template: RocPlugin_v51.include
-RocPlugin_v52.template: RocPlugin_v52.include
-RocPlugin_v54.template: RocPlugin_v54.include
-RocPlugin_v56.template: RocPlugin_v56.include
-RocPlugin_v57.template: RocPlugin_v57.include
+DspPlugin_v63.template: DspPlugin_v63.generated
+DspPlugin_v64.template: DspPlugin_v64.generated
+FemPlugin_v32.template: FemPlugin_v32.generated
+FemPlugin_v35.template: FemPlugin_v35.generated
+FemPlugin_v36.template: FemPlugin_v36.generated
+AcpcFemPlugin_v22.template: AcpcFemPlugin_v22.generated
+RocPlugin_v45.template: RocPlugin_v45.generated
+RocPlugin_v51.template: RocPlugin_v51.generated
+RocPlugin_v52.template: RocPlugin_v52.generated
+RocPlugin_v54.template: RocPlugin_v54.generated
+RocPlugin_v56.template: RocPlugin_v56.generated
+RocPlugin_v57.template: RocPlugin_v57.generated
 
-%.include: ../src/%.cpp
+%.generated: ../src/%.cpp
 	../export2epics.pl < $^ > $@

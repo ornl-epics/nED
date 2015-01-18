@@ -22,7 +22,7 @@
 
 EPICS_REGISTER_PLUGIN(DspPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Version", string, "Blocking", int);
 
-const unsigned DspPlugin::NUM_DSPPLUGIN_CONFIGPARAMS    = 277;
+const unsigned DspPlugin::NUM_DSPPLUGIN_CONFIGPARAMS    = 472;
 const unsigned DspPlugin::NUM_DSPPLUGIN_STATUSPARAMS    = 116;
 const double DspPlugin::DSP_RESPONSE_TIMEOUT            = 1.0;
 

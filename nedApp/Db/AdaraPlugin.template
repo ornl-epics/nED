@@ -23,6 +23,10 @@ record(longout, "$(P)CheckInt")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
 }
+record(stringin, "$(P)ClientIp")
+{
+    field(FLNK, "$(P)StatusCalc.PROC")
+}
 
 record(longin, "$(P)BadPulsCnt")
 {
@@ -43,4 +47,23 @@ record(longin, "$(P)BadDspCnt")
    field(PINI,  "YES")
    field(HIGH,  "1")
    field(HSV,   "MAJOR")
+}
+record(scalcout, "$(P)StatusCalc")
+{
+    field(DESC, "Determine global OCC status")
+    field(INAA, "$(P)ClientIp NPP")
+    field(CALC, "(LEN(AA)==0)?0:1")
+    field(OOPT, "Every Time")
+    field(PINI, "YES")
+    field(IVOA, "Don't drive outputs")
+    # Can't use OUT field as it will automatically determine that bi is "string" type
+    field(FLNK,  "$(P)Status")
+}
+record(bi, "$(P)Status")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "ADARA client status")
+    field(INP,  "$(P)StatusCalc.VAL NPP")
+    field(ZNAM, "Not connected")
+    field(ONAM, "Connected")
 }

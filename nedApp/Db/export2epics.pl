@@ -253,7 +253,7 @@ foreach $line ( <STDIN> ) {
             longout($name, $desc, $valstr, $val);
         } elsif ($width == 1 && $valstr ne "") {
             bo($name, $desc, $valstr, $val);
-        } elsif ($width > 1 && $width < 15 && $valstr ne "") {
+        } elsif ($width > 1 && $width <= 16 && $valstr ne "") {
             mbbo($name, $desc, $valstr, $val);
         } else {
             longout($name, $desc, $valstr, $val);

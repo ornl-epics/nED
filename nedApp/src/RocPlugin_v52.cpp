@@ -520,7 +520,7 @@ void RocPlugin::createConfigParams_v52()
     createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // Chan7 B sample maximum
     createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // Chan8 B sample maximum
 
-    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope [autocorrect]
+    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope
 
     createConfigParam("Ch1:Enable",       'E', 0x0,  1,  0, 1);     // Chan1 enable                  (0=disable,1=enable)
     createConfigParam("Ch2:Enable",       'E', 0x0,  1,  1, 1);     // Chan2 enable                  (0=disable,1=enable)
@@ -545,7 +545,7 @@ void RocPlugin::createConfigParams_v52()
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
     createConfigParam("MinAdc",           'E', 0x6,  16, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  16, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",       'E', 0x8,  16, 0, -6);    // Integrator release point
+    createConfigParam("IntRelease",       'E', 0x8,  16, 0, 65530); // Integrator release point
     createConfigParam("MinDiscrimWidth",  'E', 0x9,  12, 0, 1);     // Minimum discriminator width
     createConfigParam("Sample1",          'E', 0xA,  4,  0, 2);     // Sample 1 point [0:10]
     createConfigParam("Sample2",          'E', 0xB,  6,  0, 14);    // Sample 1 point [2:50]
@@ -556,7 +556,7 @@ void RocPlugin::createConfigParams_v52()
     createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // Edge detect enable            (0=disable,1=enable)
     createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
     createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
-    createConfigParam("AutoCorrection",   'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
+    createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)

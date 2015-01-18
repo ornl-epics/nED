@@ -27,6 +27,7 @@ STREAMDEVICE=   $(SUPPORT)/StreamDevice/master
 OCCLIB=         /home/controls/occ/master/lib
 SNCSEQ=		$(SUPPORT)/seq/master
 PVMEDIATOR=	$(SUPPORT)/pvMediator/master
+CALC=		$(SUPPORT)/calc/master
 
 EPICS_BASE=/home/controls/epics/base/master
 BASEV4=/home/controls/epics/basev4/master

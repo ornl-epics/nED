@@ -120,35 +120,36 @@ void RocPlugin::createStatusParams_v57()
 
 void RocPlugin::createCounterParams_v57()
 {
-    createCounterParam("CntParity",        0x0, 16,  0); // LVDS parity error counter
-    createCounterParam("CntUartParity",    0x1, 16,  0); // UART parity error counter
-    createCounterParam("CntUartByte",      0x2, 16,  0); // UART byte error counter
-    createCounterParam("CntMissClk",       0x3, 16,  0); // Link RX clock missing cnt
-    createCounterParam("Ch0:CntFifoFull",  0x4, 16,  0); // Ch0 ADC FIFO full counter
-    createCounterParam("Ch1:CntFifoFull",  0x5, 16,  0); // Ch1 ADC FIFO full counter
-    createCounterParam("Ch2:CntFifoFull",  0x6, 16,  0); // Ch2 ADC FIFO full counter
-    createCounterParam("Ch3:CntFifoFull",  0x7, 16,  0); // Ch3 ADC FIFO full counter
-    createCounterParam("Ch4:CntFifoFull",  0x8, 16,  0); // Ch4 ADC FIFO full counter
-    createCounterParam("Ch5:CntFifoFull",  0x9, 16,  0); // Ch5 ADC FIFO full counter
-    createCounterParam("Ch6:CntFifoFull",  0xA, 16,  0); // Ch6 ADC FIFO full counter
-    createCounterParam("Ch7:CntFifoFull",  0xB, 16,  0); // Ch7 ADC FIFO full counter
-    createCounterParam("Ch0:CntDiscSum",   0xC, 16,  0); // Ch0 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch1:CntDiscSum",   0xD, 16,  0); // Ch1 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch2:CntDiscSum",   0xE, 16,  0); // Ch2 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch3:CntDiscSum",   0xF, 16,  0); // Ch3 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch4:CntDiscSum",   0x10, 16,  0); // Ch4 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch5:CntDiscSum",   0x11, 16,  0); // Ch5 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch6:CntDiscSum",   0x12, 16,  0); // Ch6 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch7:CntDiscSum",   0x13, 16,  0); // Ch7 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch0:CntRate",      0x14, 16,  0); // Ch0 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch1:CntRate",      0x15, 16,  0); // Ch1 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch2:CntRate",      0x16, 16,  0); // Ch2 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch3:CntRate",      0x17, 16,  0); // Ch3 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch4:CntRate",      0x18, 16,  0); // Ch4 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch5:CntRate",      0x19, 16,  0); // Ch5 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch6:CntRate",      0x1A, 16,  0); // Ch6 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch7:CntRate",      0x1B, 16,  0); // Ch7 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("CntOutRate",       0x1C, 16,  0); // Total outrate counter (calc:1000*A/52.4288,unit:counts/s,prec:0)
+//     BLXXX:Det:RocXXX:| sig name       |                   | EPICS record description  | (bi and mbbi description)
+    createCounterParam("CntParity",         0x0, 16,  0); // LVDS parity error counter
+    createCounterParam("CntUartParity",     0x1, 16,  0); // UART parity error counter
+    createCounterParam("CntUartByte",       0x2, 16,  0); // UART byte error counter
+    createCounterParam("CntMissClk",        0x3, 16,  0); // Link RX clock missing cnt
+    createCounterParam("Ch0:CntFifoFull",   0x4, 16,  0); // Ch0 ADC FIFO full counter
+    createCounterParam("Ch1:CntFifoFull",   0x5, 16,  0); // Ch1 ADC FIFO full counter
+    createCounterParam("Ch2:CntFifoFull",   0x6, 16,  0); // Ch2 ADC FIFO full counter
+    createCounterParam("Ch3:CntFifoFull",   0x7, 16,  0); // Ch3 ADC FIFO full counter
+    createCounterParam("Ch4:CntFifoFull",   0x8, 16,  0); // Ch4 ADC FIFO full counter
+    createCounterParam("Ch5:CntFifoFull",   0x9, 16,  0); // Ch5 ADC FIFO full counter
+    createCounterParam("Ch6:CntFifoFull",   0xA, 16,  0); // Ch6 ADC FIFO full counter
+    createCounterParam("Ch7:CntFifoFull",   0xB, 16,  0); // Ch7 ADC FIFO full counter
+    createCounterParam("Ch0:RateDiscSum",   0xC, 16,  0); // Ch0 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch1:RateDiscSum",   0xD, 16,  0); // Ch1 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch2:RateDiscSum",   0xE, 16,  0); // Ch2 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:RateDiscSum",   0xF, 16,  0); // Ch3 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:RateDiscSum",  0x10, 16,  0); // Ch4 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:RateDiscSum",  0x11, 16,  0); // Ch5 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:RateDiscSum",  0x12, 16,  0); // Ch6 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:RateDiscSum",  0x13, 16,  0); // Ch7 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch0:RateOut",      0x14, 16,  0); // Ch0 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch1:RateOut",      0x15, 16,  0); // Ch1 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch2:RateOut",      0x16, 16,  0); // Ch2 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:RateOut",      0x17, 16,  0); // Ch3 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:RateOut",      0x18, 16,  0); // Ch4 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:RateOut",      0x19, 16,  0); // Ch5 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:RateOut",      0x1A, 16,  0); // Ch6 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:RateOut",      0x1B, 16,  0); // Ch7 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("RateOut",          0x1C, 16,  0); // Total outrate counter       (calc:1000*A/52.4288,unit:counts/s,prec:0)
 }
 
 void RocPlugin::createConfigParams_v57()
@@ -354,7 +355,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // Chan7 B sample maximum
     createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // Chan8 B sample maximum
 
-    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope
+    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope [autocorrect]
 
     createConfigParam("Ch1:Enable",       'E', 0x0,  1,  0, 1);     // Chan1 enable                  (0=disable,1=enable)
     createConfigParam("Ch2:Enable",       'E', 0x0,  1,  1, 1);     // Chan2 enable                  (0=disable,1=enable)
@@ -379,7 +380,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
     createConfigParam("MinAdc",           'E', 0x6,  16, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  16, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",       'E', 0x8,  16, 0, -6);    // Integrator release point
+    createConfigParam("IntRelease",       'E', 0x8,  16, 0, 65530); // Integrator release point
     createConfigParam("MinDiscrimWidth",  'E', 0x9,  12, 0, 1);     // Minimum discriminator width
     createConfigParam("Sample1",          'E', 0xA,  4,  0, 2);     // Sample 1 point [0:10]
     createConfigParam("Sample2",          'E', 0xB,  6,  0, 14);    // Sample 1 point [2:50]
@@ -398,12 +399,9 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
     createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
     createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
-    // @todo: I protest the addition of 'TestPatternAltEn' when the test pattern module is intended to be standard
-    //        across all modules.  Currently, this v5.7 ROC firmware is the only one with an 'alternate' pattern selection.
-    //        Given that there are 2 additional bits available in this register, we should design the firmware appropriately
-    //        for all forseeable use-cases.  This is the first *challenge* to the agreed-upon API.
-    createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Test pattern alt enable       (0=disable,1=enable)
+
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternDebug", 'F', 0x1,  3, 12, 0);     // Engineering Use only
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
-    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate
+    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
 }
