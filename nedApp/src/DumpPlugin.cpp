@@ -13,6 +13,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #define NUM_DUMPPLUGIN_PARAMS ((int)(&LAST_DUMPPLUGIN_PARAM - &FIRST_DUMPPLUGIN_PARAM + 1))
 
@@ -21,6 +22,7 @@ EPICS_REGISTER_PLUGIN(DumpPlugin, 3, "Port name", string, "Dispatcher port name"
 DumpPlugin::DumpPlugin(const char *portName, const char *dispatcherPortName, int blocking)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_DUMPPLUGIN_PARAMS, 1, asynOctetMask, asynOctetMask)
     , m_fd(-1)
+    , m_fdIsPipe(false)
     , m_rtdlEn(true)
     , m_neutronEn(true)
     , m_metadataEn(true)
@@ -33,6 +35,9 @@ DumpPlugin::DumpPlugin(const char *portName, const char *dispatcherPortName, int
     createParam("MetadataPktsEn",   asynParamInt32, &MetadataPktsEn, 1); // WRITE - Switch for metadata packets
     createParam("CmdPktsEn",        asynParamInt32, &CmdPktsEn, 1);      // WRITE - Switch for command packets
     createParam("UnknwnPktsEn",     asynParamInt32, &UnknwnPktsEn, 1);   // WRITE - Switch for unrecognized packets
+    createParam("SavedCount",       asynParamInt32, &SavedCount, 0);     // READ - Num saved packets to file
+    createParam("NotSavedCount",    asynParamInt32, &NotSavedCount, 0);  // READ - Num not saved packets due error
+    createParam("CorruptOffset",    asynParamInt32, &CorruptOffset, 0);  // READ - Corrupted data absolute offset in file
     callParamCallbacks();
 }
 
@@ -43,57 +48,90 @@ DumpPlugin::~DumpPlugin()
 
 void DumpPlugin::processData(const DasPacketList * const packetList)
 {
-    int nReceived = 0;
-    int nProcessed = 0;
-    getIntegerParam(RxCount,    &nReceived);
-    getIntegerParam(ProcCount,  &nProcessed);
+    int nReceived = 0, nProcessed = 0, nSaved = 0, nNotSaved = 0, corruptOffset = 0;
+    getIntegerParam(RxCount,        &nReceived);
+    getIntegerParam(ProcCount,      &nProcessed);
+    getIntegerParam(SavedCount,     &nSaved);
+    getIntegerParam(NotSavedCount,  &nNotSaved);
+    getIntegerParam(CorruptOffset,  &corruptOffset);
 
     nReceived += packetList->size();
 
-    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-        const DasPacket *packet = *it;
+    if (m_fd == -1) {
+        // Plugin is enabled but file was not opened - either not specified or error
+        nNotSaved += packetList->size();
+    } else {
+        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+            const DasPacket *packet = *it;
 
-        if (m_fd == -1)
-            continue;
+            // Skip filtered-out packets
+            if ( (m_rtdlEn     && packet->isRtdl()        ) ||
+                 (m_neutronEn  && packet->isNeutronData() ) ||
+                 (m_metadataEn && packet->isMetaData()    ) ||
+                 (m_cmdEn      && packet->isCommand()     ) ||
+                 (m_unknwnEn) ) {
 
-        // Skip filtered-out packets
-        if ( (m_rtdlEn     && packet->isRtdl()        ) ||
-             (m_neutronEn  && packet->isNeutronData() ) ||
-             (m_metadataEn && packet->isMetaData()    ) ||
-             (m_cmdEn      && packet->isCommand()     ) ||
-             (m_unknwnEn) ) {
+                nProcessed++;
 
-            ssize_t ret = write(m_fd, packet, packet->length());
-            if (ret != static_cast<ssize_t>(packet->length())) {
-                if (ret == -1) {
-                    LOG_ERROR("Abort dumping to file due to an error: %s", strerror(errno));
-                    closeFile();
-                    break;
+                // m_fd is non-blocking, might fail when system buffers are full
+                ssize_t ret = write(m_fd, packet, packet->length());
+                if (ret == static_cast<ssize_t>(packet->length())) {
+                    nSaved++;
                 } else {
-                    off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
-                    LOG_WARN("Only dumped %zuB out of %uB at offset %lu", ret, packet->length(), offset);
-                    continue;
+                    nNotSaved++;
+                    if (ret == -1) {
+                        LOG_WARN("Failed to save packet to file: %s", strerror(errno));
+                    } else if (m_fdIsPipe) {
+                        // Nothing we can do about it
+                        char path[1024];
+                        getStringParam(FilePath, sizeof(path), path);
+                        LOG_ERROR("Wrote %d/%d bytes to pipe %s - reader will be confused", ret, packet->length(), path);
+                        if (corruptOffset == 0) {
+                            corruptOffset = lseek(m_fd, 0, SEEK_CUR) - ret;
+                        }
+                    } else if (lseek(m_fd, -1 * ret, SEEK_CUR) != 0) {
+                        // Too bad but lseek() failed - very unlikely
+                        off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
+                        char path[1024];
+                        getStringParam(FilePath, sizeof(path), path);
+                        LOG_ERROR("Wrote %d/%d bytes to %s at offset %lu", ret, packet->length(), path, offset);
+                        if (corruptOffset == 0) {
+                            corruptOffset = offset;
+                        }
+                    } else {
+                        LOG_WARN("Failed to save packet to file");
+                    }
                 }
             }
-
-            nProcessed++;
         }
     }
 
-    setIntegerParam(RxCount,    nReceived);
-    setIntegerParam(ProcCount,  nProcessed);
+    setIntegerParam(RxCount,        nReceived);
+    setIntegerParam(ProcCount,      nProcessed);
+    setIntegerParam(SavedCount,     nSaved);
+    setIntegerParam(NotSavedCount,  nNotSaved);
+    setIntegerParam(CorruptOffset,  corruptOffset);
     callParamCallbacks();
 }
 
 asynStatus DumpPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Enable) {
+        closeFile();
+
         if (value > 0) {
             char path[1024];
-            if (m_fd == -1 && getStringParam(FilePath, sizeof(path), path) == asynSuccess && openFile(path) == false)
-                return asynError;
-        } else {
-            closeFile();
+
+            setIntegerParam(SavedCount, 0);
+            setIntegerParam(NotSavedCount, 0);
+            setIntegerParam(CorruptOffset, 0);
+            callParamCallbacks();
+
+            if (getStringParam(FilePath, sizeof(path), path) == asynSuccess) {
+                // Ignore errors on opening file, there's NotSavedCount
+                // that will increment
+                (void)openFile(path);
+            }
         }
     } else if (pasynUser->reason == RtdlPktsEn) {
         m_rtdlEn = (value > 0);
@@ -113,12 +151,19 @@ asynStatus DumpPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t
 {
     if (pasynUser->reason == FilePath) {
         int enabled = 0;
+        *nActual = nChars;
         // If plugin is enabled, switch file now, otherwise postpone until enabled
         if (getIntegerParam(Enable, &enabled) == asynSuccess && enabled == 1) {
             closeFile();
-            if (openFile(std::string(value, nChars)) == false) {
-                return asynError;
-            }
+
+            setIntegerParam(SavedCount, 0);
+            setIntegerParam(NotSavedCount, 0);
+            setIntegerParam(CorruptOffset, 0);
+            callParamCallbacks();
+
+            // Ignore errors on opening file, there's NotSavedCount
+            // that will increment
+            (void)openFile(std::string(value, nChars));
         }
     }
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
@@ -126,21 +171,28 @@ asynStatus DumpPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t
 
 bool DumpPlugin::openFile(const std::string &path)
 {
-    m_fd = open(path.c_str(), O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
+    struct stat statBuf;
+
+    // Create new file if necessary, truncate existing file, works with named pipes
+    m_fd = open(path.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
     if (m_fd == -1) {
         LOG_ERROR("Can not open dump file '%s': %s", path.c_str(), strerror(errno));
         return false;
     }
 
-    LOG_INFO("Switched dump file to '%s'", path.c_str());
+    if (fstat(m_fd, &statBuf) == 0) {
+        m_fdIsPipe = ((statBuf.st_mode & S_IFIFO) == S_IFIFO);
+    }
+
+    LOG_INFO("Switched dump to %s '%s'", (m_fdIsPipe ? "named pipe" : "regular file"), path.c_str());
     return true;
 }
 
 void DumpPlugin::closeFile()
 {
     if (m_fd != -1) {
-        (void)fcntl(m_fd, F_SETFL, O_NONBLOCK); // best we can do, if fcntl() fails, close() could stall for a while
         (void)close(m_fd);
         m_fd = -1;
     }
+    m_fdIsPipe = false;
 }

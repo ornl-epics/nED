@@ -21,20 +21,18 @@
  * set through FilePath parameter and plugin needs to be enabled to actually
  * open a file and save data. When plugin is disabled, file gets closed.
  *
- * File blocking mode is used for opening and writing to file. This is to
- * asure that all the data is written to file without having to buffer it
- * locally. It could block for a while and stall the acquisition.
- * It's expected that this plugin is used mainly for debugging
- * purposes or when analysing data and as such doesn't impact the production
- * acquisition. When closing the file, file is switched to non-blocking
- * mode before. That is because kernel buffers are sometimes only synchronized
- * when the file is closed. It was observed to take a long time, but there's
- * not much we could do in that case. So the idea is not to wait for close
- * to complete.
+ * After experiencing long delays on open() and write() system calls, this
+ * plugin is now completly non-blocking. Not saved packets are acounted and
+ * reported through PV. Partially written packet are deleted from the file
+ * unless the output file is a named pipe, in which case data was already
+ * transfered to client's side of the pipe. In such case the corruption offset
+ * is reported. Saved and not saved packet counter as well as corruption offset
+ * are reset when a new file is opened.
  */
 class DumpPlugin : public BasePlugin {
     private: // variables
         int m_fd;           //!< File handle for an opened file, or -1
+        bool m_fdIsPipe;    //!< true when opened file is a named pipe
 
     public: // functions
         /**
@@ -113,7 +111,10 @@ class DumpPlugin : public BasePlugin {
         int MetadataPktsEn; //!< Switch for metadata packets
         int CmdPktsEn;      //!< Switch for command packets
         int UnknwnPktsEn;   //!< Switch for unrecognized packets
-        #define LAST_DUMPPLUGIN_PARAM UnknwnPktsEn
+        int SavedCount;     //!< Num saved packets to file
+        int NotSavedCount;  //!< Num not saved packets due error
+        int CorruptOffset;  //!< Corrupted data absolute offset in file
+        #define LAST_DUMPPLUGIN_PARAM CorruptOffset
 };
 
 #endif // DUMP_PLUGIN_H

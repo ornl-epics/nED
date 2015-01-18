@@ -56,4 +56,34 @@ record(bo, "$(P)UnknwnPktsEn")
     field(ZNAM, "disabled")
     field(ONAM, "enabled")
 }
-
+record(longin, "$(P)SavedCount")
+{
+    field(DESC, "Num saved packets")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))SavedCount")
+    field(VAL,  "0")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(longin, "$(P)NotSavedCount")
+{
+    field(DESC, "Num not saved packets error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))NotSavedCount")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)CorruptOffset")
+{
+    field(DESC, "Corrupted data offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CorruptOffset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
+    field(SCAN, "I/O Intr")
+}
