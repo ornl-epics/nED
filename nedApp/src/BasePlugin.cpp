@@ -100,7 +100,10 @@ void BasePlugin::processDataUnlocked(const DasPacketList * const packetList)
 asynStatus BasePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Enable) {
-        if (enableCallbacks(value > 0) == false)
+        this->unlock();
+        bool status = enableCallbacks(value > 0);
+        this->lock();
+        if (status == false)
             return asynError;
     } else if (pasynUser->reason == DataModeP) {
         switch (value) {

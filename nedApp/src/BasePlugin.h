@@ -234,6 +234,8 @@ class BasePlugin : public asynPortDriver {
          * asyn parameter or using this function.
          *
          * @param[in] enable Enable callbacks when true, disable otherwise.
+         * @note This function must be called with the lock released, otherwise a
+         *       deadlock can occur in the call to cancelInterruptUser.
          * @return true if operation succeeded.
          */
         bool enableCallbacks(bool enable);
