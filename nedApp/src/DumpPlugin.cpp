@@ -38,6 +38,7 @@ DumpPlugin::DumpPlugin(const char *portName, const char *dispatcherPortName, int
     createParam("SavedCount",       asynParamInt32, &SavedCount, 0);     // READ - Num saved packets to file
     createParam("NotSavedCount",    asynParamInt32, &NotSavedCount, 0);  // READ - Num not saved packets due error
     createParam("CorruptOffset",    asynParamInt32, &CorruptOffset, 0);  // READ - Corrupted data absolute offset in file
+    createParam("Overwrite",        asynParamInt32, &Overwrite, 0);      // WRITE - Overwrite existing file
     callParamCallbacks();
 }
 
@@ -85,7 +86,7 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
                         // Nothing we can do about it
                         char path[1024];
                         getStringParam(FilePath, sizeof(path), path);
-                        LOG_ERROR("Wrote %d/%d bytes to pipe %s - reader will be confused", ret, packet->length(), path);
+                        LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->length(), path);
                         if (corruptOffset == 0) {
                             corruptOffset = lseek(m_fd, 0, SEEK_CUR) - ret;
                         }
@@ -94,7 +95,7 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
                         off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
                         char path[1024];
                         getStringParam(FilePath, sizeof(path), path);
-                        LOG_ERROR("Wrote %d/%d bytes to %s at offset %lu", ret, packet->length(), path, offset);
+                        LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->length(), path, offset);
                         if (corruptOffset == 0) {
                             corruptOffset = offset;
                         }
@@ -117,6 +118,12 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
 asynStatus DumpPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Enable) {
+        // Prevent reporting false positives by disabling plugin early.
+        // Disabling plugin might temporarily release a lock and let some
+        // packets come through.
+        if (BasePlugin::writeInt32(pasynUser, value) != asynSuccess)
+            return asynError;
+
         closeFile();
 
         if (value > 0) {
@@ -128,11 +135,14 @@ asynStatus DumpPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             callParamCallbacks();
 
             if (getStringParam(FilePath, sizeof(path), path) == asynSuccess) {
+                int overwrite = 0;
+                getIntegerParam(Overwrite, &overwrite);
                 // Ignore errors on opening file, there's NotSavedCount
                 // that will increment
-                (void)openFile(path);
+                (void)openFile(path, overwrite != 0);
             }
         }
+        return asynSuccess;
     } else if (pasynUser->reason == RtdlPktsEn) {
         m_rtdlEn = (value > 0);
     } else if (pasynUser->reason == NeutronPktsEn) {
@@ -161,17 +171,25 @@ asynStatus DumpPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t
             setIntegerParam(CorruptOffset, 0);
             callParamCallbacks();
 
+            int overwrite = 0;
+            getIntegerParam(Overwrite, &overwrite);
+
             // Ignore errors on opening file, there's NotSavedCount
             // that will increment
-            (void)openFile(std::string(value, nChars));
+            (void)openFile(std::string(value, nChars), overwrite != 0);
         }
     }
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
-bool DumpPlugin::openFile(const std::string &path)
+bool DumpPlugin::openFile(const std::string &path, bool overwrite)
 {
     struct stat statBuf;
+
+    if (stat(path.c_str(), &statBuf) == 0 && overwrite == false) {
+        LOG_WARN("Not overwriting file '%s'", path.c_str());
+        return false;
+    }
 
     // Create new file if necessary, truncate existing file, works with named pipes
     m_fd = open(path.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
@@ -180,9 +198,7 @@ bool DumpPlugin::openFile(const std::string &path)
         return false;
     }
 
-    if (fstat(m_fd, &statBuf) == 0) {
-        m_fdIsPipe = ((statBuf.st_mode & S_IFIFO) == S_IFIFO);
-    }
+    m_fdIsPipe = ((statBuf.st_mode & S_IFIFO) == S_IFIFO);
 
     LOG_INFO("Switched dump to %s '%s'", (m_fdIsPipe ? "named pipe" : "regular file"), path.c_str());
     return true;

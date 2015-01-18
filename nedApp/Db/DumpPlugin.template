@@ -87,3 +87,14 @@ record(longin, "$(P)CorruptOffset")
     field(HSV,  "MAJOR")
     field(SCAN, "I/O Intr")
 }
+record(bo, "$(P)Overwrite")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Overwrite existing file")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Overwrite")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}

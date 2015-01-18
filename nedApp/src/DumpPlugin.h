@@ -93,7 +93,7 @@ class DumpPlugin : public BasePlugin {
          * @param[in] path Absolute file path of a new file.
          * @return true on success, false otherwise.
          */
-        bool openFile(const std::string &path);
+        bool openFile(const std::string &path, bool overwrite);
 
         /**
          * Close file handle and disable further writes.
@@ -114,7 +114,8 @@ class DumpPlugin : public BasePlugin {
         int SavedCount;     //!< Num saved packets to file
         int NotSavedCount;  //!< Num not saved packets due error
         int CorruptOffset;  //!< Corrupted data absolute offset in file
-        #define LAST_DUMPPLUGIN_PARAM CorruptOffset
+        int Overwrite;      //!< Overwrite existing file
+        #define LAST_DUMPPLUGIN_PARAM Overwrite
 };
 
 #endif // DUMP_PLUGIN_H
