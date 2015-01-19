@@ -149,7 +149,7 @@ void RocPlugin::createCounterParams_v57()
     createCounterParam("Ch5:RateOut",      0x19, 16,  0); // Ch5 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
     createCounterParam("Ch6:RateOut",      0x1A, 16,  0); // Ch6 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
     createCounterParam("Ch7:RateOut",      0x1B, 16,  0); // Ch7 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("RateOut",          0x1C, 16,  0); // Total outrate counter       (calc:1000*A/52.4288,unit:counts/s,prec:0)
+    createCounterParam("RateOut",          0x1C, 16,  0); // Total outrate counter       (calc:1000*A/52.4288,unit:counts/s)
 }
 
 void RocPlugin::createConfigParams_v57()

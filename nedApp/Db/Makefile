@@ -65,4 +65,4 @@ RocPlugin_v56.template: RocPlugin_v56.generated
 RocPlugin_v57.template: RocPlugin_v57.generated
 
 %.generated: ../src/%.cpp
-	../export2epics.pl < $^ > $@
+	../export2epics.py -i $^ -o $@
