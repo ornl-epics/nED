@@ -35,7 +35,7 @@ from optparse import OptionParser
 __version__ = "0.2.0"
 
 DEFAULT_NED_DIR = "/home/controls/epics/nED/master"
-PVTABLE_DIR_TMPL = "/home/controls/<beamline>/opi/pvtable/<iocname>/"
+PVTABLE_DIR_TMPL = "/home/controls/<beamline>/pvtable/<iocname>/"
 
 def parse_st_cmd_env(st_cmd_filepath):
     """ Parse st.cmd file and extract environment variables """
@@ -124,9 +124,9 @@ def write_pvs_file(outpath, pv_prefix, vars):
 
         for var in vars:
             outfile.write("        <pv>\n")
-            outfile.write("            <selected>false</selected>\n")
+            outfile.write("            <selected>true</selected>\n")
             outfile.write("            <name>{0}{1}</name>\n".format(pv_prefix, var["name"]))
-            outfile.write("            <tolerance>1</tolerance>\n")
+            outfile.write("            <tolerance>0.1</tolerance>\n")
             outfile.write("            <saved_value>{0}</saved_value>\n".format(var["val"]))
             outfile.write("        </pv>\n")
 

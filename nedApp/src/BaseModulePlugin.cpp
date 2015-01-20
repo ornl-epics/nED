@@ -434,7 +434,8 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig()
     if (cfgSection == '0') {
         payloadLength = m_configPayloadLength;
     } else {
-        payloadLength = m_configSectionSizes[cfgSection];
+        int wordsize = (m_behindDsp ? 2 : 4);
+        payloadLength = m_configSectionSizes[cfgSection] * wordsize;
     }
 
     // Skip empty sections
