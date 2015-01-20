@@ -43,6 +43,7 @@ class AdaraPlugin : public BaseSocketPlugin {
         uint64_t m_nPacketsPrevPulse;       //!< Number of dropped packets associated to already complete pulse
         epicsTimeStamp m_lastSentTimestamp; //!< Timestamp of last packet sent to Adara
         epicsTimeStamp m_lastRtdlTimestamp; //!< Timestamp of last RTDL packet sent to Adara
+        bool m_heartbeatActive;     //!< Allow to temporarily disable heartbeat to prevent interleaved writes on socket
 
         /**
          * Structure describing output packets sequence for a given source.

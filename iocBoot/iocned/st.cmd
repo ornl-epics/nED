@@ -24,6 +24,10 @@ save_restoreSet_SeqPeriodInSeconds(600)
 set_pass0_restoreFile("$(IOCNAME).sav")
 set_pass1_restoreFile("$(IOCNAME).sav")
 
+# asyn reporting - per port basis
+#asynSetTraceIOMask("<port>", 0, 0xFF)
+#asynSetTraceMask("<port>", 0, 0xFF)
+
 # Access Security
 # NOTE: All nED configuration and output records are writable only by BEAMLINE
 #       Uncomment and update next 2 lines to enable access security
@@ -40,9 +44,9 @@ CmdDispatcherConfigure("cmd", "occ")
 dbLoadRecords("../../db/CmdDispatcherPlugin.db","P=$(PREFIX)cmd:,PORT=cmd")
 
 PixelMapPluginConfigure("PixMap", "occ", 1, "/tmp/test.pixelmap", 4194304)
-dbLoadRecords("../../db/PixelMapPlugin.template","P=$(PREFIX)pm1:,PORT=PixMap")
+dbLoadRecords("../../db/PixelMapPlugin.db","P=$(PREFIX)pm1:,PORT=PixMap")
 
-AdaraPluginConfigure("Adara1", "occ", 1, 2)
+AdaraPluginConfigure("Adara1", "occ", 1, 1)
 dbLoadRecords("../../db/AdaraPlugin.db","P=$(PREFIX)adara1:,PORT=Adara1")
 
 ProxyPluginConfigure("proxy1", "PixMap")

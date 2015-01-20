@@ -8,8 +8,10 @@
  */
 
 #include "BaseSocketPlugin.h"
+#include "likely.h"
 #include "Log.h"
 
+#include <fcntl.h>
 #include <poll.h>
 #include <osiSock.h>
 #include <string.h> // strerror
@@ -28,8 +30,11 @@ BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherP
     createParam("ListenPort",   asynParamInt32,     &ListenPort);       // WRITE - Port number to listen to
     createParam("ClientIp",     asynParamOctet,     &ClientIP, "");     // READ - Client IP if connected, or empty string
     createParam("CheckInt",     asynParamInt32,     &CheckInt, 2);      // WRITE - Check client interval in seconds
+    createParam("ClientInactive",asynParamFloat64,  &ClientInactive, 0.0);// READ - Number of seconds of client inactivity
+    createParam("CloseClient",  asynParamInt32,     &CloseClient, 0);   // WRITE - Force client disconnect
     callParamCallbacks();
 
+    // Schedule a period task to check for incoming client
     std::function<float(void)> watchdogCb = std::bind(&BaseSocketPlugin::checkClient, this);
     scheduleCallback(watchdogCb, 2.0);
 }
@@ -41,14 +46,64 @@ BaseSocketPlugin::~BaseSocketPlugin()
 bool BaseSocketPlugin::send(const uint32_t *data, uint32_t length)
 {
     const char *rest = reinterpret_cast<const char *>(data);
+    double inactive = 0.0;
+    epicsTimeStamp t1;
+    bool firstRun = true;
+    ssize_t sent = 0;
+    int myErrno = 0;
+
+    // Optimize most likely path, mainly avoid time consuming unlocking/locking
+    sent = write(m_clientSock, rest, length);
+    if (likely(sent == length)) {
+        return true;
+    }
+
+    // perform error checking inside the loop
+    myErrno = errno;
+    epicsTimeGetCurrent(&t1);
+
     while (m_clientSock != -1 && length > 0) {
-        ssize_t sent = write(m_clientSock, rest, length);
-        if (sent == -1) {
-            LOG_ERROR("Closed socket due to an write error - %s", strerror(errno));
-            disconnectClient();
+        if (firstRun == false) {
+            int sock = m_clientSock; // got local reference to be able to release lock
+            this->unlock();
+            // With unlocked write, ClientDiscon can be used to force client disconnect
+            // OS will recognize invalid sock and return EINVAL error, which the code
+            // below should catch and cleanup the rest
+            sent = write(sock, rest, length);
+            myErrno = errno;
+            this->lock();
         }
-        rest += sent;
-        length -= sent;
+        firstRun = false;
+
+        // Not everything went as planned
+        if (sent >= 0) {
+            epicsTimeGetCurrent(&t1);
+            rest += sent;
+            length -= sent;
+        } else { //sent == -1
+            // SO_SNDTIMEO will interrupt every 1.0s
+            if (myErrno == EAGAIN || myErrno == EWOULDBLOCK) {
+                // Export client inactivity time through parameter.
+                // PV database can be configured to automatically disconnect
+                // at certain threshold.
+                epicsTimeStamp t2;
+                epicsTimeGetCurrent(&t2);
+                inactive = epicsTimeDiffInSeconds(&t2, &t1);
+                setDoubleParam(ClientInactive, inactive);
+                callParamCallbacks();
+
+            } else if (m_clientSock != -1) {
+                LOG_ERROR("Closed socket due to an write error - %s", strerror(myErrno));
+                disconnectClient();
+                // No need to break, while loop will check
+            }
+        }
+    }
+
+    if (inactive != 0.0) {
+        // while loop got interrupted due to client disconnect
+        setDoubleParam(ClientInactive, 0.0);
+        callParamCallbacks();
     }
 
     return (length == 0);
@@ -96,6 +151,11 @@ asynStatus BaseSocketPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         setIntegerParam(CheckInt, value);
         callParamCallbacks();
         return asynSuccess;
+    } else if (pasynUser->reason == CloseClient) {
+        if (value > 0) {
+            disconnectClient();
+            LOG_INFO("Disconnected client on user request");
+        }
     }
 
     return BasePlugin::writeInt32(pasynUser, value);
@@ -193,6 +253,7 @@ bool BaseSocketPlugin::connectClient()
 {
     char clientip[128];
     struct pollfd fds;
+    struct timeval timeout;
 
     if (m_clientSock != -1)
         return true;
@@ -216,6 +277,12 @@ bool BaseSocketPlugin::connectClient()
     setStringParam(ClientIP, clientip);
     callParamCallbacks();
 
+    timeout = { .tv_sec = 1, .tv_usec = 0 };
+    if (setsockopt(m_clientSock, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout)) != 0) {
+        // Socket remains in blocking mode, hope client doesn't stall
+        LOG_ERROR("Failed to set socket timeout");
+    }
+
     clientConnected();
 
     LOG_INFO("New TCP client from %s", clientip);
@@ -225,13 +292,16 @@ bool BaseSocketPlugin::connectClient()
 
 void BaseSocketPlugin::disconnectClient()
 {
-    if (m_clientSock != -1)
-        close(m_clientSock);
-    m_clientSock = -1;
-    setStringParam(ClientIP, "");
-    callParamCallbacks();
+    if (m_clientSock != -1) {
+        (void)fcntl(m_clientSock, F_SETFL, O_NONBLOCK);
+        (void)close(m_clientSock);
+        m_clientSock = -1;
 
-    clientDisconnected();
+        setStringParam(ClientIP, "");
+        callParamCallbacks();
+
+        clientDisconnected();
+    }
 }
 
 float BaseSocketPlugin::checkClient()

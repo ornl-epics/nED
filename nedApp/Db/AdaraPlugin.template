@@ -67,3 +67,26 @@ record(bi, "$(P)Status")
     field(ZNAM, "Not connected")
     field(ONAM, "Connected")
 }
+record(ao, "$(P)InactiveTimeout")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Max client inactive timeout")
+    field(VAL,  "0.0") # 0.0 means disabled
+    field(PINI, "YES")
+    field(EGU,  "Seconds")
+    field(PREC, "1")
+}
+record(calcout, "$(P)AutoReset")
+{
+    field(DESC, "Auto disconnect client")
+    field(INPA, "$(P)InactiveTimeout NPP")
+    field(INPB, "$(P)ClientInactive NPP")
+    field(CALC, "(A>0.0)&&(B>A)") # 1 when true, 0 otherwise
+    field(OUT,  "$(P)CloseClient PP")
+    field(OOPT, "When Non-zero")
+}
+# Upgrade ClientInactive from BaseSocketPlugin
+record(ai, "$(P)ClientInactive")
+{
+    field(FLNK, "$(P)AutoReset PP")
+}

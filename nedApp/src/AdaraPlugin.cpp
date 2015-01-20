@@ -28,6 +28,7 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
     , m_nReceived(0)
     , m_nUnexpectedDspDrops(0)
     , m_nPacketsPrevPulse(0)
+    , m_heartbeatActive(true)
 {
     m_lastSentTimestamp = { 0, 0 };
 
@@ -86,12 +87,14 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
 
                 // The RTDL packet contents is just what ADARA expects.
                 // Prefix that with the length and type of packet.
+                m_heartbeatActive = false;
                 if (send(outpacket, sizeof(uint32_t)*2) &&
                     send(packet->payload, sizeof(uint32_t)*std::min(packet->getPayloadLength(), 32U))) {
                     m_nTransmitted++;
                     epicsTimeGetCurrent(&m_lastSentTimestamp);
                     m_lastRtdlTimestamp = timestamp;
                 }
+                m_heartbeatActive = true;
             }
             m_nProcessed++;
 
@@ -136,7 +139,9 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                         outpacket[8] = seq->rtdl.tsync_width;
                         outpacket[9] = seq->rtdl.tsync_delay;
 
+                        m_heartbeatActive = false;
                         (void)send(outpacket, sizeof(uint32_t)*10);
+                        m_heartbeatActive = true;
                     }
                     seq->pulseSeq = 0;
                     seq->rtdl = *rtdl; // Cache current packet RTDL for the next injected packet
@@ -153,11 +158,13 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 outpacket[8] = rtdl->tsync_width;
                 outpacket[9] = rtdl->tsync_delay;
 
+                m_heartbeatActive = false;
                 if (send(outpacket, sizeof(uint32_t)*10) &&
                     send(reinterpret_cast<const uint32_t*>(events), sizeof(DasPacket::Event)*eventsCount)) {
                     m_nTransmitted++;
                     epicsTimeGetCurrent(&m_lastSentTimestamp);
                 }
+                m_heartbeatActive = true;
                 m_nProcessed++;
             }
         }
@@ -179,8 +186,9 @@ float AdaraPlugin::checkClient()
 
     getIntegerParam(CheckInt, &heartbeatInt);
     epicsTimeGetCurrent(&now);
+    double inactive = epicsTimeDiffInSeconds(&now, &m_lastSentTimestamp);
 
-    if (isClientConnected() && epicsTimeDiffInSeconds(&now, &m_lastSentTimestamp) > heartbeatInt) {
+    if (m_heartbeatActive && isClientConnected() && inactive > heartbeatInt) {
         uint32_t outpacket[4];
 
         outpacket[0] = 0;
