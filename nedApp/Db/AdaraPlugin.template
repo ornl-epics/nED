@@ -73,7 +73,7 @@ record(ao, "$(P)InactiveTimeout")
     field(DESC, "Max client inactive timeout")
     field(VAL,  "0.0") # 0.0 means disabled
     field(PINI, "YES")
-    field(EGU,  "Seconds")
+    field(EGU,  "seconds")
     field(PREC, "1")
 }
 record(calcout, "$(P)AutoReset")

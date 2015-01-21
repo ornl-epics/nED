@@ -30,6 +30,15 @@ class BaseSocketPlugin : public BasePlugin {
         static const int defaultInterfaceMask = asynOctetMask | asynFloat64Mask | BasePlugin::defaultInterfaceMask;
         static const int defaultInterruptMask = asynOctetMask | asynFloat64Mask | BasePlugin::defaultInterruptMask;
 
+        enum {
+            STATUS_NOT_INIT     = 0, //!< Not initialized
+            STATUS_LISTENING    = 1, //!< Listening
+            STATUS_BAD_IP       = 2, //!< Can not resolve hostname/IP
+            STATUS_SOCKET_ERR   = 3, //!< Socket error
+            STATUS_BIND_PERM    = 4, //!< Not allowed to bind to port
+            STATUS_IN_USE       = 5, //!< Socket already in use
+        };
+
         /**
          * Constructor
          *
@@ -166,6 +175,7 @@ class BaseSocketPlugin : public BasePlugin {
         #define FIRST_BASESOCKETPLUGIN_PARAM ListenIP
         int ListenIP;
         int ListenPort;
+        int ListenStatus;
         int ClientIP;
         int CheckInt;
         int ClientInactive;
