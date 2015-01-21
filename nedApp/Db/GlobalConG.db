@@ -47,19 +47,14 @@ record(ao, "$(P)PctCriterion") {
 }
 
 # Busy records for requesting command sequences
-record(busy, "$(P)Disable") {
-   field(DESC, "Disable all devices")
-   field(ONAM, "Disabling")
-   field(ZNAM, "Disable")
-}
-record(busy, "$(P)Enable") {
-   field(DESC, "Enable All devices")
-   field(ONAM, "Enabling")
-   field(ZNAM, "Enable")
+record(busy, "$(P)Clear") {
+   field(DESC, "Request Clear sequence")
+   field(ONAM, "Clearing")
+   field(ZNAM, "Clear")
 }
 record(busy, "$(P)Stop") {
    field(DESC, "Request Stop sequence")
-   field(ONAM, "Stopping")
+   field(ONAM, "Stoping")
    field(ZNAM, "Stop")
 }
 record(busy, "$(P)Start") {
