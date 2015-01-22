@@ -182,12 +182,15 @@ int severity;
 /*
  * SET_DISABLES used for setting all modules enabled or disabled
  */
-#define SET_DISABLES(NAME, VAL) 			\
+#define SET_DISABLES(NAME, VAL, EVNAME) 		\
     state NAME {					\
        when() {						\
           for (i = 0; i< numFound; i++) {		\
              disable[i] = VAL; pvPut(disable[i]);	\
           }						\
+          EVNAME = 0;	/* release busy record */	\
+          pvPut(EVNAME);				\
+          PVPUTSTR(statePV,Ready)			\
        } state Ready					\
     }  							\
 /*
@@ -415,13 +418,10 @@ int severity;
  * code from the "OP_xxx" command defines above, and NEXT is the destination
  * state to perform the operation.
  */
-#define CMD_WHEN(EVNAME, NEXT) 			\
-       when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
-          PVPUTSTR(statePV,NEXT)				\
-          if (strcmp(prevReq, #NEXT)) {				\
-             for (i = 0; i< numFound; i++)			\
-                PVPUTNUM(cmdSucceeded[i], 0)			\
-          }							\
+#define CMD_WHEN(EVNAME, NEXT) 						\
+       when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {		\
+          PVPUTSTR(statePV,NEXT)					\
+          for (i = 0; i< numFound; i++) PVPUTNUM(cmdSucceeded[i], 0)	\
        } state NEXT
 
 /*
@@ -481,14 +481,14 @@ ss GlobalControl {
     OP_DONE(DoneDiscover, globalCheck)
     state Ready {
        CMD_WHEN(globalEnable, Enabling)
-       CMD_WHEN(globalEnable, Disabling)
+       CMD_WHEN(globalDisable, Disabling)
        CMD_WHEN(globalStop, Stopping)
        CMD_WHEN(globalStart, Starting)
        CMD_WHEN(globalWriteConf, WritingConf)
        CMD_WHEN(globalCheck, Discover)
     }		
-    SET_DISABLES(Enabling, 0)
-    SET_DISABLES(Disabling, 1)
+    SET_DISABLES(Enabling, 0, globalEnable)
+    SET_DISABLES(Disabling, 1, globalDisable)
     CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
     TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting)
