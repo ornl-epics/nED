@@ -44,6 +44,7 @@ class AdaraPlugin : public BaseSocketPlugin {
         epicsTimeStamp m_lastSentTimestamp; //!< Timestamp of last packet sent to Adara
         epicsTimeStamp m_lastRtdlTimestamp; //!< Timestamp of last RTDL packet sent to Adara
         bool m_heartbeatActive;     //!< Allow to temporarily disable heartbeat to prevent interleaved writes on socket
+        uint32_t m_dataPktType;     //!< Type of data packets, raw or mapped pixel data
 
         /**
          * Structure describing output packets sequence for a given source.
@@ -102,6 +103,11 @@ class AdaraPlugin : public BaseSocketPlugin {
         ~AdaraPlugin();
 
         /**
+         * Overloaded function.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
          * Process RTDL and NeutronData packets only, skip rest.
          *
          * @param[in] packetList List of packets to be processed
@@ -136,7 +142,8 @@ class AdaraPlugin : public BaseSocketPlugin {
         #define FIRST_ADARAPLUGIN_PARAM BadPulsCnt
         int BadPulsCnt;
         int BadDspCnt;
-        #define LAST_ADARAPLUGIN_PARAM BadDspCnt
+        int PixelsMapped;
+        #define LAST_ADARAPLUGIN_PARAM PixelsMapped
 };
 
 #endif // ADARA_PLUGIN_H

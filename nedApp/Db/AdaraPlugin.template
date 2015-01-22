@@ -90,3 +90,14 @@ record(ai, "$(P)ClientInactive")
 {
     field(FLNK, "$(P)AutoReset PP")
 }
+record(bo, "$(P)PixelsMapped")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Were pixels previously mapped?")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PixelsMapped")
+    field(ZNAM, "Raw pixels")
+    field(ONAM, "Mapped pixels")
+    field(PINI, "YES")
+}

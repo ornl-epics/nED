@@ -16,10 +16,11 @@ EPICS_REGISTER_PLUGIN(AdaraPlugin, 4, "port name", string, "dispatcher port", st
 
 #define NUM_ADARAPLUGIN_PARAMS      ((int)(&LAST_ADARAPLUGIN_PARAM - &FIRST_ADARAPLUGIN_PARAM + 1))
 
-#define ADARA_CODE_DAS_DATA         0x00000000
-#define ADARA_CODE_DAS_RTDL         0x00000100
-#define ADARA_CODE_SOURCE_LIST      0x00000200
-#define ADARA_CODE_HEARTBEAT        0x00400900
+#define ADARA_PKT_TYPE_RAW_EVENT    0x00000000
+#define ADARA_PKT_TYPE_RTDL         0x00000100
+#define ADARA_PKT_TYPE_SOURCE_LIST  0x00000200
+#define ADARA_PKT_TYPE_MAPPED_EVENT 0x00000300
+#define ADARA_PKT_TYPE_HEARTBEAT    0x00400900
 
 AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, int blocking, int numDsps)
     : BaseSocketPlugin(portName, dispatcherPortName, blocking, NUM_ADARAPLUGIN_PARAMS)
@@ -29,6 +30,7 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
     , m_nUnexpectedDspDrops(0)
     , m_nPacketsPrevPulse(0)
     , m_heartbeatActive(true)
+    , m_dataPktType(ADARA_PKT_TYPE_RAW_EVENT)
 {
     m_lastSentTimestamp = { 0, 0 };
 
@@ -49,11 +51,20 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
 
     createParam("BadPulsCnt",   asynParamInt32, &BadPulsCnt, 0); // READ - Num dropped packets associated to already completed pulse
     createParam("BadDspCnt",    asynParamInt32, &BadDspCnt,  0); // READ - Num dropped packets from unexpected DSP
+    createParam("PixelsMapped", asynParamInt32, &PixelsMapped, 0); // WRITE - Tells whether data packets are flagged as raw or mapped pixel data
     callParamCallbacks();
 }
 
 AdaraPlugin::~AdaraPlugin()
 {
+}
+
+asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (pasynUser->reason == PixelsMapped) {
+        m_dataPktType = (value == 0 ? ADARA_PKT_TYPE_RAW_EVENT : ADARA_PKT_TYPE_MAPPED_EVENT);
+    }
+    return BaseSocketPlugin::writeInt32(pasynUser, value);
 }
 
 void AdaraPlugin::processData(const DasPacketList * const packetList)
@@ -83,7 +94,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
             // and packet/data flag.
             if (epicsTimeEqual(&timestamp, &m_lastRtdlTimestamp) == 0) { // time not equal
                 outpacket[0] = 30*sizeof(uint32_t);
-                outpacket[1] = ADARA_CODE_DAS_RTDL;
+                outpacket[1] = ADARA_PKT_TYPE_RTDL;
 
                 // The RTDL packet contents is just what ADARA expects.
                 // Prefix that with the length and type of packet.
@@ -129,7 +140,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 if (epicsTimeEqual(&currentTs, &prevTs) == 0) {
                     if (prevTs.secPastEpoch > 0 && prevTs.nsec > 0) {
                         outpacket[0] = 24;
-                        outpacket[1] = ADARA_CODE_DAS_DATA;
+                        outpacket[1] = m_dataPktType;
                         outpacket[2] = seq->rtdl.timestamp_sec;
                         outpacket[3] = seq->rtdl.timestamp_nsec;
                         outpacket[4] = seq->sourceId;
@@ -148,7 +159,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 }
 
                 outpacket[0] = 24 + sizeof(DasPacket::Event)*eventsCount;
-                outpacket[1] = ADARA_CODE_DAS_DATA;
+                outpacket[1] = m_dataPktType;
                 outpacket[2] = rtdl->timestamp_sec;
                 outpacket[3] = rtdl->timestamp_nsec;
                 outpacket[4] = seq->sourceId;
@@ -192,7 +203,7 @@ float AdaraPlugin::checkClient()
         uint32_t outpacket[4];
 
         outpacket[0] = 0;
-        outpacket[1] = ADARA_CODE_HEARTBEAT;
+        outpacket[1] = ADARA_PKT_TYPE_HEARTBEAT;
         outpacket[2] = now.secPastEpoch;
         outpacket[3] = now.nsec;
 
@@ -210,7 +221,7 @@ void AdaraPlugin::clientConnected()
     int idx = 0;
 
     outpacket[idx++] = sizeof(uint32_t) * m_dspSources.size() * 2;
-    outpacket[idx++] = ADARA_CODE_SOURCE_LIST;
+    outpacket[idx++] = ADARA_PKT_TYPE_SOURCE_LIST;
     outpacket[idx++] = now.secPastEpoch;
     outpacket[idx++] = now.nsec;
     for (auto it = m_dspSources.begin(); it != m_dspSources.end(); it++) {
