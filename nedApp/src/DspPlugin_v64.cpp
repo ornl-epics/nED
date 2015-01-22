@@ -272,14 +272,14 @@ void DspPlugin::createConfigParams_v64() {
 
     createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 166660); // LVDS TSYNC generate divisor (166660=240Hz, 666800=60Hz, 800000=50Hz, 1333200=30Hz)
     createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor     (0=10ns, 1=20ns, 106=1us, 1060=10us, 106250=1ms)
-    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (83330=8.3ms, 10=1us, 10000=1ms)
+    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (83330=8.3ms, 10=1us, 20=2us, 10000=1ms)
 
-    createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
-    createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 0); // Crossbar Switch Pass ctrl B  (1=Send to trans A,2=send to trans B)
     createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
+    createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
     createConfigParam("OptA:EOC",       'E', 0x8,  1,  4, 1); // Optical TX A End of Chain
     createConfigParam("OptA:FilterCmd", 'E', 0x8,  2,  5, 0); // Optical TX A Command Filter
     createConfigParam("OptB:TxMode",    'E', 0x8,  2,  8, 3); // Optical TX B output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
+    createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 2); // Crossbar Switch Pass ctrl B  (1=Send to trans A,2=send to trans B)
     createConfigParam("OptB:EOC",       'E', 0x8,  1, 12, 1); // Optical TX B End of Chain
     createConfigParam("OptB:FilterCmd", 'E', 0x8,  2, 13, 0); // Optical TX B Command Filter
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
@@ -324,8 +324,8 @@ void DspPlugin::createCounterParams_v64()
     createCounterParam("SCntrs:1",         0x0, 16, 16); // x0111
     createCounterParam("BadCmdCnt",        0x1, 16,  0); // Unrecognized commands
     createCounterParam("BadCmdLvdsCnt",    0x1, 16, 16); // LVDS CMD parsing errors
-    createCounterParam("LvdsFifoAFCnt",    0x2, 16,  0); // LVDS Tx FIFO Almost Full 
-    createCounterParam("SCntrs:5",         0x2, 16, 16); // x0555 
+    createCounterParam("LvdsFifoAFCnt",    0x2, 16,  0); // LVDS Tx FIFO Almost Full
+    createCounterParam("SCntrs:5",         0x2, 16, 16); // x0555
     createCounterParam("OptA:LosCnt",      0x3, 16,  0); // TBD
     createCounterParam("OptA:TxFltCnt",    0x3, 16, 16); // TBD
     createCounterParam("OptA:ComFailCnt",  0x4, 16,  0); // TBD
@@ -346,37 +346,37 @@ void DspPlugin::createCounterParams_v64()
     createCounterParam("OptB:PktFlagCnt",  0xB, 16, 16); // TBD
     createCounterParam("ChL1ParityErCnt",  0xC, 16,  0); // Even parity error
     createCounterParam("ChL1FrameErCnt",   0xC, 16, 16); // Composite framing errors
-    createCounterParam("ChL1IDTFfCnt",     0xD, 16,  0); // External IDT FIFO is full 
+    createCounterParam("ChL1IDTFfCnt",     0xD, 16,  0); // External IDT FIFO is full
     createCounterParam("ChL1ExtAfCnt",     0xD, 16, 16); // External FIFO AF
     createCounterParam("ChL1PpAfCnt",      0xE, 16,  0); // Channel-link packet FIFO AF
     createCounterParam("ChL1SCntrs:29",    0xE, 16, 16); // ZERO
     createCounterParam("ChL2ParityErCnt",  0xF, 16,  0); // Even parity error
     createCounterParam("ChL2FrameErCnt",   0xF, 16, 16); // Composite framing errors
-    createCounterParam("ChL2IDTFfCnt",    0x10, 16,  0); // External IDT FIFO is full 
+    createCounterParam("ChL2IDTFfCnt",    0x10, 16,  0); // External IDT FIFO is full
     createCounterParam("ChL2ExtAfCnt",    0x10, 16, 16); // External FIFO AF
     createCounterParam("ChL2PpAfCnt",     0x11, 16,  0); // Channel-link packet FIFO AF
     createCounterParam("ChL2SCntrs:35",   0x11, 16, 16); // ZERO
     createCounterParam("ChL3ParityErCnt", 0x12, 16,  0); // Even parity error
     createCounterParam("ChL3FrameErCnt",  0x12, 16, 16); // Composite framing errors
-    createCounterParam("ChL3IDTFfCnt",    0x13, 16,  0); // External IDT FIFO is full 
+    createCounterParam("ChL3IDTFfCnt",    0x13, 16,  0); // External IDT FIFO is full
     createCounterParam("ChL3ExtAfCnt",    0x13, 16, 16); // External FIFO AF
     createCounterParam("ChL3PpAfCnt",     0x14, 16,  0); // Channel-link packet FIFO AF
     createCounterParam("ChL3SCntrs:41",   0x14, 16, 16); // ZERO
     createCounterParam("ChL4ParityErCnt", 0x15, 16,  0); // Even parity error
     createCounterParam("ChL4FrameErCnt",  0x15, 16, 16); // Composite framing errors
-    createCounterParam("ChL4IDTFfCnt",    0x16, 16,  0); // External IDT FIFO is full 
+    createCounterParam("ChL4IDTFfCnt",    0x16, 16,  0); // External IDT FIFO is full
     createCounterParam("ChL4ExtAfCnt",    0x16, 16, 16); // External FIFO AF
     createCounterParam("ChL4PpAfCnt",     0x17, 16,  0); // Channel-link packet FIFO AF
     createCounterParam("ChL4SCntrs:47",   0x17, 16, 16); // ZERO
     createCounterParam("ChL5ParityErCnt", 0x18, 16,  0); // Even parity error
     createCounterParam("ChL5FrameErCnt",  0x18, 16, 16); // Composite framing errors
-    createCounterParam("ChL5IDTFfCnt",    0x19, 16,  0); // External IDT FIFO is full 
+    createCounterParam("ChL5IDTFfCnt",    0x19, 16,  0); // External IDT FIFO is full
     createCounterParam("ChL5ExtAfCnt",    0x19, 16, 16); // External FIFO AF
     createCounterParam("ChL5PpAfCnt",     0x1A, 16,  0); // Channel-link packet FIFO AF
     createCounterParam("ChL5SCntrs:53",   0x1A, 16, 16); // ZERO
     createCounterParam("ChL6ParityErCnt", 0x1B, 16,  0); // Even parity error
     createCounterParam("ChL6FrameErCnt",  0x1B, 16, 16); // Composite framing errors
-    createCounterParam("ChL6IDTFfCnt",    0x1C, 16,  0); // External IDT FIFO is full 
+    createCounterParam("ChL6IDTFfCnt",    0x1C, 16,  0); // External IDT FIFO is full
     createCounterParam("ChL6ExtAfCnt",    0x1C, 16, 16); // External FIFO AF
     createCounterParam("ChL6PpAfCnt",     0x1D, 16,  0); // Channel-link packet FIFO AF
     createCounterParam("ChL6SCntrs:59",   0x1D, 16, 16); // ZERO
