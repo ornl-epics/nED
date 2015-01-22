@@ -102,7 +102,9 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 if (send(outpacket, sizeof(uint32_t)*2) &&
                     send(packet->payload, sizeof(uint32_t)*std::min(packet->getPayloadLength(), 32U))) {
                     m_nTransmitted++;
-                    epicsTimeGetCurrent(&m_lastSentTimestamp);
+                    // Disabling this allows the plugin to send heartbeat every time there's
+                    // no data which seems to help SMS do the book-keeping.
+                    //epicsTimeGetCurrent(&m_lastSentTimestamp);
                     m_lastRtdlTimestamp = timestamp;
                 }
                 m_heartbeatActive = true;
