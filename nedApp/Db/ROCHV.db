@@ -116,6 +116,7 @@ record(ao, "$(P):VoltSet") {
 #
 record(bo, "$(G):OnOff") {
    field(DESC, "Global HV on/off PV")
+   field(ASG, "BEAMLINE")
    field(DTYP, "Soft Channel")
    field(ONAM, "ON")
    field(ZNAM, "OFF")
