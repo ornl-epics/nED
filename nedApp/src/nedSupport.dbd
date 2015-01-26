@@ -5,6 +5,8 @@ include "PVAClientRegister.dbd"
 include "PVAServerRegister.dbd"
 include "registerChannelProviderLocal.dbd"
 #include "dbPv.dbd"
+include "calcSupport.dbd"
+include "sCalcoutRecord.dbd"
 registrar("OccRegister")
 registrar("CmdDispatcherRegister")
 registrar("DiscoverPluginRegister")

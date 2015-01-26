@@ -129,7 +129,7 @@ asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *in
 asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *index, const char *initValue)
 {
     asynStatus status = asynPortDriver::createParam(name, type, index);
-    if (status == asynSuccess && type == asynParamInt32)
+    if (status == asynSuccess && type == asynParamOctet)
         status = setStringParam(*index, initValue);
     return status;
 }
@@ -179,7 +179,8 @@ std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &
     std::shared_ptr<Timer> timer(new Timer(true));
     if (timer) {
         std::function<float(void)> timerCb = std::bind(&BasePlugin::timerExpire, this, timer, callback);
-        timer->schedule(timerCb, delay);
+        if (!timer->schedule(timerCb, delay)) 
+           LOG_WARN("Failed to schedule callback");
     }
     return timer;
 }

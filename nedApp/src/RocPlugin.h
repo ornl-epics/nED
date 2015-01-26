@@ -31,8 +31,8 @@
  * * ROC hw=5.2 fw=5.2 as v52
  * * ROC hw=5.2 fw=5.4 as v54
  * * ROC hw=5.2 fw=5.5 as v55 (via v54 plugin)
- * * ROC hw=5.2 fw=5.6 as v56 (TODO: consider refactor into v52 plugin)
- * * ROC hw=5.2 fw=5.6 as v57 (TODO: consider refactor into v55/v54 plugin)
+ * * ROC hw=5.2 fw=5.6 as v56
+ * * ROC hw=5.2 fw=5.6 as v57
  *
  * In general firmware versions differ in status or configuration
  * parameters they provide. Those are available in individual files

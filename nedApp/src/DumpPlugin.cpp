@@ -21,8 +21,19 @@ EPICS_REGISTER_PLUGIN(DumpPlugin, 3, "Port name", string, "Dispatcher port name"
 DumpPlugin::DumpPlugin(const char *portName, const char *dispatcherPortName, int blocking)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_DUMPPLUGIN_PARAMS, 1, asynOctetMask, asynOctetMask)
     , m_fd(-1)
+    , m_rtdlEn(true)
+    , m_neutronEn(true)
+    , m_metadataEn(true)
+    , m_cmdEn(true)
+    , m_unknwnEn(true)
 {
-    createParam("FilePath",     asynParamOctet, &FilePath); // WRITE - Path to file where to save all received data
+    createParam("FilePath",         asynParamOctet, &FilePath);          // WRITE - Path to file where to save all received data
+    createParam("RtdlPktsEn",       asynParamInt32, &RtdlPktsEn, 1);     // WRITE - Switch for RTDL packets
+    createParam("NeutronPktsEn",    asynParamInt32, &NeutronPktsEn, 1);  // WRITE - Switch for neutron packets
+    createParam("MetadataPktsEn",   asynParamInt32, &MetadataPktsEn, 1); // WRITE - Switch for metadata packets
+    createParam("CmdPktsEn",        asynParamInt32, &CmdPktsEn, 1);      // WRITE - Switch for command packets
+    createParam("UnknwnPktsEn",     asynParamInt32, &UnknwnPktsEn, 1);   // WRITE - Switch for unrecognized packets
+    callParamCallbacks();
 }
 
 DumpPlugin::~DumpPlugin()
@@ -45,20 +56,28 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
         if (m_fd == -1)
             continue;
 
-        ssize_t ret = write(m_fd, packet, packet->length());
-        if (ret != static_cast<ssize_t>(packet->length())) {
-            if (ret == -1) {
-                LOG_ERROR("Abort dumping to file due to an error: %s", strerror(errno));
-                closeFile();
-                break;
-            } else {
-                off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
-                LOG_WARN("Only dumped %zuB out of %uB at offset %lu", ret, packet->length(), offset);
-                continue;
-            }
-        }
+        // Skip filtered-out packets
+        if ( (m_rtdlEn     && packet->isRtdl()        ) ||
+             (m_neutronEn  && packet->isNeutronData() ) ||
+             (m_metadataEn && packet->isMetaData()    ) ||
+             (m_cmdEn      && packet->isCommand()     ) ||
+             (m_unknwnEn) ) {
 
-        nProcessed++;
+            ssize_t ret = write(m_fd, packet, packet->length());
+            if (ret != static_cast<ssize_t>(packet->length())) {
+                if (ret == -1) {
+                    LOG_ERROR("Abort dumping to file due to an error: %s", strerror(errno));
+                    closeFile();
+                    break;
+                } else {
+                    off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
+                    LOG_WARN("Only dumped %zuB out of %uB at offset %lu", ret, packet->length(), offset);
+                    continue;
+                }
+            }
+
+            nProcessed++;
+        }
     }
 
     setIntegerParam(RxCount,    nReceived);
@@ -76,6 +95,16 @@ asynStatus DumpPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         } else {
             closeFile();
         }
+    } else if (pasynUser->reason == RtdlPktsEn) {
+        m_rtdlEn = (value > 0);
+    } else if (pasynUser->reason == NeutronPktsEn) {
+        m_neutronEn = (value > 0);
+    } else if (pasynUser->reason == MetadataPktsEn) {
+        m_metadataEn = (value > 0);
+    } else if (pasynUser->reason == CmdPktsEn) {
+        m_cmdEn = (value > 0);
+    } else if (pasynUser->reason == UnknwnPktsEn) {
+        m_unknwnEn = (value > 0);
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }
