@@ -179,6 +179,8 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         int ErrCrc;
         int ErrLength;
         int ErrFrame;
+        int SfpSerNo;
+        int SfpPartNo;
         int SfpType;
         int SfpTemp;
         int SfpRxPower;

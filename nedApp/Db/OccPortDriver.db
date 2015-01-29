@@ -240,6 +240,24 @@ record(ai, "$(P)FpgaAuxV")
     field(HHSV, "MAJOR")
     field(SCAN, "I/O Intr")
 }
+record(stringin, "$(P)SfpSerNo")
+{
+    info(archive, "Monitor, 00:01:00")
+    field(DESC, "SFP serial number")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))SfpSerNo")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(stringin, "$(P)SfpPartNo")
+{
+    info(archive, "Monitor, 00:01:00")
+    field(DESC, "SFP part number")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))SfpPartNo")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
 record(mbbi, "$(P)SfpType")
 {
     info(archive, "Monitor, 00:10:00")
