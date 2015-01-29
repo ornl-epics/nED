@@ -120,36 +120,35 @@ void RocPlugin::createStatusParams_v57()
 
 void RocPlugin::createCounterParams_v57()
 {
-//     BLXXX:Det:RocXXX:| sig name       |                   | EPICS record description  | (bi and mbbi description)
-    createCounterParam("CntParity",         0x0, 16,  0); // LVDS parity error counter
-    createCounterParam("CntUartParity",     0x1, 16,  0); // UART parity error counter
-    createCounterParam("CntUartByte",       0x2, 16,  0); // UART byte error counter
-    createCounterParam("CntMissClk",        0x3, 16,  0); // Link RX clock missing cnt
-    createCounterParam("Ch0:CntFifoFull",   0x4, 16,  0); // Ch0 ADC FIFO full counter
-    createCounterParam("Ch1:CntFifoFull",   0x5, 16,  0); // Ch1 ADC FIFO full counter
-    createCounterParam("Ch2:CntFifoFull",   0x6, 16,  0); // Ch2 ADC FIFO full counter
-    createCounterParam("Ch3:CntFifoFull",   0x7, 16,  0); // Ch3 ADC FIFO full counter
-    createCounterParam("Ch4:CntFifoFull",   0x8, 16,  0); // Ch4 ADC FIFO full counter
-    createCounterParam("Ch5:CntFifoFull",   0x9, 16,  0); // Ch5 ADC FIFO full counter
-    createCounterParam("Ch6:CntFifoFull",   0xA, 16,  0); // Ch6 ADC FIFO full counter
-    createCounterParam("Ch7:CntFifoFull",   0xB, 16,  0); // Ch7 ADC FIFO full counter
-    createCounterParam("Ch0:RateDiscSum",   0xC, 16,  0); // Ch0 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch1:RateDiscSum",   0xD, 16,  0); // Ch1 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch2:RateDiscSum",   0xE, 16,  0); // Ch2 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch3:RateDiscSum",   0xF, 16,  0); // Ch3 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch4:RateDiscSum",  0x10, 16,  0); // Ch4 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch5:RateDiscSum",  0x11, 16,  0); // Ch5 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch6:RateDiscSum",  0x12, 16,  0); // Ch6 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch7:RateDiscSum",  0x13, 16,  0); // Ch7 SUM discriminator rate  (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch0:RateOut",      0x14, 16,  0); // Ch0 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch1:RateOut",      0x15, 16,  0); // Ch1 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch2:RateOut",      0x16, 16,  0); // Ch2 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch3:RateOut",      0x17, 16,  0); // Ch3 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch4:RateOut",      0x18, 16,  0); // Ch4 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch5:RateOut",      0x19, 16,  0); // Ch5 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch6:RateOut",      0x1A, 16,  0); // Ch6 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("Ch7:RateOut",      0x1B, 16,  0); // Ch7 outrate counter         (calc:1000*A/52.4288,unit:counts/s)
-    createCounterParam("RateOut",          0x1C, 16,  0); // Total outrate counter       (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntParity",        0x0, 16,  0); // LVDS parity error counter
+    createCounterParam("CntUartParity",    0x1, 16,  0); // UART parity error counter
+    createCounterParam("CntUartByte",      0x2, 16,  0); // UART byte error counter
+    createCounterParam("CntMissClk",       0x3, 16,  0); // Link RX clock missing cnt
+    createCounterParam("Ch0:CntFifoFull",  0x4, 16,  0); // Ch0 ADC FIFO full counter
+    createCounterParam("Ch1:CntFifoFull",  0x5, 16,  0); // Ch1 ADC FIFO full counter
+    createCounterParam("Ch2:CntFifoFull",  0x6, 16,  0); // Ch2 ADC FIFO full counter
+    createCounterParam("Ch3:CntFifoFull",  0x7, 16,  0); // Ch3 ADC FIFO full counter
+    createCounterParam("Ch4:CntFifoFull",  0x8, 16,  0); // Ch4 ADC FIFO full counter
+    createCounterParam("Ch5:CntFifoFull",  0x9, 16,  0); // Ch5 ADC FIFO full counter
+    createCounterParam("Ch6:CntFifoFull",  0xA, 16,  0); // Ch6 ADC FIFO full counter
+    createCounterParam("Ch7:CntFifoFull",  0xB, 16,  0); // Ch7 ADC FIFO full counter
+    createCounterParam("Ch0:CntDiscSum",   0xC, 16,  0); // Ch0 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch1:CntDiscSum",   0xD, 16,  0); // Ch1 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch2:CntDiscSum",   0xE, 16,  0); // Ch2 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:CntDiscSum",   0xF, 16,  0); // Ch3 SUM discriminator rate    (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:CntDiscSum",   0x10, 16,  0); // Ch4 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:CntDiscSum",   0x11, 16,  0); // Ch5 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:CntDiscSum",   0x12, 16,  0); // Ch6 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:CntDiscSum",   0x13, 16,  0); // Ch7 SUM discriminator rate   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch0:CntRate",      0x14, 16,  0); // Ch0 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch1:CntRate",      0x15, 16,  0); // Ch1 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch2:CntRate",      0x16, 16,  0); // Ch2 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch3:CntRate",      0x17, 16,  0); // Ch3 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch4:CntRate",      0x18, 16,  0); // Ch4 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch5:CntRate",      0x19, 16,  0); // Ch5 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch6:CntRate",      0x1A, 16,  0); // Ch6 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("Ch7:CntRate",      0x1B, 16,  0); // Ch7 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
+    createCounterParam("CntOutRate",       0x1C, 16,  0); // Total outrate counter (calc:1000*A/52.4288,unit:counts/s,prec:0)
 }
 
 void RocPlugin::createConfigParams_v57()
@@ -259,103 +258,103 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch8:B:GainAdj",    '2', 0x57, 12, 0, 0);     // Chan8 B gain adjust
 
     createConfigParam("Ch1:A:Scale",      '3', 0x0,  12, 0, 2048);  // Chan1 A scale
-    createConfigParam("Ch2:A:Scale",      '3', 0x1,  12, 0, 2048);  // Chan2 A scale
-    createConfigParam("Ch3:A:Scale",      '3', 0x2,  12, 0, 2048);  // Chan3 A scale
-    createConfigParam("Ch4:A:Scale",      '3', 0x3,  12, 0, 2048);  // Chan4 A scale
-    createConfigParam("Ch5:A:Scale",      '3', 0x4,  12, 0, 2048);  // Chan5 A scale
-    createConfigParam("Ch6:A:Scale",      '3', 0x5,  12, 0, 2048);  // Chan6 A scale
-    createConfigParam("Ch7:A:Scale",      '3', 0x6,  12, 0, 2048);  // Chan7 A scale
-    createConfigParam("Ch8:A:Scale",      '3', 0x7,  12, 0, 2048);  // Chan8 A scale
-    createConfigParam("Ch1:B:Scale",      '3', 0x8,  12, 0, 2048);  // Chan1 B scale
-    createConfigParam("Ch2:B:Scale",      '3', 0x9,  12, 0, 2048);  // Chan2 B scale
+    createConfigParam("Ch1:A:Offset",     '3', 0x1,  12, 0, 1600);  // Chan1 A offset
+    createConfigParam("Ch1:B:Scale",      '3', 0x2,  12, 0, 2048);  // Chan1 B scale
+    createConfigParam("Ch1:B:Offset",     '3', 0x3,  12, 0, 1600);  // Chan1 B offset
+    createConfigParam("Ch2:A:Scale",      '3', 0x4,  12, 0, 2048);  // Chan2 A scale
+    createConfigParam("Ch2:A:Offset",     '3', 0x5,  12, 0, 1600);  // Chan2 A offset
+    createConfigParam("Ch2:B:Scale",      '3', 0x6,  12, 0, 2048);  // Chan2 B scale
+    createConfigParam("Ch2:B:Offset",     '3', 0x7,  12, 0, 1600);  // Chan2 B offset
+    createConfigParam("Ch3:A:Scale",      '3', 0x8,  12, 0, 2048);  // Chan3 A scale
+    createConfigParam("Ch3:A:Offset",     '3', 0x9,  12, 0, 1600);  // Chan3 A offset
     createConfigParam("Ch3:B:Scale",      '3', 0xA,  12, 0, 2048);  // Chan3 B scale
-    createConfigParam("Ch4:B:Scale",      '3', 0xB,  12, 0, 2048);  // Chan4 B scale
-    createConfigParam("Ch5:B:Scale",      '3', 0xC,  12, 0, 2048);  // Chan5 B scale
-    createConfigParam("Ch6:B:Scale",      '3', 0xD,  12, 0, 2048);  // Chan6 B scale
-    createConfigParam("Ch7:B:Scale",      '3', 0xE,  12, 0, 2048);  // Chan7 B scale
-    createConfigParam("Ch8:B:Scale",      '3', 0xF,  12, 0, 2048);  // Chan8 B scale
+    createConfigParam("Ch3:B:Offset",     '3', 0xB,  12, 0, 1600);  // Chan3 B offset
+    createConfigParam("Ch4:A:Scale",      '3', 0xC,  12, 0, 2048);  // Chan4 A scale
+    createConfigParam("Ch4:A:Offset",     '3', 0xD,  12, 0, 1600);  // Chan4 A offset
+    createConfigParam("Ch4:B:Scale",      '3', 0xE,  12, 0, 2048);  // Chan4 B scale
+    createConfigParam("Ch4:B:Offset",     '3', 0xF,  12, 0, 1600);  // Chan4 B offset
 
-    createConfigParam("Ch1:A:Offset",     '3', 0x10, 12, 0, 1600);  // Chan1 A offset
-    createConfigParam("Ch2:A:Offset",     '3', 0x11, 12, 0, 1600);  // Chan2 A offset
-    createConfigParam("Ch3:A:Offset",     '3', 0x12, 12, 0, 1600);  // Chan3 A offset
-    createConfigParam("Ch4:A:Offset",     '3', 0x13, 12, 0, 1600);  // Chan4 A offset
-    createConfigParam("Ch5:A:Offset",     '3', 0x14, 12, 0, 1600);  // Chan5 A offset
+    createConfigParam("Ch5:A:Scale",      '3', 0x10, 12, 0, 2048);  // Chan5 A scale
+    createConfigParam("Ch5:A:Offset",     '3', 0x11, 12, 0, 1600);  // Chan5 A offset
+    createConfigParam("Ch5:B:Scale",      '3', 0x12, 12, 0, 2048);  // Chan5 B scale
+    createConfigParam("Ch5:B:Offset",     '3', 0x13, 12, 0, 1600);  // Chan5 B offset
+    createConfigParam("Ch6:A:Scale",      '3', 0x14, 12, 0, 2048);  // Chan6 A scale
     createConfigParam("Ch6:A:Offset",     '3', 0x15, 12, 0, 1600);  // Chan6 A offset
-    createConfigParam("Ch7:A:Offset",     '3', 0x16, 12, 0, 1600);  // Chan7 A offset
-    createConfigParam("Ch8:A:Offset",     '3', 0x17, 12, 0, 1600);  // Chan8 A offset
-    createConfigParam("Ch1:B:Offset",     '3', 0x18, 12, 0, 1600);  // Chan1 B offset
-    createConfigParam("Ch2:B:Offset",     '3', 0x19, 12, 0, 1600);  // Chan2 B offset
-    createConfigParam("Ch3:B:Offset",     '3', 0x1A, 12, 0, 1600);  // Chan3 B offset
-    createConfigParam("Ch4:B:Offset",     '3', 0x1B, 12, 0, 1600);  // Chan4 B offset
-    createConfigParam("Ch5:B:Offset",     '3', 0x1C, 12, 0, 1600);  // Chan5 B offset
-    createConfigParam("Ch6:B:Offset",     '3', 0x1D, 12, 0, 1600);  // Chan6 B offset
-    createConfigParam("Ch7:B:Offset",     '3', 0x1E, 12, 0, 1600);  // Chan7 B offset
+    createConfigParam("Ch6:B:Scale",      '3', 0x16, 12, 0, 2048);  // Chan6 B scale
+    createConfigParam("Ch6:B:Offset",     '3', 0x17, 12, 0, 1600);  // Chan6 B offset
+    createConfigParam("Ch7:A:Scale",      '3', 0x18, 12, 0, 2048);  // Chan7 A scale
+    createConfigParam("Ch7:A:Offset",     '3', 0x19, 12, 0, 1600);  // Chan7 A offset
+    createConfigParam("Ch7:B:Scale",      '3', 0x1A, 12, 0, 2048);  // Chan7 B scale
+    createConfigParam("Ch7:B:Offset",     '3', 0x1B, 12, 0, 1600);  // Chan7 B offset
+    createConfigParam("Ch8:A:Scale",      '3', 0x1C, 12, 0, 2048);  // Chan8 A scale
+    createConfigParam("Ch8:A:Offset",     '3', 0x1D, 12, 0, 1600);  // Chan8 A offset
+    createConfigParam("Ch8:B:Scale",      '3', 0x1E, 12, 0, 2048);  // Chan8 B scale
     createConfigParam("Ch8:B:Offset",     '3', 0x1F, 12, 0, 1600);  // Chan8 B offset
 
-    createConfigParam("Ch1:ScaleFact",    '4', 0x0,  12, 0, 2048);  // Chan1 scale factor
-    createConfigParam("Ch2:ScaleFact",    '4', 0x1,  12, 0, 2048);  // Chan2 scale factor
-    createConfigParam("Ch3:ScaleFact",    '4', 0x2,  12, 0, 2048);  // Chan3 scale factor
-    createConfigParam("Ch4:ScaleFact",    '4', 0x3,  12, 0, 2048);  // Chan4 scale factor
-    createConfigParam("Ch5:ScaleFact",    '4', 0x4,  12, 0, 2048);  // Chan5 scale factor
-    createConfigParam("Ch6:ScaleFact",    '4', 0x5,  12, 0, 2048);  // Chan6 scale factor
-    createConfigParam("Ch7:ScaleFact",    '4', 0x6,  12, 0, 2048);  // Chan7 scale factor
-    createConfigParam("Ch8:ScaleFact",    '4', 0x7,  12, 0, 2048);  // Chan8 scale factor
+    createConfigParam("Ch1:ScaleFact",    '3', 0x20, 12, 0, 2048);  // Chan1 scale factor
+    createConfigParam("Ch2:ScaleFact",    '3', 0x21, 12, 0, 2048);  // Chan2 scale factor
+    createConfigParam("Ch3:ScaleFact",    '3', 0x22, 12, 0, 2048);  // Chan3 scale factor
+    createConfigParam("Ch4:ScaleFact",    '3', 0x23, 12, 0, 2048);  // Chan4 scale factor
+    createConfigParam("Ch5:ScaleFact",    '3', 0x24, 12, 0, 2048);  // Chan5 scale factor
+    createConfigParam("Ch6:ScaleFact",    '3', 0x25, 12, 0, 2048);  // Chan6 scale factor
+    createConfigParam("Ch7:ScaleFact",    '3', 0x26, 12, 0, 2048);  // Chan7 scale factor
+    createConfigParam("Ch8:ScaleFact",    '3', 0x27, 12, 0, 2048);  // Chan8 scale factor
 
     createConfigParam("Ch1:A:Baseline",   'C', 0x0,  12, 0, 100);   // Chan1 A baseline value
-    createConfigParam("Ch2:A:Baseline",   'C', 0x1,  12, 0, 100);   // Chan2 A baseline value
-    createConfigParam("Ch3:A:Baseline",   'C', 0x2,  12, 0, 100);   // Chan3 A baseline value
-    createConfigParam("Ch4:A:Baseline",   'C', 0x3,  12, 0, 100);   // Chan4 A baseline value
-    createConfigParam("Ch5:A:Baseline",   'C', 0x4,  12, 0, 100);   // Chan5 A baseline value
-    createConfigParam("Ch6:A:Baseline",   'C', 0x5,  12, 0, 100);   // Chan6 A baseline value
-    createConfigParam("Ch7:A:Baseline",   'C', 0x6,  12, 0, 100);   // Chan7 A baseline value
-    createConfigParam("Ch8:A:Baseline",   'C', 0x7,  12, 0, 100);   // Chan8 A baseline value
-    createConfigParam("Ch1:B:Baseline",   'C', 0x8,  12, 0, 100);   // Chan1 B baseline value
-    createConfigParam("Ch2:B:Baseline",   'C', 0x9,  12, 0, 100);   // Chan2 B baseline value
-    createConfigParam("Ch3:B:Baseline",   'C', 0xA,  12, 0, 100);   // Chan3 B baseline value
-    createConfigParam("Ch4:B:Baseline",   'C', 0xB,  12, 0, 100);   // Chan4 B baseline value
-    createConfigParam("Ch5:B:Baseline",   'C', 0xC,  12, 0, 100);   // Chan5 B baseline value
-    createConfigParam("Ch6:B:Baseline",   'C', 0xD,  12, 0, 100);   // Chan6 B baseline value
-    createConfigParam("Ch7:B:Baseline",   'C', 0xE,  12, 0, 100);   // Chan7 B baseline value
+    createConfigParam("Ch1:B:Baseline",   'C', 0x1,  12, 0, 100);   // Chan1 B baseline value
+    createConfigParam("Ch2:A:Baseline",   'C', 0x2,  12, 0, 100);   // Chan2 A baseline value
+    createConfigParam("Ch2:B:Baseline",   'C', 0x3,  12, 0, 100);   // Chan2 B baseline value
+    createConfigParam("Ch3:A:Baseline",   'C', 0x4,  12, 0, 100);   // Chan3 A baseline value
+    createConfigParam("Ch3:B:Baseline",   'C', 0x5,  12, 0, 100);   // Chan3 B baseline value
+    createConfigParam("Ch4:A:Baseline",   'C', 0x6,  12, 0, 100);   // Chan4 A baseline value
+    createConfigParam("Ch4:B:Baseline",   'C', 0x7,  12, 0, 100);   // Chan4 B baseline value
+    createConfigParam("Ch5:A:Baseline",   'C', 0x8,  12, 0, 100);   // Chan5 A baseline value
+    createConfigParam("Ch5:B:Baseline",   'C', 0x9,  12, 0, 100);   // Chan5 B baseline value
+    createConfigParam("Ch6:A:Baseline",   'C', 0xA,  12, 0, 100);   // Chan6 A baseline value
+    createConfigParam("Ch6:B:Baseline",   'C', 0xB,  12, 0, 100);   // Chan6 B baseline value
+    createConfigParam("Ch7:A:Baseline",   'C', 0xC,  12, 0, 100);   // Chan7 A baseline value
+    createConfigParam("Ch7:B:Baseline",   'C', 0xD,  12, 0, 100);   // Chan7 B baseline value
+    createConfigParam("Ch8:A:Baseline",   'C', 0xE,  12, 0, 100);   // Chan8 A baseline value
     createConfigParam("Ch8:B:Baseline",   'C', 0xF,  12, 0, 100);   // Chan8 B baseline value
 
     // There's an unused part of C section in v5.4 C:0x10 - C:0x1F
-    createConfigParam("ConfigFiller",     'C', 0x1F, 16, 0, 0);     // Config filler
+    createConfigParam("ConfigFillerC",    'C', 0x1F, 16, 0, 0);     // Config filler
 
-    createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 100);   // Chan1 A sample minimum
-    createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 100);   // Chan2 A sample minimum
-    createConfigParam("Ch3:A:SampleMin",  'D', 0x2,  12, 0, 100);   // Chan3 A sample minimum
-    createConfigParam("Ch4:A:SampleMin",  'D', 0x3,  12, 0, 100);   // Chan4 A sample minimum
-    createConfigParam("Ch5:A:SampleMin",  'D', 0x4,  12, 0, 100);   // Chan5 A sample minimum
-    createConfigParam("Ch6:A:SampleMin",  'D', 0x5,  12, 0, 100);   // Chan6 A sample minimum
-    createConfigParam("Ch7:A:SampleMin",  'D', 0x6,  12, 0, 100);   // Chan7 A sample minimum
-    createConfigParam("Ch8:A:SampleMin",  'D', 0x7,  12, 0, 100);   // Chan8 A sample minimum
-    createConfigParam("Ch1:B:SampleMin",  'D', 0x8,  12, 0, 100);   // Chan1 B sample minimum
-    createConfigParam("Ch2:B:SampleMin",  'D', 0x9,  12, 0, 100);   // Chan2 B sample minimum
-    createConfigParam("Ch3:B:SampleMin",  'D', 0xA,  12, 0, 100);   // Chan3 B sample minimum
-    createConfigParam("Ch4:B:SampleMin",  'D', 0xB,  12, 0, 100);   // Chan4 B sample minimum
-    createConfigParam("Ch5:B:SampleMin",  'D', 0xC,  12, 0, 100);   // Chan5 B sample minimum
-    createConfigParam("Ch6:B:SampleMin",  'D', 0xD,  12, 0, 100);   // Chan6 B sample minimum
-    createConfigParam("Ch7:B:SampleMin",  'D', 0xE,  12, 0, 100);   // Chan7 B sample minimum
-    createConfigParam("Ch8:B:SampleMin",  'D', 0xF,  12, 0, 100);   // Chan8 B sample minimum
+    createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:A:SampleMin",  'D', 0x2,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:A:SampleMin",  'D', 0x3,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:A:SampleMin",  'D', 0x4,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:A:SampleMin",  'D', 0x5,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:A:SampleMin",  'D', 0x6,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:A:SampleMin",  'D', 0x7,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:B:SampleMin",  'D', 0x8,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:B:SampleMin",  'D', 0x9,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:B:SampleMin",  'D', 0xA,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:B:SampleMin",  'D', 0xB,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:B:SampleMin",  'D', 0xC,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:B:SampleMin",  'D', 0xD,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:B:SampleMin",  'D', 0xE,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:B:SampleMin",  'D', 0xF,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
 
-    createConfigParam("Ch1:A:SampleMax",  'D', 0x10, 12, 0, 1000);  // Chan1 A sample maximum
-    createConfigParam("Ch2:A:SampleMax",  'D', 0x11, 12, 0, 1000);  // Chan2 A sample maximum
-    createConfigParam("Ch3:A:SampleMax",  'D', 0x12, 12, 0, 1000);  // Chan3 A sample maximum
-    createConfigParam("Ch4:A:SampleMax",  'D', 0x13, 12, 0, 1000);  // Chan4 A sample maximum
-    createConfigParam("Ch5:A:SampleMax",  'D', 0x14, 12, 0, 1000);  // Chan5 A sample maximum
-    createConfigParam("Ch6:A:SampleMax",  'D', 0x15, 12, 0, 1000);  // Chan6 A sample maximum
-    createConfigParam("Ch7:A:SampleMax",  'D', 0x16, 12, 0, 1000);  // Chan7 A sample maximum
-    createConfigParam("Ch8:A:SampleMax",  'D', 0x17, 12, 0, 1000);  // Chan8 A sample maximum
-    createConfigParam("Ch1:B:SampleMax",  'D', 0x18, 12, 0, 1000);  // Chan1 B sample maximum
-    createConfigParam("Ch2:B:SampleMax",  'D', 0x19, 12, 0, 1000);  // Chan2 B sample maximum
-    createConfigParam("Ch3:B:SampleMax",  'D', 0x1A, 12, 0, 1000);  // Chan3 B sample maximum
-    createConfigParam("Ch4:B:SampleMax",  'D', 0x1B, 12, 0, 1000);  // Chan4 B sample maximum
-    createConfigParam("Ch5:B:SampleMax",  'D', 0x1C, 12, 0, 1000);  // Chan5 B sample maximum
-    createConfigParam("Ch6:B:SampleMax",  'D', 0x1D, 12, 0, 1000);  // Chan6 B sample maximum
-    createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // Chan7 B sample maximum
-    createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // Chan8 B sample maximum
+    createConfigParam("Ch1:A:SampleMax",  'D', 0x10, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:A:SampleMax",  'D', 0x11, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:A:SampleMax",  'D', 0x12, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:A:SampleMax",  'D', 0x13, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:A:SampleMax",  'D', 0x14, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:A:SampleMax",  'D', 0x15, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:A:SampleMax",  'D', 0x16, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:A:SampleMax",  'D', 0x17, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:B:SampleMax",  'D', 0x18, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:B:SampleMax",  'D', 0x19, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:B:SampleMax",  'D', 0x1A, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:B:SampleMax",  'D', 0x1B, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:B:SampleMax",  'D', 0x1C, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:B:SampleMax",  'D', 0x1D, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
 
-    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope [autocorrect]
+    createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // *** UNUSED BY FIRMWARE ***
 
     createConfigParam("Ch1:Enable",       'E', 0x0,  1,  0, 1);     // Chan1 enable                  (0=disable,1=enable)
     createConfigParam("Ch2:Enable",       'E', 0x0,  1,  1, 1);     // Chan2 enable                  (0=disable,1=enable)
@@ -378,19 +377,19 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("TimeVetoLow",      'E', 0x1,  32, 0, 0);     // Timestamp veto low
     createConfigParam("TimeVetoHigh",     'E', 0x3,  32, 0, 0);     // Timestamp veto high
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
-    createConfigParam("MinAdc",           'E', 0x6,  16, 0, 100);   // Minimum ADC
-    createConfigParam("MaxAdc",           'E', 0x7,  16, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",       'E', 0x8,  16, 0, 65530); // Integrator release point
-    createConfigParam("MinDiscrimWidth",  'E', 0x9,  12, 0, 1);     // Minimum discriminator width
+    createConfigParam("MinAdc",           'E', 0x6,  12, 0, 100);   // Minimum ADC
+    createConfigParam("MaxAdc",           'E', 0x7,  12, 0, 1000);  // Maximum ADC
+    createConfigParam("IntRelease",       'E', 0x8,  8,  0, 65530); // Integrator release point
+    createConfigParam("MinDiscrimWidth",  'E', 0x9,  8,  0, 1);     // Minimum discriminator width
     createConfigParam("Sample1",          'E', 0xA,  4,  0, 2);     // Sample 1 point [0:10]
     createConfigParam("Sample2",          'E', 0xB,  6,  0, 14);    // Sample 1 point [2:50]
     createConfigParam("TsyncDelay",       'E', 0xC,  32, 0, 0);     // TSYNC delay
 
-    createConfigParam("LvdsRate",         'F', 0x0,  1, 15, 1);     // LVDS output rate              (0=20Mhz,1=40Mhz)
-    createConfigParam("AutoCorrectMode",  'F', 0x0,  1, 14, 0);     // Auto correction sample mode   (0=TSYNC,1=fake trigger)
-    createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // Edge detect enable            (0=disable,1=enable)
-    createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
-    createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
+    createConfigParam("LvdsRate",         'F', 0x0,  1, 15, 1);     // *** UNUSED BY FIRMWARE ***    (0=20Mhz,1=40Mhz)
+    createConfigParam("AutoCorrectMode",  'F', 0x0,  1, 14, 0);     // *** UNUSED BY FIRMWARE ***    (0=TSYNC,1=fake trigger)
+    createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // *** UNUSED BY FIRMWARE ***    (0=disable,1=enable)
+    createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // *** UNUSED BY FIRMWARE ***    (0=SUM discr,1=A discr,2=B discr,3=all)
+    createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // *** UNUSED BY FIRMWARE ***    (0=disable,1=enable)
     createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
