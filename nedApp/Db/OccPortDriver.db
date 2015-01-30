@@ -196,9 +196,23 @@ record(ai, "$(P)FpgaTemp")
     field(INP,  "@asyn($(PORT))FpgaTemp")
     field(EGU,  "Celsius")
     field(PREC, "2")
-    field(HIHI, "62")
+    field(HIGH, "60")
+    field(HSV,  "MINOR")
+    field(HIHI, "70")
     field(HHSV, "MAJOR")
+    field(HYST, "2")
     field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)FpgaTempAlarm")
+}
+record(calcout, "$(P)FpgaTempAlarm")
+{
+    field(DESC, "Take action on MAJOR alarm")
+    field(INPA, "$(P)RxEn.RVAL NPP")
+    field(INPB, "$(P)FpgaTemp.VAL NPP")
+    field(INPC, "$(P)FpgaTemp.HIHI NPP")
+    field(CALC, "(B>C)?0:A")
+    field(OUT,  "$(P)RxEn PP")
+    field(OOPT, "Transition to Zero")
 }
 record(ai, "$(P)FpgaCoreV")
 {
@@ -226,6 +240,41 @@ record(ai, "$(P)FpgaAuxV")
     field(HHSV, "MAJOR")
     field(SCAN, "I/O Intr")
 }
+record(stringin, "$(P)SfpSerNo")
+{
+    info(archive, "Monitor, 00:01:00")
+    field(DESC, "SFP serial number")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))SfpSerNo")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(stringin, "$(P)SfpPartNo")
+{
+    info(archive, "Monitor, 00:01:00")
+    field(DESC, "SFP part number")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))SfpPartNo")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(mbbi, "$(P)SfpType")
+{
+    info(archive, "Monitor, 00:10:00")
+    field(DESC, "SFP type")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))SfpType")
+    field(ZRVL, "0")
+    field(ZRST, "Unknown")
+    field(ONVL, "1")
+    field(ONST, "Single mode")
+    field(TWVL, "2")
+    field(TWST, "Multi mode")
+    field(UNSV, "MINOR")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)SfpTxPowerLim")
+}
 record(ai, "$(P)SfpTemp")
 {
     info(archive, "Scan, 00:01:00")
@@ -234,8 +283,10 @@ record(ai, "$(P)SfpTemp")
     field(INP,  "@asyn($(PORT))SfpTemp")
     field(EGU,  "Celsius")
     field(PREC, "2")
-    field(HIHI, "50")
-    field(HHSV, "MAJOR")
+    field(HIGH, "60")
+    field(HSV,  "MINOR")
+    field(HIHI, "70")
+    field(HYST, "2")
     field(SCAN, "I/O Intr")
 }
 record(ai, "$(P)SfpRxPower")
@@ -250,6 +301,14 @@ record(ai, "$(P)SfpRxPower")
     field(LLSV, "MAJOR")
     field(SCAN, "I/O Intr")
 }
+record(calcout, "$(P)SfpTxPowerLim")
+{
+    field(DESC, "Adjust SFP TX power low limit")
+    field(INPA, "$(P)SfpType.RVAL NPP")
+    field(CALC, "(A==1)?216:(A==2)?196:0") # Single mode specification 216uW, multi mode 216uW
+    field(OUT,  "$(P)SfpTxPower.LOLO PP")
+    field(OOPT, "On Change")
+}
 record(ai, "$(P)SfpTxPower")
 {
     info(archive, "Scan, 00:10:00")
@@ -257,7 +316,7 @@ record(ai, "$(P)SfpTxPower")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpTxPower")
     field(EGU,  "uW")
-    field(LOLO, "400")
+    field(LOLO, "0") # Configured automatically by SfpTxPowerLim
     field(LLSV, "MAJOR")
     field(SCAN, "I/O Intr")
 }

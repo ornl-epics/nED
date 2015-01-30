@@ -59,6 +59,9 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("ErrCrc",           asynParamInt32,     &ErrCrc);                   // READ - Number of CRC errors detected by OCC
     createParam("ErrLength",        asynParamInt32,     &ErrLength);                // READ - Number of length errors detected by OCC
     createParam("ErrFrame",         asynParamInt32,     &ErrFrame);                 // READ - Number of frame errors detected by OCC
+    createParam("SfpSerNo",         asynParamOctet,     &SfpSerNo);                 // READ - SFP serial number string
+    createParam("SfpPartNo",        asynParamOctet,     &SfpPartNo);                // READ - SFP part number string
+    createParam("SfpType",          asynParamInt32,     &SfpType);                  // READ - SFP type
     createParam("SfpTemp",          asynParamFloat64,   &SfpTemp);                  // READ - SFP temperature in Celsius
     createParam("SfpRxPower",       asynParamFloat64,   &SfpRxPower);               // READ - SFP RX power in uW
     createParam("SfpTxPower",       asynParamFloat64,   &SfpTxPower);               // READ - SFP TX power in uW
@@ -180,6 +183,9 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             setIntegerParam(ErrCrc,         occstatus.err_crc);
             setIntegerParam(ErrLength,      occstatus.err_length);
             setIntegerParam(ErrFrame,       occstatus.err_frame);
+            setStringParam(SfpSerNo,        occstatus.sfp_serial_number);
+            setStringParam(SfpPartNo,       occstatus.sfp_part_number);
+            setIntegerParam(SfpType,        occstatus.sfp_type);
             setDoubleParam(SfpTemp,         occstatus.sfp_temp);
             setDoubleParam(SfpRxPower,      occstatus.sfp_rx_power);
             setDoubleParam(SfpTxPower,      occstatus.sfp_tx_power);
