@@ -22,36 +22,47 @@ EPICS_REGISTER_PLUGIN(AdaraPlugin, 4, "port name", string, "dispatcher port", st
 #define ADARA_PKT_TYPE_MAPPED_EVENT 0x00000300
 #define ADARA_PKT_TYPE_HEARTBEAT    0x00400900
 
+/**
+ * A thread-safe class that returns unique number every time it's queried.
+ *
+ * SMS needs a unique ID for every data source. Each source id needs to be
+ * unique accross all AdaraPlugin instances.
+ */
+class SourceListIndex {
+    public:
+        SourceListIndex() : m_index(0) {}
+        uint32_t get() {
+            m_mutex.lock();
+            uint32_t index = m_index++;
+            m_mutex.unlock();
+            return index;
+        }
+    private:
+        epicsMutex m_mutex;
+        uint32_t m_index;
+};
+
+//!< Make a single instance accross all AdaraPlugin instances.
+static SourceListIndex g_sourceList;
+
 AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, int blocking, int numDsps)
     : BaseSocketPlugin(portName, dispatcherPortName, blocking, NUM_ADARAPLUGIN_PARAMS)
     , m_nTransmitted(0)
     , m_nProcessed(0)
     , m_nReceived(0)
-    , m_nUnexpectedDspDrops(0)
     , m_nPacketsPrevPulse(0)
     , m_heartbeatActive(true)
     , m_dataPktType(ADARA_PKT_TYPE_RAW_EVENT)
 {
     m_lastSentTimestamp = { 0, 0 };
 
-    if (numDsps < 0) {
-        numDsps = 1;
-        LOG_WARN("Raising number of DSPs to 1");
-    } else if (numDsps > ADARA_MAX_NUM_DSPS) {
-        numDsps = ADARA_MAX_NUM_DSPS;
-        LOG_WARN("Maximum number of DSPs is %d", ADARA_MAX_NUM_DSPS);
-    }
-
-    // Partially populate source mapping, only assign SMS source IDs, DSP ids
-    // will be assigned when some data is received. But we need to have source
-    // IDs as early as SMS connects to announce them.
-    for (int i = 0; i < numDsps; i++) {
-        m_dspSources.push_back(DspSource(0x0, i*2, i*2+1));
-    }
+    m_neutronSeq.sourceId = g_sourceList.get();
+    m_metadataSeq.sourceId = g_sourceList.get();
 
     createParam("BadPulsCnt",   asynParamInt32, &BadPulsCnt, 0); // READ - Num dropped packets associated to already completed pulse
-    createParam("BadDspCnt",    asynParamInt32, &BadDspCnt,  0); // READ - Num dropped packets from unexpected DSP
     createParam("PixelsMapped", asynParamInt32, &PixelsMapped, 0); // WRITE - Tells whether data packets are flagged as raw or mapped pixel data
+    createParam("NeutronsEn",   asynParamInt32, &NeutronsEn, 0); // WRITE - Enable forwarding neutron events
+    createParam("MetadataEn",   asynParamInt32, &MetadataEn, 0); // WRITE - Enable forwarding metadata events
     callParamCallbacks();
 }
 
@@ -70,9 +81,13 @@ asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 void AdaraPlugin::processData(const DasPacketList * const packetList)
 {
     uint32_t outpacket[10];
+    int neutronsEn = 0, metadataEn = 0;
 
     if (getDataMode() != DATA_MODE_NORMAL)
         return;
+
+    getIntegerParam(NeutronsEn, &neutronsEn);
+    getIntegerParam(MetadataEn, &metadataEn);
 
     m_nReceived += packetList->size();
 
@@ -119,13 +134,13 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 eventsCount /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
                 epicsTimeStamp currentTs = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
                 epicsTimeStamp prevTs;
-                SourceSequence *seq = findSourceSequence(packet->source, packet->isNeutronData());
+                SourceSequence *seq = (packet->isNeutronData() ? &m_neutronSeq : &m_metadataSeq);
 
-                // Account and drop packets from unexpected DSP
-                if (!seq) {
-                    m_nUnexpectedDspDrops++;
-                    LOG_ERROR("Unexpected number of DSPs detected, dropping packet");
-                    continue;
+                // Skip if disabled
+                if (packet->isNeutronData()) {
+                    if (neutronsEn == 0) continue;
+                } else {
+                    if (metadataEn == 0) continue;
                 }
 
                 prevTs.secPastEpoch = seq->rtdl.timestamp_sec;
@@ -188,7 +203,6 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
     setIntegerParam(ProcCount,      m_nProcessed);
     setIntegerParam(RxCount,        m_nReceived);
     setIntegerParam(BadPulsCnt,     m_nPacketsPrevPulse);
-    setIntegerParam(BadDspCnt,      m_nUnexpectedDspDrops);
     callParamCallbacks();
 }
 
@@ -213,39 +227,4 @@ float AdaraPlugin::checkClient()
         (void)send(outpacket, sizeof(outpacket));
     }
     return BaseSocketPlugin::checkClient();
-}
-
-void AdaraPlugin::clientConnected()
-{
-    uint32_t outpacket[4 + 2*ADARA_MAX_NUM_DSPS];
-    epicsTimeStamp now;
-    epicsTimeGetCurrent(&now);
-    int idx = 0;
-
-    outpacket[idx++] = sizeof(uint32_t) * m_dspSources.size() * 2;
-    outpacket[idx++] = ADARA_PKT_TYPE_SOURCE_LIST;
-    outpacket[idx++] = now.secPastEpoch;
-    outpacket[idx++] = now.nsec;
-    for (auto it = m_dspSources.begin(); it != m_dspSources.end(); it++) {
-        outpacket[idx++] = it->neutronSeq.sourceId;
-        outpacket[idx++] = it->metadataSeq.sourceId;
-    }
-
-// TODO: SMS can survive without the list, but it's sensitive about inactive sources
-//       Temporarily disable sending list until more controlled way is introduced.
-//       According to Jeeem, SMS han survive without it.
-//    (void)send(outpacket, sizeof(uint32_t)*idx);
-}
-
-AdaraPlugin::SourceSequence* AdaraPlugin::findSourceSequence(uint32_t dspId, bool neutron)
-{
-    for (auto it = m_dspSources.begin(); it != m_dspSources.end(); it++) {
-        if (it->dspId == 0x0) {
-            it->dspId = dspId;
-        }
-        if (it->dspId == dspId) {
-            return (neutron ? &it->neutronSeq : &it->metadataSeq);
-        }
-    }
-    return 0;
 }

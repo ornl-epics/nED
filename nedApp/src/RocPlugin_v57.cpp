@@ -318,7 +318,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch8:B:Baseline",   'C', 0xF,  12, 0, 100);   // Chan8 B baseline value
 
     // There's an unused part of C section in v5.4 C:0x10 - C:0x1F
-    createConfigParam("ConfigFillerC",    'C', 0x1F, 16, 0, 0);     // Config filler
+    createConfigParam("ConfigFiller",     'C', 0x1F, 16, 0, 0);     // Config filler
 
     createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
     createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***

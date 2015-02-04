@@ -37,16 +37,26 @@ record(longin, "$(P)BadPulsCnt")
    field(PINI,  "YES")
    field(HIGH,  "1")
    field(HSV,   "MAJOR")
+   field(FLNK,  "$(P)BadPulsRunCnt")
 }
-record(longin, "$(P)BadDspCnt")
+# When processed it retrieves current value of old packets
+# and schedules calculation of difference record. When scheduled before
+# each run start, BadPulsRunCnt keeps counter per run.
+record(longin, "$(P)PreStart")
 {
-   field(DESC,  "Unexpected DSP drop packets")
-   field(DTYP,  "asynInt32")
-   field(INP,   "@asyn($(PORT))BadDspCnt")
-   field(SCAN,  "I/O Intr")
+   field(DESC,  "Last completed run dropped packets")
+   field(INP,   "$(P)BadPulsCnt NPP")
+   field(FLNK,  "$(P)BadPulsRunCnt")
+   field(VAL,   "0")
    field(PINI,  "YES")
-   field(HIGH,  "1")
-   field(HSV,   "MAJOR")
+}
+record(calc, "$(P)BadPulsRunCnt")
+{
+   field(DESC,  "Prev pulse dropped packets per run")
+   field(INPA,  "$(P)LastBadPulsCnt NPP")
+   field(INPB,  "$(P)BadPulsCnt NPP")
+   field(CALC,  "B-A")
+   field(PINI,  "YES")
 }
 record(scalcout, "$(P)StatusCalc")
 {
@@ -99,5 +109,25 @@ record(bo, "$(P)PixelsMapped")
     field(OUT,  "@asyn($(PORT))PixelsMapped")
     field(ZNAM, "Raw pixels")
     field(ONAM, "Mapped pixels")
+    field(PINI, "YES")
+}
+record(bo, "$(P)NeutronsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))NeutronsEn")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(PINI, "YES")
+}
+record(bo, "$(P)MetadataEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MetadataEn")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
     field(PINI, "YES")
 }
