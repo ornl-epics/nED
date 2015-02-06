@@ -13,6 +13,7 @@
 #include "FemPlugin.h"
 #include "Log.h"
 #include "RocPlugin.h"
+#include "AdcRocPlugin.h"
 
 #include <cstring>
 #include <sstream>
@@ -111,6 +112,9 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                 case DasPacket::MOD_TYPE_ROC:
                     RocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
+                case DasPacket::MOD_TYPE_ADCROC:
+                    AdcRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
                 default:
                     break;
                 }
@@ -158,6 +162,7 @@ uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_HROC:      type = "HROC";      break;
             case DasPacket::MOD_TYPE_IROC:      type = "IROC";      break;
             case DasPacket::MOD_TYPE_ROC:       type = "ROC";       break;
+            case DasPacket::MOD_TYPE_ADCROC:    type = "ADCROC";    break;
             case DasPacket::MOD_TYPE_SANSROC:   type = "SANSROC";   break;
             default:                            type = "unknown";
         }
@@ -204,6 +209,7 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_DSP:       plugin = "DspPlugin";       type = "dsp";     break;
             case DasPacket::MOD_TYPE_FEM:       plugin = "FemPlugin";       type = "fem";     break;
             case DasPacket::MOD_TYPE_ROC:       plugin = "RocPlugin";       type = "roc";     break;
+            case DasPacket::MOD_TYPE_ADCROC:    plugin = "AdcRocPlugin";    type = "adcroc";  break;
 /*
  * These are not yet supported
             case DasPacket::MOD_TYPE_AROC:      plugin = "ArocPlugin";      type = "aroc";    break;
