@@ -14,6 +14,7 @@
 #include "StateMachine.h"
 #include "Timer.h"
 
+#include <fstream>
 #include <map>
 
 #define SM_ACTION_CMD(a)        (a)
@@ -100,6 +101,17 @@ class BaseModulePlugin : public BasePlugin {
         };
 
         /**
+         * Valid remote upgrade status values.
+         */
+        enum RemoteUpgradeStatus {
+            UPGRADE_NOT_STARTED     = 0, //!< Remote upgrade not yet started
+            UPGRADE_IN_PROGRESS     = 1, //!< Remote upgrade currently in progress
+            UPGRADE_DONE            = 2, //!< All data sent and acknowledged by remote party
+            UPGRADE_CANCELED        = 3, //!< Canceled due to packet timeout or nack
+            UPGRADE_INIT_FAILED     = 4, //!< Failed to initialize
+        };
+
+        /**
          * Structure describing the status parameters obtained from modules.
          */
         struct StatusParamDesc {
@@ -167,6 +179,13 @@ class BaseModulePlugin : public BasePlugin {
         std::map<char, uint32_t> m_configSectionSizes;  //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
         std::map<char, uint32_t> m_configSectionOffsets;//!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
         std::shared_ptr<Timer> m_timeoutTimer;          //!< Currently running timer for response timeout handling
+        struct {
+            bool inProgress;        //!< Remote upgrade currently in progress
+            std::ifstream file;     //!< Firmware image file path, stays opened while in progress
+            uint32_t *buffer;       //!< Buffer to read data into
+            int bufferSize;         //!< Buffer size in bytes, (re)allocated when inProgress transitions to true
+            int position;           //!< Current file position, used as progress
+        } m_remoteUpgrade;          //!< Remote upgrade context
 
     public: // functions
 
@@ -438,6 +457,32 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspStop(const DasPacket *packet);
 
         /**
+         * Send part of the new firmware image as one packet.
+         *
+         * The firmware image is split into packets based on UpgradePktSize
+         * parameter. On first packet, the remote upgrade sequence is
+         * initialized.
+         * Updates the UpgradeStatus parameter for every relevant change.
+         *
+         * @image html Remote_Upgrade_SM.png
+         * @image latex Remote_Upgrade_SM.png width=6in
+         * @return DasPacket::CMD_PROGRAM or 0 when no packet was sent for some reason.
+         */
+        virtual DasPacket::CommandType reqProgram();
+
+        /**
+         * Default handler for PROGRAM response.
+         *
+         * Verifies that the remote module accepted partial firmware packet.
+         * On last packet it the remote upgrade sequence is stopped.
+         * Updates the UpgradeStatus parameter for every relevant change.
+         *
+         * @retval true Remote module acknowledged reception.
+         * @retval false Timeout has occurred or remote module refused packet.
+         */
+        virtual bool rspProgram(const DasPacket *packet);
+
+        /**
          * Create and register single integer status parameter.
          *
          * Status parameter is an individual status entity exported by module.
@@ -526,6 +571,42 @@ class BaseModulePlugin : public BasePlugin {
          */
         bool cancelTimeoutCallback();
 
+        /**
+         * Initialize remote upgrade sequence.
+         *
+         * Opens the file and determines its length. UpgradeSize and UpgradeLen
+         * PVs are updated. Next buffer for each packet is allocated based on
+         * user provided value, rounded to nearest power of 2. Finally the
+         * upgrade in progress flag is set, which prevents starting second
+         * upgrade sequence.
+         *
+         * @return true when initialized, false on any error.
+         */
+        bool remoteUpgradeStart();
+
+        /**
+         * Read some data from file and send it to remote party.
+         *
+         * Read data into previously allocated buffer and ship it.
+         *
+         * @return false when no more data to send.
+         */
+        bool remoteUpgradeSend();
+
+        /**
+         * Test for more data to send.
+         *
+         * @return true when some data available, false otherwise.
+         */
+        bool remoteUpgradeDone();
+
+        /**
+         * Stop current remote upgrade sequence.
+         *
+         * Must be called before initiating new sequence.
+         */
+        void remoteUpgradeStop();
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.
@@ -547,7 +628,12 @@ class BaseModulePlugin : public BasePlugin {
         int Supported;      //!< Flag whether module is supported
         int Verified;       //!< Hardware id, version and type all verified
         int CfgSection;     //!< Selected configuration section to be written
-        #define LAST_BASEMODULEPLUGIN_PARAM CfgSection
+        int UpgradeFile;    //!< New firmware file to be programed
+        int UpgradePktSize; //!< Max payload size for split transfer
+        int UpgradeStatus;  //!< Remote upgrade status
+        int UpgradeSize;    //!< Total firmware size in bytes
+        int UpgradePos;     //!< Bytes already sent to remote party
+        #define LAST_BASEMODULEPLUGIN_PARAM UpgradePos
 };
 
 #endif // BASE_MODULE_PLUGIN_H

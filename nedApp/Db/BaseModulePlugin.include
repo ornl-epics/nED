@@ -64,6 +64,8 @@ record(mbbo, "$(P)CmdReq")
     field(EIST, "Read counters")
     field(NIVL, "37")
     field(NIST, "Reset counters")
+    field(TEVL, "111")
+    field(TEST, "Program")
 }
 record(stringin, "$(P)HwDate")
 {
@@ -233,3 +235,59 @@ record(mbbo, "$(P)CfgSection")
     field(FFVL, "70")
     field(FFST, "Section F")
 }
+record(mbbi, "$(P)UpgradeStatus")
+{
+    field(DESC, "Remote upgrade status")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UpgradeStatus")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "Not started")
+    field(ONVL, "1")
+    field(ONST, "In progress")
+    field(TWVL, "2")
+    field(TWST, "Complete")
+    field(THVL, "3")
+    field(THST, "Canceled")
+    field(FRVL, "4")
+    field(FRST, "Init failed")
+}
+record(longin, "$(P)UpgradeSize")
+{
+    field(DESC, "Total firmware size in bytes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UpgradeSize")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(EGU,  "B")
+}
+record(longin, "$(P)UpgradePos")
+{
+    field(DESC, "Bytes sent to remote party")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UpgradePos")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(EGU,  "B")
+}
+record(longout, "$(P)UpgradePktSize")
+{
+    field(DESC, "Number of bytes per packet")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))UpgradePktSize")
+    field(EGU,  "B")
+    field(ASG,  "BEAMLINE")
+}
+record(waveform, "$(P)UpgradeFile")
+{
+    field(DESC, "New firmware file to be programed")
+    field(PINI, "YES")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT))UpgradeFile")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(ASG,  "BEAMLINE")
+}
+
