@@ -26,6 +26,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     , m_statusPayloadLength(0)
     , m_countersPayloadLength(0)
     , m_configPayloadLength(0)
+    , m_upgradePayloadLength(0)
     , m_verifySM(ST_TYPE_VERSION_INIT)
     , m_waitingResponse(static_cast<DasPacket::CommandType>(0))
     , m_behindDsp(behindDsp)
@@ -111,8 +112,8 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         case DasPacket::CMD_STOP:
             m_waitingResponse = reqStop();
             break;
-        case DasPacket::CMD_PROGRAM:
-            m_waitingResponse = reqProgram();
+        case DasPacket::CMD_UPGRADE:
+            m_waitingResponse = reqUpgrade();
             break;
         default:
             setIntegerParam(CmdRsp, LAST_CMD_ERROR);
@@ -142,9 +143,16 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         callParamCallbacks();
         return asynSuccess;
     }
+    if (pasynUser->reason == UpgradePktSize) {
+        // Enforce 4 bytes aligned transfers
+        value = ALIGN_UP(value, 4);
+        setIntegerParam(UpgradePktSize, value);
+        callParamCallbacks();
+        return BasePlugin::writeInt32(pasynUser, value);
+    }
 
     // Not a command, it's probably the new configuration option
-    std::map<int, struct ConfigParamDesc>::iterator it = m_configParams.find(pasynUser->reason);
+    std::map<int, struct ParamDesc>::iterator it = m_configParams.find(pasynUser->reason);
     if (it != m_configParams.end()) {
         uint32_t mask = (0x1ULL << it->second.width) - 1;
         if (static_cast<int>(value & mask) != value) {
@@ -159,6 +167,20 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
     // Just issue default handler to see if it can handle it
     return BasePlugin::writeInt32(pasynUser, value);
+}
+
+asynStatus BaseModulePlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+{
+    if (pasynUser->reason == UpgradeFile) {
+        uint32_t length;
+        if (fileSize(std::string(value, nChars), length) == false)
+            return asynError;
+
+        *nActual = nChars;
+        setIntegerParam(UpgradeSize, length);
+        callParamCallbacks();
+    }
+    return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
 void BaseModulePlugin::sendToDispatcher(DasPacket::CommandType command, uint32_t *payload, uint32_t length)
@@ -260,6 +282,9 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     case DasPacket::CMD_STOP:
         ack = rspStop(packet);
         break;
+    case DasPacket::CMD_UPGRADE:
+        ack = rspUpgrade(packet);
+        break;
     default:
         LOG_WARN("Received unhandled response 0x%02X", command);
         return false;
@@ -320,22 +345,7 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet)
         return false;
     }
 
-    const uint32_t *payload = packet->getPayload();
-    for (auto it=m_statusParams.begin(); it != m_statusParams.end(); it++) {
-        int offset = it->second.offset;
-        int shift = it->second.shift;
-        if (m_behindDsp) {
-            shift += (offset % 2 == 0 ? 0 : 16);
-            offset /= 2;
-        }
-        int value = payload[offset] >> shift;
-        if ((shift + it->second.width) > 32) {
-            value |= payload[offset + 1] << (32 - shift);
-        }
-        value &= (0x1ULL << it->second.width) - 1;
-        setIntegerParam(it->first, value);
-    }
-    callParamCallbacks();
+    extractParams(packet, m_statusParams);
     return true;
 }
 
@@ -374,22 +384,7 @@ bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
         return false;
     }
 
-    const uint32_t *payload = packet->getPayload();
-    for (std::map<int, StatusParamDesc>::iterator it=m_counterParams.begin(); it != m_counterParams.end(); it++) {
-        int offset = it->second.offset;
-        int shift = it->second.shift;
-        if (m_behindDsp) {
-            shift += (offset % 2 == 0 ? 0 : 16);
-            offset /= 2;
-        }
-        int value = payload[offset] >> shift;
-        if ((shift + it->second.width) > 32) {
-            value |= payload[offset + 1] << (32 - shift);
-        }
-        value &= (0x1ULL << it->second.width) - 1;
-        setIntegerParam(it->first, value);
-    }
-    callParamCallbacks();
+    extractParams(packet, m_counterParams);
     return true;
 }
 
@@ -416,22 +411,7 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet)
         return false;
     }
 
-    const uint32_t *payload = packet->getPayload();
-    for (auto it=m_configParams.begin(); it != m_configParams.end(); it++) {
-        int offset = m_configSectionOffsets[it->second.section] + it->second.offset;
-        int shift = it->second.shift;
-        if (m_behindDsp) {
-            shift += (offset % 2 == 0 ? 0 : 16);
-            offset /= 2;
-        }
-        int value = payload[offset] >> shift;
-        if ((shift + it->second.width) > 32) {
-            value |= payload[offset + 1] << (32 - shift);
-        }
-        value &= (0x1ULL << it->second.width) - 1;
-        setIntegerParam(it->first, value);
-    }
-    callParamCallbacks();
+    extractParams(packet, m_configParams, m_configSectionOffsets);
     return true;
 }
 
@@ -566,7 +546,7 @@ bool BaseModulePlugin::rspStop(const DasPacket *packet)
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
-DasPacket::CommandType BaseModulePlugin::reqProgram()
+DasPacket::CommandType BaseModulePlugin::reqUpgrade()
 {
     if (m_remoteUpgrade.inProgress == false) {
         if (remoteUpgradeStart() == false) {
@@ -584,32 +564,38 @@ DasPacket::CommandType BaseModulePlugin::reqProgram()
         return static_cast<DasPacket::CommandType>(0);
     }
 
-    return DasPacket::CMD_PROGRAM;
+    return DasPacket::CMD_UPGRADE;
 }
 
-bool BaseModulePlugin::rspProgram(const DasPacket *packet)
+bool BaseModulePlugin::rspUpgrade(const DasPacket *packet)
 {
     if (!cancelTimeoutCallback()) {
-        LOG_WARN("Received CMD_STOP response after timeout");
+        LOG_WARN("Received CMD_UPGRADE response after timeout");
         return false;
     }
-    if (packet->cmdinfo.command == DasPacket::RSP_NACK) {
+    if (packet->cmdinfo.command != DasPacket::RSP_ACK) {
         remoteUpgradeStop();
         setIntegerParam(UpgradeStatus, UPGRADE_CANCELED);
+        setIntegerParam(UpgradePos, 0);
         callParamCallbacks();
+        return false;
     }
-    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+
+    extractParams(packet, m_upgradeParams);
+    return true;
 }
 
 void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
     int index;
     if (createParam(name, asynParamInt32, &index) != asynSuccess) {
-        LOG_ERROR("Module status parameter '%s' cannot be created (already exist?)", name);
+        LOG_ERROR("Status parameter '%s' cannot be created (already exist?)", name);
         return;
     }
 
-    StatusParamDesc desc;
+    ParamDesc desc;
+    desc.section = 0;
+    desc.initVal = 0;
     desc.offset = offset;
     desc.shift = shift;
     desc.width = nBits;
@@ -626,11 +612,13 @@ void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uin
 {
     int index;
     if (createParam(name, asynParamInt32, &index) != asynSuccess) {
-        LOG_ERROR("Module status counter parameter '%s' cannot be created (already exist?)", name);
+        LOG_ERROR("Counter parameter '%s' cannot be created (already exist?)", name);
         return;
     }
 
-    StatusParamDesc desc;
+    ParamDesc desc;
+    desc.section = 0;
+    desc.initVal = 0;
     desc.offset = offset;
     desc.shift = shift;
     desc.width = nBits;
@@ -647,12 +635,12 @@ void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_
 {
     int index;
     if (createParam(name, asynParamInt32, &index) != asynSuccess) {
-        LOG_ERROR("Module config parameter '%s' cannot be created (already exist?)", name);
+        LOG_ERROR("Config parameter '%s' cannot be created (already exist?)", name);
         return;
     }
     setIntegerParam(index, value);
 
-    ConfigParamDesc desc;
+    ParamDesc desc;
     desc.section = section;
     desc.offset  = offset;
     desc.shift   = shift;
@@ -666,6 +654,30 @@ void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_
     // m_configPayloadLength is calculated *after* we create all sections
     m_configSectionSizes[section] = std::max(m_configSectionSizes[section], length);
 }
+
+void BaseModulePlugin::linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
+{
+    int index;
+    if (findParam(name, &index) != asynSuccess) {
+        LOG_ERROR("Can not find existing parameter '%s' to be linked", name);
+        return;
+    }
+
+    ParamDesc desc;
+    desc.section = 0;
+    desc.initVal = 0;
+    desc.offset = offset;
+    desc.shift = shift;
+    desc.width = nBits;
+    m_upgradeParams[index] = desc;
+
+    uint32_t length = offset + 1;
+    if (m_behindDsp && nBits > 16)
+        length++;
+    uint32_t wordsize = (m_behindDsp ? 2 : 4);
+    m_upgradePayloadLength = std::max(m_upgradePayloadLength, length*wordsize);
+}
+
 
 uint32_t BaseModulePlugin::ip2addr(const std::string &text)
 {
@@ -698,9 +710,10 @@ float BaseModulePlugin::noResponseCleanup(DasPacket::CommandType command)
         m_waitingResponse = static_cast<DasPacket::CommandType>(0);
         setIntegerParam(CmdRsp, LAST_CMD_TIMEOUT);
 
-        if (command == DasPacket::CMD_PROGRAM) {
+        if (command == DasPacket::CMD_UPGRADE) {
             remoteUpgradeStop();
             setIntegerParam(UpgradeStatus, UPGRADE_CANCELED);
+            setIntegerParam(UpgradePos, 0);
         }
 
         callParamCallbacks();
@@ -778,16 +791,7 @@ bool BaseModulePlugin::remoteUpgradeStart() {
         m_remoteUpgrade.file.close();
         return false;
     }
-
-    // Round it to closest power of 2
-    chunkSize--;
-    chunkSize |= chunkSize >> 1;
-    chunkSize |= chunkSize >> 2;
-    chunkSize |= chunkSize >> 4;
-    chunkSize |= chunkSize >> 8;
-    chunkSize |= chunkSize >> 16;
-    chunkSize++;
-    chunkSize += (chunkSize == 0);
+    chunkSize = ALIGN_UP(chunkSize, 4);
 
     // Allocate buffer if required
     if (chunkSize > m_remoteUpgrade.bufferSize) {
@@ -804,6 +808,7 @@ bool BaseModulePlugin::remoteUpgradeStart() {
     m_remoteUpgrade.position = 0;
     setIntegerParam(UpgradeSize, length);
     setIntegerParam(UpgradePos, m_remoteUpgrade.position);
+    setIntegerParam(UpgradePktSize, chunkSize);
     callParamCallbacks();
 
     m_remoteUpgrade.inProgress = true;
@@ -825,7 +830,7 @@ bool BaseModulePlugin::remoteUpgradeSend()
     setIntegerParam(UpgradePos, m_remoteUpgrade.position);
     callParamCallbacks();
 
-    sendToDispatcher(DasPacket::CMD_PROGRAM, m_remoteUpgrade.buffer, nRead);
+    sendToDispatcher(DasPacket::CMD_UPGRADE, m_remoteUpgrade.buffer, nRead);
     return true;
 }
 
@@ -840,3 +845,30 @@ void BaseModulePlugin::remoteUpgradeStop()
         m_remoteUpgrade.file.close();
     m_remoteUpgrade.inProgress = false;
 }
+
+void BaseModulePlugin::extractParams(const DasPacket *packet, const std::map<int, ParamDesc> &table, const std::map<char, uint32_t> &sectOffsets)
+{
+    const uint32_t *payload = packet->getPayload();
+    for (auto it=table.begin(); it != table.end(); it++) {
+        int shift = it->second.shift;
+        int offset = it->second.offset;
+        if (it->second.section != 0) {
+            auto jt = sectOffsets.find(it->second.section);
+            if (jt != sectOffsets.end()) {
+                offset += jt->second;
+            }
+        }
+        if (m_behindDsp) {
+            shift += (offset % 2 == 0 ? 0 : 16);
+            offset /= 2;
+        }
+        int value = payload[offset] >> shift;
+        if ((shift + it->second.width) > 32) {
+            value |= payload[offset + 1] << (32 - shift);
+        }
+        value &= (0x1ULL << it->second.width) - 1;
+        setIntegerParam(it->first, value);
+    }
+    callParamCallbacks();
+};
+

@@ -15,7 +15,7 @@
 
 EPICS_REGISTER_PLUGIN(FemPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 290;
+const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 290; // MAX(`for file in FemPlugin_v3*; do grep create $file | grep Param | wc -l; done`)
 
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
@@ -52,6 +52,12 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         createStatusParams_v36();
         createConfigParams_v36();
         createCounterParams_v36();
+    } else if (m_version == "v37") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v37();
+        createConfigParams_v37();
+        createCounterParams_v37();
+        createUpgradeParams_v37();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);

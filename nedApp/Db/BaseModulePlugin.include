@@ -65,7 +65,7 @@ record(mbbo, "$(P)CmdReq")
     field(NIVL, "37")
     field(NIST, "Reset counters")
     field(TEVL, "111")
-    field(TEST, "Program")
+    field(TEST, "Upgrade")
 }
 record(stringin, "$(P)HwDate")
 {
@@ -279,6 +279,15 @@ record(longout, "$(P)UpgradePktSize")
     field(OUT,  "@asyn($(PORT))UpgradePktSize")
     field(EGU,  "B")
     field(ASG,  "BEAMLINE")
+}
+record(longin, "$(P)UpgradePktSize_RBV")
+{
+    field(DESC, "RB Number of bytes per packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UpgradePktSize")
+    field(EGU,  "B")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
 }
 record(waveform, "$(P)UpgradeFile")
 {

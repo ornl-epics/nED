@@ -114,21 +114,12 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Structure describing the status parameters obtained from modules.
          */
-        struct StatusParamDesc {
+        struct ParamDesc {
             uint32_t offset;        //!< An 4-byte offset within the payload
             uint32_t shift;         //!< Position of the field bits within 32 bits dword at given offset
             uint32_t width;         //!< Number of bits used for the value
-        };
-
-        /**
-         * Structure describing the config parameters obtained from modules.
-         */
-        struct ConfigParamDesc {
-            char section;           //!< Section name
-            uint32_t offset;        //!< An 4-byte offset within the section
-            uint32_t shift;         //!< Position of the field bits within 32 bits dword at given offset
-            uint32_t width;         //!< Number of bits used for the value
-            int initVal;            //!< Initial value after object is created or configuration reset is being requested
+            char section;           //!< Section name (only for configuration params)
+            int initVal;            //!< Initial value after object is created or configuration reset is being requested (config only)
         };
 
         struct Version {
@@ -168,9 +159,11 @@ class BaseModulePlugin : public BasePlugin {
         uint32_t m_statusPayloadLength;                 //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
         uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
         uint32_t m_configPayloadLength;                 //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParam()
-        std::map<int, StatusParamDesc> m_statusParams;  //!< Map of exported status parameters
-        std::map<int, StatusParamDesc> m_counterParams; //!< Map of exported status counter parameters
-        std::map<int, ConfigParamDesc> m_configParams;  //!< Map of exported config parameters
+        uint32_t m_upgradePayloadLength;                //!< Size in bytes of the PROGRAM response payload, calculated dynamically by linkUpgradeParam()
+        std::map<int, ParamDesc> m_statusParams;        //!< Map of exported status parameters
+        std::map<int, ParamDesc> m_counterParams;       //!< Map of exported status counter parameters
+        std::map<int, ParamDesc> m_configParams;        //!< Map of exported config parameters
+        std::map<int, ParamDesc> m_upgradeParams;       //!< Map of exported remote upgrade parameters
         StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
 
@@ -226,6 +219,11 @@ class BaseModulePlugin : public BasePlugin {
          * @return asynSuccess on success, asynError otherwise
          */
         virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
+         * Handle writing strings.
+         */
+        virtual asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
 
         /**
          * Create a packet and send it through dispatcher to the OCC board
@@ -466,12 +464,12 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @image html Remote_Upgrade_SM.png
          * @image latex Remote_Upgrade_SM.png width=6in
-         * @return DasPacket::CMD_PROGRAM or 0 when no packet was sent for some reason.
+         * @return DasPacket::CMD_UPGRADE or 0 when no packet was sent for some reason.
          */
-        virtual DasPacket::CommandType reqProgram();
+        virtual DasPacket::CommandType reqUpgrade();
 
         /**
-         * Default handler for PROGRAM response.
+         * Default handler for CMD_UPGRADE response.
          *
          * Verifies that the remote module accepted partial firmware packet.
          * On last packet it the remote upgrade sequence is stopped.
@@ -480,7 +478,7 @@ class BaseModulePlugin : public BasePlugin {
          * @retval true Remote module acknowledged reception.
          * @retval false Timeout has occurred or remote module refused packet.
          */
-        virtual bool rspProgram(const DasPacket *packet);
+        virtual bool rspUpgrade(const DasPacket *packet);
 
         /**
          * Create and register single integer status parameter.
@@ -514,6 +512,21 @@ class BaseModulePlugin : public BasePlugin {
          * Create and register single integer config parameter.
          */
         void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
+
+        /**
+         * Link existing parameter to upgrade parameters table.
+         *
+         * Useful when two hardware registers in two different response types
+         * have the same meaning and need to be merged into one plugin parameter.
+         * When either of the responses is received, only one parameter gets
+         * updated.
+         *
+         * @param[in] name must be any previously created parameter.
+         * @param[in] offset word/dword offset within the payload.
+         * @param[in] nBits Width of the parameter in number of bits.
+         * @param[in] shift Starting bit position within the word/dword.
+         */
+        void linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
 
         /**
          * Convert IP or hex string into 4 byte hardware address.
@@ -612,6 +625,23 @@ class BaseModulePlugin : public BasePlugin {
          * Trigger calculating the configuration parameter offsets.
          */
         void recalculateConfigParams();
+
+        /**
+         * Method parses packet payload and extracts parameter values.
+         *
+         * This generic method works for status, counter and configuration
+         * parameters. For every parameter in the table, it finds the matching
+         * value in the packet payload and assign it as new parameter value.
+         * When section offsets table is given, the parameter offset is
+         * considered relative to the section it belongs.
+         *
+         * @param[in] packet to be parsed
+         * @param[in] table of paramaters to be matched
+         * @param[in] sectOffsets is a able of section offsets.
+         */
+        void extractParams(const DasPacket *packet,
+                           const std::map<int, ParamDesc> &table,
+                           const std::map<char, uint32_t> &sectOffsets=std::map<char, uint32_t>());
 
     protected:
         #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq

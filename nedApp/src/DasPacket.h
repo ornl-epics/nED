@@ -130,6 +130,13 @@ struct DasPacket
             BAD_PACKET                  = 0x42, //!< Bad packet
             CMD_HV_SEND                 = 0x50, //!< Send data through RS232 port, HV connected to ROC
             CMD_HV_RECV                 = 0x51, //!< Receive data from RS232 port, HV connected to ROC
+            CMD_EEPROM_ERASE            = 0x60, //!< Erase device EEPROM
+            CMD_EEPROM_LOAD             = 0x61, //!< Load data from EEPROM (?)
+            CMD_EEPROM_READ             = 0x62, //!< Read contents of EEPROM and return (?)
+            CMD_EEPROM_WRITE            = 0x63, //!< Write contents of EEPROM (?)
+            CMD_EEPROM_READ_WORD        = 0x64, //!< Read single word from EEPROM
+            CMD_EEPROM_WRITE_WORD       = 0x65, //!< Write single word to EEPROM
+            CMD_UPGRADE                 = 0x6F, //!< Send chunk of new firmware data
             CMD_DISCOVER                = 0x80, //!< Discover modules
             CMD_START                   = 0x82, //!< Start acquisition
             CMD_STOP                    = 0x83, //!< Stop acquisition
