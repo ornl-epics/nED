@@ -58,6 +58,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("UpgradeStatus",asynParamInt32, &UpgradeStatus, UPGRADE_NOT_STARTED); // READ -Remote upgrade status
     createParam("UpgradeSize",  asynParamInt32, &UpgradeSize, 0);           // READ - Total firmware size in bytes
     createParam("UpgradePos",   asynParamInt32, &UpgradePos, 0);            // READ - Bytes already sent to remote porty
+    createParam("UpgradeAbort", asynParamInt32, &UpgradeAbort, 0);          // WRITE - Abort current upgrade sequence
 
     std::string hardwareIp = addr2ip(m_hardwareId);
     setStringParam(HwId, hardwareIp.c_str());
@@ -149,6 +150,15 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         setIntegerParam(UpgradePktSize, value);
         callParamCallbacks();
         return BasePlugin::writeInt32(pasynUser, value);
+    }
+    if (pasynUser->reason == UpgradeAbort) {
+        if (remoteUpgradeInProgress() == true) {
+            remoteUpgradeStop();
+            setIntegerParam(UpgradeStatus, UPGRADE_USER_ABORT);
+            setIntegerParam(UpgradePos, 0);
+            callParamCallbacks();
+        }
+        return asynSuccess;
     }
 
     // Not a command, it's probably the new configuration option
@@ -548,7 +558,7 @@ bool BaseModulePlugin::rspStop(const DasPacket *packet)
 
 DasPacket::CommandType BaseModulePlugin::reqUpgrade()
 {
-    if (m_remoteUpgrade.inProgress == false) {
+    if (remoteUpgradeInProgress() == false) {
         if (remoteUpgradeStart() == false) {
             setIntegerParam(UpgradeStatus, UPGRADE_INIT_FAILED);
             callParamCallbacks();
@@ -837,6 +847,11 @@ bool BaseModulePlugin::remoteUpgradeSend()
 bool BaseModulePlugin::remoteUpgradeDone()
 {
     return m_remoteUpgrade.file.eof();
+}
+
+bool BaseModulePlugin::remoteUpgradeInProgress()
+{
+    return m_remoteUpgrade.inProgress;
 }
 
 void BaseModulePlugin::remoteUpgradeStop()

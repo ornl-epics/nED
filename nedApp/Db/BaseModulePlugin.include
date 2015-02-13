@@ -253,6 +253,8 @@ record(mbbi, "$(P)UpgradeStatus")
     field(THST, "Canceled")
     field(FRVL, "4")
     field(FRST, "Init failed")
+    field(FVVL, "5")
+    field(FVST, "User aborted")
 }
 record(longin, "$(P)UpgradeSize")
 {
@@ -299,4 +301,12 @@ record(waveform, "$(P)UpgradeFile")
     field(NELM, "1024")
     field(ASG,  "BEAMLINE")
 }
-
+record(bo, "$(P)UpgradeAbort")
+{
+    field(DESC, "Abort current upgrade sequence")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))UpgradeAbort")
+    field(ASG,  "BEAMLINE")
+    field(ZNAM, "No action")
+    field(ONAM, "Abort")
+}

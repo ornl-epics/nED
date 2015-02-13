@@ -109,6 +109,7 @@ class BaseModulePlugin : public BasePlugin {
             UPGRADE_DONE            = 2, //!< All data sent and acknowledged by remote party
             UPGRADE_CANCELED        = 3, //!< Canceled due to packet timeout or nack
             UPGRADE_INIT_FAILED     = 4, //!< Failed to initialize
+            UPGRADE_USER_ABORT      = 5, //!< Aborted by user
         };
 
         /**
@@ -620,6 +621,14 @@ class BaseModulePlugin : public BasePlugin {
          */
         void remoteUpgradeStop();
 
+        /**
+         * Check whether remote upgrade sequence is active.
+         *
+         * @retval true active
+         * @retval false not active
+         */
+        bool remoteUpgradeInProgress();
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.
@@ -663,7 +672,8 @@ class BaseModulePlugin : public BasePlugin {
         int UpgradeStatus;  //!< Remote upgrade status
         int UpgradeSize;    //!< Total firmware size in bytes
         int UpgradePos;     //!< Bytes already sent to remote party
-        #define LAST_BASEMODULEPLUGIN_PARAM UpgradePos
+        int UpgradeAbort;   //!< Abort current upgrade sequence
+        #define LAST_BASEMODULEPLUGIN_PARAM UpgradeAbort
 };
 
 #endif // BASE_MODULE_PLUGIN_H
