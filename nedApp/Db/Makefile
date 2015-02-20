@@ -41,6 +41,7 @@ DB += RocPlugin_v52.db
 DB += RocPlugin_v54.db
 DB += RocPlugin_v56.db
 DB += RocPlugin_v57.db
+DB += AdcRocPlugin_v02.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
@@ -63,6 +64,7 @@ RocPlugin_v52.template: RocPlugin_v52.generated
 RocPlugin_v54.template: RocPlugin_v54.generated
 RocPlugin_v56.template: RocPlugin_v56.generated
 RocPlugin_v57.template: RocPlugin_v57.generated
+AdcRocPlugin_v02.template: AdcRocPlugin_v02.generated
 
 %.generated: ../src/%.cpp
 	../export2epics.py -i $^ -o $@

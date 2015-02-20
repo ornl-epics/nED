@@ -20,13 +20,10 @@
  *
  * The AdcRocPlugin extends BaseModulePlugin with the ROC board specifics.
  * It handles DISCOVER response to verify module type and READ_VERSION
- * which parses the version information. It also provides support for
- * High Voltage communication through RS232 port on ROC boards and
- * exposes that through StreamDevice friendly interfaces.
- *
+ * which parses the version information.
  * Several firmware version are supported:
  *
- * * ADC ROC hw=?.? fw=?.? as v01 (IN PROGRESS)
+ * * ADC ROC hw=?.? fw=?.? as v02 (IN PROGRESS)
  *
  * In general firmware versions differ in status or configuration
  * parameters they provide. Those are available in individual files
@@ -46,7 +43,6 @@ class AdcRocPlugin : public BaseModulePlugin {
 
     private: // variables
         std::string m_version;                              //!< Version string as passed to constructor
-        Fifo<char> m_hvBuffer;                              //!< FIFO buffer for data received from HV module but not yet processed
 
     public: // functions
 
@@ -125,39 +121,27 @@ class AdcRocPlugin : public BaseModulePlugin {
          */
         bool rspReadConfig(const DasPacket *packet);
 
-        /**
-         * Override START response handler.
-         *
-         * TODO: Does ADC ROC have dedicated acquisition register?
-         */
-        bool rspStart(const DasPacket *packet);
-
-        /**
-         * Override STOP response handler.
-         *
-         * TODO: Does ADC ROC have dedicated acquisition register?
-         */
-        bool rspStop(const DasPacket *packet);
-
-        /**
+       /**
          * Create and register all status ADCROC v0.1 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v01();
+        void createStatusParams_v02();
 
         /**
          * Create and register all config ADCROC v0.1 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v01();
+        void createConfigParams_v02();
 
         /**
          * Create and register all status counter ADCROC v0.1 parameters to be exposed to EPICS.
          */
-        void createCounterParams_v01();
+        void createCounterParams_v02();
 
     protected:
+        /*
         #define FIRST_ADCROCPLUGIN_PARAM Acquiring
         int Acquiring;
         #define LAST_ADCROCPLUGIN_PARAM Acquiring
+        */
 };
 
 #endif // ADC_ROC_PLUGIN_H

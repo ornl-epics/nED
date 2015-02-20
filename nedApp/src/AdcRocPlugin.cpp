@@ -20,9 +20,9 @@ const unsigned AdcRocPlugin::NUM_ADCROCPLUGIN_DYNPARAMS       = 650;  //!< Since
 const float    AdcRocPlugin::NO_RESPONSE_TIMEOUT           = 1.0;
 
 /**
- * ADC ROC V01 version response format
+ * ADC ROC V02 version response format
  */
-struct RspReadVersion_v01 {
+struct RspReadVersion_v02 {
 #ifdef BITFIELD_LSB_FIRST
     unsigned hw_revision:8;     // Board revision number
     unsigned hw_version:8;      // Board version number
@@ -32,7 +32,7 @@ struct RspReadVersion_v01 {
     unsigned day:8;             // Day
     unsigned month:8;           // Month
 #else
-#error Missing RspReadVersionV01 declaration
+#error Missing RspReadVersionV02 declaration
 #endif // BITFIELD_LSB_FIRST
 };
 
@@ -42,11 +42,11 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
     , m_version(version)
 {
     if (0) {
-    } else if (m_version == "v01") {
+    } else if (m_version == "v02") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v01();
-        createConfigParams_v01();
-        createCounterParams_v01();
+        createStatusParams_v02();
+        createConfigParams_v02();
+        createCounterParams_v02();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ADC ROC version '%s'", version);
@@ -118,7 +118,7 @@ bool AdcRocPlugin::rspDiscover(const DasPacket *packet)
 bool AdcRocPlugin::rspReadVersion(const DasPacket *packet)
 {
     char date[20];
-    size_t len = sizeof(RspReadVersion_v01);
+    size_t len = sizeof(RspReadVersion_v02);
 
     if (!BaseModulePlugin::rspReadVersion(packet))
         return false;
@@ -139,8 +139,7 @@ bool AdcRocPlugin::rspReadVersion(const DasPacket *packet)
 
     callParamCallbacks();
 
-    // GSG TODO: verify that version matches whatever is expected
-    if (version.hw_version == 5) {
+    if (version.hw_version == 0) {
         char ver[10];
         snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
         if (m_version == ver)
@@ -153,11 +152,11 @@ bool AdcRocPlugin::rspReadVersion(const DasPacket *packet)
 
 bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version, size_t expectedLen)
 {
-    const RspReadVersion_v01 *response;
+    const RspReadVersion_v02 *response;
     if (expectedLen != 0 && expectedLen != packet->getPayloadLength()) {
         return false;
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v01)) {
-        response = reinterpret_cast<const RspReadVersion_v01*>(packet->getPayload());
+    } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v02)) {
+        response = reinterpret_cast<const RspReadVersion_v02*>(packet->getPayload());
     } else {
         return false;
     }
@@ -180,11 +179,11 @@ bool AdcRocPlugin::rspReadConfig(const DasPacket *packet)
     /* GSG TODO: Need to verify that we don't have to do this....this was
      * required only because v54 firmware was broken and appended four extra
      * bytes at the end of the payload. 
-    if (m_version == "v01") {
+    if (m_version == "v02") {
         uint8_t buffer[130]; // actual size of the READ_CONFIG packet
 
         if (packet->length() > sizeof(buffer)) {
-            LOG_ERROR("Received v01 READ_CONFIG response bigger than expected");
+            LOG_ERROR("Received v02 READ_CONFIG response bigger than expected");
             return asynError;
         }
 
@@ -197,28 +196,6 @@ bool AdcRocPlugin::rspReadConfig(const DasPacket *packet)
     }
    */
     return BaseModulePlugin::rspReadConfig(packet);
-}
-
-bool AdcRocPlugin::rspStart(const DasPacket *packet)
-{
-    /* GSG TODO: Does ADC ROC have dedicated acquisition register? */
-    bool ack = BaseModulePlugin::rspStart(packet);
-    if (m_version == "v01") {
-        setIntegerParam(Acquiring, (ack ? 1 : 0));
-        callParamCallbacks();
-    }
-    return ack;
-}
-
-bool AdcRocPlugin::rspStop(const DasPacket *packet)
-{
-    /* GSG TODO: Does ADC ROC have dedicated acquisition register? */
-    bool ack = BaseModulePlugin::rspStop(packet);
-    if (m_version == "v01") {
-        setIntegerParam(Acquiring, (ack ? 0 : 1));
-        callParamCallbacks();
-    }
-    return ack;
 }
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
