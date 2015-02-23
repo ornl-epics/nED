@@ -121,20 +121,35 @@ class AdcRocPlugin : public BaseModulePlugin {
          */
         bool rspReadConfig(const DasPacket *packet);
 
-       /**
-         * Create and register all status ADCROC v0.1 parameters to be exposed to EPICS.
+        /**
+         * Create and register all status ADCROC v0.2 parameters to be exposed to EPICS.
          */
         void createStatusParams_v02();
 
         /**
-         * Create and register all config ADCROC v0.1 parameters to be exposed to EPICS.
+         * Create and register all config ADCROC v0.2 parameters to be exposed to EPICS.
          */
         void createConfigParams_v02();
 
         /**
-         * Create and register all status counter ADCROC v0.1 parameters to be exposed to EPICS.
+         * Create and register all status counter ADCROC v0.2 parameters to be exposed to EPICS.
          */
         void createCounterParams_v02();
+
+        /**
+         * Create and register all status ADCROC v0.3 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v03();
+
+        /**
+         * Create and register all config ADCROC v0.3 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v03();
+
+        /**
+         * Create and register all status counter ADCROC v0.3 parameters to be exposed to EPICS.
+         */
+        void createCounterParams_v03();
 
     protected:
         /*

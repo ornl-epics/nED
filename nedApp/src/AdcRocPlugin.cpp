@@ -20,9 +20,9 @@ const unsigned AdcRocPlugin::NUM_ADCROCPLUGIN_DYNPARAMS       = 650;  //!< Since
 const float    AdcRocPlugin::NO_RESPONSE_TIMEOUT           = 1.0;
 
 /**
- * ADC ROC V02 version response format
+ * ADC ROC version response format
  */
-struct RspReadVersion_v02 {
+struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
     unsigned hw_revision:8;     // Board revision number
     unsigned hw_version:8;      // Board version number
@@ -32,7 +32,7 @@ struct RspReadVersion_v02 {
     unsigned day:8;             // Day
     unsigned month:8;           // Month
 #else
-#error Missing RspReadVersionV02 declaration
+#error Missing RspReadVersion declaration
 #endif // BITFIELD_LSB_FIRST
 };
 
@@ -47,7 +47,12 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
         createStatusParams_v02();
         createConfigParams_v02();
         createCounterParams_v02();
-    } else {
+    } else if (m_version == "v03") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v03();
+        createConfigParams_v03();
+        createCounterParams_v03();
+    }  else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ADC ROC version '%s'", version);
     }
@@ -118,7 +123,7 @@ bool AdcRocPlugin::rspDiscover(const DasPacket *packet)
 bool AdcRocPlugin::rspReadVersion(const DasPacket *packet)
 {
     char date[20];
-    size_t len = sizeof(RspReadVersion_v02);
+    size_t len = sizeof(RspReadVersion);
 
     if (!BaseModulePlugin::rspReadVersion(packet))
         return false;
@@ -152,11 +157,11 @@ bool AdcRocPlugin::rspReadVersion(const DasPacket *packet)
 
 bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version, size_t expectedLen)
 {
-    const RspReadVersion_v02 *response;
+    const RspReadVersion *response;
     if (expectedLen != 0 && expectedLen != packet->getPayloadLength()) {
         return false;
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v02)) {
-        response = reinterpret_cast<const RspReadVersion_v02*>(packet->getPayload());
+    } else if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
+        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
     } else {
         return false;
     }
