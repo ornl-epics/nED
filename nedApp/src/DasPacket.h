@@ -100,7 +100,7 @@ struct DasPacket
         /**
          * Commands used by different DAS modules.
          *
-         * Add those gradualy as migrating from legacy software. Make sure
+         * Add those gradually as migrating from legacy software. Make sure
          * to document each one well when added.
          */
         enum CommandType {
@@ -139,10 +139,13 @@ struct DasPacket
             CMD_EEPROM_WRITE_WORD       = 0x65, //!< Write single word to EEPROM
             CMD_UPGRADE                 = 0x6F, //!< Send chunk of new firmware data
             CMD_DISCOVER                = 0x80, //!< Discover modules
+            CMD_RESET                   = 0x81, //!< Reset of all components
             CMD_START                   = 0x82, //!< Start acquisition
             CMD_STOP                    = 0x83, //!< Stop acquisition
             CMD_TSYNC                   = 0x84, //!< TSYNC packet
             CMD_RTDL                    = 0x85, //!< RTDL is a command packet, but can also be data packet if info == 0xFC
+            CMD_PM_PULSE_RQST_ON        = 0x90, //!< Request one pulse for Pulsed Magnet
+            CMD_PM_PULSE_RQST_OFF       = 0x91, //!< Clears one pulse request for Pulsed Magnet
         };
 
         /**
@@ -156,6 +159,7 @@ struct DasPacket
             MOD_TYPE_CROC               = 0x29,
             MOD_TYPE_IROC               = 0x2A,
             MOD_TYPE_BIDIMROC           = 0x2B,
+            MOD_TYPE_ADCROC             = 0x2D,
             MOD_TYPE_DSP                = 0x30,
             MOD_TYPE_SANSROC            = 0x40,
             MOD_TYPE_ACPC               = 0xA0,

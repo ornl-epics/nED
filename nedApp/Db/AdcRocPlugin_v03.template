@@ -1,0 +1,5 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "AdcRocPlugin_v03.generated"
+include "AdcRocPlugin.include"
+include "GlobalConD.include"
