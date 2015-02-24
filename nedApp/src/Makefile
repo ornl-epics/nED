@@ -59,6 +59,7 @@ SHARED_LIBRARIES = NO
 INC += CircularBuffer.h
 
 LIB_SRCS  += GlobalCon.st
+$(PROD_NAME)_SRCS  += Common.cpp
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp
 $(PROD_NAME)_SRCS  += OccPortDriver.cpp
@@ -91,6 +92,7 @@ $(PROD_NAME)_SRCS  += FemPlugin.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v35.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v36.cpp
+$(PROD_NAME)_SRCS  += FemPlugin_v37.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin_v22.cpp
 $(PROD_NAME)_SRCS  += DiscoverPlugin.cpp
