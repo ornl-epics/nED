@@ -161,10 +161,12 @@ class BaseModulePlugin : public BasePlugin {
         uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
         uint32_t m_configPayloadLength;                 //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParam()
         uint32_t m_upgradePayloadLength;                //!< Size in bytes of the PROGRAM response payload, calculated dynamically by linkUpgradeParam()
+        uint32_t m_temperaturePayloadLength;            //!< Size in bytes of the READ_TEMPERATURE response payload, calculated dynamically by createTempParam()
         std::map<int, ParamDesc> m_statusParams;        //!< Map of exported status parameters
         std::map<int, ParamDesc> m_counterParams;       //!< Map of exported status counter parameters
         std::map<int, ParamDesc> m_configParams;        //!< Map of exported config parameters
         std::map<int, ParamDesc> m_upgradeParams;       //!< Map of exported remote upgrade parameters
+        std::map<int, ParamDesc> m_temperatureParams;   //!< Map of exported temperature parameters
         StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
 
@@ -482,6 +484,25 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspUpgrade(const DasPacket *packet);
 
         /**
+         * Called when read temperature request to the module should be made.
+         *
+         * Base implementation simply sends a READ_TEMP command and sets up
+         * timeout callback.
+         *
+         * @return Response to wait for.
+         */
+        virtual DasPacket::CommandType reqReadTemperature();
+
+        /**
+         * Default handler for READ_TEMP response.
+         *
+         * Read the packet payload and populate temperature parameters.
+         *
+         * @param[in] packet with response to READ_TEMP
+         * @return true if packet was parsed and temperature extracted.
+         */
+        virtual bool rspReadTemperature(const DasPacket *packet);
+        /**
          * Create and register single integer status parameter.
          *
          * Status parameter is an individual status entity exported by module.
@@ -513,6 +534,13 @@ class BaseModulePlugin : public BasePlugin {
          * Create and register single integer config parameter.
          */
         void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
+
+        /**
+         * Create and register single integer temperature parameter.
+         *
+         * Temperature values are returned in READ_TEMPERATURE response payload.
+         */
+        void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
 
         /**
          * Link existing parameter to upgrade parameters table.

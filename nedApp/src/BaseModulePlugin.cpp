@@ -116,6 +116,9 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         case DasPacket::CMD_UPGRADE:
             m_waitingResponse = reqUpgrade();
             break;
+        case DasPacket::CMD_READ_TEMPERATURE:
+            m_waitingResponse = reqReadTemperature();
+            break;
         default:
             setIntegerParam(CmdRsp, LAST_CMD_ERROR);
             callParamCallbacks();
@@ -294,6 +297,9 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
         break;
     case DasPacket::CMD_UPGRADE:
         ack = rspUpgrade(packet);
+        break;
+    case DasPacket::CMD_READ_TEMPERATURE:
+        ack = rspReadTemperature(packet);
         break;
     default:
         LOG_WARN("Received unhandled response 0x%02X", command);
@@ -595,6 +601,30 @@ bool BaseModulePlugin::rspUpgrade(const DasPacket *packet)
     return true;
 }
 
+DasPacket::CommandType BaseModulePlugin::reqReadTemperature()
+{
+    sendToDispatcher(DasPacket::CMD_READ_TEMPERATURE);
+    return DasPacket::CMD_READ_TEMPERATURE;
+}
+
+bool BaseModulePlugin::rspReadTemperature(const DasPacket *packet)
+{
+    if (!cancelTimeoutCallback()) {
+        LOG_WARN("Received READ_TEMPERATURE response after timeout");
+        return false;
+    }
+
+    if (packet->getPayloadLength() != ALIGN_UP(m_temperaturePayloadLength, 4)) {
+        LOG_ERROR("Received wrong READ_TEMP response based on length; "
+                  "received %u, expected %u",
+                  packet->getPayloadLength(), ALIGN_UP(m_temperaturePayloadLength, 4));
+        return false;
+    }
+
+    extractParams(packet, m_temperatureParams);
+    return true;
+}
+
 void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
     int index;
@@ -663,6 +693,29 @@ void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_
         length++;
     // m_configPayloadLength is calculated *after* we create all sections
     m_configSectionSizes[section] = std::max(m_configSectionSizes[section], length);
+}
+
+void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
+{
+    int index;
+    if (createParam(name, asynParamInt32, &index) != asynSuccess) {
+        LOG_ERROR("Temperature parameter '%s' cannot be created (already exist?)", name);
+        return;
+    }
+
+    ParamDesc desc;
+    desc.section = 0;
+    desc.initVal = 0;
+    desc.offset = offset;
+    desc.shift = shift;
+    desc.width = nBits;
+    m_temperatureParams[index] = desc;
+
+    uint32_t length = offset + 1;
+    if (m_behindDsp && nBits > 16)
+        length++;
+    uint32_t wordsize = (m_behindDsp ? 2 : 4);
+    m_temperaturePayloadLength = std::max(m_temperaturePayloadLength, length*wordsize);
 }
 
 void BaseModulePlugin::linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)

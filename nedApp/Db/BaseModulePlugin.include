@@ -70,6 +70,8 @@ record(mbbo, "$(P)CmdReq")
     field(ELST, "Request pulse")
     field(TVVL, "145")
     field(TVST, "Clear pulse")
+    field(THVL, "35")
+    field(THST, "Read temperature")
 }
 record(stringin, "$(P)HwDate")
 {
