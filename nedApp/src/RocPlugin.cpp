@@ -17,7 +17,6 @@
 EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
 const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
-const float    RocPlugin::NO_RESPONSE_TIMEOUT           = 1.0;
 
 /**
  * ROC V5 version response format

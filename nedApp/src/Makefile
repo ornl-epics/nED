@@ -102,6 +102,8 @@ $(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
 $(PROD_NAME)_SRCS  += PvaMetaData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
+$(PROD_NAME)_SRCS  += AcpcPlugin.cpp
+$(PROD_NAME)_SRCS  += AcpcPlugin_v41.cpp
 
 #===========================
 

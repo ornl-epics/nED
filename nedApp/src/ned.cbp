@@ -43,6 +43,9 @@
 		<Unit filename="AcpcFemPlugin.cpp" />
 		<Unit filename="AcpcFemPlugin.h" />
 		<Unit filename="AcpcFemPlugin_v22.cpp" />
+		<Unit filename="AcpcPlugin.cpp" />
+		<Unit filename="AcpcPlugin.h" />
+		<Unit filename="AcpcPlugin_v41.cpp" />
 		<Unit filename="AcpcPvaPlugin.cpp" />
 		<Unit filename="AcpcPvaPlugin.h" />
 		<Unit filename="AdaraPlugin.cpp" />

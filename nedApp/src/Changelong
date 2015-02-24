@@ -1,0 +1,5 @@
+2015/02/25:
+* DspPlugin_v* register names change:
+  LvdsTsCtrl -> LvdsTsyncCtrl
+  LvdsTxenCttrl -> LvdsTxenCtrl
+  LvdsTxCtrl -> LvdsTclkMode
