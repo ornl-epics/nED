@@ -57,25 +57,30 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 1);
         createStatusParams_v51();
         createConfigParams_v51();
+        createTemperatureParams_v51();
     } else if (m_version == "v52") {
         setIntegerParam(Supported, 1);
         createStatusParams_v52();
         createConfigParams_v52();
+        createTemperatureParams_v52();
     } else if (m_version == "v54" || m_version == "v55") {
         setIntegerParam(Supported, 1);
         createStatusParams_v54();
         createConfigParams_v54();
+        createTemperatureParams_v54();
         createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
     } else if (m_version == "v56") {
         setIntegerParam(Supported, 1);
         createStatusParams_v56();
         createCounterParams_v56();
         createConfigParams_v56();
+        createTemperatureParams_v56();
     } else if (m_version == "v57") {
         setIntegerParam(Supported, 1);
         createStatusParams_v57();
         createCounterParams_v57();
         createConfigParams_v57();
+        createTemperatureParams_v57();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);

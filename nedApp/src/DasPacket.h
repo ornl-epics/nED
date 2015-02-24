@@ -107,6 +107,7 @@ struct DasPacket
             CMD_READ_VERSION            = 0x20, //!< Read module version
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
             CMD_READ_STATUS             = 0x22, //!< Read module status
+            CMD_READ_TEMPERATURE        = 0x23, //!< Read module temperature(s)
             CMD_READ_STATUS_COUNTERS    = 0x24, //!< Read module status counters
             CMD_RESET_STATUS_COUNTERS   = 0x25, //!< Reset module status counters
             CMD_WRITE_CONFIG            = 0x30, //!< Write module configuration

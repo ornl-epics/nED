@@ -208,6 +208,11 @@ class RocPlugin : public BaseModulePlugin {
         void createConfigParams_v51();
 
         /**
+         * Create and register all temperature ROC v5.1 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v51();
+
+        /**
          * Create and register all status ROC v5.2 parameters to be exposed to EPICS.
          */
         void createStatusParams_v52();
@@ -218,6 +223,11 @@ class RocPlugin : public BaseModulePlugin {
         void createConfigParams_v52();
 
         /**
+         * Create and register all temperature ROC v5.2 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v52();
+
+        /**
          * Create and register all status ROC v5.4/v5.5 parameters to be exposed to EPICS.
          */
         void createStatusParams_v54();
@@ -226,6 +236,11 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all config ROC v5.4/v5.5 parameters to be exposed to EPICS.
          */
         void createConfigParams_v54();
+
+        /**
+         * Create and register all temperature ROC v5.4 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v54();
 
         /**
          * Create and register all status ROC v5.6 parameters to be exposed to EPICS.
@@ -243,6 +258,11 @@ class RocPlugin : public BaseModulePlugin {
         void createConfigParams_v56();
 
         /**
+         * Create and register all temperature ROC v5.6 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v56();
+
+        /**
          * Create and register all status ROC v5.7 parameters to be exposed to EPICS.
          */
         void createStatusParams_v57();
@@ -256,6 +276,11 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all config ROC v5.7 parameters to be exposed to EPICS.
          */
         void createConfigParams_v57();
+
+        /**
+         * Create and register all temperature ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v57();
 
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring

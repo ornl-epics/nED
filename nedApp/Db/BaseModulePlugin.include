@@ -66,6 +66,8 @@ record(mbbo, "$(P)CmdReq")
     field(NIST, "Reset counters")
     field(TEVL, "111")
     field(TEST, "Upgrade")
+    field(ELVL, "35")
+    field(ELST, "Read temperature")
 }
 record(stringin, "$(P)HwDate")
 {
