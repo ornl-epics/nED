@@ -244,12 +244,12 @@ void DspPlugin::createConfigParams_v64() {
     createConfigParam("LvdsFilterMask", 'E', 0x1, 16, 16, 65535); // LVDS command filter mask
 
 //      BLXXX:Det:DspX:| sig nam|                            | EPICS record description | (bi and mbbi description)
-    createConfigParam("LvdsTxCtrl",     'E', 0x2,  1,  0, 0); // LVDS TX control TCLK mode    (0=TCLK from int,1=TCLK from LVDS)
-    createConfigParam("LvdsTxTclk",     'E', 0x2,  2,  2, 0); // LVDS TX control T&C TCLK mod (0=TCLK,1=TCLK,2=always 0,3=always 1)
+    createConfigParam("LvdsTclkMode",   'E', 0x2,  1,  0, 0); // LVDS TX control TCLK mode    (0=TCLK from int,1=TCLK from LVDS)
+    createConfigParam("LvdsTclkCtrl",   'E', 0x2,  2,  2, 0); // LVDS TX control T&C TCLK mod (0=TCLK,1=TCLK,2=always 0,3=always 1)
     createConfigParam("LvdsTsyncMode",  'E', 0x2,  2,  4, 1); // LVDS TSYNC_O mode            (0=local TSYNC,1=TSYNC from TREF,2=TSYNC from LVDS,3=TSYNC from opt)
-    createConfigParam("LvdsTsCtrl",     'E', 0x2,  2,  6, 0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
+    createConfigParam("LvdsTsyncCtrl",  'E', 0x2,  2,  6, 0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
     createConfigParam("LvdsSysrstCtrl", 'E', 0x2,  2,  8, 0); // LVDS T&C SYSRST# buffer ctrl (0=sysrst,1=sysrst,2=always 0,3=always 1)
-    createConfigParam("LvdsTxenCttrl",  'E', 0x2,  2, 10, 0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
+    createConfigParam("LvdsTxenCtrl",   'E', 0x2,  2, 10, 0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
     createConfigParam("LvdsOutClck",    'E', 0x2,  2, 16, 0); // LVDS output clock mode
     createConfigParam("LvdsNRetry",     'E', 0x2,  2, 18, 3); // LVDS downstream retrys
     createConfigParam("Ch1:WordLen",    'E', 0x2,  1, 20, 0); // LVDS chan1 data word length  (0=RX FIFO data,1=set to 4)
