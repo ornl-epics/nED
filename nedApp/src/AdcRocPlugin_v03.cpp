@@ -65,6 +65,68 @@ void AdcRocPlugin::createStatusParams_v03()
 void AdcRocPlugin::createCounterParams_v03()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
+      createCounterParam("CntParity",           0x0,  16,  0);  // LVDS parity err counter
+      createCounterParam("CntType",             0x1,  16,  0);  // LVDS data type err counter
+      createCounterParam("CntLength",           0x2,  16,  0);  // LVDS length err counter
+      createCounterParam("CntTimeout",          0x3,  16,  0);  // LVDS timeout err counter
+      createCounterParam("CntNoStart",          0x4,  16,  0);  // LVDS no start err counter
+      createCounterParam("CntPreStart",         0x5,  16,  0);  // LVDS start b/f stop count
+      createCounterParam("CntFull",             0x6,  16,  0);  // LVDS fifo full err counter
+      createCounterParam("CntTimerErr",         0x7,  16,  0);  // timer err counter
+      createCounterParam("CntUnknownCmdErr",    0x8,  16,  0);  // unknown command err counter
+      createCounterParam("CntPktLengthErr",     0x9,  16,  0);  // packet length err counter
+      createCounterParam("CntProgramErr",       0xA,  16,  0);  // programming err counter
+      createCounterParam("CntOutFullErr",       0xB,  16,  0);  // board output FIFO full cnt
+      createCounterParam("Ch1:CntDIGOutFullErr",0xC,  16,  0);  // DIG0 output FIFO full cnt
+      createCounterParam("Ch2:CntDIGOutFullErr",0xD,  16,  0);  // DIG1 output FIFO full cnt
+      createCounterParam("Ch3:CntDIGOutFullErr",0xE,  16,  0);  // DIG2 output FIFO full cnt
+      createCounterParam("Ch4:CntDIGOutFullErr",0xF,  16,  0);  // DIG3 output FIFO full cnt
+      createCounterParam("Ch5:CntDIGOutFullErr",0x10, 16,  0);  // DIG4 output FIFO full cnt
+      createCounterParam("Ch6:CntDIGOutFullErr",0x11, 16,  0);  // DIG5 output FIFO full cnt
+      createCounterParam("Ch7:CntDIGOutFullErr",0x12, 16,  0);  // DIG6 output FIFO full cnt
+      createCounterParam("Ch8:CntDIGOutFullErr",0x13, 16,  0);  // DIG7 output FIFO full cnt
+      createCounterParam("Ch1:CntADCOutFullErr",0x14, 16,  0);  // ADC0 output FIFO full cnt
+      createCounterParam("Ch2:CntADCOutFullErr",0x15, 16,  0);  // ADC1 output FIFO full cnt
+      createCounterParam("Ch3:CntADCOutFullErr",0x16, 16,  0);  // ADC2 output FIFO full cnt
+      createCounterParam("Ch4:CntADCOutFullErr",0x17, 16,  0);  // ADC3 output FIFO full cnt
+      createCounterParam("Ch5:CntADCOutFullErr",0x18, 16,  0);  // ADC4 output FIFO full cnt
+      createCounterParam("Ch6:CntADCOutFullErr",0x19, 16,  0);  // ADC5 output FIFO full cnt
+      createCounterParam("Ch7:CntADCOutFullErr",0x1A, 16,  0);  // ADC6 output FIFO full cnt
+      createCounterParam("Ch8:CntADCOutFullErr",0x1B, 16,  0);  // ADC7 output FIFO full cnt
+      createCounterParam("CntChLinkDisconnect", 0x1C, 16,  0);  // Ch Link disconnect counter
+      createCounterParam("Ch1:RateDIG",         0x1D, 16,  0);  // DIG0 ratemeter
+      createCounterParam("Ch2:RateDIG",         0x1E, 16,  0);  // DIG1 ratemeter
+      createCounterParam("Ch3:RateDIG",         0x1F, 16,  0);  // DIG2 ratemeter
+      createCounterParam("Ch4:RateDIG",         0x20, 16,  0);  // DIG3 ratemeter
+      createCounterParam("Ch5:RateDIG",         0x21, 16,  0);  // DIG4 ratemeter
+      createCounterParam("Ch6:RateDIG",         0x22, 16,  0);  // DIG5 ratemeter
+      createCounterParam("Ch7:RateDIG",         0x23, 16,  0);  // DIG6 ratemeter
+      createCounterParam("Ch8:RateDIG",         0x24, 16,  0);  // DIG7 ratemeter
+      createCounterParam("Ch1:RateDIGEvents",   0x25, 16,  0);  // DIG0 events ratemeter
+      createCounterParam("Ch2:RateDIGEvents",   0x26, 16,  0);  // DIG1 events ratemeter
+      createCounterParam("Ch3:RateDIGEvents",   0x27, 16,  0);  // DIG2 events ratemeter
+      createCounterParam("Ch4:RateDIGEvents",   0x28, 16,  0);  // DIG3 events ratemeter
+      createCounterParam("Ch5:RateDIGEvents",   0x29, 16,  0);  // DIG4 events ratemeter
+      createCounterParam("Ch6:RateDIGEvents",   0x2A, 16,  0);  // DIG5 events ratemeter
+      createCounterParam("Ch7:RateDIGEvents",   0x2B, 16,  0);  // DIG6 events ratemeter
+      createCounterParam("Ch8:RateDIGEvents",   0x2C, 16,  0);  // DIG7 events ratemeter
+      createCounterParam("Ch1:RateADCOkPulses", 0x2D, 16,  0);  // ADC0 Ok pulses ratemeter
+      createCounterParam("Ch2:RateADCOkPulses", 0x2E, 16,  0);  // ADC1 Ok pulses ratemeter
+      createCounterParam("Ch3:RateADCOkPulses", 0x2F, 16,  0);  // ADC2 Ok pulses ratemeter
+      createCounterParam("Ch4:RateADCOkPulses", 0x30, 16,  0);  // ADC3 Ok pulses ratemeter
+      createCounterParam("Ch5:RateADCOkPulses", 0x31, 16,  0);  // ADC4 Ok pulses ratemeter
+      createCounterParam("Ch6:RateADCOkPulses", 0x32, 16,  0);  // ADC5 Ok pulses ratemeter
+      createCounterParam("Ch7:RateADCOkPulses", 0x33, 16,  0);  // ADC6 Ok pulses ratemeter
+      createCounterParam("Ch8:RateADCOkPulses", 0x34, 16,  0);  // ADC7 Ok pulses ratemeter
+      createCounterParam("Ch1:RateADCEvents",   0x35, 16,  0);  // ADC0 events ratemeter
+      createCounterParam("Ch2:RateADCEvents",   0x36, 16,  0);  // ADC1 events ratemeter
+      createCounterParam("Ch3:RateADCEvents",   0x37, 16,  0);  // ADC2 events ratemeter
+      createCounterParam("Ch4:RateADCEvents",   0x38, 16,  0);  // ADC3 events ratemeter
+      createCounterParam("Ch5:RateADCEvents",   0x39, 16,  0);  // ADC4 events ratemeter
+      createCounterParam("Ch6:RateADCEvents",   0x3A, 16,  0);  // ADC5 events ratemeter
+      createCounterParam("Ch7:RateADCEvents",   0x3B, 16,  0);  // ADC6 events ratemeter
+      createCounterParam("Ch8:RateADCEvents",   0x3C, 16,  0);  // ADC7 events ratemeter
+      createCounterParam("CntOutRate",          0x3D, 16,  0);  // Board total events ratemeter
 }
 
 void AdcRocPlugin::createConfigParams_v03()
