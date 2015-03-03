@@ -23,7 +23,7 @@
  * which parses the version information.
  * Several firmware version are supported:
  *
- * * ADC ROC hw=?.? fw=?.? as v02 (IN PROGRESS)
+ * * ADC ROC hw=0.1 fw=0.3 as v03
  *
  * In general firmware versions differ in status or configuration
  * parameters they provide. Those are available in individual files
@@ -152,11 +152,6 @@ class AdcRocPlugin : public BaseModulePlugin {
         void createCounterParams_v03();
 
     protected:
-        /*
-        #define FIRST_ADCROCPLUGIN_PARAM Acquiring
-        int Acquiring;
-        #define LAST_ADCROCPLUGIN_PARAM Acquiring
-        */
 };
 
 #endif // ADC_ROC_PLUGIN_H
