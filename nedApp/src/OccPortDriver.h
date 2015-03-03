@@ -92,8 +92,6 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         Thread *m_occBufferReadThread;
         Thread *m_occStatusRefreshThread;
         epicsEvent m_statusEvent;
-        epicsTimeStamp m_dataRateOutTime;                       //!< Used to track time since last DataRateOut parameter calculation, private to calculateDataRateOut() function
-        uint32_t m_dataRateOutCount;                            //!< Used to track number of bytes since last DataRateOut parameter calculation, private to calculateDataRateOut() function
         static const int DEFAULT_BASIC_STATUS_INTERVAL;
         static const int DEFAULT_EXTENDED_STATUS_INTERVAL;
 
@@ -111,6 +109,11 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
+         * Overloaded method to read asyn int32 parameters
+         */
+        asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
+
+        /**
          * Overloaded method.
          */
         asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
@@ -120,11 +123,6 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          */
         asynStatus createParam(const char *name, asynParamType type, int *index, int defaultValue);
         using asynPortDriver::createParam;
-
-        /**
-         * Calculate data processing rate
-         */
-        void calculateDataRateOut(uint32_t consumed);
 
         /**
          * Report an error detected in receive data thread
@@ -193,7 +191,9 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         int DmaSize;
         int BufUsed;
         int BufSize;
-        int RxRate;
+        int RecvRate;
+        int CopyRate;
+        int ProcRate;
         int RxEn;
         int RxEnRb;
         int ErrPktEn;
