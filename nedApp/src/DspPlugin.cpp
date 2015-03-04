@@ -57,7 +57,6 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
                        blocking, NUM_DSPPLUGIN_PARAMS + NUM_DSPPLUGIN_CONFIGPARAMS + NUM_DSPPLUGIN_STATUSPARAMS)
     , m_version(version)
 {
-    setIntegerParam(HwType, DasPacket::MOD_TYPE_DSP);
     if (m_version == "v63") {
         createConfigParams_v63();
         createStatusParams_v63();

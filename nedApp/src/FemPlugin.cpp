@@ -63,8 +63,6 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         LOG_ERROR("Unsupported FEM version '%s'", version);
     }
 
-    setIntegerParam(HwType, DasPacket::MOD_TYPE_FEM);
-
     LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
 
     callParamCallbacks();

@@ -46,7 +46,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
     createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasPacket::CommandType)
     createParam("HwId",         asynParamOctet, &HwId);                     // READ - Connected module hardware id
-    createParam("HwType",       asynParamInt32, &HwType);                   // READ - Module type                    (see DasPacket::ModuleType)
+    createParam("HwType",       asynParamInt32, &HwType, hardwareType);     // READ - Module type                    (see DasPacket::ModuleType)
     createParam("HwDate",       asynParamOctet, &HwDate);                   // READ - Module hardware date
     createParam("HwVer",        asynParamInt32, &HwVer);                    // READ - Module hardware version
     createParam("HwRev",        asynParamInt32, &HwRev);                    // READ - Module hardware revision
@@ -352,7 +352,8 @@ bool BaseModulePlugin::rspReadVersion(const DasPacket *packet)
 
     setIntegerParam(HwVer, version.hw_version);
     setIntegerParam(HwRev, version.hw_revision);
-    setStringParam(HwDate, "");
+    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.hw_year, version.hw_month, version.hw_day);
+    setStringParam(HwDate, date);
     setIntegerParam(FwVer, version.fw_version);
     setIntegerParam(FwRev, version.fw_revision);
     snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
