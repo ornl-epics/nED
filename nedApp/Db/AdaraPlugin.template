@@ -4,6 +4,7 @@ include "BaseSocketPlugin.include"
 # Upgrade BasePlugin::Enable PV
 record(bo, "$(P)Enable")
 {
+    info(archive, "Scan, 00:01:00")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
 }
@@ -25,6 +26,7 @@ record(longout, "$(P)CheckInt")
 }
 record(stringin, "$(P)ClientIp")
 {
+    info(archive, "Scan, 00:01:00")
     field(FLNK, "$(P)StatusCalc.PROC")
 }
 
