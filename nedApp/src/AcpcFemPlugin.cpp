@@ -42,7 +42,6 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
 {
     createStatusParams_v22();
 
-    setIntegerParam(HwType, DasPacket::MOD_TYPE_ACPCFEM);
     setIntegerParam(Supported, 1);
 
     LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());

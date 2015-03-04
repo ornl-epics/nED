@@ -55,7 +55,6 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ADC ROC version '%s'", version);
     }
-    setIntegerParam(HwType, DasPacket::MOD_TYPE_ADCROC);
 
     LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
 
