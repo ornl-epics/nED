@@ -34,7 +34,7 @@ struct RspReadVersion {
 };
 
 AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, true, blocking,
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ACPC, true, blocking,
                        NUM_ACPCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
     , m_version(version)
 {
@@ -54,35 +54,8 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, con
     callParamCallbacks();
 }
 
-bool AcpcPlugin::rspDiscover(const DasPacket *packet)
+bool AcpcPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    return (BaseModulePlugin::rspDiscover(packet) &&
-            packet->cmdinfo.module_type == DasPacket::MOD_TYPE_ACPC);
-}
-
-bool AcpcPlugin::rspReadVersion(const DasPacket *packet)
-{
-    char date[20];
-
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    BaseModulePlugin::Version version;
-    if (!parseVersionRsp(packet, version, sizeof(RspReadVersion))) {
-        LOG_WARN("Bad READ_VERSION response");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    setStringParam(HwDate, "");
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    callParamCallbacks();
-
     if (version.hw_version == 4) {
         char ver[10];
         snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
@@ -90,20 +63,16 @@ bool AcpcPlugin::rspReadVersion(const DasPacket *packet)
             return true;
     }
 
-    LOG_WARN("Unsupported ROC version");
     return false;
 }
 
-bool AcpcPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version, size_t expectedLen)
+bool AcpcPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
-    const RspReadVersion *response;
-    if (expectedLen != 0 && expectedLen != packet->getPayloadLength()) {
+    if (packet->getPayloadLength() != sizeof(RspReadVersion))
         return false;
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
-    } else {
-        return false;
-    }
+
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;
     version.hw_year     = 0;

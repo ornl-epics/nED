@@ -43,46 +43,36 @@ class AcpcPlugin : public BaseModulePlugin {
         AcpcPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
 
         /**
-         * Try to parse the ROC version response packet an populate the structure.
+         * Try to parse the ACPC version response packet an populate the structure.
          *
-         * Function will parse all known ROC version responses and populate the
+         * Function will parse all known ACPC version responses and populate the
          * version structure. If the function returns false, it does not recognize
          * the response.
          *
-         * All ROC boards except for v5.4 have the same response. v5.4 adds an extra
-         * vendor field which the function disregards.
-         *
-         * When expectedLen parameter is non-zero, the function will only accept
-         * the response that matches the size. This is useful when the version
-         * is known in advance and this function can be used to verify that returned
-         * version matches configured one. If the parsed version length doesn't match
-         * the expected length, funtion returns false.
-         *
          * @param[in] packet to be parsed
          * @param[out] version structure to be populated
-         * @param[in] expectedLen expected size of the version response, used to
-         *                        verify the parsed packet matches this one
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version, size_t expectedLen=0);
+        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+
+        /**
+         * Member counterpart of parseVersionRsp().
+         *
+         * @see AcpcPlugin::parseVersionRsp()
+         */
+        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        {
+            return parseVersionRsp(packet, version);
+        }
+
+        /**
+         * Configured version must match actual.
+         *
+         * @return true when they match, false otherwise.
+         */
+        bool checkVersion(const BaseModulePlugin::Version &version);
 
     private: // functions
-        /**
-         * Verify the DISCOVER response is from ROC.
-         *
-         * @param[in] packet with response to DISCOVER
-         * @return true if packet was parsed and type of module is ROC.
-         */
-        bool rspDiscover(const DasPacket *packet);
-
-        /**
-         * Overrided READ_VERSION handler dispatches real work to one of rspReadVersion_*
-         *
-         * @param[in] packet with response to READ_VERSION
-         * @return true if packet was parsed and module version verified.
-         */
-        bool rspReadVersion(const DasPacket *packet);
-
         /**
          * Create and register all status ROC v4.4/v4.5 parameters to be exposed to EPICS.
          */
