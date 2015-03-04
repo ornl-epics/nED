@@ -17,7 +17,6 @@
 EPICS_REGISTER_PLUGIN(AdcRocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
 const unsigned AdcRocPlugin::NUM_ADCROCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
-const float    AdcRocPlugin::NO_RESPONSE_TIMEOUT           = 1.0;
 
 /**
  * ADC ROC version response format
@@ -37,7 +36,7 @@ struct RspReadVersion {
 };
 
 AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, true, blocking,
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ADCROC, true, blocking,
                        NUM_ADCROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
     , m_version(version)
 {
@@ -114,36 +113,8 @@ asynStatus AdcRocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nCha
     return BaseModulePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
 }
 
-bool AdcRocPlugin::rspDiscover(const DasPacket *packet)
+bool AdcRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    return (BaseModulePlugin::rspDiscover(packet) &&
-            packet->cmdinfo.module_type == DasPacket::MOD_TYPE_ADCROC);
-}
-
-bool AdcRocPlugin::rspReadVersion(const DasPacket *packet)
-{
-    char date[20];
-    size_t len = sizeof(RspReadVersion);
-
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    BaseModulePlugin::Version version;
-    if (!parseVersionRsp(packet, version, len)) {
-        LOG_WARN("Bad READ_VERSION response");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    setStringParam(HwDate, "");
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    callParamCallbacks();
-
     if (version.hw_version == 0) {
         char ver[10];
         snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
@@ -151,16 +122,13 @@ bool AdcRocPlugin::rspReadVersion(const DasPacket *packet)
             return true;
     }
 
-    LOG_WARN("Unsupported ROC version");
     return false;
 }
 
-bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version, size_t expectedLen)
+bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
     const RspReadVersion *response;
-    if (expectedLen != 0 && expectedLen != packet->getPayloadLength()) {
-        return false;
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
+    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
         response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
     } else {
         return false;
@@ -183,7 +151,7 @@ bool AdcRocPlugin::rspReadConfig(const DasPacket *packet)
 {
     /* GSG TODO: Need to verify that we don't have to do this....this was
      * required only because v54 firmware was broken and appended four extra
-     * bytes at the end of the payload. 
+     * bytes at the end of the payload.
     if (m_version == "v02") {
         uint8_t buffer[130]; // actual size of the READ_CONFIG packet
 

@@ -44,7 +44,7 @@ struct RspReadVersion_v54 : public RspReadVersion_v5x {
 };
 
 RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, true, blocking,
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ROC, true, blocking,
                        NUM_ROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
     , m_version(version)
 {
@@ -148,53 +148,10 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
     return BaseModulePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
 }
 
-bool RocPlugin::rspDiscover(const DasPacket *packet)
-{
-    return (BaseModulePlugin::rspDiscover(packet) &&
-            packet->cmdinfo.module_type == DasPacket::MOD_TYPE_ROC);
-}
-
-bool RocPlugin::rspReadVersion(const DasPacket *packet)
-{
-    char date[20];
-    size_t len = (m_version == "v54" ? sizeof(RspReadVersion_v54) : sizeof(RspReadVersion_v5x));
-
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    BaseModulePlugin::Version version;
-    if (!parseVersionRsp(packet, version, len)) {
-        LOG_WARN("Bad READ_VERSION response");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    setStringParam(HwDate, "");
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    callParamCallbacks();
-
-    if (version.hw_version == 5) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
-        if (m_version == ver)
-            return true;
-    }
-
-    LOG_WARN("Unsupported ROC version");
-    return false;
-}
-
-bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version, size_t expectedLen)
+bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
     const RspReadVersion_v5x *response;
-    if (expectedLen != 0 && expectedLen != packet->getPayloadLength()) {
-        return false;
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v5x)) {
+    if (packet->getPayloadLength() == sizeof(RspReadVersion_v5x)) {
         response = reinterpret_cast<const RspReadVersion_v5x*>(packet->getPayload());
     } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v54)) {
         response = reinterpret_cast<const RspReadVersion_v5x*>(packet->getPayload());
@@ -213,6 +170,18 @@ bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
     version.fw_day      = HEX_BYTE_TO_DEC(response->day);
 
     return true;
+}
+
+bool RocPlugin::checkVersion(const BaseModulePlugin::Version &version)
+{
+    if (version.hw_version == 5) {
+        char ver[10];
+        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
+        if (m_version == ver)
+            return true;
+    }
+
+    return false;
 }
 
 bool RocPlugin::rspReadConfig(const DasPacket *packet)

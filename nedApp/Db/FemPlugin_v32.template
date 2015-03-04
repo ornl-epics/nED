@@ -3,3 +3,24 @@ include "BaseModulePlugin.include"
 include "FemPlugin.include"
 include "FemPlugin_v32.generated"
 include "GlobalConD.include"
+
+record(longin, "$(P)HwVer")
+{
+    field(HIGH, "11")
+    field(LOW,  "9")
+}   
+record(longin, "$(P)HwRev")
+{
+    field(HIGH, "10")
+    field(LOW,  "8")
+}   
+record(longin, "$(P)FwVer")
+{
+    field(HIGH, "4")
+    field(LOW,  "2")
+}   
+record(longin, "$(P)FwRev")
+{
+    field(HIGH, "3")
+    field(LOW,  "1")
+}

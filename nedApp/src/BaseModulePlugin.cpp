@@ -18,11 +18,14 @@
 
 const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 2.0;
 
-BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId,
-                                   bool behindDsp, int blocking, int numParams, int interfaceMask, int interruptMask)
+BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherPortName,
+                                   const char *hardwareId, DasPacket::ModuleType hardwareType,
+                                   bool behindDsp, int blocking, int numParams,
+                                   int interfaceMask, int interruptMask)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_BASEMODULEPLUGIN_PARAMS + numParams, 1,
                  interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
     , m_hardwareId(ip2addr(hardwareId))
+    , m_hardwareType(hardwareType)
     , m_statusPayloadLength(0)
     , m_countersPayloadLength(0)
     , m_configPayloadLength(0)
@@ -323,7 +326,7 @@ bool BaseModulePlugin::rspDiscover(const DasPacket *packet)
         LOG_WARN("Received DISCOVER response after timeout");
         return false;
     }
-    return true;
+    return (m_hardwareType == packet->cmdinfo.module_type);
 }
 
 DasPacket::CommandType BaseModulePlugin::reqReadVersion()
@@ -334,11 +337,30 @@ DasPacket::CommandType BaseModulePlugin::reqReadVersion()
 
 bool BaseModulePlugin::rspReadVersion(const DasPacket *packet)
 {
+    char date[20];
+    Version version;
+
     if (!cancelTimeoutCallback()) {
         LOG_WARN("Received READ_VERSION response after timeout");
         return false;
     }
-    return true;
+
+    if (!parseVersionRspM(packet, version)) {
+        LOG_WARN("Bad READ_VERSION response");
+        return false;
+    }
+
+    setIntegerParam(HwVer, version.hw_version);
+    setIntegerParam(HwRev, version.hw_revision);
+    setStringParam(HwDate, "");
+    setIntegerParam(FwVer, version.fw_version);
+    setIntegerParam(FwRev, version.fw_revision);
+    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
+    setStringParam(FwDate, date);
+
+    callParamCallbacks();
+
+    return checkVersion(version);
 }
 
 DasPacket::CommandType BaseModulePlugin::reqReadStatus()

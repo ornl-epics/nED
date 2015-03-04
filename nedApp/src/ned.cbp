@@ -47,6 +47,8 @@
 		<Unit filename="AcpcPvaPlugin.h" />
 		<Unit filename="AdaraPlugin.cpp" />
 		<Unit filename="AdaraPlugin.h" />
+		<Unit filename="AdcRocPlugin.cpp" />
+		<Unit filename="AdcRocPlugin.h" />
 		<Unit filename="BaseCircularBuffer.cpp" />
 		<Unit filename="BaseCircularBuffer.h" />
 		<Unit filename="BaseDispatcherPlugin.cpp" />

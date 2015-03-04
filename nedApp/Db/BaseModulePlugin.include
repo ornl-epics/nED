@@ -78,62 +78,68 @@ record(stringin, "$(P)HwDate")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))HwDate")
     field(VAL,  "Unknown")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)HwRev")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))HwRev")
     field(VAL,  "0")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)HwVerStr")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
 }
 record(longin, "$(P)HwVer")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))HwVer")
     field(VAL,  "0")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)HwVerStr")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
+}
+record(scalcout, "$(P)HwVerStr")
+{
+    field(DESC, "HW version concatenated")
+    field(INPA, "$(P)HwVer NPP MS")
+    field(INPB, "$(P)HwRev NPP MS")
+    field(CALC, "PRINTF('%i',A)+'.'+PRINTF('%i',B)")
 }
 record(stringin, "$(P)FwDate")
 {
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))FwDate")
     field(VAL,  "Unknown")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)FwRev")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))FwRev")
     field(VAL,  "0")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)FwVerStr")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
 }
 record(longin, "$(P)FwVer")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))FwVer")
     field(VAL,  "0")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)FwVerStr")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
 }
-record(fanout, "$(P)VerFanout")
+record(scalcout, "$(P)FwVerStr")
 {
-    field(DESC, "Version records fanout")
-    field(LNK1, "$(P)HwVer")
-    field(LNK2, "$(P)HwRev")
-    field(LNK3, "$(P)HwDate")
-    field(LNK4, "$(P)FwVer")
-    field(LNK5, "$(P)FwRev")
-    field(LNK6, "$(P)FwDate")
-}
-record(calcout, "$(P)VerProc")
-{
-    field(DESC, "Detect version query")
-    field(INPA, "$(P)CmdReq NPP")
-    field(INPB, "$(P)CmdRsp NPP")
-    field(CALC, "(A=2)&&(B=1)")
-    field(OUT,  "$(P)VerFanout.PROC")
-    field(OOPT, "When Non-zero")
-    field(OEVT, "1")
+    field(DESC, "FW version concatenated")
+    field(INPA, "$(P)FwVer NPP MS")
+    field(INPB, "$(P)FwRev NPP MS")
+    field(CALC, "PRINTF('%i',A)+'.'+PRINTF('%i',B)")
 }
 record(bi, "$(P)Supported")
 {

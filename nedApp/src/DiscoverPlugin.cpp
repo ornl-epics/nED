@@ -40,7 +40,7 @@ asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         setIntegerParam(Discovered, 0);
         setIntegerParam(Verified, 0);
         callParamCallbacks();
-        
+
         m_discovered.clear();
         reqDiscover(DasPacket::HWID_BROADCAST);
         return asynSuccess;
@@ -78,7 +78,7 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                 reqVersion(packet->getSourceAddress());
 
                 nDiscovered++;
-            
+
                 // The global LVDS discover packet should address all modules connected
                 // through LVDS. For some unidentified reason, ROC boards connected directly
                 // to DSP don't respond, whereas ROCs behind FEM do.
@@ -194,7 +194,7 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
     int ret;
     int length = size;
     uint32_t i = 1;
-    
+
     std::map<std::string, uint32_t> ids;
 
     for (std::map<uint32_t, ModuleDesc>::iterator it = m_discovered.begin(); it != m_discovered.end(); it++, i++) {
@@ -223,12 +223,12 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
 */
             default:                            plugin = "Unknown";         type = "unkn";    break;
         }
-        
+
         if (ids.find(type) == ids.end())
             ids.insert(std::pair<std::string, uint32_t>(type, 1));
         std::stringstream id;
         id << type << ids[type]++;
-        
+
         ret = snprintf(buffer, length, "{ PLUGIN=%s, ID=%s, IP=%s, VER=%d%d }\n",
                        plugin, id.str().c_str(), moduleId.c_str(), version.fw_version, version.fw_revision);
         if (ret == -1 || ret > length)
@@ -245,7 +245,7 @@ asynStatus DiscoverPlugin::readOctet(asynUser *pasynUser, char *value, size_t nC
     if (pasynUser->reason == Output) {
         int format = 0;
         getIntegerParam(Format, &format);
-        
+
         if (format == 0)
             *nActual = formatOutput(value, nChars);
         else

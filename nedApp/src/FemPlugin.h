@@ -47,23 +47,24 @@ class FemPlugin : public BaseModulePlugin {
          */
         static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
 
+        /**
+         * Member counterpart of parseVersionRsp().
+         *
+         * @see FemPlugin::parseVersionRsp()
+         */
+        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        {
+            return parseVersionRsp(packet, version);
+        }
+
+        /**
+         * Configured version must match actual.
+         *
+         * @return true when they match, false otherwise.
+         */
+        bool checkVersion(const BaseModulePlugin::Version &version);
+
     private: // functions
-        /**
-         * Verify the DISCOVER response is from ROC.
-         *
-         * @param[in] packet with response to DISCOVER
-         * @return true if packet was parsed and type of module is ROC.
-         */
-        bool rspDiscover(const DasPacket *packet);
-
-        /**
-         * Overrided READ_VERSION handler to parse FEM version
-         *
-         * @param[in] packet with response to READ_VERSION
-         * @return true if packet was parsed and module version verified.
-         */
-        bool rspReadVersion(const DasPacket *packet);
-
         /**
          * Create and register all status FEM10 parameters to be exposed to EPICS.
          */

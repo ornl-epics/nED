@@ -157,6 +157,7 @@ class BaseModulePlugin : public BasePlugin {
 
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
+        DasPacket::ModuleType m_hardwareType;           //!< Hardware type
         uint32_t m_statusPayloadLength;                 //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
         uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
         uint32_t m_configPayloadLength;                 //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParam()
@@ -194,6 +195,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] hardwareId Hardware ID of the module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
+         * @param[in] hardwareType Type of hardware module.
          * @param[in] behindDsp Is this module behind the DSP which transforms some of the packets?
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          * @param[in] numParams The number of parameters that the derived class supports.
@@ -201,7 +203,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
         BaseModulePlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId,
-                         bool behindDsp, int blocking=0, int numParams=0,
+                         DasPacket::ModuleType hardwareType, bool behindDsp, int blocking=0, int numParams=0,
                          int interfaceMask=BaseModulePlugin::defaultInterfaceMask,
                          int interruptMask=BaseModulePlugin::defaultInterruptMask);
 
@@ -656,6 +658,30 @@ class BaseModulePlugin : public BasePlugin {
          * @retval false not active
          */
         bool remoteUpgradeInProgress();
+
+        /**
+         * Try to parse READ_VERSION packet payload into a Version structure.
+         *
+         * There's no common version response payload. Every module uses
+         * different format. It's up to the derived class to provide proper
+         * parsing.
+         * Derived classes implement this function as static so it can be used
+         * withouth object context (ie. in DiscoverPlugin). However C++ prohibits
+         * overloading static functions, so this member function has an extra M
+         * at the end.
+         *
+         * @param[in] packet to be parsed
+         * @param[out] version structure to be populated
+         * @return true if succesful, false if version response packet could not be parsed.
+         */
+        virtual bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version) = 0;
+
+        /**
+         * Configured version must match actual.
+         *
+         * @return true when they match, false otherwise.
+         */
+        virtual bool checkVersion(const BaseModulePlugin::Version &version) = 0;
 
     private: // functions
         /**

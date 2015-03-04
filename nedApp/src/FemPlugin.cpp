@@ -35,7 +35,7 @@ struct RspReadVersion {
 };
 
 FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, true,
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_FEM, true,
                        blocking, NUM_FEMPLUGIN_PARAMS + NUM_FEMPLUGIN_DYNPARAMS)
     , m_version(version)
 {
@@ -70,12 +70,6 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
     callParamCallbacks();
 }
 
-bool FemPlugin::rspDiscover(const DasPacket *packet)
-{
-    return (BaseModulePlugin::rspDiscover(packet) &&
-            packet->cmdinfo.module_type == DasPacket::MOD_TYPE_FEM);
-}
-
 bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
     const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
@@ -97,30 +91,8 @@ bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
     return true;
 }
 
-bool FemPlugin::rspReadVersion(const DasPacket *packet)
+bool FemPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    char date[20];
-    BaseModulePlugin::Version version;
-
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    if (!parseVersionRsp(packet, version)) {
-        LOG_ERROR("Received unexpected READ_VERSION response for this FEM type");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.hw_year, version.hw_month, version.hw_day);
-    setStringParam(HwDate, date);
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    callParamCallbacks();
-
     if ((version.hw_version == 10 && version.hw_revision == 2) ||
         (version.hw_version == 10 && version.hw_revision == 9)) {
         char ver[10];
@@ -129,6 +101,5 @@ bool FemPlugin::rspReadVersion(const DasPacket *packet)
             return true;
     }
 
-    LOG_WARN("Unsupported ROC version");
     return false;
 }
