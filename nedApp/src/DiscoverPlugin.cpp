@@ -13,6 +13,7 @@
 #include "FemPlugin.h"
 #include "Log.h"
 #include "RocPlugin.h"
+#include "AdcRocPlugin.h"
 
 #include <cstring>
 #include <sstream>
@@ -39,7 +40,7 @@ asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         setIntegerParam(Discovered, 0);
         setIntegerParam(Verified, 0);
         callParamCallbacks();
-        
+
         m_discovered.clear();
         reqDiscover(DasPacket::HWID_BROADCAST);
         return asynSuccess;
@@ -77,7 +78,7 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                 reqVersion(packet->getSourceAddress());
 
                 nDiscovered++;
-            
+
                 // The global LVDS discover packet should address all modules connected
                 // through LVDS. For some unidentified reason, ROC boards connected directly
                 // to DSP don't respond, whereas ROCs behind FEM do.
@@ -110,6 +111,9 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                     break;
                 case DasPacket::MOD_TYPE_ROC:
                     RocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_ADCROC:
+                    AdcRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
                 default:
                     break;
@@ -158,6 +162,7 @@ uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_HROC:      type = "HROC";      break;
             case DasPacket::MOD_TYPE_IROC:      type = "IROC";      break;
             case DasPacket::MOD_TYPE_ROC:       type = "ROC";       break;
+            case DasPacket::MOD_TYPE_ADCROC:    type = "ADCROC";    break;
             case DasPacket::MOD_TYPE_SANSROC:   type = "SANSROC";   break;
             default:                            type = "unknown";
         }
@@ -189,7 +194,7 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
     int ret;
     int length = size;
     uint32_t i = 1;
-    
+
     std::map<std::string, uint32_t> ids;
 
     for (std::map<uint32_t, ModuleDesc>::iterator it = m_discovered.begin(); it != m_discovered.end(); it++, i++) {
@@ -204,6 +209,7 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_DSP:       plugin = "DspPlugin";       type = "dsp";     break;
             case DasPacket::MOD_TYPE_FEM:       plugin = "FemPlugin";       type = "fem";     break;
             case DasPacket::MOD_TYPE_ROC:       plugin = "RocPlugin";       type = "roc";     break;
+            case DasPacket::MOD_TYPE_ADCROC:    plugin = "AdcRocPlugin";    type = "adcroc";  break;
 /*
  * These are not yet supported
             case DasPacket::MOD_TYPE_AROC:      plugin = "ArocPlugin";      type = "aroc";    break;
@@ -217,12 +223,12 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
 */
             default:                            plugin = "Unknown";         type = "unkn";    break;
         }
-        
+
         if (ids.find(type) == ids.end())
             ids.insert(std::pair<std::string, uint32_t>(type, 1));
         std::stringstream id;
         id << type << ids[type]++;
-        
+
         ret = snprintf(buffer, length, "{ PLUGIN=%s, ID=%s, IP=%s, VER=%d%d }\n",
                        plugin, id.str().c_str(), moduleId.c_str(), version.fw_version, version.fw_revision);
         if (ret == -1 || ret > length)
@@ -239,7 +245,7 @@ asynStatus DiscoverPlugin::readOctet(asynUser *pasynUser, char *value, size_t nC
     if (pasynUser->reason == Output) {
         int format = 0;
         getIntegerParam(Format, &format);
-        
+
         if (format == 0)
             *nActual = formatOutput(value, nChars);
         else

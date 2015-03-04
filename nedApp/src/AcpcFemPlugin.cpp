@@ -36,7 +36,7 @@ struct RspReadVersion {
 
 
 AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, true,
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ACPCFEM, true,
                        blocking, NUM_ACPCFEMPLUGIN_PARAMS + NUM_ACPCFEMPLUGIN_DYNPARAMS)
     , m_version(version)
 {
@@ -50,35 +50,8 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
     callParamCallbacks();
 }
 
-bool AcpcFemPlugin::rspDiscover(const DasPacket *packet)
+bool AcpcFemPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    return (BaseModulePlugin::rspDiscover(packet) &&
-            packet->cmdinfo.module_type == DasPacket::MOD_TYPE_ACPCFEM);
-}
-
-bool AcpcFemPlugin::rspReadVersion(const DasPacket *packet)
-{
-    char date[20];
-
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    BaseModulePlugin::Version version;
-    if (!parseVersionRsp(packet, version)) {
-        LOG_WARN("Bad READ_VERSION response");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    setStringParam(HwDate, "");
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    callParamCallbacks();
-
     if (version.hw_version == 2 && version.hw_revision == 5 && version.fw_version == 2 && version.fw_revision == 2)
         return true;
 

@@ -60,6 +60,7 @@ CircularBuffer::~CircularBuffer()
 void CircularBuffer::clear()
 {
     m_consumer = m_producer = 0;
+    m_error = 0;
 }
 
 uint32_t CircularBuffer::push(void *data, uint32_t len)
@@ -104,6 +105,8 @@ uint32_t CircularBuffer::push(void *data, uint32_t len)
     m_producer += len;
     m_producer %= m_size;
     m_lock.unlock();
+
+    (void)BaseCircularBuffer::push(data, len);
 
     m_event.signal();
 
@@ -172,6 +175,8 @@ int CircularBuffer::consume(uint32_t len)
     m_consumer = (m_consumer + len) % m_size;
     m_lock.unlock();
 
+    (void)BaseCircularBuffer::consume(len);
+
     return 0;
 }
 
@@ -221,3 +226,4 @@ uint32_t CircularBuffer::size()
 {
     return m_size;
 }
+

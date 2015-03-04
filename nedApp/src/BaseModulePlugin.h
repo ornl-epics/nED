@@ -14,6 +14,7 @@
 #include "StateMachine.h"
 #include "Timer.h"
 
+#include <fstream>
 #include <map>
 
 #define SM_ACTION_CMD(a)        (a)
@@ -100,23 +101,26 @@ class BaseModulePlugin : public BasePlugin {
         };
 
         /**
-         * Structure describing the status parameters obtained from modules.
+         * Valid remote upgrade status values.
          */
-        struct StatusParamDesc {
-            uint32_t offset;        //!< An 4-byte offset within the payload
-            uint32_t shift;         //!< Position of the field bits within 32 bits dword at given offset
-            uint32_t width;         //!< Number of bits used for the value
+        enum RemoteUpgradeStatus {
+            UPGRADE_NOT_STARTED     = 0, //!< Remote upgrade not yet started
+            UPGRADE_IN_PROGRESS     = 1, //!< Remote upgrade currently in progress
+            UPGRADE_DONE            = 2, //!< All data sent and acknowledged by remote party
+            UPGRADE_CANCELED        = 3, //!< Canceled due to packet timeout or nack
+            UPGRADE_INIT_FAILED     = 4, //!< Failed to initialize
+            UPGRADE_USER_ABORT      = 5, //!< Aborted by user
         };
 
         /**
-         * Structure describing the config parameters obtained from modules.
+         * Structure describing the status parameters obtained from modules.
          */
-        struct ConfigParamDesc {
-            char section;           //!< Section name
-            uint32_t offset;        //!< An 4-byte offset within the section
+        struct ParamDesc {
+            uint32_t offset;        //!< An 4-byte offset within the payload
             uint32_t shift;         //!< Position of the field bits within 32 bits dword at given offset
             uint32_t width;         //!< Number of bits used for the value
-            int initVal;            //!< Initial value after object is created or configuration reset is being requested
+            char section;           //!< Section name (only for configuration params)
+            int initVal;            //!< Initial value after object is created or configuration reset is being requested (config only)
         };
 
         struct Version {
@@ -153,12 +157,17 @@ class BaseModulePlugin : public BasePlugin {
 
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
+        DasPacket::ModuleType m_hardwareType;           //!< Hardware type
         uint32_t m_statusPayloadLength;                 //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
         uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
         uint32_t m_configPayloadLength;                 //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParam()
-        std::map<int, StatusParamDesc> m_statusParams;  //!< Map of exported status parameters
-        std::map<int, StatusParamDesc> m_counterParams; //!< Map of exported status counter parameters
-        std::map<int, ConfigParamDesc> m_configParams;  //!< Map of exported config parameters
+        uint32_t m_upgradePayloadLength;                //!< Size in bytes of the PROGRAM response payload, calculated dynamically by linkUpgradeParam()
+        uint32_t m_temperaturePayloadLength;            //!< Size in bytes of the READ_TEMPERATURE response payload, calculated dynamically by createTempParam()
+        std::map<int, ParamDesc> m_statusParams;        //!< Map of exported status parameters
+        std::map<int, ParamDesc> m_counterParams;       //!< Map of exported status counter parameters
+        std::map<int, ParamDesc> m_configParams;        //!< Map of exported config parameters
+        std::map<int, ParamDesc> m_upgradeParams;       //!< Map of exported remote upgrade parameters
+        std::map<int, ParamDesc> m_temperatureParams;   //!< Map of exported temperature parameters
         StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
 
@@ -167,6 +176,13 @@ class BaseModulePlugin : public BasePlugin {
         std::map<char, uint32_t> m_configSectionSizes;  //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
         std::map<char, uint32_t> m_configSectionOffsets;//!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
         std::shared_ptr<Timer> m_timeoutTimer;          //!< Currently running timer for response timeout handling
+        struct {
+            bool inProgress;        //!< Remote upgrade currently in progress
+            std::ifstream file;     //!< Firmware image file path, stays opened while in progress
+            uint32_t *buffer;       //!< Buffer to read data into
+            int bufferSize;         //!< Buffer size in bytes, (re)allocated when inProgress transitions to true
+            int position;           //!< Current file position, used as progress
+        } m_remoteUpgrade;          //!< Remote upgrade context
 
     public: // functions
 
@@ -179,6 +195,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] hardwareId Hardware ID of the module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
+         * @param[in] hardwareType Type of hardware module.
          * @param[in] behindDsp Is this module behind the DSP which transforms some of the packets?
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          * @param[in] numParams The number of parameters that the derived class supports.
@@ -186,7 +203,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
         BaseModulePlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId,
-                         bool behindDsp, int blocking=0, int numParams=0,
+                         DasPacket::ModuleType hardwareType, bool behindDsp, int blocking=0, int numParams=0,
                          int interfaceMask=BaseModulePlugin::defaultInterfaceMask,
                          int interruptMask=BaseModulePlugin::defaultInterruptMask);
 
@@ -207,6 +224,11 @@ class BaseModulePlugin : public BasePlugin {
          * @return asynSuccess on success, asynError otherwise
          */
         virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
+         * Handle writing strings.
+         */
+        virtual asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
 
         /**
          * Create a packet and send it through dispatcher to the OCC board
@@ -438,6 +460,51 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspStop(const DasPacket *packet);
 
         /**
+         * Send part of the new firmware image as one packet.
+         *
+         * The firmware image is split into packets based on UpgradePktSize
+         * parameter. On first packet, the remote upgrade sequence is
+         * initialized.
+         * Updates the UpgradeStatus parameter for every relevant change.
+         *
+         * @image html Remote_Upgrade_SM.png
+         * @image latex Remote_Upgrade_SM.png width=6in
+         * @return DasPacket::CMD_UPGRADE or 0 when no packet was sent for some reason.
+         */
+        virtual DasPacket::CommandType reqUpgrade();
+
+        /**
+         * Default handler for CMD_UPGRADE response.
+         *
+         * Verifies that the remote module accepted partial firmware packet.
+         * On last packet it the remote upgrade sequence is stopped.
+         * Updates the UpgradeStatus parameter for every relevant change.
+         *
+         * @retval true Remote module acknowledged reception.
+         * @retval false Timeout has occurred or remote module refused packet.
+         */
+        virtual bool rspUpgrade(const DasPacket *packet);
+
+        /**
+         * Called when read temperature request to the module should be made.
+         *
+         * Base implementation simply sends a READ_TEMP command and sets up
+         * timeout callback.
+         *
+         * @return Response to wait for.
+         */
+        virtual DasPacket::CommandType reqReadTemperature();
+
+        /**
+         * Default handler for READ_TEMP response.
+         *
+         * Read the packet payload and populate temperature parameters.
+         *
+         * @param[in] packet with response to READ_TEMP
+         * @return true if packet was parsed and temperature extracted.
+         */
+        virtual bool rspReadTemperature(const DasPacket *packet);
+        /**
          * Create and register single integer status parameter.
          *
          * Status parameter is an individual status entity exported by module.
@@ -469,6 +536,28 @@ class BaseModulePlugin : public BasePlugin {
          * Create and register single integer config parameter.
          */
         void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
+
+        /**
+         * Create and register single integer temperature parameter.
+         *
+         * Temperature values are returned in READ_TEMPERATURE response payload.
+         */
+        void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
+
+        /**
+         * Link existing parameter to upgrade parameters table.
+         *
+         * Useful when two hardware registers in two different response types
+         * have the same meaning and need to be merged into one plugin parameter.
+         * When either of the responses is received, only one parameter gets
+         * updated.
+         *
+         * @param[in] name must be any previously created parameter.
+         * @param[in] offset word/dword offset within the payload.
+         * @param[in] nBits Width of the parameter in number of bits.
+         * @param[in] shift Starting bit position within the word/dword.
+         */
+        void linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
 
         /**
          * Convert IP or hex string into 4 byte hardware address.
@@ -526,11 +615,96 @@ class BaseModulePlugin : public BasePlugin {
          */
         bool cancelTimeoutCallback();
 
+        /**
+         * Initialize remote upgrade sequence.
+         *
+         * Opens the file and determines its length. UpgradeSize and UpgradeLen
+         * PVs are updated. Next buffer for each packet is allocated based on
+         * user provided value, rounded to nearest power of 2. Finally the
+         * upgrade in progress flag is set, which prevents starting second
+         * upgrade sequence.
+         *
+         * @return true when initialized, false on any error.
+         */
+        bool remoteUpgradeStart();
+
+        /**
+         * Read some data from file and send it to remote party.
+         *
+         * Read data into previously allocated buffer and ship it.
+         *
+         * @return false when no more data to send.
+         */
+        bool remoteUpgradeSend();
+
+        /**
+         * Test for more data to send.
+         *
+         * @return true when some data available, false otherwise.
+         */
+        bool remoteUpgradeDone();
+
+        /**
+         * Stop current remote upgrade sequence.
+         *
+         * Must be called before initiating new sequence.
+         */
+        void remoteUpgradeStop();
+
+        /**
+         * Check whether remote upgrade sequence is active.
+         *
+         * @retval true active
+         * @retval false not active
+         */
+        bool remoteUpgradeInProgress();
+
+        /**
+         * Try to parse READ_VERSION packet payload into a Version structure.
+         *
+         * There's no common version response payload. Every module uses
+         * different format. It's up to the derived class to provide proper
+         * parsing.
+         * Derived classes implement this function as static so it can be used
+         * withouth object context (ie. in DiscoverPlugin). However C++ prohibits
+         * overloading static functions, so this member function has an extra M
+         * at the end.
+         *
+         * @param[in] packet to be parsed
+         * @param[out] version structure to be populated
+         * @return true if succesful, false if version response packet could not be parsed.
+         */
+        virtual bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version) = 0;
+
+        /**
+         * Configured version must match actual.
+         *
+         * @return true when they match, false otherwise.
+         */
+        virtual bool checkVersion(const BaseModulePlugin::Version &version) = 0;
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.
          */
         void recalculateConfigParams();
+
+        /**
+         * Method parses packet payload and extracts parameter values.
+         *
+         * This generic method works for status, counter and configuration
+         * parameters. For every parameter in the table, it finds the matching
+         * value in the packet payload and assign it as new parameter value.
+         * When section offsets table is given, the parameter offset is
+         * considered relative to the section it belongs.
+         *
+         * @param[in] packet to be parsed
+         * @param[in] table of paramaters to be matched
+         * @param[in] sectOffsets is a able of section offsets.
+         */
+        void extractParams(const DasPacket *packet,
+                           const std::map<int, ParamDesc> &table,
+                           const std::map<char, uint32_t> &sectOffsets=std::map<char, uint32_t>());
 
     protected:
         #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
@@ -547,7 +721,13 @@ class BaseModulePlugin : public BasePlugin {
         int Supported;      //!< Flag whether module is supported
         int Verified;       //!< Hardware id, version and type all verified
         int CfgSection;     //!< Selected configuration section to be written
-        #define LAST_BASEMODULEPLUGIN_PARAM CfgSection
+        int UpgradeFile;    //!< New firmware file to be programed
+        int UpgradePktSize; //!< Max payload size for split transfer
+        int UpgradeStatus;  //!< Remote upgrade status
+        int UpgradeSize;    //!< Total firmware size in bytes
+        int UpgradePos;     //!< Bytes already sent to remote party
+        int UpgradeAbort;   //!< Abort current upgrade sequence
+        #define LAST_BASEMODULEPLUGIN_PARAM UpgradeAbort
 };
 
 #endif // BASE_MODULE_PLUGIN_H

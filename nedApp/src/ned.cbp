@@ -50,6 +50,9 @@
 		<Unit filename="AcpcPvaPlugin.h" />
 		<Unit filename="AdaraPlugin.cpp" />
 		<Unit filename="AdaraPlugin.h" />
+		<Unit filename="AdcRocPlugin.cpp" />
+		<Unit filename="AdcRocPlugin.h" />
+		<Unit filename="BaseCircularBuffer.cpp" />
 		<Unit filename="BaseCircularBuffer.h" />
 		<Unit filename="BaseDispatcherPlugin.cpp" />
 		<Unit filename="BaseDispatcherPlugin.h" />
@@ -65,6 +68,7 @@
 		<Unit filename="CircularBuffer.h" />
 		<Unit filename="CmdDispatcher.cpp" />
 		<Unit filename="CmdDispatcher.h" />
+		<Unit filename="Common.cpp" />
 		<Unit filename="Common.h" />
 		<Unit filename="DasPacket.cpp" />
 		<Unit filename="DasPacket.h" />
@@ -90,7 +94,9 @@
 		<Unit filename="FemPlugin_v32.cpp" />
 		<Unit filename="FemPlugin_v35.cpp" />
 		<Unit filename="FemPlugin_v36.cpp" />
+		<Unit filename="FemPlugin_v37.cpp" />
 		<Unit filename="Fifo.h" />
+		<Unit filename="GlobalCon.st" />
 		<Unit filename="Log.h" />
 		<Unit filename="OccPortDriver.cpp" />
 		<Unit filename="OccPortDriver.h" />

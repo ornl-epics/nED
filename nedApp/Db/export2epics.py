@@ -29,6 +29,7 @@ def parse_one(type, params_str, desc_str, extra_str):
         'status':  [ "name", "offset", "width", "bit_offset" ],
         'counter': [ "name", "offset", "width", "bit_offset" ],
         'config':  [ "name", "section", "section_offset", "width", "bit_offset", "default" ],
+        'temp':    [ "name", "offset", "width", "bit_offset" ],
     }
 
     params = map(lambda x: x.strip(" \t\"\'"), params_str.split(","))
@@ -53,6 +54,10 @@ def parse_one(type, params_str, desc_str, extra_str):
                 param['prec'] = e[5:].strip(" ")
             elif e.startswith("unit:"):
                 param['unit'] = e[5:].strip(" ")
+            elif e.startswith("low:"):
+                param['low'] = e[4:].strip(" ")
+            elif e.startswith("high:"):
+                param['high'] = e[5:].strip(" ")
             elif "=" in e:
                 if "options" not in param:
                     param['options'] = []
@@ -77,6 +82,7 @@ def parse_src_file(path, verbose=False):
         'status':  re.compile("createStatusParam\s*\((.*)\);(.*)$"),
         'counter': re.compile("createCounterParam\s*\((.*)\);(.*)$"),
         'config':  re.compile("createConfigParam\s*\((.*)\);(.*)$"),
+        'temp':    re.compile("createTempParam\s*\((.*)\);(.*)$"),
     }
     re_desc = re.compile("\s*//\s*([^\(]*)(.*)$")
 
@@ -141,6 +147,12 @@ def _longinlongout_val(param, outfile):
         outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
     if "unit" in param:
         outfile.write("    field(EGU,  \"{0}\")\n".format(param['unit']))
+    if "low" in param:
+        outfile.write("    field(LOW,  \"{0}\")\n".format(param['low']))
+        outfile.write("    field(LSV,  \"MAJOR\")\n")
+    if "high" in param:
+        outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
+        outfile.write("    field(HSV,  \"MAJOR\")\n")
 
 def generate_out_db_record(param, outfile):
     if "options" in param:
@@ -229,10 +241,7 @@ def generate_in_db_record(param, outfile):
         outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
         outfile.write("    field(INPA, \"$(P){0}_Raw NPP\")\n".format(param['name']))
         outfile.write("    field(CALC, \"{0}\")\n".format(param['calc']))
-        if "unit" in param:
-            outfile.write("    field(EGU,  \"{0}\")\n".format(param['unit']))
-        if "prec" in param:
-            outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
+        _longinlongout_val(param, outfile)
         outfile.write("}\n")
 
         outfile.write("record({0}, \"$(P){1}_Raw\")\n".format(type, param['name']))

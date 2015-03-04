@@ -2,6 +2,7 @@ include "BasePlugin.include"
 
 record(bo, "$(P)Enable")
 {
+    info(archive, "Scan, 00:01:00")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
 }

@@ -18,7 +18,10 @@ struct occ_handle;
  * A DMA circular buffer class.
  *
  * The DmaCircularBuffer works directly with the DMA buffer populated by the OCC
- * board. It does not make any copy of the data whatsoever. See occlib.h for details.
+ * board. It does not make any copy of the data whatsoever. See occlib.h for
+ * details.
+ * There's no push() function implemented, instead OCC board pushes data to the
+ * buffer directly. Push rate is always 0.
  */
 class DmaCircularBuffer : public BaseCircularBuffer {
     public:
