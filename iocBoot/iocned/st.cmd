@@ -2,8 +2,8 @@
 
 < envPaths
 
-epicsEnvSet("IOCNAME", "bl99-Det-nED")
-epicsEnvSet("PREFIX", "BL99:Det:")
+epicsEnvSet("IOCNAME", "bl100-Det-nED")
+epicsEnvSet("PREFIX", "BL100:Det:")
 epicsEnvSet("STREAM_PROTOCOL_PATH", "../../protocol/")
 epicsEnvSet("NED", "../..")
 
@@ -38,8 +38,8 @@ set_pass1_restoreFile("$(IOCNAME).sav")
 dbLoadRecords("$(NED)/db/nEDCommon.db","P=$(PREFIX)")
 
 ## Load record instances
-OccConfigure("occ", "/dev/snsocb1", 40000000)
-dbLoadRecords("$(NED)/db/OccPortDriver.db","P=$(PREFIX)occ:,PORT=occ")
+OccConfigure("occ", "/dev/snsocb0", 40000000)
+dbLoadRecords("$(NED)/db/OccPortDriver.db","P=$(PREFIX)occ1:,PORT=occ")
 
 CmdDispatcherConfigure("cmd", "occ")
 dbLoadRecords("$(NED)/db/CmdDispatcherPlugin.db","P=$(PREFIX)cmd:,PORT=cmd")
@@ -61,20 +61,20 @@ DspPluginConfigure("Dsp1", "cmd", "21.250.118.223", "v63", 0)
 dbLoadRecords("$(NED)/db/DspPlugin_v63.db","P=$(PREFIX)dsp1:,PORT=Dsp1")
 
 DiscoverPluginConfigure("Disc", "occ")
-dbLoadRecords("$(NED)/db/DiscoverPlugin.db","P=$(PREFIX)disc:,PORT=Disc")
+dbLoadRecords("$(NED)/db/DiscoverPlugin.db","P=$(PREFIX)disc1:,PORT=Disc")
 
 RocPluginConfigure("roc1", "cmd", "20.39.216.73", "v52", 0)
 #dbLoadRecords("$(NED)/db/ROCHV.db","P=$(PREFIX)HV1,G=$(PREFIX)HVG,PORT=roc1")
 dbLoadRecords("$(NED)/db/RocPlugin_v52.db","P=$(PREFIX)roc1:,PORT=roc1")
 
 DumpPluginConfigure("dump", "occ", 0)
-dbLoadRecords("$(NED)/db/DumpPlugin.db","P=$(PREFIX)dump:,PORT=dump")
+dbLoadRecords("$(NED)/db/DumpPlugin.db","P=$(PREFIX)dump1:,PORT=dump")
 
 StatPluginConfigure("stat", "occ", 0)
-dbLoadRecords("$(NED)/db/StatPlugin.db","P=$(PREFIX)stat:,PORT=stat")
+dbLoadRecords("$(NED)/db/StatPlugin.db","P=$(PREFIX)stat1:,PORT=stat")
 
 RtdlPluginConfigure("rtdl", "occ", 0)
-dbLoadRecords("$(NED)/db/RtdlPlugin.db","P=$(PREFIX)rtdl:,PORT=rtdl")
+dbLoadRecords("$(NED)/db/RtdlPlugin.db","P=$(PREFIX)rtdl1:,PORT=rtdl")
 
 FemPluginConfigure("fem1", "cmd", "0x603B0817", "v22", 1)
 dbLoadRecords("$(NED)/db/FemPlugin_v32.db","P=$(PREFIX)fem1:,PORT=fem1")
@@ -82,8 +82,14 @@ dbLoadRecords("$(NED)/db/FemPlugin_v32.db","P=$(PREFIX)fem1:,PORT=fem1")
 AcpcFemPluginConfigure("fem2", "cmd", "20.128.234.122", "v22", 0)
 dbLoadRecords("$(NED)/db/AcpcFemPlugin_v22.db","P=$(PREFIX)fem2:,PORT=fem2")
 
+AcpcPluginConfigure("acpc1", "cmd", "19.168.97.176", "v144", 0)
+dbLoadRecords("$(NED)/db/AcpcPlugin_v144.db","P=$(PREFIX)acpc1:,PORT=acpc1")
+
+ArocPluginConfigure("aroc1", "cmd", "14.88.10.147", "v23", 0)
+dbLoadRecords("$(NED)/db/ArocPlugin_v23.db","P=$(PREFIX)aroc1:,PORT=roc1")
+
 DebugPluginConfigure("gm", "cmd", 0)
-dbLoadRecords("$(NED)/db/DebugPlugin.db","P=$(PREFIX)gm:,PORT=gm")
+dbLoadRecords("$(NED)/db/DebugPlugin.db","P=$(PREFIX)dbg1:,PORT=gm")
 
 FlatFieldPluginConfigure("ff", "occ", 0)
 dbLoadRecords("$(NED)/db/FlatFieldPlugin.db","P=$(PREFIX)ff:,PORT=ff")

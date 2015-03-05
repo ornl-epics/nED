@@ -45,13 +45,16 @@
 		<Unit filename="AcpcFemPlugin_v22.cpp" />
 		<Unit filename="AcpcPlugin.cpp" />
 		<Unit filename="AcpcPlugin.h" />
-		<Unit filename="AcpcPlugin_v41.cpp" />
+		<Unit filename="AcpcPlugin_v144.cpp" />
 		<Unit filename="AcpcPvaPlugin.cpp" />
 		<Unit filename="AcpcPvaPlugin.h" />
 		<Unit filename="AdaraPlugin.cpp" />
 		<Unit filename="AdaraPlugin.h" />
 		<Unit filename="AdcRocPlugin.cpp" />
 		<Unit filename="AdcRocPlugin.h" />
+		<Unit filename="ArocPlugin.cpp" />
+		<Unit filename="ArocPlugin.h" />
+		<Unit filename="ArocPlugin_v23.cpp" />
 		<Unit filename="BaseCircularBuffer.cpp" />
 		<Unit filename="BaseCircularBuffer.h" />
 		<Unit filename="BaseDispatcherPlugin.cpp" />

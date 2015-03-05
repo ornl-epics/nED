@@ -8,26 +8,30 @@
  */
 
 #include "AcpcPlugin.h"
+#include "Common.h"
 #include "Log.h"
-
-#define HEX_BYTE_TO_DEC(a)      ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
 
 EPICS_REGISTER_PLUGIN(AcpcPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned AcpcPlugin::NUM_ACPCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+const unsigned AcpcPlugin::NUM_ACPCPLUGIN_DYNPARAMS       = 260;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
 
 /**
  * ACPC version response format
  */
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
-    unsigned hw_revision:8;     // Board revision number
-    unsigned hw_version:8;      // Board version number
-    unsigned fw_revision:8;     // Firmware revision number
-    unsigned fw_version:8;      // Firmware version number
-    unsigned year:16;           // Year
-    unsigned day:8;             // Day
-    unsigned month:8;           // Month
+    unsigned hw_revision:8;     //!< Board revision number
+    unsigned hw_version:8;      //!< Board version number
+    unsigned hw_year:16;        //!< Board year
+    unsigned hw_day:8;          //!< Board day
+    unsigned hw_month:8;        //!< Board month
+    unsigned fw_revision:8;     //!< Firmware revision number
+    unsigned fw_version:8;      //!< Firmware version number
+    unsigned fw_year:16;        //!< Firmware year
+    unsigned fw_day:8;          //!< Firmware day
+    unsigned fw_month:8;        //!< Firmware month
+    unsigned filler1:32;        //!< Not used
+    unsigned filler2:32;        //!< Not used
 #else
 #error Missing RspReadVersion declaration
 #endif // BITFIELD_LSB_FIRST
@@ -39,15 +43,14 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, con
     , m_version(version)
 {
     if (0) {
-    } else if (m_version == "v41") {
+    } else if (m_version == "v144") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v41();
-        createConfigParams_v41();
+        createStatusParams_v144();
+        createConfigParams_v144();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ACPC version '%s'", version);
     }
-    setIntegerParam(HwType, DasPacket::MOD_TYPE_ACPC);
 
     LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
 
@@ -75,14 +78,14 @@ bool AcpcPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Vers
 
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;
-    version.hw_year     = 0;
-    version.hw_month    = 0;
-    version.hw_day      = 0;
+    version.hw_year     = HEX_BYTE_TO_DEC(response->hw_year) + 2000;
+    version.hw_month    = HEX_BYTE_TO_DEC(response->hw_month);
+    version.hw_day      = HEX_BYTE_TO_DEC(response->hw_day);
     version.fw_version  = response->fw_version;
     version.fw_revision = response->fw_revision;
-    version.fw_year     = HEX_BYTE_TO_DEC(response->year >> 8) * 100 + HEX_BYTE_TO_DEC(response->year);
-    version.fw_month    = HEX_BYTE_TO_DEC(response->month);
-    version.fw_day      = HEX_BYTE_TO_DEC(response->day);
+    version.fw_year     = HEX_BYTE_TO_DEC(response->fw_year) + 2000;
+    version.fw_month    = HEX_BYTE_TO_DEC(response->fw_month);
+    version.fw_day      = HEX_BYTE_TO_DEC(response->fw_day);
 
     return true;
 }

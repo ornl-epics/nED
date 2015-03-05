@@ -17,7 +17,7 @@
  * ACPC 4.01 is Miljkos firmware that produces good X,Y position in normal mode.
  */
 
-void AcpcPlugin::createStatusParams_v41()
+void AcpcPlugin::createStatusParams_v144()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                            | EPICS record description | (bi and mbbi description)
     createStatusParam("Ctrl:RxFlg",         0x0,  8,  0); // CTRL error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
@@ -210,29 +210,29 @@ void AcpcPlugin::createStatusParams_v41()
     createStatusParam("SortHasData",       0x21,  1, 12); // Sort data available           (0=no data,1=has data)
 }
 
-void AcpcPlugin::createConfigParams_v41()
+void AcpcPlugin::createConfigParams_v144()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",      '1',  0x0, 32,  0,    0); // Chan1 position index
 
-    createConfigParam("Ch1:RisingEdge",   'B',  0x0,  2,  0,    0); // Chan1 Rising Edge
-    createConfigParam("Ch2:RisingEdge",   'B',  0x0,  2,  2,    0); // Chan2 Rising Edge
-    createConfigParam("Ch3:RisingEdge",   'B',  0x0,  2,  4,    0); // Chan3 Rising Edge
-    createConfigParam("Ch4:RisingEdge",   'B',  0x0,  2,  6,    0); // Chan4 Rising Edge
-    createConfigParam("Ch5:RisingEdge",   'B',  0x0,  2,  8,    0); // Chan5 Rising Edge
-    createConfigParam("Ch6:RisingEdge",   'B',  0x0,  2, 10,    0); // Chan6 Rising Edge
-    createConfigParam("Ch7:RisingEdge",   'B',  0x0,  2, 12,    0); // Chan7 Rising Edge
-    createConfigParam("Ch8:RisingEdge",   'B',  0x0,  2, 14,    0); // Chan8 Rising Edge
-    createConfigParam("Ch9:RisingEdge",   'B',  0x1,  2,  0,    0); // Chan9 Rising Edge
+    createConfigParam("Ch1:Mode",         'B',  0x0,  2,  0,    2); // Chan1 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
+    createConfigParam("Ch2:Mode",         'B',  0x0,  2,  2,    2); // Chan2 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
+    createConfigParam("Ch3:Mode",         'B',  0x0,  2,  4,    2); // Chan3 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
+    createConfigParam("Ch4:Mode",         'B',  0x0,  2,  6,    2); // Chan4 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
+    createConfigParam("Ch5:Mode",         'B',  0x0,  2,  8,    2); // Chan5 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
+    createConfigParam("Ch6:Mode",         'B',  0x0,  2, 10,    2); // Chan6 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
+    createConfigParam("Ch7:Mode",         'B',  0x0,  2, 12,    2); // Chan7 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
+    createConfigParam("Ch8:Mode",         'B',  0x0,  2, 14,    2); // Chan8 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
+    createConfigParam("Ch9:Mode",         'B',  0x1,  2,  0,    2); // Chan9 mode                    (0=fall edge late,1=fall edge early,2=rise edge,3=rise edge late)
 
-    createConfigParam("PromptPlsRej1",    'C',  0x0, 32,  0,    0); // Prompt pulse reject range 1 - TODO: verify register width
-    createConfigParam("PromptPlsRej2",    'C',  0x2, 32,  0,    0); // Prompt pulse reject range 2 - TODO: verify register width
-    createConfigParam("PromptPlsRej3",    'C',  0x4, 32,  0,    0); // Prompt pulse reject range 3 - TODO: verify register width
-    createConfigParam("PromptPlsRej4",    'C',  0x6, 32,  0,    0); // Prompt pulse reject range 4 - TODO: verify register width
-    createConfigParam("PromptPlsRej5",    'C',  0x8, 32,  0,    0); // Prompt pulse reject range 5 - TODO: verify register width
-    createConfigParam("PromptPlsRej6",    'C',  0xA, 32,  0,    0); // Prompt pulse reject range 6 - TODO: verify register width
-    createConfigParam("PromptPlsRej7",    'C',  0xC, 32,  0,    0); // Prompt pulse reject range 7 - TODO: verify register width
-    createConfigParam("PromptPlsRej8",    'C',  0xE, 32,  0,    0); // Prompt pulse reject range 8 - TODO: verify register width
+    createConfigParam("PromptPlsRej1",    'C',  0x0, 32,  0, 0xFFFFFFFF); // Prompt pulse reject range 1 - TODO: verify register width
+    createConfigParam("PromptPlsRej2",    'C',  0x2, 32,  0, 0xFFFFFFFF); // Prompt pulse reject range 2 - TODO: verify register width
+    createConfigParam("PromptPlsRej3",    'C',  0x4, 32,  0, 0xFFFFFFFF); // Prompt pulse reject range 3 - TODO: verify register width
+    createConfigParam("PromptPlsRej4",    'C',  0x6, 32,  0, 0xFFFFFFFF); // Prompt pulse reject range 4 - TODO: verify register width
+    createConfigParam("PromptPlsRej5",    'C',  0x8, 32,  0, 0xFFFFFFFF); // Prompt pulse reject range 5 - TODO: verify register width
+    createConfigParam("PromptPlsRej6",    'C',  0xA, 32,  0, 0xFFFFFFFF); // Prompt pulse reject range 6 - TODO: verify register width
+    createConfigParam("PromptPlsRej7",    'C',  0xC, 32,  0, 0xFFFFFFFF); // Prompt pulse reject range 7 - TODO: verify register width
+    createConfigParam("PromptPlsRej8",    'C',  0xE, 32,  0, 0xFFFFFFFF); // Prompt pulse reject range 8 - TODO: verify register width
 
     createConfigParam("RelPosition1",     'D',  0x0, 32,  0,    0); // Relative position 1         - TODO: verify register width
     createConfigParam("RelPosition2",     'D',  0x2, 32,  0,    0); // Relative position 2         - TODO: verify register width
@@ -260,23 +260,23 @@ void AcpcPlugin::createConfigParams_v41()
     createConfigParam("RelPosition24",    'D', 0x2E, 32,  0,    0); // Relative position 24        - TODO: verify register width
 
     createConfigParam("ScaleInit",        'E',  0x0, 32,  0,    0); // Scale init                  - TODO: verify register width
-    createConfigParam("NumIter",          'E',  0x2,  5,  0,    0); // Max number of iters         - TODO: verify name & desc
+    createConfigParam("NumIter",          'E',  0x2,  5,  0,    7); // Max number of iters         - TODO: verify name & desc
     createConfigParam("IterInit",         'E',  0x2,  6,  5,    0); // Iter init                   - TODO: verify name & desc
-    createConfigParam("IterUp",           'E',  0x2,  4, 11,    0); // Iter up                     - TODO: verify name & desc
-    createConfigParam("IterDown",         'E',  0x2,  4, 15,    0); // Iter down                   - TODO: verify name & desc
+    createConfigParam("IterUp",           'E',  0x2,  4, 11,    3); // Iter up                     - TODO: verify name & desc
+    createConfigParam("IterDown",         'E',  0x2,  4, 15,    1); // Iter down                   - TODO: verify name & desc
     createConfigParam("InitScaleFactor",  'E',  0x3,  2,  3,    0); // Init scale factor           - TODO: verify name & desc
-    createConfigParam("InitCalcPoints",   'E',  0x3,  2,  5,    0); // Init calc points            - TODO: verify name & desc
-    createConfigParam("EdgeCalcPoints",   'E',  0x3,  2,  7,    0); // Edge calc points            - TODO: verify name & desc
-    createConfigParam("BesEdgeCalcPoints",'E',  0x3,  2,  9,    0); // Beside edge calc points     - TODO: verify name & desc
+    createConfigParam("InitCalcPoints",   'E',  0x3,  2,  5,    3); // Init calc points            - TODO: verify name & desc
+    createConfigParam("EdgeCalcPoints",   'E',  0x3,  2,  7,    2); // Edge calc points            - TODO: verify name & desc
+    createConfigParam("BesEdgeCalcPoints",'E',  0x3,  2,  9,    2); // Beside edge calc points     - TODO: verify name & desc
     createConfigParam("SkipCalcs",        'E',  0x3,  1, 11,    0); // Skip calculations           - TODO: verify name & desc
     createConfigParam("DeltaInvert",      'E',  0x3,  2, 12,    0); // Delta invert                - TODO: verify name & desc
     createConfigParam("GdsInvert",        'E',  0x3,  1, 14,    0); // GDS invert                  - TODO: verify name & desc
-    createConfigParam("DebugAddr1",       'E',  0x4,  5,  0,    0); // Debug address 1
-    createConfigParam("DebugAddr2",       'E',  0x4,  5,  5,    0); // Debug address 2             - TODO: verify offset
-    createConfigParam("DebugAddr3",       'E',  0x4,  5, 10,    0); // Debug address 3             - TODO: verify offset
-    createConfigParam("DebugAddr4",       'E',  0x4,  5, 15,    0); // Debug address 4             - TODO: verify offset
-    createConfigParam("DebugAddr5",       'E',  0x5,  5,  4,    0); // Debug address 5             - TODO: verify offset
-    createConfigParam("DebugAddr6",       'E',  0x5,  5,  9,    0); // Debug address 6             - TODO: verify offset
+    createConfigParam("DebugAddr1",       'E',  0x4,  5,  0,    7); // Debug address 1
+    createConfigParam("DebugAddr2",       'E',  0x4,  5,  5,    6); // Debug address 2             - TODO: verify offset
+    createConfigParam("DebugAddr3",       'E',  0x4,  5, 10,   15); // Debug address 3             - TODO: verify offset
+    createConfigParam("DebugAddr4",       'E',  0x4,  5, 15,   14); // Debug address 4             - TODO: verify offset
+    createConfigParam("DebugAddr5",       'E',  0x5,  5,  4,    8); // Debug address 5             - TODO: verify offset
+    createConfigParam("DebugAddr6",       'E',  0x5,  5,  9,    5); // Debug address 6             - TODO: verify offset
     createConfigParam("DebugMtxDis",      'E',  0x5,  1, 30,    0); // Disable MTX debug           (0=enabled,1=disabled)
     createConfigParam("DebugLvmrDis",     'E',  0x5,  1, 31,    0); // Disable LVMR debug          (0=enabled,1=disabled)
     createConfigParam("DebugMtrOutput",   'E',  0x6,  3,  0,    0); // MTR debug output
@@ -284,30 +284,30 @@ void AcpcPlugin::createConfigParams_v41()
     createConfigParam("DebugStep",        'E',  0x6,  2,  5,    0); // MTR debug output
     createConfigParam("DebugWrenDis",     'E',  0x6,  1,  7,    0); // MTR debug output            (0=enabled,1=disabled)
     createConfigParam("SkipCalcMain",     'E',  0x6,  1,  8,    0); // Skip main calc              (0=enabled,1=disabled)
-    createConfigParam("InitPosShift",     'E',  0x7,  6,  0,    0); // Init position shift
-    createConfigParam("DivideShiftCnt",   'E',  0x7,  6,  6,    0); // Divide shift count
-    createConfigParam("OffsetCorrEn",     'E',  0x8,  1,  0,    0); // Offset correction enable    (0=disabled,1=enabled)
-    createConfigParam("SendPhotosum",     'E',  0x8,  1,  1,    0); // Send photosum               (0=disabled,1=enabled)
-    createConfigParam("Tbd",              'E',  0x8,  6,  2,    0); // TODO: One or many registers
-    createConfigParam("LowerPhotoSum",    'E',  0x9, 28,  0,    0); // Lower PhotoSum
-    createConfigParam("UpperPhotoSum",    'E', 0x11, 28,  0,    0); // Upper PhotoSum
-    createConfigParam("TsyncDelay",       'E', 0x13, 32,  0,    0); // TSYNC delay
-    createConfigParam("TimeRange",        'E', 0x15, 32,  0, 3584); // Time range - TODO: not sure about name
-    createConfigParam("LvdsSysrstCtrl",   'E', 0x16,  2,  0,    0); // LVDS T&C SYSRST# buffer ctrl (0=sysrst,1=sysrst,2=always 0,3=always 1)
-    createConfigParam("LvdsTclkCtrl",     'E', 0x16,  2,  2,    0); // LVDS TX control T&C TCLK mod (0=TCLK,1=TCLK,2=always 0,3=always 1)
-    createConfigParam("LvdsTsyncCtrl",    'E', 0x16,  2,  4,    0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
-    createConfigParam("LvdsTxenCtrl",     'E', 0x16,  2,  6,    0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
-    createConfigParam("LvdsTestEn",       'E', 0x16,  1, 10,    0); // LVDS test enable             (0=disable,1=enable)
-    createConfigParam("PeakMinThreshold", 'E', 0x17, 16,  0,    1); // ACPC peak min threshold
-    createConfigParam("PeakMaxThreshold", 'E', 0x18, 16,  0, 0xFFFF); // ACPC peak max threshold
+    createConfigParam("InitPosShift",     'E',  0x7,  6,  0,   15); // Init position shift
+    createConfigParam("DivideShiftCnt",   'E',  0x7,  6,  6,   24); // Divide shift count
+    createConfigParam("OffsetCorrEn",     'E',  0x8,  1,  0,    1); // Offset correction enable    (0=disabled,1=enabled)
+    createConfigParam("SendPhotosum",     'E',  0x8,  1,  1,    1); // Send photosum               (0=disabled,1=enabled)
+    createConfigParam("Tbd",              'E',  0x8,  6,  2,   20); // TODO: One or many registers
+    createConfigParam("LowerPhotoSum",    'E',  0x9, 28,  0, 512000); // Lower PhotoSum
+    createConfigParam("UpperPhotoSum",    'E',  0xB, 28,  0, 2867200); // Upper PhotoSum
+    createConfigParam("TsyncDelay",       'E',  0xD, 32,  0,    0); // TSYNC delay
+    createConfigParam("TimeRange",        'E',  0xF, 32,  0, 3584); // Time range - TODO: not sure about name
+    createConfigParam("LvdsSysrstCtrl",   'E', 0x10,  2,  0,    0); // LVDS T&C SYSRST# buffer ctrl (0=sysrst,1=sysrst,2=always 0,3=always 1)
+    createConfigParam("LvdsTclkCtrl",     'E', 0x10,  2,  2,    0); // LVDS TX control T&C TCLK mod (0=TCLK,1=TCLK,2=always 0,3=always 1)
+    createConfigParam("LvdsTsyncCtrl",    'E', 0x10,  2,  4,    0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
+    createConfigParam("LvdsTxenCtrl",     'E', 0x10,  2,  6,    0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
+    createConfigParam("LvdsTestEn",       'E', 0x10,  1, 10,    0); // LVDS test enable             (0=disable,1=enable)
+    createConfigParam("PeakMinThreshold", 'E', 0x11, 16,  0,    1); // ACPC peak min threshold
+    createConfigParam("PeakMaxThreshold", 'E', 0x12, 16,  0, 0xFFFF); // ACPC peak max threshold
 
     createConfigParam("LvdsResetMode",    'F',  0x0,  1,  0,    0); // Reset mode                   (0=internal,1=external)
     createConfigParam("LvdsTclkMode",     'F',  0x0,  1,  1,    0); // Reset mode                   (0=external,1=internal)
     createConfigParam("LvdsTsyncMode",    'F',  0x0,  1,  2,    0); // Reset mode                   (0=external,1=internal)
-    createConfigParam("LvdsTxenMode",     'F',  0x0,  1,  3,    0); // Reset mode                   (0=external,1=internal)
+    createConfigParam("LvdsTxenMode",     'F',  0x0,  1,  3,    1); // Reset mode                   (0=external,1=internal)
     createConfigParam("OutputMode",       'F',  0x0,  2,  4,    0); // Output mode                  (0=normal,1=raw,2=extended)
-    createConfigParam("XorderEn",         'F',  0x0,  1,  6,    0); // X order                      (0=disabled,1=enabled)
-    createConfigParam("YorderEn",         'F',  0x0,  1,  7,    0); // Y order                      (0=disabled,1=enabled)
+    createConfigParam("XorderEn",         'F',  0x0,  1,  6,    1); // X order                      (0=disabled,1=enabled)
+    createConfigParam("YorderEn",         'F',  0x0,  1,  7,    1); // Y order                      (0=disabled,1=enabled)
     createConfigParam("SortEn",           'F',  0x0,  1,  8,    0); // Enable sorting               (0=disabled,1=enabled)
     createConfigParam("AlignEn",          'F',  0x0,  1,  9,    0); // Enable aligning              (0=disabled,1=enabled)
     createConfigParam("RisingEdgeEn",     'F',  0x0,  1, 11,    0); // Rising edge reading          (0=disabled,1=enabled)
