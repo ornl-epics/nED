@@ -13,6 +13,7 @@
 #include <string>
 
 #define ALIGN_UP(number, boundary)      (((number) + (boundary) - 1) & ~((boundary) - 1))
+#define HEX_BYTE_TO_DEC(a)              ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
 
 /**
  * Determine file size.

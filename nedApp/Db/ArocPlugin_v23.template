@@ -1,0 +1,26 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "ArocPlugin_v23.generated"
+include "ArocPlugin.include"
+include "GlobalConD.include"
+
+record(longin, "$(P)HwVer")
+{
+    field(HIGH, "3")
+    field(LOW,  "1")
+}
+record(longin, "$(P)HwRev")
+{
+    field(HIGH, "3")
+    field(LOW,  "1")
+}
+record(longin, "$(P)FwVer")
+{
+    field(HIGH, "3")
+    field(LOW,  "1")
+}
+record(longin, "$(P)FwRev")
+{
+    field(HIGH, "4")
+    field(LOW,  "2")
+}

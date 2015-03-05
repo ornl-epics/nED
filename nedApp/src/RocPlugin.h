@@ -54,8 +54,6 @@ class RocPlugin : public BaseModulePlugin {
 
     private: // structures and definitions
         static const unsigned NUM_ROCPLUGIN_DYNPARAMS;      //!< Maximum number of asyn parameters, including the status and configuration parameters
-        static const unsigned NUM_CHANNELS = 8;             //!< Number of channels connected to ROC
-        static const float    NO_RESPONSE_TIMEOUT;          //!< Timeout to wait for response from ROC, in seconds
 
     private: // variables
         std::string m_version;                              //!< Version string as passed to constructor
