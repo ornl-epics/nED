@@ -104,12 +104,13 @@ class BaseModulePlugin : public BasePlugin {
          * Valid remote upgrade status values.
          */
         enum RemoteUpgradeStatus {
-            UPGRADE_NOT_STARTED     = 0, //!< Remote upgrade not yet started
-            UPGRADE_IN_PROGRESS     = 1, //!< Remote upgrade currently in progress
-            UPGRADE_DONE            = 2, //!< All data sent and acknowledged by remote party
-            UPGRADE_CANCELED        = 3, //!< Canceled due to packet timeout or nack
-            UPGRADE_INIT_FAILED     = 4, //!< Failed to initialize
-            UPGRADE_USER_ABORT      = 5, //!< Aborted by user
+            UPGRADE_NOT_SUPPORTED   = 0, //!< Remote upgrade not yet started
+            UPGRADE_NOT_STARTED     = 1, //!< Remote upgrade not yet started
+            UPGRADE_IN_PROGRESS     = 2, //!< Remote upgrade currently in progress
+            UPGRADE_DONE            = 3, //!< All data sent and acknowledged by remote party
+            UPGRADE_CANCELED        = 4, //!< Canceled due to packet timeout or nack
+            UPGRADE_INIT_FAILED     = 5, //!< Failed to initialize
+            UPGRADE_USER_ABORT      = 6, //!< Aborted by user
         };
 
         /**

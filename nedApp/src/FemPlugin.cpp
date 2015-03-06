@@ -54,6 +54,7 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         createCounterParams_v36();
     } else if (m_version == "v37") {
         setIntegerParam(Supported, 1);
+        setIntegerParam(UpgradeStatus, UPGRADE_NOT_STARTED); // supported but not started
         createStatusParams_v37();
         createConfigParams_v37();
         createCounterParams_v37();

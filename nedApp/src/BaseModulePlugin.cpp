@@ -58,7 +58,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("CfgSection",   asynParamInt32, &CfgSection, '0');          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
     createParam("UpgradeFile",  asynParamOctet, &UpgradeFile);              // WRITE - Path to the firmware file to be programmed
     createParam("UpgradePktSize",asynParamInt32,&UpgradePktSize, 256);      // WRITE - Maximum payload size for split program file transfer
-    createParam("UpgradeStatus",asynParamInt32, &UpgradeStatus, UPGRADE_NOT_STARTED); // READ -Remote upgrade status
+    createParam("UpgradeStatus",asynParamInt32, &UpgradeStatus, UPGRADE_NOT_SUPPORTED); // READ -Remote upgrade status
     createParam("UpgradeSize",  asynParamInt32, &UpgradeSize, 0);           // READ - Total firmware size in bytes
     createParam("UpgradePos",   asynParamInt32, &UpgradePos, 0);            // READ - Bytes already sent to remote porty
     createParam("UpgradeAbort", asynParamInt32, &UpgradeAbort, 0);          // WRITE - Abort current upgrade sequence
