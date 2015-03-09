@@ -30,6 +30,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     , m_countersPayloadLength(0)
     , m_configPayloadLength(0)
     , m_upgradePayloadLength(0)
+    , m_temperaturePayloadLength(0)
     , m_verifySM(ST_TYPE_VERSION_INIT)
     , m_waitingResponse(static_cast<DasPacket::CommandType>(0))
     , m_behindDsp(behindDsp)
