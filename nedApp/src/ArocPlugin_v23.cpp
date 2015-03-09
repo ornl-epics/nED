@@ -86,7 +86,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("X1:AutoAdjEn",       0x7,  1,  7); // X1 Auto-Adjust Active        (0=not active,1=active)
 
     createStatusParam("X2:AdcOffsetVal",    0x7,  8,  8); // X2 ADC Offset value
-    createStatusParam("X2:AdcOffsetVal",    0x8,  9,  0); // X2 ADC Offset value
+    createStatusParam("X2:InputOffset",     0x8,  9,  0); // X2 ADC Offset value
     createStatusParam("X2:AutoAdjOverflow", 0x8,  1,  9); // X2 Auto-Adjust overflow      (0=no,1=yes)
     createStatusParam("X2:AutoAdjSlope1",   0x8,  1, 10); // X2 Auto-Adjust Slope? l      (0=not active,1=active)
     createStatusParam("X2:AutoAdjOffset",   0x8,  1, 11); // X2 Auto-Adjust Offset l      (0=not active,1=active)
@@ -106,7 +106,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("X3:AutoAdjEn",       0xA,  1,  7); // X3 Auto-Adjust Active        (0=not active,1=active)
 
     createStatusParam("X4:AdcOffsetVal",    0xA,  8,  8); // X4 ADC Offset value
-    createStatusParam("X4:AdcOffsetVal",    0xB,  9,  0); // X4 ADC Offset value
+    createStatusParam("X4:InputOffset",     0xB,  9,  0); // X4 ADC Offset value
     createStatusParam("X4:AutoAdjOverflow", 0xB,  1,  9); // X4 Auto-Adjust overflow      (0=no,1=yes)
     createStatusParam("X4:AutoAdjSlope1",   0xB,  1, 10); // X4 Auto-Adjust Slope? l      (0=not active,1=active)
     createStatusParam("X4:AutoAdjOffset",   0xB,  1, 11); // X4 Auto-Adjust Offset l      (0=not active,1=active)
@@ -126,7 +126,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("X5:AutoAdjEn",       0xD,  1,  7); // X5 Auto-Adjust Active        (0=not active,1=active)
 
     createStatusParam("X6:AdcOffsetVal",    0xD,  8,  8); // X6 ADC Offset value
-    createStatusParam("X6:AdcOffsetVal",    0xE,  9,  0); // X6 ADC Offset value
+    createStatusParam("X6:InputOffset",     0xE,  9,  0); // X6 ADC Offset value
     createStatusParam("X6:AutoAdjOverflow", 0xE,  1,  9); // X6 Auto-Adjust overflow      (0=no,1=yes)
     createStatusParam("X6:AutoAdjSlope1",   0xE,  1, 10); // X6 Auto-Adjust Slope? l      (0=not active,1=active)
     createStatusParam("X6:AutoAdjOffset",   0xE,  1, 11); // X6 Auto-Adjust Offset l      (0=not active,1=active)
@@ -146,7 +146,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("X7:AutoAdjEn",      0x10, 1,  7); // X7 Auto-Adjust Active        (0=not active,1=active)
 
     createStatusParam("X8:AdcOffsetVal",   0x10, 8,  8); // X8 ADC Offset value
-    createStatusParam("X8:AdcOffsetVal",   0x11, 9,  0); // X8 ADC Offset value
+    createStatusParam("X8:InputOffset",    0x11, 9,  0); // X8 ADC Offset value
     createStatusParam("X8:AutoAdjOverflow",0x11, 1,  9); // X8 Auto-Adjust overflow      (0=no,1=yes)
     createStatusParam("X8:AutoAdjSlope1",  0x11, 1, 10); // X8 Auto-Adjust Slope? l      (0=not active,1=active)
     createStatusParam("X8:AutoAdjOffset",  0x11, 1, 11); // X8 Auto-Adjust Offset l      (0=not active,1=active)
@@ -166,7 +166,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("Y1:AutoAdjEn",      0x13,  1,  7); // Y1 Auto-Adjust Active        (0=not active,1=active)
 
     createStatusParam("Y2:AdcOffsetVal",   0x13,  8,  8); // Y2 ADC Offset value
-    createStatusParam("Y2:AdcOffsetVal",   0x14,  9,  0); // Y2 ADC Offset value
+    createStatusParam("Y2:InputOffset",    0x14,  9,  0); // Y2 ADC Offset value
     createStatusParam("Y2:AutoAdjOverflow",0x14,  1,  9); // Y2 Auto-Adjust overflow      (0=no,1=yes)
     createStatusParam("Y2:AutoAdjSlope1",  0x14,  1, 10); // Y2 Auto-Adjust Slope? l      (0=not active,1=active)
     createStatusParam("Y2:AutoAdjOffset",  0x14,  1, 11); // Y2 Auto-Adjust Offset l      (0=not active,1=active)
@@ -186,7 +186,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("Y3:AutoAdjEn",      0x16,  1,  7); // Y3 Auto-Adjust Active        (0=not active,1=active)
 
     createStatusParam("Y4:AdcOffsetVal",   0x16,  8,  8); // Y4 ADC Offset value
-    createStatusParam("Y4:AdcOffsetVal",   0x17,  9,  0); // Y4 ADC Offset value
+    createStatusParam("Y4:InputOffset",    0x17,  9,  0); // Y4 ADC Offset value
     createStatusParam("Y4:AutoAdjOverflow",0x17,  1,  9); // Y4 Auto-Adjust overflow      (0=no,1=yes)
     createStatusParam("Y4:AutoAdjSlope1",  0x17,  1, 10); // Y4 Auto-Adjust Slope? l      (0=not active,1=active)
     createStatusParam("Y4:AutoAdjOffset",  0x17,  1, 11); // Y4 Auto-Adjust Offset l      (0=not active,1=active)
@@ -206,7 +206,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("Y5:AutoAdjEn",      0x19,  1,  7); // Y5 Auto-Adjust Active        (0=not active,1=active)
 
     createStatusParam("Y6:AdcOffsetVal",   0x19,  8,  8); // Y6 ADC Offset value
-    createStatusParam("Y6:AdcOffsetVal",   0x1A,  9,  0); // Y6 ADC Offset value
+    createStatusParam("Y6:InputOffset",    0x1A,  9,  0); // Y6 ADC Offset value
     createStatusParam("Y6:AutoAdjOverflow",0x1A,  1,  9); // Y6 Auto-Adjust overflow      (0=no,1=yes)
     createStatusParam("Y6:AutoAdjSlope1",  0x1A,  1, 10); // Y6 Auto-Adjust Slope? l      (0=not active,1=active)
     createStatusParam("Y6:AutoAdjOffset",  0x1A,  1, 11); // Y6 Auto-Adjust Offset l      (0=not active,1=active)
@@ -226,7 +226,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("Y7:AutoAdjEn",      0x1C,  1,  7); // Y7 Auto-Adjust Active        (0=not active,1=active)
 
     createStatusParam("Y8:AdcOffsetVal",   0x1C,  8,  8); // Y8 ADC Offset value
-    createStatusParam("Y8:AdcOffsetVal",   0x1D,  9,  0); // Y8 ADC Offset value
+    createStatusParam("Y8:InputOffset",    0x1D,  9,  0); // Y8 ADC Offset value
     createStatusParam("Y8:AutoAdjOverflow",0x1D,  1,  9); // Y8 Auto-Adjust overflow      (0=no,1=yes)
     createStatusParam("Y8:AutoAdjSlope1",  0x1D,  1, 10); // Y8 Auto-Adjust Slope? l      (0=not active,1=active)
     createStatusParam("Y8:AutoAdjOffset",  0x1D,  1, 11); // Y8 Auto-Adjust Offset l      (0=not active,1=active)

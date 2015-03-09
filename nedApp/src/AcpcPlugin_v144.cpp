@@ -25,8 +25,8 @@ void AcpcPlugin::createStatusParams_v144()
     createStatusParam("Ctrl:GotCmdPkt",     0x0,  1,  9); // CTRL got cmd packet          (0=no cmd pkt,1=got cmd pkt)
     createStatusParam("Ctrl:FifoHasData",   0x0,  1, 10); // CTRL FIFO has data           (0=empty,1=has data)
     createStatusParam("Ctrl:FifoAlmostFull",0x0,  1, 11); // CTRL FIFO almost full        (0=not full,1=almost full)
-    createStatusParam("Ctrl:FifoGotAlmFull",0x0,  1, 12); // CTRL FIFO almost full        (0=not full,1=almost full) - TODO: dcomserver doesn't know this one
-    createStatusParam("Ctrl:FifoFull",      0x0,  1, 13); // CTRL FIFO full               (0=not full,1=full) - TODO: dcomserver thinks this one is at bit 12
+    createStatusParam("Ctrl:FifoGotAlmFull",0x0,  1, 12); // CTRL FIFO almost full        (0=not full,1=almost full)
+    createStatusParam("Ctrl:FifoFull",      0x0,  1, 13); // CTRL FIFO full               (0=not full,1=full)
     createStatusParam("Ctrl:CntBadPackets", 0x1, 16,  0); // CTRL num bad packets
 
     createStatusParam("Ch1:RxFlg",          0x2,  8,  0); // Chan1 error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
@@ -92,34 +92,25 @@ void AcpcPlugin::createStatusParams_v144()
     createStatusParam("Ch7:FifoFull",       0xE,  1, 13); // Chan7 FIFO full               (0=not full,1=full)
     createStatusParam("Ch7:CntBadPackets",  0xF, 16,  0); // Chan7 num bad packets
 
-    createStatusParam("Ch7:RxFlg",         0x10,  8,  0); // Chan7 error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch7:GotDataPkt",    0x10,  1,  8); // Chan7 got data packet         (0=no data pkt,1=got data pkt)
-    createStatusParam("Ch7:GotCmdPkt",     0x10,  1,  9); // Chan7 got cmd packet          (0=no cmd pkt,1=got cmd pkt)
-    createStatusParam("Ch7:FifoHasData",   0x10,  1, 10); // Chan7 FIFO has data           (0=empty,1=has data)
-    createStatusParam("Ch7:FifoAlmostFull",0x10,  1, 11); // Chan7 FIFO almost full        (0=not full,1=almost full)
-    createStatusParam("Ch7:FifoGotAlmFull",0x10,  1, 12); // Chan7 FIFO got almost full    (0=not full,1=almost full)
-    createStatusParam("Ch7:FifoFull",      0x10,  1, 13); // Chan7 FIFO full               (0=not full,1=full)
-    createStatusParam("Ch7:CntBadPackets", 0x11, 16,  0); // Chan7 num bad packets
+    createStatusParam("Ch8:RxFlg",         0x10,  8,  0); // Chan8 error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
+    createStatusParam("Ch8:GotDataPkt",    0x10,  1,  8); // Chan8 got data packet         (0=no data pkt,1=got data pkt)
+    createStatusParam("Ch8:GotCmdPkt",     0x10,  1,  9); // Chan8 got cmd packet          (0=no cmd pkt,1=got cmd pkt)
+    createStatusParam("Ch8:FifoHasData",   0x10,  1, 10); // Chan8 FIFO has data           (0=empty,1=has data)
+    createStatusParam("Ch8:FifoAlmostFull",0x10,  1, 11); // Chan8 FIFO almost full        (0=not full,1=almost full)
+    createStatusParam("Ch8:FifoGotAlmFull",0x10,  1, 12); // Chan8 FIFO got almost full    (0=not full,1=almost full)
+    createStatusParam("Ch8:FifoFull",      0x10,  1, 13); // Chan8 FIFO full               (0=not full,1=full)
+    createStatusParam("Ch8:CntBadPackets", 0x11, 16,  0); // Chan8 num bad packets
 
-    createStatusParam("Ch8:RxFlg",         0x12,  8,  0); // Chan8 error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch8:GotDataPkt",    0x12,  1,  8); // Chan8 got data packet         (0=no data pkt,1=got data pkt)
-    createStatusParam("Ch8:GotCmdPkt",     0x12,  1,  9); // Chan8 got cmd packet          (0=no cmd pkt,1=got cmd pkt)
-    createStatusParam("Ch8:FifoHasData",   0x12,  1, 10); // Chan8 FIFO has data           (0=empty,1=has data)
-    createStatusParam("Ch8:FifoAlmostFull",0x12,  1, 11); // Chan8 FIFO almost full        (0=not full,1=almost full)
-    createStatusParam("Ch8:FifoGotAlmFull",0x12,  1, 12); // Chan8 FIFO got almost full    (0=not full,1=almost full)
-    createStatusParam("Ch8:FifoFull",      0x12,  1, 13); // Chan8 FIFO full               (0=not full,1=full)
-    createStatusParam("Ch8:CntBadPackets", 0x13, 16,  0); // Chan8 num bad packets
+    createStatusParam("Ch9:RxFlg",         0x12,  8,  0); // Chan9 error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
+    createStatusParam("Ch9:GotDataPkt",    0x12,  1,  8); // Chan9 got data packet         (0=no data pkt,1=got data pkt)
+    createStatusParam("Ch9:GotCmdPkt",     0x12,  1,  9); // Chan9 got cmd packet          (0=no cmd pkt,1=got cmd pkt)
+    createStatusParam("Ch9:FifoHasData",   0x12,  1, 10); // Chan9 FIFO has data           (0=empty,1=has data)
+    createStatusParam("Ch9:FifoAlmostFull",0x12,  1, 11); // Chan9 FIFO almost full        (0=not full,1=almost full)
+    createStatusParam("Ch9:FifoGotAlmFull",0x12,  1, 12); // Chan9 FIFO got almost full    (0=not full,1=almost full)
+    createStatusParam("Ch9:FifoFull",      0x12,  1, 13); // Chan9 FIFO full               (0=not full,1=full)
+    createStatusParam("Ch9:CntBadPackets", 0x13, 16,  0); // Chan9 num bad packets
 
-    createStatusParam("Ch9:RxFlg",         0x14,  8,  0); // Chan9 error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch9:GotDataPkt",    0x14,  1,  8); // Chan9 got data packet         (0=no data pkt,1=got data pkt)
-    createStatusParam("Ch9:GotCmdPkt",     0x14,  1,  9); // Chan9 got cmd packet          (0=no cmd pkt,1=got cmd pkt)
-    createStatusParam("Ch9:FifoHasData",   0x14,  1, 10); // Chan9 FIFO has data           (0=empty,1=has data)
-    createStatusParam("Ch9:FifoAlmostFull",0x14,  1, 11); // Chan9 FIFO almost full        (0=not full,1=almost full)
-    createStatusParam("Ch9:FifoGotAlmFull",0x14,  1, 12); // Chan9 FIFO got almost full    (0=not full,1=almost full)
-    createStatusParam("Ch9:FifoFull",      0x14,  1, 13); // Chan9 FIFO full               (0=not full,1=full)
-    createStatusParam("Ch9:CntBadPackets", 0x15, 16,  0); // Chan9 num bad packets
-
-    createStatusParam("EepromCode",        0x16, 32,  0); // EEPROM code
+    createStatusParam("EepromCode",        0x14, 32,  0); // EEPROM code
 
     createStatusParam("MatrixState",       0x16,  5,  0); // MATRIX state
     createStatusParam("LvmrCalcState",     0x16,  5,  5); // LVMR calc state
@@ -159,7 +150,7 @@ void AcpcPlugin::createStatusParams_v144()
     createStatusParam("CntBadPacketErr",   0x19,  8,  0); // Bad Packet Errors
     createStatusParam("CntIbcErr",         0x19,  8,  8); // Bad IBC Errors
 
-    createStatusParam("ErrIbcHwerr",       0x1A,  1,  0); // Bad IBC Cnt for HWERR         (0=no error,1=error) - TODO: dcomserver uses 4 bits but checks 1
+    createStatusParam("ErrIbcHwerr",       0x1A,  1,  0); // Bad IBC Cnt for HWERR         (0=no error,1=error)
     createStatusParam("DffAlmostFull",     0x1A,  1,  4); // DFF almost full               (0=has space,1=almost full)
     createStatusParam("DffHasData",        0x1A,  1,  5); // DFF has data                  (0=no data,1=has data)
     createStatusParam("Calc:HwErr",        0x1A,  1,  6); // CALC Hardware error           (0=no error,1=error)
@@ -175,14 +166,14 @@ void AcpcPlugin::createStatusParams_v144()
     createStatusParam("ErrBadCmd",         0x1D,  1,  0); // Unknown command               (0=no error,1=error)
     createStatusParam("ErrPktLength",      0x1D,  1,  1); // Packet length error           (0=no error,1=error)
     createStatusParam("ErrProgramming",    0x1D,  1,  2); // Programming error             (0=no error,1=error)
-    createStatusParam("ErrUnconfigured",   0x1D,  1,  4); // Unconfigured                  (0=no error,1=error)
+    createStatusParam("Configured",        0x1D,  1,  4); // Configured                    (0=configured,1=not configured)
     createStatusParam("ErrNoHwId",         0x1D,  1,  4); // Missing hardware id           (0=no error,1=error)
     createStatusParam("FilteredNack",      0x1D,  1,  5); // Filtered NACK                 (0=not action,1=filtered)
     createStatusParam("NewHwId",           0x1D,  1,  6); // Found new hardware id         (0=not found,1=found)
     createStatusParam("CntFilteredNacks",  0x1D,  8,  7); // Number of filtered NACKs
     createStatusParam("Acquiring",         0x1D,  1, 15); // Acquiring data                (0=not acquiring,1=acquiring)
 
-    createStatusParam("OutputModeRB",      0x1E,  2,  0); // Data mode                     (0=normal,1=raw,2=extended) - TODO: check valid values
+    createStatusParam("OutputModeRB",      0x1E,  2,  0); // Data mode                     (0=normal,1=raw,2=extended)
     createStatusParam("CntFilteredAcks",   0x1E,  8,  2); // Number of filtered ACKs
     createStatusParam("CmdIn:HasData",     0x1E,  1, 10); // CMD input FIFO has data       (0=no data,1=has data)
     createStatusParam("CmdIn:AlmostFull",  0x1E,  1, 11); // CMD input FIFO almost full    (0=has space,1=almost full)
