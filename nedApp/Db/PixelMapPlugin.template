@@ -6,11 +6,19 @@ record(bo, "$(P)Enable")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
 }
-record(calc, "$(P)Status")
+record(calc, "$(P)StatusCalc")
 {
     field(DESC, "PixelMap plugin status")
-    field(INPA, "$(P)ErrImport.RVAL NPP")
-    field(CALC, "A==0")
+    field(INPA, "$(P)ErrImport.SEVR")
+    field(CALC, "A=0")
+    field(FLNK, "$(P)Status")
+}
+record(bi, "$(P)Status")
+{
+    field(ZNAM, "Not OK")
+    field(ONAM, "OK")
+    field(ZSV,  "MAJOR")
+    field(INP,  "$(P)StatusCalc")
 }
 record(waveform, "$(P)FilePath")
 {
@@ -32,10 +40,13 @@ record(mbbi, "$(P)ErrImport")
     field(ZRST, "No error")
     field(ONVL, "1")
     field(ONST, "No pixelmap file")
+    field(ONSV, "MAJOR")
     field(TWVL, "2")
     field(TWST, "File parse error")
+    field(TWSV, "MAJOR")
     field(THVL, "3")
     field(THST, "Memory alloc err")
+    field(THSV, "MAJOR")
     field(FLNK, "$(P)Status")
 }
 record(longin, "$(P)CntError")

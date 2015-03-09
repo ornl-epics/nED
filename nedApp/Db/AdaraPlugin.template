@@ -64,20 +64,17 @@ record(scalcout, "$(P)StatusCalc")
 {
     field(DESC, "Determine global OCC status")
     field(INAA, "$(P)ClientIp NPP")
-    field(CALC, "(LEN(AA)==0)?0:1")
-    field(OOPT, "Every Time")
+    field(CALC, "LEN(AA)>0")
     field(PINI, "YES")
-    field(IVOA, "Don't drive outputs")
-    # Can't use OUT field as it will automatically determine that bi is "string" type
-    field(FLNK,  "$(P)Status")
+    field(FLNK, "$(P)Status")
 }
 record(bi, "$(P)Status")
 {
-    field(ASG,  "BEAMLINE")
-    field(DESC, "ADARA client status")
-    field(INP,  "$(P)StatusCalc.VAL NPP")
+    field(DESC, "ADARA plugin status")
     field(ZNAM, "Not connected")
     field(ONAM, "Connected")
+    field(ZSV,  "MAJOR")
+    field(INP,  "$(P)StatusCalc")
 }
 record(ao, "$(P)InactiveTimeout")
 {

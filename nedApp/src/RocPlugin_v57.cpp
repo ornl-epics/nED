@@ -23,10 +23,10 @@
 void RocPlugin::createStatusParams_v57()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                         | EPICS record description  | (bi and mbbi description)
-    createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring mode.               (0=not acquiring,1=acquiring)
+    createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring mode.               (0=not acquiring [alarm],1=acquiring)
     createStatusParam("ErrParity",        0x0,  1, 10); // LVDS parity error.            (0=no error,1=error)
-    createStatusParam("Configured",       0x0,  1,  9); // Not configured                (0=configured,1=not configured)
-    createStatusParam("Discovered",       0x0,  1,  8); // Configured                    (0=discovered,1=not discovered)
+    createStatusParam("Configured",       0x0,  1,  9); // Configured                    (0=configured,1=not configured [alarm])
+    createStatusParam("Discovered",       0x0,  1,  8); // Discovered                    (0=discovered,1=not discovered)
     createStatusParam("SysrstBHigh",      0x0,  1,  7); // SYSRST_B Got HIGH             (0=no,1=yes)
     createStatusParam("SysrstBLow",       0x0,  1,  6); // SYSRST_B Got LOW              (0=no,1=yes)
     createStatusParam("TxenBHigh",        0x0,  1,  5); // TXEN_B Got HIGH               (0=no,1=yes)

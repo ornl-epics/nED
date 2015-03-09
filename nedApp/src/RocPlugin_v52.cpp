@@ -46,9 +46,9 @@ void RocPlugin::createStatusParams_v52()
     createStatusParam("DataFifoEmpty",        0x1,  1,  6); // Data FIFO Empty flag.        (0=not empty,1=empty)
     createStatusParam("HVStatus",             0x1,  1,  5); // High Voltage Status bit      (0=not present,1=present)
     createStatusParam("CalcActive",           0x1,  1,  4); // Calculation: Active          (0=not active,1=active)
-    createStatusParam("Acquiring",            0x1,  1,  3); // Acquiring data               (0=not acquiring,1=acquiring)
+    createStatusParam("Acquiring",            0x1,  1,  3); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
     createStatusParam("Discovered",           0x1,  1,  2); // Discovered                   (0=not discovered,1=discovered)
-    createStatusParam("Configured",           0x1,  2,  0); // Configured                   (0=not configured,1=section 1 conf'd,2=section 2 conf'd,3=all conf'd)
+    createStatusParam("Configured",           0x1,  2,  0); // Configured                   (0=not configured [alarm],1=section 1 conf'd,2=section 2 conf'd,3=all conf'd)
 
     createStatusParam("RiseEdgeA",            0x2,  8,  8); // Discriminator A set
     createStatusParam("SysrstBHigh",          0x2,  1,  7); // SYSRST_B Got HIGH            (0=no,1=yes)

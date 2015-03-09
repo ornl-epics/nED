@@ -268,7 +268,7 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("Ch4:SrcCtrl",    'E', 0x3,  2,  6, 0); // LVDS ch4 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
     createConfigParam("Ch5:SrcCtrl",    'E', 0x3,  2,  8, 0); // LVDS ch5 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
     createConfigParam("Ch6:SrcCtrl",    'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB[0])
+    createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB)
 
     createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 166660); // LVDS TSYNC generate divisor (166660=240Hz, 666800=60Hz, 800000=50Hz, 1333200=30Hz)
     createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor     (0=10ns, 1=20ns, 106=1us, 1060=10us, 106250=1ms)
@@ -314,8 +314,8 @@ void DspPlugin::createConfigParams_v63() {
 void DspPlugin::createStatusParams_v63()
 {
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
-    createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured,1=configured)
-    createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring,1=acquiring)
+    createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured)
+    createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
     createStatusParam("ErrProgram",    0x0,  1,  2); // WRITE_CNFG during ACQ        (0=no error,1=error)
     createStatusParam("ErrLength",     0x0,  1,  3); // Packet length error          (0=no error,1=error)
     createStatusParam("ErrCmdBad",     0x0,  1,  4); // Unrecognized command error   (0=no error,1=error)

@@ -41,7 +41,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("Ibc7",               0x1,  1,  6); // My IBC = 6                   (0=no,1=yes)
     createStatusParam("Ibc8",               0x1,  1,  7); // My IBC = 7                   (0=no,1=yes)
     createStatusParam("Ibc9",               0x1,  1,  8); // My IBC = 8                   (0=no,1=yes)
-    createStatusParam("Configured",         0x1,  2,  9); // Configured                   (0=not configured,1=full config,2=part config,3=all config)
+    createStatusParam("Configured",         0x1,  2,  9); // Configured                   (0=not configured [alarm],1=full config,2=part config,3=all config)
     createStatusParam("Discovered",         0x1,  1, 11); // Discovered                   (0=not discovered,1=discovered)
 
     createStatusParam("YDiscrimCnt",        0x2,  8,  0); // Y discriminator hit
@@ -60,7 +60,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("EvFifoAlmostFull",   0x3,  1, 10); // Event FIFO almost full       (0=has space,1=almost full)
     createStatusParam("RawFifoHasData",     0x3,  1, 11); // Raw FIFO has data            (0=no data,1=has data)
     createStatusParam("RawFifoAlmostFull",  0x3,  1, 12); // Raw FIFO almost full         (0=has space,1=almost full)
-    createStatusParam("Acquiring",          0x3,  1, 13); // Acquiring data               (0=not acquiring,1=acquiring)
+    createStatusParam("Acquiring",          0x3,  1, 13); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
     createStatusParam("LvdsVerify",         0x3,  1, 14); // LVDS VERIFY detected         (0=not detected,1=detected)
 
     createStatusParam("YFifoHasData",       0x4,  8,  0); // Y FIFO has data
