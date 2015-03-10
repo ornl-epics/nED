@@ -10,6 +10,8 @@
 #include "FlatFieldPlugin.h"
 #include "Log.h"
 
+#include <dirent.h>
+
 #include <fstream>
 #include <limits>
 #include <string>
@@ -18,12 +20,18 @@
 
 #define PIXID_ERR       (1 << 31)
 
+#if defined(WIN32) || defined(_WIN32)
+#   define PATH_SEPARATOR "\\"
+#else
+#   define PATH_SEPARATOR "/"
+#endif
+
 EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Dispatcher port name", string, "Correction tables file", string, "Buffer size", int);
 
-FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importFilePath, int bufSize)
+FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importDir, int bufSize)
     : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_FLATFIELDPLUGIN_PARAMS, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
 {
-    ImportError err = MAP_ERR_NONE;
+    ImportError err = FF_ERR_NONE;
 
     if (bufSize > 0) {
         m_bufferSize = bufSize;
@@ -34,19 +42,19 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     m_buffer = reinterpret_cast<uint8_t *>(malloc(m_bufferSize));
     if (m_buffer == 0) {
         m_bufferSize = 0;
-        err = MAP_ERR_NO_MEM;
+        err = FF_ERR_NO_MEM;
     }
 
-    if (err == MAP_ERR_NONE)
-        err = importFile(importFilePath);
+    if (err == FF_ERR_NONE)
+        err = importFiles(importDir);
 
-    createParam("FilePath",     asynParamOctet, &FilePath, importFilePath); // Path to correction tables file
+    createParam("ImportDir",    asynParamOctet, &ImportDir, importDir); // Path to correction tables directory
     createParam("ErrImport",    asynParamInt32, &ErrImport, err); // Last mapping import error
     createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels, probably due to missing correction tables
     createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
-    createParam("MapMode",      asynParamInt32, &MapMode, MAP_DISABLED); // Event map mode (see FlatFieldPlugin::MapMode_t)
+    createParam("FfMode",       asynParamInt32, &FfMode, FF_DISABLED); // FlatField transformation mode (see FlatFieldPlugin::FfMode_t)
     createParam("MaxRawX",      asynParamFloat64, &MaxRawX, 158.0);  // Maximum value for X returned by camera
     createParam("MaxRawY",      asynParamFloat64, &MaxRawY, 158.0);  // Maximum value for X returned by camera
     callParamCallbacks();
@@ -64,7 +72,7 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     int nProcessed = 0;
     TransformErrors errors;
     int nSplits = 0;
-    int mapMode = MAP_DISABLED;
+    int ffMode = FF_DISABLED;
 
     if (m_buffer == 0) {
         LOG_ERROR("Flat field correction disabled due to import error");
@@ -77,9 +85,9 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     getIntegerParam(CntUnmap,   &errors.nUnmapped);
     getIntegerParam(CntError,   &errors.nPrevious);
     getIntegerParam(CntSplit,   &nSplits);
-    getIntegerParam(MapMode,    &mapMode);
+    getIntegerParam(FfMode,     &ffMode);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL)
-        mapMode = MAP_DISABLED;
+        ffMode = FF_DISABLED;
     // This is a trick to avoid locking. Since plugin design ensures a single
     // instance of processDataUnlocked() function at any time, we read in
     // values and store them as class members. This makes member variables
@@ -88,7 +96,7 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     getDoubleParam(MaxRawY,     &m_maxRawY);
     this->unlock();
 
-    if (mapMode == MAP_DISABLED) {
+    if (ffMode == FF_DISABLED) {
         // TODO: sendToPlugins should not call waitAllReleased() automatically.
         //       Neither should we. All we have to do is send packetlist
         //       to clients and return. Reference counters will be okay.
@@ -210,7 +218,7 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
     return errors;
 }
 
-uint16_t FlatFieldPlugin::xyToPixel(double x, double y, const FlatFieldPlugin::CorrTablePair_t &tables)
+uint32_t FlatFieldPlugin::xyToPixel(double x, double y, const FlatFieldPlugin::CorrTablePair_t &tables)
 {
     x *= tables.first.size() / m_maxRawX;
     y *= tables.second.size() / m_maxRawY;
@@ -228,7 +236,7 @@ uint16_t FlatFieldPlugin::xyToPixel(double x, double y, const FlatFieldPlugin::C
         y -= (dy * tables.second[xp][yp+1]) + ((1 - dy) * tables.second[xp][yp]);
     }
 
-    return (tables.first.size() * (int)x) + (int)y;cal
+    return (tables.first.size() * (int)x) + (int)y;
 }
 
 bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::string &value)
@@ -258,6 +266,8 @@ bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::
         if (pos == std::string::npos)
             continue;
 
+        line = line.substr(pos);
+
         // Parse comment line, stripped text before ':' is key, value is after ':'
         pos = line.find_first_of(':');
         if (pos == std::string::npos) {
@@ -278,28 +288,31 @@ bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::
     return false;
 }
 
-bool FlatFieldPlugin::parseHeaders(std::ifstream &infile, int &size_x, int &size_y, int &position_id, char &table_dim)
+FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile, int &size_x, int &size_y, int &position_id, char &table_dim)
 {
     size_x = 0;
     size_y = 0;
     position_id = -1;
     table_dim = ' ';
     int version = 0;
+    uint32_t nHeaders = 0;
 
     std::string key, value;
 
     while (parseHeader(infile, key, value)) {
         if (key == "Format version") {
-            if (sscanf(value.c_str(), "%d", &version) != 2) {
+            if (sscanf(value.c_str(), "%d", &version) != 1) {
                 LOG_ERROR("Failed to read file format version");
-                return false;
+                return FF_ERR_PARSE;
             }
+            nHeaders++;
         }
         if (key == "Table size") {
             if (sscanf(value.c_str(), "%dx%d", &size_x, &size_y) != 2) {
                 LOG_ERROR("Failed to read table size");
-                return false;
+                return FF_ERR_PARSE;
             }
+            nHeaders++;
         }
         if (key == "Table dimension") {
             if (value == "X" || value == "x")
@@ -308,52 +321,58 @@ bool FlatFieldPlugin::parseHeaders(std::ifstream &infile, int &size_x, int &size
                 table_dim = 'y';
             else {
                 LOG_ERROR("Failed to read table dimension");
-                return false;
+                return FF_ERR_PARSE;
             }
+            nHeaders++;
         }
         if (key == "Position id") {
             if (sscanf(value.c_str(), "%d", &position_id) != 1) {
                 LOG_ERROR("Failed to read camera id");
-                return false;
+                return FF_ERR_PARSE;
             }
+            nHeaders++;
         }
     }
 
-    // Make sure the header defines table size
+    if (nHeaders == 0) {
+        LOG_WARN("Unknown file format");
+        return FF_ERR_BAD_FORMAT;
+    }
+
+    // Make sure we got all required headers
     if (version == 0) {
         LOG_ERROR("Invalid file format, missing version");
-        return false;
+        return FF_ERR_PARSE;
     }
     if (version != 1) {
         LOG_ERROR("Invalid file format, unsupported format version '%d'", version);
-        return false;
+        return FF_ERR_PARSE;
     }
     if (size_x == 0 && size_y == 0) {
         LOG_ERROR("Invalid file format, missing table size header");
-        return false;
+        return FF_ERR_PARSE;
     }
     if (table_dim == ' ') {
         LOG_ERROR("Invalid file format, missing camera id header");
-        return false;
+        return FF_ERR_PARSE;
     }
     if (position_id == -1) {
         LOG_ERROR("Invalid file format, missing camera id header");
-        return false;
+        return FF_ERR_PARSE;
     }
 
-    return true;
+    return FF_ERR_NONE;
 }
 
 FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path)
 {
-    // TODO: this function needs to read a file containing multiple tables
-
+    ImportError err = FF_ERR_NONE;
     std::ifstream infile(path.c_str());
 
     // Return empty table on any failure
     if (infile.fail()) {
         LOG_ERROR("Failed to open input file");
-        return MAP_ERR_NO_FILE;
+        return FF_ERR_NO_FILE;
     }
 
     while (!infile.eof()) {
@@ -361,15 +380,14 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
         char table_id;
         CorrTable_t table;
 
-        if (!parseHeaders(infile, size_x, size_y, position_id, table_id)) {
+        err = parseHeaders(infile, size_x, size_y, position_id, table_id);
+        if (err != FF_ERR_NONE)
             break;
-        }
 
         // Correction factors should follow as doubles, X rows and Y columns.
         // Table size must match the one defined in header.
-        table.reserve(size_x);
+        table.resize(size_x, std::vector<double>(size_y, 0.0));
         for (int i = 0; i < size_x; i++) {
-            table[i].reserve(size_y);
             for (int j = 0; j < size_y; j++) {
                 double value;
                 infile >> value;
@@ -377,19 +395,63 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
 
                 if (infile.eof()) {
                     LOG_ERROR("Premature end of file");
-                    return MAP_ERR_PARSE;
+                    err = FF_ERR_PARSE;
+                    break;
                 }
             }
         }
 
-        if (table_id == 'x')
-            m_corrTables[position_id].first = table;
-        else
-            m_corrTables[position_id].second = table;
+        if (table_id == 'x') {
+            if (m_corrTables[position_id].first.size() > 0)
+                err = FF_ERR_EXIST;
+            else
+                m_corrTables[position_id].first = table;
+        } else {
+            if (m_corrTables[position_id].second.size() > 0)
+                err = FF_ERR_EXIST;
+            else
+                m_corrTables[position_id].second = table;
+        }
+
+        break;
     }
 
-    bool done = infile.eof();
     infile.close();
 
-    return (done ? MAP_ERR_NONE : MAP_ERR_PARSE);
+    return err;
+}
+
+FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &path)
+{
+    ImportError err = FF_ERR_NONE;
+    struct dirent entry, *result;
+    DIR *dir = opendir(path.c_str());
+    uint32_t nImported = 0;
+
+    if (dir == NULL)
+        return FF_ERR_NO_FILE;
+
+    while (readdir_r(dir, &entry, &result) == 0 && result != NULL) {
+        std::string filename = entry.d_name;
+        if (filename != ".." && filename != ".") {
+            err = importFile(path + PATH_SEPARATOR + filename);
+
+            // Stop on first critical error
+            if (err == FF_ERR_PARSE || err == FF_ERR_EXIST)
+                break;
+
+            if (err == FF_ERR_NONE)
+                nImported++;
+
+            // Mask non-critical errors
+            err = FF_ERR_NONE;
+        }
+    }
+
+    closedir(dir);
+
+    if (nImported == 0 && err == FF_ERR_NONE)
+        err = FF_ERR_NO_FILE;
+
+    return err;
 }

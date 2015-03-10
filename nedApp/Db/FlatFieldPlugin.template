@@ -1,11 +1,107 @@
 include "BasePlugin.include"
 
-record(waveform,"$(P)RefTable") {
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Axis positions")
-    field(DTYP, "asynInt32ArrayOut")
-    field(INP,  "@asyn($(PORT))RefTable")
-    field(NELM, "10")
-    field(FTVL, "LONG")
+record(bo, "$(P)Enable")
+{
+    info(archive, "Monitor, 00:10:00")
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
 }
-
+record(calc, "$(P)StatusCalc")
+{
+    field(DESC, "PixelMap plugin status")
+    field(INPA, "$(P)ErrImport.SEVR")
+    field(CALC, "A=0")
+    field(FLNK, "$(P)Status")
+}
+record(bi, "$(P)Status")
+{
+    field(ZNAM, "Not OK")
+    field(ONAM, "OK")
+    field(ZSV,  "MAJOR")
+    field(INP,  "$(P)StatusCalc")
+}
+record(waveform, "$(P)ImportDir")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))ImportDir")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(PINI, "YES")
+}
+record(mbbi, "$(P)ErrImport")
+{
+    field(DESC, "Error importing file")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrImport")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "No error")
+    field(ONVL, "1")
+    field(ONST, "No file imported")
+    field(ONSV, "MAJOR")
+    field(TWVL, "2")
+    field(TWST, "File parse error")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Memory alloc err")
+    field(THSV, "MAJOR")
+    field(FRVL, "4")
+    field(FRST, "Double position")
+    field(FRSV, "MAJOR")
+    field(FVVL, "5")
+    field(FVST, "Bad file format")
+    field(FVSV, "MAJOR")
+    field(FLNK, "$(P)Status")
+}
+record(longin, "$(P)CntError")
+{
+    field(DESC, "Num of unknown-error pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntError")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntUnmap")
+{
+    field(DESC, "Number unmapped pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntUnmap")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntSplit")
+{
+    field(DESC, "Number of splits occurred")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntSplit")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bo, "$(P)ResetCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset counters")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetCnt")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(bo, "$(P)FfMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable flat-field transformation")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))FfMode")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Pass thru all")
+    field(ONVL, "1")
+    field(ONST, "Transform neutrons")
+}

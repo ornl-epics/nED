@@ -62,33 +62,41 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Possible errors
          */
         typedef enum {
-            MAP_ERR_NONE        = 0, //!< No error
-            MAP_ERR_NO_FILE     = 1, //!< Failed to find file
-            MAP_ERR_PARSE       = 2, //!< Failed to parse file
-            MAP_ERR_NO_MEM      = 3, //!< Failed to allocate internal buffer
+            FF_ERR_NONE         = 0, //!< No error
+            FF_ERR_NO_FILE      = 1, //!< Failed to find file
+            FF_ERR_PARSE        = 2, //!< Failed to parse file
+            FF_ERR_NO_MEM       = 3, //!< Failed to allocate internal buffer
+            FF_ERR_EXIST        = 4, //!< Correction table for this position already imported
+            FF_ERR_BAD_FORMAT   = 5, //!< Unrecognized file format
         } ImportError;
 
         /**
          * Enable or disable mapping mode
          */
         typedef enum {
-            MAP_DISABLED        = 0, //!< Don't map any events - passthru
-            MAP_ENABLED         = 1, //!< Map all events
-        } MapMode_t;
+            FF_DISABLED         = 0, //!< Passthru mode
+            FF_ENABLED          = 1, //!< Transform neutron events
+        } FfMode_t;
 
     public: // structures and defines
         /**
          * Constructor for FlatFieldPlugin
          *
          * Constructor will create and populate PVs with default values.
+         * It will also try to parse all files it finds in importDir as X and Y
+         * flat-field correction tables. See FlatFieldPlugin::importFile() for
+         * file format details.
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] importFilePath Path to a file holding all correction tables
+         * @param[in] importDir Directory path where all correction tables are.
          * @param[in] bufSize Transformation buffer size.
          */
         FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importFilePath, int bufSize);
 
+        /**
+         * Destructor deinitializes members.
+         */
         ~FlatFieldPlugin();
 
         /**
@@ -120,10 +128,10 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * comment lines start with character '#'. Header lines are key,value
          * tupples separated by ':'. Unknown header lines are treated as
          * comment. Valid header keys are:
-         * * Format version
-         * * Table size
-         * * Table dimension
-         * * Position id
+         * - Format version
+         * - Table size
+         * - Table dimension
+         * - Position id
          *
          * ASCII file has several advantages over binary file. It's cross
          * platform independent, it's easy to read and debug, it can be saved
@@ -142,8 +150,33 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * +0.44 +5.09 +12.11
          * +0.79 -9.10 -3.61
          * @endcode
+         *
+         * @param[in] path Relative or absolute path to a file to parse.
+         * @retval MAP_ERR_NO_FILE No such file or file can not be opened.
+         * @retval MAP_ERR_BAD_FORMAT File doesn't look like valid correction
+         *         table file.
+         * @retval MAP_ERR_PARSE File seems to be valid correction table but
+         *         there was problem parsing it.
+         * @retval MAP_ERR_EXIST Data for this position already imported.
+         * @retval MAP_ERR_NONE No error, file was successfully imported.
          */
         ImportError importFile(const std::string &path);
+
+        /**
+         * Try to import all files in given directory.
+         *
+         * Function calls importFile() function for every file it finds in
+         * specified directory. It stops processing files after first critical
+         * error from importFile():
+         * - MAP_ERR_PARSE
+         * - MAP_ERR_EXIST
+         *
+         * @note Should work on WIN32 as well, but not tested.
+         * @param[in] dir Relative or absolute path to a directory with
+         *                correction table files.
+         * @return Critical error from importFile() or MAP_ERR_NONE.
+         */
+        ImportError importFiles(const std::string &dir);
 
         /**
          * Parse single header from the current file position.
@@ -162,11 +195,21 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * to obtain required fields. Blank lines are truncated. Header line
          * can be of any. Function succeeds only if it finds all required
          * headers and parses them. Required header lines:
-         * Table size: <X>x<Y>
-         * Camera id: <id>
-         * Table dimension: <x or y>
+         * - Format version: <ver>
+         * - Table size: <X>x<Y>
+         * - Table dimension: <x or y>
+         * - Position id: <id>
+         *
+         * @param[in] infile Opened file to parse headers from.
+         * @param[out] size_x X dimension size
+         * @param[out] size_y Y dimension size
+         * @param[out] position_id Camera position id
+         * @param[out] dimension Correction table dimension, 'X' or 'Y'
+         * @retval MAP_ERR_BAD_FORMAT Unrecognized file format
+         * @retval MAP_ERR_PARSE File seems to be expected format but parse error.
+         * @retval MAP_ERR_NONE Header parsed.
          */
-        bool parseHeaders(std::ifstream &infile, int &size_x, int &size_y, int &camera_id, char &table_dim);
+        ImportError parseHeaders(std::ifstream &infile, int &size_x, int &size_y, int &position_id, char &dimension);
 
     private: // variables
         static const unsigned TABLE_X_SIZE = 512;
@@ -183,14 +226,14 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         std::map<uint32_t, CorrTablePair_t> m_corrTables; //!< One correction table per ACPC camera.
 
     protected:
-        #define FIRST_FLATFIELDPLUGIN_PARAM FilePath
-        int FilePath;       //!< Absolute path to pixel map file
+        #define FIRST_FLATFIELDPLUGIN_PARAM ImportDir
+        int ImportDir;      //!< Absolute path to pixel map file
         int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
         int CntUnmap;       //!< Number of unmapped pixels
         int CntError;       //!< Number of generic error pixel ids detected
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
-        int MapMode;        //!< Event mapping mode (see PixelMapPlugin::MapMode_t)
+        int FfMode;         //!< Flat-field transformation mode (see FlatFieldPlugin::FfMode_t)
         int MaxRawX;        //!< Maximum value for X returned by camera
         int MaxRawY;        //!< Maximum value for Y returned by camera
         #define LAST_FLATFIELDPLUGIN_PARAM MaxRawY

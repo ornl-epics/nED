@@ -91,7 +91,7 @@ dbLoadRecords("$(NED)/db/ArocPlugin_v23.db","P=$(PREFIX)aroc1:,PORT=roc1")
 DebugPluginConfigure("gm", "cmd", 0)
 dbLoadRecords("$(NED)/db/DebugPlugin.db","P=$(PREFIX)dbg1:,PORT=gm")
 
-FlatFieldPluginConfigure("ff", "occ", 0)
+FlatFieldPluginConfigure("ff", "occ", "/home/kvx/git/nED/flatfield/example/flatfield", 1048576)
 dbLoadRecords("$(NED)/db/FlatFieldPlugin.db","P=$(PREFIX)ff:,PORT=ff")
 
 AcpcPvaPluginConfigure("AcpcPva", "occ", "$(PREFIX)pva:Neutrons")
