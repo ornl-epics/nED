@@ -79,6 +79,8 @@
 		<Unit filename="FemPlugin.cpp" />
 		<Unit filename="FemPlugin.h" />
 		<Unit filename="Fifo.h" />
+		<Unit filename="FlatFieldPlugin.cpp" />
+		<Unit filename="FlatFieldPlugin.h" />
 		<Unit filename="GenericModulePlugin.cpp" />
 		<Unit filename="GenericModulePlugin.h" />
 		<Unit filename="Log.h" />
