@@ -7,6 +7,7 @@
  * @author Klemen Vodopivec
  */
 
+#include "Common.h"
 #include "OccPortDriver.h"
 #include "DmaCircularBuffer.h"
 #include "DmaCopier.h"
@@ -58,6 +59,9 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("ErrCrc",           asynParamInt32,     &ErrCrc);                   // READ - Number of CRC errors detected by OCC
     createParam("ErrLength",        asynParamInt32,     &ErrLength);                // READ - Number of length errors detected by OCC
     createParam("ErrFrame",         asynParamInt32,     &ErrFrame);                 // READ - Number of frame errors detected by OCC
+    createParam("SfpSerNo",         asynParamOctet,     &SfpSerNo);                 // READ - SFP serial number string
+    createParam("SfpPartNo",        asynParamOctet,     &SfpPartNo);                // READ - SFP part number string
+    createParam("SfpType",          asynParamInt32,     &SfpType);                  // READ - SFP type
     createParam("SfpTemp",          asynParamFloat64,   &SfpTemp);                  // READ - SFP temperature in Celsius
     createParam("SfpRxPower",       asynParamFloat64,   &SfpRxPower);               // READ - SFP RX power in uW
     createParam("SfpTxPower",       asynParamFloat64,   &SfpTxPower);               // READ - SFP TX power in uW
@@ -69,7 +73,9 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("DmaSize",          asynParamInt32,     &DmaSize);                  // READ - DMA memory size
     createParam("BufUsed",          asynParamInt32,     &BufUsed);                  // READ - Virtual buffer used space
     createParam("BufSize",          asynParamInt32,     &BufSize);                  // READ - Virtual buffer size
-    createParam("RxRate",           asynParamInt32,     &RxRate);                   // READ - Data processing throughput in B/s
+    createParam("RecvRate",         asynParamInt32,     &RecvRate);                 // READ - OCC receiving throughput in B/s
+    createParam("CopyRate",         asynParamInt32,     &CopyRate);                 // READ - Copy to internal buffer throughput in B/s
+    createParam("ProcRate",         asynParamInt32,     &ProcRate);                 // READ - Data processing throughput in B/s
     createParam("RxEn",             asynParamInt32,     &RxEn);                     // WRITE - Enable incoming data          (0=disable,1=enable)
     createParam("RxEnRb",           asynParamInt32,     &RxEnRb);                   // READ - Incoming data enabled         (0=disabled,1=enabled)
     createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
@@ -90,6 +96,9 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
         asynPrint(this->pasynUserSelf, ASYN_TRACE_ERROR, "Unable to open OCC device - %s(%d)\n", strerror(-status), status);
         m_occ = NULL;
     }
+
+    // Initialize some parameters values
+    setIntegerParam(BufSize, localBufferSize);
 
     callParamCallbacks();
 
@@ -179,6 +188,9 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             setIntegerParam(ErrCrc,         occstatus.err_crc);
             setIntegerParam(ErrLength,      occstatus.err_length);
             setIntegerParam(ErrFrame,       occstatus.err_frame);
+            setStringParam(SfpSerNo,        occstatus.sfp_serial_number);
+            setStringParam(SfpPartNo,       occstatus.sfp_part_number);
+            setIntegerParam(SfpType,        occstatus.sfp_type);
             setDoubleParam(SfpTemp,         occstatus.sfp_temp);
             setDoubleParam(SfpRxPower,      occstatus.sfp_rx_power);
             setDoubleParam(SfpTxPower,      occstatus.sfp_tx_power);
@@ -187,8 +199,7 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
 
             setIntegerParam(DmaUsed,        occstatus.dma_used);
             setIntegerParam(DmaSize,        occstatus.dma_size);
-            setIntegerParam(BufUsed,        m_circularBuffer->used());
-            setIntegerParam(BufSize,        m_circularBuffer->size());
+            setIntegerParam(RecvRate,       occstatus.rx_rate);
 
             if (occstatus.stalled)
                 setIntegerParam(RxStalled,  STALL_DMA);
@@ -291,6 +302,30 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return asynPortDriver::writeInt32(pasynUser, value);
 }
 
+asynStatus OccPortDriver::readInt32(asynUser *pasynUser, epicsInt32 *value)
+{
+    if (m_occ == NULL) {
+        // OCC not initialized, nothing that we can do here
+        LOG_ERROR("OCC device not initialized");
+        return asynError;
+    }
+
+    if (pasynUser->reason == BufUsed) {
+        *value = m_circularBuffer->used();
+        return asynSuccess;
+    }
+    if (pasynUser->reason == ProcRate) {
+        *value = m_circularBuffer->getReadRate();
+        return asynSuccess;
+    }
+    if (pasynUser->reason == CopyRate) {
+        // is 0 when no copy buffer is used
+        *value = m_circularBuffer->getPushRate();
+        return asynSuccess;
+    }
+    return asynPortDriver::readInt32(pasynUser, value);
+}
+
 asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer)
 {
     if (m_occ == NULL) {
@@ -303,7 +338,7 @@ asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer
 
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
-            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), packet->length());
+            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->length(), 4));
             if (ret != 0) {
                 setIntegerParam(LastErr, -ret);
                 setIntegerParam(Status, STAT_OCC_ERROR);
@@ -322,27 +357,6 @@ asynStatus OccPortDriver::createParam(const char *name, asynParamType type, int 
     if (status == asynSuccess)
         status = setIntegerParam(*index, defaultValue);
     return status;
-}
-
-void OccPortDriver::calculateDataRateOut(uint32_t consumed)
-{
-    epicsTimeStamp now;
-    double difftime;
-
-    this->lock();
-    m_dataRateOutCount += consumed;
-
-    epicsTimeGetCurrent(&now);
-    difftime = epicsTimeDiffInSeconds(&now, &m_dataRateOutTime);
-    if (difftime > 1.0) {
-        double throughput = static_cast<double>(m_dataRateOutCount) / difftime;
-        m_dataRateOutTime = now;
-        m_dataRateOutCount = 0;
-
-        setIntegerParam(RxRate, throughput);
-        callParamCallbacks();
-    }
-    this->unlock();
 }
 
 void OccPortDriver::reset() {
@@ -387,6 +401,7 @@ void OccPortDriver::reset() {
     // Flag resetting mode, status thread will recover
     this->lock();
     setIntegerParam(Status, STAT_OK);
+    setIntegerParam(RxStalled, STALL_NONE);
     callParamCallbacks();
     this->unlock();
 }
@@ -397,7 +412,6 @@ void OccPortDriver::handleRecvError(int ret)
     int resetParam = 0;
 
     this->lock();
-    setIntegerParam(RxRate, 0);
 
     if (ret == -EBADMSG) {
         setIntegerParam(Status, STAT_BAD_DATA);
@@ -448,17 +462,12 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
     DasPacketList packetsList;
     uint32_t retryCounter = 0;
 
-    // Initialize members used in helper function calculateDataRateOut()
-    epicsTimeGetCurrent(&m_dataRateOutTime);
-    m_dataRateOutCount = 0;
-
     while (shutdown->tryWait() == false) {
         consumed = 0;
 
         // Wait for data, use a timeout for data rate out calculation
         int ret = m_circularBuffer->wait(&data, &length, 1.0);
         if (ret == -ETIME) {
-            calculateDataRateOut(0);
             continue;
         } else if (ret != 0) {
             handleRecvError(ret);
@@ -471,12 +480,6 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
         if (packetsList.empty() == false) {
             // Notify everybody about new data
             sendToPlugins(REASON_OCCDATA, &packetsList);
-
-            // Plugins have been notified, hopefully they're all non-blocking.
-            // While waiting for threads to synchronize, we have some time.
-
-            // Calculate data processing throughput every second
-            calculateDataRateOut(consumed);
 
             // Decrease reference counter and wait for everybody else to do the same
             packetsList.release(); // reset() set it to 1

@@ -1,0 +1,123 @@
+DspPluginConfigure("dsp1", "cmd", "21.162.47.161", "v63", 0)
+dbLoadRecords("../../db/DspPlugin.db","P=$(PREFIX,undefined)dsp1:,PORT=dsp1")
+
+FemPluginConfigure("fem1", "cmd", "0.55.228.186", "v00", 0)
+dbLoadRecords("../../db/FemPlugin.db","P=$(PREFIX,undefined)fem1:,PORT=fem1")
+
+FemPluginConfigure("fem2", "cmd", "21.190.216.248", "v00", 0)
+dbLoadRecords("../../db/FemPlugin.db","P=$(PREFIX,undefined)fem2:,PORT=fem2")
+
+FemPluginConfigure("fem3", "cmd", "21.190.220.68", "v00", 0)
+dbLoadRecords("../../db/FemPlugin.db","P=$(PREFIX,undefined)fem3:,PORT=fem3")
+
+FemPluginConfigure("fem4", "cmd", "21.190.231.15", "v00", 0)
+dbLoadRecords("../../db/FemPlugin.db","P=$(PREFIX,undefined)fem4:,PORT=fem4")
+
+FemPluginConfigure("fem5", "cmd", "21.190.237.196", "v00", 0)
+dbLoadRecords("../../db/FemPlugin.db","P=$(PREFIX,undefined)fem5:,PORT=fem5")
+
+FemPluginConfigure("fem6", "cmd", "21.191.11.141", "v00", 0)
+dbLoadRecords("../../db/FemPlugin.db","P=$(PREFIX,undefined)fem6:,PORT=fem6")
+
+RocPluginConfigure("roc1", "cmd", "21.217.194.157", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc1:,PORT=roc1")
+
+RocPluginConfigure("roc2", "cmd", "21.217.196.225", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc2:,PORT=roc2")
+
+RocPluginConfigure("roc3", "cmd", "21.217.197.104", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc3:,PORT=roc3")
+
+RocPluginConfigure("roc4", "cmd", "21.217.205.145", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc4:,PORT=roc4")
+
+RocPluginConfigure("roc5", "cmd", "21.217.207.64", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc5:,PORT=roc5")
+
+RocPluginConfigure("roc6", "cmd", "21.217.208.198", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc6:,PORT=roc6")
+
+RocPluginConfigure("roc7", "cmd", "21.217.210.159", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc7:,PORT=roc7")
+
+RocPluginConfigure("roc8", "cmd", "21.217.211.7", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc8:,PORT=roc8")
+
+RocPluginConfigure("roc9", "cmd", "21.217.213.163", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc9:,PORT=roc9")
+
+RocPluginConfigure("roc10", "cmd", "21.217.217.67", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc10:,PORT=roc10")
+
+RocPluginConfigure("roc11", "cmd", "21.217.217.255", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc11:,PORT=roc11")
+
+RocPluginConfigure("roc12", "cmd", "21.217.219.240", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc12:,PORT=roc12")
+
+RocPluginConfigure("roc13", "cmd", "21.217.221.40", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc13:,PORT=roc13")
+
+RocPluginConfigure("roc14", "cmd", "21.217.226.219", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc14:,PORT=roc14")
+
+RocPluginConfigure("roc15", "cmd", "21.217.228.38", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc15:,PORT=roc15")
+
+RocPluginConfigure("roc16", "cmd", "21.217.237.41", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc16:,PORT=roc16")
+
+RocPluginConfigure("roc17", "cmd", "21.217.243.113", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc17:,PORT=roc17")
+
+RocPluginConfigure("roc18", "cmd", "21.217.243.128", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc18:,PORT=roc18")
+
+RocPluginConfigure("roc19", "cmd", "21.217.251.81", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc19:,PORT=roc19")
+
+RocPluginConfigure("roc20", "cmd", "21.217.252.148", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc20:,PORT=roc20")
+
+RocPluginConfigure("roc21", "cmd", "21.217.254.203", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc21:,PORT=roc21")
+
+RocPluginConfigure("roc22", "cmd", "21.218.1.121", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc22:,PORT=roc22")
+
+RocPluginConfigure("roc23", "cmd", "21.218.2.164", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc23:,PORT=roc23")
+
+RocPluginConfigure("roc24", "cmd", "21.218.2.166", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc24:,PORT=roc24")
+
+RocPluginConfigure("roc25", "cmd", "21.218.4.242", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc25:,PORT=roc25")
+
+RocPluginConfigure("roc26", "cmd", "21.218.12.241", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc26:,PORT=roc26")
+
+RocPluginConfigure("roc27", "cmd", "21.218.20.227", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc27:,PORT=roc27")
+
+RocPluginConfigure("roc28", "cmd", "21.218.32.48", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc28:,PORT=roc28")
+
+RocPluginConfigure("roc29", "cmd", "21.218.32.67", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc29:,PORT=roc29")
+
+RocPluginConfigure("roc30", "cmd", "21.218.39.128", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc30:,PORT=roc30")
+
+RocPluginConfigure("roc31", "cmd", "21.218.41.35", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc31:,PORT=roc31")
+
+RocPluginConfigure("roc32", "cmd", "21.218.47.103", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc32:,PORT=roc32")
+
+RocPluginConfigure("roc33", "cmd", "21.218.48.251", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc33:,PORT=roc33")
+
+RocPluginConfigure("roc34", "cmd", "21.218.51.16", "v52", 0)
+dbLoadRecords("../../db/RocPlugin_v52.db","P=$(PREFIX,undefined)roc34:,PORT=roc34")
+

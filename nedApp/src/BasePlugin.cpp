@@ -100,7 +100,10 @@ void BasePlugin::processDataUnlocked(const DasPacketList * const packetList)
 asynStatus BasePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Enable) {
-        if (enableCallbacks(value > 0) == false)
+        this->unlock();
+        bool status = enableCallbacks(value > 0);
+        this->lock();
+        if (status == false)
             return asynError;
     } else if (pasynUser->reason == DataModeP) {
         switch (value) {
@@ -126,10 +129,18 @@ asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *in
     return status;
 }
 
+asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *index, double initValue)
+{
+    asynStatus status = asynPortDriver::createParam(name, type, index);
+    if (status == asynSuccess && type == asynParamFloat64)
+        status = setDoubleParam(*index, initValue);
+    return status;
+}
+
 asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *index, const char *initValue)
 {
     asynStatus status = asynPortDriver::createParam(name, type, index);
-    if (status == asynSuccess && type == asynParamInt32)
+    if (status == asynSuccess && type == asynParamOctet)
         status = setStringParam(*index, initValue);
     return status;
 }
@@ -179,7 +190,8 @@ std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &
     std::shared_ptr<Timer> timer(new Timer(true));
     if (timer) {
         std::function<float(void)> timerCb = std::bind(&BasePlugin::timerExpire, this, timer, callback);
-        timer->schedule(timerCb, delay);
+        if (!timer->schedule(timerCb, delay))
+           LOG_WARN("Failed to schedule callback");
     }
     return timer;
 }

@@ -1,18 +1,263 @@
 include "BasePlugin.include"
 
-record(longin, "$(P)$(CNT)")
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CmdCnt")
 {
    field(DTYP,  "asynInt32")
-   field(INP,   "@asyn($(PORT))$(CNT)")
+   field(INP,   "@asyn($(PORT))CmdCnt")
    field(VAL,   "0")
    field(SCAN,  "Passive")
 }
-record(calc, "$(P)$(RATE)")
+record(calc, "$(P)CmdCntRate")
 {
-   field(INPA,  "$(P)$(CNT) NPP")
-   field(INPB,  "$(P)$(CNT) PP")
+   field(INPA,  "$(P)CmdCnt NPP")
+   field(INPB,  "$(P)CmdCnt PP")
    field(CALC,  "B-A")
    field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)DataCnt")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))DataCnt")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)DataCntRate")
+{
+   field(INPA,  "$(P)DataCnt NPP")
+   field(INPB,  "$(P)DataCnt PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)MetaCnt")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))MetaCnt")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)MetaCntRate")
+{
+   field(INPA,  "$(P)MetaCnt NPP")
+   field(INPB,  "$(P)MetaCnt PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)RtdlCnt")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))RtdlCnt")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)RtdlCntRate")
+{
+   field(INPA,  "$(P)RtdlCnt NPP")
+   field(INPB,  "$(P)RtdlCnt PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)TsyncCnt")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))TsyncCnt")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)TsyncCntRate")
+{
+   field(INPA,  "$(P)TsyncCnt NPP")
+   field(INPB,  "$(P)TsyncCnt PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)BadCnt")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))BadCnt")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)BadCntRate")
+{
+   field(INPA,  "$(P)BadCnt NPP")
+   field(INPB,  "$(P)BadCnt PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)TotCnt")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))TotCnt")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)TotCntRate")
+{
+   field(INPA,  "$(P)TotCnt NPP")
+   field(INPB,  "$(P)TotCnt PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)CmdByte")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))CmdByte")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)CmdByteRate")
+{
+   field(INPA,  "$(P)CmdByte NPP")
+   field(INPB,  "$(P)CmdByte PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)DataByte")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))DataByte")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)DataByteRate")
+{
+   field(INPA,  "$(P)DataByte NPP")
+   field(INPB,  "$(P)DataByte PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(calc, "$(P)DataEventRate")
+{
+   field(INPA,  "$(P)DataByteRate NPP")
+   field(INPB,  "$(P)DataCntRate NPP")
+   field(INPC,  "48") # 24 bytes for DAS header, 24 bytes for RTDL header
+   field(INPD,  "8") # TODO: Improve by reading dsp:LvdsDataSize
+   field(CALC,  "(A-(B*C))/D")
+   field(EGU,   "events/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)MetaByte")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))MetaByte")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)MetaByteRate")
+{
+   field(INPA,  "$(P)MetaByte NPP")
+   field(INPB,  "$(P)MetaByte PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(calc, "$(P)MetaEventRate")
+{
+   field(INPA,  "$(P)MetaByteRate NPP")
+   field(INPB,  "$(P)MetaCntRate NPP")
+   field(INPC,  "48") # 24 bytes for DAS header, 24 bytes for RTDL header
+   field(INPD,  "8") # TODO: Improve by reading dsp:LvdsDataSize
+   field(CALC,  "(A-(B*C))/D")
+   field(EGU,   "events/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)RtdlByte")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))RtdlByte")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)RtdlByteRate")
+{
+   field(INPA,  "$(P)RtdlByte NPP")
+   field(INPB,  "$(P)RtdlByte PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)TsyncByte")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))TsyncByte")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)TsyncByteRate")
+{
+   field(INPA,  "$(P)TsyncByte NPP")
+   field(INPB,  "$(P)TsyncByte PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)BadByte")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))BadByte")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)BadByteRate")
+{
+   field(INPA,  "$(P)BadByte NPP")
+   field(INPB,  "$(P)BadByte PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(longin, "$(P)TotByte")
+{
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))TotByte")
+   field(VAL,   "0")
+   field(SCAN,  "Passive")
+}
+record(calc, "$(P)TotByteRate")
+{
+   field(INPA,  "$(P)TotByte NPP")
+   field(INPB,  "$(P)TotByte PP")
+   field(CALC,  "B-A")
+   field(EGU,   "pkt/s")
+   field(VAL,   "0")
+   field(SCAN,  "1 second")
+}
+record(calc, "$(P)TotEventRate")
+{
+   field(INPA,  "$(P)DataEventRate NPP")
+   field(INPB,  "$(P)MetaEventRate NPP")
+   field(CALC,  "A+B")
+   field(EGU,   "events/s")
    field(VAL,   "0")
    field(SCAN,  "1 second")
 }

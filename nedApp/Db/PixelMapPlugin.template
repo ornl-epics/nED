@@ -1,50 +1,59 @@
+include "BasePlugin.include"
+
 record(bo, "$(P)Enable")
 {
+    info(archive, "Scan, 00:01:00")
     info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(calc, "$(P)StatusCalc")
+{
+    field(DESC, "PixelMap plugin status")
+    field(INPA, "$(P)ErrImport.SEVR")
+    field(CALC, "A=0")
+    field(FLNK, "$(P)Status")
+}
+record(bi, "$(P)Status")
+{
+    field(ZNAM, "Not OK")
+    field(ONAM, "OK")
+    field(ZSV,  "MAJOR")
+    field(INP,  "$(P)StatusCalc")
+}
+record(waveform, "$(P)FilePath")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))FilePath")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
     field(PINI, "YES")
 }
 record(mbbi, "$(P)ErrImport")
 {
     field(DESC, "Error importing file")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))MapError")
+    field(INP,  "@asyn($(PORT))ErrImport")
     field(SCAN, "I/O Intr")
     field(PINI, "YES")
     field(ZRVL, "0")
     field(ZRST, "No error")
     field(ONVL, "1")
     field(ONST, "No pixelmap file")
+    field(ONSV, "MAJOR")
     field(TWVL, "2")
     field(TWST, "File parse error")
+    field(TWSV, "MAJOR")
     field(THVL, "3")
     field(THST, "Memory alloc err")
+    field(THSV, "MAJOR")
+    field(FLNK, "$(P)Status")
 }
-record(bo, "$(P)PassThru")
+record(longin, "$(P)CntError")
 {
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Disable pixel mapping")
+    field(DESC, "Num of unknown-error pixels")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))PassThru")
-    field(VAL,  "0")
-    field(PINI, "YES")
-    field(ZNAM, "Mapping enabled")
-    field(ONAM, "Mapping disabled")
-}
-record(longin, "$(P)CntErrOthr")
-{
-    field(DESC, "Number unknown error pixels")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))CntErrOthr")
-    field(SCAN, "I/O Intr")
-    field(VAL,  "0")
-    field(PINI, "YES")
-}
-record(longin, "$(P)CntErrOff")
-{
-    field(DESC, "Num out-of-range error pixels")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))CntErrOff")
+    field(INP,  "@asyn($(PORT))CntError")
     field(SCAN, "I/O Intr")
     field(VAL,  "0")
     field(PINI, "YES")
@@ -66,4 +75,31 @@ record(longin, "$(P)CntSplit")
     field(SCAN, "I/O Intr")
     field(VAL,  "0")
     field(PINI, "YES")
+}
+record(bo, "$(P)ResetCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset counters")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetCnt")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(mbbo, "$(P)MapMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Events mapping mode")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MapMode")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Pass thru all")
+    field(ONVL, "1")
+    field(ONST, "Map good events")
+    field(TWVL, "2")
+    field(TWST, "Map bad events")
+    field(THVL, "3")
+    field(THST, "Map all events")
 }

@@ -1,0 +1,42 @@
+# Upgrade BasePlugin::Enable PV
+record(bo, "$(P)Enable")
+{
+    info(archive, "Scan, 00:01:00")
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+
+record(stringin, "$(P)PvNeutronsName")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))PvNeutronsName")
+    field(PINI, "YES")
+    field(SCAN, "Passive")
+}
+record(stringin, "$(P)PvMetadataName")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))PvMetadataName")
+    field(PINI, "YES")
+    field(SCAN, "Passive")
+}
+record(bo, "$(P)PvNeutronsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PvNeutronsEn")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(bo, "$(P)PvMetadataEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PvMetadataEn")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}

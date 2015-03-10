@@ -4,7 +4,9 @@ include "asyn.dbd"
 include "PVAClientRegister.dbd"
 include "PVAServerRegister.dbd"
 include "registerChannelProviderLocal.dbd"
-include "dbPv.dbd"
+#include "dbPv.dbd"
+include "calcSupport.dbd"
+include "sCalcoutRecord.dbd"
 registrar("OccRegister")
 registrar("CmdDispatcherRegister")
 registrar("DiscoverPluginRegister")
@@ -12,12 +14,17 @@ registrar("ProxyPluginRegister")
 registrar("AdaraPluginRegister")
 registrar("DspPluginRegister")
 registrar("RocPluginRegister")
+registrar("AdcRocPluginRegister")
 registrar("FemPluginRegister")
 registrar("AcpcFemPluginRegister")
 registrar("DumpPluginRegister")
 registrar("StatPluginRegister")
 registrar("RtdlPluginRegister")
-registrar("GenericModulePluginRegister")
+registrar("DebugPluginRegister")
+registrar("RocPvaPluginRegister")
 registrar("FlatFieldPluginRegister")
 registrar("AcpcPvaPluginRegister")
 registrar("PixelMapPluginRegister")
+registrar("GlobalConRegistrar")
+registrar("AcpcPluginRegister")
+registrar("ArocPluginRegister")

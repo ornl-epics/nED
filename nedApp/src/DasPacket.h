@@ -15,6 +15,23 @@
 /**
  * Class representing a DAS packet.
  *
+ * DasPacket is a container for data transfered over OCC link. It's a structure
+ * representing one DAS packet. DAS packet is dynamic in size and the actual
+ * length is defined by the header. Header is the first 6 4-byte entities and
+ * defines the rest of the data. Packet size is limited by DSP to around
+ * 3624 bytes and is always 4-byte aligned. When actual payload does not align
+ * on 4-byte boundary, data is padded. The length header parameter always
+ * defines the actual size of the packet.
+ *
+ * Packets are received from DSP through OCC board. They can be distinguished
+ * into two groups, data and commands packets. When DSP receives data from
+ * submodules, it merges data from many submodules into data packets of payload
+ * size max 3600 bytes. Commands and responses are treated as command packets
+ * and their flow is described with next picture.
+ *
+ * @image html OCC_protocol_packing.png
+ * @image latex OCC_protocol_packing.png width=6in
+ *
  * Don't introduce any virtual functions here as this will break allocating
  * objects from OCC buffer.
  */
@@ -83,25 +100,52 @@ struct DasPacket
         /**
          * Commands used by different DAS modules.
          *
-         * Add those gradualy as migrating from legacy software. Make sure
+         * Add those gradually as migrating from legacy software. Make sure
          * to document each one well when added.
          */
         enum CommandType {
             CMD_READ_VERSION            = 0x20, //!< Read module version
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
             CMD_READ_STATUS             = 0x22, //!< Read module status
+            CMD_READ_TEMPERATURE        = 0x23, //!< Read module temperature(s)
             CMD_READ_STATUS_COUNTERS    = 0x24, //!< Read module status counters
+            CMD_RESET_STATUS_COUNTERS   = 0x25, //!< Reset module status counters
             CMD_WRITE_CONFIG            = 0x30, //!< Write module configuration
+            CMD_WRITE_CONFIG_1          = 0x31, //!< Write module configuration section 1
+            CMD_WRITE_CONFIG_2          = 0x32, //!< Write module configuration section 2
+            CMD_WRITE_CONFIG_3          = 0x33, //!< Write module configuration section 3
+            CMD_WRITE_CONFIG_4          = 0x34, //!< Write module configuration section 4
+            CMD_WRITE_CONFIG_5          = 0x35, //!< Write module configuration section 5
+            CMD_WRITE_CONFIG_6          = 0x36, //!< Write module configuration section 6
+            CMD_WRITE_CONFIG_7          = 0x37, //!< Write module configuration section 7
+            CMD_WRITE_CONFIG_8          = 0x38, //!< Write module configuration section 8
+            CMD_WRITE_CONFIG_9          = 0x39, //!< Write module configuration section 9
+            CMD_WRITE_CONFIG_A          = 0x3A, //!< Write module configuration section A
+            CMD_WRITE_CONFIG_B          = 0x3B, //!< Write module configuration section B
+            CMD_WRITE_CONFIG_C          = 0x3C, //!< Write module configuration section C
+            CMD_WRITE_CONFIG_D          = 0x3D, //!< Write module configuration section D
+            CMD_WRITE_CONFIG_E          = 0x3E, //!< Write module configuration section E
+            CMD_WRITE_CONFIG_F          = 0x3F, //!< Write module configuration section F
             RSP_NACK                    = 0x40, //!< NACK to the command, the command that is being acknowledged is in payload[0] or payload[1]
             RSP_ACK                     = 0x41, //!< ACK to the command, the command that is being acknowledged is in payload[0] or payload[1]
             BAD_PACKET                  = 0x42, //!< Bad packet
             CMD_HV_SEND                 = 0x50, //!< Send data through RS232 port, HV connected to ROC
             CMD_HV_RECV                 = 0x51, //!< Receive data from RS232 port, HV connected to ROC
+            CMD_EEPROM_ERASE            = 0x60, //!< Erase device EEPROM
+            CMD_EEPROM_LOAD             = 0x61, //!< Load data from EEPROM (?)
+            CMD_EEPROM_READ             = 0x62, //!< Read contents of EEPROM and return (?)
+            CMD_EEPROM_WRITE            = 0x63, //!< Write contents of EEPROM (?)
+            CMD_EEPROM_READ_WORD        = 0x64, //!< Read single word from EEPROM
+            CMD_EEPROM_WRITE_WORD       = 0x65, //!< Write single word to EEPROM
+            CMD_UPGRADE                 = 0x6F, //!< Send chunk of new firmware data
             CMD_DISCOVER                = 0x80, //!< Discover modules
+            CMD_RESET                   = 0x81, //!< Reset of all components
             CMD_START                   = 0x82, //!< Start acquisition
             CMD_STOP                    = 0x83, //!< Stop acquisition
             CMD_TSYNC                   = 0x84, //!< TSYNC packet
             CMD_RTDL                    = 0x85, //!< RTDL is a command packet, but can also be data packet if info == 0xFC
+            CMD_PM_PULSE_RQST_ON        = 0x90, //!< Request one pulse for Pulsed Magnet
+            CMD_PM_PULSE_RQST_OFF       = 0x91, //!< Clears one pulse request for Pulsed Magnet
         };
 
         /**
@@ -115,6 +159,7 @@ struct DasPacket
             MOD_TYPE_CROC               = 0x29,
             MOD_TYPE_IROC               = 0x2A,
             MOD_TYPE_BIDIMROC           = 0x2B,
+            MOD_TYPE_ADCROC             = 0x2D,
             MOD_TYPE_DSP                = 0x30,
             MOD_TYPE_SANSROC            = 0x40,
             MOD_TYPE_ACPC               = 0xA0,
@@ -152,7 +197,7 @@ struct DasPacket
             unsigned only_neutron_data:1;   //!< Only neutron data, if 0 some metadata is included
             unsigned rtdl_present:1;        //!< Is RTDL 6-words data included right after the header? Should be always 1 for newer DSPs
             unsigned unused4:1;             //!< Always zero?
-            unsigned format_code:3;         //!< Format code
+            unsigned format_code:3;         //!< Format code, 000 for neutron data, 111 for RTDL data packet
             unsigned subpacket_count:16;    //!< Subpacket counter
             unsigned unused24_27:4;         //!< Not used, should be all 0
             unsigned last_subpacket:1;      //!< Is this the last subpacket?
@@ -209,6 +254,13 @@ struct DasPacket
          * passes thru the data it receives, so the software must format
          * the package as expected by modules. LVDS is 21-bit
          * bus and the protocol itself uses 5 control bits. There's 16 bits for data.
+         *
+         * The payload must be 4-byte aligned memory block, but the payload_length
+         * can be 2 bytes less than the memory length. The payload_length
+         * is put in the packet header, the transmit unit is 4 bytes. Code that
+         * transmits data to OCC takes length from the packet header and aligns
+         * it up to 4-byte boundary. Received packets are always 4-byte aligned,
+         * courtesy of DSP.
          *
          * This functions re-formats payload data into LVDS data, taking care
          * of protocol flags and packing it into OCC packet. The result
@@ -273,32 +325,6 @@ struct DasPacket
         const RtdlHeader *getRtdlHeader() const;
 
         /**
-         * Return pointer to packet payload data regardless of RtdlHeader included or not.
-         *
-         * Function checks packet integrity and returns invalid address in case
-         * of any error. Caller should always check the return address or count
-         * parameter.
-         *
-         * @param[out] count Number of 4-byte blocks in the returned address or 0 on error.
-         * @return Starting address of the payload data or 0 on error.
-         */
-        const uint32_t *getData(uint32_t *count) const;
-
-        /**
-         * Return pointer to packet payload data regardless of RtdlHeader included or not.
-         *
-         * Function checks packet integrity and returns invalid address in case
-         * of any error. Caller should always check the return address or count
-         * parameter.
-         *
-         * @param[out] count Number of 4-byte dwords in returned address or 0 on error.
-         * @return Starting address of the payload data or 0 on error.
-         */
-        uint32_t *getData(uint32_t *count) {
-            return const_cast<DasPacket *>(this)->getData(count);
-        }
-
-        /**
          * Return the actual response type.
          *
          * Response packet command field does not always contain the response
@@ -335,6 +361,13 @@ struct DasPacket
         /**
          * Return address to the actual packet payload.
          *
+         * The packet payload is all data after the protocol header.
+         * Protocol header is 24 bytes long. For modules behind DSP there's
+         * optional 4 or 8 bytes of data describing the sub-module address
+         * and response type.
+         * Everything else is considered payload, including the RTDL information
+         * provided by DSP-T in data packets.
+         *
          * The response packets behind the DSP contain their address in the
          * first 4-bytes of the payload. The real payload is thus shifted for
          * 4 bytes. This only applies to the command responses as the data
@@ -356,9 +389,49 @@ struct DasPacket
          *
          * @see getPayload
          * @see getSourceAddress
-         * @return Returns number of the actual payload.
+         * @return Returns length of the packet payload in bytes.
          */
         uint32_t getPayloadLength() const;
+
+
+        /**
+         * Return pointer to packet payload data regardless of RtdlHeader included or not.
+         *
+         * Data packets always originate from DSP. DSP aggregates data from all
+         * sub-modules into data packets. There is never LVDS header information
+         * in data packets. But there is always RTDL header when data packets
+         * are created by DSP-T.
+         *
+         * Function checks packet integrity and returns invalid address in case
+         * of any error. Caller should always check the return address or count
+         * parameter.
+         *
+         * @param[out] count Number of 4-byte blocks in the returned address or 0 on error.
+         * @return Starting address of the payload data or 0 on error.
+         */
+        const uint32_t *getData(uint32_t *count) const;
+
+        /**
+         * Return pointer to packet payload data regardless of RtdlHeader included or not.
+         *
+         * Function checks packet integrity and returns invalid address in case
+         * of any error. Caller should always check the return address or count
+         * parameter.
+         *
+         * @param[out] count Number of 4-byte dwords in returned address or 0 on error.
+         * @return Starting address of the payload data or 0 on error.
+         */
+        uint32_t *getData(uint32_t *count) {
+            return const_cast<uint32_t *>(const_cast<const DasPacket *>(this)->getData(count));
+        }
+
+        /**
+         * Return the length of real packet data, excluding RTDL information.
+         *
+         * @see getData
+         * @return Returns length of the packet data in bytes.
+         */
+        uint32_t getDataLength() const;
 
         /**
          * Copy header and RTDL header of this container to another one.

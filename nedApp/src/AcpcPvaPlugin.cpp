@@ -8,30 +8,43 @@
  */
 
 #include "AcpcPvaPlugin.h"
+#include "Log.h"
 
-EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", string, "pvAccess PV record prefix", string);
+EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", string, "PV prefix", string);
+const uint32_t AcpcPvaPlugin::CACHE_SIZE = 32*1024;
 
-AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName)
-    : BasePvaPlugin(portName, dispatcherPortName, pvName)
+AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
+    : BasePvaPlugin(portName, dispatcherPortName, pvPrefix)
 {
-    uint32_t maxNormalEventsPerPacket = (DasPacket::MaxLength/4) / 6;
-
-    if (!!m_pvRecord) {
-        // Guestimate container size and force memory pre-allocation, will automatically extend if needed
-        m_pvRecord->cache.time_of_flight.reserve(maxNormalEventsPerPacket); // normal mode is the shortest => max counts in packet
-        m_pvRecord->cache.position_index.reserve(maxNormalEventsPerPacket);
-        m_pvRecord->cache.position_x.reserve(maxNormalEventsPerPacket);
-        m_pvRecord->cache.position_y.reserve(maxNormalEventsPerPacket);
-        m_pvRecord->cache.photo_sum_x.reserve(maxNormalEventsPerPacket);
-        m_pvRecord->cache.photo_sum_y.reserve(maxNormalEventsPerPacket);
-    }
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.position_index.reserve(CACHE_SIZE);
+    m_cache.position_x.reserve(CACHE_SIZE);
+    m_cache.position_y.reserve(CACHE_SIZE);
+    m_cache.photo_sum_x.reserve(CACHE_SIZE);
+    m_cache.photo_sum_y.reserve(CACHE_SIZE);
 }
 
-void AcpcPvaPlugin::processDataNormal(const DasPacketList * const packetList)
+asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    // This function is assuming exclusive access to m_pvRecord.
-    // Locked processData() enforces that guarantee.
+    if (pasynUser->reason == DataModeP) {
+        switch (value) {
+        case DATA_MODE_NORMAL:
+            setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
+            break;
+        case DATA_MODE_RAW:
+        case DATA_MODE_VERBOSE:
+            // TODO
+            break;
+        default:
+            LOG_ERROR("Ignoring invalid output mode %d", value);
+            return asynError;
+        }
+    }
+    return BasePvaPlugin::writeInt32(pasynUser, value);
+}
 
+void AcpcPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
+{
     // Structure describing normal data from ACPC.
     struct AcpcNormalData {
         uint32_t time_of_flight;
@@ -42,44 +55,35 @@ void AcpcPvaPlugin::processDataNormal(const DasPacketList * const packetList)
         uint32_t photo_sum_y;
     };
 
-    // Sanity check, BasePvaPlugin should prevent it anyway
-    if (!m_pvRecord)
-        return;
+    uint32_t nEvents = count / (sizeof(AcpcNormalData) / sizeof(uint32_t));
+    const AcpcNormalData *events = reinterpret_cast<const AcpcNormalData *>(data);
 
-    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-        const DasPacket *packet = *it;
-        const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
-
-        // TODO: what about metadata? In tof,pixel format?
-        if (packet->isNeutronData() == false || rtdl == 0)
-            continue;
-
-        // Extract timestamp and proton charge from RTDL
-        // RTDL should always be present when working with DSP-T
-        epics::pvData::TimeStamp time(rtdl->timestamp_sec, rtdl->timestamp_nsec);
-        if (time != m_pvRecord->cache.timeStamp) {
-            // Different pulse detected, post what we have and start over
-            m_pvRecord->postCached();
-        }
-        m_pvRecord->cache.timeStamp.put(rtdl->timestamp_sec, rtdl->timestamp_nsec);
-        m_pvRecord->cache.proton_charge = rtdl->charge;
-
-        // Data itself does not contain format information. Simple length
-        // check is the best we can do.
-        uint32_t nEvents;
-        const struct AcpcNormalData *data = reinterpret_cast<const AcpcNormalData *>(packet->getData(&nEvents));
-        nEvents /= (sizeof(AcpcNormalData) / sizeof(uint32_t));
-
-        // Go through events and append to cache
-        while (nEvents-- > 0) {
-            m_pvRecord->cache.time_of_flight.push_back(data->time_of_flight);
-            m_pvRecord->cache.position_index.push_back(data->position_index);
-            m_pvRecord->cache.position_x.push_back(data->position_x);
-            m_pvRecord->cache.position_y.push_back(data->position_y);
-            m_pvRecord->cache.photo_sum_x.push_back(data->photo_sum_x);
-            m_pvRecord->cache.photo_sum_y.push_back(data->photo_sum_y);
-            data++;
-        }
-        m_pvRecord->postCached();
+    // Go through events and append to cache
+    while (nEvents-- > 0) {
+        m_cache.time_of_flight.push_back(events->time_of_flight & 0x000FFFFF);
+        m_cache.position_index.push_back(events->position_index);
+        m_cache.position_x.push_back(events->position_x);
+        m_cache.position_y.push_back(events->position_y);
+        m_cache.photo_sum_x.push_back(events->photo_sum_x);
+        m_cache.photo_sum_y.push_back(events->photo_sum_y);
+        events++;
     }
+}
+
+void AcpcPvaPlugin::postNormalData(const PvaNeutronData::shared_pointer& pvRecord)
+{
+    pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
+    pvRecord->position_index->replace(freeze(m_cache.position_index));
+    pvRecord->position_x->replace(freeze(m_cache.position_x));
+    pvRecord->position_y->replace(freeze(m_cache.position_y));
+    pvRecord->photo_sum_x->replace(freeze(m_cache.photo_sum_x));
+    pvRecord->photo_sum_y->replace(freeze(m_cache.photo_sum_y));
+
+    // Reduce gradual memory reallocation by pre-allocating instead of clear()
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.position_index.reserve(CACHE_SIZE);
+    m_cache.position_x.reserve(CACHE_SIZE);
+    m_cache.position_y.reserve(CACHE_SIZE);
+    m_cache.photo_sum_x.reserve(CACHE_SIZE);
+    m_cache.photo_sum_y.reserve(CACHE_SIZE);
 }

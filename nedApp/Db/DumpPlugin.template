@@ -6,3 +6,95 @@ record(stringout, "$(P)FilePath")
     field(DTYP, "asynOctetWrite")
     field(OUT,  "@asyn($(PORT))FilePath")
 }
+record(bo, "$(P)RtdlPktsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))RtdlPktsEn")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(bo, "$(P)NeutronPktsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))NeutronPktsEn")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(bo, "$(P)MetadataPktsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MetadataPktsEn")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(bo, "$(P)CmdPktsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CmdPktsEn")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(bo, "$(P)UnknwnPktsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))UnknwnPktsEn")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(longin, "$(P)SavedCount")
+{
+    field(DESC, "Num saved packets")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))SavedCount")
+    field(VAL,  "0")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(longin, "$(P)NotSavedCount")
+{
+    field(DESC, "Num not saved packets error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))NotSavedCount")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)CorruptOffset")
+{
+    field(DESC, "Corrupted data offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CorruptOffset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)Overwrite")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Overwrite existing file")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Overwrite")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}

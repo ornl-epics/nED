@@ -45,40 +45,28 @@ class AcpcFemPlugin : public BaseModulePlugin {
          */
         static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
 
+        /**
+         * Member counterpart of parseVersionRsp().
+         *
+         * @see AcpcFemPlugin::parseVersionRsp()
+         */
+        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        {
+            return parseVersionRsp(packet, version);
+        }
+
+        /**
+         * Configured version must match actual.
+         *
+         * @return true when they match, false otherwise.
+         */
+        bool checkVersion(const BaseModulePlugin::Version &version);
+
     private: // functions
         /**
-         * Verify the DISCOVER response is from ROC.
-         *
-         * @param[in] packet with response to DISCOVER
-         * @return true if packet was parsed and type of module is ROC.
+         * Create and register all status ACPC FEM parameters to be exposed to EPICS.
          */
-        bool rspDiscover(const DasPacket *packet);
-
-        /**
-         * Overrided READ_VERSION handler dispatches real work to one of rspReadVersion_*
-         *
-         * @param[in] packet with response to READ_VERSION
-         * @return true if packet was parsed and module version verified.
-         */
-        bool rspReadVersion(const DasPacket *packet);
-
-        /**
-         * Handler for READ_VERSION response from FEM V10
-         *
-         * Populate hardware info parameters, like HwVer, HwRev, FwVer etc.
-         * @relates rspReadVersion
-         */
-        bool rspReadVersion_V10(const DasPacket *packet);
-
-        /**
-         * Create and register all status FEM V10 parameters to be exposed to EPICS.
-         */
-        void createStatusParams();
-
-        /**
-         * Create and register all config FEM V10 parameters to be exposed to EPICS.
-         */
-        void createConfigParams();
+        void createStatusParams_v22();
 };
 
 #endif // ACPC_FEM_PLUGIN_H

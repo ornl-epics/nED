@@ -12,6 +12,7 @@
 
 #include "BasePlugin.h"
 #include "PvaNeutronData.h"
+#include "PvaMetaData.h"
 
 /**
  * Abstract plugin for exporting data through EPICSv4 pvaccess
@@ -23,16 +24,36 @@
  * and is always available to the specialized plugin, or the plugin will be
  * disabled from start on regardless the attempt to enable it through PV.
  *
- * The base plugin also ensures a common output mode switching interface for
- * all specialized plugins.
- * Specialization plugins only need to implement one or many OCC data processing
- * functions to extract detector specific data and push it to m_pvRecord object.
- * There's no field in DasPacket that describes the payload. We rely on external
- * party to flag current mode through Mode parameter. Based on that appropriate
- * processData*() function is invoked.
+ * Derived classes should handle DataMode switching mode and set new callbacks
+ * to handle data. This is the most efficient way of packet processing data
+ * decoupled from packet detection.
  */
 class BasePvaPlugin : public BasePlugin {
     public:
+        /*
+         * C callback function to process neutrons packet data.
+         *
+         * @param[in] this_ Pointer to plugin instance (this).
+         * @param[in] Pointer to the start of the data.
+         * @param[in] Size of the data in 4-bytes
+         */
+        typedef void (*ProcessDataCb)(BasePvaPlugin *this_, const uint32_t *data, uint32_t dataLen);
+
+        /*
+         * C callback function to post neutrons data collected since previous post.
+         *
+         * This calback defined by derived plugin is invoked when data needs
+         * to be pushed out. This happens when new pulse is detected or there's
+         * currently no more data available. The timeStamp and proton_charge
+         * attributes of Neutrons structure are already populated before the
+         * callback is invoked. Also the transaction on pvRecord has been
+         * started before the callback is invoked.
+         *
+         * @param[in] this_ Pointer to plugin instance (this).
+         * @param[in] pvRecord PV record to push neutrons data to.
+         */
+        typedef void (*PostDataCb)(BasePvaPlugin *, const PvaNeutronData::shared_pointer& pvRecord);
+
         /**
          * Constructor
          *
@@ -53,37 +74,101 @@ class BasePvaPlugin : public BasePlugin {
          * Intercept Enable parameter to disallow enabling the plugin if
          * pvRecord initialization failed.
          */
-        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+        virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
          * Overloaded function to receive all OCC data.
          *
-         * Specialized plugins are advised to use one of more specific
-         * functions.
+         * Function filters out non-data packets and packets without valid RTDL
+         * header. It ensures all packet accounting. It delegates processing of
+         * packet to external function provided through callbacks. When new pulse
+         * is detected or when running out of data, a callback to post data is called.
          */
-        virtual void processData(const DasPacketList * const packetList);
+        void processData(const DasPacketList * const packetList);
 
         /**
-         * Process incoming data as normal detector data.
+         * Parse data as metadata and populate metadata arrays.
+         *
+         * @param[in] data Raw data to be parsed.
+         * @param[in] count Number of 4-byte elements in raw data.
          */
-        virtual void processDataNormal(const DasPacketList * const packetList) {};
+        void processMetaData(const uint32_t *data, uint32_t count);
 
         /**
-         * Process incoming data as raw detector data.
+         * Set callback functions for processing neutrons packet and posting data.
+         *
+         * Static C functions were selected for performance reasons. At
+         * least packet processing callback is invoked quite often and other
+         * implementations (virtual function, std::function are all slower).
+         *
+         * @param[in] procNeutronsCb Neutrons packet data processing function
+         * @param[in] postNeutronsCb Function to be called when PV update should be done.
          */
-        virtual void processDataRaw(const DasPacketList * const packetList) {};
-
-        /**
-         * Process incoming data as extended detector data.
-         */
-        virtual void processDataExtended(const DasPacketList * const packetList) {};
+        void setCallbacks(ProcessDataCb procNeutronCb, PostDataCb postNeutronsCb);
 
     protected:
-        PvaNeutronData::shared_pointer m_pvRecord;
+        PvaNeutronData::shared_pointer m_pvNeutrons;
+        PvaNeutronData::shared_pointer m_pvMetadata;
+
+    private:
+        uint32_t m_nReceived;       //!< Number of packets received
+        uint32_t m_nProcessed;      //!< Number of data packets processed
+        epicsTimeStamp m_pulseTime; //!< Current pulse EPICS timestamp
+        double m_pulseCharge;       //!< Current pulse charge
+        uint32_t m_neutronsPostSeq; //!< Current post sequence id for neutrons
+        uint32_t m_metadataPostSeq; //!< Current post sequence id for metadata
+        bool m_neutronsEn;          //!< Enable exporting Neutrons PV
+        bool m_metadataEn;          //!< Enable exporting Metadata PV
+        ProcessDataCb m_processNeutronsCb; //!< Callback function ptr to process neutron packet data
+        PostDataCb m_postNeutronsCb;//!< Callback function ptr to post data collected so far
+
+        /**
+         * A cache to store metadata until it's posted.
+         */
+        struct {
+            epics::pvData::PVUIntArray::svector time_of_flight;
+            epics::pvData::PVUIntArray::svector pixel;
+        } m_cacheMeta;
+
+        /**
+         * Invoke derived plugin callback to send data.
+         */
+        void postData(bool postNeutrons, bool postMetadata);
+
+    private: // statics
+
+        /**
+         * Number of elements in each cache array.
+         */
+        static const uint32_t CACHE_SIZE;
+
+        /**
+         * Neutrons PV id
+         */
+        static const std::string PV_NEUTRONS;
+
+        /**
+         * Metadata PV id
+         */
+        static const std::string PV_METADATA;
+
+        /**
+         * asynPortDriver interface mask used.
+         */
+        static const int interfaceMask;
+
+        /**
+         * asynPortDriver interrupt mask used.
+         */
+        static const int interruptMask;
 
     private: // asyn parameters
-        #define FIRST_BASEPVAPLUGIN_PARAM 0
-        #define LAST_BASEPVAPLUGIN_PARAM 0
+        #define FIRST_BASEPVAPLUGIN_PARAM PvNeutronsName
+        int PvNeutronsName;
+        int PvMetadataName;
+        int PvNeutronsEn;
+        int PvMetadataEn;
+        #define LAST_BASEPVAPLUGIN_PARAM PvMetadataEn
 };
 
 #endif // BASE_PVA_PLUGIN_H

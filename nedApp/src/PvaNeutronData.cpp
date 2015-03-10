@@ -21,9 +21,17 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
     epics::pvData::PVStructurePtr pvStructure = pvDataCreate->createPVStructure(
         fieldCreate->createFieldBuilder()
         ->add("timeStamp",      standardField->timeStamp())
-        ->add("proton_charge",  epics::pvData::pvDouble)
+        ->add("proton_charge",  standardField->scalar(epics::pvData::pvDouble, ""))
         ->add("time_of_flight", standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("pixel",          standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a2",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a19",     standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a48",     standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b12",     standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_index", standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_x",     standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_y",     standardField->scalarArray(epics::pvData::pvUInt, ""))
@@ -43,48 +51,6 @@ PvaNeutronData::PvaNeutronData(const std::string &recordName, const epics::pvDat
     : epics::pvDatabase::PVRecord(recordName, pvStructure)
 {}
 
-void PvaNeutronData::beginGroupPut()
-{
-    lock();
-    epics::pvDatabase::PVRecord::beginGroupPut();
-}
-
-void PvaNeutronData::endGroupPut()
-{
-    epics::pvDatabase::PVRecord::endGroupPut();
-    unlock();
-}
-
-void PvaNeutronData::postCachedUnlocked()
-{
-    // TODO: Will EPICSv4 recognize not updated fields and optimize them away?
-    epics::pvDatabase::PVRecord::beginGroupPut();
-    time_of_flight->replace(freeze(cache.time_of_flight));
-    proton_charge->put(cache.proton_charge);
-    pixel->replace(freeze(cache.pixel));
-    position_index->replace(freeze(cache.position_index));
-    position_x->replace(freeze(cache.position_x));
-    position_y->replace(freeze(cache.position_y));
-    photo_sum_x->replace(freeze(cache.photo_sum_x));
-    photo_sum_y->replace(freeze(cache.photo_sum_y));
-    epics::pvDatabase::PVRecord::endGroupPut();
-
-    cache.time_of_flight.clear();
-    cache.pixel.clear();
-    cache.position_index.clear();
-    cache.position_x.clear();
-    cache.position_y.clear();
-    cache.photo_sum_x.clear();
-    cache.photo_sum_y.clear();
-}
-
-void PvaNeutronData::postCached()
-{
-    lock();
-    postCachedUnlocked();
-    unlock();
-}
-
 bool PvaNeutronData::init()
 {
     initPVRecord();
@@ -92,7 +58,7 @@ bool PvaNeutronData::init()
     if (!timeStamp.attach(getPVStructure()->getSubField("timeStamp")))
         return false;
 
-    proton_charge = getPVStructure()->getSubField<epics::pvData::PVDouble>("proton_charge");
+    proton_charge = getPVStructure()->getDoubleField("proton_charge.value");
     if (proton_charge.get() == NULL)
         return false;
 
@@ -102,6 +68,38 @@ bool PvaNeutronData::init()
 
     pixel = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("pixel.value");
     if (pixel.get() == NULL)
+        return false;
+
+    sample_a1 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a1.value");
+    if (sample_a1.get() == NULL)
+        return false;
+
+    sample_a2 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a2.value");
+    if (sample_a2.get() == NULL)
+        return false;
+
+    sample_a8 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a8.value");
+    if (sample_a8.get() == NULL)
+        return false;
+
+    sample_a19 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a19.value");
+    if (sample_a19.get() == NULL)
+        return false;
+
+    sample_a48 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a48.value");
+    if (sample_a48.get() == NULL)
+        return false;
+
+    sample_b1 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b1.value");
+    if (sample_b1.get() == NULL)
+        return false;
+
+    sample_b8 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b8.value");
+    if (sample_b8.get() == NULL)
+        return false;
+
+    sample_b12 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b12.value");
+    if (sample_b12.get() == NULL)
         return false;
 
     position_index = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("position_index.value");

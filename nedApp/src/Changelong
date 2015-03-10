@@ -1,0 +1,11 @@
+Capture here all changes that break compatibility. Add taggs as well so it's
+easy to check whether care needs to be taken when upgrading beamline.
+
+2015/02/25:
+* DspPlugin_v* register names change:
+  LvdsTxCtrl -> LvdsTclkMode
+  LvdsTxTclk -> LvdsTclkCtrl
+  LvdsTsCtrl -> LvdsTsyncCtrl
+  LvdsTxenCttrl -> LvdsTxenCtrl
+
+2015/02/23: rel1.0

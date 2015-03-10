@@ -14,15 +14,6 @@
 
 /**
  * Plugin for FEM module.
- *
- * General plugin parameters:
- * asyn param    | asyn param type | init val | mode | Description                   |
- * ------------- | --------------- | -------- | ---- | ------------------------------
- * HwDate        | asynOctet       | ""       | RO   | Hardware date as YYYY/MM/DD
- * HwVer         | asynParamInt32  | 0        | RO   | Hardware version
- * HwRev         | asynParamInt32  | 0        | RO   | Hardware revision
- * FwVer         | asynParamInt32  | 0        | RO   | Firmware version
- * FwRev         | asynParamInt32  | 0        | RO   | Firmware revision
  */
 class FemPlugin : public BaseModulePlugin {
     private: // structures and definitions
@@ -47,40 +38,87 @@ class FemPlugin : public BaseModulePlugin {
          */
         FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
 
+        /**
+         * Try to parse the FEM version response packet an populate the structure.
+         *
+         * @param[in] packet to be parsed
+         * @param[out] version structure to be populated
+         * @return true if succesful, false if version response packet could not be parsed.
+         */
+        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+
+        /**
+         * Member counterpart of parseVersionRsp().
+         *
+         * @see FemPlugin::parseVersionRsp()
+         */
+        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        {
+            return parseVersionRsp(packet, version);
+        }
+
+        /**
+         * Configured version must match actual.
+         *
+         * @return true when they match, false otherwise.
+         */
+        bool checkVersion(const BaseModulePlugin::Version &version);
+
     private: // functions
         /**
-         * Verify the DISCOVER response is from ROC.
-         *
-         * @param[in] packet with response to DISCOVER
-         * @return true if packet was parsed and type of module is ROC.
+         * Create and register all status FEM10 parameters to be exposed to EPICS.
          */
-        bool rspDiscover(const DasPacket *packet);
+        void createStatusParams_v32();
 
         /**
-         * Overrided READ_VERSION handler dispatches real work to one of rspReadVersion_*
-         *
-         * @param[in] packet with response to READ_VERSION
-         * @return true if packet was parsed and module version verified.
+         * Create and register all config FEM10 parameters to be exposed to EPICS.
          */
-        bool rspReadVersion(const DasPacket *packet);
+        void createConfigParams_v32();
 
         /**
-         * Handler for READ_VERSION response from FEM V10
-         *
-         * Populate hardware info parameters, like HwVer, HwRev, FwVer etc.
-         * @relates rspReadVersion
+         * Create and register all status FEM9 v35 parameters to be exposed to EPICS.
          */
-        bool rspReadVersion_V10(const DasPacket *packet);
+        void createStatusParams_v35();
 
         /**
-         * Create and register all status FEM V10 parameters to be exposed to EPICS.
+         * Create and register all config FEM9 v35 parameters to be exposed to EPICS.
          */
-        void createStatusParams_V10();
+        void createConfigParams_v35();
 
         /**
-         * Create and register all config FEM V10 parameters to be exposed to EPICS.
+         * Create and register all status FEM9 v36 parameters to be exposed to EPICS.
          */
-        void createConfigParams_V10();
+        void createStatusParams_v36();
+
+        /**
+         * Create and register all config FEM9 v36 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v36();
+
+        /**
+         * Create and register all counter FEM9 v36 parameters to be exposed to EPICS.
+         */
+        void createCounterParams_v36();
+
+        /**
+         * Create and register all status FEM9 v37 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v37();
+
+        /**
+         * Create and register all config FEM9 v37 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v37();
+
+        /**
+         * Create and register all counter FEM9 v37 parameters to be exposed to EPICS.
+         */
+        void createCounterParams_v37();
+
+        /**
+         * Link all upgrade FEM9 v37 parameters to be exposed to EPICS.
+         */
+        void createUpgradeParams_v37();
 };
 
 #endif // DSP_PLUGIN_H
