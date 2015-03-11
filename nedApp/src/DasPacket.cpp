@@ -15,7 +15,7 @@
 
 // Static members initilization
 const uint32_t DasPacket::MinLength = sizeof(DasPacket);
-const uint32_t DasPacket::MaxLength = 1800*8 + MinLength;
+const uint32_t DasPacket::MaxLength = 4000 + MinLength; // DPS-T limit is 3600
 
 DasPacket::DasPacket(uint32_t source_, uint32_t destination_, CommandInfo cmdinfo_, uint32_t payload_length_, uint32_t *payload_)
     : destination(destination_)
