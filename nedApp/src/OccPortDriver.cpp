@@ -502,14 +502,12 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             // OCC still doesn't have enough data, check what's going on
             DasPacket *packet = reinterpret_cast<DasPacket *>(data);
             if (packet->length() > DasPacket::MaxLength) {
-                handleRecvError(-EBADMSG);
                 LOG_ERROR("Possibly corrupted data in queue based on packet length, aborting process thread");
-                break;
+            } else {
+                LOG_ERROR("Partial data from OCC, aborting process thread");
             }
-
-            // Maybe there just wasn't enough data - very likely this will loop forever
-            LOG_ERROR("Partial data from OCC, retrying in a while");
-            epicsThreadSleep(1e-3);
+            handleRecvError(-EBADMSG);
+            break;
         }
     }
 }
