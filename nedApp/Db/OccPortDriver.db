@@ -1,6 +1,6 @@
 record(mbbi, "$(P)PortStatus")
 {
-    info(archive, "Monitor, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "Status of OccPortDriver")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -193,7 +193,7 @@ record(mbbi, "$(P)RxStalled")
 }
 record(ai, "$(P)FpgaTemp")
 {
-    info(archive, "Scan, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "FPGA temperature")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))FpgaTemp")
@@ -220,7 +220,7 @@ record(calcout, "$(P)FpgaTempAlarm")
 }
 record(ai, "$(P)FpgaCoreV")
 {
-    info(archive, "Monitor, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "FPGA core voltage")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))FpgaCoreV")
@@ -228,7 +228,7 @@ record(ai, "$(P)FpgaCoreV")
     field(PREC, "3")
     field(LOLO, "0.97")
     field(HIHI, "1.03")
-    field(ADEL, "0.05")
+    field(ADEL, "0.03")
     field(LLSV, "MAJOR")
     field(HHSV, "MAJOR")
     field(SCAN, "I/O Intr")
@@ -249,7 +249,7 @@ record(ai, "$(P)FpgaAuxV")
 }
 record(stringin, "$(P)SfpSerNo")
 {
-    info(archive, "Monitor, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "SFP serial number")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))SfpSerNo")
@@ -258,7 +258,7 @@ record(stringin, "$(P)SfpSerNo")
 }
 record(stringin, "$(P)SfpPartNo")
 {
-    info(archive, "Monitor, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "SFP part number")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))SfpPartNo")
@@ -267,7 +267,7 @@ record(stringin, "$(P)SfpPartNo")
 }
 record(mbbi, "$(P)SfpType")
 {
-    info(archive, "Monitor, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "SFP type")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -284,7 +284,7 @@ record(mbbi, "$(P)SfpType")
 }
 record(ai, "$(P)SfpTemp")
 {
-    info(archive, "Scan, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "SFP temperature")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpTemp")
@@ -299,7 +299,7 @@ record(ai, "$(P)SfpTemp")
 }
 record(ai, "$(P)SfpRxPower")
 {
-    info(archive, "Scan, 00:10:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "SFP RX power")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpRxPower")
@@ -320,7 +320,7 @@ record(calcout, "$(P)SfpTxPowerLim")
 }
 record(ai, "$(P)SfpTxPower")
 {
-    info(archive, "Scan, 00:10:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "SFP TX power")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpTxPower")
@@ -353,7 +353,7 @@ record(ai, "$(P)SfpTxBiasC")
 }
 record(longin, "$(P)ErrCrc")
 {
-    info(archive, "Scan, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "FPGA detected CRC errors counter")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))ErrCrc")
@@ -361,7 +361,7 @@ record(longin, "$(P)ErrCrc")
 }
 record(longin, "$(P)ErrLength")
 {
-    info(archive, "Scan, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "FPGA detected length errors counter")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))ErrLength")
@@ -369,7 +369,7 @@ record(longin, "$(P)ErrLength")
 }
 record(longin, "$(P)ErrFrame")
 {
-    info(archive, "Scan, 00:01:00")
+    info(archive, "Monitor, 00:10:00")
     field(DESC, "FPGA detected frame errors counter")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))ErrFrame")

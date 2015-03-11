@@ -8,6 +8,7 @@
  */
 
 #include "CircularBuffer.h"
+#include "DasPacket.h"
 
 #include <cantProceed.h>
 #include <stdlib.h>
@@ -18,14 +19,13 @@
 #include <stdexcept>
 
 static const uint32_t UNIT_SIZE            = 4;              // OCC data is 4 byte aligned
-static const uint32_t ROLLOVER_BUFFER_SIZE = 1800*UNIT_SIZE; // Comes from the OCC protocol, max 1800 events in packet
 
 using namespace std;
 
 CircularBuffer::CircularBuffer(uint32_t size)
     : m_unit(UNIT_SIZE)
     , m_size(_align(size, m_unit))
-    , m_rolloverSize(min(m_size - m_unit, ROLLOVER_BUFFER_SIZE))
+    , m_rolloverSize(min(m_size - m_unit, 2 * DasPacket::MaxLength))
     , m_error(0)
     , m_consumer(0)
     , m_producer(0)
