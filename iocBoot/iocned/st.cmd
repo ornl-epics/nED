@@ -37,35 +37,25 @@ set_pass1_restoreFile("$(IOCNAME).sav")
 
 dbLoadRecords("$(NED)/db/nEDCommon.db","P=$(PREFIX)")
 
-## Load record instances
-OccConfigure("occ", "/dev/snsocb0", 40000000)
+### Core Support Modules
+
+OccConfigure("occ", "/dev/snsocb0", 41943040)
 dbLoadRecords("$(NED)/db/OccPortDriver.db","P=$(PREFIX)occ1:,PORT=occ")
 
 CmdDispatcherConfigure("cmd", "occ")
-dbLoadRecords("$(NED)/db/CmdDispatcherPlugin.db","P=$(PREFIX)cmd:,PORT=cmd")
+dbLoadRecords("$(NED)/db/CmdDispatcherPlugin.db","P=$(PREFIX)cmd1:,PORT=cmd")
 
-PixelMapPluginConfigure("PixMap", "occ", 1, "/tmp/test.pixelmap", 4194304)
-dbLoadRecords("$(NED)/db/PixelMapPlugin.db","P=$(PREFIX)pm1:,PORT=PixMap")
 
-AdaraPluginConfigure("Adara1", "occ", 1, 1)
+### Global RX Plug-ins
+
+AdaraPluginConfigure("adara", "occ", 1, 1)
 dbLoadRecords("$(NED)/db/AdaraPlugin.db","P=$(PREFIX)adara1:,PORT=Adara1")
 
-ProxyPluginConfigure("proxy1", "PixMap")
-dbLoadRecords("$(NED)/db/ProxyPlugin.db","P=$(PREFIX)proxy1:,PORT=proxy1")
+#ProxyPluginConfigure("proxy", "occ")
+#dbLoadRecords("$(NED)/db/ProxyPlugin.db","P=$(PREFIX)proxy1:,PORT=proxy1")
 
-RocPvaPluginConfigure("rocPva1", "occ", "$(PREFIX)rocpva1:Neutrons")
-dbLoadRecords("$(NED)/db/RocPvaPlugin.db","P=$(PREFIX)rocpva1:,PORT=rocPva1")
-
-#DspPluginConfigure("Dsp1", "occ", "0x15FA76DF")
-DspPluginConfigure("Dsp1", "cmd", "21.250.118.223", "v63", 0)
-dbLoadRecords("$(NED)/db/DspPlugin_v63.db","P=$(PREFIX)dsp1:,PORT=Dsp1")
-
-DiscoverPluginConfigure("Disc", "occ")
+DiscoverPluginConfigure("disc", "occ")
 dbLoadRecords("$(NED)/db/DiscoverPlugin.db","P=$(PREFIX)disc1:,PORT=Disc")
-
-RocPluginConfigure("roc1", "cmd", "20.39.216.73", "v52", 0)
-#dbLoadRecords("$(NED)/db/ROCHV.db","P=$(PREFIX)HV1,G=$(PREFIX)HVG,PORT=roc1")
-dbLoadRecords("$(NED)/db/RocPlugin_v52.db","P=$(PREFIX)roc1:,PORT=roc1")
 
 DumpPluginConfigure("dump", "occ", 0)
 dbLoadRecords("$(NED)/db/DumpPlugin.db","P=$(PREFIX)dump1:,PORT=dump")
@@ -76,26 +66,30 @@ dbLoadRecords("$(NED)/db/StatPlugin.db","P=$(PREFIX)stat1:,PORT=stat")
 RtdlPluginConfigure("rtdl", "occ", 0)
 dbLoadRecords("$(NED)/db/RtdlPlugin.db","P=$(PREFIX)rtdl1:,PORT=rtdl")
 
-FemPluginConfigure("fem1", "cmd", "0x603B0817", "v22", 1)
-dbLoadRecords("$(NED)/db/FemPlugin_v32.db","P=$(PREFIX)fem1:,PORT=fem1")
+DebugPluginConfigure("dbg", "cmd", 0)
+dbLoadRecords("$(NED)/db/DebugPlugin.db","P=$(PREFIX)dbg1:,PORT=dbg")
 
-AcpcFemPluginConfigure("fem2", "cmd", "20.128.234.122", "v22", 0)
-dbLoadRecords("$(NED)/db/AcpcFemPlugin_v22.db","P=$(PREFIX)fem2:,PORT=fem2")
 
-AcpcPluginConfigure("acpc1", "cmd", "19.168.97.176", "v144", 0)
-dbLoadRecords("$(NED)/db/AcpcPlugin_v144.db","P=$(PREFIX)acpc1:,PORT=acpc1")
+### Data pre-processing Plugins
 
-ArocPluginConfigure("aroc1", "cmd", "14.88.10.147", "v23", 0)
-dbLoadRecords("$(NED)/db/ArocPlugin_v23.db","P=$(PREFIX)aroc1:,PORT=roc1")
+#FlatFieldPluginConfigure("ff", "occ", 0)
+#dbLoadRecords("$(NED)/db/FlatFieldPlugin.db","P=$(PREFIX)ff:,PORT=ff")
 
-DebugPluginConfigure("gm", "cmd", 0)
-dbLoadRecords("$(NED)/db/DebugPlugin.db","P=$(PREFIX)dbg1:,PORT=gm")
+#PixelMapPluginConfigure("pixmap", "occ", 1, "/tmp/test.pixelmap", 4194304)
+#dbLoadRecords("$(NED)/db/PixelMapPlugin.db","P=$(PREFIX)pm1:,PORT=pixmap")
 
-FlatFieldPluginConfigure("ff", "occ", 0)
-dbLoadRecords("$(NED)/db/FlatFieldPlugin.db","P=$(PREFIX)ff:,PORT=ff")
 
-AcpcPvaPluginConfigure("AcpcPva", "occ", "$(PREFIX)pva:Neutrons")
-dbLoadRecords("$(NED)/db/AcpcPvaPlugin.db","P=$(PREFIX)pva:,PORT=AcpcPva")
+### PV Access Plugins
+
+#AcpcPvaPluginConfigure("AcpcPva", "occ", "$(PREFIX)pva:Neutrons")
+#dbLoadRecords("$(NED)/db/AcpcPvaPlugin.db","P=$(PREFIX)pva:,PORT=AcpcPva")
+
+#RocPvaPluginConfigure("RocPva", "occ", "$(PREFIX)pva:Neutrons")
+#dbLoadRecords("$(NED)/db/RocPvaPlugin.db","P=$(PREFIX)pva:,PORT=RocPva")
+
+
+### Detectors configuration in external file
+< detectors
 
 iocInit()
 
@@ -106,7 +100,7 @@ create_monitor_set("$(IOCNAME).req", 30)
 ###create_monitor_set("$(IOCNAME)_pass0.req", 30)
 
 # Display status
-save_restoreShow(10)
+#save_restoreShow(10)
 
 # Fanout record for init in HVROC.db instead of PINI mechanism
 #epicsThreadSleep 1 
