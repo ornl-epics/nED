@@ -28,6 +28,8 @@ record(mbbo, "$(P)ReqCmd")
     field(NIST, "LVDS powerdown")
     field(TEVL, "36")
     field(TEST, "Read counters")
+    field(ELVL, "48")
+    field(ELST, "Write last config")
 }
 record(stringout, "$(P)ReqDest")
 {
