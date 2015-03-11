@@ -60,8 +60,9 @@ class BasePvaPlugin : public BasePlugin {
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] pvName Name for the EPICSv4 PV serving the data.
+         * @param[in] numParams Number of asyn parameters created by derived class.
          */
-        BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName);
+        BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvName, int numParams=0);
 
         /**
          * Abstract destructor.

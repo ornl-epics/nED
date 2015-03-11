@@ -19,9 +19,10 @@ const std::string BasePvaPlugin::PV_METADATA("Metadata");
 const int BasePvaPlugin::interfaceMask = asynOctetMask | BasePlugin::defaultInterfaceMask;
 const int BasePvaPlugin::interruptMask = asynOctetMask | BasePlugin::defaultInterfaceMask;
 
-BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
-    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, 0, NUM_BASEPVAPLUGIN_PARAMS, 0,
-                 interfaceMask, interruptMask)
+BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix, int numParams)
+    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, /*blocking=*/0,
+                 numParams + NUM_BASEPVAPLUGIN_PARAMS,
+                 /*maxAddr=*/0, interfaceMask, interruptMask)
     , m_nReceived(0)
     , m_nProcessed(0)
     , m_pulseTime({0, 0})

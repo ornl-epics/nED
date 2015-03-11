@@ -10,11 +10,13 @@
 #include "AcpcPvaPlugin.h"
 #include "Log.h"
 
+#define NUM_ACPCPVAPLUGIN_PARAMS ((int)(&LAST_ACPCPVAPLUGIN_PARAM - &FIRST_ACPCPVAPLUGIN_PARAM + 1))
+
 EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", string, "PV prefix", string);
 const uint32_t AcpcPvaPlugin::CACHE_SIZE = 32*1024;
 
 AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
-    : BasePvaPlugin(portName, dispatcherPortName, pvPrefix)
+    : BasePvaPlugin(portName, dispatcherPortName, pvPrefix, NUM_ACPCPVAPLUGIN_PARAMS)
 {
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
@@ -22,16 +24,28 @@ AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortNam
     m_cache.position_y.reserve(CACHE_SIZE);
     m_cache.photo_sum_x.reserve(CACHE_SIZE);
     m_cache.photo_sum_y.reserve(CACHE_SIZE);
+
+    createParam("FlatFieldEn",   asynParamInt32, &FlatFieldEn, 0); // WRITE - Normal data has been flat-field corrected
+    callParamCallbacks();
 }
 
 asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == DataModeP) {
+        int flatfieldEn = 0;
+        getIntegerParam(FlatFieldEn, &flatfieldEn);
+
         switch (value) {
         case DATA_MODE_NORMAL:
-            setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
+            if (flatfieldEn == 1) {
+                setCallbacks(&AcpcPvaPlugin::processFlatfieldedData, &AcpcPvaPlugin::postFlatfieldedData);
+            } else {
+                setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
+            }
             break;
         case DATA_MODE_RAW:
+            setCallbacks(&AcpcPvaPlugin::processRawData, &AcpcPvaPlugin::postRawData);
+            break;
         case DATA_MODE_VERBOSE:
             // TODO
             break;
@@ -39,14 +53,48 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             LOG_ERROR("Ignoring invalid output mode %d", value);
             return asynError;
         }
+    } else if (pasynUser->reason == FlatFieldEn) {
+        int dataMode = DATA_MODE_NORMAL;
+        getIntegerParam(DataModeP, &dataMode);
+
+        if (dataMode == DATA_MODE_NORMAL) {
+            if (value == 1) {
+                setCallbacks(&AcpcPvaPlugin::processFlatfieldedData, &AcpcPvaPlugin::postFlatfieldedData);
+            } else {
+                setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
+            }
+        }
     }
     return BasePvaPlugin::writeInt32(pasynUser, value);
+}
+
+void AcpcPvaPlugin::processFlatfieldedData(const uint32_t *data, uint32_t count)
+{
+    uint32_t nEvents = count / (sizeof(DasPacket::Event) / sizeof(uint32_t));
+    const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(data);
+
+    // Go through events and append to cache
+    while (nEvents-- > 0) {
+        m_cache.time_of_flight.push_back(events->tof);
+        m_cache.pixel.push_back(events->pixelid);
+        events++;
+    }
+}
+
+void AcpcPvaPlugin::postFlatfieldedData(const PvaNeutronData::shared_pointer& pvRecord)
+{
+    m_pvNeutrons->time_of_flight->replace(freeze(m_cache.time_of_flight));
+    m_pvNeutrons->pixel->replace(freeze(m_cache.pixel));
+
+    // Reduce gradual memory reallocation by pre-allocating instead of clear()
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.pixel.reserve(CACHE_SIZE);
 }
 
 void AcpcPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
 {
     // Structure describing normal data from ACPC.
-    struct AcpcNormalData {
+    struct NormalEvent {
         uint32_t time_of_flight;
         uint32_t position_index;
         uint32_t position_x;
@@ -55,8 +103,8 @@ void AcpcPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
         uint32_t photo_sum_y;
     };
 
-    uint32_t nEvents = count / (sizeof(AcpcNormalData) / sizeof(uint32_t));
-    const AcpcNormalData *events = reinterpret_cast<const AcpcNormalData *>(data);
+    uint32_t nEvents = count / (sizeof(NormalEvent) / sizeof(uint32_t));
+    const NormalEvent *events = reinterpret_cast<const NormalEvent *>(data);
 
     // Go through events and append to cache
     while (nEvents-- > 0) {
@@ -86,4 +134,56 @@ void AcpcPvaPlugin::postNormalData(const PvaNeutronData::shared_pointer& pvRecor
     m_cache.position_y.reserve(CACHE_SIZE);
     m_cache.photo_sum_x.reserve(CACHE_SIZE);
     m_cache.photo_sum_y.reserve(CACHE_SIZE);
+}
+
+void AcpcPvaPlugin::processRawData(const uint32_t *data, uint32_t count)
+{
+    // Structure describing normal data from ACPC.
+    struct RawEvent {
+        uint32_t time_of_flight;
+        uint32_t position_index;
+        uint32_t sample_a[8];
+        uint32_t sample_b[8];
+    };
+
+    uint32_t nEvents = count / (sizeof(RawEvent) / sizeof(uint32_t));
+    const RawEvent *events = reinterpret_cast<const RawEvent *>(data);
+
+    // Go through events and append to cache
+    while (nEvents-- > 0) {
+        m_cache.time_of_flight.push_back(events->time_of_flight & 0x000FFFFF);
+        m_cache.position_index.push_back(events->position_index);
+
+        if (events->position_index & 0x10) {
+            for (int i = 0; i < 8; i++)
+                m_cache.sample_a8.push_back(events->sample_a[i]);
+        } else {
+            for (int i = 7; i >= 0; i--)
+                m_cache.sample_a8.push_back(events->sample_a[i]);
+        }
+
+        if (events->position_index & 0x20) {
+            for (int i = 0; i < 8; i++)
+                m_cache.sample_b8.push_back(events->sample_b[i]);
+        } else {
+            for (int i = 7; i >= 0; i--)
+                m_cache.sample_b8.push_back(events->sample_b[i]);
+        }
+
+        events++;
+    }
+}
+
+void AcpcPvaPlugin::postRawData(const PvaNeutronData::shared_pointer& pvRecord)
+{
+    pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
+    pvRecord->position_index->replace(freeze(m_cache.position_index));
+    pvRecord->sample_a8->replace(freeze(m_cache.sample_a8));
+    pvRecord->sample_b8->replace(freeze(m_cache.sample_b8));
+
+    // Reduce gradual memory reallocation by pre-allocating instead of clear()
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.position_index.reserve(CACHE_SIZE);
+    m_cache.sample_a8.reserve(8 * CACHE_SIZE);
+    m_cache.sample_b8.reserve(8 * CACHE_SIZE);
 }

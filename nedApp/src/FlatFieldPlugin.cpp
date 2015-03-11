@@ -48,6 +48,8 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     if (err == FF_ERR_NONE)
         err = importFiles(importDir);
 
+    createParam("TransfCount",  asynParamInt32, &TransfCount, 0); // Number of packets transformed
+    createParam("ImportReport", asynParamOctet, &ImportReport);   // Generate textual file import report
     createParam("ImportDir",    asynParamOctet, &ImportDir, importDir); // Path to correction tables directory
     createParam("ErrImport",    asynParamInt32, &ErrImport, err); // Last mapping import error
     createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels, probably due to missing correction tables
@@ -66,10 +68,39 @@ FlatFieldPlugin::~FlatFieldPlugin()
         free(m_buffer);
 }
 
+asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
+{
+    if (pasynUser->reason == ImportReport) {
+
+        const char *importErrMap[] = {
+            "imported",                     // FF_ERR_NONE
+            "no such file",                 // FF_ERR_NO_FILE
+            "parse error",                  // FF_ERR_PARSE
+            "no memory",                    // FF_ERR_NO_MEM
+            "duplicate data for position",  // FF_ERR_EXIST
+            "unrecognized file format",     // FF_ERR_BAD_FORMAT
+        };
+
+        *nActual = 0;
+        for (auto it = m_filesStatus.begin(); it != m_filesStatus.end(); it++) {
+            int ret = snprintf(value, nChars, "%-30s - %s\n", it->first.c_str(), importErrMap[it->second]);
+            if (ret == -1 || (size_t)ret > nChars)
+                break;
+
+            nChars -= ret;
+            value += ret;
+            *nActual += ret;
+        }
+        return asynSuccess;
+    }
+    return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
+}
+
 void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList)
 {
     int nReceived = 0;
     int nProcessed = 0;
+    int nTransformed = 0;
     TransformErrors errors;
     int nSplits = 0;
     int ffMode = FF_DISABLED;
@@ -82,8 +113,9 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     this->lock();
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
+    getIntegerParam(TransfCount,&nTransformed);
     getIntegerParam(CntUnmap,   &errors.nUnmapped);
-    getIntegerParam(CntError,   &errors.nPrevious);
+    getIntegerParam(CntError,   &errors.nErrors);
     getIntegerParam(CntSplit,   &nSplits);
     getIntegerParam(FfMode,     &ffMode);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL)
@@ -105,7 +137,6 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
         m_packetList.release();
         m_packetList.waitAllReleased();
         m_packetList.clear();
-        nProcessed += packetList->size();
     } else {
         // Break single loop into two parts to have single point of sending data
         for (auto it = packetList->cbegin(); it != packetList->cend(); ) {
@@ -124,13 +155,13 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
                     break;
                 }
 
-                nProcessed++;
-
                 // Reuse the original packet if nothing to map
                 if (packet->isNeutronData() == false) {
                     m_packetList.push_back(packet);
                     continue;
                 }
+
+                nTransformed++;
 
                 // Reserve part of buffer for this packet, it may shrink from original but never grow
                 DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
@@ -147,10 +178,16 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
         }
     }
 
+    nReceived += packetList->size();
+    nProcessed += packetList->size();
+
     this->lock();
     setIntegerParam(RxCount,    nReceived   % std::numeric_limits<int32_t>::max());
     setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
+    setIntegerParam(TransfCount,nTransformed% std::numeric_limits<int32_t>::max());
     setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntUnmap,   errors.nUnmapped);
+    setIntegerParam(CntError,   errors.nErrors);
     callParamCallbacks();
     this->unlock();
 }
@@ -197,7 +234,7 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
 
         // Skip error pixels
         if (srcEvent->position_index & PIXID_ERR) {
-            errors.nPrevious++;
+            errors.nErrors++;
             srcEvent++;
             continue;;
         }
@@ -327,7 +364,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
         }
         if (key == "Position id") {
             if (sscanf(value.c_str(), "%d", &position_id) != 1) {
-                LOG_ERROR("Failed to read camera id");
+                LOG_ERROR("Failed to read position id");
                 return FF_ERR_PARSE;
             }
             nHeaders++;
@@ -353,11 +390,11 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
         return FF_ERR_PARSE;
     }
     if (table_dim == ' ') {
-        LOG_ERROR("Invalid file format, missing camera id header");
+        LOG_ERROR("Invalid file format, missing position id header");
         return FF_ERR_PARSE;
     }
     if (position_id == -1) {
-        LOG_ERROR("Invalid file format, missing camera id header");
+        LOG_ERROR("Invalid file format, missing position id header");
         return FF_ERR_PARSE;
     }
 
@@ -423,10 +460,10 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
 
 FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &path)
 {
-    ImportError err = FF_ERR_NONE;
     struct dirent entry, *result;
     DIR *dir = opendir(path.c_str());
     uint32_t nImported = 0;
+    uint32_t nErrors = 0;
 
     if (dir == NULL)
         return FF_ERR_NO_FILE;
@@ -434,24 +471,23 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &pat
     while (readdir_r(dir, &entry, &result) == 0 && result != NULL) {
         std::string filename = entry.d_name;
         if (filename != ".." && filename != ".") {
-            err = importFile(path + PATH_SEPARATOR + filename);
-
-            // Stop on first critical error
-            if (err == FF_ERR_PARSE || err == FF_ERR_EXIST)
-                break;
+            ImportError err = importFile(path + PATH_SEPARATOR + filename);
+            m_filesStatus[filename] = err;
 
             if (err == FF_ERR_NONE)
                 nImported++;
-
-            // Mask non-critical errors
-            err = FF_ERR_NONE;
+            else if (err != FF_ERR_BAD_FORMAT)
+                nErrors++;
         }
     }
 
     closedir(dir);
 
-    if (nImported == 0 && err == FF_ERR_NONE)
-        err = FF_ERR_NO_FILE;
+    if (nErrors > 0)
+        return FF_ERR_PARSE;
 
-    return err;
+    if (nImported == 0)
+        return FF_ERR_NO_FILE;
+
+    return FF_ERR_NONE;
 }

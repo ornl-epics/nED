@@ -86,11 +86,6 @@ class ArocPlugin : public BaseModulePlugin {
          * Create and register all config AROC v2.3 parameters to be exposed to EPICS.
          */
         void createConfigParams_v23();
-
-    protected:
-        #define FIRST_ROCPLUGIN_PARAM Acquiring
-        int Acquiring; // TODO remove
-        #define LAST_ROCPLUGIN_PARAM Acquiring
 };
 
 #endif // AROC_PLUGIN_H

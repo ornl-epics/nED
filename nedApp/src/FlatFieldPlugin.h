@@ -36,21 +36,21 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          */
         class TransformErrors {
             public:
-                int32_t nPrevious;  //!< Pixel id has error bit already set
+                int32_t nErrors;    //!< Pixel id has error bit already set
                 int32_t nUnmapped;  //!< No correction table was found for given module
 
                 TransformErrors()
-                    : nPrevious(0)
+                    : nErrors(0)
                     , nUnmapped(0)
                 {}
 
                 TransformErrors &operator+=(const TransformErrors &rhs)
                 {
                     // Prevent overflow, stop counting at INT32_MAX instead
-                    if (rhs.nPrevious > std::numeric_limits<int32_t>::max() - nPrevious)
-                        nPrevious = std::numeric_limits<int32_t>::max();
+                    if (rhs.nErrors > std::numeric_limits<int32_t>::max() - nErrors)
+                        nErrors = std::numeric_limits<int32_t>::max();
                     else
-                        nPrevious += rhs.nPrevious;
+                        nErrors += rhs.nErrors;
                     if (rhs.nUnmapped > std::numeric_limits<int32_t>::max() - nUnmapped)
                         nUnmapped = std::numeric_limits<int32_t>::max();
                     else
@@ -98,6 +98,11 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Destructor deinitializes members.
          */
         ~FlatFieldPlugin();
+
+        /**
+         * Handle reading octet (string) data from plugin.
+         */
+        asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
 
         /**
          * Overloaded function to process incoming OCC packets.
@@ -166,15 +171,14 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Try to import all files in given directory.
          *
          * Function calls importFile() function for every file it finds in
-         * specified directory. It stops processing files after first critical
-         * error from importFile():
-         * - MAP_ERR_PARSE
-         * - MAP_ERR_EXIST
+         * specified directory.
          *
          * @note Should work on WIN32 as well, but not tested.
          * @param[in] dir Relative or absolute path to a directory with
          *                correction table files.
-         * @return Critical error from importFile() or MAP_ERR_NONE.
+         * @retval FF_ERR_NONE All files imported succesfully.
+         * @retval FF_ERR_NO_FILE No files found to import.
+         * @retval FF_ERR_PARSE Failed to parse some files.
          */
         ImportError importFiles(const std::string &dir);
 
@@ -224,9 +228,12 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         double m_photosumYLow;      //!< Y photo sum low threshold
         double m_photosumYHi;       //!< Y photo sum high threshold
         std::map<uint32_t, CorrTablePair_t> m_corrTables; //!< One correction table per ACPC camera.
+        std::map<std::string, ImportError> m_filesStatus; //!< Import file status
 
     protected:
-        #define FIRST_FLATFIELDPLUGIN_PARAM ImportDir
+        #define FIRST_FLATFIELDPLUGIN_PARAM TransfCount
+        int TransfCount;    //!< Number of packets transformed
+        int ImportReport;   //!< Generate textual file import report
         int ImportDir;      //!< Absolute path to pixel map file
         int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
         int CntUnmap;       //!< Number of unmapped pixels

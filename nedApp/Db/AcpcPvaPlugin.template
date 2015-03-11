@@ -1,8 +1,19 @@
 include "BasePlugin.include"
+include "BasePvaPlugin.include"
 
 # Upgrade BasePlugin::Enable PV
 record(bo, "$(P)Enable")
 {
     info(autosaveFields, "VAL")
     field(PINI, "YES")
+}
+
+record(bo, "$(P)FlatFieldEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Flag whether flat-field transformed")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))FlatFieldEn")
+    field(ZNAM, "raw data")
+    field(ONAM, "transformed")
 }
