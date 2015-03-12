@@ -154,6 +154,11 @@ DECL(float, pctCriterion, {GPREFIX}PctCriterion)
  */
 DECL(int, running, {GPREFIX}Running)
 
+/* 
+ * switch between accumulate success and try every time behaviors
+ */
+DECL(int, accumSuccess, {GPREFIX}AccumSuccess)
+
 /*
  * Variables used by sequencer to keep track of success or failure of 
  * individual device operations.
@@ -214,8 +219,8 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdFailed[i]) {	\
-       } state NAME##0	
+       when (disable[i] || (cmdSucceeded[i] && accumSuccess) || cmdFailed[i]) \
+       {} state NAME##0	
 
 #define CMD_END(NAME, COMMAND)					\
        when() {							\
@@ -251,8 +256,8 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdFailed[i]) {	\
-       } state NAME##0	
+       when (disable[i] || (cmdSucceeded[i] && accumSuccess) || cmdFailed[i]) \
+       {} state NAME##0	
 
 
 #define RSP_END(NAME)						\
@@ -341,8 +346,8 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdFailed[i]) {	\
-       } state NAME##0	
+       when (disable[i] || (cmdSucceeded[i] && accumSuccess) || cmdFailed[i]) \
+       {} state NAME##0	
 
 #define TEST_PV_END(NAME, PVNAME, DESIRED)			\
        when() {							\
@@ -387,6 +392,7 @@ int severity;
                 numEnabled++;						\
                 if (cmdFailed[i]) {					\
                    cmdFailed[i] = 0;	/* ready for next use */	\
+                   PVPUTNUM(cmdSucceeded[i],0)				\
                 } else {						\
                    failMsg[i][0] = 0;					\
                    pvPut(failMsg[i]);					\
@@ -421,7 +427,10 @@ int severity;
 #define CMD_WHEN(EVNAME, NEXT) 						\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {		\
           PVPUTSTR(statePV,NEXT)					\
-          for (i = 0; i< numFound; i++) PVPUTNUM(cmdSucceeded[i], 0)	\
+          pvGet(accumSuccess);						\
+          if (!accumSuccess || strcmp(prevReq, #NEXT)) {               	\
+             for (i = 0; i< numFound; i++) PVPUTNUM(cmdSucceeded[i], 0)	\
+          }								\
        } state NEXT
 
 /*
