@@ -187,7 +187,7 @@ def parse_src_file(path, verbose=False):
                         desc = match_d.group(1)
                         extra = match_d.group(2)
 
-                    params.append( parse_one(type, match.group(1), desc, extra ) )
+                    params.append( parse_one(type, match.group(1), desc, extra) )
 
     return params
 
@@ -293,6 +293,8 @@ def generate_out_db_record(param, outfile):
     elif type == "mbbo":
         _mbbimbbo_val(param, outfile, param['default'])
     else:
+        outfile.write("    field(LOPR, \"0\")\n")
+        outfile.write("    field(HOPR, \"{0}\")\n".format(2**param['width'] - 1))
         _longinlongout_val(param, outfile, param['default'])
     outfile.write("}\n")
 
