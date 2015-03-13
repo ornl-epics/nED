@@ -71,4 +71,6 @@ void CmdDispatcher::sendToPlugins(const DasPacket *first, const DasPacket *last)
 
     cmdList.reset(reinterpret_cast<const uint8_t*>(first), length);
     BaseDispatcherPlugin::sendToPlugins(&cmdList);
+    cmdList.release();
+    cmdList.waitAllReleased();
 }

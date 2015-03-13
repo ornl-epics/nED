@@ -111,11 +111,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
 
     // Optimize pass thru mode
     if (mapMode == MAP_NONE) {
-        m_packetList.reset(packetList); // reset() automatically reserves
-        sendToPlugins(&m_packetList);
-        m_packetList.release();
-        m_packetList.waitAllReleased();
-        m_packetList.clear();
+        sendToPlugins(packetList);
         nProcessed += packetList->size();
     } else {
         // Break single loop into two parts to have single point of sending data

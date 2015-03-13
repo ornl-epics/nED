@@ -129,14 +129,7 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     this->unlock();
 
     if (ffMode == FF_DISABLED) {
-        // TODO: sendToPlugins should not call waitAllReleased() automatically.
-        //       Neither should we. All we have to do is send packetlist
-        //       to clients and return. Reference counters will be okay.
-        m_packetList.reset(packetList); // reset() automatically reserves
-        sendToPlugins(&m_packetList);
-        m_packetList.release();
-        m_packetList.waitAllReleased();
-        m_packetList.clear();
+        sendToPlugins(packetList);
     } else {
         // Break single loop into two parts to have single point of sending data
         for (auto it = packetList->cbegin(); it != packetList->cend(); ) {
