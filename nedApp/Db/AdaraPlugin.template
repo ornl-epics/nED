@@ -6,7 +6,9 @@ record(bo, "$(P)Enable")
 {
     info(archive, "Monitor, 00:10:00")
     info(autosaveFields, "VAL")
+    field(ZSV,  "MAJOR")
     field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
 }
 # Upgrade BaseSocketPlugin::* PVs
 record(stringout, "$(P)ListenIp")
@@ -64,7 +66,8 @@ record(scalcout, "$(P)StatusCalc")
 {
     field(DESC, "Determine global OCC status")
     field(INAA, "$(P)ClientIp NPP")
-    field(CALC, "LEN(AA)>0")
+    field(INPA, "$(P)Enable.SEVR NPP")
+    field(CALC, "A=0&&LEN(AA)>0")
     field(PINI, "YES")
     field(FLNK, "$(P)Status")
 }
