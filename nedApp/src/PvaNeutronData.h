@@ -35,10 +35,10 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC/ACPC ONLY: ADC samples
         epics::pvData::PVUIntArrayPtr sample_b12;       //!< AROC ONLY: Diagnostic values
         epics::pvData::PVUIntArrayPtr position_index;   //!< Position index mapping
-        epics::pvData::PVUIntArrayPtr position_x;       //!< Position X
-        epics::pvData::PVUIntArrayPtr position_y;       //!< Position Y
-        epics::pvData::PVUIntArrayPtr photo_sum_x;      //!< Photo sum X
-        epics::pvData::PVUIntArrayPtr photo_sum_y;      //!< Photo sum Y
+        epics::pvData::PVFloatArrayPtr position_x;      //!< Position X
+        epics::pvData::PVFloatArrayPtr position_y;      //!< Position Y
+        epics::pvData::PVFloatArrayPtr photo_sum_x;     //!< Photo sum X
+        epics::pvData::PVFloatArrayPtr photo_sum_y;     //!< Photo sum Y
 
     public:
         POINTER_DEFINITIONS(PvaNeutronData);

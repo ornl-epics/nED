@@ -10,10 +10,31 @@ record(bo, "$(P)Enable")
 
 record(bo, "$(P)FlatFieldEn")
 {
+    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Flag whether flat-field transformed")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))FlatFieldEn")
     field(ZNAM, "raw data")
     field(ONAM, "transformed")
+}
+record(longout, "$(P)XyFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "X,Y UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))XyFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "30")
+}
+record(longout, "$(P)PsFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Photo sum UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PsFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "30")
 }

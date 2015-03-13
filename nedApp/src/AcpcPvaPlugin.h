@@ -167,10 +167,10 @@ class AcpcPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVUIntArray::svector time_of_flight;
             epics::pvData::PVUIntArray::svector pixel;
             epics::pvData::PVUIntArray::svector position_index;
-            epics::pvData::PVUIntArray::svector position_x;
-            epics::pvData::PVUIntArray::svector position_y;
-            epics::pvData::PVUIntArray::svector photo_sum_x;
-            epics::pvData::PVUIntArray::svector photo_sum_y;
+            epics::pvData::PVFloatArray::svector position_x;
+            epics::pvData::PVFloatArray::svector position_y;
+            epics::pvData::PVFloatArray::svector photo_sum_x;
+            epics::pvData::PVFloatArray::svector photo_sum_y;
             epics::pvData::PVUIntArray::svector sample_a8;
             epics::pvData::PVUIntArray::svector sample_b8;
         } m_cache;
@@ -180,10 +180,15 @@ class AcpcPvaPlugin : public BasePvaPlugin {
          */
         static const uint32_t CACHE_SIZE;
 
+        uint32_t m_xyDivider; // X,Y is in UQm.n format, divider is (1 << n)
+        uint32_t m_photosumDivider; // Photo Sum is in UQm.n format, divider is (1 << n)
+
     protected:
         #define FIRST_ACPCPVAPLUGIN_PARAM FlatFieldEn
         int FlatFieldEn;
-        #define LAST_ACPCPVAPLUGIN_PARAM FlatFieldEn
+        int XyFractWidth;
+        int PsFractWidth;
+        #define LAST_ACPCPVAPLUGIN_PARAM PsFractWidth
 };
 
 #endif // ACPC_PVA_PLUGIN_H

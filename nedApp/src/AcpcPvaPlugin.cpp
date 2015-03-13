@@ -17,6 +17,8 @@ const uint32_t AcpcPvaPlugin::CACHE_SIZE = 32*1024;
 
 AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
     : BasePvaPlugin(portName, dispatcherPortName, pvPrefix, NUM_ACPCPVAPLUGIN_PARAMS)
+    , m_xyDivider(1 << 24)
+    , m_photosumDivider(1 << 15)
 {
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
@@ -26,6 +28,9 @@ AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortNam
     m_cache.photo_sum_y.reserve(CACHE_SIZE);
 
     createParam("FlatFieldEn",   asynParamInt32, &FlatFieldEn, 0); // WRITE - Normal data has been flat-field corrected
+    // UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
+    createParam("XyFractWidth",  asynParamInt32, &XyFractWidth, 24); // WRITE - Number of fraction bits in X,Y data
+    createParam("PsFractWidth",  asynParamInt32, &PsFractWidth, 15); // WRITE - Number of fraction bits in PhotoSum data
     callParamCallbacks();
 }
 
@@ -64,6 +69,12 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
                 setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
             }
         }
+    } else if (pasynUser->reason == XyFractWidth) {
+        m_xyDivider = 1 << value;
+        return asynSuccess;
+    } else if (pasynUser->reason == PsFractWidth) {
+        m_photosumDivider = 1 << value;
+        return asynSuccess;
     }
     return BasePvaPlugin::writeInt32(pasynUser, value);
 }
@@ -104,17 +115,18 @@ void AcpcPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
     };
 
     uint32_t nEvents = count / (sizeof(NormalEvent) / sizeof(uint32_t));
-    const NormalEvent *events = reinterpret_cast<const NormalEvent *>(data);
+    const NormalEvent *event = reinterpret_cast<const NormalEvent *>(data);
 
     // Go through events and append to cache
     while (nEvents-- > 0) {
-        m_cache.time_of_flight.push_back(events->time_of_flight & 0x000FFFFF);
-        m_cache.position_index.push_back(events->position_index);
-        m_cache.position_x.push_back(events->position_x);
-        m_cache.position_y.push_back(events->position_y);
-        m_cache.photo_sum_x.push_back(events->photo_sum_x);
-        m_cache.photo_sum_y.push_back(events->photo_sum_y);
-        events++;
+        m_cache.time_of_flight.push_back(event->time_of_flight & 0x000FFFFF);
+        m_cache.position_index.push_back(event->position_index);
+        // In UQm.n format
+        m_cache.position_x.push_back((1.0 * event->position_x) / m_xyDivider);
+        m_cache.position_y.push_back((1.0 * event->position_y) / m_xyDivider);
+        m_cache.photo_sum_x.push_back((1.0 * event->photo_sum_x) / m_photosumDivider);
+        m_cache.photo_sum_y.push_back((1.0 * event->photo_sum_y) / m_photosumDivider);
+        event++;
     }
 }
 
