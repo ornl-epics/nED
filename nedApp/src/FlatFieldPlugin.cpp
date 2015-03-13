@@ -19,6 +19,7 @@
 #define NUM_FLATFIELDPLUGIN_PARAMS ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1))
 
 #define PIXID_ERR       (1 << 31)
+#define MAX_PIXEL_SIZE  512
 
 #if defined(WIN32) || defined(_WIN32)
 #   define PATH_SEPARATOR "\\"
@@ -48,7 +49,6 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     if (err == FF_ERR_NONE)
         err = importFiles(importDir);
 
-    createParam("TransfCount",  asynParamInt32, &TransfCount, 0); // Number of packets transformed
     createParam("ImportReport", asynParamOctet, &ImportReport);   // Generate textual file import report
     createParam("ImportDir",    asynParamOctet, &ImportDir, importDir); // Path to correction tables directory
     createParam("ErrImport",    asynParamInt32, &ErrImport, err); // Last mapping import error
@@ -57,8 +57,10 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
     createParam("FfMode",       asynParamInt32, &FfMode, FF_DISABLED); // FlatField transformation mode (see FlatFieldPlugin::FfMode_t)
-    createParam("MaxRawX",      asynParamFloat64, &MaxRawX, 158.0);  // Maximum value for X returned by camera
-    createParam("MaxRawY",      asynParamFloat64, &MaxRawY, 158.0);  // Maximum value for X returned by camera
+    createParam("XyRange",      asynParamFloat64, &XyRange, 158.0); // WRITE - Maximum X and Y values from detector
+    // UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
+    createParam("XyFractWidth",  asynParamInt32, &XyFractWidth, 24); // WRITE - Number of fraction bits in X,Y data
+    createParam("PsFractWidth",  asynParamInt32, &PsFractWidth, 15); // WRITE - Number of fraction bits in PhotoSum data
     callParamCallbacks();
 }
 
@@ -66,6 +68,35 @@ FlatFieldPlugin::~FlatFieldPlugin()
 {
     if (m_buffer != 0)
         free(m_buffer);
+}
+
+asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (pasynUser->reason == ResetCnt) {
+        if (value > 0) {
+            setIntegerParam(CntUnmap, 0);
+            setIntegerParam(CntError, 0);
+            setIntegerParam(CntSplit, 0);
+            callParamCallbacks();
+        }
+        return asynSuccess;
+    } else if (pasynUser->reason == XyFractWidth) {
+        if (value < 1 || value > 30)
+            return asynError;
+    } else if (pasynUser->reason == PsFractWidth) {
+        if (value < 1 || value > 30)
+            return asynError;
+    }
+    return BaseDispatcherPlugin::writeInt32(pasynUser, value);
+}
+
+asynStatus FlatFieldPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
+{
+    if (pasynUser->reason == XyRange) {
+        if (value <= 0.0 || value >= MAX_PIXEL_SIZE)
+            return asynError;
+    }
+    return BaseDispatcherPlugin::writeFloat64(pasynUser, value);
 }
 
 asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
@@ -79,11 +110,12 @@ asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t n
             "no memory",                    // FF_ERR_NO_MEM
             "duplicate data for position",  // FF_ERR_EXIST
             "unrecognized file format",     // FF_ERR_BAD_FORMAT
+            "table size mismatch",          // FF_ERR_BAD_SIZE
         };
 
         *nActual = 0;
         for (auto it = m_filesStatus.begin(); it != m_filesStatus.end(); it++) {
-            int ret = snprintf(value, nChars, "%-30s - %s\n", it->first.c_str(), importErrMap[it->second]);
+            int ret = snprintf(value, nChars, "%-20s - %s\n", it->first.c_str(), importErrMap[it->second]);
             if (ret == -1 || (size_t)ret > nChars)
                 break;
 
@@ -100,10 +132,14 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
 {
     int nReceived = 0;
     int nProcessed = 0;
-    int nTransformed = 0;
     TransformErrors errors;
     int nSplits = 0;
     int ffMode = FF_DISABLED;
+    DasPacketList newPacketList;
+
+    // Parametrize calculating algorithms based on detector.
+    double xyRange = 0.0;
+    int xyFractWidth = 0;
 
     if (m_buffer == 0) {
         LOG_ERROR("Flat field correction disabled due to import error");
@@ -113,30 +149,32 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     this->lock();
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
-    getIntegerParam(TransfCount,&nTransformed);
     getIntegerParam(CntUnmap,   &errors.nUnmapped);
     getIntegerParam(CntError,   &errors.nErrors);
     getIntegerParam(CntSplit,   &nSplits);
     getIntegerParam(FfMode,     &ffMode);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL)
         ffMode = FF_DISABLED;
-    // This is a trick to avoid locking. Since plugin design ensures a single
-    // instance of processDataUnlocked() function at any time, we read in
-    // values and store them as class members. This makes member variables
-    // const for the duration of this function.
-    getDoubleParam(MaxRawX,     &m_maxRawX);
-    getDoubleParam(MaxRawY,     &m_maxRawY);
+    getIntegerParam(XyFractWidth, &xyFractWidth);
+    getDoubleParam(XyRange,     &xyRange);
     this->unlock();
+
+    // This is a trick to avoid locking access to member variables. Since
+    // plugin design ensures a single instance of processDataUnlocked()
+    // function at any time, we read in values and store them as class members.
+    // This makes member variables const for the duration of this function.
+    m_xyScale = 1.0 * m_tablesSize / ((1 << xyFractWidth) * xyRange);
+    m_psScale = 0.0; // TODO
 
     if (ffMode == FF_DISABLED) {
         sendToPlugins(packetList);
+        nProcessed += packetList->size();
     } else {
         // Break single loop into two parts to have single point of sending data
         for (auto it = packetList->cbegin(); it != packetList->cend(); ) {
             uint32_t bufferOffset = 0;
 
-            m_packetList.clear(); // Doesn't resize the vector, just tosses elements
-            m_packetList.reserve();
+            newPacketList.reserve();
 
             for (; it != packetList->cend(); it++) {
                 const DasPacket *packet = *it;
@@ -150,34 +188,32 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
 
                 // Reuse the original packet if nothing to map
                 if (packet->isNeutronData() == false) {
-                    m_packetList.push_back(packet);
+                    newPacketList.push_back(packet);
                     continue;
                 }
 
-                nTransformed++;
+                nProcessed++;
 
                 // Reserve part of buffer for this packet, it may shrink from original but never grow
                 DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
-                m_packetList.push_back(newPacket);
+                newPacketList.push_back(newPacket);
                 bufferOffset += packet->length();
 
                 // Do the X,Y -> pixid transformation - this could be parallelized
                 errors += transformPacket(packet, newPacket);
             }
 
-            sendToPlugins(&m_packetList);
-            m_packetList.release();
-            m_packetList.waitAllReleased();
+            sendToPlugins(&newPacketList);
+            newPacketList.release();
+            newPacketList.waitAllReleased();
         }
     }
 
     nReceived += packetList->size();
-    nProcessed += packetList->size();
 
     this->lock();
     setIntegerParam(RxCount,    nReceived   % std::numeric_limits<int32_t>::max());
     setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
-    setIntegerParam(TransfCount,nTransformed% std::numeric_limits<int32_t>::max());
     setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntUnmap,   errors.nUnmapped);
     setIntegerParam(CntError,   errors.nErrors);
@@ -188,7 +224,6 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
 FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacket *srcPacket, DasPacket *destPacket)
 {
     TransformErrors errors;
-    uint32_t pixelOffset = 4; // TODO: parameter from AcpcResolution**2
 
     struct AcpcNormalData {
         uint32_t time_of_flight;
@@ -210,15 +245,8 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
 
     while (nEvents-- > 0) {
 
-        // Convert raw values into real ones
-        double x = (1.0 * srcEvent->position_x) / (1 << 24);
-        double y = (1.0 * srcEvent->position_y) / (1 << 24);
-        double photosum_x = (1.0 * srcEvent->photo_sum_x) / (1 << 15);
-        double photosum_y = (1.0 * srcEvent->photo_sum_y) / (1 << 15);
-        uint32_t position_id = srcEvent->position_index & 0x7fff0000;
-
         // Find appropriate correction table
-        auto corrTable = m_corrTables.find(position_id);
+        auto corrTable = m_corrTables.find(srcEvent->position_index);
         if (corrTable == m_corrTables.end()) {
             errors.nUnmapped++;
             srcEvent++;
@@ -232,11 +260,18 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
             continue;;
         }
 
+        // Convert raw values into ones used by calculations
+        double x = srcEvent->position_x * m_xyScale;
+        double y = srcEvent->position_y * m_xyScale;
+        double photosum_x = srcEvent->photo_sum_x * m_psScale;
+        double photosum_y = srcEvent->photo_sum_y * m_psScale;
+
         // TODO: missing photo sum correction and thresholds
 
         // Form TOF,pixelid tupple
         destEvent->tof = srcEvent->time_of_flight;
-        destEvent->pixelid = (position_id * pixelOffset) | xyToPixel(x, y, corrTable->second);
+        destEvent->pixelid  = srcEvent->position_index << 18;
+        destEvent->pixelid |= xyToPixel(x, y, corrTable->second.first, corrTable->second.second);
 
         srcEvent++;
         destEvent++;
@@ -248,25 +283,24 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
     return errors;
 }
 
-uint32_t FlatFieldPlugin::xyToPixel(double x, double y, const FlatFieldPlugin::CorrTablePair_t &tables)
+uint32_t FlatFieldPlugin::xyToPixel(double x, double y, const FlatFieldPlugin::CorrTable_t &xtable, const FlatFieldPlugin::CorrTable_t &ytable)
 {
-    x *= tables.first.size() / m_maxRawX;
-    y *= tables.second.size() / m_maxRawY;
+    if (x < 0.0 || x >= xtable.size() || y < 0.0 || y >= ytable.size() ||
+        xtable.size() > MAX_PIXEL_SIZE || ytable.size() > MAX_PIXEL_SIZE) {
 
-    if (x >= 0 && x <= tables.first.size() &&
-        y >= 0 && y <= tables.second.size()) {
-
-        int xp = (int)x;
-        int yp = (int)y;
-
-        double dx = (xp > 0 && xp < 511) ? x - xp : 0;
-        double dy = (yp > 0 && yp < 511) ? y - yp : 0;
-
-        x -= (dx * tables.first[xp+1][yp])  + ((1 - dx) * tables.first[xp][yp]);
-        y -= (dy * tables.second[xp][yp+1]) + ((1 - dy) * tables.second[xp][yp]);
+        return 0;
     }
 
-    return (tables.first.size() * (int)x) + (int)y;
+    unsigned xp = (int)x;
+    unsigned yp = (int)y;
+
+    double dx = (xp == 0 || xp == (xtable.size()  - 1)) ? 0 : x - xp;
+    double dy = (yp == 0 || yp == (ytable.size() - 1)) ? 0 : y - yp;
+
+    x -= (dx * xtable[xp+1][yp])  + ((1 - dx) * xtable[xp][yp]);
+    y -= (dy * ytable[xp][yp+1]) + ((1 - dy) * ytable[xp][yp]);
+
+    return (MAX_PIXEL_SIZE * (int)x) + (int)y;
 }
 
 bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::string &value)
@@ -318,11 +352,11 @@ bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::
     return false;
 }
 
-FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile, int &size_x, int &size_y, int &position_id, char &table_dim)
+FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, char &table_dim)
 {
     size_x = 0;
     size_y = 0;
-    position_id = -1;
+    position_id = 0xFFFFFFFF;
     table_dim = ' ';
     int version = 0;
     uint32_t nHeaders = 0;
@@ -338,7 +372,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
             nHeaders++;
         }
         if (key == "Table size") {
-            if (sscanf(value.c_str(), "%dx%d", &size_x, &size_y) != 2) {
+            if (sscanf(value.c_str(), "%ux%u", &size_x, &size_y) != 2) {
                 LOG_ERROR("Failed to read table size");
                 return FF_ERR_PARSE;
             }
@@ -356,7 +390,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
             nHeaders++;
         }
         if (key == "Position id") {
-            if (sscanf(value.c_str(), "%d", &position_id) != 1) {
+            if (sscanf(value.c_str(), "%u", &position_id) != 1) {
                 LOG_ERROR("Failed to read position id");
                 return FF_ERR_PARSE;
             }
@@ -386,7 +420,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
         LOG_ERROR("Invalid file format, missing position id header");
         return FF_ERR_PARSE;
     }
-    if (position_id == -1) {
+    if (position_id == 0xFFFFFFFF) {
         LOG_ERROR("Invalid file format, missing position id header");
         return FF_ERR_PARSE;
     }
@@ -394,7 +428,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
     return FF_ERR_NONE;
 }
 
-FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path)
+FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path, uint32_t &tableSize)
 {
     ImportError err = FF_ERR_NONE;
     std::ifstream infile(path.c_str());
@@ -406,7 +440,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
     }
 
     while (!infile.eof()) {
-        int size_x, size_y, position_id;
+        uint32_t size_x, size_y, position_id;
         char table_id;
         CorrTable_t table;
 
@@ -414,11 +448,18 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
         if (err != FF_ERR_NONE)
             break;
 
+        if (tableSize == 0)
+            tableSize = size_x;
+        if (tableSize == 0 || size_x != tableSize || size_y != tableSize) {
+            err = FF_ERR_BAD_SIZE;
+            break;
+        }
+
         // Correction factors should follow as doubles, X rows and Y columns.
         // Table size must match the one defined in header.
         table.resize(size_x, std::vector<double>(size_y, 0.0));
-        for (int i = 0; i < size_x; i++) {
-            for (int j = 0; j < size_y; j++) {
+        for (uint32_t i = 0; i < size_x; i++) {
+            for (uint32_t j = 0; j < size_y; j++) {
                 double value;
                 infile >> value;
                 table[i][j] = value;
@@ -457,6 +498,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &pat
     DIR *dir = opendir(path.c_str());
     uint32_t nImported = 0;
     uint32_t nErrors = 0;
+    uint32_t m_tablesSize = 0;
 
     if (dir == NULL)
         return FF_ERR_NO_FILE;
@@ -464,7 +506,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &pat
     while (readdir_r(dir, &entry, &result) == 0 && result != NULL) {
         std::string filename = entry.d_name;
         if (filename != ".." && filename != ".") {
-            ImportError err = importFile(path + PATH_SEPARATOR + filename);
+            ImportError err = importFile(path + PATH_SEPARATOR + filename, m_tablesSize);
             m_filesStatus[filename] = err;
 
             if (err == FF_ERR_NONE)
@@ -476,8 +518,10 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &pat
 
     closedir(dir);
 
-    if (nErrors > 0)
+    if (nErrors > 0) {
+        m_corrTables.clear();
         return FF_ERR_PARSE;
+    }
 
     if (nImported == 0)
         return FF_ERR_NO_FILE;

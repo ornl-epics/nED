@@ -68,6 +68,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
             FF_ERR_NO_MEM       = 3, //!< Failed to allocate internal buffer
             FF_ERR_EXIST        = 4, //!< Correction table for this position already imported
             FF_ERR_BAD_FORMAT   = 5, //!< Unrecognized file format
+            FF_ERR_BAD_SIZE     = 6, //!< One or more tables dimension size mismatched
         } ImportError;
 
         /**
@@ -100,6 +101,16 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         ~FlatFieldPlugin();
 
         /**
+         * Handle writing plugin integer parameters from PV.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
+         * Handle writing plugin double parameters from PV.
+         */
+        asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
+
+        /**
          * Handle reading octet (string) data from plugin.
          */
         asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
@@ -119,11 +130,19 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         TransformErrors transformPacket(const DasPacket *srcPacket, DasPacket *destPacket);
 
         /**
-         * Correct single event  X,Y positions and convert it to pixel id.
+         * Correct single event X,Y positions and convert it to pixel id.
          *
-         * no locking required, only class variable is m_tables which is const
+         * Each position is adjusted using the corresponding correction table.
+         * Pixel id is calculated and returned. It's filling in lower 18 bits.
+         * Correction tables up to size 512x512 are supported.
+         *
+         * @param[in] x Calculated position X in range [0.0 .. X table size)
+         * @param[in] y Calculated position Y in range [0.0 .. Y table size)
+         * @param[in] xtable X correction factor table
+         * @param[in] ytable Y correction factor table
+         * @return Calculated pixel id, 0 when X,Y out of range.
          */
-        uint32_t xyToPixel(double x, double y, const CorrTablePair_t &tables);
+        uint32_t xyToPixel(double x, double y, const CorrTable_t &xtable, const CorrTable_t &ytable);
 
         /**
          * Parse the flat-field file and populate the tables.
@@ -157,6 +176,8 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @endcode
          *
          * @param[in] path Relative or absolute path to a file to parse.
+         * @param[out] tableSize Both table dimensions must match this one,
+         *                       initialized to size_x if 0.
          * @retval MAP_ERR_NO_FILE No such file or file can not be opened.
          * @retval MAP_ERR_BAD_FORMAT File doesn't look like valid correction
          *         table file.
@@ -165,13 +186,18 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @retval MAP_ERR_EXIST Data for this position already imported.
          * @retval MAP_ERR_NONE No error, file was successfully imported.
          */
-        ImportError importFile(const std::string &path);
+        ImportError importFile(const std::string &path, uint32_t &tableSize);
 
         /**
          * Try to import all files in given directory.
          *
          * Function calls importFile() function for every file it finds in
-         * specified directory.
+         * specified directory. Member variables m_corrTables is populated
+         * with one pair of X,Y correction tables per detector (position).
+         * In case of any error m_corrTables is emptied.
+         *
+         * It also populates m_tablesSize variable which represents a single
+         * dimension size for any given correction table.
          *
          * @note Should work on WIN32 as well, but not tested.
          * @param[in] dir Relative or absolute path to a directory with
@@ -213,26 +239,25 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @retval MAP_ERR_PARSE File seems to be expected format but parse error.
          * @retval MAP_ERR_NONE Header parsed.
          */
-        ImportError parseHeaders(std::ifstream &infile, int &size_x, int &size_y, int &position_id, char &dimension);
+        ImportError parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, char &dimension);
 
     private: // variables
-        static const unsigned TABLE_X_SIZE = 512;
-        static const unsigned TABLE_Y_SIZE = 512;
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
         uint32_t m_bufferSize;      //!< Size of buffer
-        DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins
-        double m_maxRawX;           //!< Maximum value for X returned by camera (cached)
-        double m_maxRawY;           //!< Maximum value for Y returned by camera (cached)
         double m_photosumXLow;      //!< X photo sum low threshold
         double m_photosumXHi;       //!< X photo sum high threshold
         double m_photosumYLow;      //!< Y photo sum low threshold
         double m_photosumYHi;       //!< Y photo sum high threshold
         std::map<uint32_t, CorrTablePair_t> m_corrTables; //!< One correction table per ACPC camera.
+        uint32_t m_tablesSize;       //!< X (or Y) dimension of all tables, all tables must be the same size, X and Y dimension must equal
         std::map<std::string, ImportError> m_filesStatus; //!< Import file status
 
+        // Following member variables must be carefully used since they're used un-locked
+        double m_xyScale;           //!< Scaling factor to transform raw X,Y range to [0.0 .. m_tablesSize)
+        double m_psScale;           //!< Scaling factor to transform raw photo sum range to [0.0 .. 512.0)
+
     protected:
-        #define FIRST_FLATFIELDPLUGIN_PARAM TransfCount
-        int TransfCount;    //!< Number of packets transformed
+        #define FIRST_FLATFIELDPLUGIN_PARAM ImportReport
         int ImportReport;   //!< Generate textual file import report
         int ImportDir;      //!< Absolute path to pixel map file
         int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
@@ -241,9 +266,10 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int FfMode;         //!< Flat-field transformation mode (see FlatFieldPlugin::FfMode_t)
-        int MaxRawX;        //!< Maximum value for X returned by camera
-        int MaxRawY;        //!< Maximum value for Y returned by camera
-        #define LAST_FLATFIELDPLUGIN_PARAM MaxRawY
+        int XyFractWidth;   //!< X,Y is in UQm.n format, n is fraction width
+        int PsFractWidth;   //!< Photo sum is in UQm.n format, n is fraction width
+        int XyRange;        //!< Maximum X and Y values from detector
+        #define LAST_FLATFIELDPLUGIN_PARAM XyRange
 };
 
 #endif // FLAT_FIELD_PLUGIN_H

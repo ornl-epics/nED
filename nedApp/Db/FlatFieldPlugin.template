@@ -4,12 +4,16 @@ record(bo, "$(P)Enable")
 {
     info(archive, "Monitor, 00:10:00")
     info(autosaveFields, "VAL")
+    field(ZSV,  "MAJOR")
     field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(calc, "$(P)StatusCalc")
 {
     field(INPA, "$(P)ErrImport.SEVR")
-    field(CALC, "A=0")
+    field(INPB, "$(P)Enable.SEVR")
+    field(INPC, "$(P)FfMode.SEVR")
+    field(CALC, "(A+B+C)=0")
     field(FLNK, "$(P)Status")
 }
 record(bi, "$(P)Status")
@@ -19,15 +23,6 @@ record(bi, "$(P)Status")
     field(ONAM, "OK")
     field(ZSV,  "MAJOR")
     field(INP,  "$(P)StatusCalc")
-}
-record(longin, "$(P)TransfCount")
-{
-    field(DTYP, "Number of transformed pkts")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))TransfCount")
-    field(VAL,  "0")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
 }
 record(waveform, "$(P)ImportReport")
 {
@@ -71,6 +66,9 @@ record(mbbi, "$(P)ErrImport")
     field(FVVL, "5")
     field(FVST, "Bad file format")
     field(FVSV, "MAJOR")
+    field(SXVL, "6")
+    field(SXST, "Table size mismatch")
+    field(SXSV, "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
 record(longin, "$(P)CntError")
@@ -120,4 +118,38 @@ record(bo, "$(P)FfMode")
     field(PINI, "YES")
     field(ZNAM, "Pass thru all")
     field(ONAM, "Transform neutrons")
+    field(ZSV,  "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(longout, "$(P)XyFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "X,Y UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))XyFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "30")
+}
+record(longout, "$(P)PsFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Photo sum UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PsFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "30")
+}
+record(ao, "$(P)XyRange")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max X,Y values from detector")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))XyRange")
+    field(PINI, "YES")
+    field(HOPR, "512")
+    field(LOPR, "1")
+    field(PREC, "2")
 }
