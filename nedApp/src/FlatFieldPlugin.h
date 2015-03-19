@@ -15,7 +15,33 @@
 #include <limits>
 
 /**
- * FlatFieldPlugin produces tof,pixelid stream out of x,y positions produces by some detectors.
+ * FlatFieldPlugin applies flat-field correction to calculated X,Y events
+ *
+ * The plugin corrects X,Y events pre-calculated by ACPC. It corrects events
+ * according to pre-calibrated correction factors, checks photo sum correctness
+ * and converts X,Y event into pixel id that can be used by other plugins or
+ * external parties.
+ *
+ * Internally the algorithm corrects X,Y events using 2 correction tables per
+ * postion (one ACPC), one table for each dimension. Those are two-dimensional
+ * tables containing correction factors. Algorithm also uses 1 photo sum limits
+ * table for X dimension. All tables must be of the same size, usually 512x512
+ * elements.
+ *
+ * Correction tables are used as lookup tables for getting X and Y correction
+ * factors. X and Y are first scaled to match tables range. Scaled values
+ * are used to locate cell within the table. Using the scaled X and Y, a value
+ * from photo sum limits table is obtained and is used to filter out invalid
+ * events based on photo sum value. The same scaled X and Y are then used on
+ * X correction table as index to get X correction factor. Similarly
+ * for Y dimension. X and Y correction factors are applied to raw X and Y
+ * accordingly. Finally position id, corrected X and Y tripplet is converted
+ * to 32 bit unsigned pixel id using this formula:
+ * pixel = (<position id> & 0x3FFF << 18) | (<corrected X> & 0x1FF << 9) | (<corrected Y> & 0x1FF)
+ *
+ * Every ACPC should be assigned a unique position id. m_corrTables variables
+ * is an array of all positions configured. Each position has at most 4 tables,
+ * but at least X correction, Y correction and X photo sum tables.
  */
 class FlatFieldPlugin : public BaseDispatcherPlugin {
     private: // structures & typedefs
@@ -25,9 +51,15 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         typedef std::vector< std::vector<double> > CorrTable_t;
 
         /**
-         * Pair of X,Y correction tables.
+         * Type of the table being imported, also index in m_corrTables.
          */
-        typedef std::pair<CorrTable_t, CorrTable_t> CorrTablePair_t;
+        typedef enum {
+            TABLE_X_CORRECTION  = 0,
+            TABLE_Y_CORRECTION  = 1,
+            TABLE_X_PHOTOSUM    = 2,
+            TABLE_Y_PHOTOSUM    = 3,
+            TABLE_UNKNOWN, // This element must be the last one
+        } TableType_t;
 
         /**
          * Structure used for returning error counters from transform function.
@@ -38,10 +70,12 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
             public:
                 int32_t nErrors;    //!< Pixel id has error bit already set
                 int32_t nUnmapped;  //!< No correction table was found for given module
+                int32_t nPhotoSum;  //!< Number of photo sum rejected pixels
 
                 TransformErrors()
                     : nErrors(0)
                     , nUnmapped(0)
+                    , nPhotoSum(0)
                 {}
 
                 TransformErrors &operator+=(const TransformErrors &rhs)
@@ -55,9 +89,14 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
                         nUnmapped = std::numeric_limits<int32_t>::max();
                     else
                         nUnmapped += rhs.nUnmapped;
+                    if (rhs.nPhotoSum > std::numeric_limits<int32_t>::max() - nPhotoSum)
+                        nPhotoSum = std::numeric_limits<int32_t>::max();
+                    else
+                        nPhotoSum += rhs.nPhotoSum;
                     return *this;
                 }
         };
+
         /**
          * Possible errors
          */
@@ -69,6 +108,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
             FF_ERR_EXIST        = 4, //!< Correction table for this position already imported
             FF_ERR_BAD_FORMAT   = 5, //!< Unrecognized file format
             FF_ERR_BAD_SIZE     = 6, //!< One or more tables dimension size mismatched
+            FF_ERR_INCOMPLETE   = 7, //!< One or more tables missing
         } ImportError;
 
         /**
@@ -136,13 +176,26 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Pixel id is calculated and returned. It's filling in lower 18 bits.
          * Correction tables up to size 512x512 are supported.
          *
-         * @param[in] x Calculated position X in range [0.0 .. X table size)
-         * @param[in] y Calculated position Y in range [0.0 .. Y table size)
-         * @param[in] xtable X correction factor table
-         * @param[in] ytable Y correction factor table
-         * @return Calculated pixel id, 0 when X,Y out of range.
+         * @param[in] x Calculated position X, in range [0.0 .. X table size)
+         * @param[in] y Calculated position Y, in range [0.0 .. Y table size)
+         * @param[in] position_id Detector position id to find corresponding correction tables.
+         * @return Calculated pixel id, 0 when X,Y out of range or no table found.
          */
-        uint32_t xyToPixel(double x, double y, const CorrTable_t &xtable, const CorrTable_t &ytable);
+        uint32_t xyToPixel(double x, double y, uint32_t position_id);
+
+        /**
+         * Determine whether the X,Y position is within photo sum limits.
+         *
+         * For now only uses X photosum table, according to Miljko both X and Y
+         * should be used.
+         *
+         * @param[in] x Calculate position X, in range [0.0 .. X table size)
+         * @param[in] y Calculate position Y, in range [0.0 .. X table size)
+         * @param[in] photosum_x Photo sum X value
+         * @param[in] position_id Detector position id to find corresponding correction tables.
+         * @return true when X,Y position is within photosum checks, false otherwise
+         */
+        bool checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position_id);
 
         /**
          * Parse the flat-field file and populate the tables.
@@ -234,27 +287,34 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[out] size_x X dimension size
          * @param[out] size_y Y dimension size
          * @param[out] position_id Camera position id
-         * @param[out] dimension Correction table dimension, 'X' or 'Y'
+         * @param[out] type Type of imported table
          * @retval MAP_ERR_BAD_FORMAT Unrecognized file format
          * @retval MAP_ERR_PARSE File seems to be expected format but parse error.
          * @retval MAP_ERR_NONE Header parsed.
          */
-        ImportError parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, char &dimension);
+        ImportError parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, FlatFieldPlugin::TableType_t &type);
+
+        /**
+         * Find correction table.
+         *
+         * @param[in] position_id Detector position
+         * @param[in] type Table type.
+         * @return Pointer to table or empty pointer if not found.
+         */
+        std::shared_ptr<CorrTable_t> findTable(uint32_t position_id, TableType_t type);
 
     private: // variables
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
         uint32_t m_bufferSize;      //!< Size of buffer
-        double m_photosumXLow;      //!< X photo sum low threshold
-        double m_photosumXHi;       //!< X photo sum high threshold
-        double m_photosumYLow;      //!< Y photo sum low threshold
-        double m_photosumYHi;       //!< Y photo sum high threshold
-        std::map<uint32_t, CorrTablePair_t> m_corrTables; //!< One correction table per ACPC camera.
+        std::vector< std::vector<std::shared_ptr<CorrTable_t> > > m_corrTables; //!< First dimension is detector, second dimension is table type (X,Y, photosum X,Y = 4 tables per detector)
         uint32_t m_tablesSize;       //!< X (or Y) dimension of all tables, all tables must be the same size, X and Y dimension must equal
         std::map<std::string, ImportError> m_filesStatus; //!< Import file status
 
-        // Following member variables must be carefully used since they're used un-locked
+        // Following member variables must be carefully set since they're used un-locked
         double m_xyScale;           //!< Scaling factor to transform raw X,Y range to [0.0 .. m_tablesSize)
-        double m_psScale;           //!< Scaling factor to transform raw photo sum range to [0.0 .. 512.0)
+        double m_psScale;           //!< Scaling factor to convert unsigned UQm.n 32 bit value into double
+        double m_psLowDecBase;      //!< PhotoSum lower decrement base
+        double m_psLowDecLim;       //!< PhotoSum lower decrement limit
 
     protected:
         #define FIRST_FLATFIELDPLUGIN_PARAM ImportReport
@@ -267,9 +327,11 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int ResetCnt;       //!< Reset counters
         int FfMode;         //!< Flat-field transformation mode (see FlatFieldPlugin::FfMode_t)
         int XyFractWidth;   //!< X,Y is in UQm.n format, n is fraction width
-        int PsFractWidth;   //!< Photo sum is in UQm.n format, n is fraction width
         int XyRange;        //!< Maximum X and Y values from detector
-        #define LAST_FLATFIELDPLUGIN_PARAM XyRange
+        int PsFractWidth;   //!< Photo sum is in UQm.n format, n is fraction width
+        int PsLowDecBase;   //!< PhotoSum lower decrement base
+        int PsLowDecLim;    //!< PhotoSum lower decrement limit
+        #define LAST_FLATFIELDPLUGIN_PARAM PsLowDecLim
 };
 
 #endif // FLAT_FIELD_PLUGIN_H

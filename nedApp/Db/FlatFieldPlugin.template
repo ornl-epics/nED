@@ -69,6 +69,9 @@ record(mbbi, "$(P)ErrImport")
     field(SXVL, "6")
     field(SXST, "Table size mismatch")
     field(SXSV, "MAJOR")
+    field(SVVL, "7")
+    field(SVST, "Missing tables")
+    field(SVSV, "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
 record(longin, "$(P)CntError")
@@ -131,16 +134,6 @@ record(longout, "$(P)XyFractWidth")
     field(PINI, "YES")
     field(HOPR, "30")
 }
-record(longout, "$(P)PsFractWidth")
-{
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Photo sum UQm.n fraction width")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))PsFractWidth")
-    field(PINI, "YES")
-    field(HOPR, "30")
-}
 record(ao, "$(P)XyRange")
 {
     info(autosaveFields, "VAL")
@@ -151,5 +144,35 @@ record(ao, "$(P)XyRange")
     field(PINI, "YES")
     field(HOPR, "512")
     field(LOPR, "1")
+    field(PREC, "2")
+}
+record(longout, "$(P)PsFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Photo sum UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PsFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "30")
+}
+record(ao, "$(P)PsLowDecBase")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "PhotoSum lower decrement base")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))PsLowDecBase")
+    field(PINI, "YES")
+    field(PREC, "2")
+}
+record(ao, "$(P)PsLowDecLim")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "PhotoSum lower decrement limit")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))PsLowDecLim")
+    field(PINI, "YES")
     field(PREC, "2")
 }

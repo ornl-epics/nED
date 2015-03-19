@@ -57,10 +57,12 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
     createParam("FfMode",       asynParamInt32, &FfMode, FF_DISABLED); // FlatField transformation mode (see FlatFieldPlugin::FfMode_t)
-    createParam("XyRange",      asynParamFloat64, &XyRange, 158.0); // WRITE - Maximum X and Y values from detector
-    // UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
+    // Next two params are in UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
     createParam("XyFractWidth",  asynParamInt32, &XyFractWidth, 24); // WRITE - Number of fraction bits in X,Y data
     createParam("PsFractWidth",  asynParamInt32, &PsFractWidth, 15); // WRITE - Number of fraction bits in PhotoSum data
+    createParam("XyRange",      asynParamFloat64, &XyRange, 158.0); // WRITE - Maximum X and Y values from detector
+    createParam("PsLowDecBase", asynParamFloat64, &PsLowDecBase, 300.0); // WRITE - PhotoSum lower decrement base
+    createParam("PsLowDecLim",  asynParamFloat64, &PsLowDecLim, 400.0); // WRITE - PhotoSum lower decrement limit
     callParamCallbacks();
 }
 
@@ -137,9 +139,10 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     int ffMode = FF_DISABLED;
     DasPacketList newPacketList;
 
-    // Parametrize calculating algorithms based on detector.
+    // Parametrise calculating algorithms based on detector.
     double xyRange = 0.0;
     int xyFractWidth = 0;
+    int psFractWidth = 0;
 
     if (m_buffer == 0) {
         LOG_ERROR("Flat field correction disabled due to import error");
@@ -156,15 +159,19 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL)
         ffMode = FF_DISABLED;
     getIntegerParam(XyFractWidth, &xyFractWidth);
+    getIntegerParam(PsFractWidth, &psFractWidth);
     getDoubleParam(XyRange,     &xyRange);
-    this->unlock();
 
     // This is a trick to avoid locking access to member variables. Since
     // plugin design ensures a single instance of processDataUnlocked()
     // function at any time, we read in values and store them as class members.
     // This makes member variables const for the duration of this function.
     m_xyScale = 1.0 * m_tablesSize / ((1 << xyFractWidth) * xyRange);
-    m_psScale = 0.0; // TODO
+    m_psScale = 1.0 / (1 << psFractWidth);
+    getDoubleParam(PsLowDecBase,&m_psLowDecBase);
+    getDoubleParam(PsLowDecLim, &m_psLowDecLim);
+
+    this->unlock();
 
     if (ffMode == FF_DISABLED) {
         sendToPlugins(packetList);
@@ -244,15 +251,6 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
     nDestEvents = 0;
 
     while (nEvents-- > 0) {
-
-        // Find appropriate correction table
-        auto corrTable = m_corrTables.find(srcEvent->position_index);
-        if (corrTable == m_corrTables.end()) {
-            errors.nUnmapped++;
-            srcEvent++;
-            continue;
-        }
-
         // Skip error pixels
         if (srcEvent->position_index & PIXID_ERR) {
             errors.nErrors++;
@@ -261,17 +259,29 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
         }
 
         // Convert raw values into ones used by calculations
+        uint32_t position_id = srcEvent->position_index & 0x3FFF;
         double x = srcEvent->position_x * m_xyScale;
         double y = srcEvent->position_y * m_xyScale;
         double photosum_x = srcEvent->photo_sum_x * m_psScale;
-        double photosum_y = srcEvent->photo_sum_y * m_psScale;
+        // unused srcEvent->photo_sum_y
 
-        // TODO: missing photo sum correction and thresholds
+        // Check photo sum
+        if (checkPhotoSumLimits(x, y, photosum_x, position_id) == false) {
+            errors.nPhotoSum++;
+            srcEvent++;
+            continue;
+        }
 
         // Form TOF,pixelid tupple
         destEvent->tof = srcEvent->time_of_flight;
-        destEvent->pixelid  = srcEvent->position_index << 18;
-        destEvent->pixelid |= xyToPixel(x, y, corrTable->second.first, corrTable->second.second);
+        destEvent->pixelid  = position_id << 18;
+        destEvent->pixelid |= xyToPixel(x, y, position_id);
+
+        if ((destEvent->pixelid & 0x3FFFF) == 0) {
+            errors.nUnmapped++;
+            srcEvent++;
+            continue;
+        }
 
         srcEvent++;
         destEvent++;
@@ -283,24 +293,64 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
     return errors;
 }
 
-uint32_t FlatFieldPlugin::xyToPixel(double x, double y, const FlatFieldPlugin::CorrTable_t &xtable, const FlatFieldPlugin::CorrTable_t &ytable)
+std::shared_ptr<FlatFieldPlugin::CorrTable_t> FlatFieldPlugin::findTable(uint32_t position_id, TableType_t type)
 {
-    if (x < 0.0 || x >= xtable.size() || y < 0.0 || y >= ytable.size() ||
-        xtable.size() > MAX_PIXEL_SIZE || ytable.size() > MAX_PIXEL_SIZE) {
+    if (m_corrTables.size() > position_id && m_corrTables[position_id].size() > (unsigned)type)
+        return m_corrTables[position_id][type];
 
+    return std::shared_ptr<CorrTable_t>();
+}
+
+uint32_t FlatFieldPlugin::xyToPixel(double x, double y, uint32_t position_id)
+{
+    std::shared_ptr<CorrTable_t> xtable = findTable(position_id, TABLE_X_CORRECTION);
+    std::shared_ptr<CorrTable_t> ytable = findTable(position_id, TABLE_Y_CORRECTION);
+
+    if (xtable.get() == 0 || ytable.get() == 0)
         return 0;
-    }
+
+    // Tables are guaranteed to be MAX_PIXEL_SIZE elements in any direction
+    if (x < 0.0 || x >= xtable->size() || y < 0.0 || y >= ytable->size())
+        return 0;
+
+    // All checks passed - do the correction
 
     unsigned xp = (int)x;
     unsigned yp = (int)y;
 
-    double dx = (xp == 0 || xp == (xtable.size()  - 1)) ? 0 : x - xp;
-    double dy = (yp == 0 || yp == (ytable.size() - 1)) ? 0 : y - yp;
+    double dx = (xp == 0 || xp == (xtable->size()  - 1)) ? 0 : x - xp;
+    double dy = (yp == 0 || yp == (ytable->size() - 1)) ? 0 : y - yp;
 
-    x -= (dx * xtable[xp+1][yp])  + ((1 - dx) * xtable[xp][yp]);
-    y -= (dy * ytable[xp][yp+1]) + ((1 - dy) * ytable[xp][yp]);
+    x -= (dx * (*xtable)[xp+1][yp]) + ((1 - dx) * (*xtable)[xp][yp]);
+    y -= (dy * (*ytable)[xp][yp+1]) + ((1 - dy) * (*ytable)[xp][yp]);
 
     return (MAX_PIXEL_SIZE * (int)x) + (int)y;
+}
+
+bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position_id)
+{
+    std::shared_ptr<CorrTable_t> xtable = findTable(position_id, TABLE_X_PHOTOSUM);
+
+    if (xtable.get() == 0)
+        return false;
+
+    // Tables are guaranteed to be MAX_PIXEL_SIZE elements in any direction
+    if (x < 0.0 || x >= xtable->size())
+        return 0;
+
+    double mean = (*xtable)[int(x)][int(y)];
+    double upperLimit = mean + m_psLowDecBase;
+    double lowerLimit = 0;
+
+    // Code re-ordered from dcomserver to evaluate most-likely case first
+    if (photosum_x >= 1800)
+        lowerLimit = mean - m_psLowDecBase;
+    else if (photosum_x >= 1400)
+        lowerLimit = mean - m_psLowDecBase - (1800 - photosum_x)/4;
+    else
+        lowerLimit = mean - m_psLowDecLim;
+
+    return (lowerLimit <= photosum_x && photosum_x <= upperLimit);
 }
 
 bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::string &value)
@@ -352,12 +402,12 @@ bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::
     return false;
 }
 
-FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, char &table_dim)
+FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, FlatFieldPlugin::TableType_t &type)
 {
     size_x = 0;
     size_y = 0;
     position_id = 0xFFFFFFFF;
-    table_dim = ' ';
+    type = TABLE_UNKNOWN;
     int version = 0;
     uint32_t nHeaders = 0;
 
@@ -378,13 +428,28 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
             }
             nHeaders++;
         }
-        if (key == "Table dimension") {
-            if (value == "X" || value == "x")
-                table_dim = 'x';
-            else if (value == "Y" || value == "y")
-                table_dim = 'y';
-            else {
-                LOG_ERROR("Failed to read table dimension");
+        if (key == "Table type") {
+            char dim;
+            if (sscanf(value.c_str(), "Photo Sum %c", &dim) == 1) {
+                if (dim == 'x' || dim == 'X') {
+                    type = TABLE_X_PHOTOSUM;
+                } else if (dim == 'y' || dim == 'Y') {
+                    type = TABLE_Y_PHOTOSUM;
+                } else {
+                    LOG_ERROR("Failed to parse table type");
+                    return FF_ERR_PARSE;
+                }
+            } else if (sscanf(value.c_str(), "Correction %c", &dim) == 1) {
+                if (dim == 'x' || dim == 'X') {
+                    type = TABLE_X_CORRECTION;
+                } else if (dim == 'y' || dim == 'Y') {
+                    type = TABLE_Y_CORRECTION;
+                } else {
+                    LOG_ERROR("Failed to parse table type");
+                    return FF_ERR_PARSE;
+                }
+            } else {
+                LOG_ERROR("Failed to read table type");
                 return FF_ERR_PARSE;
             }
             nHeaders++;
@@ -412,12 +477,12 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
         LOG_ERROR("Invalid file format, unsupported format version '%d'", version);
         return FF_ERR_PARSE;
     }
-    if (size_x == 0 && size_y == 0) {
+    if (size_x == 0 || size_y == 0 || size_x > MAX_PIXEL_SIZE || size_y > MAX_PIXEL_SIZE) {
         LOG_ERROR("Invalid file format, missing table size header");
         return FF_ERR_PARSE;
     }
-    if (table_dim == ' ') {
-        LOG_ERROR("Invalid file format, missing position id header");
+    if (type == TABLE_UNKNOWN) {
+        LOG_ERROR("Invalid file format, missing table type header");
         return FF_ERR_PARSE;
     }
     if (position_id == 0xFFFFFFFF) {
@@ -433,7 +498,6 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
     ImportError err = FF_ERR_NONE;
     std::ifstream infile(path.c_str());
 
-    // Return empty table on any failure
     if (infile.fail()) {
         LOG_ERROR("Failed to open input file");
         return FF_ERR_NO_FILE;
@@ -441,10 +505,15 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
 
     while (!infile.eof()) {
         uint32_t size_x, size_y, position_id;
-        char table_id;
-        CorrTable_t table;
+        TableType_t type;
+        std::shared_ptr<CorrTable_t> table(new CorrTable_t);
 
-        err = parseHeaders(infile, size_x, size_y, position_id, table_id);
+        if (table.get() == 0) {
+            err = FF_ERR_NO_MEM;
+            break;
+        }
+
+        err = parseHeaders(infile, size_x, size_y, position_id, type);
         if (err != FF_ERR_NONE)
             break;
 
@@ -457,12 +526,12 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
 
         // Correction factors should follow as doubles, X rows and Y columns.
         // Table size must match the one defined in header.
-        table.resize(size_x, std::vector<double>(size_y, 0.0));
+        table->resize(size_x, std::vector<double>(size_y, 0.0));
         for (uint32_t i = 0; i < size_x; i++) {
             for (uint32_t j = 0; j < size_y; j++) {
                 double value;
                 infile >> value;
-                table[i][j] = value;
+                (*table)[i][j] = value;
 
                 if (infile.eof()) {
                     LOG_ERROR("Premature end of file");
@@ -472,16 +541,16 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
             }
         }
 
-        if (table_id == 'x') {
-            if (m_corrTables[position_id].first.size() > 0)
-                err = FF_ERR_EXIST;
-            else
-                m_corrTables[position_id].first = table;
+        // Make sure there's enough place in the m_corrTables
+        if (m_corrTables.size() <= position_id)
+            m_corrTables.resize(position_id + 1);
+        if (m_corrTables[position_id].size() < TABLE_UNKNOWN)
+            m_corrTables[position_id].resize(TABLE_UNKNOWN);
+
+        if (m_corrTables[position_id][type].get() != 0) {
+            err = FF_ERR_EXIST;
         } else {
-            if (m_corrTables[position_id].second.size() > 0)
-                err = FF_ERR_EXIST;
-            else
-                m_corrTables[position_id].second = table;
+            m_corrTables[position_id][type] = table;
         }
 
         break;
@@ -517,6 +586,19 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &pat
     }
 
     closedir(dir);
+
+    // Check that each position has X,Y and X photosum table at least
+    for (auto it = m_corrTables.begin(); it != m_corrTables.end(); it++) {
+        if (it->size() > 0) {
+            if ((*it)[TABLE_X_CORRECTION].get() == 0 ||
+                (*it)[TABLE_Y_CORRECTION].get() == 0 ||
+                (*it)[TABLE_X_PHOTOSUM].get() == 0) {
+
+                m_corrTables.clear();
+                return FF_ERR_INCOMPLETE;
+            }
+        }
+    }
 
     if (nErrors > 0) {
         m_corrTables.clear();
