@@ -69,6 +69,7 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
                 setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
             }
         }
+        flushData();
     } else if (pasynUser->reason == XyFractWidth) {
         m_xyDivider = 1 << value;
         return asynSuccess;

@@ -73,6 +73,8 @@ asynStatus BasePvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         m_neutronsEn = (value > 0);
     } else if (pasynUser->reason == PvMetadataEn) {
         m_metadataEn = (value > 0);
+    } else if (pasynUser->reason == DataModeP) {
+        flushData();
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }
@@ -191,7 +193,68 @@ void BasePvaPlugin::processMetaData(const uint32_t *data, uint32_t count)
     }
 }
 
-void BasePvaPlugin::setCallbacks(ProcessDataCb procCb, PostDataCb postCb) {
+void BasePvaPlugin::flushData()
+{
+    epics::pvData::PVUIntArray::svector emptyIntArrray;
+    epics::pvData::PVFloatArray::svector emptyFloatArray;
+    epics::pvData::TimeStamp time;
+
+    if (m_pvNeutrons) {
+
+        m_pvNeutrons->lock();
+
+        // Keep time, update user tag
+        m_pvNeutrons->timeStamp.get(time);
+        time.setUserTag(m_neutronsPostSeq++);
+
+        try {
+            m_pvNeutrons->beginGroupPut();
+            m_pvNeutrons->timeStamp.set(time);
+            m_pvNeutrons->proton_charge->put(0);
+            m_pvNeutrons->time_of_flight->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->pixel->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->sample_a1->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->sample_a2->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->sample_a8->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->sample_a19->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->sample_a48->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->sample_b1->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->sample_b8->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->sample_b12->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->position_index->replace(freeze(emptyIntArrray));
+            m_pvNeutrons->position_x->replace(freeze(emptyFloatArray));
+            m_pvNeutrons->position_y->replace(freeze(emptyFloatArray));
+            m_pvNeutrons->photo_sum_x->replace(freeze(emptyFloatArray));
+            m_pvNeutrons->photo_sum_y->replace(freeze(emptyFloatArray));
+            m_pvNeutrons->endGroupPut();
+        } catch (std::exception &e) {
+            LOG_ERROR("Exception caught in BasePvaPlugin::postData, postNeutrons: %s.", e.what());
+        }
+        m_pvNeutrons->unlock();
+    }
+
+    if (m_pvMetadata) {
+        m_pvMetadata->lock();
+
+        // Keep time, update user tag
+        m_pvMetadata->timeStamp.get(time);
+        time.setUserTag(m_metadataPostSeq++);
+
+        try {
+            m_pvMetadata->timeStamp.set(time);
+            m_pvMetadata->proton_charge->put(0);
+            m_pvMetadata->time_of_flight->replace(freeze(emptyIntArrray));
+            m_pvMetadata->pixel->replace(freeze(emptyIntArrray));
+            m_pvMetadata->endGroupPut();
+        } catch (std::exception &e) {
+            LOG_ERROR("Exception caught in BasePvaPlugin::postData, postNeutrons: %s.", e.what());
+        }
+        m_pvMetadata->unlock();
+    }
+}
+
+void BasePvaPlugin::setCallbacks(ProcessDataCb procCb, PostDataCb postCb)
+{
     m_processNeutronsCb = procCb;
     m_postNeutronsCb = postCb;
 }

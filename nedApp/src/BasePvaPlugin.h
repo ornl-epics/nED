@@ -96,6 +96,17 @@ class BasePvaPlugin : public BasePlugin {
         void processMetaData(const uint32_t *data, uint32_t count);
 
         /**
+         * Flushes any data in Neutrons and Metadata PVRecord except for timestamp.
+         *
+         * Data currently in any of the PVRecord fields except for timestamp
+         * is flushed. This results in a monitor update with all the fields
+         * reset to default. Such functionality is useful when switching data
+         * modes, otherwise data from old mode would show up with every PVRecord
+         * update as if it was new data.
+         */
+        void flushData();
+
+        /**
          * Set callback functions for processing neutrons packet and posting data.
          *
          * Static C functions were selected for performance reasons. At
