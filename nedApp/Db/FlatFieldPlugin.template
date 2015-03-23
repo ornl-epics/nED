@@ -1,5 +1,17 @@
 include "BasePlugin.include"
 
+# Upgrade DataMode record
+record(mbbo, "$(P)DataMode")
+{
+    field(FLNK, "$(P)DataModeCalc")
+}
+record(calcout, "$(P)DataModeCalc")
+{
+    field(INPA, "$(P)DataMode NPP")
+    field(CALC, "A=0") # Select between pass-thru and flatten
+    field(OUT,  "$(P)FfMode PP")
+}
+
 record(bo, "$(P)Enable")
 {
     info(archive, "Monitor, 00:10:00")
@@ -92,6 +104,15 @@ record(longin, "$(P)CntUnmap")
     field(VAL,  "0")
     field(PINI, "YES")
 }
+record(longin, "$(P)CntPhotoSum")
+{
+    field(DESC, "Num of bad photo sum pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntPhotoSum")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
 record(longin, "$(P)CntSplit")
 {
     field(DESC, "Number of splits occurred")
@@ -110,18 +131,23 @@ record(bo, "$(P)ResetCnt")
     field(ZNAM, "None")
     field(ONAM, "Reset")
 }
-record(bo, "$(P)FfMode")
+record(mbbo, "$(P)FfMode")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
-    field(DESC, "Enable flat-field transformation")
+    field(DESC, "Operation mode")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))FfMode")
     field(VAL,  "0")
     field(PINI, "YES")
-    field(ZNAM, "Pass thru all")
-    field(ONAM, "Transform neutrons")
-    field(ZSV,  "MAJOR")
+    field(ZRVL, "0")
+    field(ZRST, "Pass thru all")
+    field(ZRSV, "MAJOR")
+    field(ONVL, "1")
+    field(ONST, "Apply flat-field")
+    field(TWVL, "2")
+    field(TWST, "Transform only")
+    field(TWSV, "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
 record(longout, "$(P)XyFractWidth")

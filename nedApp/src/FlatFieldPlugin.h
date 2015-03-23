@@ -15,7 +15,7 @@
 #include <limits>
 
 /**
- * FlatFieldPlugin applies flat-field correction to calculated X,Y events
+ * FlatFieldPlugin applies flat-field correction to pre-calculated X,Y events.
  *
  * The plugin corrects X,Y events pre-calculated by ACPC. It corrects events
  * according to pre-calibrated correction factors, checks photo sum correctness
@@ -39,9 +39,23 @@
  * to 32 bit unsigned pixel id using this formula:
  * pixel = (<position id> & 0x3FFF << 18) | (<corrected X> & 0x1FF << 9) | (<corrected Y> & 0x1FF)
  *
+ * Sliding photo sum X value is checked to be within pre-calibrated thresholds.
+ * Single X photo sum lookup table is used to determine threshold for given
+ * X,Y event. Events outside the threshold are eliminated. CntPhotoSum counter
+ * is incremented for every eliminated event.
+ *
  * Every ACPC should be assigned a unique position id. m_corrTables variables
  * is an array of all positions configured. Each position has at most 4 tables,
  * but at least X correction, Y correction and X photo sum tables.
+ *
+ * Plugin supports 3 modes of operation (see FlatFieldPlugin::FfMode_t):
+ * - In pass-thru mode it forwards all packets intact. This includes also
+ *   command responses and other non-neutron data packets.
+ * - In flatten mode it applies flat-field correction and photo sum elimination
+ *   as described above.
+ * - In convert only mode it doesn't apply flat-field correction or phhoto sum
+ *   elimination, it only converts X,Y event into TOF,pixel id format that many
+ *   other plugins understand.
  */
 class FlatFieldPlugin : public BaseDispatcherPlugin {
     private: // structures & typedefs
@@ -115,8 +129,10 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Enable or disable mapping mode
          */
         typedef enum {
-            FF_DISABLED         = 0, //!< Passthru mode
-            FF_ENABLED          = 1, //!< Transform neutron events
+            FF_PASS_THRU        = 0, //!< Passthru mode
+            FF_FLATTEN          = 1, //!< Transform neutron events
+            FF_CONVERT_ONLY     = 2, //!< Convert X,Y event into TOF,pixel id only,
+                                     //!< no flat-field correction or photo sum elimination is applied
         } FfMode_t;
 
     public: // structures and defines
@@ -280,7 +296,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * headers and parses them. Required header lines:
          * - Format version: <ver>
          * - Table size: <X>x<Y>
-         * - Table dimension: <x or y>
+         * - Table type: Correction <x or y>
          * - Position id: <id>
          *
          * @param[in] infile Opened file to parse headers from.
@@ -315,6 +331,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         double m_psScale;           //!< Scaling factor to convert unsigned UQm.n 32 bit value into double
         double m_psLowDecBase;      //!< PhotoSum lower decrement base
         double m_psLowDecLim;       //!< PhotoSum lower decrement limit
+        int m_ffMode;               //!< Mode of operation
 
     protected:
         #define FIRST_FLATFIELDPLUGIN_PARAM ImportReport
@@ -323,6 +340,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
         int CntUnmap;       //!< Number of unmapped pixels
         int CntError;       //!< Number of generic error pixel ids detected
+        int CntPhotoSum;    //!< Number of photo sum eliminated pixels
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int FfMode;         //!< Flat-field transformation mode (see FlatFieldPlugin::FfMode_t)

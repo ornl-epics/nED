@@ -8,6 +8,7 @@
  */
 
 #include "FlatFieldPlugin.h"
+#include "likely.h"
 #include "Log.h"
 
 #include <dirent.h>
@@ -54,9 +55,10 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("ErrImport",    asynParamInt32, &ErrImport, err); // Last mapping import error
     createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels, probably due to missing correction tables
     createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
+    createParam("CntPhotoSum",  asynParamInt32, &CntPhotoSum, 0); // Number of photo sum eliminated pixels
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
-    createParam("FfMode",       asynParamInt32, &FfMode, FF_DISABLED); // FlatField transformation mode (see FlatFieldPlugin::FfMode_t)
+    createParam("FfMode",       asynParamInt32, &FfMode, FF_PASS_THRU); // FlatField transformation mode (see FlatFieldPlugin::FfMode_t)
     // Next two params are in UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
     createParam("XyFractWidth",  asynParamInt32, &XyFractWidth, 24); // WRITE - Number of fraction bits in X,Y data
     createParam("PsFractWidth",  asynParamInt32, &PsFractWidth, 15); // WRITE - Number of fraction bits in PhotoSum data
@@ -87,6 +89,9 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
     } else if (pasynUser->reason == PsFractWidth) {
         if (value < 1 || value > 30)
+            return asynError;
+    } else if (pasynUser->reason == FfMode) {
+        if (value != FF_PASS_THRU && value != FF_FLATTEN && value != FF_CONVERT_ONLY)
             return asynError;
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
@@ -136,7 +141,6 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     int nProcessed = 0;
     TransformErrors errors;
     int nSplits = 0;
-    int ffMode = FF_DISABLED;
     DasPacketList newPacketList;
 
     // Parametrise calculating algorithms based on detector.
@@ -154,10 +158,11 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     getIntegerParam(ProcCount,  &nProcessed);
     getIntegerParam(CntUnmap,   &errors.nUnmapped);
     getIntegerParam(CntError,   &errors.nErrors);
+    getIntegerParam(CntPhotoSum,&errors.nPhotoSum);
     getIntegerParam(CntSplit,   &nSplits);
-    getIntegerParam(FfMode,     &ffMode);
+    getIntegerParam(FfMode,     &m_ffMode);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL)
-        ffMode = FF_DISABLED;
+        m_ffMode = FF_PASS_THRU;
     getIntegerParam(XyFractWidth, &xyFractWidth);
     getIntegerParam(PsFractWidth, &psFractWidth);
     getDoubleParam(XyRange,     &xyRange);
@@ -173,7 +178,7 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
 
     this->unlock();
 
-    if (ffMode == FF_DISABLED) {
+    if (m_ffMode == FF_PASS_THRU) {
         sendToPlugins(packetList);
         nProcessed += packetList->size();
     } else {
@@ -223,6 +228,7 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntUnmap,   errors.nUnmapped);
+    setIntegerParam(CntPhotoSum,errors.nPhotoSum);
     setIntegerParam(CntError,   errors.nErrors);
     callParamCallbacks();
     this->unlock();
@@ -303,32 +309,37 @@ std::shared_ptr<FlatFieldPlugin::CorrTable_t> FlatFieldPlugin::findTable(uint32_
 
 uint32_t FlatFieldPlugin::xyToPixel(double x, double y, uint32_t position_id)
 {
-    std::shared_ptr<CorrTable_t> xtable = findTable(position_id, TABLE_X_CORRECTION);
-    std::shared_ptr<CorrTable_t> ytable = findTable(position_id, TABLE_Y_CORRECTION);
+    if (likely(m_ffMode == FF_FLATTEN)) {
+        std::shared_ptr<CorrTable_t> xtable = findTable(position_id, TABLE_X_CORRECTION);
+        std::shared_ptr<CorrTable_t> ytable = findTable(position_id, TABLE_Y_CORRECTION);
 
-    if (xtable.get() == 0 || ytable.get() == 0)
-        return 0;
+        if (xtable.get() == 0 || ytable.get() == 0)
+            return 0;
 
-    // Tables are guaranteed to be MAX_PIXEL_SIZE elements in any direction
-    if (x < 0.0 || x >= xtable->size() || y < 0.0 || y >= ytable->size())
-        return 0;
+        // Tables are guaranteed to be MAX_PIXEL_SIZE elements in any direction
+        if (x < 0.0 || x >= xtable->size() || y < 0.0 || y >= ytable->size())
+            return 0;
 
-    // All checks passed - do the correction
+        // All checks passed - do the correction
 
-    unsigned xp = (int)x;
-    unsigned yp = (int)y;
+        unsigned xp = (int)x;
+        unsigned yp = (int)y;
 
-    double dx = (xp == 0 || xp == (xtable->size()  - 1)) ? 0 : x - xp;
-    double dy = (yp == 0 || yp == (ytable->size() - 1)) ? 0 : y - yp;
+        double dx = (xp == 0 || xp == (xtable->size()  - 1)) ? 0 : x - xp;
+        double dy = (yp == 0 || yp == (ytable->size() - 1)) ? 0 : y - yp;
 
-    x -= (dx * (*xtable)[xp+1][yp]) + ((1 - dx) * (*xtable)[xp][yp]);
-    y -= (dy * (*ytable)[xp][yp+1]) + ((1 - dy) * (*ytable)[xp][yp]);
+        x -= (dx * (*xtable)[xp+1][yp]) + ((1 - dx) * (*xtable)[xp][yp]);
+        y -= (dy * (*ytable)[xp][yp+1]) + ((1 - dy) * (*ytable)[xp][yp]);
+    }
 
     return (MAX_PIXEL_SIZE * (int)x) + (int)y;
 }
 
 bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position_id)
 {
+    if (unlikely(m_ffMode != FF_FLATTEN))
+        return true;
+
     std::shared_ptr<CorrTable_t> xtable = findTable(position_id, TABLE_X_PHOTOSUM);
 
     if (xtable.get() == 0)
@@ -567,7 +578,8 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &pat
     DIR *dir = opendir(path.c_str());
     uint32_t nImported = 0;
     uint32_t nErrors = 0;
-    uint32_t m_tablesSize = 0;
+
+    m_tablesSize = 0;
 
     if (dir == NULL)
         return FF_ERR_NO_FILE;
