@@ -117,6 +117,12 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         case DasPacket::CMD_STOP:
             m_waitingResponse = reqStop();
             break;
+        case DasPacket::CMD_PM_PULSE_RQST_ON:
+            m_waitingResponse = reqPulse();
+            break;
+        case DasPacket::CMD_PM_PULSE_RQST_OFF:
+            m_waitingResponse = reqPulseClear();
+            break;
         case DasPacket::CMD_UPGRADE:
             m_waitingResponse = reqUpgrade();
             break;
@@ -298,6 +304,12 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
         break;
     case DasPacket::CMD_STOP:
         ack = rspStop(packet);
+        break;
+    case DasPacket::CMD_PM_PULSE_RQST_ON:
+        ack = rspPulse(packet);
+        break;
+    case DasPacket::CMD_PM_PULSE_RQST_OFF:
+        ack = rspPulseClear(packet);
         break;
     case DasPacket::CMD_UPGRADE:
         ack = rspUpgrade(packet);
@@ -562,6 +574,18 @@ DasPacket::CommandType BaseModulePlugin::reqStart()
     return DasPacket::CMD_START;
 }
 
+DasPacket::CommandType BaseModulePlugin::reqPulse()
+{
+    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_ON);
+    return DasPacket::CMD_PM_PULSE_RQST_ON;
+}
+
+DasPacket::CommandType BaseModulePlugin::reqPulseClear()
+{
+    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_OFF);
+    return DasPacket::CMD_PM_PULSE_RQST_OFF;
+}
+
 bool BaseModulePlugin::rspStart(const DasPacket *packet)
 {
     if (!cancelTimeoutCallback()) {
@@ -581,6 +605,24 @@ bool BaseModulePlugin::rspStop(const DasPacket *packet)
 {
     if (!cancelTimeoutCallback()) {
         LOG_WARN("Received CMD_STOP response after timeout");
+        return false;
+    }
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
+
+bool BaseModulePlugin::rspPulse(const DasPacket *packet)
+{
+    if (!cancelTimeoutCallback()) {
+        LOG_WARN("Received CMD_PM_PULSE_RQST_ON response after timeout");
+        return false;
+    }
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
+
+bool BaseModulePlugin::rspPulseClear(const DasPacket *packet)
+{
+    if (!cancelTimeoutCallback()) {
+        LOG_WARN("Received CMD_PM_PULSE_RQST_OFF response after timeout");
         return false;
     }
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
