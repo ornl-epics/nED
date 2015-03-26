@@ -1,0 +1,87 @@
+/**
+ * \mainpage nED main page
+ *
+ * \tableofcontents
+ *
+ * \section intro_sec Introduction
+ * nED is neutron data acquisition and detectors control software. It replaces
+ * dcomserver in functionality. It was designed from ground up to handle large
+ * amounts of data while providing stable operation. Name nED stands for
+ * <b>n</b>eutron <b>E</b>vent <b>D</b>istributor and was first suggested by
+ * Lisa M. Debeer-Schmitt around March 2014. nED development started in January
+ * 2014.
+ *
+ * \section repo_sec Source code version control
+ * All nED sources are kept in version control repository. Use of branches is
+ * encouraged for new functionality development, bugfixes, and other development
+ * activities.
+ *
+ * \section dir_sec Directory structure
+ * Project is grouped into top level directories that can be further split
+ * into subdirectories. Directory structure follows EPICS application guidelines,
+ * in fact initial directory structure was create with makeBaseApp.pl EPICS
+ * tool.
+ * - <em>configure/</em>\n
+ *   This directory contains EPICS build files. Usually only RELEASE file needs
+ *   to be updated when new EPICS dependency is required. Refer to EPICS
+ *   documentation for details about this directory.
+ * - <em>iocned/</em>\n
+ *   Example IOC configuration is located here. Refer to section \ref ioc_sec
+ *   for details about instantiating nED IOC.
+ * - <em>nedApp/Db/</em>\n
+ *   nED EPICS database files are located here. Some of the files are generated
+ *   dynamically from source files by export2epics.py script located in same
+ *   directory and invoked automatically from Makefile. Refer to section \ref
+ *   plugin_params_sec for details how to create dynamic EPICS records.
+ * - <em>nedApp/doc/</em>\n
+ *   Doxygen configuration and support tools are located here. Doxygen is
+ *   configured to look for sources in nedApp/src/. Some of the source code
+ *   is parsed by <tt>export2doxy.py</tt> tool to extract EPICS records documentation.
+ *   Any Doxygen supported output format can be built, at the moment HTML and 
+ *   PDF documentation is located in nedApp/doc/html/ and nedApp/doc/latex/
+ *   respectively.
+ * - <em>nedApp/src/</em>\n
+ *   nED C/C++ sources are located here. Every C++ class is defined in
+ *   <tt>\<class name\>.h</tt> header file and implemented in
+ *   <tt>\<class name\>.cpp</tt> file.
+ *   Some of the detectors classes implement part of their functions
+ *   in <tt>\<class name\>_v\<detector version\>.cpp</tt> files for easy
+ *   parsing with external tools and comparing registers between different
+ *   versions. EPICS sequencer files are named *.st. A CodeBlocks project file
+ *   is provided for convenience, although CodeBlocks is not required to
+ *   build or edit any of nED files.
+ * - <em>nedApp/src/unittest/</em>\n
+ *   Some of the core functionality is supported by unit tests. This includes
+ *   FIFO implementation. Whenever code change is made to code covered with
+ *   unit tests, those should be re-run to verify change correctness.
+ * - <em>protocol/</em>\n
+ *   This directory contains StreamDevice protocol files. Although main
+ *   communication protocol with detectors is implemented in nED itself,
+ *   some detectors are connected to external devices which support different
+ *   protocol. For example, ROC boards can be connected to external high
+ *   voltage devices which use ASCII protocol (ie. ?LV reads current voltage).
+ * - <em>tools/</em>\n
+ *   Support tools that are not specific to single directory are located here.
+ *
+ * \section build_sec Building
+ * EPICS build system is engaged to build source code and to resolve dependencies.
+ * The top level <tt>Makefile</tt> file is used to build all required
+ * components. Some components (like IOC) are left out from automatic building
+ * but can be built manualy. When all dependant libaries listed in
+ * <tt>configure/RELEASE</tt> are installed, building nED should be as simple
+ * as running <tt>make</tt> in top level directory.
+ * 
+ * EPICS build system creates binaries with built in library search path. This
+ * means that all dependant libraries must not be moved to different location
+ * after nED was built.
+ *
+ * By default nED sources are built in optimized release mode without debug
+ * symbols. This can be changed in <tt>nedApp/src/Makefile</tt> followed by
+ * recompilation of all sources.
+ * \note Debug build can be significantly slower than release mode.
+ *
+ * \subsection plugin_params_sec
+ * TODO
+ * \subsection ioc_sec
+ * TODO: describe setting up IOC
+ */
