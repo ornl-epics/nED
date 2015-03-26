@@ -434,6 +434,24 @@ class BaseModulePlugin : public BasePlugin {
         virtual DasPacket::CommandType reqStart();
 
         /**
+         * Request one pulse for Pulsed Magnet.
+         *
+         * This function is asynchronous and does not wait for response.
+         *
+         * @return Response to wait for.
+         */
+        virtual DasPacket::CommandType reqPulse();
+
+        /**
+         * Clears one pulse request for Pulsed Magnet.
+         *
+         * This function is asynchronous and does not wait for response.
+         *
+         * @return Response to wait for.
+         */
+        virtual DasPacket::CommandType reqPulseClear();
+
+        /**
          * Default handler for START response.
          *
          * @param[in] packet with response to START
@@ -459,6 +477,24 @@ class BaseModulePlugin : public BasePlugin {
          * @retval false Timeout has occurred and response is invalid.
          */
         virtual bool rspStop(const DasPacket *packet);
+
+        /**
+         * Default handler for CMD_PM_PULSE_RQST_ON response.
+         *
+         * @param[in] packet with response to pulse request
+         * @retval true Timeout has not yet occurred
+         * @retval false Timeout has occurred and response is invalid.
+         */
+        virtual bool rspPulse(const DasPacket *packet);
+
+        /**
+         * Default handler for CMD_PM_PULSE_RQST_OFF response.
+         *
+         * @param[in] packet with response to pulse clear
+         * @retval true Timeout has not yet occurred
+         * @retval false Timeout has occurred and response is invalid.
+         */
+        virtual bool rspPulseClear(const DasPacket *packet);
 
         /**
          * Send part of the new firmware image as one packet.
