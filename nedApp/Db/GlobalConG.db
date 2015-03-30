@@ -80,7 +80,7 @@ record(busy, "$(P)WriteConf") {
 
 # Control retry behavior
 record(bo, "$(P)AccumSuccess") {
-   field(DESC, "Rewrite succeeded commands?")
+   field(DESC, "Don't rewrite succeeded cmds")
    field(PINI, "YES")
    field(ONAM, "Yes")
    field(ZNAM, "No")
