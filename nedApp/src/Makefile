@@ -15,6 +15,11 @@ include $(TOP)/configure/CONFIG
 # 
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
 USR_CXXFLAGS += -std=c++0x
+#
+# GLOBALCON_MAXDEVICES defaults to 100 in GlobalCon.st but can be changed here
+#
+USR_CFLAGS += -DGLOBALCON_MAXDEVICES=100
+
 #USR_CXXFLAGS += -fopenmp
 #USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)

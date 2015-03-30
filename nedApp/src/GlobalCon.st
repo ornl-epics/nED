@@ -61,10 +61,12 @@ option -c;	/* do not wait for PVs to connect */
 
 #define PVSEVROK	0
 /* 
- * MAXDEVICES is for static mem allocation and must be higher than number of
- * devices expected.
+ * GLOBALCON_MAXDEVICES is for static mem allocation and must be higher than 
+ * number of devices expected. 
  */
-#define MAXDEVICES 100	
+#ifndef GLOBALCON_MAXDEVICES
+#define GLOBALCON_MAXDEVICES 100	
+#endif
 
 /*
  * set PV n to numeric value v and put. 
@@ -89,8 +91,8 @@ option -c;	/* do not wait for PVs to connect */
  * Macro to declare an array of PVs and allocate memory for later runtime 
  * assignment. t is the type and n the variable name.
  */
-#define PVARRAY(t,n) 		\
-	t n[MAXDEVICES];	\
+#define PVARRAY(t,n) 			\
+	t n[GLOBALCON_MAXDEVICES];	\
 	assign n[0] to "";
 
 /*
@@ -163,14 +165,14 @@ DECL(int, accumSuccess, {GPREFIX}AccumSuccess)
  * Variables used by sequencer to keep track of success or failure of 
  * individual device operations.
  */
-int cmdFailed[MAXDEVICES];
+int cmdFailed[GLOBALCON_MAXDEVICES];
 int numSucceeded = 0;
 int numEnabled = 0;
 
 /*
  * List of devices found in IOC using seqGrep. numFound indicates number found.
  */
-string deviceNames[MAXDEVICES];
+string deviceNames[GLOBALCON_MAXDEVICES];
 DECL(int, numFound, {GPREFIX}NumFound)
 
 /*
@@ -442,7 +444,7 @@ ss GlobalControl {
          PVPUTSTR(statePV,init)
          /* find set of devices we are interested in */
          numFound = seqGrep("stringin", ".*:FailMsg", &deviceNames[0][0], 
-                                                       MAXDEVICES);
+                                                       GLOBALCON_MAXDEVICES);
          pvPut(numFound);
          for (i=0; i<numFound; i++) {
             pvAssign(failMsg[i], deviceNames[i]);
