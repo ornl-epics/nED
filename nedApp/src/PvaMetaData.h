@@ -23,7 +23,7 @@
 class PvaMetaData : public epics::pvDatabase::PVRecord {
     public: // Pointers in to the PV records' data structure
         epics::pvData::PVTimeStamp    timeStamp;        //!< Pulses' absolute EPICS timestamp, in sec.nsec since January 1, 1990
-        epics::pvData::PVDoublePtr    proton_charge;    //!< Pulse proton charge
+        epics::pvData::PVDoublePtr    proton_charge;    //!< Pulse proton charge in Coulombs
         epics::pvData::PVUIntArrayPtr time_of_flight;   //!< Time of flight offest from pulse start
         epics::pvData::PVUIntArrayPtr pixel;            //!< Pixel ID
 
