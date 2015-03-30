@@ -1,6 +1,6 @@
 .PHONY: clean html pdf mkdirtmp
 
-all: mkdirtmp html pdf 
+all: mkdirtmp html pdf
 install: all
 
 pdf:
