@@ -185,6 +185,10 @@ class BasePlugin : public asynPortDriver {
         /**
          * Helper function to create output asynPortDriver param with initial value set.
          */
+        asynStatus createParam(const char *name, asynParamType type, int *index, double initValue);
+        /**
+         * Helper function to create output asynPortDriver param with initial value set.
+         */
         asynStatus createParam(const char *name, asynParamType type, int *index, const char *initValue);
 
         using asynPortDriver::createParam;

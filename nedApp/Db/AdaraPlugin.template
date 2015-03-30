@@ -4,8 +4,11 @@ include "BaseSocketPlugin.include"
 # Upgrade BasePlugin::Enable PV
 record(bo, "$(P)Enable")
 {
+    info(archive, "Monitor, 00:10:00")
     info(autosaveFields, "VAL")
+    field(ZSV,  "MAJOR")
     field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
 }
 # Upgrade BaseSocketPlugin::* PVs
 record(stringout, "$(P)ListenIp")
@@ -25,6 +28,7 @@ record(longout, "$(P)CheckInt")
 }
 record(stringin, "$(P)ClientIp")
 {
+    info(archive, "Monitor, 00:10:00")
     field(FLNK, "$(P)StatusCalc.PROC")
 }
 
@@ -37,33 +41,95 @@ record(longin, "$(P)BadPulsCnt")
    field(PINI,  "YES")
    field(HIGH,  "1")
    field(HSV,   "MAJOR")
+   field(FLNK,  "$(P)BadPulsRunCnt")
 }
-record(longin, "$(P)BadDspCnt")
+# When processed it retrieves current value of old packets
+# and schedules calculation of difference record. When scheduled before
+# each run start, BadPulsRunCnt keeps counter per run.
+record(longin, "$(P)PreStart")
 {
-   field(DESC,  "Unexpected DSP drop packets")
-   field(DTYP,  "asynInt32")
-   field(INP,   "@asyn($(PORT))BadDspCnt")
-   field(SCAN,  "I/O Intr")
+   field(DESC,  "Last completed run dropped packets")
+   field(INP,   "$(P)BadPulsCnt NPP")
+   field(FLNK,  "$(P)BadPulsRunCnt")
+   field(VAL,   "0")
    field(PINI,  "YES")
-   field(HIGH,  "1")
-   field(HSV,   "MAJOR")
+}
+record(calc, "$(P)BadPulsRunCnt")
+{
+   field(DESC,  "Prev pulse dropped packets per run")
+   field(INPA,  "$(P)LastBadPulsCnt NPP")
+   field(INPB,  "$(P)BadPulsCnt NPP")
+   field(CALC,  "B-A")
+   field(PINI,  "YES")
 }
 record(scalcout, "$(P)StatusCalc")
 {
     field(DESC, "Determine global OCC status")
     field(INAA, "$(P)ClientIp NPP")
-    field(CALC, "(LEN(AA)==0)?0:1")
-    field(OOPT, "Every Time")
+    field(INPA, "$(P)Enable.SEVR NPP")
+    field(CALC, "A=0&&LEN(AA)>0")
     field(PINI, "YES")
-    field(IVOA, "Don't drive outputs")
-    # Can't use OUT field as it will automatically determine that bi is "string" type
-    field(FLNK,  "$(P)Status")
+    field(FLNK, "$(P)Status")
 }
 record(bi, "$(P)Status")
 {
-    field(ASG,  "BEAMLINE")
-    field(DESC, "ADARA client status")
-    field(INP,  "$(P)StatusCalc.VAL NPP")
+    field(DESC, "ADARA plugin status")
     field(ZNAM, "Not connected")
     field(ONAM, "Connected")
+    field(ZSV,  "MAJOR")
+    field(INP,  "$(P)StatusCalc")
+}
+record(ao, "$(P)InactiveTimeout")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Max client inactive timeout")
+    field(VAL,  "0.0") # 0.0 means disabled
+    field(PINI, "YES")
+    field(EGU,  "seconds")
+    field(PREC, "1")
+}
+record(calcout, "$(P)AutoReset")
+{
+    field(DESC, "Auto disconnect client")
+    field(INPA, "$(P)InactiveTimeout NPP")
+    field(INPB, "$(P)ClientInactive NPP")
+    field(CALC, "(A>0.0)&&(B>A)") # 1 when true, 0 otherwise
+    field(OUT,  "$(P)CloseClient PP")
+    field(OOPT, "When Non-zero")
+}
+# Upgrade ClientInactive from BaseSocketPlugin
+record(ai, "$(P)ClientInactive")
+{
+    field(FLNK, "$(P)AutoReset PP")
+}
+record(bo, "$(P)PixelsMapped")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Were pixels previously mapped?")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PixelsMapped")
+    field(ZNAM, "Raw pixels")
+    field(ONAM, "Mapped pixels")
+    field(PINI, "YES")
+}
+record(bo, "$(P)NeutronsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))NeutronsEn")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(PINI, "YES")
+}
+record(bo, "$(P)MetadataEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MetadataEn")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(PINI, "YES")
 }

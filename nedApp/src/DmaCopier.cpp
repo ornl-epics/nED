@@ -30,18 +30,9 @@ void DmaCopier::copyWorker(epicsEvent *shutdown)
         size_t len;
         int status;
 
-        if (full()) {
-            // There's no space in circular buffer, give consumers some extra
-            // time and retry. Hopefully the OCC can host data for a while.
-            // Otherwise a stall condition will occur which is detected in
-            // OccPortDriver.
-            wakeUpConsumer(0);
-            epicsThreadSleep(THREAD_INTERVAL);
-            continue;
-        }
 
         status = occ_data_wait(m_occ, &data, &len, THREAD_INTERVAL*1000);
-        if (status == -ETIME || len == 0)
+        if (status == -ETIME || (len == 0 && status == 0))
             continue;
         if (status != 0) {
             wakeUpConsumer(status);

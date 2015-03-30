@@ -59,9 +59,11 @@ SHARED_LIBRARIES = NO
 INC += CircularBuffer.h
 
 LIB_SRCS  += GlobalCon.st
+$(PROD_NAME)_SRCS  += Common.cpp
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp
 $(PROD_NAME)_SRCS  += OccPortDriver.cpp
+$(PROD_NAME)_SRCS  += BaseCircularBuffer.cpp
 $(PROD_NAME)_SRCS  += DmaCircularBuffer.cpp
 $(PROD_NAME)_SRCS  += CircularBuffer.cpp
 $(PROD_NAME)_SRCS  += DmaCopier.cpp
@@ -78,6 +80,9 @@ $(PROD_NAME)_SRCS  += DspPlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v64.cpp
 $(PROD_NAME)_SRCS  += RocPlugin.cpp
+$(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
+$(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
+$(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
@@ -88,6 +93,7 @@ $(PROD_NAME)_SRCS  += FemPlugin.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v35.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v36.cpp
+$(PROD_NAME)_SRCS  += FemPlugin_v37.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin_v22.cpp
 $(PROD_NAME)_SRCS  += DiscoverPlugin.cpp
@@ -102,6 +108,10 @@ $(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
 $(PROD_NAME)_SRCS  += PvaMetaData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
+$(PROD_NAME)_SRCS  += AcpcPlugin.cpp
+$(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
+$(PROD_NAME)_SRCS  += ArocPlugin.cpp
+$(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
 
 #===========================
 

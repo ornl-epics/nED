@@ -3,8 +3,86 @@
 # The script generates EPICS databases files for the selected module.
 #
 # Parse lines like this and transform them into EPICS records:
-# createConfigParam("LvdsRxNoEr5", 'E', 0x0,  1, 16, 0); // LVDS ignore errors (0=discard erronous packet,1=keep all packets)
-# createStatusParam("UartByteErr", 0x0,  1, 29); // UART: Byte error              (0=no error,1=error)
+# * createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
+#   produces read/write field:
+#   record(mbbo, "$(P)AcquireMode")
+#   {
+#       info(autosaveFields, "VAL")
+#       field(ASG,  "BEAMLINE")
+#       field(DESC, "Acquire mode")
+#       field(PINI, "YES")
+#       field(VAL,  "0")
+#       field(OUT,  "$(P)AcquireModeW PP")
+#       field(ZRVL, "0")
+#       field(ZRST, "normal")
+#       field(ONVL, "1")
+#       field(ONST, "verbose")
+#       field(TWVL, "2")
+#       field(TWST, "fakedata")
+#       field(THVL, "3")
+#       field(THST, "trigger")
+#   }
+#   record(mbbo, "$(P)AcquireModeW")
+#   {
+#       field(ASG,  "BEAMLINE")
+#       field(DESC, "Acquire mode")
+#       field(DTYP, "asynInt32")
+#       field(OUT,  "@asyn($(PORT))AcquireMode")
+#       field(SDIS, "$(P)AcquireModeS.PACT")
+#       field(DISV, "1")
+#       field(ZRVL, "0")
+#       field(ZRST, "normal")
+#       field(ONVL, "1")
+#       field(ONST, "verbose")
+#       field(TWVL, "2")
+#       field(TWST, "fakedata")
+#       field(THVL, "3")
+#       field(THST, "trigger")
+#   }
+#   record(mbbi, "$(P)AcquireModeR")
+#   {
+#       field(DTYP, "asynInt32")
+#       field(DESC, "Acquire mode")
+#       field(INP,  "@asyn($(PORT))AcquireMode")
+#       field(SCAN, "I/O Intr")
+#       field(FLNK, "$(P)AcquireModeS")
+#       field(ZRVL, "0")
+#       field(ZRST, "normal")
+#       field(ONVL, "1")
+#       field(ONST, "verbose")
+#       field(TWVL, "2")
+#       field(TWST, "fakedata")
+#       field(THVL, "3")
+#       field(THST, "trigger")
+#   }
+#   record(mbbo, "$(P)AcquireModeS")
+#   {
+#       field(DOL,  "$(P)AcquireModeR NPP")
+#       field(OMSL, "closed_loop")
+#       field(OUT,  "$(P)AcquireMode PP")
+#       field(ZRVL, "0")
+#       field(ZRST, "normal")
+#       field(ONVL, "1")
+#       field(ONST, "verbose")
+#       field(TWVL, "2")
+#       field(TWST, "fakedata")
+#       field(THVL, "3")
+#       field(THST, "trigger")
+#   }
+#
+# * createStatusParam("Acquiring",            0x1,  1,  3); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
+#   produces:
+#   record(bi, "$(P)Acquiring")
+#   {
+#      field(DESC, "Acquiring data")
+#      field(DTYP, "asynInt32")
+#      field(INP,  "@asyn($(PORT))Acquiring")
+#      field(SCAN, "I/O Intr")
+#      field(ZNAM, "not acquiring")
+#      field(ZSV,  "MAJOR")
+#      field(ONAM, "acquiring")
+#   }
+#
 # The description is truncated to match EPICS string specifications
 #
 # asyn device support doesn't support bi-directional EPICS records. We use a trick
@@ -25,10 +103,13 @@ from optparse import OptionParser
 __version__ = "0.1.0"
 
 def parse_one(type, params_str, desc_str, extra_str):
+    re_option = re.compile("^([^=]*)=([^\[]*)(.*)\]?")
+
     names = {
         'status':  [ "name", "offset", "width", "bit_offset" ],
         'counter': [ "name", "offset", "width", "bit_offset" ],
         'config':  [ "name", "section", "section_offset", "width", "bit_offset", "default" ],
+        'temp':    [ "name", "offset", "width", "bit_offset" ],
     }
 
     params = map(lambda x: x.strip(" \t\"\'"), params_str.split(","))
@@ -41,7 +122,7 @@ def parse_one(type, params_str, desc_str, extra_str):
     param['desc'] = desc_str.strip(" \t\n").replace("\"", "\\\"")
     if param['desc'][:28] != param['desc']:
         param['desc'] = param['desc'][:28]
-        sys.stderr.write("WARN: Truncating '{0}' record description to 28 chars".format(param['name']))
+        sys.stderr.write("WARN: Truncating '{0}' record description to 28 chars\n".format(param['name']))
 
     if extra_str:
         extra_str = extra_str.strip(" \t\n()")
@@ -53,14 +134,23 @@ def parse_one(type, params_str, desc_str, extra_str):
                 param['prec'] = e[5:].strip(" ")
             elif e.startswith("unit:"):
                 param['unit'] = e[5:].strip(" ")
+            elif e.startswith("low:"):
+                param['low'] = e[4:].strip(" ")
+            elif e.startswith("high:"):
+                param['high'] = e[5:].strip(" ")
             elif "=" in e:
                 if "options" not in param:
                     param['options'] = []
-                (key, value) = e.split("=")
-                param['options'].append({
-                    'key': int(key.strip(" ")),
-                    'value': value.strip(" ")
-                })
+                match = re_option.search(e)
+                if match:
+                    d = {
+                        'key': int(match.group(1).strip(" ")),
+                        'value': match.group(2).strip(" " ),
+                        'alarm': False
+                    }
+                    if "alarm" in match.group(3):
+                        d['alarm'] = True
+                    param['options'].append(d)
 
     if type is "config":
         param['direction'] = "inout"
@@ -77,6 +167,7 @@ def parse_src_file(path, verbose=False):
         'status':  re.compile("createStatusParam\s*\((.*)\);(.*)$"),
         'counter': re.compile("createCounterParam\s*\((.*)\);(.*)$"),
         'config':  re.compile("createConfigParam\s*\((.*)\);(.*)$"),
+        'temp':    re.compile("createTempParam\s*\((.*)\);(.*)$"),
     }
     re_desc = re.compile("\s*//\s*([^\(]*)(.*)$")
 
@@ -96,51 +187,87 @@ def parse_src_file(path, verbose=False):
                         desc = match_d.group(1)
                         extra = match_d.group(2)
 
-                    params.append( parse_one(type, match.group(1), desc, extra ) )
+                    params.append( parse_one(type, match.group(1), desc, extra) )
 
     return params
 
-def _bibo_val(param, outfile):
+def _bibo_val(param, outfile, default_value=None):
     for i in range(0, 1):
         if param['options'][i]['key'] not in [ 0, 1 ]:
-            sys.stderr.write("ERROR: Invalid 2-choice key: {0}".format(param['options'][i]['key']))
+            sys.stderr.write("ERROR: Invalid 2-choice key: {0}\n".format(param['options'][i]['key']))
             return
 
     if param['options'][0]['key'] == 0:
-        outfile.write("    field(ZNAM, \"{0}\")\n".format(param['options'][0]['value']))
-        outfile.write("    field(ONAM, \"{0}\")\n".format(param['options'][1]['value']))
+        zero = param['options'][0]
+        one  = param['options'][1]
     else:
-        outfile.write("    field(ZNAM, \"{0}\")\n".format(param['options'][1]['value']))
-        outfile.write("    field(ONAM, \"{0}\")\n".format(param['options'][0]['value']))
+        zero = param['options'][1]
+        one  = param['options'][0]
 
-def _mbbimbbo_val(param, outfile):
+    outfile.write("    field(ZNAM, \"{0}\")\n".format(zero['value']))
+    if zero['alarm']:
+        outfile.write("    field(ZSV,  \"MAJOR\")\n")
+
+    outfile.write("    field(ONAM, \"{0}\")\n".format(one['value']))
+    if one['alarm']:
+        outfile.write("    field(OSV,  \"MAJOR\")\n")
+
+    if default_value is not None:
+        if default_value == zero['key']:
+            outfile.write("    field(VAL,  \"0\")\n")
+        elif default_value == one['key']:
+            outfile.write("    field(VAL,  \"1\")\n")
+        else:
+            sys.stderr.write("ERROR: Default value '{0}' not found in record\n".format(default_value))
+
+def _mbbimbbo_val(param, outfile, default_value=None):
     fields = [
-        { 'val': "ZRVL", 'string': "ZRST" },
-        { 'val': "ONVL", 'string': "ONST" },
-        { 'val': "TWVL", 'string': "TWST" },
-        { 'val': "THVL", 'string': "THST" },
-        { 'val': "FRVL", 'string': "FRST" },
-        { 'val': "FVVL", 'string': "FVST" },
-        { 'val': "SXVL", 'string': "SXST" },
-        { 'val': "SVVL", 'string': "SVST" },
-        { 'val': "EIVL", 'string': "EIST" },
-        { 'val': "NIVL", 'string': "NIST" },
-        { 'val': "TEVL", 'string': "TEST" },
-        { 'val': "ELVL", 'string': "ELST" },
-        { 'val': "TVVL", 'string': "TVST" },
-        { 'val': "TTVL", 'string': "TTST" },
-        { 'val': "FTVL", 'string': "FTST" },
-        { 'val': "FFVL", 'string': "FFST" },
+        { 'val': "ZRVL", 'string': "ZRST", 'alarm': "ZRSV" },
+        { 'val': "ONVL", 'string': "ONST", 'alarm': "ONSV" },
+        { 'val': "TWVL", 'string': "TWST", 'alarm': "TWSV" },
+        { 'val': "THVL", 'string': "THST", 'alarm': "THSV" },
+        { 'val': "FRVL", 'string': "FRST", 'alarm': "FRSV" },
+        { 'val': "FVVL", 'string': "FVST", 'alarm': "FVSV" },
+        { 'val': "SXVL", 'string': "SXST", 'alarm': "SXSV" },
+        { 'val': "SVVL", 'string': "SVST", 'alarm': "SVSV" },
+        { 'val': "EIVL", 'string': "EIST", 'alarm': "EISV" },
+        { 'val': "NIVL", 'string': "NIST", 'alarm': "NISV" },
+        { 'val': "TEVL", 'string': "TEST", 'alarm': "TESV" },
+        { 'val': "ELVL", 'string': "ELST", 'alarm': "ELSV" },
+        { 'val': "TVVL", 'string': "TVST", 'alarm': "TVSV" },
+        { 'val': "TTVL", 'string': "TTST", 'alarm': "TTSV" },
+        { 'val': "FTVL", 'string': "FTST", 'alarm': "FTSV" },
+        { 'val': "FFVL", 'string': "FFST", 'alarm': "FFSV" },
     ]
+    val_field = None
     for i in range(0,len(param['options'])):
         outfile.write("    field({0}, \"{1}\")\n".format(fields[i]['val'], param['options'][i]['key']))
         outfile.write("    field({0}, \"{1}\")\n".format(fields[i]['string'], param['options'][i]['value']))
 
-def _longinlongout_val(param, outfile):
+        # Check if this value needs to set an alarm
+        if param['options'][i]['alarm']:
+            outfile.write("    field({0}, \"MAJOR\")\n".format(fields[i]['alarm']))
+
+        # Find the right index for default value in case they're in different order
+        if default_value == param['options'][i]['key']:
+            val_field = "    field(VAL,  \"{0}\")\n".format(i)
+
+    if val_field:
+        outfile.write(val_field)
+
+def _longinlongout_val(param, outfile, default_value=None):
+    if default_value is not None:
+        outfile.write("    field(VAL,  \"{0}\")\n".format(param['default']))
     if "prec" in param:
         outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
     if "unit" in param:
         outfile.write("    field(EGU,  \"{0}\")\n".format(param['unit']))
+    if "low" in param:
+        outfile.write("    field(LOW,  \"{0}\")\n".format(param['low']))
+        outfile.write("    field(LSV,  \"MAJOR\")\n")
+    if "high" in param:
+        outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
+        outfile.write("    field(HSV,  \"MAJOR\")\n")
 
 def generate_out_db_record(param, outfile):
     if "options" in param:
@@ -160,14 +287,15 @@ def generate_out_db_record(param, outfile):
     outfile.write("    field(ASG,  \"BEAMLINE\")\n")
     outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
     outfile.write("    field(PINI, \"YES\")\n")
-    outfile.write("    field(VAL,  \"{0}\")\n".format(param['default']))
     outfile.write("    field(OUT,  \"$(P){0}W PP\")\n".format(param['name']))
     if type == "bo":
-        _bibo_val(param, outfile)
+        _bibo_val(param, outfile, param['default'])
     elif type == "mbbo":
-        _mbbimbbo_val(param, outfile)
+        _mbbimbbo_val(param, outfile, param['default'])
     else:
-        _longinlongout_val(param, outfile)
+        outfile.write("    field(LOPR, \"0\")\n")
+        outfile.write("    field(HOPR, \"{0}\")\n".format(2**param['width'] - 1))
+        _longinlongout_val(param, outfile, param['default'])
     outfile.write("}\n")
 
     outfile.write("record({0}, \"$(P){1}W\")\n".format(type, param['name']))
@@ -229,10 +357,7 @@ def generate_in_db_record(param, outfile):
         outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
         outfile.write("    field(INPA, \"$(P){0}_Raw NPP\")\n".format(param['name']))
         outfile.write("    field(CALC, \"{0}\")\n".format(param['calc']))
-        if "unit" in param:
-            outfile.write("    field(EGU,  \"{0}\")\n".format(param['unit']))
-        if "prec" in param:
-            outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
+        _longinlongout_val(param, outfile)
         outfile.write("}\n")
 
         outfile.write("record({0}, \"$(P){1}_Raw\")\n".format(type, param['name']))

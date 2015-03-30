@@ -23,6 +23,7 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     , m_hardwareId(0)
     , m_payloadLen(0)
     , m_expectedResponse(static_cast<DasPacket::CommandType>(0))
+    , m_lastConfigPayloadLen(0)
 {
     createParam("ReqDest",      asynParamOctet, &ReqDest);      // WRITE - Module address to communicate with
     createParam("ReqCmd",       asynParamInt32, &ReqCmd);       // WRITE - Command to be sent to module
@@ -105,9 +106,9 @@ void DebugPlugin::request(const DasPacket::CommandType command)
     (void)getIntegerParam(ReqIsDsp, &isDsp);
 
     if (isDsp == 1)
-        packet = DasPacket::createOcc(DasPacket::HWID_SELF, m_hardwareId, command, 0);
+        packet = DasPacket::createOcc(DasPacket::HWID_SELF, m_hardwareId, command, m_lastConfigPayloadLen, m_lastConfigPayload);
     else
-        packet = DasPacket::createLvds(DasPacket::HWID_SELF, m_hardwareId, command, 0);
+        packet = DasPacket::createLvds(DasPacket::HWID_SELF, m_hardwareId, command, m_lastConfigPayloadLen, m_lastConfigPayload);
 
     if (packet) {
         BasePlugin::sendToDispatcher(packet);
@@ -177,6 +178,15 @@ bool DebugPlugin::response(const DasPacket *packet)
     // Cache the payload to read it through readOctet()
     m_payloadLen = std::min(packet->getPayloadLength()/4, static_cast<uint32_t>(sizeof(m_payload)));
     memcpy(m_payload, packet->getPayload(), m_payloadLen*4);
+
+    // Cache last READ_CONFIG response separately, allowing other commands to be executed
+    // before using this payload for writing configuration
+    // Don't enforce MAC address checking, allowing to transfer the same configuration to
+    // multiple boards of the same type.
+    if (responseCmd == DasPacket::CMD_READ_CONFIG) {
+        m_lastConfigPayloadLen = m_payloadLen * 4;
+        memcpy(m_lastConfigPayload, m_payload, m_lastConfigPayloadLen);
+    }
 
     return true;
 }

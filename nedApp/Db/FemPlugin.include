@@ -3,9 +3,11 @@
 # let's fake it to be always enabled.
 record(bi, "$(P)Acquiring")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Acquiring data")
     field(VAL,  "1")
     field(PINI, "YES")
     field(ZNAM, "not acquiring")
     field(ONAM, "acquiring")
+    field(ZSV,  "MAJOR")
 }

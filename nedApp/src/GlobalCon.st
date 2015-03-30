@@ -219,7 +219,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) \
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 #define CMD_END(NAME, COMMAND)					\
@@ -256,7 +256,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) \
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 
@@ -346,7 +346,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) \
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 #define TEST_PV_END(NAME, PVNAME, DESIRED)			\
