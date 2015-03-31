@@ -431,7 +431,10 @@ int severity;
           PVPUTSTR(statePV,NEXT)					\
           pvGet(accumSuccess);						\
           if (!accumSuccess || strcmp(prevReq, #NEXT)) {               	\
-             for (i = 0; i< numFound; i++) PVPUTNUM(cmdSucceeded[i], 0)	\
+             for (i = 0; i< numFound; i++) {				\
+                PVPUTNUM(cmdSucceeded[i], 0)				\
+                failMsg[i][0] = 0; pvPut(failMsg[i]);			\
+             }								\
           }								\
        } state NEXT
 
