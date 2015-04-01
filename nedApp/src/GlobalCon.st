@@ -64,9 +64,7 @@ option -c;	/* do not wait for PVs to connect */
  * GLOBALCON_MAXDEVICES is for static mem allocation and must be higher than 
  * number of devices expected. 
  */
-#ifndef GLOBALCON_MAXDEVICES
 #define GLOBALCON_MAXDEVICES 100	
-#endif
 
 /*
  * set PV n to numeric value v and put. 
