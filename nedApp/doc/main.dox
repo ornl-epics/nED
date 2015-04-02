@@ -144,7 +144,9 @@
  * to filter out packets that are not command responses. Since command responses
  * are very infrequent comparing to data packets, this helps reduce CPU cycles
  * by not invoking the plugin if there's no data for it. Especially with big
- * number of detectors. Plugin can be connected to one plugin at a time.
+ * number of detectors. Each plugin can be connected to one source plugin and
+ * many destination plugins. This can be described as parent/child relantionship,
+ * each plugin can have 1 parent but many children.
  *
  * Each plugin can be individually configured to run in its own thread. When
  * carefully configured, this provides further optimization improvements as
@@ -186,10 +188,56 @@
 
  * TODO: describe briefly all detectors, including the commands supported, trickst like ROC need to be discovered and configured, etc.
  *
- * \section processData_sec
+ * \subsection pluginCom_sec Plugins communication
+ * All plugins are based on asynPortDriver class and thus inherit all its
+ * capabilities. In asyn terminology an instance of asynPortDriver class is
+ * called port, but nED uses name plugin. We'll stick to plugin to not confuse
+ * the reader. asynPortDriver provides methods to register to other plugins,
+ * send data to registered plugins, receive outside get data callbacks and
+ * more. Sometimes detailed knowledge of asyn is required to understand some
+ * of the functionality. BasePlugin packs most often used capabilites and
+ * hides the complexity, providing a uniform API for derived plugins to use.
+ * Still similarities with asynPortDriver can be observed, so that experienced
+ * user can easily upgrade the provided functionality by matching it to
+ * asynPortDriver.
+ *
+ * That said, the most important communication mechanism is passing raw detector
+ * data between plugins. Detector data is formatted into packets called DAS
+ * packets. DasPacket class describes raw packet and provides several
+ * convenient functions and definitions for parsing packets. DasPackets are
+ * exchanged between plugins using the asyn's generic pointer interface.
+ * areaDetector uses same approach, but format data into NDArray strcture.
+ * nED would have to convert raw data into NDArray before sending to plugins
+ * and then back to DasPacket format in plugins.
+ * Passing DasPackets is done very efficiently with zero-copy all the way to
+ * actually sending data to external clients. When OCC board receives data it
+ * puts it into system memory using DMA. nED is notified about the location of
+ * new data and points DasPacket to it. As DasPacket is pointer container it
+ * doesn't copy the data. DasPackets are grouped into DasPacketList and sent
+ * to plugins using the asyn generic pointer interface. Plugin is notified by
+ * calling its overloaded proecessData() function. DasPacket data must not
+ * be altered by plugins, because all plugins receive pointer to the same
+ * memory.
+ * When plugins wants to send data to detectors, it packs it into DasPacket
+ * container and sends it to parent plugin. The operation itself is
+ * synchronous and handle is given back as soon as data reaches OCC board.
+ * But actual response is asynchronous, response to the command just sent
+ * is received when detector sends it through the receive mechanism described
+ * above.
+ *
+ * Plugins so far don't use other asyn types (asynInt32, asynFloat64, etc.)
+ * for inter-communication but they could. However all EPICS database
+ * records use these basic types for getting or setting plugin parameters.
+ * Except for some common values like enabling the plugin, nED doesn't
+ * extend asynPortDriver functionality for these callbacks. Consult
+ * asynPortDriver documentation for details. One thing to remember is that
+ * none of the plugin callbacks must block, meaning wait undeterministically.
+ * Usually this involves writing to files, sockets etc.
+ *
+ * \subsection processData_sec
  * Incoming data from OCC directly or from a dispatcher plugin is processed
- * by all attached plugins. Data is formated as list of DAS packets. All
- * attached plugins receive a callback from the source plugin
+ * by all attached plugins. Data is formated as list of DAS packets into
+ * DasPacketList. All attached plugins receive a callback from the source plugin
  * in the order they were connected. When the destination plugin is configured
  * to process data in a thread, the source plugin sends data to the next
  * plugin in line immediately. The source plugin then waits for all destination
