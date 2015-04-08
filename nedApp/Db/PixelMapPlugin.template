@@ -47,7 +47,7 @@ record(mbbi, "$(P)ErrImport")
     field(THVL, "3")
     field(THST, "Memory alloc err")
     field(THSV, "MAJOR")
-    field(FLNK, "$(P)Status")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(longin, "$(P)CntError")
 {

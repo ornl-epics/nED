@@ -148,6 +148,7 @@ record(bi, "$(P)RxEnRb")
     field(ONAM, "Enabled")
     field(ZSV,  "MAJOR")
     field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(bo, "$(P)ErrPktEn")
 {
@@ -190,6 +191,7 @@ record(mbbi, "$(P)RxStalled")
     field(THST, "Copy stalled")
     field(THSV, "MAJOR")
     field(UNSV, "MINOR")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(ai, "$(P)FpgaTemp")
 {
@@ -217,6 +219,7 @@ record(calcout, "$(P)FpgaTempAlarm")
     field(CALC, "(B>C)?0:A")
     field(OUT,  "$(P)RxEn PP")
     field(OOPT, "Transition To Zero")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(ai, "$(P)FpgaCoreV")
 {
