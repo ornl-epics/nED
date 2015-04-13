@@ -105,7 +105,7 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
 
             m_pulseTime = { time.secPastEpoch, time.nsec };
             // Convert charge from 10pC unsigned integer to C double
-            m_pulseCharge = static_cast<double>(rtdl->pulse_charge * 10) * 10e-12;
+            m_pulseCharge = static_cast<double>(rtdl->pulse_charge * 10) * 1e-12;
         }
 
         if (packet->isMetaData() && m_metadataEn) {

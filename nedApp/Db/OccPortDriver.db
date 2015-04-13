@@ -148,6 +148,7 @@ record(bi, "$(P)RxEnRb")
     field(ONAM, "Enabled")
     field(ZSV,  "MAJOR")
     field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(bo, "$(P)ErrPktEn")
 {
@@ -190,6 +191,7 @@ record(mbbi, "$(P)RxStalled")
     field(THST, "Copy stalled")
     field(THSV, "MAJOR")
     field(UNSV, "MINOR")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(ai, "$(P)FpgaTemp")
 {
@@ -217,6 +219,7 @@ record(calcout, "$(P)FpgaTempAlarm")
     field(CALC, "(B>C)?0:A")
     field(OUT,  "$(P)RxEn PP")
     field(OOPT, "Transition To Zero")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(ai, "$(P)FpgaCoreV")
 {
@@ -391,7 +394,7 @@ record(calc, "$(P)DmaUsedMb")
     field(INPA, "$(P)DmaUsed NPP")
     field(CALC, "A/(1024*1024)")
     field(SCAN, "Passive")
-    field(EGU,  "MB")
+    field(EGU,  "MiB")
 }
 record(longin, "$(P)DmaSize")
 {
@@ -409,7 +412,7 @@ record(calc, "$(P)DmaSizeMb")
     field(INPA, "$(P)DmaSize NPP")
     field(CALC, "A/(1024*1024)")
     field(SCAN, "Passive")
-    field(EGU,  "MB")
+    field(EGU,  "MiB")
 }
 record(longin, "$(P)BufUsed")
 {
@@ -427,7 +430,7 @@ record(calc, "$(P)BufUsedMb")
     field(INPA, "$(P)BufUsed NPP")
     field(CALC, "A/(1024*1024)")
     field(SCAN, "Passive")
-    field(EGU,  "MB")
+    field(EGU,  "MiB")
 }
 record(longin, "$(P)BufSize")
 {
@@ -445,7 +448,7 @@ record(calc, "$(P)BufSizeMb")
     field(INPA, "$(P)BufSize NPP")
     field(CALC, "A/(1024*1024)")
     field(SCAN, "Passive")
-    field(EGU,  "MB")
+    field(EGU,  "MiB")
 }
 record(longout, "$(P)StatusInt")
 {
@@ -477,19 +480,19 @@ record(longin, "$(P)RecvRateBs")
 }
 record(calc, "$(P)RecvRateKBs")
 {
-    field(DESC, "OCC receive rate KB/s")
+    field(DESC, "OCC receive rate kB/s")
     field(INPA, "$(P)RecvRateBs NPP")
     field(FLNK, "$(P)RecvRateMBs")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
-    field(EGU,  "KB/s")
+    field(EGU,  "kB/s")
     field(PREC, "1")
 }
 record(calc, "$(P)RecvRateMBs")
 {
     field(DESC, "OCC receive rate MB/s")
     field(INPA, "$(P)RecvRateKBs NPP")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
     field(EGU,  "MB/s")
     field(PREC, "2")
@@ -506,19 +509,19 @@ record(longin, "$(P)CopyRateBs")
 }
 record(calc, "$(P)CopyRateKBs")
 {
-    field(DESC, "Copy to buffer rate KB/s")
+    field(DESC, "Copy to buffer rate kB/s")
     field(INPA, "$(P)CopyRateBs NPP")
     field(FLNK, "$(P)CopyRateMBs")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
-    field(EGU,  "KB/s")
+    field(EGU,  "kB/s")
     field(PREC, "1")
 }
 record(calc, "$(P)CopyRateMBs")
 {
     field(DESC, "Copy to buffer rate MB/s")
     field(INPA, "$(P)CopyRateKBs NPP")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
     field(EGU,  "MB/s")
     field(PREC, "2")
@@ -535,19 +538,19 @@ record(longin, "$(P)ProcRateBs")
 }
 record(calc, "$(P)ProcRateKBs")
 {
-    field(DESC, "Data processing rate KB/s")
+    field(DESC, "Data processing rate kB/s")
     field(INPA, "$(P)ProcRateBs NPP")
     field(FLNK, "$(P)ProcRateMBs")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
-    field(EGU,  "KB/s")
+    field(EGU,  "kB/s")
     field(PREC, "1")
 }
 record(calc, "$(P)ProcRateMBs")
 {
     field(DESC, "Data processing rate MB/s")
     field(INPA, "$(P)ProcRateKBs NPP")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
     field(EGU,  "MB/s")
     field(PREC, "2")

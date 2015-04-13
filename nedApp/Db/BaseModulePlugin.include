@@ -80,12 +80,14 @@ record(calc, "$(P)HwStatus")
 {
     field(DESC, "Hardware status")
     field(INPA, "$(P)Configured.SEVR NPP")
-    field(INPB, "$(P)Acquiring.SEVR NPP")
-    field(CALC, "A=0&&B=0")
+    field(CALC, "A=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
+# Detector is considered missing if it doesn't respond to at 2 or more
+# subsequent commands. Record recoveres (goes out of alarm) if it responds
+# afterwards.
 record(calc, "$(P)MissCount")
 {
     field(DESC, "Count missing responses")
@@ -96,7 +98,7 @@ record(calc, "$(P)MissCount")
     field(HSV,  "MINOR")
     field(HIHI, "3")
     field(HHSV, "MAJOR")
-    field(FLNK, "$(P)StatusCalc PP")
+    field(FLNK, "$(P)StatusCalc")
 }
 # All status logic tries to use 1 = OK, 0 = Not OK
 # Summarize alarms.
@@ -107,7 +109,8 @@ record(calc, "$(P)StatusCalc")
     field(INPB, "$(P)Supported.SEVR")
     field(INPC, "$(P)Verified.SEVR")
     field(INPD, "$(P)HwStatus.SEVR")
-    field(CALC, "A=0&&B=0&&C=0&&D=0")
+    field(INPE, "$(P)Acquiring.SEVR")
+    field(CALC, "(A+B+C+D+E)=0")
     field(PINI, "YES") # For Supported link
     field(FLNK, "$(P)Status")
 }
@@ -240,7 +243,7 @@ record(mbbi, "$(P)HwType")
     field(TEVL, "161")
     field(ELVL, "162")
     field(TVVL, "170")
-    field(THVL, "45")
+    field(TTVL, "45")
     field(ZRST, "ROC")
     field(ONST, "AROC")
     field(TWST, "HROC")
@@ -254,7 +257,7 @@ record(mbbi, "$(P)HwType")
     field(TEST, "ACPC FEM")
     field(ELST, "FFC")
     field(TVST, "FEM")
-    field(THST, "ADCROC")
+    field(TTST, "ADCROC")
 }
 record(mbbo, "$(P)CfgSection")
 {

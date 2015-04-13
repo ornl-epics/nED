@@ -1,18 +1,18 @@
-.PHONY: clean html pdf mkdirtmp
+.PHONY: clean html pdf generate
 
-all: mkdirtmp html
+all: html
+
 install: all
 
-pdf:
+pdf: Doxyfile generate
 	(cd latex/; make pdf > /dev/null)
 
-html: Doxyfile $(wildcard ../src/*.cpp)
-	./export2doxy.py -v -o tmp/ ../src/*cpp
+html: Doxyfile generate
 	doxygen >/dev/null
 
 clean:
 	rm -fR html/ latex/ tmp/
 
-mkdirtmp:
+generate: $(wildcard ../src/*.cpp)
 	mkdir -p tmp/
-
+	./export2doxy.py -v -o tmp/ ../src/*cpp
