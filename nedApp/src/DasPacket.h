@@ -152,6 +152,14 @@ struct DasPacket
          * Type of modules
          */
         enum ModuleType {
+            CHAN_1                      = 0x10,
+            CHAN_2                      = 0x11,
+            CHAN_3                      = 0x12,
+            CHAN_4                      = 0x13,
+            CHAN_5                      = 0x14,
+            CHAN_6                      = 0x15,
+            CHAN_7                      = 0x16,
+            CHAN_8                      = 0x17,
             MOD_TYPE_ROC                = 0x20,   //!< ROC (or LPSD) module
             MOD_TYPE_AROC               = 0x21,   //!< AROC
             MOD_TYPE_HROC               = 0x22,
@@ -242,10 +250,11 @@ struct DasPacket
          * @param[in] source address of the sender
          * @param[in] destination address
          * @param[in] command type for new packet
+         * @param[in] channel target channel, 0 for no specific channel.
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload = 0);
+        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
          * Create DasPacket LVDS command (non DSPs)
@@ -269,10 +278,11 @@ struct DasPacket
          * @param[in] source address of the sender
          * @param[in] destination address
          * @param[in] command type for new packet
+         * @param[in] channel target channel, 0 for no specific channel.
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload = 0);
+        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
          * Check if packet is valid, like the alignment check, size check, etc.

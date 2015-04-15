@@ -120,8 +120,9 @@ class BaseModulePlugin : public BasePlugin {
             uint32_t offset;        //!< An 4-byte offset within the payload
             uint32_t shift;         //!< Position of the field bits within 32 bits dword at given offset
             uint32_t width;         //!< Number of bits used for the value
-            char section;           //!< Section name (only for configuration params)
-            int initVal;            //!< Initial value after object is created or configuration reset is being requested (config only)
+            uint8_t section;        //!< Section name, valid values [0x0..0xF] (configuration params only)
+            uint8_t channel;        //!< Channel number in range [1..8], 0 means global configuration (configuration params only)
+            int32_t initVal;        //!< Initial value after object is created or configuration reset is being requested (configuration params only)
         };
 
         struct Version {
@@ -171,11 +172,14 @@ class BaseModulePlugin : public BasePlugin {
         std::map<int, ParamDesc> m_temperatureParams;   //!< Map of exported temperature parameters
         StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
+        bool m_configInitialized;                       //!< Configuration sections sizes and offsets are calculated
+        uint32_t m_expectedChannel;                     //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
+        uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
 
     private: // variables
         bool m_behindDsp;
-        std::map<char, uint32_t> m_configSectionSizes;  //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
-        std::map<char, uint32_t> m_configSectionOffsets;//!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
+        std::map<int, uint32_t> m_configSectionSizes;   //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
+        std::map<int, uint32_t> m_configSectionOffsets; //!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
         std::shared_ptr<Timer> m_timeoutTimer;          //!< Currently running timer for response timeout handling
         struct {
             bool inProgress;        //!< Remote upgrade currently in progress
@@ -214,6 +218,21 @@ class BaseModulePlugin : public BasePlugin {
         virtual ~BaseModulePlugin() = 0;
 
         /**
+         * Set number of channels supported by module.
+         *
+         * When module firmware implements its channels as individual
+         * configuration register sets, this function can be used to specify
+         * number of channels supported. It must be called before
+         * createConfigParam().
+         *
+         * Most of the modules have their channel configuration as part of
+         * global configuration and they don't need to call this function.
+         *
+         * @param[in] n Number of individually configured channels, max 16.
+         */
+        void setNumChannels(uint32_t n);
+
+        /**
          * Handle parameters write requests for integer type.
          *
          * When an integer parameter is written through PV, this function
@@ -244,10 +263,11 @@ class BaseModulePlugin : public BasePlugin {
          * array of 4 byte unsigned integers. The length should be dividable by 2.
          *
          * @param[in] command A command of the packet to be sent out.
+         * @param[in] channel Select a target channel, 0 means no specific channel.
          * @param[in] payload Payload to be sent out, can be NULL if length is also 0.
          * @param[in] length Payload length in bytes.
          */
-        void sendToDispatcher(DasPacket::CommandType command, uint32_t *payload=0, uint32_t length=0);
+        void sendToDispatcher(DasPacket::CommandType command, uint8_t channel=0, uint32_t *payload=0, uint32_t length=0);
 
         /**
          * Overloaded incoming data handler.
@@ -382,7 +402,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadConfig();
+        virtual DasPacket::CommandType reqReadConfig(uint8_t channel=0);
 
         /**
          * Default handler for READ_CONFIG response.
@@ -408,9 +428,10 @@ class BaseModulePlugin : public BasePlugin {
          *
          * This function is asynchronous and does not wait for response.
          *
+         * @param[in] channel Optional channel identifier.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqWriteConfig();
+        virtual DasPacket::CommandType reqWriteConfig(uint8_t channel=0);
 
         /**
          * Default handler for READ_CONFIG response.
@@ -572,7 +593,15 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Create and register single integer config parameter.
          */
-        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
+        void createConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
+
+        /**
+         * Convenience function for modules that don't split configuration for channels.
+         */
+        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
+        {
+            createConfigParam(name, 0, section, offset, nBits, shift, value);
+        }
 
         /**
          * Create and register single integer temperature parameter.
@@ -741,7 +770,7 @@ class BaseModulePlugin : public BasePlugin {
          */
         void extractParams(const DasPacket *packet,
                            const std::map<int, ParamDesc> &table,
-                           const std::map<char, uint32_t> &sectOffsets=std::map<char, uint32_t>());
+                           const std::map<int, uint32_t> &sectOffsets=std::map<int, uint32_t>());
 
     protected:
         #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq

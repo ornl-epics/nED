@@ -21,7 +21,7 @@ const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 650;  //!< Since suppo
 /**
  * ROC V5 version response format
  */
-struct RspReadVersion_v5x {
+struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
     unsigned hw_revision:8;     // Board revision number
     unsigned hw_version:8;      // Board version number
@@ -38,7 +38,7 @@ struct RspReadVersion_v5x {
 /**
  * ROC V5 fw 5.4 adds vendor field.
  */
-struct RspReadVersion_v54 : public RspReadVersion_v5x {
+struct RspReadVersion_v54 : public RspReadVersion {
     uint32_t vendor_id;
 };
 
@@ -49,6 +49,7 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
 {
     if (0) {
     } else if (m_version == "v45" || m_version == "v44") {
+        setNumChannels(8);
         setIntegerParam(Supported, 1);
         createStatusParams_v45();
         createConfigParams_v45();
@@ -148,11 +149,11 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
 
 bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
-    const RspReadVersion_v5x *response;
-    if (packet->getPayloadLength() == sizeof(RspReadVersion_v5x)) {
-        response = reinterpret_cast<const RspReadVersion_v5x*>(packet->getPayload());
+    const RspReadVersion *response;
+    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
+        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
     } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v54)) {
-        response = reinterpret_cast<const RspReadVersion_v5x*>(packet->getPayload());
+        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
     } else {
         return false;
     }
@@ -172,7 +173,7 @@ bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
 
 bool RocPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    if (version.hw_version == 5) {
+    if (version.hw_version == 5 || version.hw_version == 2) {
         char ver[10];
         snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
         if (m_version == ver)
@@ -232,7 +233,7 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
     for (uint32_t i = 0; i < length; i++) {
         buffer[i/2] |= data[i] << (16*(i%2));
     }
-    sendToDispatcher(DasPacket::CMD_HV_SEND, buffer, bufferLen);
+    sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
 }
 
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
