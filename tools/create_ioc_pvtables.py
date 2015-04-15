@@ -96,7 +96,8 @@ def parse_src_file(path, mode):
     types = {
       'status':  re.compile("createStatusParam\s*\(\s*\"([\w:]+)\"\s*,"),
       'counter': re.compile("createCounterParam\s*\(\s*\"([\w:]+)\"\s*,"),
-      'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\".*,\s*(\S+)\s*\);.*")
+      'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\".*,\s*(\S+)\s*\);.*"),
+      'temp':    re.compile("createTempParam\s*\(\s*\"([\w:]+)\"\s*,"),
     }
 
     if path not in vars_cache:
@@ -226,7 +227,7 @@ def main():
             print "Found {0} plugin configuration named {1}".format(plugin["name"], plugin["device"])
         inpath = os.path.join(ned_dir, plugin["name"] + ".cpp")
 
-        for mode in [ "status", "config", "counter" ]:
+        for mode in [ "status", "config", "counter", "temp" ]:
 
             try:
                 vars = parse_src_file(inpath, mode)

@@ -30,7 +30,12 @@ int DmaCircularBuffer::wait(void **data, uint32_t *len, double timeout)
 
 int DmaCircularBuffer::consume(uint32_t len)
 {
-    return occ_data_ack(m_occ, len);
+    int ret = occ_data_ack(m_occ, len);
+
+    if (ret == 0)
+        (void)BaseCircularBuffer::consume(len);
+
+    return ret;
 }
 
 bool DmaCircularBuffer::empty()

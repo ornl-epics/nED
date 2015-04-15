@@ -23,7 +23,7 @@
 EPICS_REGISTER_PLUGIN(PixelMapPlugin, 5, "Port name", string, "Dispatcher port name", string, "Blocking", int, "PixelMap file", string, "Buffer size", int);
 
 PixelMapPlugin::PixelMapPlugin(const char *portName, const char *dispatcherPortName, int blocking, const char *pixelMapFile, int bufSize)
-    : BaseDispatcherPlugin(portName, dispatcherPortName, blocking, NUM_PIXELMAPPLUGIN_PARAMS)
+    : BaseDispatcherPlugin(portName, dispatcherPortName, blocking, NUM_PIXELMAPPLUGIN_PARAMS, asynOctetMask, asynOctetMask)
     , m_buffer(0)
     , m_bufferSize(0)
 {
@@ -44,12 +44,13 @@ PixelMapPlugin::PixelMapPlugin(const char *portName, const char *dispatcherPortN
     if (err == MAP_ERR_NONE)
         err = importPixelMapFile(pixelMapFile);
 
+    createParam("FilePath",     asynParamOctet, &FilePath, pixelMapFile); // Path to pixel map file
     createParam("ErrImport",    asynParamInt32, &ErrImport, err); // Last mapping import error
     createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels
     createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
-    createParam("MapMode",      asynParamInt32, &MapMode);        // Event map mode (see PixelMapPlugin::MapMode_t)
+    createParam("MapMode",      asynParamInt32, &MapMode, MAP_NONE); // Event map mode (see PixelMapPlugin::MapMode_t)
     callParamCallbacks();
 }
 
@@ -139,6 +140,8 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
                         break;
                     }
 
+                    nProcessed++;
+
                     // Reuse the original packet if nothing to map
                     if (packet->isNeutronData() == false) {
                         m_packetList.push_back(packet);
@@ -153,8 +156,6 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
                     // Do the pixel id mapping - this can be parallelized
                     #pragma omp task firstprivate(packet, newPacket) shared(errors)
                     errors += packetMap(packet, newPacket, static_cast<MapMode_t>(mapMode));
-
-                    nProcessed++;
                 }
 
                 // Synchronize threads

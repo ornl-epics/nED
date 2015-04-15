@@ -53,11 +53,10 @@ struct RspReadVersion {
 };
 
 DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, false,
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_DSP, false,
                        blocking, NUM_DSPPLUGIN_PARAMS + NUM_DSPPLUGIN_CONFIGPARAMS + NUM_DSPPLUGIN_STATUSPARAMS)
     , m_version(version)
 {
-    setIntegerParam(HwType, DasPacket::MOD_TYPE_DSP);
     if (m_version == "v63") {
         createConfigParams_v63();
         createStatusParams_v63();
@@ -96,36 +95,8 @@ bool DspPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
     return true;
 }
 
-bool DspPlugin::rspDiscover(const DasPacket *packet)
+bool DspPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    return (BaseModulePlugin::rspDiscover(packet) &&
-            packet->cmdinfo.module_type == DasPacket::MOD_TYPE_DSP);
-}
-
-bool DspPlugin::rspReadVersion(const DasPacket *packet)
-{
-    char date[20];
-
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    BaseModulePlugin::Version version;
-    if (!parseVersionRsp(packet, version)) {
-        LOG_WARN("Bad READ_VERSION response");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.hw_year, version.hw_month, version.hw_day);
-    setStringParam(HwDate, date);
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    callParamCallbacks();
-
     if (version.hw_version == 2 && version.hw_revision == 4) {
         if (version.fw_version == 6 && version.fw_revision == 3 && m_version == "v63")
             return true;
@@ -133,6 +104,5 @@ bool DspPlugin::rspReadVersion(const DasPacket *packet)
             return true;
     }
 
-    LOG_WARN("Unsupported DSP version");
     return false;
 }

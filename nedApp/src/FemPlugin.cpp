@@ -15,7 +15,7 @@
 
 EPICS_REGISTER_PLUGIN(FemPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 290;
+const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 290; // MAX(`for file in FemPlugin_v3*; do grep create $file | grep Param | wc -l; done`)
 
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
@@ -35,7 +35,7 @@ struct RspReadVersion {
 };
 
 FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, true,
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_FEM, true,
                        blocking, NUM_FEMPLUGIN_PARAMS + NUM_FEMPLUGIN_DYNPARAMS)
     , m_version(version)
 {
@@ -52,22 +52,21 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         createStatusParams_v36();
         createConfigParams_v36();
         createCounterParams_v36();
+    } else if (m_version == "v37") {
+        setIntegerParam(Supported, 1);
+        setIntegerParam(UpgradeStatus, UPGRADE_NOT_STARTED); // supported but not started
+        createStatusParams_v37();
+        createConfigParams_v37();
+        createCounterParams_v37();
+        createUpgradeParams_v37();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);
     }
 
-    setIntegerParam(HwType, DasPacket::MOD_TYPE_FEM);
-
     LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
 
     callParamCallbacks();
-}
-
-bool FemPlugin::rspDiscover(const DasPacket *packet)
-{
-    return (BaseModulePlugin::rspDiscover(packet) &&
-            packet->cmdinfo.module_type == DasPacket::MOD_TYPE_FEM);
 }
 
 bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
@@ -91,30 +90,8 @@ bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
     return true;
 }
 
-bool FemPlugin::rspReadVersion(const DasPacket *packet)
+bool FemPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    char date[20];
-    BaseModulePlugin::Version version;
-
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    if (!parseVersionRsp(packet, version)) {
-        LOG_ERROR("Received unexpected READ_VERSION response for this FEM type");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.hw_year, version.hw_month, version.hw_day);
-    setStringParam(HwDate, date);
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    callParamCallbacks();
-
     if ((version.hw_version == 10 && version.hw_revision == 2) ||
         (version.hw_version == 10 && version.hw_revision == 9)) {
         char ver[10];
@@ -123,6 +100,5 @@ bool FemPlugin::rspReadVersion(const DasPacket *packet)
             return true;
     }
 
-    LOG_WARN("Unsupported ROC version");
     return false;
 }

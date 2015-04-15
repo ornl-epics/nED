@@ -23,10 +23,10 @@
 void RocPlugin::createStatusParams_v57()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                         | EPICS record description  | (bi and mbbi description)
-    createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring mode.               (0=not acquiring,1=acquiring)
+    createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring mode.               (0=not acquiring [alarm],1=acquiring)
     createStatusParam("ErrParity",        0x0,  1, 10); // LVDS parity error.            (0=no error,1=error)
-    createStatusParam("Configured",       0x0,  1,  9); // Not configured                (0=configured,1=not configured)
-    createStatusParam("Discovered",       0x0,  1,  8); // Configured                    (0=discovered,1=not discovered)
+    createStatusParam("Configured",       0x0,  1,  9); // Configured                    (0=configured,1=not configured [alarm])
+    createStatusParam("Discovered",       0x0,  1,  8); // Discovered                    (0=discovered,1=not discovered)
     createStatusParam("SysrstBHigh",      0x0,  1,  7); // SYSRST_B Got HIGH             (0=no,1=yes)
     createStatusParam("SysrstBLow",       0x0,  1,  6); // SYSRST_B Got LOW              (0=no,1=yes)
     createStatusParam("TxenBHigh",        0x0,  1,  5); // TXEN_B Got HIGH               (0=no,1=yes)
@@ -318,7 +318,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch8:B:Baseline",   'C', 0xF,  12, 0, 100);   // Chan8 B baseline value
 
     // There's an unused part of C section in v5.4 C:0x10 - C:0x1F
-    createConfigParam("ConfigFillerC",    'C', 0x1F, 16, 0, 0);     // Config filler
+    createConfigParam("ConfigFiller",     'C', 0x1F, 16, 0, 0);     // Config filler
 
     createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
     createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
@@ -379,7 +379,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
     createConfigParam("MinAdc",           'E', 0x6,  12, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  12, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",       'E', 0x8,  8,  0, -6);    // Integrator release point
+    createConfigParam("IntRelease",       'E', 0x8,  8,  0, 65530); // Integrator release point
     createConfigParam("MinDiscrimWidth",  'E', 0x9,  8,  0, 1);     // Minimum discriminator width
     createConfigParam("Sample1",          'E', 0xA,  4,  0, 2);     // Sample 1 point [0:10]
     createConfigParam("Sample2",          'E', 0xB,  6,  0, 14);    // Sample 1 point [2:50]
@@ -400,7 +400,16 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
 
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
-    createConfigParam("TestPatternDebug", 'F', 0x1,  3, 12, 0);     // Engineering Use only
+    createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Alternate test pattern enable (0=disable,1=enable)
+    createConfigParam("TestPatternDebug", 'F', 0x1,  2, 12, 0);     // Engineering Use only
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
     createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
+}
+
+void RocPlugin::createTemperatureParams_v57()
+{
+//  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
+    createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
+    createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
+    createTempParam("TempPreampB",      0x2, 16, 0); // Preamp B temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
 }

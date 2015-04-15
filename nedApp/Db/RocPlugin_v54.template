@@ -1,6 +1,6 @@
 include "BasePlugin.include"
 include "BaseModulePlugin.include"
-include "RocPlugin_v54.include"
+include "RocPlugin_v54.generated"
 include "RocPlugin.include"
 include "GlobalConD.include"
 
@@ -15,3 +15,23 @@ record(bi, "$(P)Acquiring")
     field(ONAM, "acquiring")
 }
 
+record(longin, "$(P)HwVer")
+{
+    field(HIGH, "6")
+    field(LOW,  "4")
+}
+record(longin, "$(P)HwRev")
+{
+    field(HIGH, "3")
+    field(LOW,  "1")
+}
+record(longin, "$(P)FwVer")
+{
+    field(HIGH, "6")
+    field(LOW,  "4")
+}
+record(longin, "$(P)FwRev")
+{
+    field(HIGH, "6") # Supports 5.4 and 5.5
+    field(LOW,  "3")
+}

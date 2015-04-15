@@ -11,33 +11,6 @@ record(stringin, "$(P)HwId")
     field(SCAN, "Passive")
     field(PINI, "YES")
 }
-record(mbbi, "$(P)CmdRsp")
-{
-    field(DESC, "Last command response")
-    field(PINI, "YES")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))CmdRsp")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-    field(FLNK, "$(P)StatChange")
-    field(ZRVL, "0")
-    field(ZRST, "None issued")
-    field(ONVL, "1")
-    field(ONST, "Success")
-    field(TWVL, "2")
-    field(TWST, "Waiting")
-    field(THVL, "3")
-    field(THST, "Timeout")
-    field(FRVL, "4")
-    field(FRST, "Error")
-    field(FVVL, "5")
-    field(FVST, "Skipped")
-}
-record(fanout, "$(P)StatChange")
-{
-    field(DESC, "Status change fanout")
-    field(LNK1, "$(P)VerProc")
-}
 record(mbbo, "$(P)CmdReq")
 {
     field(ASG,  "BEAMLINE")
@@ -64,68 +37,157 @@ record(mbbo, "$(P)CmdReq")
     field(EIST, "Read counters")
     field(NIVL, "37")
     field(NIST, "Reset counters")
+    field(TEVL, "111")
+    field(TEST, "Upgrade")
+    field(ELVL, "35")
+    field(ELST, "Read temperature")
+    field(TVVL, "144")
+    field(TVST, "Request pulse")
+    field(TTVL, "145")
+    field(TTST, "Clear pulse")
+}
+record(mbbi, "$(P)CmdRsp")
+{
+    field(DESC, "Last command response")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CmdRsp")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(FLNK, "$(P)RspCheck PP")
+    field(ZRVL, "0")
+    field(ZRST, "None issued")
+    field(ONVL, "1")
+    field(ONST, "Success")
+    field(TWVL, "2")
+    field(TWST, "Waiting")
+    field(THVL, "3")
+    field(THST, "Timeout")
+    field(FRVL, "4")
+    field(FRST, "Error")
+    field(FVVL, "5")
+    field(FVST, "Skipped")
+}
+record(fanout, "$(P)RspCheck")
+{
+    field(DESC, "Response check fanout")
+    field(LNK1, "$(P)MissCount PP")
+    field(LNK2, "$(P)HwStatus PP")
+}
+# Placeholder record, may be extended by module.
+# MAJOR alarm is captured in overall status.
+record(calc, "$(P)HwStatus")
+{
+    field(DESC, "Hardware status")
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(CALC, "A=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+# Detector is considered missing if it doesn't respond to at 2 or more
+# subsequent commands. Record recoveres (goes out of alarm) if it responds
+# afterwards.
+record(calc, "$(P)MissCount")
+{
+    field(DESC, "Count missing responses")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(INPB, "$(P)MissCount NPP")
+    field(CALC, "(A=3)?B+1:(A=2)?B:0")
+    field(HIGH, "2")
+    field(HSV,  "MINOR")
+    field(HIHI, "3")
+    field(HHSV, "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+# All status logic tries to use 1 = OK, 0 = Not OK
+# Summarize alarms.
+record(calc, "$(P)StatusCalc")
+{
+    field(DESC, "Turn MAJOR alarms into error")
+    field(INPA, "$(P)MissCount.SEVR")
+    field(INPB, "$(P)Supported.SEVR")
+    field(INPC, "$(P)Verified.SEVR")
+    field(INPD, "$(P)HwStatus.SEVR")
+    field(INPE, "$(P)Acquiring.SEVR")
+    field(CALC, "(A+B+C+D+E)=0")
+    field(PINI, "YES") # For Supported link
+    field(FLNK, "$(P)Status")
+}
+record(bi, "$(P)Status")
+{
+    field(ZNAM, "Not OK")
+    field(ONAM, "OK")
+    field(ZSV,  "MAJOR")
+    field(INP,  "$(P)StatusCalc")
 }
 record(stringin, "$(P)HwDate")
 {
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))HwDate")
     field(VAL,  "Unknown")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)HwRev")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))HwRev")
     field(VAL,  "0")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)HwVerStr")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
 }
 record(longin, "$(P)HwVer")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))HwVer")
     field(VAL,  "0")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)HwVerStr")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
+}
+record(scalcout, "$(P)HwVerStr")
+{
+    field(DESC, "HW version concatenated")
+    field(INPA, "$(P)HwVer NPP MS")
+    field(INPB, "$(P)HwRev NPP MS")
+    field(CALC, "PRINTF('%i',A)+'.'+PRINTF('%i',B)")
 }
 record(stringin, "$(P)FwDate")
 {
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))FwDate")
     field(VAL,  "Unknown")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)FwRev")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))FwRev")
     field(VAL,  "0")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)FwVerStr")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
 }
 record(longin, "$(P)FwVer")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))FwVer")
     field(VAL,  "0")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)FwVerStr")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
 }
-record(fanout, "$(P)VerFanout")
+record(scalcout, "$(P)FwVerStr")
 {
-    field(DESC, "Version records fanout")
-    field(LNK1, "$(P)HwVer")
-    field(LNK2, "$(P)HwRev")
-    field(LNK3, "$(P)HwDate")
-    field(LNK4, "$(P)FwVer")
-    field(LNK5, "$(P)FwRev")
-    field(LNK6, "$(P)FwDate")
-}
-record(calcout, "$(P)VerProc")
-{
-    field(DESC, "Detect version query")
-    field(INPA, "$(P)CmdReq NPP")
-    field(INPB, "$(P)CmdRsp NPP")
-    field(CALC, "(A=2)&&(B=1)")
-    field(OUT,  "$(P)VerFanout.PROC")
-    field(OOPT, "When Non-zero")
-    field(OEVT, "1")
+    field(DESC, "FW version concatenated")
+    field(INPA, "$(P)FwVer NPP MS")
+    field(INPB, "$(P)FwRev NPP MS")
+    field(CALC, "PRINTF('%i',A)+'.'+PRINTF('%i',B)")
 }
 record(bi, "$(P)Supported")
 {
@@ -135,6 +197,7 @@ record(bi, "$(P)Supported")
     field(SCAN, "Passive")
     field(PINI, "YES")
     field(ZNAM, "Not supported")
+    field(ZSV,  "MAJOR")
     field(ONAM, "Supported")
 }
 record(mbbi, "$(P)Verified")
@@ -158,6 +221,7 @@ record(mbbi, "$(P)Verified")
     field(FRSV, "MAJOR")
     field(EIVL, "5")
     field(EIST, "Type & version OK")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(mbbi, "$(P)HwType")
 {
@@ -179,6 +243,7 @@ record(mbbi, "$(P)HwType")
     field(TEVL, "161")
     field(ELVL, "162")
     field(TVVL, "170")
+    field(TTVL, "45")
     field(ZRST, "ROC")
     field(ONST, "AROC")
     field(TWST, "HROC")
@@ -192,6 +257,7 @@ record(mbbi, "$(P)HwType")
     field(TEST, "ACPC FEM")
     field(ELST, "FFC")
     field(TVST, "FEM")
+    field(TTST, "ADCROC")
 }
 record(mbbo, "$(P)CfgSection")
 {
@@ -232,4 +298,167 @@ record(mbbo, "$(P)CfgSection")
     field(FTST, "Section E")
     field(FFVL, "70")
     field(FFST, "Section F")
+}
+record(mbbi, "$(P)UpgradeStatus")
+{
+    field(DESC, "Remote upgrade status")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UpgradeStatus")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "Not supported")
+    field(ONVL, "1")
+    field(ONST, "Not started")
+    field(TWVL, "2")
+    field(TWST, "In progress")
+    field(THVL, "3")
+    field(THST, "Complete")
+    field(FRVL, "4")
+    field(FRST, "Canceled")
+    field(FVVL, "5")
+    field(FVST, "Init failed")
+    field(SXVL, "5")
+    field(SXST, "User aborted")
+}
+record(longin, "$(P)UpgradeSize")
+{
+    field(DESC, "Total firmware size in bytes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UpgradeSize")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(EGU,  "B")
+}
+record(longin, "$(P)UpgradePos")
+{
+    field(DESC, "Bytes sent to remote party")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UpgradePos")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(EGU,  "B")
+}
+record(longout, "$(P)UpgradePktSize")
+{
+    field(DESC, "Number of bytes per packet")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))UpgradePktSize")
+    field(EGU,  "B")
+    field(ASG,  "BEAMLINE")
+}
+record(longin, "$(P)UpgradePktSize_RBV")
+{
+    field(DESC, "RB Number of bytes per packet")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))UpgradePktSize")
+    field(EGU,  "B")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(waveform, "$(P)UpgradeFile")
+{
+    field(DESC, "New firmware file to be programed")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT))UpgradeFile")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(ASG,  "BEAMLINE")
+}
+record(bo, "$(P)UpgradeAbort")
+{
+    field(DESC, "Abort current upgrade sequence")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))UpgradeAbort")
+    field(ASG,  "BEAMLINE")
+    field(ZNAM, "No action")
+    field(ONAM, "Abort")
+}
+# Periodic .5 second sseq record serializes processing of user configurable
+# periodic records. When run in parallel they would fight for CmdReq, where
+# only one request can be on-going until response is received.
+# *Refresh records heavily depend on SCAN period to be .5 second.
+record(sseq, "$(P)PeriodicCheckUp")
+{
+    field(DESC,  "Periodic check fanout")
+    field(SCAN,  ".5 second")
+    field(DOL1,  "1")
+    field(DOL2,  "1")
+    field(DOL3,  "1")
+    field(LNK1,  "$(P)StatusRefresh.PROC CA")
+    field(LNK2,  "$(P)CountersRefresh.PROC CA")
+    field(LNK3,  "$(P)TempRefresh.PROC CA")
+    field(WAIT1, "Wait")
+    field(WAIT2, "Wait")
+    field(WAIT3, "Wait")
+}
+record(longin, "$(P)StatusRefreshInt")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Periodically update status interval")
+    field(FLNK, "$(P)StatusRefresh PP")
+    field(PINI, "YES")
+    field(VAL,  "0") # Refresh interval in seconds, 0 to disable
+    field(EGU,  "seconds")
+}
+record(calcout, "$(P)StatusRefresh")
+{
+    field(DESC, "Periodically update status")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)StatusRefreshInt NPP")
+    field(INPB, "$(P)StatusRefresh NPP")
+    field(INPC, "$(P)CmdRsp NPP")
+    # Possibly delays Transition To Zero for 2 seconds if CmdRsp=Waiting
+    field(CALC, "(C=2||A=0||((B+1)<(2*A)))?B+1:0")
+    field(OCAL, "3") # Send Read status
+    field(OUT,  "$(P)CmdReq PP")
+    field(OOPT, "Transition To Zero")
+    field(DOPT, "Use OCAL")
+}
+record(longout, "$(P)CountersRefreshInt")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Periodically update counters interval")
+    field(FLNK, "$(P)CountersRefresh PP")
+    field(PINI, "YES")
+    field(VAL,  "0") # Refresh interval in seconds, 0 to disable
+    field(EGU,  "seconds")
+}
+record(calcout, "$(P)CountersRefresh")
+{
+    info(autosaveFields, "INPA")
+    field(DESC, "Periodically update counters")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CountersRefreshInt NPP")
+    field(INPB, "$(P)CountersRefresh NPP")
+    field(INPC, "$(P)CmdRsp NPP")
+    # Possibly delay Transition To Zero for 1 second if CmdRsp=Waiting
+    field(CALC, "(C=2||A=0||((B+1)<(2*A)))?B+1:0")
+    field(OCAL, "8") # Send Read counters
+    field(OUT,  "$(P)CmdReq PP")
+    field(OOPT, "Transition To Zero")
+    field(DOPT, "Use OCAL")
+}
+record(longout, "$(P)TempRefreshInt")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Periodically update temp. interval")
+    field(FLNK, "$(P)TempRefresh PP")
+    field(PINI, "YES")
+    field(VAL,  "0") # Refresh interval in seconds, 0 to disable. Override in modules which support it
+    field(EGU,  "seconds")
+}
+record(calcout, "$(P)TempRefresh")
+{
+    field(DESC, "Periodically update temperatures")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)TempRefreshInt NPP")
+    field(INPB, "$(P)TempRefresh NPP")
+    field(INPC, "$(P)CmdRsp NPP")
+    # Possibly delay Transition To Zero for 1 second if CmdRsp=Waiting
+    field(CALC, "(C=2||A=0||((B+1)<(2*A)))?B+1:0")
+    field(OCAL, "11") # Send Read temperatures
+    field(OUT,  "$(P)CmdReq PP")
+    field(OOPT, "Transition To Zero")
+    field(DOPT, "Use OCAL")
 }

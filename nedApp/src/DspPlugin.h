@@ -45,22 +45,24 @@ class DspPlugin : public BaseModulePlugin {
          */
         static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
 
-    private:
         /**
-         * Verify the DISCOVER response is from DSP.
+         * Member counterpart of parseVersionRsp().
          *
-         * @param[in] packet with response to DISCOVER
-         * @return true if packet was parsed and type of module is DSP.
+         * @see DspPlugin::parseVersionRsp()
          */
-        bool rspDiscover(const DasPacket *packet);
+        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        {
+            return parseVersionRsp(packet, version);
+        }
 
         /**
-         * Overrided READ_VERSION handler.
+         * Configured version must match actual.
          *
-         * @param[in] packet with response to READ_VERSION
-         * @return true if packet was parsed and module version verified.
+         * @return true when they match, false otherwise.
          */
-        bool rspReadVersion(const DasPacket *packet);
+        bool checkVersion(const BaseModulePlugin::Version &version);
+
+    private:
 
         /**
          * Create and register all configuration parameters to be exposed to EPICS.
@@ -81,7 +83,7 @@ class DspPlugin : public BaseModulePlugin {
          * Create and register all status parameters to be exposed to EPICS.
          */
         void createStatusParams_v64();
-        
+
         /**
          * Create and register all counter parameters to be exposed to EPICS.
          */

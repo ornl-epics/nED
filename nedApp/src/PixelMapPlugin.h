@@ -149,7 +149,8 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         std::vector<uint32_t> m_map; //!< Pixel mapping, index is raw pixel id, value is translated pixel id
 
     private: // asyn parameters
-        #define FIRST_PIXELMAPPLUGIN_PARAM ErrImport
+        #define FIRST_PIXELMAPPLUGIN_PARAM FilePath
+        int FilePath;       //!< Absolute path to pixel map file
         int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
         int CntUnmap;       //!< Number of unmapped pixels
         int CntError;       //!< Number of generic error pixel ids detected

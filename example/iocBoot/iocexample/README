@@ -1,0 +1,8 @@
+Default st.cmd file imports detectors configuration from a file called
+detectors. This is of the same format as st.cmd and any valid EPICS shell
+command can be put in there. However the file has been split for easy detector
+configuration with the help of DiscoverPlugin. When the detectors setup is not
+known or needs to be update, use 'Global discover' button in DiscoverPlugin.
+Then select 'substitution format' output mode and copy&paste discovered modules
+into detectors.substitution file in this directery. Run `make detectors' and
+the configuration is complete.
