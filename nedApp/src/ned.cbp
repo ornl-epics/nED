@@ -52,6 +52,8 @@
 		<Unit filename="AdaraPlugin.h" />
 		<Unit filename="AdcRocPlugin.cpp" />
 		<Unit filename="AdcRocPlugin.h" />
+		<Unit filename="AdcRocPlugin_v02.cpp" />
+		<Unit filename="AdcRocPlugin_v03.cpp" />
 		<Unit filename="ArocPlugin.cpp" />
 		<Unit filename="ArocPlugin.h" />
 		<Unit filename="ArocPlugin_v23.cpp" />

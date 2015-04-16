@@ -52,8 +52,8 @@ void RocPlugin::createStatusParams_v45()
     createStatusParam("TclkHigh",             0x3,  1,  4); // TCLK Got HIGH                (0=no,1=yes)
     createStatusParam("TclkLow",              0x3,  1,  3); // TCLK Got LOW                 (0=no,1=yes)
     createStatusParam("CalcActive",           0x3,  1,  2); // Calculation: Active          (0=not active,1=active)
-    createStatusParam("Acquiring",            0x3,  1,  1); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
-    createStatusParam("Discovered",           0x3,  1,  0); // Discovered                   (0=not discovered,1=discovered)
+    createStatusParam("Acquiring",            0x3,  1,  1); // Acquiring data               (0=not acquiring [alarm],1=acquiring, archive:monitor)
+    createStatusParam("Discovered",           0x3,  1,  0); // Discovered                   (0=not discovered,1=discovered, archive:monitor)
 }
 
 void RocPlugin::createConfigParams_v45()

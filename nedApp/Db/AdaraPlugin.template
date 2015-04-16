@@ -4,7 +4,7 @@ include "BaseSocketPlugin.include"
 # Upgrade BasePlugin::Enable PV
 record(bo, "$(P)Enable")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     info(autosaveFields, "VAL")
     field(ZSV,  "MAJOR")
     field(PINI, "YES")
@@ -28,7 +28,7 @@ record(longout, "$(P)CheckInt")
 }
 record(stringin, "$(P)ClientIp")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:00:10, VAL")
     field(FLNK, "$(P)StatusCalc.PROC")
 }
 
@@ -73,6 +73,7 @@ record(scalcout, "$(P)StatusCalc")
 }
 record(bi, "$(P)Status")
 {
+    info(archive, "Monitor, 00:00:10, VAL")
     field(DESC, "ADARA plugin status")
     field(ZNAM, "Not connected")
     field(ONAM, "Connected")
