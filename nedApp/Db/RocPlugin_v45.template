@@ -23,3 +23,11 @@ record(longin, "$(P)FwRev")
     field(HIGH, "6")
     field(LOW,  "4")
 }
+
+# ROC 4.x don't provide Configured register
+record(calc, "$(P)HwStatus")
+{
+    #field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
+    field(CALC, "B=0")
+}
