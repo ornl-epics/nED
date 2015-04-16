@@ -17,3 +17,83 @@ record(calc, "$(P)HwStatus")
     field(INPB, "$(P)Discovered.SEVR NPP")
     field(CALC, "A=0&&B=0&&C=0")
 }
+# GSG: following records are for Pulse Magnet OPI Interface
+record(calc, "$(P)Ch1:IdleSampPeriodR")
+{
+    field(INPA, "$(P)Ch1:ADC:RateCoef CP MS")
+    field(CALC, "(A+1)*.01")
+    field(EGU, "mS")
+    #field(OOPT, "On Change")
+}
+record(ao, "$(P)Ch1:IdleSampPeriodW")
+{
+    field(FLNK, "$(P)Ch1:IdleSampPeriodC")
+    field(DRVH, "655")
+    field(DRVL, "0.01")
+    field(EGU, "mS")
+}
+record(calcout, "$(P)Ch1:IdleSampPeriodC")
+{
+    field(INPA, "$(P)Ch1:IdleSampPeriodW")
+    field(CALC, "(A/.01) - 1")
+    field(OUT, "$(P)Ch1:ADC:RateCoef PP")
+}
+record(calc, "$(P)Ch1:ThresholdR")
+{
+    field(INPA, "$(P)Ch1:ADC:Threshold CP MS")
+    field(INPB, "$(P)AdcRange.RVAL CP MS")
+    field(CALC, "A*((B+1)*0.15)")
+    field(EGU, "mV")
+}
+record(ao, "$(P)Ch1:ThresholdW")
+{
+    field(FLNK, "$(P)Ch1:ThresholdC")
+    field(DRVH, "9830")
+    field(DRVL, "0")
+    field(EGU, "mV")
+}
+record(calcout, "$(P)Ch1:ThresholdC")
+{
+    field(INPA, "$(P)Ch1:ThresholdW CP MS")
+    field(INPB, "$(P)AdcRange.RVAL CP MS")
+    field(CALC, "A/((B+1)*0.15)")
+    field(OUT, "$(P)Ch1:ADC:Threshold PP")
+}
+record(calc, "$(P)DelayFromTsyncR")
+{
+    field(INPA, "$(P)PmTsyncDelay CP MS")
+    field(CALC, "A*.05")
+    field(EGU, "uS")
+}
+record(ao, "$(P)DelayFromTsyncW")
+{
+    field(FLNK, "$(P)DelayFromTsyncC")
+    field(DRVH, "838860")
+    field(DRVL, "0")
+    field(EGU, "uS")
+}
+record(calcout, "$(P)DelayFromTsyncC")
+{
+    field(INPA, "$(P)DelayFromTsyncW CP MS")
+    field(CALC, "A/.05")
+    field(OUT, "$(P)PmTsyncDelay PP")
+}
+record(calc, "$(P)MinRepeatTimeR")
+{
+    field(INPA, "$(P)PmRatePeriod CP MS")
+    field(CALC, "A*(8/(1000*60))")
+    field(EGU, "min")
+}
+record(ao, "$(P)MinRepeatTimeW")
+{
+    field(FLNK, "$(P)MinRepeatTimeC")
+    field(DRVH, "8.7")
+    field(DRVL, "0")
+    field(EGU, "min")
+}
+record(calcout, "$(P)MinRepeatTimeC")
+{
+    field(INPA, "$(P)MinRepeatTimeW CP MS")
+    field(CALC, "(A*1000*60)/8")
+    field(OUT, "$(P)PmRatePeriod PP")
+}
