@@ -260,7 +260,7 @@ void ArocPlugin::createConfigParams_v23()
 
     createConfigParam("Ch1:A:AdcOffset",  '2', 0x10,  8,  0,  100); // Chan1 A ADC offset
     createConfigParam("Ch2:A:AdcOffset",  '2', 0x11,  8,  0,  100); // Chan2 A ADC offset
-    createConfigParam("Ch3:A:AdcOffset",  '2', 0x 8,  8,  0,  100); // Chan3 A ADC offset
+    createConfigParam("Ch3:A:AdcOffset",  '2', 0x12,  8,  0,  100); // Chan3 A ADC offset
     createConfigParam("Ch4:A:AdcOffset",  '2', 0x13,  8,  0,  100); // Chan4 A ADC offset
     createConfigParam("Ch5:A:AdcOffset",  '2', 0x14,  8,  0,  100); // Chan5 A ADC offset
     createConfigParam("Ch6:A:AdcOffset",  '2', 0x15,  8,  0,  100); // Chan6 A ADC offset
