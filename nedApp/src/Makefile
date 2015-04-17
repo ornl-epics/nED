@@ -51,6 +51,7 @@ PROD_LIBS += calc
 PROD_SRCS  += ned_registerRecordDeviceDriver.cpp
 PROD_SRCS  += main.cpp
 PROD_SRCS  += GlobalCon.st
+PROD_SRCS  += ApplyConfig.st
 
 # Static library
 LIBRARY = ned
@@ -60,6 +61,7 @@ SHARED_LIBRARIES = NO
 INC += CircularBuffer.h
 
 LIB_SRCS  += GlobalCon.st
+LIB_SRCS  += ApplyConfig.st
 $(PROD_NAME)_SRCS  += Common.cpp
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp
