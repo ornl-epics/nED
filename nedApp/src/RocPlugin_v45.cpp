@@ -155,7 +155,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch1:MinAdc",       1, 'E',  0x0, 14, 0, 100);// Chan1 Minimum ADC
     createConfigParam("Ch1:MaxAdc",       1, 'E',  0x1, 14, 0, 1000); // Chan1 Maximum ADC
     createConfigParam("Ch1:IntRelease",   1, 'E',  0x2,  9, 0, 506); // Chan1 Integrator release p
-    createConfigParam("Ch1:MinPulseWidth",1, 'E',  0x3,  9, 0, 1);  // Chan1 min pulse width
+    createConfigParam("Ch1:MinDiscrimWidth",1, 'E',  0x3,  9, 0, 1);  // Chan1 min pulse width
     createConfigParam("Ch1:VetoInhibit",  1, 'E',  0x4, 12, 0, 0);  // Chan1 veto inhibit point
     createConfigParam("Ch1:NegDiscrTime", 1, 'E',  0x5, 12, 0, 0);  // Chan1 negative discr timeout
     createConfigParam("Ch1:Sample1",      1, 'E',  0x6,  9, 0, 2);  // Chan1 Sample 1 point [0:10]
@@ -182,7 +182,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch2:MinAdc",       2, 'E',  0x0, 14, 0, 100);// Chan2 Minimum ADC
     createConfigParam("Ch2:MaxAdc",       2, 'E',  0x1, 14, 0, 1000); // Chan2 Maximum ADC
     createConfigParam("Ch2:IntRelease",   2, 'E',  0x2,  9, 0, 506); // Chan2 Integrator release p
-    createConfigParam("Ch2:MinPulseWidth",2, 'E',  0x3,  9, 0, 1);  // Chan2 min pulse width
+    createConfigParam("Ch2:MinDiscrimWidth",2, 'E',  0x3,  9, 0, 1);  // Chan2 min pulse width
     createConfigParam("Ch2:VetoInhibit",  2, 'E',  0x4, 12, 0, 0);  // Chan2 veto inhibit point
     createConfigParam("Ch2:NegDiscrTime", 2, 'E',  0x5, 12, 0, 0);  // Chan2 negative discr timeout
     createConfigParam("Ch2:Sample1",      2, 'E',  0x6,  9, 0, 2);  // Chan2 Sample 1 point [0:10]
@@ -209,7 +209,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch3:MinAdc",       3, 'E',  0x0, 14, 0, 100);// Chan3 Minimum ADC
     createConfigParam("Ch3:MaxAdc",       3, 'E',  0x1, 14, 0, 1000); // Chan3 Maximum ADC
     createConfigParam("Ch3:IntRelease",   3, 'E',  0x2,  9, 0, 506); // Chan3 Integrator release p
-    createConfigParam("Ch3:MinPulseWidth",3, 'E',  0x3,  9, 0, 1);  // Chan3 min pulse width
+    createConfigParam("Ch3:MinDiscrimWidth",3, 'E',  0x3,  9, 0, 1);  // Chan3 min pulse width
     createConfigParam("Ch3:VetoInhibit",  3, 'E',  0x4, 12, 0, 0);  // Chan3 veto inhibit point
     createConfigParam("Ch3:NegDiscrTime", 3, 'E',  0x5, 12, 0, 0);  // Chan3 negative discr timeout
     createConfigParam("Ch3:Sample1",      3, 'E',  0x6,  9, 0, 2);  // Chan3 Sample 1 point [0:10]
@@ -236,7 +236,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch4:MinAdc",       4, 'E',  0x0, 14, 0, 100);// Chan4 Minimum ADC
     createConfigParam("Ch4:MaxAdc",       4, 'E',  0x1, 14, 0, 1000); // Chan4 Maximum ADC
     createConfigParam("Ch4:IntRelease",   4, 'E',  0x2,  9, 0, 506); // Chan4 Integrator release p
-    createConfigParam("Ch4:MinPulseWidth",4, 'E',  0x3,  9, 0, 1);  // Chan4 min pulse width
+    createConfigParam("Ch4:MinDiscrimWidth",4, 'E',  0x3,  9, 0, 1);  // Chan4 min pulse width
     createConfigParam("Ch4:VetoInhibit",  4, 'E',  0x4, 12, 0, 0);  // Chan4 veto inhibit point
     createConfigParam("Ch4:NegDiscrTime", 4, 'E',  0x5, 12, 0, 0);  // Chan4 negative discr timeout
     createConfigParam("Ch4:Sample1",      4, 'E',  0x6,  9, 0, 2);  // Chan4 Sample 1 point [0:10]
@@ -263,7 +263,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch5:MinAdc",       5, 'E',  0x0, 14, 0, 100);// Chan5 Minimum ADC
     createConfigParam("Ch5:MaxAdc",       5, 'E',  0x1, 14, 0, 1000); // Chan5 Maximum ADC
     createConfigParam("Ch5:IntRelease",   5, 'E',  0x2,  9, 0, 506); // Chan5 Integrator release p
-    createConfigParam("Ch5:MinPulseWidth",5, 'E',  0x3,  9, 0, 1);  // Chan5 min pulse width
+    createConfigParam("Ch5:MinDiscrimWidth",5, 'E',  0x3,  9, 0, 1);  // Chan5 min pulse width
     createConfigParam("Ch5:VetoInhibit",  5, 'E',  0x4, 12, 0, 0);  // Chan5 veto inhibit point
     createConfigParam("Ch5:NegDiscrTime", 5, 'E',  0x5, 12, 0, 0);  // Chan5 negative discr timeout
     createConfigParam("Ch5:Sample1",      5, 'E',  0x6,  9, 0, 2);  // Chan5 Sample 1 point [0:10]
@@ -290,7 +290,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch6:MinAdc",       6, 'E',  0x0, 14, 0, 100);// Chan6 Minimum ADC
     createConfigParam("Ch6:MaxAdc",       6, 'E',  0x1, 14, 0, 1000); // Chan6 Maximum ADC
     createConfigParam("Ch6:IntRelease",   6, 'E',  0x2,  9, 0, 506); // Chan6 Integrator release p
-    createConfigParam("Ch6:MinPulseWidth",6, 'E',  0x3,  9, 0, 1);  // Chan6 min pulse width
+    createConfigParam("Ch6:MinDiscrimWidth",6, 'E',  0x3,  9, 0, 1);  // Chan6 min pulse width
     createConfigParam("Ch6:VetoInhibit",  6, 'E',  0x4, 12, 0, 0);  // Chan6 veto inhibit point
     createConfigParam("Ch6:NegDiscrTime", 6, 'E',  0x5, 12, 0, 0);  // Chan6 negative discr timeout
     createConfigParam("Ch6:Sample1",      6, 'E',  0x6,  9, 0, 2);  // Chan6 Sample 1 point [0:10]
@@ -317,7 +317,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch7:MinAdc",       7, 'E',  0x0, 14, 0, 100);// Chan7 Minimum ADC
     createConfigParam("Ch7:MaxAdc",       7, 'E',  0x1, 14, 0, 1000); // Chan7 Maximum ADC
     createConfigParam("Ch7:IntRelease",   7, 'E',  0x2,  9, 0, 506); // Chan7 Integrator release p
-    createConfigParam("Ch7:MinPulseWidth",7, 'E',  0x3,  9, 0, 1);  // Chan7 min pulse width
+    createConfigParam("Ch7:MinDiscrimWidth",7, 'E',  0x3,  9, 0, 1);  // Chan7 min pulse width
     createConfigParam("Ch7:VetoInhibit",  7, 'E',  0x4, 12, 0, 0);  // Chan7 veto inhibit point
     createConfigParam("Ch7:NegDiscrTime", 7, 'E',  0x5, 12, 0, 0);  // Chan7 negative discr timeout
     createConfigParam("Ch7:Sample1",      7, 'E',  0x6,  9, 0, 2);  // Chan7 Sample 1 point [0:10]
@@ -344,7 +344,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch8:MinAdc",       8, 'E',  0x0, 14, 0, 100);// Chan8 Minimum ADC
     createConfigParam("Ch8:MaxAdc",       8, 'E',  0x1, 14, 0, 1000); // Chan8 Maximum ADC
     createConfigParam("Ch8:IntRelease",   8, 'E',  0x2,  9, 0, 506); // Chan8 Integrator release p
-    createConfigParam("Ch8:MinPulseWidth",8, 'E',  0x3,  9, 0, 1);  // Chan8 min pulse width
+    createConfigParam("Ch8:MinDiscrimWidth",8, 'E',  0x3,  9, 0, 1);  // Chan8 min pulse width
     createConfigParam("Ch8:VetoInhibit",  8, 'E',  0x4, 12, 0, 0);  // Chan8 veto inhibit point
     createConfigParam("Ch8:NegDiscrTime", 8, 'E',  0x5, 12, 0, 0);  // Chan8 negative discr timeout
     createConfigParam("Ch8:Sample1",      8, 'E',  0x6,  9, 0, 2);  // Chan8 Sample 1 point [0:10]
