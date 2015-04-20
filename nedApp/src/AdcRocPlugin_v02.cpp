@@ -57,9 +57,9 @@ void AdcRocPlugin::createStatusParams_v02()
       createStatusParam("ErrLength",            0x5,  1,  5);   // LVDS packet length error
       createStatusParam("ErrType",              0x5,  1,  4);   // LVDS data type error
       createStatusParam("ErrParity",            0x5,  1,  3);   // LVDS parity error
-      createStatusParam("Acquiring",            0x5,  1,  2);   // Acquiring data
-      createStatusParam("Configured",           0x5,  1,  1);   // Module configured
-      createStatusParam("Discovered",           0x5,  1,  0);   // Module discovered
+      createStatusParam("Acquiring",            0x5,  1,  2);   // Acquiring data                    (0=not acquiring [alarm],1=acquiring, archive:monitor)
+      createStatusParam("Configured",           0x5,  1,  1);   // Module configured                 (0=not configured [alarm],1=configured, archive:monitor)
+      createStatusParam("Discovered",           0x5,  1,  0);   // Module discovered                 (0=not discovered,1=discovered, archive:monitor)
 }
 
 void AdcRocPlugin::createCounterParams_v02()
@@ -88,7 +88,7 @@ void AdcRocPlugin::createConfigParams_v02()
       createConfigParam("Ch8:ADC:PositionIdx",  '1', 0x1E, 32, 0, 0x60070000); // Chan8 ADC position index
       createConfigParam("PositionIdxBus",       '1', 0x20, 32, 0, 0);          // Pos Index bus *** UNUSED ***
 
-      createConfigParam("Ch1:ADC:Threshold",    'C', 0x0, 16, 0, 10);  // Chan1 ADC Threshold 
+      createConfigParam("Ch1:ADC:Threshold",    'C', 0x0, 16, 0, 10);  // Chan1 ADC Threshold
       createConfigParam("Ch2:ADC:Threshold",    'C', 0x1, 16, 0, 10);  // Chan2 ADC Threshold
       createConfigParam("Ch3:ADC:Threshold",    'C', 0x2, 16, 0, 10);  // Chan3 ADC Threshold
       createConfigParam("Ch4:ADC:Threshold",    'C', 0x3, 16, 0, 10);  // Chan4 ADC Threshold

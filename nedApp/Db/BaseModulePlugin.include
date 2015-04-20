@@ -78,11 +78,8 @@ record(fanout, "$(P)RspCheck")
 # MAJOR alarm is captured in overall status.
 record(calc, "$(P)HwStatus")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "Hardware status")
-    field(INPA, "$(P)Configured.SEVR NPP")
-    field(CALC, "A=0")
-    field(LOW,  "0")
-    field(LSV,  "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
 # Detector is considered missing if it doesn't respond to at 2 or more
@@ -90,6 +87,7 @@ record(calc, "$(P)HwStatus")
 # afterwards.
 record(calc, "$(P)MissCount")
 {
+    info(archive, "Monitor, 00:00:10, VAL")
     field(DESC, "Count missing responses")
     field(INPA, "$(P)CmdRsp NPP")
     field(INPB, "$(P)MissCount NPP")
@@ -116,6 +114,7 @@ record(calc, "$(P)StatusCalc")
 }
 record(bi, "$(P)Status")
 {
+    info(archive, "Monitor, 00:00:10, VAL")
     field(ZNAM, "Not OK")
     field(ONAM, "OK")
     field(ZSV,  "MAJOR")

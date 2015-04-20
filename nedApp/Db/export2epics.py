@@ -141,6 +141,8 @@ def parse_one(type, params_str, desc_str, extra_str):
                 param['low'] = e[4:].strip(" ")
             elif e.startswith("high:"):
                 param['high'] = e[5:].strip(" ")
+            elif e.startswith("archive:"):
+                param['archive'] = e[8:].strip(" ")
             elif "=" in e:
                 if "options" not in param:
                     param['options'] = []
@@ -286,6 +288,8 @@ def generate_out_db_record(param, outfile):
 
     outfile.write("record({0}, \"$(P){1}\")\n".format(type, param['name']))
     outfile.write("{\n")
+    if "archive" in param and param['archive'] == "monitor":
+        outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
     outfile.write("    info(autosaveFields, \"VAL\")\n")
     outfile.write("    field(ASG,  \"BEAMLINE\")\n")
     outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
@@ -357,6 +361,8 @@ def generate_in_db_record(param, outfile):
     if "calc" in param:
         outfile.write("record(calc, \"$(P){0}\")\n".format(param['name']))
         outfile.write("{\n")
+        if "archive" in param and param['archive'] == "monitor":
+            outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
         outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
         outfile.write("    field(INPA, \"$(P){0}_Raw NPP\")\n".format(param['name']))
         outfile.write("    field(CALC, \"{0}\")\n".format(param['calc']))
@@ -369,6 +375,8 @@ def generate_in_db_record(param, outfile):
     else:
         outfile.write("record({0}, \"$(P){1}\")\n".format(type, param['name']))
         outfile.write("{\n")
+        if "archive" in param and param['archive'] == "monitor":
+            outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
 
     outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
     outfile.write("    field(DTYP, \"asynInt32\")\n")

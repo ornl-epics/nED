@@ -314,8 +314,8 @@ void DspPlugin::createConfigParams_v63() {
 void DspPlugin::createStatusParams_v63()
 {
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
-    createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured)
-    createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
+    createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured, archive:monitor)
+    createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring [alarm],1=acquiring, archive:monitor)
     createStatusParam("ErrProgram",    0x0,  1,  2); // WRITE_CNFG during ACQ        (0=no error,1=error)
     createStatusParam("ErrLength",     0x0,  1,  3); // Packet length error          (0=no error,1=error)
     createStatusParam("ErrCmdBad",     0x0,  1,  4); // Unrecognized command error   (0=no error,1=error)
