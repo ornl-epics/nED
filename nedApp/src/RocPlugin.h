@@ -190,6 +190,16 @@ class RocPlugin : public BaseModulePlugin {
         void createConfigParams_v45();
 
         /**
+         * Create and register all status ROC v4.7 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v47();
+
+        /**
+         * Create and register all config ROC v4.7 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v47();
+
+        /**
          * Create and register all status ROC v5.1 parameters to be exposed to EPICS.
          */
         void createStatusParams_v51();

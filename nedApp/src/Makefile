@@ -85,6 +85,7 @@ $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
+$(PROD_NAME)_SRCS  += RocPlugin_v47.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp

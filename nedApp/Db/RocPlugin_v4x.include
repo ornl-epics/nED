@@ -1,0 +1,182 @@
+# Common PVs for all ROC4.x
+
+# Upgrade CfgChannel record with added 8 channels
+record(mbbo, "$(P)CfgChannel")
+{
+    field(ONVL, "1") 
+    field(ONST, "Channel 1")
+    field(TWVL, "2") 
+    field(TWST, "Channel 2")
+    field(THVL, "3")
+    field(THST, "Channel 3")
+    field(FRVL, "4")
+    field(FRST, "Channel 4")
+    field(FVVL, "5")
+    field(FVST, "Channel 5")
+    field(SXVL, "6")
+    field(SXST, "Channel 6")
+    field(SVVL, "7")
+    field(SVST, "Channel 7")
+    field(EIVL, "8")
+    field(EIST, "Channel 8")
+}
+
+# ROC 4.x don't provide Configured register
+record(calc, "$(P)HwStatus")
+{
+    #field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
+    field(CALC, "B=0")
+}
+
+# Fanout records to synchronize channel configurations
+# In later firmwares these were implemented there.
+record(dfanout, "$(P)Sample1")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Sample 1 point [0:10]")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:Sample1 PP")
+    field(OUTB, "$(P)Ch2:Sample1 PP")
+    field(OUTC, "$(P)Ch3:Sample1 PP")
+    field(OUTD, "$(P)Ch4:Sample1 PP")
+    field(OUTE, "$(P)Ch5:Sample1 PP")
+    field(OUTF, "$(P)Ch6:Sample1 PP")
+    field(OUTG, "$(P)Ch7:Sample1 PP")
+    field(OUTH, "$(P)Ch8:Sample1 PP")
+    field(LOPR, "0")
+    field(HOPR, "511")
+    field(VAL,  "2")
+}
+record(dfanout, "$(P)Sample2")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Sample 1 point [0:10]")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:Sample2 PP")
+    field(OUTB, "$(P)Ch2:Sample2 PP")
+    field(OUTC, "$(P)Ch3:Sample2 PP")
+    field(OUTD, "$(P)Ch4:Sample2 PP")
+    field(OUTE, "$(P)Ch5:Sample2 PP")
+    field(OUTF, "$(P)Ch6:Sample2 PP")
+    field(OUTG, "$(P)Ch7:Sample2 PP")
+    field(OUTH, "$(P)Ch8:Sample2 PP")
+    field(LOPR, "0")
+    field(HOPR, "511")
+    field(VAL,  "14")
+}
+record(dfanout, "$(P)IntRelease")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Integrator release point")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:IntRelease PP")
+    field(OUTB, "$(P)Ch2:IntRelease PP")
+    field(OUTC, "$(P)Ch3:IntRelease PP")
+    field(OUTD, "$(P)Ch4:IntRelease PP")
+    field(OUTE, "$(P)Ch5:IntRelease PP")
+    field(OUTF, "$(P)Ch6:IntRelease PP")
+    field(OUTG, "$(P)Ch7:IntRelease PP")
+    field(OUTH, "$(P)Ch8:IntRelease PP")
+    field(LOPR, "0")
+    field(HOPR, "511")
+    field(VAL,  "506")
+}
+record(dfanout, "$(P)MinAdc")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Minimum ADC")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:MinAdc PP")
+    field(OUTB, "$(P)Ch2:MinAdc PP")
+    field(OUTC, "$(P)Ch3:MinAdc PP")
+    field(OUTD, "$(P)Ch4:MinAdc PP")
+    field(OUTE, "$(P)Ch5:MinAdc PP")
+    field(OUTF, "$(P)Ch6:MinAdc PP")
+    field(OUTG, "$(P)Ch7:MinAdc PP")
+    field(OUTH, "$(P)Ch8:MinAdc PP")
+    field(LOPR, "0")
+    field(HOPR, "16383")
+    field(VAL,  "100")
+}
+record(dfanout, "$(P)MaxAdc")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Maximum ADC")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:MaxAdc PP")
+    field(OUTB, "$(P)Ch2:MaxAdc PP")
+    field(OUTC, "$(P)Ch3:MaxAdc PP")
+    field(OUTD, "$(P)Ch4:MaxAdc PP")
+    field(OUTE, "$(P)Ch5:MaxAdc PP")
+    field(OUTF, "$(P)Ch6:MaxAdc PP")
+    field(OUTG, "$(P)Ch7:MaxAdc PP")
+    field(OUTH, "$(P)Ch8:MaxAdc PP")
+    field(LOPR, "0")
+    field(HOPR, "16383")
+    field(VAL,  "1000")
+}
+record(dfanout, "$(P)MinDiscrimWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Minimum discriminator width")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:MinDiscrimWidth PP")
+    field(OUTB, "$(P)Ch2:MinDiscrimWidth PP")
+    field(OUTC, "$(P)Ch3:MinDiscrimWidth PP")
+    field(OUTD, "$(P)Ch4:MinDiscrimWidth PP")
+    field(OUTE, "$(P)Ch5:MinDiscrimWidth PP")
+    field(OUTF, "$(P)Ch6:MinDiscrimWidth PP")
+    field(OUTG, "$(P)Ch7:MinDiscrimWidth PP")
+    field(OUTH, "$(P)Ch8:MinDiscrimWidth PP")
+    field(LOPR, "0")
+    field(HOPR, "511")
+    field(VAL,  "1")
+}
+record(dfanout, "$(P)MaximumSlope")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Maximum slope")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:MaximumSlope PP")
+    field(OUTB, "$(P)Ch2:MaximumSlope PP")
+    field(OUTC, "$(P)Ch3:MaximumSlope PP")
+    field(OUTD, "$(P)Ch4:MaximumSlope PP")
+    field(OUTE, "$(P)Ch5:MaximumSlope PP")
+    field(OUTF, "$(P)Ch6:MaximumSlope PP")
+    field(OUTG, "$(P)Ch7:MaximumSlope PP")
+    field(OUTH, "$(P)Ch8:MaximumSlope PP")
+    field(LOPR, "0")
+    field(HOPR, "4095")
+    field(VAL,  "0")
+}
+
+# Override CmdReq and route it through a calc PV to filter out Write config
+record(mbbo, "$(P)CmdReq")
+{
+    field(DTYP, "Soft Channel")
+    field(OUT,  "")
+    field(OUT,  "$(P)CmdReqFilter PP")
+}
+record(longout, "$(P)CmdReqRaw")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Send command to module")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CmdReq")
+}
+record(calcout, "$(P)CmdReqFilter")
+{
+    field(INPA, "$(P)CmdReq.RVAL NPP")
+    field(INPB, "$(P)CfgChannel.RVAL NPP")
+    field(CALC, "(A=33||A=48)&&B#0?0:A") # Intercept Read/Write config, sequencer will take over
+    field(OUT,  "$(P)CmdReqRaw PP")
+    field(OOPT, "When Non-zero")
+}

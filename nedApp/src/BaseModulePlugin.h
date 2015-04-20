@@ -402,7 +402,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadConfig(uint8_t channel=0);
+        virtual DasPacket::CommandType reqReadConfig();
 
         /**
          * Default handler for READ_CONFIG response.
@@ -428,10 +428,9 @@ class BaseModulePlugin : public BasePlugin {
          *
          * This function is asynchronous and does not wait for response.
          *
-         * @param[in] channel Optional channel identifier.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqWriteConfig(uint8_t channel=0);
+        virtual DasPacket::CommandType reqWriteConfig();
 
         /**
          * Default handler for READ_CONFIG response.
@@ -787,6 +786,7 @@ class BaseModulePlugin : public BasePlugin {
         int Supported;      //!< Flag whether module is supported
         int Verified;       //!< Hardware id, version and type all verified
         int CfgSection;     //!< Selected configuration section to be written
+        int CfgChannel;     //!< Selected channel to be configured
         int UpgradeFile;    //!< New firmware file to be programed
         int UpgradePktSize; //!< Max payload size for split transfer
         int UpgradeStatus;  //!< Remote upgrade status

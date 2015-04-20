@@ -65,6 +65,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("Supported",    asynParamInt32, &Supported);                // READ - Is requested module version supported (0=not supported,1=supported)
     createParam("Verified",     asynParamInt32, &Verified);                 // READ - Flag whether module type and version were verified
     createParam("CfgSection",   asynParamInt32, &CfgSection, 0x0);          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
+    createParam("CfgChannel",   asynParamInt32, &CfgChannel, 0);            // WRITE - Select channel to be configured, 0 means main configuration
     createParam("UpgradeFile",  asynParamOctet, &UpgradeFile);              // WRITE - Path to the firmware file to be programmed
     createParam("UpgradePktSize",asynParamInt32,&UpgradePktSize, 256);      // WRITE - Maximum payload size for split program file transfer
     createParam("UpgradeStatus",asynParamInt32, &UpgradeStatus, UPGRADE_NOT_SUPPORTED); // READ -Remote upgrade status
@@ -460,9 +461,18 @@ bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
     return true;
 }
 
-DasPacket::CommandType BaseModulePlugin::reqReadConfig(uint8_t channel)
+DasPacket::CommandType BaseModulePlugin::reqReadConfig()
 {
-    sendToDispatcher(DasPacket::CMD_READ_CONFIG, channel);
+    int cfgChannel = 0;
+    getIntegerParam(CfgChannel, &cfgChannel);
+
+    if (cfgChannel > m_numChannels || cfgChannel < 0) {
+        LOG_ERROR("Can not read channel %d configuration, module only supports %u channels", cfgChannel, m_numChannels);
+        return static_cast<DasPacket::CommandType>(0);
+    }
+
+    sendToDispatcher(DasPacket::CMD_READ_CONFIG, cfgChannel);
+    m_expectedChannel = cfgChannel;
     return DasPacket::CMD_READ_CONFIG;
 }
 
@@ -490,6 +500,7 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet)
         m_expectedChannel = 0;
         return false;
     }
+    m_expectedChannel = 0;
 
     // Response contains registers for all sections for a selected channel or global configuration
     uint32_t section_f = SECTION_ID(0xF, channel);
@@ -500,47 +511,37 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet)
         LOG_ERROR("Received wrong READ_CONFIG response based on length; "
                   "received %uB, expected %uB",
                   packet->getPayloadLength(), ALIGN_UP(length, 4));
-        m_expectedChannel = 0;
         return false;
     }
 
     extractParams(packet, m_configParams, m_configSectionOffsets);
-
-    m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
-    if (m_expectedChannel > 0) {
-        m_waitingResponse = reqReadConfig(m_expectedChannel);
-
-        if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
-            if (!scheduleTimeoutCallback(m_waitingResponse, NO_RESPONSE_TIMEOUT))
-                LOG_WARN("Failed to schedule CmdRsp timeout callback");
-            setIntegerParam(CmdRsp, LAST_CMD_WAIT);
-        } else {
-           setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
-        }
-
-        callParamCallbacks();
-    }
-
     return true;
 }
 
-DasPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t channel)
+DasPacket::CommandType BaseModulePlugin::reqWriteConfig()
 {
     int wordsize = (m_behindDsp ? 2 : 4);
     int cfgSection = 0;
+    int cfgChannel = 0;
     getIntegerParam(CfgSection, &cfgSection);
+    getIntegerParam(CfgChannel, &cfgChannel);
 
     if (!m_configInitialized) {
         recalculateConfigParams();
         m_configInitialized = true;
     }
 
+    if (cfgChannel > m_numChannels || cfgChannel < 0) {
+        LOG_ERROR("Can not configure channel %d, module only supports %u channels", cfgChannel, m_numChannels);
+        return static_cast<DasPacket::CommandType>(0);
+    }
+
     uint32_t payloadLength;
     if (cfgSection == 0x0) {
-        uint32_t section_f = SECTION_ID(0xF, channel);
+        uint32_t section_f = SECTION_ID(0xF, cfgChannel);
         payloadLength = m_configSectionOffsets[section_f] + m_configSectionSizes[section_f];
     } else {
-        uint32_t sectionId = SECTION_ID(cfgSection, channel);
+        uint32_t sectionId = SECTION_ID(cfgSection, cfgChannel);
         payloadLength = m_configSectionSizes[sectionId];
     }
     payloadLength *= wordsize;
@@ -562,7 +563,7 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t channel)
         int value = 0;
         uint32_t offset = it->second.offset;
 
-        if (it->second.channel != channel) {
+        if (it->second.channel != cfgChannel) {
             continue;
         } else if (cfgSection == 0x0) {
             uint32_t sectionId = SECTION_ID(it->second.section, it->second.channel);
@@ -620,7 +621,8 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t channel)
         default:
             return static_cast<DasPacket::CommandType>(0);
     }
-    sendToDispatcher(rsp, channel, data, payloadLength);
+    sendToDispatcher(rsp, cfgChannel, data, payloadLength);
+    m_expectedChannel = cfgChannel;
     return rsp;
 }
 
@@ -632,38 +634,18 @@ bool BaseModulePlugin::rspWriteConfig(const DasPacket *packet)
         return false;
     }
 
-    if (packet->cmdinfo.command != DasPacket::RSP_ACK) {
-        m_expectedChannel = 0;
-        return false;
-    }
-
     uint8_t channel = 0;
     if (packet->cmdinfo.module_type != 0)
         channel = (packet->cmdinfo.module_type & 0xF) + 1;
 
     if (channel != m_expectedChannel) {
-        LOG_WARN("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, channel);
+        LOG_WARN("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, channel);
         m_expectedChannel = 0;
         return false;
     }
+    m_expectedChannel = 0;
 
-    m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
-    if (m_expectedChannel > 0) {
-        m_waitingResponse = reqWriteConfig(m_expectedChannel);
-
-        if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
-            if (!scheduleTimeoutCallback(m_waitingResponse,
-                                         NO_RESPONSE_TIMEOUT))
-               LOG_WARN("Failed to schedule CmdRsp timeout callback");
-            setIntegerParam(CmdRsp, LAST_CMD_WAIT);
-        } else {
-            setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
-        }
-
-        callParamCallbacks();
-    }
-
-    return true;
+    return (packet->cmdinfo.command != DasPacket::RSP_ACK);
 }
 
 DasPacket::CommandType BaseModulePlugin::reqStart()

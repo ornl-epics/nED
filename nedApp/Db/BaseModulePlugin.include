@@ -298,6 +298,16 @@ record(mbbo, "$(P)CfgSection")
     field(FFVL, "15")
     field(FFST, "Section F")
 }
+record(mbbo, "$(P)CfgChannel")
+{
+    field(DESC, "Selected config channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CfgChannel")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "Main")
+}
 record(mbbi, "$(P)UpgradeStatus")
 {
     field(DESC, "Remote upgrade status")
