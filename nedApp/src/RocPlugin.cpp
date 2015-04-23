@@ -188,7 +188,7 @@ bool RocPlugin::checkVersion(const BaseModulePlugin::Version &version)
     return false;
 }
 
-bool RocPlugin::rspReadConfig(const DasPacket *packet)
+bool RocPlugin::rspReadConfig(const DasPacket *packet, uint8_t expectedChannel)
 {
     if (m_version == "v54") {
         uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
@@ -202,11 +202,9 @@ bool RocPlugin::rspReadConfig(const DasPacket *packet)
         memcpy(buffer, packet, packet->length());
         packet = reinterpret_cast<const DasPacket *>(buffer);
         const_cast<DasPacket *>(packet)->payload_length -= 4; // This is the only reason we're doing all the buffering
-
-        return BaseModulePlugin::rspReadConfig(packet);
     }
 
-    return BaseModulePlugin::rspReadConfig(packet);
+    return BaseModulePlugin::rspReadConfig(packet, expectedChannel);
 }
 
 bool RocPlugin::rspStart(const DasPacket *packet)

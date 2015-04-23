@@ -1,7 +1,7 @@
 # Common PVs for all ROC4.x
 
 # Upgrade CfgChannel record with added 8 channels
-record(mbbo, "$(P)CfgChannel")
+record(mbbi, "$(P)CfgChannel")
 {
     field(ONVL, "1") 
     field(ONST, "Channel 1")
@@ -156,27 +156,4 @@ record(dfanout, "$(P)MaximumSlope")
     field(LOPR, "0")
     field(HOPR, "4095")
     field(VAL,  "0")
-}
-
-# Override CmdReq and route it through a calc PV to filter out Write config
-record(mbbo, "$(P)CmdReq")
-{
-    field(DTYP, "Soft Channel")
-    field(OUT,  "")
-    field(OUT,  "$(P)CmdReqFilter PP")
-}
-record(longout, "$(P)CmdReqRaw")
-{
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Send command to module")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))CmdReq")
-}
-record(calcout, "$(P)CmdReqFilter")
-{
-    field(INPA, "$(P)CmdReq.RVAL NPP")
-    field(INPB, "$(P)CfgChannel.RVAL NPP")
-    field(CALC, "(A=33||A=48)&&B#0?0:A") # Intercept Read/Write config, sequencer will take over
-    field(OUT,  "$(P)CmdReqRaw PP")
-    field(OOPT, "When Non-zero")
 }

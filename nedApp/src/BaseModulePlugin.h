@@ -162,7 +162,6 @@ class BaseModulePlugin : public BasePlugin {
         DasPacket::ModuleType m_hardwareType;           //!< Hardware type
         uint32_t m_statusPayloadLength;                 //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
         uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
-        uint32_t m_configPayloadLength;                 //!< Size in bytes of the READ_CONFIG request/response payload, calculated dynamically by createConfigParam()
         uint32_t m_upgradePayloadLength;                //!< Size in bytes of the PROGRAM response payload, calculated dynamically by linkUpgradeParam()
         uint32_t m_temperaturePayloadLength;            //!< Size in bytes of the READ_TEMPERATURE response payload, calculated dynamically by createTempParam()
         std::map<int, ParamDesc> m_statusParams;        //!< Map of exported status parameters
@@ -173,8 +172,9 @@ class BaseModulePlugin : public BasePlugin {
         StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
         bool m_configInitialized;                       //!< Configuration sections sizes and offsets are calculated
-        uint32_t m_expectedChannel;                     //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
+        uint8_t m_expectedChannel;                      //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
         uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
+        uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
 
     private: // variables
         bool m_behindDsp;
@@ -336,14 +336,20 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspReadVersion(const DasPacket *packet);
 
         /**
-         * Called when read status request to the module should be made.
+         * Send request to module to read all status registers.
          *
          * Base implementation simply sends a READ_STATUS command and sets up
          * timeout callback.
          *
+         * Some modules provide channel specific registers. For those a
+         * modified read status command must be used to address particular
+         * channel. 0 always selects main/control part of the module,
+         * positive numbers select specific channel.
+         *
+         * @param[in] channel to be selected, 0 selects main/control part.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadStatus();
+        virtual DasPacket::CommandType reqReadStatus(uint8_t channel);
 
         /**
          * Default handler for READ_STATUS response.
@@ -353,7 +359,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] packet with response to READ_STATUS
          * @return true if packet was parsed and module version verified.
          */
-        virtual bool rspReadStatus(const DasPacket *packet);
+        virtual bool rspReadStatus(const DasPacket *packet, uint8_t expectedChannel);
 
         /**
          * Called when read status counters request to the module should be made.
@@ -395,14 +401,20 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspResetStatusCounters(const DasPacket *packet);
 
         /**
-         * Called when read config request to the module should be made.
+         * Send request to module to read configuration request.
          *
-         * Base implementation simply sends a READ_CONFIG command and sets up
-         * timeout callback.
+         * Send a DAS packet requesting all configuration registers for given
+         * channel.
          *
+         * Some modules provide channel specific registers. For those a
+         * modified read status command must be used to address particular
+         * channel. 0 always selects main/control part of the module,
+         * positive numbers select specific channel.
+         *
+         * @param[in] channel to be selected, 0 selects main/control part.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadConfig();
+        virtual DasPacket::CommandType reqReadConfig(uint8_t channel);
 
         /**
          * Default handler for READ_CONFIG response.
@@ -412,7 +424,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] packet with response to READ_STATUS
          * @return true if packet was parsed and module version verified.
          */
-        virtual bool rspReadConfig(const DasPacket *packet);
+        virtual bool rspReadConfig(const DasPacket *packet, uint8_t expectedChannel);
 
         /**
          * Construct WRITE_CONFIG payload and send it to module.
@@ -428,9 +440,23 @@ class BaseModulePlugin : public BasePlugin {
          *
          * This function is asynchronous and does not wait for response.
          *
+         * Most modules split their registers into sections. It's up to the
+         * module implementantion how these are defined. Often different
+         * firmware versions reorganize registers in sections. Registers
+         * within a specific section can be written individually. All sections
+         * can be written when module is not acquiring data, sections 0xA-0xF
+         * can be written any time. Selecting section 0 writes all sections.
+         *
+         * Some modules provide channel specific registers. For those a
+         * modified read status command must be used to address particular
+         * channel. 0 always selects main/control part of the module,
+         * positive numbers select specific channel.
+         *
+         * @param[in] section to be selected, 0 selects all.
+         * @param[in] channel to be selected, 0 selects main/control part.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqWriteConfig();
+        virtual DasPacket::CommandType reqWriteConfig(uint8_t section, uint8_t channel);
 
         /**
          * Default handler for READ_CONFIG response.
@@ -442,7 +468,7 @@ class BaseModulePlugin : public BasePlugin {
          * @retval true Timeout has not yet occurred
          * @retval false Timeout has occurred and response is invalid.
          */
-        virtual bool rspWriteConfig(const DasPacket *packet);
+        virtual bool rspWriteConfig(const DasPacket *packet, uint8_t expectedChannel);
 
         /**
          * Send START command to module.

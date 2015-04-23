@@ -152,14 +152,6 @@ struct DasPacket
          * Type of modules
          */
         enum ModuleType {
-            CHAN_1                      = 0x10,
-            CHAN_2                      = 0x11,
-            CHAN_3                      = 0x12,
-            CHAN_4                      = 0x13,
-            CHAN_5                      = 0x14,
-            CHAN_6                      = 0x15,
-            CHAN_7                      = 0x16,
-            CHAN_8                      = 0x17,
             MOD_TYPE_ROC                = 0x20,   //!< ROC (or LPSD) module
             MOD_TYPE_AROC               = 0x21,   //!< AROC
             MOD_TYPE_HROC               = 0x22,
@@ -182,7 +174,14 @@ struct DasPacket
         struct CommandInfo {
 #ifdef BITFIELD_LSB_FIRST
             enum CommandType command:8;     //!< 8 bits describing DAS module commands
-            enum ModuleType module_type:8;  //!< 15:8 bits describing module type
+            union __attribute__ ((__packed__)) {
+                enum ModuleType module_type:8;  //!< Module type valid in CMD_DISCOVER responses
+                struct __attribute__ ((__packed__)) {
+                    unsigned channel:4;     //!< Channel number, starting from 0
+                    unsigned is_channel:1;  //!< Is this command for channel?
+                    unsigned chan_fill:3;   //!< Not used, always 0
+                };
+            };
             unsigned lvds_parity:1;         //!< LVDS parity bit
             unsigned lvds_stop:1;           //!< Only last word in a LVDS packet should have this set to 1
             unsigned lvds_start:1;          //!< Only first word in a LVDS packet should have this set to 1

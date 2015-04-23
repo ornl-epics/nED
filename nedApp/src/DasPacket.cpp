@@ -42,8 +42,10 @@ DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandTy
     payload_length = (payload_length + 3) & ~3;
     cmdinfo.is_command = true;
     cmdinfo.command = command;
-    if (channel > 0)
-        cmdinfo.module_type = (ModuleType)(0x10 + (channel & 0xF) - 1);
+    if (channel > 0) {
+        cmdinfo.channel = (channel - 1) & 0xF;
+        cmdinfo.is_channel = 1;
+    }
 
     void *addr = malloc(sizeof(DasPacket) + payload_length);
     if (addr)
@@ -67,8 +69,10 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
     cmdinfo.is_command = true;
     cmdinfo.is_passthru = true;
     cmdinfo.command = command;
-    if (channel > 0)
-        cmdinfo.module_type = (ModuleType)(0x10 + (channel & 0xF) - 1);
+    if (channel > 0) {
+        cmdinfo.channel = (channel - 1) & 0xF;
+        cmdinfo.is_channel = 1;
+    }
 
     void *addr = malloc(sizeof(DasPacket) + ALIGN_UP(real_payload_length, 4));
     if (addr) {

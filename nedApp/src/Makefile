@@ -19,8 +19,8 @@ USR_CXXFLAGS += -std=c++0x
 #USR_CXXFLAGS += -fopenmp
 #USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)
-#CXXFLAGS += -g -ggdb
-CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
+CXXFLAGS += -g -ggdb
+CXXFLAGS += -O0 # Improve std::vector iteration times by factor 30 or so
 
 # Product
 PROD_NAME = ned
