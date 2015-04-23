@@ -1,0 +1,191 @@
+# Upgrade DataMode record with link to OutputMode
+record(mbbo, "$(P)DataMode")
+{
+    field(ASG, "BEAMLINE")
+    field(FLNK, "$(P)DataModeL")
+}
+record(longout, "$(P)DataModeL")
+{
+    field(ASG, "BEAMLINE")
+    field(DOL,  "$(P)DataMode.RVAL NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)OutputMode PP")
+}
+# Add Discovered to the list of checks
+record(calc, "$(P)HwStatus")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
+    field(CALC, "(A+B)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+}
+# GSG: following records are for Pulse Magnet OPI Interface
+record(ai, "$(P)ApplyNeeded")
+{
+    field(ASG, "BEAMLINE")
+    field(PINI, "YES")
+    field(VAL, "0")
+}
+# when we see "succeeded", clear Apply Needed, otherwise, leave it alone
+record(scalcout, "$(P)ApplyChangesClearC")
+{
+    field(ASG, "BEAMLINE")
+    field(INAA, "$(R)CfgApply:StatusStr CP MS")
+    field(INPA, "$(P)ApplyNeeded")
+    field(BB, "Succeeded")
+    field(CALC, "AA==BB?0:A")
+    field(OOPT, "Transition To Zero")
+    field(OUT, "$(P)ApplyNeeded PP")
+}
+# if any of A-G records processes and changes values, set ApplyNeeded to 1
+record(scalcout, "$(P)ApplyChangesStatusC")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)Ch1:IdleSampPeriodW CP MS")
+    field(INPB, "$(P)Ch1:ThresholdW CP MS")
+    field(INPC, "$(P)AdcRange.RVAL CP MS")
+    field(INPD, "$(P)DelayFromTsyncW CP MS")
+    field(INPE, "$(P)MinRepeatTimeW CP MS")
+    field(INPF, "$(P)PmEnable CP MS")
+    field(INPG, "$(P)MPAlwaysReady CP MS")
+    field(CALC, "A+B+C+D+E+F+G")
+    field(DOPT, "Use OCAL")
+    field(OOPT, "On Change")
+    field(OCAL, "1")
+    field(OUT, "$(P)ApplyNeeded PP")
+}
+# every read record waits for ApplyChanges before updating the applied value
+# Also, use PP on inputs so that the readout value doesnt change when W record is written
+record(calc, "$(P)Ch1:IdleSampPeriodR")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)Ch1:ADC:RateCoef PP MS")
+    field(INPB, "$(P)ApplyChangesClearC CP MS")
+    field(CALC, "(A+1)*.01")
+    field(EGU, "ms")
+    field(PREC, "1")
+}
+# provide bounds checking on input value and forward to calcout
+record(ao, "$(P)Ch1:IdleSampPeriodW")
+{
+    info(autosaveFields, "VAL")
+    field(ASG, "BEAMLINE")
+    field(PINI, "YES")
+    field(FLNK, "$(P)Ch1:IdleSampPeriodC")
+    field(DRVH, "655")
+    field(DRVL, "0.01")
+    field(PREC, "1")
+    field(EGU, "ms")
+}
+# translate from engineering units to register value
+record(calcout, "$(P)Ch1:IdleSampPeriodC")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)Ch1:IdleSampPeriodW NPP MS")
+    field(CALC, "(A/.01) - 1")
+    field(OUT, "$(P)Ch1:ADC:RateCoef PP")
+}
+record(calc, "$(P)Ch1:ThresholdR")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)Ch1:ADC:Threshold PP MS")
+    field(INPC, "$(P)ApplyChangesClearC CP MS")
+    field(INPB, "$(P)AdcRange.RVAL PP MS")
+    field(CALC, "A*((B+1)*0.15)")
+    field(EGU, "mV")
+}
+record(ao, "$(P)Ch1:ThresholdW")
+{
+    info(autosaveFields, "VAL")
+    field(ASG, "BEAMLINE")
+    field(PINI, "YES")
+    field(FLNK, "$(P)Ch1:ThresholdC")
+    field(DRVH, "9830")
+    field(DRVL, "0")
+    field(EGU, "mV")
+}
+record(calcout, "$(P)Ch1:ThresholdC")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)Ch1:ThresholdW NPP MS")
+    field(INPB, "$(P)AdcRange.RVAL NPP MS")
+    field(CALC, "A/((B+1)*0.15)")
+    field(OUT, "$(P)Ch1:ADC:Threshold PP")
+}
+record(calc, "$(P)DelayFromTsyncR")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)PmTsyncDelay PP MS")
+    field(INPB, "$(P)ApplyChangesClearC CP MS")
+    field(CALC, "A*.05")
+    field(EGU, "us")
+    field(PREC, "1")
+}
+record(ao, "$(P)DelayFromTsyncW")
+{
+    info(autosaveFields, "VAL")
+    field(ASG, "BEAMLINE")
+    field(PINI, "YES")
+    field(FLNK, "$(P)DelayFromTsyncC")
+    field(DRVH, "838860")
+    field(DRVL, "0")
+    field(EGU, "us")
+    field(PREC, "1")
+}
+record(calcout, "$(P)DelayFromTsyncC")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)DelayFromTsyncW NPP MS")
+    field(CALC, "A/.05")
+    field(OUT, "$(P)PmTsyncDelay PP")
+}
+record(calc, "$(P)MinRepeatTimeR")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)PmRatePeriod PP MS")
+    field(INPB, "$(P)ApplyChangesClearC CP MS")
+    field(CALC, "A*(8/(1000*60))")
+    field(EGU, "min")
+    field(PREC, "1")
+}
+record(ao, "$(P)MinRepeatTimeW")
+{
+    info(autosaveFields, "VAL")
+    field(ASG, "BEAMLINE")
+    field(PINI, "YES")
+    field(FLNK, "$(P)MinRepeatTimeC")
+    field(DRVH, "8.7")
+    field(DRVL, "0")
+    field(PREC, "1")
+    field(EGU, "min")
+}
+record(calcout, "$(P)MinRepeatTimeC")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)MinRepeatTimeW NPP MS")
+    field(CALC, "(A*1000*60)/8")
+    field(OUT, "$(P)PmRatePeriod PP")
+}
+record(calc, "$(P)PmEnableRR")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)PmEnable PP MS")
+    field(INPB, "$(P)ApplyChangesClearC CP MS")
+    field(CALC, "A")
+}
+record(calc, "$(P)MPAlwaysReadyRR")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)MPAlwaysReady PP MS")
+    field(INPB, "$(P)ApplyChangesClearC CP MS")
+    field(CALC, "A")
+}
+record(calc, "$(P)AdcRangeRR")
+{
+    field(ASG, "BEAMLINE")
+    field(INPA, "$(P)AdcRange PP MS")
+    field(INPB, "$(P)ApplyChangesClearC CP MS")
+    field(CALC, "A")
+}

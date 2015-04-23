@@ -29,6 +29,7 @@ DB += RocPvaPlugin.db
 DB += AcpcPvaPlugin.db
 DB += GlobalConG.db
 DB += ApplyConfig.db
+DB += PulsedMagnet.db
 
 DB += DspPlugin_v63.db
 DB += DspPlugin_v64.db

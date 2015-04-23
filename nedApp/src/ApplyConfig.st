@@ -39,7 +39,6 @@ option +s;
  * variables
  */
 string prefix;
-int Acquiring;
 
 ss ApplyConfig {
     state init {
@@ -71,14 +70,14 @@ ss ApplyConfig {
     state wait_connected {
         when (pvConnectCount() == pvAssignCount()) {
             PVPUTSTR(StatusStr, "Check status");
-        } state check_acq
+        } state stop_acq
         when (delay(2.0)) {
             PVPUTSTR(StatusStr, "Failed: PV(s) disconnected");
         } state ready
     }
 
-    STATECMD(stop_acq,  CMD_STOP,        1, stopped, error, error)
-    STATECMD(write_cfg, CMD_WRITE_CFG,   1, written, error, error)
+    STATECMD(stop_acq,  CMD_STOP,        1, write_cfg, error, error)
+    STATECMD(write_cfg, CMD_WRITE_CFG,   1, start_acq, error, error)
     STATECMD(start_acq, CMD_START,       1, completed, error, error)
 
     state completed {
