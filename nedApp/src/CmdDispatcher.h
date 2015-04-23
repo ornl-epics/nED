@@ -44,14 +44,6 @@ class CmdDispatcher : public BaseDispatcherPlugin {
          * Process only command data and send it to connected plugins.
          */
         void processDataUnlocked(const DasPacketList * const packetList);
-
-        /**
-         * Send selected consequtive packets to connected plugins.
-         *
-         * @param[in] first Pointer to the address in memory of the first packet to be sent.
-         * @param[in] last Pointer to the address in memory of the last packet to be sent.
-         */
-        void sendToPlugins(const DasPacket *first, const DasPacket *last);
 };
 
 #endif // CMD_DISPATCHER_H
