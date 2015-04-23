@@ -11,16 +11,10 @@
 #define BASE_MODULE_PLUGIN_H
 
 #include "BasePlugin.h"
-#include "StateMachine.h"
 #include "Timer.h"
 
 #include <fstream>
 #include <map>
-
-#define SM_ACTION_CMD(a)        (a)
-#define SM_ACTION_ACK(a)        ((a) | (0x1 << 16))
-#define SM_ACTION_ERR(a)        ((a) | (0x1 << 17))
-#define SM_ACTION_TIMEOUT(a)    ((a) | (0x1 << 18))
 
 /**
  * Base class for all plugins working with particular module.
@@ -169,7 +163,6 @@ class BaseModulePlugin : public BasePlugin {
         std::map<int, ParamDesc> m_configParams;        //!< Map of exported config parameters
         std::map<int, ParamDesc> m_upgradeParams;       //!< Map of exported remote upgrade parameters
         std::map<int, ParamDesc> m_temperatureParams;   //!< Map of exported temperature parameters
-        StateMachine<TypeVersionStatus, int> m_verifySM;//!< State machine for verification status
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
 
     private: // variables

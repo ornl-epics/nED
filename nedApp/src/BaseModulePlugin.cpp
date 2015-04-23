@@ -16,6 +16,13 @@
 
 #define NUM_BASEMODULEPLUGIN_PARAMS ((int)(&LAST_BASEMODULEPLUGIN_PARAM - &FIRST_BASEMODULEPLUGIN_PARAM + 1))
 
+#define VERIFY_DISCOVER_OK      (1 << 0)
+#define VERIFY_DISCOVER_FAIL    (1 << 1)
+#define VERIFY_VERSION_OK       (1 << 2)
+#define VERIFY_VERSION_FAIL     (1 << 3)
+#define VERIFY_DISCOVER_MASK    (VERIFY_DISCOVER_OK | VERIFY_DISCOVER_FAIL)
+#define VERIFY_VERSION_MASK     (VERIFY_VERSION_OK  | VERIFY_VERSION_FAIL)
+
 const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 2.0;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherPortName,
@@ -31,19 +38,9 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     , m_configPayloadLength(0)
     , m_upgradePayloadLength(0)
     , m_temperaturePayloadLength(0)
-    , m_verifySM(ST_TYPE_VERSION_INIT)
     , m_waitingResponse(static_cast<DasPacket::CommandType>(0))
     , m_behindDsp(behindDsp)
 {
-    m_verifySM.addState(ST_TYPE_VERSION_INIT,       SM_ACTION_ACK(DasPacket::CMD_DISCOVER),         ST_TYPE_OK);
-    m_verifySM.addState(ST_TYPE_VERSION_INIT,       SM_ACTION_ERR(DasPacket::CMD_DISCOVER),         ST_TYPE_ERR);
-    m_verifySM.addState(ST_TYPE_VERSION_INIT,       SM_ACTION_ACK(DasPacket::CMD_READ_VERSION),     ST_VERSION_OK);
-    m_verifySM.addState(ST_TYPE_VERSION_INIT,       SM_ACTION_ERR(DasPacket::CMD_READ_VERSION),     ST_VERSION_ERR);
-    m_verifySM.addState(ST_TYPE_OK,                 SM_ACTION_ACK(DasPacket::CMD_READ_VERSION),     ST_TYPE_VERSION_OK);
-    m_verifySM.addState(ST_TYPE_OK,                 SM_ACTION_ERR(DasPacket::CMD_READ_VERSION),     ST_VERSION_ERR);
-    m_verifySM.addState(ST_VERSION_OK,              SM_ACTION_ACK(DasPacket::CMD_DISCOVER),         ST_TYPE_VERSION_OK);
-    m_verifySM.addState(ST_VERSION_OK,              SM_ACTION_ERR(DasPacket::CMD_DISCOVER),         ST_TYPE_ERR);
-
     createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
     createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasPacket::CommandType)
     createParam("HwId",         asynParamOctet, &HwId);                     // READ - Connected module hardware id
@@ -55,7 +52,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("FwVer",        asynParamInt32, &FwVer);                    // READ - Module firmware version
     createParam("FwRev",        asynParamInt32, &FwRev);                    // READ - Module firmware revision
     createParam("Supported",    asynParamInt32, &Supported);                // READ - Is requested module version supported (0=not supported,1=supported)
-    createParam("Verified",     asynParamInt32, &Verified);                 // READ - Flag whether module type and version were verified
+    createParam("Verified",     asynParamInt32, &Verified, 0);              // READ - Flag whether module type and version were verified
     createParam("CfgSection",   asynParamInt32, &CfgSection, '0');          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
     createParam("UpgradeFile",  asynParamOctet, &UpgradeFile);              // WRITE - Path to the firmware file to be programmed
     createParam("UpgradePktSize",asynParamInt32,&UpgradePktSize, 256);      // WRITE - Maximum payload size for split program file transfer
@@ -132,7 +129,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         default:
             setIntegerParam(CmdRsp, LAST_CMD_ERROR);
             callParamCallbacks();
-            LOG_WARN("Unrecognized '%d' command", SM_ACTION_CMD(value));
+            LOG_WARN("Unrecognized '%d' command", value);
             return asynError;
         }
 
@@ -251,6 +248,9 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
 {
     bool ack = false;
     DasPacket::CommandType command = packet->getResponseType();
+    int verified;
+
+    getIntegerParam(Verified, &verified);
 
     if (m_waitingResponse != command) {
         LOG_WARN("Response '0x%02X' not allowed while waiting for 0x%02X", command, m_waitingResponse);
@@ -261,13 +261,15 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     switch (command) {
     case DasPacket::CMD_DISCOVER:
         ack = rspDiscover(packet);
-        m_verifySM.transition(ack ? SM_ACTION_ACK(DasPacket::CMD_DISCOVER) : SM_ACTION_ERR(DasPacket::CMD_DISCOVER));
-        setIntegerParam(Verified, m_verifySM.getCurrentState());
+        verified &= ~VERIFY_DISCOVER_MASK;
+        verified |= (ack ? VERIFY_DISCOVER_OK : VERIFY_DISCOVER_FAIL);
+        setIntegerParam(Verified, verified);
         break;
     case DasPacket::CMD_READ_VERSION:
         ack = rspReadVersion(packet);
-        m_verifySM.transition(ack ? SM_ACTION_ACK(DasPacket::CMD_READ_VERSION) : SM_ACTION_ERR(DasPacket::CMD_READ_VERSION));
-        setIntegerParam(Verified, m_verifySM.getCurrentState());
+        verified &= ~VERIFY_VERSION_MASK;
+        verified |= (ack ? VERIFY_VERSION_OK : VERIFY_VERSION_FAIL);
+        setIntegerParam(Verified, verified);
         break;
     case DasPacket::CMD_READ_CONFIG:
         ack = rspReadConfig(packet);
