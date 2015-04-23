@@ -32,7 +32,6 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
                  interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
     , m_hardwareId(ip2addr(hardwareId))
     , m_hardwareType(hardwareType)
-    , m_statusPayloadLength(0)
     , m_countersPayloadLength(0)
     , m_upgradePayloadLength(0)
     , m_temperaturePayloadLength(0)
@@ -82,6 +81,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     m_remoteUpgrade.buffer = 0;
     m_remoteUpgrade.bufferSize = 0;
     m_remoteUpgrade.position = 0;
+
+    m_statusPayloadLengths.push_back(0);
 }
 
 BaseModulePlugin::~BaseModulePlugin()
@@ -91,6 +92,12 @@ void BaseModulePlugin::setNumChannels(uint32_t n)
 {
     assert(n <= 16);
     m_numChannels = n;
+
+    // Only read status supports channels, read/write config is done differently
+    m_statusPayloadLengths.resize(n + 1);
+    for (uint32_t i = 1; i <= n; i++) {
+        m_statusPayloadLengths[i] = 0;
+    }
 }
 
 asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -289,6 +296,15 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
         return false;
     }
     m_waitingResponse = static_cast<DasPacket::CommandType>(0);
+
+    // Check that channel from packet and expected channel number match
+    if (! ((m_expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
+           (packet->cmdinfo.is_channel == (m_expectedChannel > 0) && packet->cmdinfo.channel == (m_expectedChannel - 1))) ) {
+        LOG_WARN("Expecting response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
+        setIntegerParam(CmdRsp, LAST_CMD_ERROR);
+        callParamCallbacks();
+        return false;
+    }
 
     switch (command) {
     case DasPacket::CMD_DISCOVER:
@@ -502,25 +518,27 @@ bool BaseModulePlugin::rspReadVersion(const DasPacket *packet)
 
 DasPacket::CommandType BaseModulePlugin::reqReadStatus(uint8_t channel)
 {
-    // TODO: channel
+    // We can be called from anywhere, verify parameter
+    if (channel > m_numChannels) {
+        LOG_ERROR("Can not read channel %u configuration, module only supports %u channels", channel, m_numChannels);
+        return static_cast<DasPacket::CommandType>(0);
+    }
 
-    sendToDispatcher(DasPacket::CMD_READ_STATUS);
+    sendToDispatcher(DasPacket::CMD_READ_STATUS, channel);
     return DasPacket::CMD_READ_STATUS;
 }
 
-bool BaseModulePlugin::rspReadStatus(const DasPacket *packet, uint8_t expectedChannel)
+bool BaseModulePlugin::rspReadStatus(const DasPacket *packet, uint8_t channel)
 {
-    // TODO: expectedChannel
-
     if (!cancelTimeoutCallback()) {
         LOG_WARN("Received READ_STATUS response after timeout");
         return false;
     }
 
-    if (packet->getPayloadLength() != ALIGN_UP(m_statusPayloadLength, 4)) {
+    if (packet->getPayloadLength() != ALIGN_UP(m_statusPayloadLengths[channel], 4)) {
         LOG_ERROR("Received wrong READ_STATUS response based on length; "
                   "received %u, expected %u",
-                  packet->getPayloadLength(), ALIGN_UP(m_statusPayloadLength, 4));
+                  packet->getPayloadLength(), ALIGN_UP(m_statusPayloadLengths[channel], 4));
         return false;
     }
 
@@ -569,6 +587,7 @@ bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
 
 DasPacket::CommandType BaseModulePlugin::reqReadConfig(uint8_t channel)
 {
+    // We can be called from anywhere, verify parameter
     if (channel > m_numChannels) {
         LOG_ERROR("Can not read channel %u configuration, module only supports %u channels", channel, m_numChannels);
         return static_cast<DasPacket::CommandType>(0);
@@ -578,7 +597,7 @@ DasPacket::CommandType BaseModulePlugin::reqReadConfig(uint8_t channel)
     return DasPacket::CMD_READ_CONFIG;
 }
 
-bool BaseModulePlugin::rspReadConfig(const DasPacket *packet, uint8_t expectedChannel)
+bool BaseModulePlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
 {
     int wordsize = (m_behindDsp ? 2 : 4);
 
@@ -592,15 +611,8 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet, uint8_t expectedCh
         m_configInitialized = true;
     }
 
-    // Check that channel from packet and expected channel number match
-    if (! ((expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
-           (packet->cmdinfo.is_channel == (expectedChannel > 0) && packet->cmdinfo.channel == (expectedChannel - 1))) ) {
-        LOG_WARN("Expecting read config response for channel %d, got for channel %d\n", expectedChannel, packet->cmdinfo.channel + 1);
-        return false;
-    }
-
     // Response contains registers for all sections for a selected channel or global configuration
-    uint32_t section_f = SECTION_ID(0xF, expectedChannel);
+    uint32_t section_f = SECTION_ID(0xF, channel);
     uint32_t length = m_configSectionOffsets[section_f] + m_configSectionSizes[section_f];
     length *= wordsize;
 
@@ -623,6 +635,7 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t section, uint8_t
         m_configInitialized = true;
     }
 
+    // We can be called from anywhere, verify parameter
     if (channel > m_numChannels) {
         LOG_ERROR("Can not configure channel %u, module only supports %u channels", channel, m_numChannels);
         return static_cast<DasPacket::CommandType>(0);
@@ -717,17 +730,10 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t section, uint8_t
     return rsp;
 }
 
-bool BaseModulePlugin::rspWriteConfig(const DasPacket *packet, uint8_t expectedChannel)
+bool BaseModulePlugin::rspWriteConfig(const DasPacket *packet, uint8_t channel)
 {
     if (!cancelTimeoutCallback()) {
         LOG_WARN("Received READ_STATUS response after timeout");
-        return false;
-    }
-
-    // Check that channel from packet and expected channel number match
-    if (! ((expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
-           (packet->cmdinfo.is_channel == (expectedChannel > 0) && packet->cmdinfo.channel == (expectedChannel - 1))) ) {
-        LOG_WARN("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, expectedChannel);
         return false;
     }
 
@@ -857,7 +863,7 @@ bool BaseModulePlugin::rspReadTemperature(const DasPacket *packet)
     return true;
 }
 
-void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
+void BaseModulePlugin::createStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
     int index;
     if (createParam(name, asynParamInt32, &index) != asynSuccess) {
@@ -867,7 +873,7 @@ void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint
 
     ParamDesc desc;
     desc.section = 0;
-    desc.channel = 0;
+    desc.channel = channel;
     desc.initVal = 0;
     desc.offset  = offset;
     desc.shift   = shift;
@@ -878,7 +884,7 @@ void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint
     if (m_behindDsp && nBits > 16)
         length++;
     uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_statusPayloadLength = std::max(m_statusPayloadLength, length*wordsize);
+    m_statusPayloadLengths[channel] = std::max(m_statusPayloadLengths[channel], length*wordsize);
 }
 
 void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
@@ -1159,20 +1165,24 @@ void BaseModulePlugin::extractParams(const DasPacket *packet, const std::map<int
     for (auto it=table.begin(); it != table.end(); it++) {
         int shift = it->second.shift;
         int offset = it->second.offset;
-        if (it->second.section != 0) {
-            uint8_t channel = 0;
-            if (packet->cmdinfo.module_type != 0)
-                channel = (packet->cmdinfo.module_type & 0xF) + 1;
+        uint8_t channel = 0;
 
-            // Skip parameters that can are not included in this response
-            if (it->second.channel != channel)
-                continue;
+        if (packet->cmdinfo.is_channel)
+            channel = packet->cmdinfo.channel + 1;
+
+        // Skip parameters that are not included in this response
+        if (it->second.channel != channel)
+            continue;
+
+        // Handle configuration parameters
+        if (it->second.section != 0) {
 
             auto jt = sectOffsets.find(SECTION_ID(it->second.section, it->second.channel));
             if (jt != sectOffsets.end()) {
                 offset += jt->second;
             }
         }
+
         if (m_behindDsp) {
             shift += (offset % 2 == 0 ? 0 : 16);
             offset /= 2;

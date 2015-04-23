@@ -160,7 +160,7 @@ class BaseModulePlugin : public BasePlugin {
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
         DasPacket::ModuleType m_hardwareType;           //!< Hardware type
-        uint32_t m_statusPayloadLength;                 //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
+        std::vector<uint32_t> m_statusPayloadLengths;   //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
         uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
         uint32_t m_upgradePayloadLength;                //!< Size in bytes of the PROGRAM response payload, calculated dynamically by linkUpgradeParam()
         uint32_t m_temperaturePayloadLength;            //!< Size in bytes of the READ_TEMPERATURE response payload, calculated dynamically by createTempParam()
@@ -357,9 +357,10 @@ class BaseModulePlugin : public BasePlugin {
          * Read the packet payload and populate status parameters.
          *
          * @param[in] packet with response to READ_STATUS
+         * @param[in] channel selected
          * @return true if packet was parsed and module version verified.
          */
-        virtual bool rspReadStatus(const DasPacket *packet, uint8_t expectedChannel);
+        virtual bool rspReadStatus(const DasPacket *packet, uint8_t channel);
 
         /**
          * Called when read status counters request to the module should be made.
@@ -422,9 +423,10 @@ class BaseModulePlugin : public BasePlugin {
          * Read the packet payload and populate status parameters.
          *
          * @param[in] packet with response to READ_STATUS
+         * @param[in] channel selected
          * @return true if packet was parsed and module version verified.
          */
-        virtual bool rspReadConfig(const DasPacket *packet, uint8_t expectedChannel);
+        virtual bool rspReadConfig(const DasPacket *packet, uint8_t channel);
 
         /**
          * Construct WRITE_CONFIG payload and send it to module.
@@ -465,10 +467,11 @@ class BaseModulePlugin : public BasePlugin {
          * kicked in and cancels still pending timeout timer.
          *
          * @param[in] packet with response to READ_STATUS
+         * @param[in] channel selected
          * @retval true Timeout has not yet occurred
          * @retval false Timeout has occurred and response is invalid.
          */
-        virtual bool rspWriteConfig(const DasPacket *packet, uint8_t expectedChannel);
+        virtual bool rspWriteConfig(const DasPacket *packet, uint8_t channel);
 
         /**
          * Send START command to module.
@@ -602,11 +605,20 @@ class BaseModulePlugin : public BasePlugin {
          * specified as 0x7).
          *
          * @param[in] name Parameter name must be unique within the plugin scope.
+         * @param[in] channel Selected channel
          * @param[in] offset word/dword offset within the payload.
          * @param[in] nBits Width of the parameter in number of bits.
          * @param[in] shift Starting bit position within the word/dword.
          */
-        void createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
+        void createStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift);
+
+        /**
+         * Convenience function for modules that don't split configuration for channels.
+         */
+        void createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
+        {
+            createStatusParam(name, 0, offset, nBits, shift);
+        }
 
         /**
          * Create and register single integer status counter parameter.
