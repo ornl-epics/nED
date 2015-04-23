@@ -24,6 +24,7 @@
 #define VERIFY_VERSION_MASK     (VERIFY_VERSION_OK  | VERIFY_VERSION_FAIL)
 
 const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 2.0;
+const float BaseModulePlugin::RESET_NO_RESPONSE_TIMEOUT = 5.0;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherPortName,
                                    const char *hardwareId, DasPacket::ModuleType hardwareType,
@@ -78,6 +79,8 @@ BaseModulePlugin::~BaseModulePlugin()
 asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == CmdReq) {
+        double timeout = NO_RESPONSE_TIMEOUT;
+
         if (m_waitingResponse != 0) {
             LOG_WARN("Command '%d' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
             return asynError;
@@ -87,6 +90,10 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         callParamCallbacks();
 
         switch (value) {
+        case DasPacket::CMD_RESET:
+            m_waitingResponse = reqReset();
+            timeout = RESET_NO_RESPONSE_TIMEOUT;
+            break;
         case DasPacket::CMD_DISCOVER:
             m_waitingResponse = reqDiscover();
             break;
@@ -134,9 +141,8 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         }
 
         if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
-            if (!scheduleTimeoutCallback(m_waitingResponse,
-                                         NO_RESPONSE_TIMEOUT))
-               LOG_WARN("Failed to schedule CmdRsp timeout callback");
+            if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
+                LOG_WARN("Failed to schedule CmdRsp timeout callback");
             setIntegerParam(CmdRsp, LAST_CMD_WAIT);
         } else {
             setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
@@ -259,6 +265,9 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     m_waitingResponse = static_cast<DasPacket::CommandType>(0);
 
     switch (command) {
+    case DasPacket::CMD_RESET:
+        ack = rspReset(packet);
+        break;
     case DasPacket::CMD_DISCOVER:
         ack = rspDiscover(packet);
         verified &= ~VERIFY_DISCOVER_MASK;
@@ -327,6 +336,21 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     setIntegerParam(CmdRsp, (ack ? LAST_CMD_OK : LAST_CMD_ERROR));
     callParamCallbacks();
     return true;
+}
+
+DasPacket::CommandType BaseModulePlugin::reqReset()
+{
+    sendToDispatcher(DasPacket::CMD_RESET);
+    return DasPacket::CMD_RESET;
+}
+
+bool BaseModulePlugin::rspReset(const DasPacket *packet)
+{
+    if (!cancelTimeoutCallback()) {
+        LOG_WARN("Received RESET response after timeout");
+        return false;
+    }
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
 DasPacket::CommandType BaseModulePlugin::reqDiscover()
@@ -855,7 +879,7 @@ float BaseModulePlugin::noResponseCleanup(DasPacket::CommandType command)
 bool BaseModulePlugin::scheduleTimeoutCallback(DasPacket::CommandType command, double delay)
 {
     std::function<float(void)> timeoutCb = std::bind(&BaseModulePlugin::noResponseCleanup, this, command);
-    m_timeoutTimer = scheduleCallback(timeoutCb, NO_RESPONSE_TIMEOUT);
+    m_timeoutTimer = scheduleCallback(timeoutCb, delay);
     return (m_timeoutTimer.get() != 0);
 }
 

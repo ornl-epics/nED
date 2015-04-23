@@ -145,6 +145,7 @@ class BaseModulePlugin : public BasePlugin {
         };
 
         static const float NO_RESPONSE_TIMEOUT;         //!< Number of seconds to wait for module response
+        static const float RESET_NO_RESPONSE_TIMEOUT;   //!< Number of seconds to wait for module RESET response
 
     public: // variables
         static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask;
@@ -267,6 +268,16 @@ class BaseModulePlugin : public BasePlugin {
          * @return true if packet has been processed, false otherwise
          */
         virtual bool processResponse(const DasPacket *packet);
+
+        /**
+         * Send request to module to do a reset.
+         */
+        virtual DasPacket::CommandType reqReset();
+
+        /**
+         * Handle RESET response.
+         */
+        virtual bool rspReset(const DasPacket *packet);
 
         /**
          * Called when discover request to the module should be made.
