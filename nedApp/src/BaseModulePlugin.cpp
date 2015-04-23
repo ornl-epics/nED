@@ -90,6 +90,7 @@ BaseModulePlugin::~BaseModulePlugin()
 
 void BaseModulePlugin::setNumChannels(uint32_t n)
 {
+    assert(m_numChannels == 0); // Prevent running multiple times
     assert(n <= 16);
     m_numChannels = n;
 
@@ -111,7 +112,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         }
 
         m_expectedChannel = 0;
-        m_cfgSectionCnt = 0;
+        m_cfgSectionCnt = 0; // used to correctly report CmdRsp when 0 channel succeeds but other channels don't have registers in particular section
 
         setIntegerParam(CfgChannel, m_expectedChannel);
         setIntegerParam(CmdRsp, LAST_CMD_WAIT);
@@ -373,7 +374,7 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     // What follows is a state machine for multiple channel commands.
     // Until there are more channels, re-issue the same command for next
     // channel in line. Don't update CmdRsp until the last channel or
-    // there was an error. Bail out on first error.
+    // when there was an error. Bail out on first error.
 
     // Turns back to 0 after last channel, works also for m_numChannels == 0
     m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);

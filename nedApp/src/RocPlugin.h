@@ -135,7 +135,7 @@ class RocPlugin : public BaseModulePlugin {
          * For non-v5.4 firmwares the function simply invokes BaseModulePlugin::rspReadConfig()
          * passing it the original packet.
          */
-        bool rspReadConfig(const DasPacket *packet, uint8_t expectedChannel);
+        bool rspReadConfig(const DasPacket *packet, uint8_t channel);
 
         /**
          * Override START response handler.

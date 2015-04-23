@@ -73,6 +73,15 @@
  * OCC command to the module and switches CmdRsp PV to waiting state.
  * Reading the CmdRsp PV immediately after writing CmdReq will
  * @b always give accurate last command status.
+ *
+ * Some modules implement channel functionality in dedicated FPGAs. In such
+ * case each FPGA keeps it's own status and configuration registers. They can
+ * be addresses with the same command but with extra channel information in the
+ * header. BaseModulePlugin aggregates all channels into a single trigger.
+ * It uses internal sequence to send multiple packets to the module, addressing
+ * all channels. It does so sequentially, any error stops sequence. Derived
+ * class must use setNumChannel() function for this functionality to get
+ * enabled.
  */
 class BaseModulePlugin : public BasePlugin {
     public: // structures and defines
@@ -220,10 +229,10 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Set number of channels supported by module.
          *
-         * When module firmware implements its channels as individual
-         * configuration register sets, this function can be used to specify
-         * number of channels supported. It must be called before
-         * createConfigParam().
+         * When module firmware implements its channels as individual register
+         * sets, this function can be used to specify number of channels
+         * supported. It must be called exactly once, before createConfigParam()
+         * or createStatusParam() calls.
          *
          * Most of the modules have their channel configuration as part of
          * global configuration and they don't need to call this function.
@@ -408,7 +417,7 @@ class BaseModulePlugin : public BasePlugin {
          * channel.
          *
          * Some modules provide channel specific registers. For those a
-         * modified read status command must be used to address particular
+         * modified read config command must be used to address particular
          * channel. 0 always selects main/control part of the module,
          * positive numbers select specific channel.
          *
@@ -450,7 +459,7 @@ class BaseModulePlugin : public BasePlugin {
          * can be written any time. Selecting section 0 writes all sections.
          *
          * Some modules provide channel specific registers. For those a
-         * modified read status command must be used to address particular
+         * modified write config command must be used to address particular
          * channel. 0 always selects main/control part of the module,
          * positive numbers select specific channel.
          *
@@ -590,6 +599,7 @@ class BaseModulePlugin : public BasePlugin {
          * @return true if packet was parsed and temperature extracted.
          */
         virtual bool rspReadTemperature(const DasPacket *packet);
+
         /**
          * Create and register single integer status parameter.
          *
@@ -613,7 +623,7 @@ class BaseModulePlugin : public BasePlugin {
         void createStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift);
 
         /**
-         * Convenience function for modules that don't split configuration for channels.
+         * Convenience function for modules that don't split status for channels.
          */
         void createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
         {
