@@ -23,6 +23,7 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     , m_hardwareId(0)
     , m_payloadLen(0)
     , m_expectedResponse(static_cast<DasPacket::CommandType>(0))
+    , m_lastConfigPayloadLen(0)
 {
     createParam("ReqDest",      asynParamOctet, &ReqDest);      // WRITE - Module address to communicate with
     createParam("ReqCmd",       asynParamInt32, &ReqCmd);       // WRITE - Command to be sent to module
@@ -37,6 +38,7 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     createParam("RspDataLen",   asynParamInt32, &RspDataLen);   // READ - Response payload length in bytes
     createParam("RspData",      asynParamOctet, &RspData);      // READ - Response payload
     createParam("ByteGrp",      asynParamInt32, &ByteGrp);      // WRITE - Byte grouping mode
+    createParam("Channel",      asynParamInt32, &Channel, 0);   // WRITE - Select channel to send command to (read/write config only)
 
     callParamCallbacks();
 }
@@ -98,16 +100,22 @@ void DebugPlugin::request(const DasPacket::CommandType command)
 {
     DasPacket *packet;
     int isDsp;
+    int channel = 0;
 
     if (m_hardwareId == 0)
         return;
 
     (void)getIntegerParam(ReqIsDsp, &isDsp);
+    (void)getIntegerParam(Channel, &channel);
+
+    // It should be 0 already if last response was not CMD_READ_CONFIG
+    if (command != DasPacket::CMD_WRITE_CONFIG)
+        m_lastConfigPayloadLen = 0;
 
     if (isDsp == 1)
-        packet = DasPacket::createOcc(DasPacket::HWID_SELF, m_hardwareId, command, 0);
+        packet = DasPacket::createOcc(DasPacket::HWID_SELF, m_hardwareId, command, channel, m_lastConfigPayloadLen, m_lastConfigPayload);
     else
-        packet = DasPacket::createLvds(DasPacket::HWID_SELF, m_hardwareId, command, 0);
+        packet = DasPacket::createLvds(DasPacket::HWID_SELF, m_hardwareId, command, channel, m_lastConfigPayloadLen, m_lastConfigPayload);
 
     if (packet) {
         BasePlugin::sendToDispatcher(packet);
@@ -177,6 +185,17 @@ bool DebugPlugin::response(const DasPacket *packet)
     // Cache the payload to read it through readOctet()
     m_payloadLen = std::min(packet->getPayloadLength()/4, static_cast<uint32_t>(sizeof(m_payload)));
     memcpy(m_payload, packet->getPayload(), m_payloadLen*4);
+
+    // Cache last READ_CONFIG response separately, allowing other commands to be executed
+    // before using this payload for writing configuration
+    // Don't enforce MAC address checking, allowing to transfer the same configuration to
+    // multiple boards of the same type.
+    if (responseCmd == DasPacket::CMD_READ_CONFIG) {
+        m_lastConfigPayloadLen = m_payloadLen * 4;
+        memcpy(m_lastConfigPayload, m_payload, m_lastConfigPayloadLen);
+    } else {
+        m_lastConfigPayloadLen = 0;
+    }
 
     return true;
 }

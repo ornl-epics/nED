@@ -105,7 +105,7 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
 
             m_pulseTime = { time.secPastEpoch, time.nsec };
             // Convert charge from 10pC unsigned integer to C double
-            m_pulseCharge = static_cast<double>(rtdl->pulse_charge * 10) * 10e-12;
+            m_pulseCharge = static_cast<double>(rtdl->pulse_charge * 10) * 1e-12;
         }
 
         if (packet->isMetaData() && m_metadataEn) {
@@ -138,37 +138,37 @@ void BasePvaPlugin::postData(bool postNeutrons, bool postMetadata)
         // EPICSv4 uses POSIX EPOCH, v3 uses EPICS EPOCH
         epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + m_pulseTime.secPastEpoch, m_pulseTime.nsec, m_neutronsPostSeq++);
 
-	m_pvNeutrons->lock();
-	try {
-	  m_pvNeutrons->beginGroupPut();
-	  m_pvNeutrons->timeStamp.set(time);
-	  m_pvNeutrons->proton_charge->put(m_pulseCharge);
-	  m_postNeutronsCb(this, m_pvNeutrons);
-	  m_pvNeutrons->endGroupPut();
-	} catch (std::exception &e) {
-	  LOG_ERROR("Exception caught in BasePvaPlugin::postData, postNeutrons: %s.", e.what());
-	  m_pvNeutrons->unlock();
-	}
-	m_pvNeutrons->unlock();
+        m_pvNeutrons->lock();
+        try {
+            m_pvNeutrons->beginGroupPut();
+            m_pvNeutrons->timeStamp.set(time);
+            m_pvNeutrons->proton_charge->put(m_pulseCharge);
+            m_postNeutronsCb(this, m_pvNeutrons);
+            m_pvNeutrons->endGroupPut();
+        } catch (std::exception &e) {
+            LOG_ERROR("Exception caught in BasePvaPlugin::postData, postNeutrons: %s.", e.what());
+        }
+        m_pvNeutrons->unlock();
     }
 
     if (postMetadata) {
         // EPICSv4 uses POSIX EPOCH, v3 uses EPICS EPOCH
         epics::pvData::TimeStamp time(epics::pvData::posixEpochAtEpicsEpoch + m_pulseTime.secPastEpoch, m_pulseTime.nsec, m_metadataPostSeq++);
 
-	m_pvMetadata->lock();
-	try {
-	  m_pvMetadata->beginGroupPut();
-	  m_pvMetadata->timeStamp.set(time);
-	  m_pvMetadata->proton_charge->put(m_pulseCharge);
-	  m_pvMetadata->time_of_flight->replace(freeze(m_cacheMeta.time_of_flight));
-	  m_pvMetadata->pixel->replace(freeze(m_cacheMeta.pixel));
-	  m_pvMetadata->endGroupPut();
-	} catch (std::exception &e) {
-	  LOG_ERROR("Exception caught in BasePvaPlugin::postData, portMetadata: %s.", e.what());
-	  m_pvNeutrons->unlock();
-	}
-	m_pvMetadata->unlock();
+        m_pvMetadata->lock();
+        try {
+            m_pvMetadata->beginGroupPut();
+            m_pvMetadata->timeStamp.set(time);
+            m_pvMetadata->proton_charge->put(m_pulseCharge);
+            m_pvMetadata->time_of_flight->replace(freeze(m_cacheMeta.time_of_flight));
+            m_pvMetadata->pixel->replace(freeze(m_cacheMeta.pixel));
+            m_pvMetadata->endGroupPut();
+        } catch (std::exception &e) {
+            LOG_ERROR("Exception caught in BasePvaPlugin::postData, portMetadata: %s.", e.what());
+            m_cacheMeta.time_of_flight.clear();
+            m_cacheMeta.pixel.clear();
+        }
+        m_pvMetadata->unlock();
 
         // Reduce gradual memory reallocation by pre-allocating instead of clear()
         m_cacheMeta.time_of_flight.reserve(CACHE_SIZE);

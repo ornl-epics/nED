@@ -1,0 +1,20 @@
+# Upgrade DataMode record with link to OutputMode
+record(mbbo, "$(P)DataMode")
+{
+    field(FLNK, "$(P)DataModeL")
+}
+record(longout, "$(P)DataModeL")
+{
+    field(DOL,  "$(P)DataMode.RVAL NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)OutputMode PP")
+}
+# Add Discovered to the list of checks
+record(calc, "$(P)HwStatus")
+{
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
+    field(CALC, "(A+B)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+}

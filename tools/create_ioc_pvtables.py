@@ -34,7 +34,6 @@ from optparse import OptionParser
 
 __version__ = "0.2.0"
 
-DEFAULT_NED_DIR = "/home/controls/epics/nED/master"
 PVTABLE_DIR_TMPL = "/home/controls/<beamline>/pvtable/<iocname>/"
 
 def parse_st_cmd_env(st_cmd_filepath):
@@ -96,7 +95,8 @@ def parse_src_file(path, mode):
     types = {
       'status':  re.compile("createStatusParam\s*\(\s*\"([\w:]+)\"\s*,"),
       'counter': re.compile("createCounterParam\s*\(\s*\"([\w:]+)\"\s*,"),
-      'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\".*,\s*(\S+)\s*\);.*")
+      'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\".*,\s*(\S+)\s*\);.*"),
+      'temp':    re.compile("createTempParam\s*\(\s*\"([\w:]+)\"\s*,"),
     }
 
     if path not in vars_cache:
@@ -209,10 +209,11 @@ def main():
             print "ERROR: {0} is not valid nED top level directory".format(options.ned_dir)
             sys.exit(1)
     else:
-        ned_dir = os.path.join(DEFAULT_NED_DIR, "nedApp", "src")
+        ned_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "nedApp", "src")
         if not os.path.isdir(ned_dir):
             print "ERROR: Can't detect nED root directory, use -n parameter to specify it"
             sys.exit(1)
+    print ned_dir
 
     plugins = parse_st_cmd_plugins(st_cmd, bl_prefix, options.verbose)
     if not plugins:
@@ -226,7 +227,7 @@ def main():
             print "Found {0} plugin configuration named {1}".format(plugin["name"], plugin["device"])
         inpath = os.path.join(ned_dir, plugin["name"] + ".cpp")
 
-        for mode in [ "status", "config", "counter" ]:
+        for mode in [ "status", "config", "counter", "temp" ]:
 
             try:
                 vars = parse_src_file(inpath, mode)

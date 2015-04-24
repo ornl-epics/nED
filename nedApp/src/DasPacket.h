@@ -100,13 +100,14 @@ struct DasPacket
         /**
          * Commands used by different DAS modules.
          *
-         * Add those gradualy as migrating from legacy software. Make sure
+         * Add those gradually as migrating from legacy software. Make sure
          * to document each one well when added.
          */
         enum CommandType {
             CMD_READ_VERSION            = 0x20, //!< Read module version
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
             CMD_READ_STATUS             = 0x22, //!< Read module status
+            CMD_READ_TEMPERATURE        = 0x23, //!< Read module temperature(s)
             CMD_READ_STATUS_COUNTERS    = 0x24, //!< Read module status counters
             CMD_RESET_STATUS_COUNTERS   = 0x25, //!< Reset module status counters
             CMD_WRITE_CONFIG            = 0x30, //!< Write module configuration
@@ -130,11 +131,21 @@ struct DasPacket
             BAD_PACKET                  = 0x42, //!< Bad packet
             CMD_HV_SEND                 = 0x50, //!< Send data through RS232 port, HV connected to ROC
             CMD_HV_RECV                 = 0x51, //!< Receive data from RS232 port, HV connected to ROC
+            CMD_EEPROM_ERASE            = 0x60, //!< Erase device EEPROM
+            CMD_EEPROM_LOAD             = 0x61, //!< Load data from EEPROM (?)
+            CMD_EEPROM_READ             = 0x62, //!< Read contents of EEPROM and return (?)
+            CMD_EEPROM_WRITE            = 0x63, //!< Write contents of EEPROM (?)
+            CMD_EEPROM_READ_WORD        = 0x64, //!< Read single word from EEPROM
+            CMD_EEPROM_WRITE_WORD       = 0x65, //!< Write single word to EEPROM
+            CMD_UPGRADE                 = 0x6F, //!< Send chunk of new firmware data
             CMD_DISCOVER                = 0x80, //!< Discover modules
+            CMD_RESET                   = 0x81, //!< Reset of all components
             CMD_START                   = 0x82, //!< Start acquisition
             CMD_STOP                    = 0x83, //!< Stop acquisition
             CMD_TSYNC                   = 0x84, //!< TSYNC packet
             CMD_RTDL                    = 0x85, //!< RTDL is a command packet, but can also be data packet if info == 0xFC
+            CMD_PM_PULSE_RQST_ON        = 0x90, //!< Request one pulse for Pulsed Magnet
+            CMD_PM_PULSE_RQST_OFF       = 0x91, //!< Clears one pulse request for Pulsed Magnet
         };
 
         /**
@@ -148,6 +159,7 @@ struct DasPacket
             MOD_TYPE_CROC               = 0x29,
             MOD_TYPE_IROC               = 0x2A,
             MOD_TYPE_BIDIMROC           = 0x2B,
+            MOD_TYPE_ADCROC             = 0x2D,
             MOD_TYPE_DSP                = 0x30,
             MOD_TYPE_SANSROC            = 0x40,
             MOD_TYPE_ACPC               = 0xA0,
@@ -162,7 +174,14 @@ struct DasPacket
         struct CommandInfo {
 #ifdef BITFIELD_LSB_FIRST
             enum CommandType command:8;     //!< 8 bits describing DAS module commands
-            enum ModuleType module_type:8;  //!< 15:8 bits describing module type
+            union __attribute__ ((__packed__)) {
+                enum ModuleType module_type:8;  //!< Module type valid in CMD_DISCOVER responses
+                struct __attribute__ ((__packed__)) {
+                    unsigned channel:4;     //!< Channel number, starting from 0
+                    unsigned is_channel:1;  //!< Is this command for channel?
+                    unsigned chan_fill:3;   //!< Not used, always 0
+                };
+            };
             unsigned lvds_parity:1;         //!< LVDS parity bit
             unsigned lvds_stop:1;           //!< Only last word in a LVDS packet should have this set to 1
             unsigned lvds_start:1;          //!< Only first word in a LVDS packet should have this set to 1
@@ -230,10 +249,11 @@ struct DasPacket
          * @param[in] source address of the sender
          * @param[in] destination address
          * @param[in] command type for new packet
+         * @param[in] channel target channel, 0 for no specific channel.
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload = 0);
+        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
          * Create DasPacket LVDS command (non DSPs)
@@ -257,10 +277,11 @@ struct DasPacket
          * @param[in] source address of the sender
          * @param[in] destination address
          * @param[in] command type for new packet
+         * @param[in] channel target channel, 0 for no specific channel.
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload = 0);
+        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
          * Check if packet is valid, like the alignment check, size check, etc.

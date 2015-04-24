@@ -17,12 +17,11 @@
 EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
 const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
-const float    RocPlugin::NO_RESPONSE_TIMEOUT           = 1.0;
 
 /**
  * ROC V5 version response format
  */
-struct RspReadVersion_v5x {
+struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
     unsigned hw_revision:8;     // Board revision number
     unsigned hw_version:8;      // Board version number
@@ -39,48 +38,58 @@ struct RspReadVersion_v5x {
 /**
  * ROC V5 fw 5.4 adds vendor field.
  */
-struct RspReadVersion_v54 : public RspReadVersion_v5x {
+struct RspReadVersion_v54 : public RspReadVersion {
     uint32_t vendor_id;
 };
 
 RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, true, blocking,
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ROC, true, blocking,
                        NUM_ROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
     , m_version(version)
 {
     if (0) {
     } else if (m_version == "v45" || m_version == "v44") {
+        setNumChannels(8);
         setIntegerParam(Supported, 1);
         createStatusParams_v45();
         createConfigParams_v45();
+    } else if (m_version == "v47") {
+        setNumChannels(8);
+        setIntegerParam(Supported, 1);
+        createStatusParams_v47();
+        createConfigParams_v47();
     } else if (m_version == "v51") {
         setIntegerParam(Supported, 1);
         createStatusParams_v51();
         createConfigParams_v51();
+        createTemperatureParams_v51();
     } else if (m_version == "v52") {
         setIntegerParam(Supported, 1);
         createStatusParams_v52();
         createConfigParams_v52();
+        createTemperatureParams_v52();
     } else if (m_version == "v54" || m_version == "v55") {
         setIntegerParam(Supported, 1);
         createStatusParams_v54();
         createConfigParams_v54();
+        createTemperatureParams_v54();
         createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
     } else if (m_version == "v56") {
         setIntegerParam(Supported, 1);
         createStatusParams_v56();
         createCounterParams_v56();
         createConfigParams_v56();
+        createTemperatureParams_v56();
     } else if (m_version == "v57") {
         setIntegerParam(Supported, 1);
         createStatusParams_v57();
         createCounterParams_v57();
         createConfigParams_v57();
+        createTemperatureParams_v57();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);
     }
-    setIntegerParam(HwType, DasPacket::MOD_TYPE_ROC);
 
     LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
 
@@ -143,56 +152,13 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
     return BaseModulePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
 }
 
-bool RocPlugin::rspDiscover(const DasPacket *packet)
+bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
-    return (BaseModulePlugin::rspDiscover(packet) &&
-            packet->cmdinfo.module_type == DasPacket::MOD_TYPE_ROC);
-}
-
-bool RocPlugin::rspReadVersion(const DasPacket *packet)
-{
-    char date[20];
-    size_t len = (m_version == "v54" ? sizeof(RspReadVersion_v54) : sizeof(RspReadVersion_v5x));
-
-    if (!BaseModulePlugin::rspReadVersion(packet))
-        return false;
-
-    BaseModulePlugin::Version version;
-    if (!parseVersionRsp(packet, version, len)) {
-        LOG_WARN("Bad READ_VERSION response");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    setStringParam(HwDate, "");
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    callParamCallbacks();
-
-    if (version.hw_version == 5) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
-        if (m_version == ver)
-            return true;
-    }
-
-    LOG_WARN("Unsupported ROC version");
-    return false;
-}
-
-bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version, size_t expectedLen)
-{
-    const RspReadVersion_v5x *response;
-    if (expectedLen != 0 && expectedLen != packet->getPayloadLength()) {
-        return false;
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v5x)) {
-        response = reinterpret_cast<const RspReadVersion_v5x*>(packet->getPayload());
+    const RspReadVersion *response;
+    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
+        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
     } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v54)) {
-        response = reinterpret_cast<const RspReadVersion_v5x*>(packet->getPayload());
+        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
     } else {
         return false;
     }
@@ -210,7 +176,19 @@ bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
     return true;
 }
 
-bool RocPlugin::rspReadConfig(const DasPacket *packet)
+bool RocPlugin::checkVersion(const BaseModulePlugin::Version &version)
+{
+    if (version.hw_version == 5 || version.hw_version == 2) {
+        char ver[10];
+        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
+        if (m_version == ver)
+            return true;
+    }
+
+    return false;
+}
+
+bool RocPlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
 {
     if (m_version == "v54") {
         uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
@@ -224,11 +202,9 @@ bool RocPlugin::rspReadConfig(const DasPacket *packet)
         memcpy(buffer, packet, packet->length());
         packet = reinterpret_cast<const DasPacket *>(buffer);
         const_cast<DasPacket *>(packet)->payload_length -= 4; // This is the only reason we're doing all the buffering
-
-        return BaseModulePlugin::rspReadConfig(packet);
     }
 
-    return BaseModulePlugin::rspReadConfig(packet);
+    return BaseModulePlugin::rspReadConfig(packet, channel);
 }
 
 bool RocPlugin::rspStart(const DasPacket *packet)
@@ -260,7 +236,7 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
     for (uint32_t i = 0; i < length; i++) {
         buffer[i/2] |= data[i] << (16*(i%2));
     }
-    sendToDispatcher(DasPacket::CMD_HV_SEND, buffer, bufferLen);
+    sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
 }
 
 bool RocPlugin::rspHvCmd(const DasPacket *packet)

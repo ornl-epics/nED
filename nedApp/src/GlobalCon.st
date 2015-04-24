@@ -61,10 +61,10 @@ option -c;	/* do not wait for PVs to connect */
 
 #define PVSEVROK	0
 /* 
- * MAXDEVICES is for static mem allocation and must be higher than number of
- * devices expected.
+ * GLOBALCON_MAXDEVICES is for static mem allocation and must be higher than 
+ * number of devices expected. 
  */
-#define MAXDEVICES 100	
+#define GLOBALCON_MAXDEVICES 100	
 
 /*
  * set PV n to numeric value v and put. 
@@ -89,8 +89,8 @@ option -c;	/* do not wait for PVs to connect */
  * Macro to declare an array of PVs and allocate memory for later runtime 
  * assignment. t is the type and n the variable name.
  */
-#define PVARRAY(t,n) 		\
-	t n[MAXDEVICES];	\
+#define PVARRAY(t,n) 			\
+	t n[GLOBALCON_MAXDEVICES];	\
 	assign n[0] to "";
 
 /*
@@ -126,7 +126,8 @@ PVARRAY(string, failMsg)
  * These are global request soft PVs. Treated as "busy" records in that they
  * are acted upon when set to "1" and reset when the operation completes.
  */
-DECLEVENT(int, globalClear, {GPREFIX}Clear)
+DECLEVENT(int, globalEnable, {GPREFIX}Enable)
+DECLEVENT(int, globalDisable, {GPREFIX}Disable)
 DECLEVENT(int, globalStop, {GPREFIX}Stop)
 DECLEVENT(int, globalStart, {GPREFIX}Start)
 DECLEVENT(int, globalCheck, {GPREFIX}Check)
@@ -153,19 +154,23 @@ DECL(float, pctCriterion, {GPREFIX}PctCriterion)
  */
 DECL(int, running, {GPREFIX}Running)
 
+/* 
+ * switch between accumulate success and try every time behaviors
+ */
+DECL(int, accumSuccess, {GPREFIX}AccumSuccess)
+
 /*
  * Variables used by sequencer to keep track of success or failure of 
  * individual device operations.
  */
-int cmdFailed[MAXDEVICES];
+int cmdFailed[GLOBALCON_MAXDEVICES];
 int numSucceeded = 0;
 int numEnabled = 0;
 
 /*
- * List of devices found by looking for all :HwType PVs in IOC using seqGrep,
- * then truncating at ":". numFound indicates how many found
+ * List of devices found in IOC using seqGrep. numFound indicates number found.
  */
-string deviceNames[MAXDEVICES];
+string deviceNames[GLOBALCON_MAXDEVICES];
 DECL(int, numFound, {GPREFIX}NumFound)
 
 /*
@@ -179,6 +184,20 @@ int severity;
 /*
  * Macros used in constructing states and combinations of states
  */
+/*
+ * SET_DISABLES used for setting all modules enabled or disabled
+ */
+#define SET_DISABLES(NAME, VAL, EVNAME) 		\
+    state NAME {					\
+       when() {						\
+          for (i = 0; i< numFound; i++) {		\
+             disable[i] = VAL; pvPut(disable[i]);	\
+          }						\
+          EVNAME = 0;	/* release busy record */	\
+          pvPut(EVNAME);				\
+          PVPUTSTR(statePV,Ready)			\
+       } state Ready					\
+    }  							\
 /*
  * CMD_BEGIN() and CMD_END() are a pair of macros that together make two states
  * that send COMMAND to all devices. The same NAME must be passed to each, and 
@@ -200,8 +219,8 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
-       } state NAME##0	
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       {} state NAME##0	
 
 #define CMD_END(NAME, COMMAND)					\
        when() {							\
@@ -237,8 +256,8 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
-       } state NAME##0	
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       {} state NAME##0	
 
 
 #define RSP_END(NAME)						\
@@ -327,8 +346,8 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) {	\
-       } state NAME##0	
+       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       {} state NAME##0	
 
 #define TEST_PV_END(NAME, PVNAME, DESIRED)			\
        when() {							\
@@ -373,6 +392,7 @@ int severity;
                 numEnabled++;						\
                 if (cmdFailed[i]) {					\
                    cmdFailed[i] = 0;	/* ready for next use */	\
+                   PVPUTNUM(cmdSucceeded[i],0)				\
                 } else {						\
                    failMsg[i][0] = 0;					\
                    pvPut(failMsg[i]);					\
@@ -404,13 +424,16 @@ int severity;
  * code from the "OP_xxx" command defines above, and NEXT is the destination
  * state to perform the operation.
  */
-#define CMD_WHEN(EVNAME, NEXT) 			\
-       when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {	\
-          PVPUTSTR(statePV,NEXT)				\
-          if (strcmp(prevReq, #NEXT)) {				\
-             for (i = 0; i< numFound; i++)			\
-                PVPUTNUM(cmdSucceeded[i], 0)			\
-          }							\
+#define CMD_WHEN(EVNAME, NEXT) 						\
+       when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {		\
+          PVPUTSTR(statePV,NEXT)					\
+          pvGet(accumSuccess);						\
+          if (!accumSuccess || strcmp(prevReq, #NEXT)) {               	\
+             for (i = 0; i< numFound; i++) {				\
+                PVPUTNUM(cmdSucceeded[i], 0)				\
+                failMsg[i][0] = 0; pvPut(failMsg[i]);			\
+             }								\
+          }								\
        } state NEXT
 
 /*
@@ -422,7 +445,7 @@ ss GlobalControl {
          PVPUTSTR(statePV,init)
          /* find set of devices we are interested in */
          numFound = seqGrep("stringin", ".*:FailMsg", &deviceNames[0][0], 
-                                                       MAXDEVICES);
+                                                       GLOBALCON_MAXDEVICES);
          pvPut(numFound);
          for (i=0; i<numFound; i++) {
             pvAssign(failMsg[i], deviceNames[i]);
@@ -454,9 +477,9 @@ ss GlobalControl {
          }
        }
        when(numFound && pvConnectCount() == pvAssignCount()) {
-          PVPUTSTR(prevReq,statePV)					\
-          strcpy(prevReq, statePV); pvPut(prevReq);			\
-          PVPUTSTR(statePV,Discover)					\
+          PVPUTSTR(prevReq,statePV)	
+          strcpy(prevReq, statePV); pvPut(prevReq);
+          PVPUTSTR(statePV,Discover)	
        } state Discover
        when (delay(5)) {
           printf("pvConnectCount = %ld pvAssignCount = %ld numFound = %d\n",
@@ -469,16 +492,15 @@ ss GlobalControl {
     CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
     OP_DONE(DoneDiscover, globalCheck)
     state Ready {
+       CMD_WHEN(globalEnable, Enabling)
+       CMD_WHEN(globalDisable, Disabling)
        CMD_WHEN(globalStop, Stopping)
        CMD_WHEN(globalStart, Starting)
        CMD_WHEN(globalWriteConf, WritingConf)
        CMD_WHEN(globalCheck, Discover)
-       CMD_WHEN(globalClear, Clear)
-    }
-    /* 
-     * not sure yet exactly how broken FEMs are, but know they do not respond 
-     * to start and stop commands.  May need to use more IFNOTs.
-     */
+    }		
+    SET_DISABLES(Enabling, 0, globalEnable)
+    SET_DISABLES(Disabling, 1, globalDisable)
     CMD_RSP_IFNOT(Starting, STARTACQCMD, StartReadStatus)
     CMD_RSP(StartReadStatus, READSTATCMD, StartTestAcq)
     TEST_PV_IFNOT(StartTestAcq, acquiring, ACQUIRING, DoneStarting)
@@ -498,16 +520,5 @@ ss GlobalControl {
     }
     CMD_RSP(DoWriting, WRITECONFCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
-    state Clear {
-       when() {
-          for (i = 0; i< numFound; i++)	{
-                PVPUTNUM(cmdSucceeded[i],1)
-                cmdFailed[i] = 0;	
-                failMsg[i][0] = 0;
-                pvPut(failMsg[i]);
-          }
-       } state DoneClear
-    }
-    OP_DONE(DoneClear, globalClear)
 }       
        

@@ -1,0 +1,332 @@
+/**
+ * \mainpage nED main page
+ *
+ * <em>Work in progress</em>
+ *
+ * \tableofcontents
+ *
+ * \section intro_sec Introduction
+ * nED is neutron data acquisition and detectors control software. It replaces
+ * dcomserver in functionality. It was designed from ground up to handle large
+ * amounts of data while providing stable operation. Name stands for
+ * <b>n</b>eutron <b>E</b>vent <b>D</b>istributor and was first suggested by
+ * Lisa M. Debeer-Schmitt around March 2014. nED development started in January
+ * 2014.
+ *
+ * \section repo_sec Source code version control
+ * All nED sources are kept in version control repository. Use of branches is
+ * encouraged for new functionality development, bugfixes, and other development
+ * activities.
+ *
+ * \section dir_sec Directory structure
+ * Project is grouped into top level directories that can be further split
+ * into subdirectories. Directory structure follows EPICS application guidelines,
+ * in fact initial directory structure was create with makeBaseApp.pl EPICS
+ * tool.
+ * - <em>configure/</em>\n
+ *   This directory contains EPICS build files. Usually only RELEASE file needs
+ *   to be updated when new EPICS dependency is required. Refer to EPICS
+ *   documentation for details about this directory.
+ * - <em>iocned/</em>\n
+ *   Example IOC configuration is located here. Refer to section \ref ioc_sec
+ *   for details about instantiating nED IOC.
+ * - <em>nedApp/Db/</em>\n
+ *   nED EPICS database files are located here. Some of the files are generated
+ *   dynamically from source files by export2epics.py script located in same
+ *   directory and invoked automatically from Makefile. Refer to section \ref
+ *   plugin_params_sec for details how to create dynamic EPICS records.
+ * - <em>nedApp/doc/</em>\n
+ *   Doxygen configuration and support tools are located here. Doxygen is
+ *   configured to look for sources in nedApp/src/. Some of the source code
+ *   is parsed by <tt>export2doxy.py</tt> tool to extract EPICS records documentation.
+ *   Any Doxygen supported output format can be built, at the moment HTML and 
+ *   PDF documentation is located in nedApp/doc/html/ and nedApp/doc/latex/
+ *   respectively.
+ * - <em>nedApp/src/</em>\n
+ *   nED C/C++ sources are located here. Every C++ class is defined in
+ *   <tt>\<class name\>.h</tt> header file and implemented in
+ *   <tt>\<class name\>.cpp</tt> file.
+ *   Some of the detectors classes implement part of their functions
+ *   in <tt>\<class name\>_v\<detector version\>.cpp</tt> files for easy
+ *   parsing with external tools and comparing registers between different
+ *   versions. EPICS sequencer files are named *.st. A CodeBlocks project file
+ *   is provided for convenience, although CodeBlocks is not required to
+ *   build or edit any of nED files.
+ * - <em>nedApp/src/unittest/</em>\n
+ *   Some of the core functionality is supported by unit tests. This includes
+ *   FIFO implementation. Whenever code change is made to code covered with
+ *   unit tests, those should be re-run to verify change correctness.
+ * - <em>protocol/</em>\n
+ *   This directory contains StreamDevice protocol files. Although main
+ *   communication protocol with detectors is implemented in nED itself,
+ *   some detectors are connected to external devices which support different
+ *   protocol. For example, ROC boards can be connected to external high
+ *   voltage devices which use ASCII protocol (ie. ?LV reads current voltage).
+ * - <em>tools/</em>\n
+ *   Support tools that are not specific to single directory are located here.
+ *
+ * \section build_sec Building
+ * EPICS build system is engaged to build source code and to resolve dependencies.
+ * The top level <tt>Makefile</tt> file is used to build all required
+ * components. Some components (like IOC) are left out from automatic building
+ * but can be built manualy. When all dependant libaries listed in
+ * <tt>configure/RELEASE</tt> are installed, building nED should be as simple
+ * as running <tt>make</tt> in top level directory.
+ * 
+ * EPICS build system creates binaries with built in library search path. This
+ * means that all dependant libraries must not be moved to different location
+ * after nED was built.
+ *
+ * Each of the top level subdirectories can be build individually.
+ *
+ * \subsection build_src_sec Building C/C++ sources
+ * Makefile for C/C++ sources lists all required source files, sequencer source
+ * files, EPICS database support files and external library dependencies. With
+ * a simple <tt>make</tt> command all of them are built. The Makefile doesn't
+ * use sophisticated dependency generators, there's merely any file dependency
+ * enforced by Makefile. Make sure to rebuild all sources when making changes,
+ * especially when changing header files.
+ *
+ * By default nED sources are built in optimized release mode without debug
+ * symbols. This can be changed in <tt>nedApp/src/Makefile</tt> followed by
+ * recompilation of all sources.
+ * \note Debug build can be significantly slower than release mode.
+ *
+ * Makefile creates nED static library <tt>libned.a</tt>in
+ * <tt>\<top\>/lib/\<host arch\></tt> directory called <tt>libned.a</tt>. It
+ * also create an IOC binary <tt>ned</tt> in <tt>\<top\>/bin/\<host arch\></tt>.
+ *
+ * <tt>make clean</tt> command cleans all files generated by the build process.
+ *
+ * \subsection build_db_sec Building EPICS database
+ * nED EPICS database files are generated based on provided templates and
+ * dynamically creates files. There's a script called export2epics.py which is
+ * invoked by Makefile for every C++ source file that contains device register
+ * configuration. The register configuration parameters are available to EPICS
+ * through asyn support when EPICS records are available. The generated files
+ * containing those records are put in <tt>tmp/</tt> subdirectory. A change in
+ * C++ source file is detected by Makefile and the corresponding file is rebuilt.
+ * It is however preferred to rebuild all database files every time.
+ *
+ * Generated EPICS database files are put in <tt>\<top\>/db/</tt> and
+ * <tt>\<top\>/dbd/</tt>.
+ *
+ * \subsection build_doc_sec Building documentation
+ * Most of nED code is covered with Doxygen documentation blocks. Some of the
+ * documentation is extracted from C/C++ files by a tool called
+ * <tt>export2doxy.py</tt> in the same directory. Generated documentation is
+ * available as HTML and PDF.
+ *
+ * \code{.sh}
+ * cd nedApp/doc
+ * make html
+ * \endcode
+ *
+ * This will build HTML documentation and put it in <tt>\<top\>/doc/html/</tt>
+ * directory. To build PDF use:
+ *
+ * \code{.sh}
+ * cd nedApp/doc
+ * make pdf
+ * \endcode
+ *
+ * \section design_sec Architecture and design
+ * nED designe is heavily influenced by
+ * <a href="http://cars9.uchicago.edu/software/epics/areaDetector.html">areaDetector</a>.
+ * Functionality is split into meaningful blocks called plugins. areaDetector
+ * calls them ports. Plugins can be attached to another plugin to receive
+ * detector data from and to send detector commands to. All plugins receive
+ * all detector data as DAS packets, but they only process those packets that
+ * they're supposed to. Some plugins are stackable, they process the data and
+ * serve it on to other plugins. There's exactly one plugin that connects to
+ * OCC hardware, it's called OccPortDriver.
+ *
+ * \dot
+ * digraph example {
+ *  node [shape=record, fontname=Helvetica, fontsize=10];
+ *  edge [arrowhead=normal,arrowtail=normal];
+ *  OccPortDriver -> CmdDispatcherPlugin
+ *  OccPortDriver -> PixelMapPlugin
+ *  OccPortDriver -> StatsPlugin
+ *  OccPortDriver -> RtdlPlugin
+ *  PixelMapPlugin -> AdaraPlugin
+ *  PixelMapPlugin -> RocPvaPlugin
+ *  CmdDispatcherPlugin -> DspPlugin
+ *  CmdDispatcherPlugin -> RocPlugin1
+ *  CmdDispatcherPlugin -> RocPlugin2
+ * }
+ * \enddot
+ *
+ * Connecting plugins together is done in IOC startup file. This allows to
+ * modify nED configuration without modifying source code. Connecting plugins
+ * together can sometimes be done in more than one way and can provide
+ * performance optimizations. For example, in the graph above all detector
+ * plugins (DspPlugin, RocPlugin) are receiving data through CmdDispatcherPlugin
+ * to filter out packets that are not command responses. Since command responses
+ * are very infrequent comparing to data packets, this helps reduce CPU cycles
+ * by not invoking the plugin if there's no data for it. Especially with big
+ * number of detectors. Each plugin can be connected to one source plugin and
+ * many destination plugins. This can be described as parent/child relantionship,
+ * each plugin can have 1 parent but many children.
+ *
+ * Each plugin can be individually configured to run in its own thread. When
+ * carefully configured, this provides further optimization improvements as
+ * plugins processing can be parallelized. See chapter \ref processData_sec
+ * for details.
+ *
+ * So far word plugin was used as high level name for an entity used in IOC
+ * configuration file. That is not strictly correct. Rest of the documentation
+ * uses name plugin for a C++ class that provides some functionality. Such
+ * a plugin can be instantieted many times in IOC configuration file and must
+ * be given a name (port name in areaDetector terminology). Plugin instances
+ * are connected together based on instance names. Going back to the example
+ * graph above you'll notice RocPlugin1 and RocPlugin2. There are no such
+ * C++ class counterparts. To be correct, all nodes in the graph above are
+ * using plugin instance names, which happen to correleate to C++ plugin
+ * classes for easier understanding of the overall picture. The same graph
+ * should be redrawn like this:
+ *
+ * \dot
+ * digraph example {
+ *  node [shape=record, fontname=Helvetica, fontsize=10];
+ *  edge [arrowhead=normal,arrowtail=normal];
+ *  occ1 -> cmd1
+ *  occ1 -> pixmap1
+ *  occ1 -> stats1
+ *  occ1 -> rtdl1
+ *  pixmap1 -> adara1
+ *  pixmap1 -> pva1
+ *  cmd1 -> dsp1
+ *  cmd1 -> roc1
+ *  cmd1 -> roc2
+ * }
+ * \enddot
+ *
+ * \subsection plugin_params_sec
+ * TODO
+ * \subsection ioc_sec
+ * TODO: describe setting up IOC
+
+ * TODO: describe briefly all detectors, including the commands supported, tricks like ROC need to be discovered and configured, etc.
+ *
+ * \subsection pluginCom_sec Plugins communication
+ * All plugins are based on asynPortDriver class and they inherit all its
+ * capabilities. In asyn terminology an instance of asynPortDriver class is
+ * called port, but nED uses name plugin. We'll stick to plugin to not confuse
+ * the reader. asynPortDriver provides methods to register to other plugins,
+ * send data to registered plugins, receive outside get data callbacks and
+ * more. Sometimes detailed knowledge of asyn is required to understand some
+ * of the functionality. BasePlugin packs most often used capabilites and
+ * hides the complexity, providing a uniform API for derived plugins to use.
+ * Still similarities with asynPortDriver can be observed, so that experienced
+ * user can easily upgrade the provided functionality by matching it to
+ * asynPortDriver.
+ *
+ * The most used communication mechanism between plugins is passing raw detector
+ * data between plugins. Detector data is formatted into packets called DAS
+ * packets. DasPacket class describes raw packet and provides several
+ * convenient functions and definitions for parsing packets. DasPackets are
+ * exchanged between plugins using the asyn's generic pointer interface.
+ * areaDetector uses same approach, but formats data into NDArray structure.
+ * nED would have to convert raw data into NDArray before sending to plugins
+ * and back to DasPacket format in plugins.
+ * Passing DasPackets is done very efficiently with zero-copy all the way to
+ * actually sending data to external clients. When OCC board receives data it
+ * puts it into system memory using DMA. nED is notified about the location of
+ * new data and casts it as DasPacket. As DasPacket is pointer container it
+ * doesn't copy the data. DasPackets are grouped into DasPacketList and sent
+ * to plugins using the asyn generic pointer interface. Plugin is notified by
+ * calling its overloaded proecessData() function. DasPacket data must not
+ * be altered by plugins, because all plugins receive pointer to the same
+ * memory.
+ * When plugins wants to send data to detectors, it packs it into DasPacket
+ * container and sends it to parent plugin. The operation itself is
+ * synchronous and handle is given back as soon as data reaches OCC board.
+ * But actual response is asynchronous, response to the command just sent
+ * is received when detector sends it through the receive mechanism described
+ * above.
+ *
+ * Plugins so far don't use other asyn types (asynInt32, asynFloat64, etc.)
+ * for inter-communication but they could. However all EPICS database
+ * records use these basic types for getting or setting plugin parameters.
+ * Consult asynPortDriver documentation for details. One thing to remember is that
+ * none of the plugin callbacks must block, meaning wait undeterministically.
+ * Usually this involves writing to files, sockets etc.
+ *
+ * \subsection processData_sec Processing data
+ * Incoming data from OCC directly or from a dispatcher plugin is processed
+ * by all attached plugins. Data is formated as list of DAS packets into
+ * DasPacketList. All attached plugins receive a callback from the source plugin
+ * in the order they were connected. When the destination plugin is configured
+ * to process data in dedicated thread, the source plugin sends data to the next
+ * plugin in line immediately. The source plugin then waits for all destination
+ * plugins to process and release the data. Data is then consumed and is
+ * discarded. Plugins will receive DasPacket exactly once. It's important that
+ * plugins keep up with the incoming data rate. nED setup is only as fast
+ * as the slowest processing plugin.
+ *
+ * BasePlugin class hides the complexity of calling the callback weather or
+ * not in custom thread. All plugins should derive from BasePlugin and
+ * reimplement one of the BasePlugin::processDataUnlocked() or
+ * BasePlugin::processData(). See functions description for details when one
+ * or the other should be used.
+ *
+ * Plugins that forward data to other plugins should use BasePlugin::processDataUnlocked()
+ * function or be very careful with the locking. Those plugins should
+ * derive from DispatcherPlugin and reimplement relevant functions. If they
+ * need to modify data they received from upper plugins, they must first make
+ * a copy and <em>modify only copied data</em>. This is very important as
+ * other plugins rely on data not to be modified.
+ *
+ * \section plugins_sec Available plugins overview
+ * There are many plugins available in nED. Each plugin is supposed to do a
+ * single task, like calculating statistics on incoming data. This makes plugin's
+ * code short and manageable.
+ *
+ * \subsection acpcPvaPlugin_sec AcpcPvaPlugin
+ * Export neutron and meta data through 2 EPICS v4 channels. See 
+ * https://trac.sns.gov/slowcontrols/wiki/pvAccessNeutronData for output format
+ * details. Different PV structure fields are populated depending on the
+ * selected \ref outputMode_sec. ACPC detector supports three data formats but
+ * this plugin only supports two:
+ * - normal - calculated X,Y position and photo sum X,Y
+ * - raw - raw data from directly from AROCs
+ *
+ * \subsection adaraPlugin_sec AdaraPlugin
+ * This is one of the most important plugins provided by nED. It serves neutron
+ * and meta data to connected SMS client for further transformation into NeXus
+ * files. When instantiated the plugin opens a single server socket to which
+ * SMS client can connect. Data from DasPacket is reformated slightly to
+ * accomodate SMS protocol. Plugin supports two output modes which is selected
+ * through plugin parameter:
+ * - output data contains logical pixel ids (neutron pixel ids have been mapped)
+ * - output data contains raw pixel ids (as received from detector)
+ *
+ * \subsection debugPlugin_sec DebugPlugin
+ * Often it is necessary to communicate with a detector regardless of nED
+ * configuration. DebugPlugin is able to send most supported commands directly
+ * to selected plugin and parse the response, display raw output and provide
+ * some additional details like response time.
+ * Plugin is often used for debugging communication or detector firmware issues.
+ * It should be disabled otherwise to save resources.
+ *
+ * \subsection discoverPlugin_sec DiscoverPlugin
+ * DAS protocol provides global discover mechanism. It's basically a broadcast
+ * command that all connected detectors respond to. In legacy software it was
+ * used to automatically detect and configure detectors, nED communicates only
+ * with detectors that have been manually configured.
+ * It's sometimes useful to do global discover to verify what detectors are
+ * connected. When triggered, plugin will first send a global discover command.
+ * Each response received back contains detectors address and type. Plugin will
+ * further send detector version request to every detector that replied to
+ * initial global discover. Final output lists all detectors discovered. List
+ * contains at least detector address, version is provided only if detector
+ * properly responded to version request. User can select output format:
+ * - default is human friendly text format,
+ * - substitution format is used as input for configuring IOC
+ *
+ * \subsection outputMode_sec Data output mode
+ * TODO
+ *
+ * \section pluginRegister_sec Register plugin with EPICS
+ */

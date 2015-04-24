@@ -1,6 +1,34 @@
 include "BasePlugin.include"
 include "BaseModulePlugin.include"
-include "RocPlugin_v56.include"
+include "RocPlugin_v56.generated"
 include "RocPlugin.include"
 include "GlobalConD.include"
 
+record(longin, "$(P)HwVer")
+{
+    field(HIGH, "6")
+    field(LOW,  "4")
+}
+record(longin, "$(P)HwRev")
+{
+    field(HIGH, "3")
+    field(LOW,  "1")
+}
+record(longin, "$(P)FwVer")
+{
+    field(HIGH, "6")
+    field(LOW,  "4")
+}
+record(longin, "$(P)FwRev")
+{
+    field(HIGH, "7")
+    field(LOW,  "5")
+}
+record(calc, "$(P)HwStatus")
+{
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
+    field(CALC, "(A+B)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+}

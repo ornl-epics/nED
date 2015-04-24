@@ -4,6 +4,7 @@
 	<Project>
 		<Option title="ned" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../../../proj_rocv2" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -16,11 +17,12 @@
 		</MakeCommands>
 		<Build>
 			<Target title="Release">
-				<Option output="O.linux-x86_64/ned" prefix_auto="1" extension_auto="1" />
+				<Option output="../../example/bin/linux-x86_64/example" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../example/iocBoot/iocexample" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="../../iocBoot/iocned/st.cmd" />
+				<Option parameters="st.cmd" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -43,10 +45,21 @@
 		<Unit filename="AcpcFemPlugin.cpp" />
 		<Unit filename="AcpcFemPlugin.h" />
 		<Unit filename="AcpcFemPlugin_v22.cpp" />
+		<Unit filename="AcpcPlugin.cpp" />
+		<Unit filename="AcpcPlugin.h" />
+		<Unit filename="AcpcPlugin_v144.cpp" />
 		<Unit filename="AcpcPvaPlugin.cpp" />
 		<Unit filename="AcpcPvaPlugin.h" />
 		<Unit filename="AdaraPlugin.cpp" />
 		<Unit filename="AdaraPlugin.h" />
+		<Unit filename="AdcRocPlugin.cpp" />
+		<Unit filename="AdcRocPlugin.h" />
+		<Unit filename="AdcRocPlugin_v02.cpp" />
+		<Unit filename="AdcRocPlugin_v03.cpp" />
+		<Unit filename="ArocPlugin.cpp" />
+		<Unit filename="ArocPlugin.h" />
+		<Unit filename="ArocPlugin_v23.cpp" />
+		<Unit filename="BaseCircularBuffer.cpp" />
 		<Unit filename="BaseCircularBuffer.h" />
 		<Unit filename="BaseDispatcherPlugin.cpp" />
 		<Unit filename="BaseDispatcherPlugin.h" />
@@ -62,6 +75,7 @@
 		<Unit filename="CircularBuffer.h" />
 		<Unit filename="CmdDispatcher.cpp" />
 		<Unit filename="CmdDispatcher.h" />
+		<Unit filename="Common.cpp" />
 		<Unit filename="Common.h" />
 		<Unit filename="DasPacket.cpp" />
 		<Unit filename="DasPacket.h" />
@@ -87,7 +101,9 @@
 		<Unit filename="FemPlugin_v32.cpp" />
 		<Unit filename="FemPlugin_v35.cpp" />
 		<Unit filename="FemPlugin_v36.cpp" />
+		<Unit filename="FemPlugin_v37.cpp" />
 		<Unit filename="Fifo.h" />
+		<Unit filename="GlobalCon.st" />
 		<Unit filename="Log.h" />
 		<Unit filename="OccPortDriver.cpp" />
 		<Unit filename="OccPortDriver.h" />
@@ -102,6 +118,7 @@
 		<Unit filename="RocPlugin.cpp" />
 		<Unit filename="RocPlugin.h" />
 		<Unit filename="RocPlugin_v45.cpp" />
+		<Unit filename="RocPlugin_v47.cpp" />
 		<Unit filename="RocPlugin_v51.cpp" />
 		<Unit filename="RocPlugin_v52.cpp" />
 		<Unit filename="RocPlugin_v54.cpp" />

@@ -27,8 +27,17 @@ class BaseSocketPlugin : public BasePlugin {
         int m_clientSock;           //!< Client socket to send/receive data to/from, -1 when no client
 
     public:
-        static const int defaultInterfaceMask = asynOctetMask | BasePlugin::defaultInterfaceMask;
-        static const int defaultInterruptMask = asynOctetMask | BasePlugin::defaultInterruptMask;
+        static const int defaultInterfaceMask = asynOctetMask | asynFloat64Mask | BasePlugin::defaultInterfaceMask;
+        static const int defaultInterruptMask = asynOctetMask | asynFloat64Mask | BasePlugin::defaultInterruptMask;
+
+        enum {
+            STATUS_NOT_INIT     = 0, //!< Not initialized
+            STATUS_LISTENING    = 1, //!< Listening
+            STATUS_BAD_IP       = 2, //!< Can not resolve hostname/IP
+            STATUS_SOCKET_ERR   = 3, //!< Socket error
+            STATUS_BIND_PERM    = 4, //!< Not allowed to bind to port
+            STATUS_IN_USE       = 5, //!< Socket already in use
+        };
 
         /**
          * Constructor
@@ -105,14 +114,19 @@ class BaseSocketPlugin : public BasePlugin {
         void disconnectClient();
 
         /**
-         * Send data to client through m_clientSock.
+         * Send all data to client through m_clientSock.
          *
-         * If an error occurs while sending, m_clientSock might get disconnected
-         * based on error severity. Rest of the class will take care of automatically
-         * reconnect new incoming connection.
+         * Function ensures all data has been written to socket or the connection
+         * is dropped. When socket's buffer is full, the function will increase
+         * the ClientInactive parameter every second. It releases the lock while
+         * waiting, allowing CloseClient parameter to be used to kill the
+         * connection from outside.
          *
-         * Caller of this function must ensure locked access. Function will block until
-         * all data has been sent to socket or error occurs.
+         * Caller of this function must ensure locked access.
+         *
+         * Function can not be extended with a timeout parameter as the
+         * implementation could not guarantee data integrity on the socket -
+         * partial data can be transmitted to client when timeout would occur.
          *
          * @param[in] data Data to be sent through the socket.
          * @param[in] length Length of data in bytes.
@@ -161,9 +175,12 @@ class BaseSocketPlugin : public BasePlugin {
         #define FIRST_BASESOCKETPLUGIN_PARAM ListenIP
         int ListenIP;
         int ListenPort;
+        int ListenStatus;
         int ClientIP;
         int CheckInt;
-        #define LAST_BASESOCKETPLUGIN_PARAM CheckInt
+        int ClientInactive;
+        int CloseClient;
+        #define LAST_BASESOCKETPLUGIN_PARAM CloseClient
 };
 
 #endif // BASESOCKET_PLUGIN_H

@@ -54,8 +54,6 @@ class RocPlugin : public BaseModulePlugin {
 
     private: // structures and definitions
         static const unsigned NUM_ROCPLUGIN_DYNPARAMS;      //!< Maximum number of asyn parameters, including the status and configuration parameters
-        static const unsigned NUM_CHANNELS = 8;             //!< Number of channels connected to ROC
-        static const float    NO_RESPONSE_TIMEOUT;          //!< Timeout to wait for response from ROC, in seconds
 
     private: // variables
         std::string m_version;                              //!< Version string as passed to constructor
@@ -102,36 +100,30 @@ class RocPlugin : public BaseModulePlugin {
          * All ROC boards except for v5.4 have the same response. v5.4 adds an extra
          * vendor field which the function disregards.
          *
-         * When expectedLen parameter is non-zero, the function will only accept
-         * the response that matches the size. This is useful when the version
-         * is known in advance and this function can be used to verify that returned
-         * version matches configured one. If the parsed version length doesn't match
-         * the expected length, funtion returns false.
-         *
          * @param[in] packet to be parsed
          * @param[out] version structure to be populated
-         * @param[in] expectedLen expected size of the version response, used to
-         *                        verify the parsed packet matches this one
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version, size_t expectedLen=0);
+        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+
+        /**
+         * Member counterpart of parseVersionRsp().
+         *
+         * @see RocPlugin::parseVersionRsp()
+         */
+        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        {
+            return parseVersionRsp(packet, version);
+        }
+
+        /**
+         * Configured version must match actual.
+         *
+         * @return true when they match, false otherwise.
+         */
+        bool checkVersion(const BaseModulePlugin::Version &version);
 
     private: // functions
-        /**
-         * Verify the DISCOVER response is from ROC.
-         *
-         * @param[in] packet with response to DISCOVER
-         * @return true if packet was parsed and type of module is ROC.
-         */
-        bool rspDiscover(const DasPacket *packet);
-
-        /**
-         * Overrided READ_VERSION handler dispatches real work to one of rspReadVersion_*
-         *
-         * @param[in] packet with response to READ_VERSION
-         * @return true if packet was parsed and module version verified.
-         */
-        bool rspReadVersion(const DasPacket *packet);
 
         /**
          * Handle READ_CONFIG response from v5.4.
@@ -143,7 +135,7 @@ class RocPlugin : public BaseModulePlugin {
          * For non-v5.4 firmwares the function simply invokes BaseModulePlugin::rspReadConfig()
          * passing it the original packet.
          */
-        bool rspReadConfig(const DasPacket *packet);
+        bool rspReadConfig(const DasPacket *packet, uint8_t channel);
 
         /**
          * Override START response handler.
@@ -198,6 +190,16 @@ class RocPlugin : public BaseModulePlugin {
         void createConfigParams_v45();
 
         /**
+         * Create and register all status ROC v4.7 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v47();
+
+        /**
+         * Create and register all config ROC v4.7 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v47();
+
+        /**
          * Create and register all status ROC v5.1 parameters to be exposed to EPICS.
          */
         void createStatusParams_v51();
@@ -206,6 +208,11 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all config ROC v5.1 parameters to be exposed to EPICS.
          */
         void createConfigParams_v51();
+
+        /**
+         * Create and register all temperature ROC v5.1 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v51();
 
         /**
          * Create and register all status ROC v5.2 parameters to be exposed to EPICS.
@@ -218,6 +225,11 @@ class RocPlugin : public BaseModulePlugin {
         void createConfigParams_v52();
 
         /**
+         * Create and register all temperature ROC v5.2 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v52();
+
+        /**
          * Create and register all status ROC v5.4/v5.5 parameters to be exposed to EPICS.
          */
         void createStatusParams_v54();
@@ -226,6 +238,11 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all config ROC v5.4/v5.5 parameters to be exposed to EPICS.
          */
         void createConfigParams_v54();
+
+        /**
+         * Create and register all temperature ROC v5.4 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v54();
 
         /**
          * Create and register all status ROC v5.6 parameters to be exposed to EPICS.
@@ -243,6 +260,11 @@ class RocPlugin : public BaseModulePlugin {
         void createConfigParams_v56();
 
         /**
+         * Create and register all temperature ROC v5.6 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v56();
+
+        /**
          * Create and register all status ROC v5.7 parameters to be exposed to EPICS.
          */
         void createStatusParams_v57();
@@ -256,6 +278,11 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all config ROC v5.7 parameters to be exposed to EPICS.
          */
         void createConfigParams_v57();
+
+        /**
+         * Create and register all temperature ROC v5.7 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v57();
 
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring

@@ -15,7 +15,7 @@
 
 // Static members initilization
 const uint32_t DasPacket::MinLength = sizeof(DasPacket);
-const uint32_t DasPacket::MaxLength = 1800*8 + MinLength;
+const uint32_t DasPacket::MaxLength = 4000 + MinLength; // DPS-T limit is 3600
 
 DasPacket::DasPacket(uint32_t source_, uint32_t destination_, CommandInfo cmdinfo_, uint32_t payload_length_, uint32_t *payload_)
     : destination(destination_)
@@ -32,7 +32,7 @@ DasPacket::DasPacket(uint32_t source_, uint32_t destination_, CommandInfo cmdinf
     }
 }
 
-DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload)
+DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload)
 {
     DasPacket *packet = 0;
     CommandInfo cmdinfo;
@@ -42,6 +42,10 @@ DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandTy
     payload_length = (payload_length + 3) & ~3;
     cmdinfo.is_command = true;
     cmdinfo.command = command;
+    if (channel > 0) {
+        cmdinfo.channel = (channel - 1) & 0xF;
+        cmdinfo.is_channel = 1;
+    }
 
     void *addr = malloc(sizeof(DasPacket) + payload_length);
     if (addr)
@@ -49,7 +53,7 @@ DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandTy
     return packet;
 }
 
-DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload)
+DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload)
 {
     DasPacket *packet = 0;
     CommandInfo cmdinfo;
@@ -65,6 +69,10 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
     cmdinfo.is_command = true;
     cmdinfo.is_passthru = true;
     cmdinfo.command = command;
+    if (channel > 0) {
+        cmdinfo.channel = (channel - 1) & 0xF;
+        cmdinfo.is_channel = 1;
+    }
 
     void *addr = malloc(sizeof(DasPacket) + ALIGN_UP(real_payload_length, 4));
     if (addr) {

@@ -47,14 +47,19 @@ record(ao, "$(P)PctCriterion") {
 }
 
 # Busy records for requesting command sequences
-record(busy, "$(P)Clear") {
-   field(DESC, "Request Clear sequence")
-   field(ONAM, "Clearing")
-   field(ZNAM, "Clear")
+record(busy, "$(P)Disable") {
+   field(DESC, "Disable all devices")
+   field(ONAM, "Disabling")
+   field(ZNAM, "Disable")
+}
+record(busy, "$(P)Enable") {
+   field(DESC, "Enable All devices")
+   field(ONAM, "Enabling")
+   field(ZNAM, "Enable")
 }
 record(busy, "$(P)Stop") {
    field(DESC, "Request Stop sequence")
-   field(ONAM, "Stoping")
+   field(ONAM, "Stopping")
    field(ZNAM, "Stop")
 }
 record(busy, "$(P)Start") {
@@ -71,5 +76,15 @@ record(busy, "$(P)WriteConf") {
    field(DESC, "Request WriteConf sequence")
    field(ONAM, "Writing")
    field(ZNAM, "WriteConf")
+}
+
+# Control retry behavior
+record(bo, "$(P)AccumSuccess") {
+   field(DESC, "Don't rewrite succeeded cmds")
+   field(PINI, "YES")
+   field(ONAM, "Yes")
+   field(ZNAM, "No")
+   field(DOL, "1")
+   info(autosaveFields, "VAL")
 }
 

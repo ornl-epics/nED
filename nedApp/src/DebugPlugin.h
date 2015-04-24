@@ -50,6 +50,8 @@ class DebugPlugin : public BasePlugin {
         uint32_t m_payload[256];    //!< Last packet payload
         uint32_t m_payloadLen;      //!< Last packet payload length, in number of elements in m_payload
         DasPacket::CommandType m_expectedResponse; //!< Used to filter our responses that we didn't request
+        uint32_t m_lastConfigPayload[256]; //!< Last READ_CONFIG response payload, useful for resending configuration
+        uint32_t m_lastConfigPayloadLen;   //!< Length of last READ_CONFIG response, in bytes
 
     public: // structures and defines
         /**
@@ -109,7 +111,8 @@ class DebugPlugin : public BasePlugin {
         int RspDataLen;     //!< Response payload length in bytes
         int RspData;        //!< Response payload
         int ByteGrp;        //!< How many byte to group
-        #define LAST_GENERICMODULEPLUGIN_PARAM ByteGrp
+        int Channel;        //!< Select channel to send command to (read/write config only
+        #define LAST_GENERICMODULEPLUGIN_PARAM Channel
 };
 
 #endif // GENERIC_MODULE_PLUGIN_H

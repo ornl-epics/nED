@@ -244,12 +244,12 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("LvdsFilterMask", 'E', 0x1, 16, 16, 65535); // LVDS command filter mask
 
 //      BLXXX:Det:DspX:| sig nam|                            | EPICS record description | (bi and mbbi description)
-    createConfigParam("LvdsTxCtrl",     'E', 0x2,  1,  0, 0); // LVDS TX control TCLK mode    (0=TCLK from int,1=TCLK from LVDS)
-    createConfigParam("LvdsTxTclk",     'E', 0x2,  2,  2, 0); // LVDS TX control T&C TCLK mod (0=TCLK,1=TCLK,2=always 0,3=always 1)
+    createConfigParam("LvdsTclkMode",   'E', 0x2,  1,  0, 0); // LVDS TX control TCLK mode    (0=TCLK from int,1=TCLK from LVDS)
+    createConfigParam("LvdsTclkCtrl",   'E', 0x2,  2,  2, 0); // LVDS TX control T&C TCLK mod (0=TCLK,1=TCLK,2=always 0,3=always 1)
     createConfigParam("LvdsTsyncMode",  'E', 0x2,  2,  4, 1); // LVDS TSYNC_O mode            (0=local TSYNC,1=TSYNC from TREF,2=TSYNC from LVDS,3=TSYNC from opt)
-    createConfigParam("LvdsTsCtrl",     'E', 0x2,  2,  6, 0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
+    createConfigParam("LvdsTsyncCtrl",  'E', 0x2,  2,  6, 0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
     createConfigParam("LvdsSysrstCtrl", 'E', 0x2,  2,  8, 0); // LVDS T&C SYSRST# buffer ctrl (0=sysrst,1=sysrst,2=always 0,3=always 1)
-    createConfigParam("LvdsTxenCttrl",  'E', 0x2,  2, 10, 0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
+    createConfigParam("LvdsTxenCtrl",   'E', 0x2,  2, 10, 0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
     createConfigParam("LvdsOutClck",    'E', 0x2,  2, 16, 0); // LVDS output clock mode
     createConfigParam("LvdsNRetry",     'E', 0x2,  2, 18, 3); // LVDS downstream retrys
     createConfigParam("Ch1:WordLen",    'E', 0x2,  1, 20, 0); // LVDS chan1 data word length  (0=RX FIFO data,1=set to 4)
@@ -268,18 +268,18 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("Ch4:SrcCtrl",    'E', 0x3,  2,  6, 0); // LVDS ch4 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
     createConfigParam("Ch5:SrcCtrl",    'E', 0x3,  2,  8, 0); // LVDS ch5 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
     createConfigParam("Ch6:SrcCtrl",    'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB[0])
+    createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB)
 
     createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 166660); // LVDS TSYNC generate divisor (166660=240Hz, 666800=60Hz, 800000=50Hz, 1333200=30Hz)
     createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor     (0=10ns, 1=20ns, 106=1us, 1060=10us, 106250=1ms)
-    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (83330=8.3ms, 10=1us, 10000=1ms)
+    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (83330=8.3ms, 10=1us, 20=2us, 10000=1ms)
 
-    createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
-    createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 0); // Crossbar Switch Pass ctrl B  (1=Send to trans A,2=send to trans B)
     createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
+    createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
     createConfigParam("OptA:EOC",       'E', 0x8,  1,  4, 1); // Optical TX A End of Chain
     createConfigParam("OptA:FilterCmd", 'E', 0x8,  2,  5, 0); // Optical TX A Command Filter
     createConfigParam("OptB:TxMode",    'E', 0x8,  2,  8, 3); // Optical TX B output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
+    createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 2); // Crossbar Switch Pass ctrl B  (1=Send to trans A,2=send to trans B)
     createConfigParam("OptB:EOC",       'E', 0x8,  1, 12, 1); // Optical TX B End of Chain
     createConfigParam("OptB:FilterCmd", 'E', 0x8,  2, 13, 0); // Optical TX B Command Filter
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
@@ -314,8 +314,8 @@ void DspPlugin::createConfigParams_v63() {
 void DspPlugin::createStatusParams_v63()
 {
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
-    createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured,1=configured)
-    createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring,1=acquiring)
+    createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured, archive:monitor)
+    createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring [alarm],1=acquiring, archive:monitor)
     createStatusParam("ErrProgram",    0x0,  1,  2); // WRITE_CNFG during ACQ        (0=no error,1=error)
     createStatusParam("ErrLength",     0x0,  1,  3); // Packet length error          (0=no error,1=error)
     createStatusParam("ErrCmdBad",     0x0,  1,  4); // Unrecognized command error   (0=no error,1=error)

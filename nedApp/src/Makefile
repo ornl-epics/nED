@@ -15,11 +15,12 @@ include $(TOP)/configure/CONFIG
 # 
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
 USR_CXXFLAGS += -std=c++0x
+
 #USR_CXXFLAGS += -fopenmp
 #USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)
-#CXXFLAGS += -g -ggdb
-CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
+CXXFLAGS += -g -ggdb
+CXXFLAGS += -O0 # Improve std::vector iteration times by factor 30 or so
 
 # Product
 PROD_NAME = ned
@@ -50,6 +51,7 @@ PROD_LIBS += calc
 PROD_SRCS  += ned_registerRecordDeviceDriver.cpp
 PROD_SRCS  += main.cpp
 PROD_SRCS  += GlobalCon.st
+PROD_SRCS  += ApplyConfig.st
 
 # Static library
 LIBRARY = ned
@@ -59,9 +61,12 @@ SHARED_LIBRARIES = NO
 INC += CircularBuffer.h
 
 LIB_SRCS  += GlobalCon.st
+LIB_SRCS  += ApplyConfig.st
+$(PROD_NAME)_SRCS  += Common.cpp
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp
 $(PROD_NAME)_SRCS  += OccPortDriver.cpp
+$(PROD_NAME)_SRCS  += BaseCircularBuffer.cpp
 $(PROD_NAME)_SRCS  += DmaCircularBuffer.cpp
 $(PROD_NAME)_SRCS  += CircularBuffer.cpp
 $(PROD_NAME)_SRCS  += DmaCopier.cpp
@@ -78,7 +83,11 @@ $(PROD_NAME)_SRCS  += DspPlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v64.cpp
 $(PROD_NAME)_SRCS  += RocPlugin.cpp
+$(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
+$(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
+$(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
+$(PROD_NAME)_SRCS  += RocPlugin_v47.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp
@@ -88,6 +97,7 @@ $(PROD_NAME)_SRCS  += FemPlugin.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v35.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v36.cpp
+$(PROD_NAME)_SRCS  += FemPlugin_v37.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcFemPlugin_v22.cpp
 $(PROD_NAME)_SRCS  += DiscoverPlugin.cpp
@@ -102,6 +112,10 @@ $(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
 $(PROD_NAME)_SRCS  += PvaMetaData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
+$(PROD_NAME)_SRCS  += AcpcPlugin.cpp
+$(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
+$(PROD_NAME)_SRCS  += ArocPlugin.cpp
+$(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
 
 #===========================
 
