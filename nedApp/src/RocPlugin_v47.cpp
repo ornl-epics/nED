@@ -679,3 +679,11 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch8:CorrectRate",  8, '8',  0x8,  2, 0, 1);  // Chan8 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
     createConfigParam("Ch8:TpCtrl",       8, '8',  0x8,  4,12, 3);  // Chan8 TP control
 }
+
+void RocPlugin::createTemperatureParams_v47()
+{
+//  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
+    createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
+    createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
+    createTempParam("TempPreampB",      0x2, 16, 0); // Preamp B temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
+}

@@ -53,11 +53,13 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 1);
         createStatusParams_v45();
         createConfigParams_v45();
+        createTemperatureParams_v45();
     } else if (m_version == "v47") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
         createStatusParams_v47();
         createConfigParams_v47();
+        createTemperatureParams_v47();
     } else if (m_version == "v51") {
         setIntegerParam(Supported, 1);
         createStatusParams_v51();
@@ -237,6 +239,7 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
         buffer[i/2] |= data[i] << (16*(i%2));
     }
     sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
+fprintf(stderr, "Sending HV command: %s (%u)\n", data, length);
 }
 
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
@@ -246,6 +249,7 @@ bool RocPlugin::rspHvCmd(const DasPacket *packet)
     // Single character per OCC packet
     char byte = payload[0] & 0xFF;
     m_hvBuffer.enqueue(&byte, 1);
+fprintf(stderr, "Received HV response: %c\n", byte);
 
     return true;
 }
