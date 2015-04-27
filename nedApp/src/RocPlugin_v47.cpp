@@ -419,12 +419,12 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch1:A:InOffset",   1, '1',  0x2, 12, 0, 100);// Chan1 A input offset
     createConfigParam("Ch1:B:InOffset",   1, '1',  0x3, 12, 0, 100);// Chan1 B input offset
     createConfigParam("Ch1:A:FullScale",  1, '1',  0x4, 12, 0, 10); // Chan1 A full scale
-    createConfigParam("Ch1:Unknown",      1, '1',  0x5, 12, 0, 0);  // Chan1 unknown register
+    createConfigParam("Ch1:Sum:FullScale",1, '1',  0x5, 12, 0, 0);  // Chan1 unknown register
     createConfigParam("Ch1:B:FullScale",  1, '1',  0x6, 12, 0, 10); // Chan1 B full scale
     createConfigParam("Ch1:PosThreshold", 1, '1',  0x7, 12, 0, 400);// Chan1 positive threshold
     createConfigParam("Ch1:NegThreshold", 1, '1',  0x8, 12, 0, 0);  // Chan1 negative threshold
     createConfigParam("Ch1:A:AdcOffset",  1, '1',  0x9, 12, 0, 100);// Chan1 A ADC offset
-    createConfigParam("Ch1:SumZero",      1, '1',  0xA, 12, 0, 0);  // Chan1 sum zero
+    createConfigParam("Ch1:Sum:AdcOffset",1, '1',  0xA, 12, 0, 0);  // Chan1 sum zero
     createConfigParam("Ch1:B:AdcOffset",  1, '1',  0xB, 12, 0, 100);// Chan1 B ADC offset
     createConfigParam("Ch1:A:GainAdj",    1, '1',  0xC, 12, 0, 0);  // Chan1 A gain adjust
     createConfigParam("Ch1:B:GainAdj",    1, '1',  0xD, 12, 0, 0);  // Chan1 B gain adjust
@@ -452,12 +452,12 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch2:A:InOffset",   2, '1',  0x2, 12, 0, 100);// Chan2 A input offset
     createConfigParam("Ch2:B:InOffset",   2, '1',  0x3, 12, 0, 100);// Chan2 B input offset
     createConfigParam("Ch2:A:FullScale",  2, '1',  0x4, 12, 0, 10); // Chan2 A full scale
-    createConfigParam("Ch2:Unknown",      2, '1',  0x5, 12, 0, 0);  // Chan2 unknown register
+    createConfigParam("Ch2:Sum:FullScale",2, '1',  0x5, 12, 0, 0);  // Chan2 unknown register
     createConfigParam("Ch2:B:FullScale",  2, '1',  0x6, 12, 0, 10); // Chan2 B full scale
     createConfigParam("Ch2:PosThreshold", 2, '1',  0x7, 12, 0, 400);// Chan2 positive threshold
     createConfigParam("Ch2:NegThreshold", 2, '1',  0x8, 12, 0, 0);  // Chan2 negative threshold
     createConfigParam("Ch2:A:AdcOffset",  2, '1',  0x9, 12, 0, 100);// Chan2 A ADC offset
-    createConfigParam("Ch2:SumZero",      2, '1',  0xA, 12, 0, 0);  // Chan2 sum zero
+    createConfigParam("Ch2:Sum:AdcOffset",2, '1',  0xA, 12, 0, 0);  // Chan2 sum zero
     createConfigParam("Ch2:B:AdcOffset",  2, '1',  0xB, 12, 0, 100);// Chan2 B ADC offset
     createConfigParam("Ch2:A:GainAdj",    2, '1',  0xC, 12, 0, 0);  // Chan2 A gain adjust
     createConfigParam("Ch2:B:GainAdj",    2, '1',  0xD, 12, 0, 0);  // Chan2 B gain adjust
@@ -485,12 +485,12 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch3:A:InOffset",   3, '1',  0x2, 12, 0, 100);// Chan3 A input offset
     createConfigParam("Ch3:B:InOffset",   3, '1',  0x3, 12, 0, 100);// Chan3 B input offset
     createConfigParam("Ch3:A:FullScale",  3, '1',  0x4, 12, 0, 10); // Chan3 A full scale
-    createConfigParam("Ch3:Unknown",      3, '1',  0x5, 12, 0, 0);  // Chan3 unknown register
+    createConfigParam("Ch3:Sum:FullScale",3, '1',  0x5, 12, 0, 0);  // Chan3 unknown register
     createConfigParam("Ch3:B:FullScale",  3, '1',  0x6, 12, 0, 10); // Chan3 B full scale
     createConfigParam("Ch3:PosThreshold", 3, '1',  0x7, 12, 0, 400);// Chan3 positive threshold
     createConfigParam("Ch3:NegThreshold", 3, '1',  0x8, 12, 0, 0);  // Chan3 negative threshold
     createConfigParam("Ch3:A:AdcOffset",  3, '1',  0x9, 12, 0, 100);// Chan3 A ADC offset
-    createConfigParam("Ch3:SumZero",      3, '1',  0xA, 12, 0, 0);  // Chan3 sum zero
+    createConfigParam("Ch3:Sum:AdcOffset",3, '1',  0xA, 12, 0, 0);  // Chan3 sum zero
     createConfigParam("Ch3:B:AdcOffset",  3, '1',  0xB, 12, 0, 100);// Chan3 B ADC offset
     createConfigParam("Ch3:A:GainAdj",    3, '1',  0xC, 12, 0, 0);  // Chan3 A gain adjust
     createConfigParam("Ch3:B:GainAdj",    3, '1',  0xD, 12, 0, 0);  // Chan3 B gain adjust
@@ -518,12 +518,12 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch4:A:InOffset",   4, '1',  0x2, 12, 0, 100);// Chan4 A input offset
     createConfigParam("Ch4:B:InOffset",   4, '1',  0x3, 12, 0, 100);// Chan4 B input offset
     createConfigParam("Ch4:A:FullScale",  4, '1',  0x4, 12, 0, 10); // Chan4 A full scale
-    createConfigParam("Ch4:Unknown",      4, '1',  0x5, 12, 0, 0);  // Chan4 unknown register
+    createConfigParam("Ch4:Sum:FullScale",4, '1',  0x5, 12, 0, 0);  // Chan4 unknown register
     createConfigParam("Ch4:B:FullScale",  4, '1',  0x6, 12, 0, 10); // Chan4 B full scale
     createConfigParam("Ch4:PosThreshold", 4, '1',  0x7, 12, 0, 400);// Chan4 positive threshold
     createConfigParam("Ch4:NegThreshold", 4, '1',  0x8, 12, 0, 0);  // Chan4 negative threshold
     createConfigParam("Ch4:A:AdcOffset",  4, '1',  0x9, 12, 0, 100);// Chan4 A ADC offset
-    createConfigParam("Ch4:SumZero",      4, '1',  0xA, 12, 0, 0);  // Chan4 sum zero
+    createConfigParam("Ch4:Sum:AdcOffset",4, '1',  0xA, 12, 0, 0);  // Chan4 sum zero
     createConfigParam("Ch4:B:AdcOffset",  4, '1',  0xB, 12, 0, 100);// Chan4 B ADC offset
     createConfigParam("Ch4:A:GainAdj",    4, '1',  0xC, 12, 0, 0);  // Chan4 A gain adjust
     createConfigParam("Ch4:B:GainAdj",    4, '1',  0xD, 12, 0, 0);  // Chan4 B gain adjust
@@ -551,12 +551,12 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch5:A:InOffset",   5, '1',  0x2, 12, 0, 100);// Chan5 A input offset
     createConfigParam("Ch5:B:InOffset",   5, '1',  0x3, 12, 0, 100);// Chan5 B input offset
     createConfigParam("Ch5:A:FullScale",  5, '1',  0x4, 12, 0, 10); // Chan5 A full scale
-    createConfigParam("Ch5:Unknown",      5, '1',  0x5, 12, 0, 0);  // Chan5 unknown register
+    createConfigParam("Ch5:Sum:FullScale",5, '1',  0x5, 12, 0, 0);  // Chan5 unknown register
     createConfigParam("Ch5:B:FullScale",  5, '1',  0x6, 12, 0, 10); // Chan5 B full scale
     createConfigParam("Ch5:PosThreshold", 5, '1',  0x7, 12, 0, 400);// Chan5 positive threshold
     createConfigParam("Ch5:NegThreshold", 5, '1',  0x8, 12, 0, 0);  // Chan5 negative threshold
     createConfigParam("Ch5:A:AdcOffset",  5, '1',  0x9, 12, 0, 100);// Chan5 A ADC offset
-    createConfigParam("Ch5:SumZero",      5, '1',  0xA, 12, 0, 0);  // Chan5 sum zero
+    createConfigParam("Ch5:Sum:AdcOffset",5, '1',  0xA, 12, 0, 0);  // Chan5 sum zero
     createConfigParam("Ch5:B:AdcOffset",  5, '1',  0xB, 12, 0, 100);// Chan5 B ADC offset
     createConfigParam("Ch5:A:GainAdj",    5, '1',  0xC, 12, 0, 0);  // Chan5 A gain adjust
     createConfigParam("Ch5:B:GainAdj",    5, '1',  0xD, 12, 0, 0);  // Chan5 B gain adjust
@@ -584,12 +584,12 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch6:A:InOffset",   6, '1',  0x2, 12, 0, 100);// Chan6 A input offset
     createConfigParam("Ch6:B:InOffset",   6, '1',  0x3, 12, 0, 100);// Chan6 B input offset
     createConfigParam("Ch6:A:FullScale",  6, '1',  0x4, 12, 0, 10); // Chan6 A full scale
-    createConfigParam("Ch6:Unknown",      6, '1',  0x5, 12, 0, 0);  // Chan6 unknown register
+    createConfigParam("Ch6:Sum:FullScale",6, '1',  0x5, 12, 0, 0);  // Chan6 unknown register
     createConfigParam("Ch6:B:FullScale",  6, '1',  0x6, 12, 0, 10); // Chan6 B full scale
     createConfigParam("Ch6:PosThreshold", 6, '1',  0x7, 12, 0, 400);// Chan6 positive threshold
     createConfigParam("Ch6:NegThreshold", 6, '1',  0x8, 12, 0, 0);  // Chan6 negative threshold
     createConfigParam("Ch6:A:AdcOffset",  6, '1',  0x9, 12, 0, 100);// Chan6 A ADC offset
-    createConfigParam("Ch6:SumZero",      6, '1',  0xA, 12, 0, 0);  // Chan6 sum zero
+    createConfigParam("Ch6:Sum:AdcOffset",6, '1',  0xA, 12, 0, 0);  // Chan6 sum zero
     createConfigParam("Ch6:B:AdcOffset",  6, '1',  0xB, 12, 0, 100);// Chan6 B ADC offset
     createConfigParam("Ch6:A:GainAdj",    6, '1',  0xC, 12, 0, 0);  // Chan6 A gain adjust
     createConfigParam("Ch6:B:GainAdj",    6, '1',  0xD, 12, 0, 0);  // Chan6 B gain adjust
@@ -617,12 +617,12 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch7:A:InOffset",   7, '1',  0x2, 12, 0, 100);// Chan7 A input offset
     createConfigParam("Ch7:B:InOffset",   7, '1',  0x3, 12, 0, 100);// Chan7 B input offset
     createConfigParam("Ch7:A:FullScale",  7, '1',  0x4, 12, 0, 10); // Chan7 A full scale
-    createConfigParam("Ch7:Unknown",      7, '1',  0x5, 12, 0, 0);  // Chan7 unknown register
+    createConfigParam("Ch7:Sum:FullScale",7, '1',  0x5, 12, 0, 0);  // Chan7 unknown register
     createConfigParam("Ch7:B:FullScale",  7, '1',  0x6, 12, 0, 10); // Chan7 B full scale
     createConfigParam("Ch7:PosThreshold", 7, '1',  0x7, 12, 0, 400);// Chan7 positive threshold
     createConfigParam("Ch7:NegThreshold", 7, '1',  0x8, 12, 0, 0);  // Chan7 negative threshold
     createConfigParam("Ch7:A:AdcOffset",  7, '1',  0x9, 12, 0, 100);// Chan7 A ADC offset
-    createConfigParam("Ch7:SumZero",      7, '1',  0xA, 12, 0, 0);  // Chan7 sum zero
+    createConfigParam("Ch7:Sum:AdcOffset",7, '1',  0xA, 12, 0, 0);  // Chan7 sum zero
     createConfigParam("Ch7:B:AdcOffset",  7, '1',  0xB, 12, 0, 100);// Chan7 B ADC offset
     createConfigParam("Ch7:A:GainAdj",    7, '1',  0xC, 12, 0, 0);  // Chan7 A gain adjust
     createConfigParam("Ch7:B:GainAdj",    7, '1',  0xD, 12, 0, 0);  // Chan7 B gain adjust
@@ -650,12 +650,12 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch8:A:InOffset",   8, '1',  0x2, 12, 0, 100);// Chan8 A input offset
     createConfigParam("Ch8:B:InOffset",   8, '1',  0x3, 12, 0, 100);// Chan8 B input offset
     createConfigParam("Ch8:A:FullScale",  8, '1',  0x4, 12, 0, 10); // Chan8 A full scale
-    createConfigParam("Ch8:Unknown",      8, '1',  0x5, 12, 0, 0);  // Chan8 unknown register
+    createConfigParam("Ch8:Sum:FullScale",8, '1',  0x5, 12, 0, 0);  // Chan8 unknown register
     createConfigParam("Ch8:B:FullScale",  8, '1',  0x6, 12, 0, 10); // Chan8 B full scale
     createConfigParam("Ch8:PosThreshold", 8, '1',  0x7, 12, 0, 400);// Chan8 positive threshold
     createConfigParam("Ch8:NegThreshold", 8, '1',  0x8, 12, 0, 0);  // Chan8 negative threshold
     createConfigParam("Ch8:A:AdcOffset",  8, '1',  0x9, 12, 0, 100);// Chan8 A ADC offset
-    createConfigParam("Ch8:SumZero",      8, '1',  0xA, 12, 0, 0);  // Chan8 sum zero
+    createConfigParam("Ch8:Sum:AdcOffset",8, '1',  0xA, 12, 0, 0);  // Chan8 sum zero
     createConfigParam("Ch8:B:AdcOffset",  8, '1',  0xB, 12, 0, 100);// Chan8 B ADC offset
     createConfigParam("Ch8:A:GainAdj",    8, '1',  0xC, 12, 0, 0);  // Chan8 A gain adjust
     createConfigParam("Ch8:B:GainAdj",    8, '1',  0xD, 12, 0, 0);  // Chan8 B gain adjust
