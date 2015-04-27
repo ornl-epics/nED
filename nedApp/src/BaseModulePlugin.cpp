@@ -167,7 +167,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             default:
                 setIntegerParam(CmdRsp, LAST_CMD_ERROR);
                 callParamCallbacks();
-                LOG_WARN("Unrecognized '%d' command", SM_ACTION_CMD(value));
+                LOG_WARN("Unrecognized '%d' command", value);
                 return asynError;
             }
 
