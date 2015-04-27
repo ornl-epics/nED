@@ -21,7 +21,7 @@ const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 650;  //!< Since suppo
 /**
  * ROC V5 version response format
  */
-struct RspReadVersion_v5x {
+struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
     unsigned hw_revision:8;     // Board revision number
     unsigned hw_version:8;      // Board version number
@@ -38,7 +38,7 @@ struct RspReadVersion_v5x {
 /**
  * ROC V5 fw 5.4 adds vendor field.
  */
-struct RspReadVersion_v54 : public RspReadVersion_v5x {
+struct RspReadVersion_v54 : public RspReadVersion {
     uint32_t vendor_id;
 };
 
@@ -49,9 +49,17 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
 {
     if (0) {
     } else if (m_version == "v45" || m_version == "v44") {
+        setNumChannels(8);
         setIntegerParam(Supported, 1);
         createStatusParams_v45();
         createConfigParams_v45();
+        createTemperatureParams_v45();
+    } else if (m_version == "v47") {
+        setNumChannels(8);
+        setIntegerParam(Supported, 1);
+        createStatusParams_v47();
+        createConfigParams_v47();
+        createTemperatureParams_v47();
     } else if (m_version == "v51") {
         setIntegerParam(Supported, 1);
         createStatusParams_v51();
@@ -148,11 +156,11 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
 
 bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
-    const RspReadVersion_v5x *response;
-    if (packet->getPayloadLength() == sizeof(RspReadVersion_v5x)) {
-        response = reinterpret_cast<const RspReadVersion_v5x*>(packet->getPayload());
+    const RspReadVersion *response;
+    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
+        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
     } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v54)) {
-        response = reinterpret_cast<const RspReadVersion_v5x*>(packet->getPayload());
+        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
     } else {
         return false;
     }
@@ -172,7 +180,7 @@ bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
 
 bool RocPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    if (version.hw_version == 5) {
+    if (version.hw_version == 5 || version.hw_version == 2) {
         char ver[10];
         snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
         if (m_version == ver)
@@ -182,7 +190,7 @@ bool RocPlugin::checkVersion(const BaseModulePlugin::Version &version)
     return false;
 }
 
-bool RocPlugin::rspReadConfig(const DasPacket *packet)
+bool RocPlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
 {
     if (m_version == "v54") {
         uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
@@ -196,11 +204,9 @@ bool RocPlugin::rspReadConfig(const DasPacket *packet)
         memcpy(buffer, packet, packet->length());
         packet = reinterpret_cast<const DasPacket *>(buffer);
         const_cast<DasPacket *>(packet)->payload_length -= 4; // This is the only reason we're doing all the buffering
-
-        return BaseModulePlugin::rspReadConfig(packet);
     }
 
-    return BaseModulePlugin::rspReadConfig(packet);
+    return BaseModulePlugin::rspReadConfig(packet, channel);
 }
 
 bool RocPlugin::rspStart(const DasPacket *packet)
@@ -232,7 +238,8 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
     for (uint32_t i = 0; i < length; i++) {
         buffer[i/2] |= data[i] << (16*(i%2));
     }
-    sendToDispatcher(DasPacket::CMD_HV_SEND, buffer, bufferLen);
+    sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
+fprintf(stderr, "Sending HV command: %s (%u)\n", data, length);
 }
 
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
@@ -242,6 +249,7 @@ bool RocPlugin::rspHvCmd(const DasPacket *packet)
     // Single character per OCC packet
     char byte = payload[0] & 0xFF;
     m_hvBuffer.enqueue(&byte, 1);
+fprintf(stderr, "Received HV response: %c\n", byte);
 
     return true;
 }

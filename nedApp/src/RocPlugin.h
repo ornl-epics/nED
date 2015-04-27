@@ -135,7 +135,7 @@ class RocPlugin : public BaseModulePlugin {
          * For non-v5.4 firmwares the function simply invokes BaseModulePlugin::rspReadConfig()
          * passing it the original packet.
          */
-        bool rspReadConfig(const DasPacket *packet);
+        bool rspReadConfig(const DasPacket *packet, uint8_t channel);
 
         /**
          * Override START response handler.
@@ -188,6 +188,26 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all config ROC v4.4/v4.5 parameters to be exposed to EPICS.
          */
         void createConfigParams_v45();
+
+        /**
+         * Create and register all temperature ROC v5.1 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v45();
+
+        /**
+         * Create and register all status ROC v4.7 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v47();
+
+        /**
+         * Create and register all config ROC v4.7 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v47();
+
+        /**
+         * Create and register all temperature ROC v5.1 parameters to be exposed to EPICS.
+         */
+        void createTemperatureParams_v47();
 
         /**
          * Create and register all status ROC v5.1 parameters to be exposed to EPICS.

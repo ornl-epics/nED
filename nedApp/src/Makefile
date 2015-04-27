@@ -19,8 +19,8 @@ USR_CXXFLAGS += -std=c++0x
 #USR_CXXFLAGS += -fopenmp
 #USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)
-#CXXFLAGS += -g -ggdb
-CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
+CXXFLAGS += -g -ggdb
+CXXFLAGS += -O0 # Improve std::vector iteration times by factor 30 or so
 
 # Product
 PROD_NAME = ned
@@ -87,6 +87,7 @@ $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
+$(PROD_NAME)_SRCS  += RocPlugin_v47.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp

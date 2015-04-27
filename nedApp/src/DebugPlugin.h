@@ -111,7 +111,8 @@ class DebugPlugin : public BasePlugin {
         int RspDataLen;     //!< Response payload length in bytes
         int RspData;        //!< Response payload
         int ByteGrp;        //!< How many byte to group
-        #define LAST_GENERICMODULEPLUGIN_PARAM ByteGrp
+        int Channel;        //!< Select channel to send command to (read/write config only
+        #define LAST_GENERICMODULEPLUGIN_PARAM Channel
 };
 
 #endif // GENERIC_MODULE_PLUGIN_H

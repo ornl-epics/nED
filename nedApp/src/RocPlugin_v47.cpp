@@ -1,15 +1,15 @@
-/* RocPlugin_v45.cpp
+/* RocPlugin_v47.cpp
  *
- * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * Copyright (c) 2015 Oak Ridge National Laboratory.
  * All rights reserved.
  * See file LICENSE that is included with this distribution.
  *
- * @author Bogdan Vacaliuc
+ * @author Klemen Vodopivec
  */
 
 #include "RocPlugin.h"
 
-void RocPlugin::createStatusParams_v45()
+void RocPlugin::createStatusParams_v47()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrParity",            0x0,  1,  0); // LVDS parity error.           (0=no error,1=error)
@@ -336,7 +336,7 @@ void RocPlugin::createStatusParams_v45()
     createStatusParam("Ch8:MultiDiscEvent",   8, 0x3,  1, 15); // Chan8 got multi-discrim ev   (0=no,1=yes)
 }
 
-void RocPlugin::createConfigParams_v45()
+void RocPlugin::createConfigParams_v47()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:A:Scale",      '8',  0x0, 12, 0, 2048);  // Chan1 A scale
@@ -402,6 +402,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("TimeVetoLow",      'E',  0x1,  32, 0, 0);    // Timestamp veto low
     createConfigParam("TimeVetoHigh",     'E',  0x3,  32, 0, 330000); // Timestamp veto high
     createConfigParam("FakeTrigDelay",    'E',  0x5,  16, 0, 20000);// Fake trigger delay
+    createConfigParam("TsyncDelay",       'E',  0x6,  32, 0, 0);    // TSYNC delay
 
     createConfigParam("LvdsRate",         'F',  0x0,  1, 15, 0);    // LVDS output rate              (0=20Mhz,1=10Mhz)
     createConfigParam("HighResMode",      'F',  0x0,  1, 9,  1);    // High resolution mode          (0=low res 0-127,1=high res 0-255)
@@ -432,6 +433,10 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch1:B:AvgMin",     1, '1', 0x10, 12, 0, 100);  // Chan1 B average minimum
     createConfigParam("Ch1:B:AvgMax",     1, '1', 0x11, 12, 0, 1000); // Chan1 B average maximum
     createConfigParam("Ch1:MaximumSlope", 1, '1', 0x12, 16, 0, 0);    // Chan1 Maximum slope
+    createConfigParam("Ch1:A:SampleMin",  1, '1', 0x13, 12, 0, 0);    // Chan1 A sample minimum
+    createConfigParam("Ch1:A:SampleMax",  1, '1', 0x14, 12, 0, 4095); // Chan1 A sample maximum
+    createConfigParam("Ch1:B:SampleMin",  1, '1', 0x15, 12, 0, 0);    // Chan1 B sample minimum
+    createConfigParam("Ch1:B:SampleMax",  1, '1', 0x16, 12, 0, 4095); // Chan1 B sample maximum
     createConfigParam("Ch1:MinAdc",       1, '8',  0x0, 14, 0, 100);  // Chan1 Minimum ADC
     createConfigParam("Ch1:MaxAdc",       1, '8',  0x1, 14, 0, 1000); // Chan1 Maximum ADC
     createConfigParam("Ch1:IntRelease",   1, '8',  0x2,  9, 0, 506);  // Chan1 Integrator release p
@@ -440,6 +445,8 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch1:NegDiscrTime", 1, '8',  0x5, 12, 0, 0);  // Chan1 negative discr timeout
     createConfigParam("Ch1:Sample1",      1, '8',  0x6,  9, 0, 2);  // Chan1 Sample 1 point [0:10]
     createConfigParam("Ch1:Sample2",      1, '8',  0x7,  9, 0, 2);  // Chan1 Sample 2 point [0:10]
+    createConfigParam("Ch1:CorrectRate",  1, '8',  0x8,  2, 0, 1);  // Chan1 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
+    createConfigParam("Ch1:TpCtrl",       1, '8',  0x8,  4,12, 3);  // Chan1 TP control
 
     createConfigParam("Ch2:PositionIdx",  2, '1',  0x0, 32, 0, 0);  // Chan2 position index
     createConfigParam("Ch2:A:InOffset",   2, '1',  0x2, 12, 0, 100);// Chan2 A input offset
@@ -459,6 +466,10 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch2:B:AvgMin",     2, '1', 0x10, 12, 0, 100);  // Chan2 B average minimum
     createConfigParam("Ch2:B:AvgMax",     2, '1', 0x11, 12, 0, 1000); // Chan2 B average maximum
     createConfigParam("Ch2:MaximumSlope", 2, '1', 0x12, 16, 0, 0);    // Chan2 Maximum slope
+    createConfigParam("Ch2:A:SampleMin",  2, '1', 0x13, 12, 0, 0);    // Chan2 A sample minimum
+    createConfigParam("Ch2:A:SampleMax",  2, '1', 0x14, 12, 0, 4095); // Chan2 A sample maximum
+    createConfigParam("Ch2:B:SampleMin",  2, '1', 0x15, 12, 0, 0);    // Chan2 B sample minimum
+    createConfigParam("Ch2:B:SampleMax",  2, '1', 0x16, 12, 0, 4095); // Chan2 B sample maximum
     createConfigParam("Ch2:MinAdc",       2, '8',  0x0, 14, 0, 100);  // Chan2 Minimum ADC
     createConfigParam("Ch2:MaxAdc",       2, '8',  0x1, 14, 0, 1000); // Chan2 Maximum ADC
     createConfigParam("Ch2:IntRelease",   2, '8',  0x2,  9, 0, 506);  // Chan2 Integrator release p
@@ -467,6 +478,8 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch2:NegDiscrTime", 2, '8',  0x5, 12, 0, 0);  // Chan2 negative discr timeout
     createConfigParam("Ch2:Sample1",      2, '8',  0x6,  9, 0, 2);  // Chan2 Sample 1 point [0:10]
     createConfigParam("Ch2:Sample2",      2, '8',  0x7,  9, 0, 2);  // Chan2 Sample 2 point [0:10]
+    createConfigParam("Ch2:CorrectRate",  2, '8',  0x8,  2, 0, 1);  // Chan2 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
+    createConfigParam("Ch2:TpCtrl",       2, '8',  0x8,  4,12, 3);  // Chan2 TP control
 
     createConfigParam("Ch3:PositionIdx",  3, '1',  0x0, 32, 0, 0);  // Chan3 position index
     createConfigParam("Ch3:A:InOffset",   3, '1',  0x2, 12, 0, 100);// Chan3 A input offset
@@ -486,6 +499,10 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch3:B:AvgMin",     3, '1', 0x10, 12, 0, 100);  // Chan3 B average minimum
     createConfigParam("Ch3:B:AvgMax",     3, '1', 0x11, 12, 0, 1000); // Chan3 B average maximum
     createConfigParam("Ch3:MaximumSlope", 3, '1', 0x12, 16, 0, 0);    // Chan3 Maximum slope
+    createConfigParam("Ch3:A:SampleMin",  3, '1', 0x13, 12, 0, 0);    // Chan3 A sample minimum
+    createConfigParam("Ch3:A:SampleMax",  3, '1', 0x14, 12, 0, 4095); // Chan3 A sample maximum
+    createConfigParam("Ch3:B:SampleMin",  3, '1', 0x15, 12, 0, 0);    // Chan3 B sample minimum
+    createConfigParam("Ch3:B:SampleMax",  3, '1', 0x16, 12, 0, 4095); // Chan3 B sample maximum
     createConfigParam("Ch3:MinAdc",       3, '8',  0x0, 14, 0, 100);  // Chan3 Minimum ADC
     createConfigParam("Ch3:MaxAdc",       3, '8',  0x1, 14, 0, 1000); // Chan3 Maximum ADC
     createConfigParam("Ch3:IntRelease",   3, '8',  0x2,  9, 0, 506);  // Chan3 Integrator release p
@@ -494,6 +511,8 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch3:NegDiscrTime", 3, '8',  0x5, 12, 0, 0);  // Chan3 negative discr timeout
     createConfigParam("Ch3:Sample1",      3, '8',  0x6,  9, 0, 2);  // Chan3 Sample 1 point [0:10]
     createConfigParam("Ch3:Sample2",      3, '8',  0x7,  9, 0, 2);  // Chan3 Sample 2 point [0:10]
+    createConfigParam("Ch3:CorrectRate",  3, '8',  0x8,  2, 0, 1);  // Chan3 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
+    createConfigParam("Ch3:TpCtrl",       3, '8',  0x8,  4,12, 3);  // Chan3 TP control
 
     createConfigParam("Ch4:PositionIdx",  4, '1',  0x0, 32, 0, 0);  // Chan4 position index
     createConfigParam("Ch4:A:InOffset",   4, '1',  0x2, 12, 0, 100);// Chan4 A input offset
@@ -513,6 +532,10 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch4:B:AvgMin",     4, '1', 0x10, 12, 0, 100);  // Chan4 B average minimum
     createConfigParam("Ch4:B:AvgMax",     4, '1', 0x11, 12, 0, 1000); // Chan4 B average maximum
     createConfigParam("Ch4:MaximumSlope", 4, '1', 0x12, 16, 0, 0);    // Chan4 Maximum slope
+    createConfigParam("Ch4:A:SampleMin",  4, '1', 0x13, 12, 0, 0);    // Chan4 A sample minimum
+    createConfigParam("Ch4:A:SampleMax",  4, '1', 0x14, 12, 0, 4095); // Chan4 A sample maximum
+    createConfigParam("Ch4:B:SampleMin",  4, '1', 0x15, 12, 0, 0);    // Chan4 B sample minimum
+    createConfigParam("Ch4:B:SampleMax",  4, '1', 0x16, 12, 0, 4095); // Chan4 B sample maximum
     createConfigParam("Ch4:MinAdc",       4, '8',  0x0, 14, 0, 100);  // Chan4 Minimum ADC
     createConfigParam("Ch4:MaxAdc",       4, '8',  0x1, 14, 0, 1000); // Chan4 Maximum ADC
     createConfigParam("Ch4:IntRelease",   4, '8',  0x2,  9, 0, 506);  // Chan4 Integrator release p
@@ -521,6 +544,8 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch4:NegDiscrTime", 4, '8',  0x5, 12, 0, 0);  // Chan4 negative discr timeout
     createConfigParam("Ch4:Sample1",      4, '8',  0x6,  9, 0, 2);  // Chan4 Sample 1 point [0:10]
     createConfigParam("Ch4:Sample2",      4, '8',  0x7,  9, 0, 2);  // Chan4 Sample 2 point [0:10]
+    createConfigParam("Ch4:CorrectRate",  4, '8',  0x8,  2, 0, 1);  // Chan4 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
+    createConfigParam("Ch4:TpCtrl",       4, '8',  0x8,  4,12, 3);  // Chan4 TP control
 
     createConfigParam("Ch5:PositionIdx",  5, '1',  0x0, 32, 0, 0);  // Chan5 position index
     createConfigParam("Ch5:A:InOffset",   5, '1',  0x2, 12, 0, 100);// Chan5 A input offset
@@ -540,6 +565,10 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch5:B:AvgMin",     5, '1', 0x10, 12, 0, 100);  // Chan5 B average minimum
     createConfigParam("Ch5:B:AvgMax",     5, '1', 0x11, 12, 0, 1000); // Chan5 B average maximum
     createConfigParam("Ch5:MaximumSlope", 5, '1', 0x12, 16, 0, 0);    // Chan5 Maximum slope
+    createConfigParam("Ch5:A:SampleMin",  5, '1', 0x13, 12, 0, 0);    // Chan5 A sample minimum
+    createConfigParam("Ch5:A:SampleMax",  5, '1', 0x14, 12, 0, 4095); // Chan5 A sample maximum
+    createConfigParam("Ch5:B:SampleMin",  5, '1', 0x15, 12, 0, 0);    // Chan5 B sample minimum
+    createConfigParam("Ch5:B:SampleMax",  5, '1', 0x16, 12, 0, 4095); // Chan5 B sample maximum
     createConfigParam("Ch5:MinAdc",       5, '8',  0x0, 14, 0, 100);  // Chan5 Minimum ADC
     createConfigParam("Ch5:MaxAdc",       5, '8',  0x1, 14, 0, 1000); // Chan5 Maximum ADC
     createConfigParam("Ch5:IntRelease",   5, '8',  0x2,  9, 0, 506);  // Chan5 Integrator release p
@@ -548,6 +577,8 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch5:NegDiscrTime", 5, '8',  0x5, 12, 0, 0);  // Chan5 negative discr timeout
     createConfigParam("Ch5:Sample1",      5, '8',  0x6,  9, 0, 2);  // Chan5 Sample 1 point [0:10]
     createConfigParam("Ch5:Sample2",      5, '8',  0x7,  9, 0, 2);  // Chan5 Sample 2 point [0:10]
+    createConfigParam("Ch5:CorrectRate",  5, '8',  0x8,  2, 0, 1);  // Chan5 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
+    createConfigParam("Ch5:TpCtrl",       5, '8',  0x8,  4,12, 3);  // Chan5 TP control
 
     createConfigParam("Ch6:PositionIdx",  6, '1',  0x0, 32, 0, 0);  // Chan6 position index
     createConfigParam("Ch6:A:InOffset",   6, '1',  0x2, 12, 0, 100);// Chan6 A input offset
@@ -567,6 +598,10 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch6:B:AvgMin",     6, '1', 0x10, 12, 0, 100);  // Chan6 B average minimum
     createConfigParam("Ch6:B:AvgMax",     6, '1', 0x11, 12, 0, 1000); // Chan6 B average maximum
     createConfigParam("Ch6:MaximumSlope", 6, '1', 0x12, 16, 0, 0);    // Chan6 Maximum slope
+    createConfigParam("Ch6:A:SampleMin",  6, '1', 0x13, 12, 0, 0);    // Chan6 A sample minimum
+    createConfigParam("Ch6:A:SampleMax",  6, '1', 0x14, 12, 0, 4095); // Chan6 A sample maximum
+    createConfigParam("Ch6:B:SampleMin",  6, '1', 0x15, 12, 0, 0);    // Chan6 B sample minimum
+    createConfigParam("Ch6:B:SampleMax",  6, '1', 0x16, 12, 0, 4095); // Chan6 B sample maximum
     createConfigParam("Ch6:MinAdc",       6, '8',  0x0, 14, 0, 100);  // Chan6 Minimum ADC
     createConfigParam("Ch6:MaxAdc",       6, '8',  0x1, 14, 0, 1000); // Chan6 Maximum ADC
     createConfigParam("Ch6:IntRelease",   6, '8',  0x2,  9, 0, 506);  // Chan6 Integrator release p
@@ -575,6 +610,8 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch6:NegDiscrTime", 6, '8',  0x5, 12, 0, 0);  // Chan6 negative discr timeout
     createConfigParam("Ch6:Sample1",      6, '8',  0x6,  9, 0, 2);  // Chan6 Sample 1 point [0:10]
     createConfigParam("Ch6:Sample2",      6, '8',  0x7,  9, 0, 2);  // Chan6 Sample 2 point [0:10]
+    createConfigParam("Ch6:CorrectRate",  6, '8',  0x8,  2, 0, 1);  // Chan6 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
+    createConfigParam("Ch6:TpCtrl",       6, '8',  0x8,  4,12, 3);  // Chan6 TP control
 
     createConfigParam("Ch7:PositionIdx",  7, '1',  0x0, 32, 0, 0);  // Chan7 position index
     createConfigParam("Ch7:A:InOffset",   7, '1',  0x2, 12, 0, 100);// Chan7 A input offset
@@ -594,6 +631,10 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch7:B:AvgMin",     7, '1', 0x10, 12, 0, 100);  // Chan7 B average minimum
     createConfigParam("Ch7:B:AvgMax",     7, '1', 0x11, 12, 0, 1000); // Chan7 B average maximum
     createConfigParam("Ch7:MaximumSlope", 7, '1', 0x12, 16, 0, 0);    // Chan7 Maximum slope
+    createConfigParam("Ch7:A:SampleMin",  7, '1', 0x13, 12, 0, 0);    // Chan7 A sample minimum
+    createConfigParam("Ch7:A:SampleMax",  7, '1', 0x14, 12, 0, 4095); // Chan7 A sample maximum
+    createConfigParam("Ch7:B:SampleMin",  7, '1', 0x15, 12, 0, 0);    // Chan7 B sample minimum
+    createConfigParam("Ch7:B:SampleMax",  7, '1', 0x16, 12, 0, 4095); // Chan7 B sample maximum
     createConfigParam("Ch7:MinAdc",       7, '8',  0x0, 14, 0, 100);  // Chan7 Minimum ADC
     createConfigParam("Ch7:MaxAdc",       7, '8',  0x1, 14, 0, 1000); // Chan7 Maximum ADC
     createConfigParam("Ch7:IntRelease",   7, '8',  0x2,  9, 0, 506);  // Chan7 Integrator release p
@@ -602,6 +643,8 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch7:NegDiscrTime", 7, '8',  0x5, 12, 0, 0);  // Chan7 negative discr timeout
     createConfigParam("Ch7:Sample1",      7, '8',  0x6,  9, 0, 2);  // Chan7 Sample 1 point [0:10]
     createConfigParam("Ch7:Sample2",      7, '8',  0x7,  9, 0, 2);  // Chan7 Sample 2 point [0:10]
+    createConfigParam("Ch7:CorrectRate",  7, '8',  0x8,  2, 0, 1);  // Chan7 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
+    createConfigParam("Ch7:TpCtrl",       7, '8',  0x8,  4,12, 3);  // Chan7 TP control
 
     createConfigParam("Ch8:PositionIdx",  8, '1',  0x0, 32, 0, 0);  // Chan8 position index
     createConfigParam("Ch8:A:InOffset",   8, '1',  0x2, 12, 0, 100);// Chan8 A input offset
@@ -621,6 +664,10 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch8:B:AvgMin",     8, '1', 0x10, 12, 0, 100);  // Chan8 B average minimum
     createConfigParam("Ch8:B:AvgMax",     8, '1', 0x11, 12, 0, 1000); // Chan8 B average maximum
     createConfigParam("Ch8:MaximumSlope", 8, '1', 0x12, 16, 0, 0);    // Chan8 Maximum slope
+    createConfigParam("Ch8:A:SampleMin",  8, '1', 0x13, 12, 0, 0);    // Chan8 A sample minimum
+    createConfigParam("Ch8:A:SampleMax",  8, '1', 0x14, 12, 0, 4095); // Chan8 A sample maximum
+    createConfigParam("Ch8:B:SampleMin",  8, '1', 0x15, 12, 0, 0);    // Chan8 B sample minimum
+    createConfigParam("Ch8:B:SampleMax",  8, '1', 0x16, 12, 0, 4095); // Chan8 B sample maximum
     createConfigParam("Ch8:MinAdc",       8, '8',  0x0, 14, 0, 100);  // Chan8 Minimum ADC
     createConfigParam("Ch8:MaxAdc",       8, '8',  0x1, 14, 0, 1000); // Chan8 Maximum ADC
     createConfigParam("Ch8:IntRelease",   8, '8',  0x2,  9, 0, 506);  // Chan8 Integrator release p
@@ -629,9 +676,11 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch8:NegDiscrTime", 8, '8',  0x5, 12, 0, 0);  // Chan8 negative discr timeout
     createConfigParam("Ch8:Sample1",      8, '8',  0x6,  9, 0, 2);  // Chan8 Sample 1 point [0:10]
     createConfigParam("Ch8:Sample2",      8, '8',  0x7,  9, 0, 2);  // Chan8 Sample 2 point [0:10]
+    createConfigParam("Ch8:CorrectRate",  8, '8',  0x8,  2, 0, 1);  // Chan8 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
+    createConfigParam("Ch8:TpCtrl",       8, '8',  0x8,  4,12, 3);  // Chan8 TP control
 }
 
-void RocPlugin::createTemperatureParams_v45()
+void RocPlugin::createTemperatureParams_v47()
 {
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
     createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)

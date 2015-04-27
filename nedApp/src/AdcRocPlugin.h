@@ -59,21 +59,6 @@ class AdcRocPlugin : public BaseModulePlugin {
         AdcRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
 
         /**
-         * Process RS232 packets only, let base implementation do the rest.
-         */
-        bool processResponse(const DasPacket *packet);
-
-        /**
-         * Send string/byte data to PVs
-         */
-        asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
-
-        /**
-         * Receive string/byte data to PVs
-         */
-        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
-
-        /**
          * Try to parse the ADCROC version response packet an populate the structure.
          *
          * Function will parse all known ADCROC version responses and populate the
@@ -106,14 +91,6 @@ class AdcRocPlugin : public BaseModulePlugin {
         bool checkVersion(const BaseModulePlugin::Version &version);
 
     private: // functions
-
-        /**
-         * Handle READ_CONFIG response.
-         *
-         * For normal firmwares the function simply invokes BaseModulePlugin::rspReadConfig()
-         * passing it the original packet.
-         */
-        bool rspReadConfig(const DasPacket *packet);
 
         /**
          * Create and register all status ADCROC v0.2 parameters to be exposed to EPICS.

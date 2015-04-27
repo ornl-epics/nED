@@ -38,6 +38,7 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     createParam("RspDataLen",   asynParamInt32, &RspDataLen);   // READ - Response payload length in bytes
     createParam("RspData",      asynParamOctet, &RspData);      // READ - Response payload
     createParam("ByteGrp",      asynParamInt32, &ByteGrp);      // WRITE - Byte grouping mode
+    createParam("Channel",      asynParamInt32, &Channel, 0);   // WRITE - Select channel to send command to (read/write config only)
 
     callParamCallbacks();
 }
@@ -99,16 +100,22 @@ void DebugPlugin::request(const DasPacket::CommandType command)
 {
     DasPacket *packet;
     int isDsp;
+    int channel = 0;
 
     if (m_hardwareId == 0)
         return;
 
     (void)getIntegerParam(ReqIsDsp, &isDsp);
+    (void)getIntegerParam(Channel, &channel);
+
+    // It should be 0 already if last response was not CMD_READ_CONFIG
+    if (command != DasPacket::CMD_WRITE_CONFIG)
+        m_lastConfigPayloadLen = 0;
 
     if (isDsp == 1)
-        packet = DasPacket::createOcc(DasPacket::HWID_SELF, m_hardwareId, command, m_lastConfigPayloadLen, m_lastConfigPayload);
+        packet = DasPacket::createOcc(DasPacket::HWID_SELF, m_hardwareId, command, channel, m_lastConfigPayloadLen, m_lastConfigPayload);
     else
-        packet = DasPacket::createLvds(DasPacket::HWID_SELF, m_hardwareId, command, m_lastConfigPayloadLen, m_lastConfigPayload);
+        packet = DasPacket::createLvds(DasPacket::HWID_SELF, m_hardwareId, command, channel, m_lastConfigPayloadLen, m_lastConfigPayload);
 
     if (packet) {
         BasePlugin::sendToDispatcher(packet);
@@ -186,6 +193,8 @@ bool DebugPlugin::response(const DasPacket *packet)
     if (responseCmd == DasPacket::CMD_READ_CONFIG) {
         m_lastConfigPayloadLen = m_payloadLen * 4;
         memcpy(m_lastConfigPayload, m_payload, m_lastConfigPayloadLen);
+    } else {
+        m_lastConfigPayloadLen = 0;
     }
 
     return true;

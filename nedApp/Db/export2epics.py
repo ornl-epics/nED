@@ -109,10 +109,13 @@ def parse_one(type, params_str, desc_str, extra_str):
         'status':  [ "name", "offset", "width", "bit_offset" ],
         'counter': [ "name", "offset", "width", "bit_offset" ],
         'config':  [ "name", "section", "section_offset", "width", "bit_offset", "default" ],
+        'config1': [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default" ],
         'temp':    [ "name", "offset", "width", "bit_offset" ],
     }
 
     params = map(lambda x: x.strip(" \t\"\'"), params_str.split(","))
+    if type is 'config' and len(params) == 7:
+        type = 'config1'
     param = dict(zip(names[type], params))
 
     for item in [ "width", "bit_offset", "default" ]:
@@ -154,7 +157,7 @@ def parse_one(type, params_str, desc_str, extra_str):
                         d['alarm'] = True
                     param['options'].append(d)
 
-    if type is "config":
+    if type is "config" or type is "config1":
         param['direction'] = "inout"
     else:
         param['direction'] = "in"

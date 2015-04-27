@@ -174,7 +174,14 @@ struct DasPacket
         struct CommandInfo {
 #ifdef BITFIELD_LSB_FIRST
             enum CommandType command:8;     //!< 8 bits describing DAS module commands
-            enum ModuleType module_type:8;  //!< 15:8 bits describing module type
+            union __attribute__ ((__packed__)) {
+                enum ModuleType module_type:8;  //!< Module type valid in CMD_DISCOVER responses
+                struct __attribute__ ((__packed__)) {
+                    unsigned channel:4;     //!< Channel number, starting from 0
+                    unsigned is_channel:1;  //!< Is this command for channel?
+                    unsigned chan_fill:3;   //!< Not used, always 0
+                };
+            };
             unsigned lvds_parity:1;         //!< LVDS parity bit
             unsigned lvds_stop:1;           //!< Only last word in a LVDS packet should have this set to 1
             unsigned lvds_start:1;          //!< Only first word in a LVDS packet should have this set to 1
@@ -242,10 +249,11 @@ struct DasPacket
          * @param[in] source address of the sender
          * @param[in] destination address
          * @param[in] command type for new packet
+         * @param[in] channel target channel, 0 for no specific channel.
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload = 0);
+        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
          * Create DasPacket LVDS command (non DSPs)
@@ -269,10 +277,11 @@ struct DasPacket
          * @param[in] source address of the sender
          * @param[in] destination address
          * @param[in] command type for new packet
+         * @param[in] channel target channel, 0 for no specific channel.
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint32_t payload_length, uint32_t *payload = 0);
+        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
          * Check if packet is valid, like the alignment check, size check, etc.
