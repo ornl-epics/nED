@@ -85,6 +85,7 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
             MAP_GOOD            = 1, //!< Map only good events
             MAP_BAD             = 2, //!< Map only bad events
             MAP_ALL             = 3, //!< Map all events
+            MAP_CORRECT_BAD     = 4, //!< For debugging only, remove the error-flag from bad events and map them as usual, only those events get passed
         } MapMode_t;
 
     public: // functions
