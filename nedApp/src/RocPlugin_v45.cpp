@@ -418,7 +418,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch1:A:InOffset",   1, '1',  0x2, 12, 0, 100);// Chan1 A input offset
     createConfigParam("Ch1:B:InOffset",   1, '1',  0x3, 12, 0, 100);// Chan1 B input offset
     createConfigParam("Ch1:A:FullScale",  1, '1',  0x4, 12, 0, 10); // Chan1 A full scale
-    createConfigParam("Ch1:Sum:FullScale",1, '1',  0x5, 12, 0, 0);  // Chan1 unknown register
+    createConfigParam("Ch1:Sum:FullScale",1, '1',  0x5, 12, 0, 0);  // Chan1 SUM full scale
     createConfigParam("Ch1:B:FullScale",  1, '1',  0x6, 12, 0, 10); // Chan1 B full scale
     createConfigParam("Ch1:PosThreshold", 1, '1',  0x7, 12, 0, 400);// Chan1 positive threshold
     createConfigParam("Ch1:NegThreshold", 1, '1',  0x8, 12, 0, 0);  // Chan1 negative threshold
@@ -445,7 +445,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch2:A:InOffset",   2, '1',  0x2, 12, 0, 100);// Chan2 A input offset
     createConfigParam("Ch2:B:InOffset",   2, '1',  0x3, 12, 0, 100);// Chan2 B input offset
     createConfigParam("Ch2:A:FullScale",  2, '1',  0x4, 12, 0, 10); // Chan2 A full scale
-    createConfigParam("Ch2:Sum:FullScale",2, '1',  0x5, 12, 0, 0);  // Chan2 unknown register
+    createConfigParam("Ch2:Sum:FullScale",2, '1',  0x5, 12, 0, 0);  // Chan2 SUM full scale
     createConfigParam("Ch2:B:FullScale",  2, '1',  0x6, 12, 0, 10); // Chan2 B full scale
     createConfigParam("Ch2:PosThreshold", 2, '1',  0x7, 12, 0, 400);// Chan2 positive threshold
     createConfigParam("Ch2:NegThreshold", 2, '1',  0x8, 12, 0, 0);  // Chan2 negative threshold
@@ -472,7 +472,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch3:A:InOffset",   3, '1',  0x2, 12, 0, 100);// Chan3 A input offset
     createConfigParam("Ch3:B:InOffset",   3, '1',  0x3, 12, 0, 100);// Chan3 B input offset
     createConfigParam("Ch3:A:FullScale",  3, '1',  0x4, 12, 0, 10); // Chan3 A full scale
-    createConfigParam("Ch3:Sum:FullScale",3, '1',  0x5, 12, 0, 0);  // Chan3 unknown register
+    createConfigParam("Ch3:Sum:FullScale",3, '1',  0x5, 12, 0, 0);  // Chan3 SUM full scale
     createConfigParam("Ch3:B:FullScale",  3, '1',  0x6, 12, 0, 10); // Chan3 B full scale
     createConfigParam("Ch3:PosThreshold", 3, '1',  0x7, 12, 0, 400);// Chan3 positive threshold
     createConfigParam("Ch3:NegThreshold", 3, '1',  0x8, 12, 0, 0);  // Chan3 negative threshold
@@ -499,7 +499,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch4:A:InOffset",   4, '1',  0x2, 12, 0, 100);// Chan4 A input offset
     createConfigParam("Ch4:B:InOffset",   4, '1',  0x3, 12, 0, 100);// Chan4 B input offset
     createConfigParam("Ch4:A:FullScale",  4, '1',  0x4, 12, 0, 10); // Chan4 A full scale
-    createConfigParam("Ch4:Sum:FullScale",4, '1',  0x5, 12, 0, 0);  // Chan4 unknown register
+    createConfigParam("Ch4:Sum:FullScale",4, '1',  0x5, 12, 0, 0);  // Chan4 SUM full scale
     createConfigParam("Ch4:B:FullScale",  4, '1',  0x6, 12, 0, 10); // Chan4 B full scale
     createConfigParam("Ch4:PosThreshold", 4, '1',  0x7, 12, 0, 400);// Chan4 positive threshold
     createConfigParam("Ch4:NegThreshold", 4, '1',  0x8, 12, 0, 0);  // Chan4 negative threshold
@@ -526,7 +526,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch5:A:InOffset",   5, '1',  0x2, 12, 0, 100);// Chan5 A input offset
     createConfigParam("Ch5:B:InOffset",   5, '1',  0x3, 12, 0, 100);// Chan5 B input offset
     createConfigParam("Ch5:A:FullScale",  5, '1',  0x4, 12, 0, 10); // Chan5 A full scale
-    createConfigParam("Ch5:Sum:FullScale",5, '1',  0x5, 12, 0, 0);  // Chan5 unknown register
+    createConfigParam("Ch5:Sum:FullScale",5, '1',  0x5, 12, 0, 0);  // Chan5 SUM full scale
     createConfigParam("Ch5:B:FullScale",  5, '1',  0x6, 12, 0, 10); // Chan5 B full scale
     createConfigParam("Ch5:PosThreshold", 5, '1',  0x7, 12, 0, 400);// Chan5 positive threshold
     createConfigParam("Ch5:NegThreshold", 5, '1',  0x8, 12, 0, 0);  // Chan5 negative threshold
@@ -553,7 +553,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch6:A:InOffset",   6, '1',  0x2, 12, 0, 100);// Chan6 A input offset
     createConfigParam("Ch6:B:InOffset",   6, '1',  0x3, 12, 0, 100);// Chan6 B input offset
     createConfigParam("Ch6:A:FullScale",  6, '1',  0x4, 12, 0, 10); // Chan6 A full scale
-    createConfigParam("Ch6:Sum:FullScale",6, '1',  0x5, 12, 0, 0);  // Chan6 unknown register
+    createConfigParam("Ch6:Sum:FullScale",6, '1',  0x5, 12, 0, 0);  // Chan6 SUM full scale
     createConfigParam("Ch6:B:FullScale",  6, '1',  0x6, 12, 0, 10); // Chan6 B full scale
     createConfigParam("Ch6:PosThreshold", 6, '1',  0x7, 12, 0, 400);// Chan6 positive threshold
     createConfigParam("Ch6:NegThreshold", 6, '1',  0x8, 12, 0, 0);  // Chan6 negative threshold
@@ -580,7 +580,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch7:A:InOffset",   7, '1',  0x2, 12, 0, 100);// Chan7 A input offset
     createConfigParam("Ch7:B:InOffset",   7, '1',  0x3, 12, 0, 100);// Chan7 B input offset
     createConfigParam("Ch7:A:FullScale",  7, '1',  0x4, 12, 0, 10); // Chan7 A full scale
-    createConfigParam("Ch7:Sum:FullScale",7, '1',  0x5, 12, 0, 0);  // Chan7 unknown register
+    createConfigParam("Ch7:Sum:FullScale",7, '1',  0x5, 12, 0, 0);  // Chan7 SUM full scale
     createConfigParam("Ch7:B:FullScale",  7, '1',  0x6, 12, 0, 10); // Chan7 B full scale
     createConfigParam("Ch7:PosThreshold", 7, '1',  0x7, 12, 0, 400);// Chan7 positive threshold
     createConfigParam("Ch7:NegThreshold", 7, '1',  0x8, 12, 0, 0);  // Chan7 negative threshold
@@ -607,7 +607,7 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch8:A:InOffset",   8, '1',  0x2, 12, 0, 100);// Chan8 A input offset
     createConfigParam("Ch8:B:InOffset",   8, '1',  0x3, 12, 0, 100);// Chan8 B input offset
     createConfigParam("Ch8:A:FullScale",  8, '1',  0x4, 12, 0, 10); // Chan8 A full scale
-    createConfigParam("Ch8:Sum:FullScale",8, '1',  0x5, 12, 0, 0);  // Chan8 unknown register
+    createConfigParam("Ch8:Sum:FullScale",8, '1',  0x5, 12, 0, 0);  // Chan8 SUM full scale
     createConfigParam("Ch8:B:FullScale",  8, '1',  0x6, 12, 0, 10); // Chan8 B full scale
     createConfigParam("Ch8:PosThreshold", 8, '1',  0x7, 12, 0, 400);// Chan8 positive threshold
     createConfigParam("Ch8:NegThreshold", 8, '1',  0x8, 12, 0, 0);  // Chan8 negative threshold

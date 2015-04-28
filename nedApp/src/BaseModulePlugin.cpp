@@ -306,15 +306,6 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     }
     m_waitingResponse = static_cast<DasPacket::CommandType>(0);
 
-    // Check that channel from packet and expected channel number match
-    if (! ((m_expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
-           (packet->cmdinfo.is_channel == (m_expectedChannel > 0) && packet->cmdinfo.channel == (m_expectedChannel - 1))) ) {
-        LOG_WARN("Expecting response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
-        setIntegerParam(CmdRsp, LAST_CMD_ERROR);
-        callParamCallbacks();
-        return false;
-    }
-
     switch (command) {
     case DasPacket::CMD_RESET:
         ack = rspReset(packet);
@@ -332,9 +323,21 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
         setIntegerParam(Verified, verified);
         break;
     case DasPacket::CMD_READ_CONFIG:
+        if (! ((m_expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
+               (packet->cmdinfo.is_channel == (m_expectedChannel > 0) && packet->cmdinfo.channel == (m_expectedChannel - 1))) ) {
+            LOG_WARN("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
+            callParamCallbacks();
+            return false;
+        }
         ack = rspReadConfig(packet, m_expectedChannel);
         break;
     case DasPacket::CMD_READ_STATUS:
+        if (! ((m_expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
+               (packet->cmdinfo.is_channel == (m_expectedChannel > 0) && packet->cmdinfo.channel == (m_expectedChannel - 1))) ) {
+            LOG_WARN("Expecting read status response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
+            callParamCallbacks();
+            return false;
+        }
         ack = rspReadStatus(packet, m_expectedChannel);
         break;
     case DasPacket::CMD_READ_STATUS_COUNTERS:
@@ -359,6 +362,12 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     case DasPacket::CMD_WRITE_CONFIG_D:
     case DasPacket::CMD_WRITE_CONFIG_E:
     case DasPacket::CMD_WRITE_CONFIG_F:
+        if (! ((m_expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
+               (packet->cmdinfo.is_channel == (m_expectedChannel > 0) && packet->cmdinfo.channel == (m_expectedChannel - 1))) ) {
+            LOG_WARN("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
+            callParamCallbacks();
+            return false;
+        }
         ack = rspWriteConfig(packet, m_expectedChannel);
         break;
     case DasPacket::CMD_START:
@@ -392,7 +401,7 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
     // Turns back to 0 after last channel, works also for m_numChannels == 0
     m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
 
-    if (ack != LAST_CMD_OK) {
+    if (ack == false) {
         // Break sequence on any error, CfgChannel holds currently failed channel
         setIntegerParam(CmdRsp, LAST_CMD_ERROR);
     } else if (m_expectedChannel == 0) {

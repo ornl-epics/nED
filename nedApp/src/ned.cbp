@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="ned" />
 		<Option makefile_is_custom="1" />
-		<Option execution_dir="../../../proj_rocv2" />
+		<Option execution_dir="../../../master" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -56,6 +56,7 @@
 		<Unit filename="AdcRocPlugin.h" />
 		<Unit filename="AdcRocPlugin_v02.cpp" />
 		<Unit filename="AdcRocPlugin_v03.cpp" />
+		<Unit filename="ApplyConfig.st" />
 		<Unit filename="ArocPlugin.cpp" />
 		<Unit filename="ArocPlugin.h" />
 		<Unit filename="ArocPlugin_v23.cpp" />
