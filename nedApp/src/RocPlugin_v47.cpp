@@ -399,7 +399,7 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch7:VerboseEn",    'E',  0x0,  1, 14, 0);    // Chan7 verbose enable          (0=disable,1=enable)
     createConfigParam("Ch8:VerboseEn",    'E',  0x0,  1, 15, 0);    // Chan8 verbose enable          (0=disable,1=enable)
 
-    createConfigParam("TimeVetoLow",      'E',  0x1,  32, 0, 5000);    // Timestamp veto low
+    createConfigParam("TimeVetoLow",      'E',  0x1,  32, 0, 5000); // Timestamp veto low
     createConfigParam("TimeVetoHigh",     'E',  0x3,  32, 0, 4031616); // Timestamp veto high
     createConfigParam("FakeTrigDelay",    'E',  0x5,  16, 0, 65535);// Fake trigger delay
     createConfigParam("TsyncDelay",       'E',  0x6,  32, 0, 0);    // TSYNC delay
