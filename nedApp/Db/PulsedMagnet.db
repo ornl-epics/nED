@@ -189,3 +189,72 @@ record(calc, "$(P)AdcRangeRR")
     field(INPB, "$(P)ApplyChangesClearC CP MS")
     field(CALC, "A")
 }
+
+# Using similar but different set of PVs for CmdReq/CmdRsp.
+record(mbbo, "$(P)PulseCmdReq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Send cpulse cmd to module")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CmdReq")
+    field(ZRVL, "144")
+    field(ZRST, "Request pulse")
+    field(ONVL, "145")
+    field(ONST, "Clear pulse")
+    field(FLNK, "$(P)PulseCmdRspEnable")
+}
+record(longout, "$(P)PulseCmdRspEnable")
+{
+    field(DOL,  "1")
+    field(OUT,  "$(P)PulseCmdRspEn PP")
+}
+record(calcout, "$(P)PulseCmdRspDisable")
+{
+    field(INPA, "$(P)PulseCmdRspRaw PP")
+    field(CALC, "A=0||A=2")
+    field(OOPT, "When Zero")
+    field(OUT,  "$(P)PulseCmdRspEn PP")
+}
+record(bi, "$(P)PulseCmdRspEn")
+{
+    field(ZNAM, "CmdRsp disabled")
+    field(ONAM, "CmdRsp enabled")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)PulseCmdRspRaw")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CmdRsp")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)PulseCmdRspFilter")
+}
+record(calcout, "$(P)PulseCmdRspFilter")
+{
+    field(INPA, "$(P)PulseCmdRspEn NPP")
+    field(CALC, "A=1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)PulseCmdRspFanout PP")
+}
+record(fanout, "$(P)PulseCmdRspFanout")
+{
+    field(LNK1, "$(P)PulseCmdRspDisable PP")
+    field(LNK2, "$(P)PulseCmdRsp PP")
+}
+record(mbbi, "$(P)PulseCmdRsp")
+{
+    field(DESC, "Last pulse cmd response")
+    field(INP,  "$(P)PulseCmdRspRaw NPP")
+    field(ZRVL, "0")
+    field(ZRST, "None issued")
+    field(ONVL, "1")
+    field(ONST, "Success")
+    field(TWVL, "2")
+    field(TWST, "Waiting")
+    field(THVL, "3")
+    field(THST, "Timeout")
+    field(FRVL, "4")
+    field(FRST, "Error")
+    field(FVVL, "5")
+    field(FVST, "Skipped")
+}

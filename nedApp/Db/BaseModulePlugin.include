@@ -41,20 +41,58 @@ record(mbbo, "$(P)CmdReq")
     field(TEST, "Upgrade")
     field(ELVL, "35")
     field(ELST, "Read temperature")
-    field(TVVL, "144")
-    field(TVST, "Request pulse")
-    field(TTVL, "145")
-    field(TTST, "Clear pulse")
+    field(FLNK, "$(P)CmdRspEnable")
+}
+# This CmdRsp* database logic is used to split set of CmdReq/CmdRsp asyn hooks into
+# multiple PVs. Not all modules provide all commands but they would all like to use
+# the same interface (for C code simplicity). We use a trick in CmdReq to only enable
+# CmdRsp PV when actually expecting something. Different set of PVs can be used
+# for specialized commands, although there might race condition if more than one PV
+# connected to asyn(CmdReq) is used at the same time. Though the worst case is that
+# CmdRsp gets false response.
+record(longout, "$(P)CmdRspEnable")
+{
+    field(DOL,  "1")
+    field(OUT,  "$(P)CmdRspEn PP")
+}
+record(calcout, "$(P)CmdRspDisable")
+{
+    field(INPA, "$(P)CmdRspRaw PP")
+    field(CALC, "A=0||A=2")
+    field(OOPT, "When Zero")
+    field(OUT,  "$(P)CmdRspEn PP")
+}
+record(bi, "$(P)CmdRspEn")
+{
+    field(ZNAM, "CmdRsp disabled")
+    field(ONAM, "CmdRsp enabled")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CmdRspRaw")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CmdRsp")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)CmdRspFilter")
+}
+record(calcout, "$(P)CmdRspFilter")
+{
+    field(INPA, "$(P)CmdRspEn NPP")
+    field(CALC, "A=1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)CmdRspFanout PP")
+}
+record(fanout, "$(P)CmdRspFanout")
+{
+    field(LNK1, "$(P)CmdRspDisable PP")
+    field(LNK2, "$(P)CmdRsp PP")
 }
 record(mbbi, "$(P)CmdRsp")
 {
     field(DESC, "Last command response")
-    field(PINI, "YES")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))CmdRsp")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-    field(FLNK, "$(P)RspCheck PP")
+    field(INP,  "$(P)CmdRspRaw NPP")
+    field(FLNK, "$(P)RspCheck")
     field(ZRVL, "0")
     field(ZRST, "None issued")
     field(ONVL, "1")
