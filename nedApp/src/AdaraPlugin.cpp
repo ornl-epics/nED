@@ -99,7 +99,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
             break;
 
         if (packet->isRtdl()) {
-            const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
+            const RtdlHeader *rtdl = packet->getRtdlHeader();
             epicsTimeStamp timestamp = { 0, 0 };
             if (rtdl != 0)
                 timestamp = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
@@ -127,7 +127,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
             m_nProcessed++;
 
         } else if (packet->isData()) {
-            const DasPacket::RtdlHeader *rtdl = packet->getRtdlHeader();
+            const RtdlHeader *rtdl = packet->getRtdlHeader();
             if (rtdl != 0) {
                 uint32_t eventsCount;
                 const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(packet->getData(&eventsCount));
