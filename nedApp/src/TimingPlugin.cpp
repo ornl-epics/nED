@@ -326,7 +326,7 @@ bool TimingPlugin::recvRtdlFromEtc(DasPacket *packet)
     while (recv(m_socket, &message, sizeof(message), 0) > 0) {
         if (message.command == 0x10000 && message.size >= 32) {
             RtdlHeader *rtdl = const_cast<RtdlHeader *>(packet->getRtdlHeader());
-            uint32_t *data = reinterpret_cast<char *>(rtdl) + sizeof(RtdlHeader);
+            uint32_t *data = reinterpret_cast<uint32_t *>(rtdl) + sizeof(RtdlHeader)/4;
 
             rtdl->timestamp_sec = message.secPastEpoch;
             rtdl->timestamp_nsec = message.nsec;
