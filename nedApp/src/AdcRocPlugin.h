@@ -93,6 +93,27 @@ class AdcRocPlugin : public BaseModulePlugin {
     private: // functions
 
         /**
+         * Request a single pulse magnet pulse
+         *
+         * Function sends a simple packet with request to trigger one pulse.
+         * Pulse must be cleared using reqClearPulse() before next one is being
+         * triggered.
+         *
+         * Valid only on modified ADC ROC that supports pulse magnet interface.
+         */
+        DasPacket::CommandType reqTriggerPulse();
+
+        /**
+         * Request clearing previous pulse magnet pulse.
+         *
+         * After a pulse magnet pulse is triggered it must be cleared (line
+         * deasserted) before the next trigger can be sent.
+         *
+         * Valid only on modified ADC ROC that supports pulse magnet interface.
+         */
+        DasPacket::CommandType reqClearPulse();
+
+        /**
          * Create and register all status ADCROC v0.2 parameters to be exposed to EPICS.
          */
         void createStatusParams_v02();
@@ -121,8 +142,6 @@ class AdcRocPlugin : public BaseModulePlugin {
          * Create and register all status counter ADCROC v0.3 parameters to be exposed to EPICS.
          */
         void createCounterParams_v03();
-
-    protected:
 };
 
 #endif // ADC_ROC_PLUGIN_H

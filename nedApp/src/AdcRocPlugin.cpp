@@ -95,6 +95,19 @@ bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Ve
     return true;
 }
 
+DasPacket::CommandType AdcRocPlugin::reqTriggerPulse()
+{
+    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_ON);
+    return DasPacket::CMD_PM_PULSE_RQST_ON;
+}
+
+DasPacket::CommandType AdcRocPlugin::reqClearPulse()
+{
+    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_OFF);
+    return DasPacket::CMD_PM_PULSE_RQST_OFF;
+}
+
+
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
 // reasons:
 // * easy parsing through scripts in tools/ directory

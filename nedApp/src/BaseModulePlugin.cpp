@@ -153,10 +153,10 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
                 m_waitingResponse = reqStop();
                 break;
             case DasPacket::CMD_PM_PULSE_RQST_ON:
-                m_waitingResponse = reqPulse();
+                m_waitingResponse = reqTriggerPulse();
                 break;
             case DasPacket::CMD_PM_PULSE_RQST_OFF:
-                m_waitingResponse = reqPulseClear();
+                m_waitingResponse = reqClearPulse();
                 break;
             case DasPacket::CMD_UPGRADE:
                 m_waitingResponse = reqUpgrade();
@@ -377,10 +377,10 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
         ack = rspStop(packet);
         break;
     case DasPacket::CMD_PM_PULSE_RQST_ON:
-        ack = rspPulse(packet);
+        ack = rspTriggerPulse(packet);
         break;
     case DasPacket::CMD_PM_PULSE_RQST_OFF:
-        ack = rspPulseClear(packet);
+        ack = rspClearPulse(packet);
         break;
     case DasPacket::CMD_UPGRADE:
         ack = rspUpgrade(packet);
@@ -784,16 +784,14 @@ DasPacket::CommandType BaseModulePlugin::reqStart()
     return DasPacket::CMD_START;
 }
 
-DasPacket::CommandType BaseModulePlugin::reqPulse()
+DasPacket::CommandType BaseModulePlugin::reqTriggerPulse()
 {
-    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_ON);
-    return DasPacket::CMD_PM_PULSE_RQST_ON;
+    return static_cast<DasPacket::CommandType>(0);
 }
 
-DasPacket::CommandType BaseModulePlugin::reqPulseClear()
+DasPacket::CommandType BaseModulePlugin::reqClearPulse()
 {
-    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_OFF);
-    return DasPacket::CMD_PM_PULSE_RQST_OFF;
+    return static_cast<DasPacket::CommandType>(0);
 }
 
 bool BaseModulePlugin::rspStart(const DasPacket *packet)
@@ -820,7 +818,7 @@ bool BaseModulePlugin::rspStop(const DasPacket *packet)
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
-bool BaseModulePlugin::rspPulse(const DasPacket *packet)
+bool BaseModulePlugin::rspTriggerPulse(const DasPacket *packet)
 {
     if (!cancelTimeoutCallback()) {
         LOG_WARN("Received CMD_PM_PULSE_RQST_ON response after timeout");
@@ -829,7 +827,7 @@ bool BaseModulePlugin::rspPulse(const DasPacket *packet)
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
-bool BaseModulePlugin::rspPulseClear(const DasPacket *packet)
+bool BaseModulePlugin::rspClearPulse(const DasPacket *packet)
 {
     if (!cancelTimeoutCallback()) {
         LOG_WARN("Received CMD_PM_PULSE_RQST_OFF response after timeout");

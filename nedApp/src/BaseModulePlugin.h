@@ -498,20 +498,20 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Request one pulse for Pulsed Magnet.
          *
-         * This function is asynchronous and does not wait for response.
+         * Functionality not implemented and always returns 0.
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqPulse();
+        virtual DasPacket::CommandType reqTriggerPulse();
 
         /**
          * Clears one pulse request for Pulsed Magnet.
          *
-         * This function is asynchronous and does not wait for response.
+         * Functionality not implemented and always returns 0.
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqPulseClear();
+        virtual DasPacket::CommandType reqClearPulse();
 
         /**
          * Default handler for START response.
@@ -535,8 +535,8 @@ class BaseModulePlugin : public BasePlugin {
          * Default handler for STOP response.
          *
          * @param[in] packet with response to STOP
-         * @retval true Timeout has not yet occurred
-         * @retval false Timeout has occurred and response is invalid.
+         * @retval true Received command ACK in time.
+         * @retval false Timeout has occurred or NACK received.
          */
         virtual bool rspStop(const DasPacket *packet);
 
@@ -544,19 +544,19 @@ class BaseModulePlugin : public BasePlugin {
          * Default handler for CMD_PM_PULSE_RQST_ON response.
          *
          * @param[in] packet with response to pulse request
-         * @retval true Timeout has not yet occurred
-         * @retval false Timeout has occurred and response is invalid.
+         * @retval true Received command ACK in time.
+         * @retval false Timeout has occurred or NACK received.
          */
-        virtual bool rspPulse(const DasPacket *packet);
+        virtual bool rspTriggerPulse(const DasPacket *packet);
 
         /**
          * Default handler for CMD_PM_PULSE_RQST_OFF response.
          *
          * @param[in] packet with response to pulse clear
-         * @retval true Timeout has not yet occurred
-         * @retval false Timeout has occurred and response is invalid.
+         * @retval true Received command ACK in time.
+         * @retval false Timeout has occurred or NACK received.
          */
-        virtual bool rspPulseClear(const DasPacket *packet);
+        virtual bool rspClearPulse(const DasPacket *packet);
 
         /**
          * Send part of the new firmware image as one packet.
