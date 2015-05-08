@@ -211,13 +211,6 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPac
                 errors.nErrors++;
                 destEvent++;
                 nDestEvents++;
-            } else if (mode & MAP_CORRECT_BAD) {
-                // Dangerous, only works for events that are within the range but
-                // were vetoed for some reason. Those can be plotted in ADnED.
-                destEvent->tof = srcEvent->tof;
-                destEvent->pixelid = srcEvent->pixelid & ~PIXID_ERR;
-                destEvent++;
-                nDestEvents++;
             }
         } else {
             if (mode & MAP_BAD) {

@@ -104,7 +104,4 @@ record(mbbo, "$(P)MapMode")
     field(TWST, "Map bad events")
     field(THVL, "3")
     field(THST, "Map all events")
-    field(THVL, "4")
-    field(THST, "Correct bad evts")
-    field(THSV, "MAJOR")
 }
