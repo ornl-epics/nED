@@ -11,6 +11,9 @@
 #include "Log.h"
 
 #include <cstring> // memcpy
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 #define NUM_TIMINGPLUGIN_PARAMS ((int)(&LAST_TIMINGPLUGIN_PARAM - &FIRST_TIMINGPLUGIN_PARAM + 1))
 
@@ -23,6 +26,7 @@ TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     , m_nReceived(0)
     , m_nProcessed(0)
     , m_timer(false)
+    , m_socket(-1)
 {
     m_rtdlPacket = reinterpret_cast<DasPacket *>(
         callocMustSucceed(1, sizeof(DasPacket) + sizeof(RtdlHeader) + 104, "Failed to allocate RTDL packet")
@@ -34,14 +38,42 @@ TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     m_rtdlPacket->payload_length = sizeof(RtdlHeader) + 104;
 
     // Nobody (ADARA) doesn't really use RTDL frames information.
-    // It ignores it if MSB of 32-bit frame is 0x00. calloc() zeroed it,
+    // ADARA ignores it if MSB of 32-bit frame is 0x00. calloc() zeroed it,
     // don't change for fake or network RTDL.
 
-    createParam("PoolSize",     asynParamInt32, &PoolSize,  0); // READ - Number of allocated packets
+    createParam("PoolSize",     asynParamInt32, &PoolSize,    0); // READ - Number of allocated packets
+    createParam("Mode",         asynParamInt32, &Mode,        0); // WRITE - Source where to ger RTDL data from
+    createParam("RecvPort",     asynParamInt32, &RecvPort, 8055); // WRITE - Remote port
 
     createFakeRtdl(m_rtdlPacket);
     std::function<float(void)> timerCb = std::bind(&TimingPlugin::updateRtdl, this);
     m_timer.schedule(timerCb, 0.01);
+}
+
+asynStatus TimingPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (pasynUser->reason == Mode) {
+        switch (value) {
+        case 0:
+            disconnectEtc();
+            break;
+        case 1:
+            int port;
+            if (getIntegerParam(RecvPort, &port) != asynSuccess || port == 0) {
+                LOG_ERROR("Can not connect to timing server: RecvPort not configured");
+                return asynError;
+            }
+            disconnectEtc();
+            if (connectEtc(port) == false) {
+                LOG_ERROR("Can not connect to timing server: connection refused");
+                return asynError;
+            }
+            break;
+        default:
+            return asynError;
+        }
+    }
+    return BasePlugin::writeInt32(pasynUser, value);
 }
 
 void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
@@ -62,6 +94,9 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
                 else
                     m_metaRtdl = *m_rtdlPacket->getRtdlHeader();
                 this->unlock();
+
+                // TODO: If RTDL is the same, entire train should be tossed or
+                //       start/end flags need to be modified.
             }
 
             if (packet->isNeutronData())
@@ -173,11 +208,20 @@ void TimingPlugin::freePacket(DasPacket *packet)
 double TimingPlugin::updateRtdl()
 {
     bool sendRtdlPacket = false;
+    int mode;
+
+    getIntegerParam(Mode, &mode);
 
     this->lock();
     // Must not block
-    sendRtdlPacket = createFakeRtdl(m_rtdlPacket);
+    if (mode == 0)
+        sendRtdlPacket = createFakeRtdl(m_rtdlPacket);
+    else if (mode == 1)
+        sendRtdlPacket = recvRtdlFromEtc(m_rtdlPacket);
     this->unlock();
+
+    // NOTE: No guarantee that there's a new RTDL data in 16ms.
+    //       Data for two pulses can be merged together in that case.
 
     if (sendRtdlPacket) {
         m_mutex.lock();
@@ -209,10 +253,97 @@ bool TimingPlugin::createFakeRtdl(DasPacket *packet)
     rtdl->cycle = (rtdl->cycle + 1) % 600;
     rtdl->last_cycle_veto = 0;
     rtdl->pulse.charge = 100000 + 5 * rand();
-    rtdl->tsync_width = 166661;
+    rtdl->tsync_width = (rtdl->cycle == 0x1 ? 166662 : 166661);
     rtdl->tstat = 30;
     rtdl->pulse.flavor = (rtdl->cycle > 0 ? RtdlHeader::RTDL_FLAVOR_TARGET_1 : RtdlHeader::RTDL_FLAVOR_NO_BEAM);
     rtdl->tof_full_offset = 1;
 
     return true;
+}
+
+bool TimingPlugin::connectEtc(uint32_t port)
+{
+    struct sockaddr_in addr;
+
+    m_socket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (m_socket == -1)
+        return false;
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    if (bind(m_socket, (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        close(m_socket);
+        m_socket = -1;
+        return false;
+    }
+
+    int bcast = 1;
+    if (setsockopt(m_socket, SOL_SOCKET, SO_BROADCAST, (char *)&bcast, sizeof(bcast)) == -1) {
+        close(m_socket);
+        m_socket = -1;
+        return false;
+    }
+
+    int flags = fcntl(m_socket, F_GETFL, 0);
+    if (flags == -1 || fcntl(m_socket, F_SETFL, flags | O_NONBLOCK) == -1) {
+        close(m_socket);
+        m_socket = -1;
+        return false;
+    }
+
+    return true;
+}
+
+void TimingPlugin::disconnectEtc()
+{
+    if (m_socket != -1) {
+        close(m_socket);
+        m_socket = -1;
+    }
+}
+
+bool TimingPlugin::recvRtdlFromEtc(DasPacket *packet)
+{
+    struct EtcRtdlPacket {
+        uint32_t receive_id;
+        uint32_t command;
+        uint32_t size;
+        uint32_t spares[3];
+
+        uint32_t nsec;
+        uint32_t secPastEpoch;
+        uint32_t pulse_type;
+        uint32_t veto_status;
+        uint32_t pulse_charge;
+        uint32_t stored_turns;
+        uint32_t ring_period;
+        uint32_t spare;
+    } message;
+
+    // m_socket is O_NONBLOCK
+    while (recv(m_socket, &message, sizeof(message), 0) > 0) {
+        if (message.command == 0x10000 && message.size >= 32) {
+            RtdlHeader *rtdl = const_cast<RtdlHeader *>(packet->getRtdlHeader());
+            uint32_t *data = reinterpret_cast<char *>(rtdl) + sizeof(RtdlHeader);
+
+            rtdl->timestamp_sec = message.secPastEpoch;
+            rtdl->timestamp_nsec = message.nsec;
+            rtdl->charge = message.pulse_type;
+            rtdl->pulse.bad = (message.pulse_type >> 6) & 0x1;
+            rtdl->pulse.charge = message.pulse_charge & 0xFFFFFF;
+            rtdl->cycle = (rtdl->cycle + 1) % 600;
+            rtdl->tsync_width = (rtdl->cycle == 0x1 ? 166662 : 166661);
+            rtdl->tsync_delay = 0x80000000;
+
+            // Ring revolution period frame id is 4
+            data[0] = 0x04 | message.ring_period & 0xFFFFFF;
+
+            return true;
+        }
+        // Eat other commands
+    }
+
+    return false;
 }

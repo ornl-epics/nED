@@ -22,14 +22,19 @@
  * sub-packets share the same RTDL header information regardless if some
  * of them are received after new RTDL data is available.
  *
+ * Plugin functionality is split into two parts. First one takes care of
+ * periodically updating RTDL data and sending out RTDL packets to registered
+ * plugins. It's running in it's own thread through EPICS timers.
+ * Second part is processing incoming packets and injecting RTDL header
+ * into them before sending them to plugins.
+ *
  * Plugin does not discard any original packets or their parts. If RTDL packets
  * are already in the inbound stream, plugin passes them on but it also
  * creates new RTDL packets with potentialy different time and certanly
  * non-synchronized cycle numbers. Don't use this plugin with DSP-T.
  *
- * RTDL data can be obtained from the network coming. In that case plugin
- * listens on broadcast address and replaces cached RTDL data as soon as
- * new one is received.
+ * RTDL data can be obtained from the network coming from ETC. In that case plugin
+ * receives RTDL data messages from ETC and replaces cached RTDL data immediately.
  *
  * Plugin can also fake RTDL data. In that case most of the information
  * is static with a few exceptions. Timestamp is taken from system clock and
@@ -64,6 +69,12 @@ class TimingPlugin : public BaseDispatcherPlugin {
         static const uint32_t PACKET_SIZE;  //!< Size of every packet allocated
         epicsMutex m_mutex;             //!< Mutex used solely to serialize sending data to plugins
         Timer m_timer;                  //!< Used to trigger periodic RTDL updates
+        int m_socket;                   //!< Socket to remote timing server
+
+        /**
+         * Handle setting integer parameters.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
          * Process received packets.
@@ -152,14 +163,39 @@ class TimingPlugin : public BaseDispatcherPlugin {
          *
          * No data is updated if current data is still valid based on 60Hz resolution.
          *
-         * @return true when packet is updated, false when current data is still accurate.
+         * @param[out] packet RTDL packet to be updated
+         * @return true when packet was updated
          */
         bool createFakeRtdl(DasPacket *packet);
+
+        /**
+         * Initialize network socket for receiving data.
+         */
+        bool connectEtc(uint32_t port);
+
+        /**
+         * Disconnect from remote socket.
+         */
+        void disconnectEtc();
+
+        /**
+         * Check if there's new RTDL message from ETC and update packet
+         *
+         * Only processes RTDL messages from ETC, skips the rest. If there's
+         * an RTDL message waiting in queue, its data is used to update RTDL
+         * packet and function returns true. Return false otherwise.
+         *
+         * @param[out] packet RTDL packet to be updated
+         * @return true when packet was updated
+         */
+        bool recvRtdlFromEtc(DasPacket *packet);
 
     protected:
         #define FIRST_TIMINGPLUGIN_PARAM PoolSize
         int PoolSize;           //!< Number of allocated packets
-        #define LAST_TIMINGPLUGIN_PARAM PoolSize
+        int Mode;               //!< Select RTDL data source, fake or network
+        int RecvPort;           //!< Remote port
+        #define LAST_TIMINGPLUGIN_PARAM RecvPort
 
 };
 #endif // TIMING_PLUGIN_H
