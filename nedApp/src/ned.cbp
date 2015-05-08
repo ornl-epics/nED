@@ -137,6 +137,8 @@
 		<Unit filename="Thread.h" />
 		<Unit filename="Timer.cpp" />
 		<Unit filename="Timer.h" />
+		<Unit filename="TimingPlugin.cpp" />
+		<Unit filename="TimingPlugin.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="unittest/testCircularBuffer.cpp" />
 		<Extensions>

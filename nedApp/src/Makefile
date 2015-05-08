@@ -20,8 +20,8 @@ USR_CXXFLAGS += -std=c++0x
 #USR_CXXFLAGS += -fopenmp
 #USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)
-CXXFLAGS += -g -ggdb
-CXXFLAGS += -O0 # Improve std::vector iteration times by factor 30 or so
+#CXXFLAGS += -g -ggdb -O0
+CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
 
 # Product
 PROD_NAME = ned
@@ -117,6 +117,7 @@ $(PROD_NAME)_SRCS  += AcpcPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
+$(PROD_NAME)_SRCS  += TimingPlugin.cpp
 
 #===========================
 

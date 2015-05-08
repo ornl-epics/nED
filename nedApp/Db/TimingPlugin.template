@@ -1,0 +1,10 @@
+include "BasePlugin.include"
+
+record(longin, "$(P)PoolSize")
+{
+   field(DESC,  "Num allocated packets")
+   field(DTYP,  "asynInt32")
+   field(INP,   "@asyn($(PORT))PoolSize")
+   field(SCAN,  "I/O Intr")
+   field(PINI,  "YES")
+}
