@@ -4,6 +4,7 @@
 	<Project>
 		<Option title="ned" />
 		<Option makefile_is_custom="1" />
+		<Option execution_dir="../../../master" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -16,11 +17,12 @@
 		</MakeCommands>
 		<Build>
 			<Target title="Release">
-				<Option output="O.linux-x86_64/ned" prefix_auto="1" extension_auto="1" />
+				<Option output="../../example/bin/linux-x86_64/example" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="../../example/iocBoot/iocexample" />
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="../../iocBoot/iocned/st.cmd" />
+				<Option parameters="st.cmd" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -52,6 +54,9 @@
 		<Unit filename="AdaraPlugin.h" />
 		<Unit filename="AdcRocPlugin.cpp" />
 		<Unit filename="AdcRocPlugin.h" />
+		<Unit filename="AdcRocPlugin_v02.cpp" />
+		<Unit filename="AdcRocPlugin_v03.cpp" />
+		<Unit filename="ApplyConfig.st" />
 		<Unit filename="ArocPlugin.cpp" />
 		<Unit filename="ArocPlugin.h" />
 		<Unit filename="ArocPlugin_v23.cpp" />
@@ -116,6 +121,7 @@
 		<Unit filename="RocPlugin.cpp" />
 		<Unit filename="RocPlugin.h" />
 		<Unit filename="RocPlugin_v45.cpp" />
+		<Unit filename="RocPlugin_v47.cpp" />
 		<Unit filename="RocPlugin_v51.cpp" />
 		<Unit filename="RocPlugin_v52.cpp" />
 		<Unit filename="RocPlugin_v54.cpp" />
@@ -123,13 +129,18 @@
 		<Unit filename="RocPlugin_v57.cpp" />
 		<Unit filename="RocPvaPlugin.cpp" />
 		<Unit filename="RocPvaPlugin.h" />
+		<Unit filename="RtdlHeader.h" />
 		<Unit filename="RtdlPlugin.cpp" />
 		<Unit filename="RtdlPlugin.h" />
 		<Unit filename="StatPlugin.cpp" />
 		<Unit filename="StatPlugin.h" />
 		<Unit filename="StateMachine.h" />
+		<Unit filename="Thread.cpp" />
+		<Unit filename="Thread.h" />
 		<Unit filename="Timer.cpp" />
 		<Unit filename="Timer.h" />
+		<Unit filename="TimingPlugin.cpp" />
+		<Unit filename="TimingPlugin.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="unittest/testCircularBuffer.cpp" />
 		<Extensions>

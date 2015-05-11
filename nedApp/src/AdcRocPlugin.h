@@ -59,21 +59,6 @@ class AdcRocPlugin : public BaseModulePlugin {
         AdcRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
 
         /**
-         * Process RS232 packets only, let base implementation do the rest.
-         */
-        bool processResponse(const DasPacket *packet);
-
-        /**
-         * Send string/byte data to PVs
-         */
-        asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
-
-        /**
-         * Receive string/byte data to PVs
-         */
-        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
-
-        /**
          * Try to parse the ADCROC version response packet an populate the structure.
          *
          * Function will parse all known ADCROC version responses and populate the
@@ -108,12 +93,25 @@ class AdcRocPlugin : public BaseModulePlugin {
     private: // functions
 
         /**
-         * Handle READ_CONFIG response.
+         * Request a single pulse magnet pulse
          *
-         * For normal firmwares the function simply invokes BaseModulePlugin::rspReadConfig()
-         * passing it the original packet.
+         * Function sends a simple packet with request to trigger one pulse.
+         * Pulse must be cleared using reqClearPulse() before next one is being
+         * triggered.
+         *
+         * Valid only on modified ADC ROC that supports pulse magnet interface.
          */
-        bool rspReadConfig(const DasPacket *packet);
+        DasPacket::CommandType reqTriggerPulse();
+
+        /**
+         * Request clearing previous pulse magnet pulse.
+         *
+         * After a pulse magnet pulse is triggered it must be cleared (line
+         * deasserted) before the next trigger can be sent.
+         *
+         * Valid only on modified ADC ROC that supports pulse magnet interface.
+         */
+        DasPacket::CommandType reqClearPulse();
 
         /**
          * Create and register all status ADCROC v0.2 parameters to be exposed to EPICS.
@@ -144,8 +142,6 @@ class AdcRocPlugin : public BaseModulePlugin {
          * Create and register all status counter ADCROC v0.3 parameters to be exposed to EPICS.
          */
         void createCounterParams_v03();
-
-    protected:
 };
 
 #endif // ADC_ROC_PLUGIN_H

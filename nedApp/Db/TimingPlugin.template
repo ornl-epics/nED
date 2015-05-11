@@ -1,0 +1,33 @@
+include "BasePlugin.include"
+
+record(longin, "$(P)PoolSize")
+{
+    field(DESC,  "Num allocated packets")
+    field(DTYP,  "asynInt32")
+    field(INP,   "@asyn($(PORT))PoolSize")
+    field(SCAN,  "I/O Intr")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)Mode")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select mode of operation")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Mode")
+    field(ZNAM, "Fake RTDL")
+    field(ONAM, "RTDL from network")
+}
+record(stringout, "$(P)RecvIp")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Server IP address")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))RecvIp")
+}
+record(longout, "$(P)RecvPort")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Server port number")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))RecvPort")
+}

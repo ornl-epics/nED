@@ -2,7 +2,7 @@ include "BasePlugin.include"
 
 record(bo, "$(P)Enable")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
 }
@@ -15,6 +15,7 @@ record(calc, "$(P)StatusCalc")
 }
 record(bi, "$(P)Status")
 {
+    info(archive, "Monitor, 00:10:00, VAL")
     field(ZNAM, "Not OK")
     field(ONAM, "OK")
     field(ZSV,  "MAJOR")
@@ -31,6 +32,7 @@ record(waveform, "$(P)FilePath")
 }
 record(mbbi, "$(P)ErrImport")
 {
+    info(archive, "Monitor, 00:10:00, VAL")
     field(DESC, "Error importing file")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))ErrImport")

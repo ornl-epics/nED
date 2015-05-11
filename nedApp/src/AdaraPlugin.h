@@ -48,7 +48,7 @@ class AdaraPlugin : public BaseSocketPlugin {
          */
         struct SourceSequence {
             uint32_t sourceId;          //!< Source id for output packets
-            DasPacket::RtdlHeader rtdl; //!< RTDL header of the current pulse
+            RtdlHeader rtdl;            //!< RTDL header of the current pulse
             uint32_t pulseSeq;          //!< Packet sequence number within one pulse
             uint32_t totalSeq;          //!< Overall packet sequence number
             SourceSequence()

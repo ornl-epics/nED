@@ -29,48 +29,27 @@ CmdDispatcher::CmdDispatcher(const char *portName, const char *connectPortName)
 
 void CmdDispatcher::processDataUnlocked(const DasPacketList * const packetList)
 {
-    const DasPacket *first = 0;
-    const DasPacket *last = 0;
     DasPacketList cmdList;
-    uint32_t nReceived = 0;
-    uint32_t nProcessed = 0;
-
-    nReceived += packetList->size();
 
     for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
         const DasPacket *packet = *it;
 
-        if (packet->isCommand() && packet->cmdinfo.command != DasPacket::CMD_RTDL && packet->cmdinfo.command != DasPacket::CMD_TSYNC) {
-            if (first == 0)
-                first = packet;
-            last = packet;
-            nProcessed++;
-        } else if (first) {
-            sendToPlugins(first, last);
-            first = last = 0;
+        if (packet->isResponse()) {
+            cmdList.push_back(packet);
         }
     }
-    if (first) {
-        sendToPlugins(first, last);
+
+    if (!cmdList.empty()) {
+        cmdList.reserve();
+        BaseDispatcherPlugin::sendToPlugins(&cmdList);
     }
 
     // Update parameters
     this->lock();
-    m_nReceived += nReceived;
-    m_nProcessed += nProcessed;
+    m_nReceived += packetList->size();
+    m_nProcessed += cmdList.size();
     setIntegerParam(ProcCount,  m_nProcessed);
     setIntegerParam(RxCount,    m_nReceived);
     callParamCallbacks();
     this->unlock();
-}
-
-void CmdDispatcher::sendToPlugins(const DasPacket *first, const DasPacket *last)
-{
-    DasPacketList cmdList;
-    uint32_t length = (reinterpret_cast<const uint8_t*>(last) - reinterpret_cast<const uint8_t*>(first)) + last->length();
-
-    cmdList.reset(reinterpret_cast<const uint8_t*>(first), length);
-    BaseDispatcherPlugin::sendToPlugins(&cmdList);
-    cmdList.release();
-    cmdList.waitAllReleased();
 }

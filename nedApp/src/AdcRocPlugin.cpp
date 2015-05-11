@@ -61,57 +61,6 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
     callParamCallbacks();
 }
 
-bool AdcRocPlugin::processResponse(const DasPacket *packet)
-{
-    DasPacket::CommandType command = packet->getResponseType();
-
-    switch (command) {
-    default:
-        return BaseModulePlugin::processResponse(packet);
-    }
-}
-
-asynStatus AdcRocPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
-{
-    /* GSG TODO:  Anything I need to handle here?
-    // Only serving StreamDevice - puts reason as -1
-    if (pasynUser->reason == -1) {
-        // StreamDevice is sending entire string => no need to buffer the request.
-        reqHvCmd(value, nChars);
-        *nActual = nChars;
-        return asynSuccess;
-    }
-   */
-    return BaseModulePlugin::writeOctet(pasynUser, value, nChars, nActual);
-}
-
-asynStatus AdcRocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
-{
-    /* GSG TODO: Anything I need to handle here?
-    // Only serving StreamDevice - puts reason as -1
-    if (pasynUser->reason == -1) {
-        asynStatus status = asynSuccess;
-
-        // Temporarily unlock the device or processResponse() will not run
-        this->unlock();
-
-        *nActual = m_hvBuffer.dequeue(value, nChars, pasynUser->timeout);
-
-        if (*nActual == 0) {
-            status = asynTimeout;
-        } else if (eomReason) {
-            if (value[*nActual - 1] == '\r') *eomReason |= ASYN_EOM_EOS;
-            if (*nActual == nChars)          *eomReason |= ASYN_EOM_CNT;
-        }
-
-        this->lock();
-
-        return status;
-    }
-    */
-    return BaseModulePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
-}
-
 bool AdcRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
     if (version.hw_version == 0) {
@@ -146,29 +95,18 @@ bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Ve
     return true;
 }
 
-bool AdcRocPlugin::rspReadConfig(const DasPacket *packet)
+DasPacket::CommandType AdcRocPlugin::reqTriggerPulse()
 {
-    /* GSG TODO: Need to verify that we don't have to do this....this was
-     * required only because v54 firmware was broken and appended four extra
-     * bytes at the end of the payload.
-    if (m_version == "v02") {
-        uint8_t buffer[130]; // actual size of the READ_CONFIG packet
-
-        if (packet->length() > sizeof(buffer)) {
-            LOG_ERROR("Received v02 READ_CONFIG response bigger than expected");
-            return asynError;
-        }
-
-        // Packet in shared queue must not be modified. So we make a copy.
-        memcpy(buffer, packet, packet->length());
-        packet = reinterpret_cast<const DasPacket *>(buffer);
-        const_cast<DasPacket *>(packet)->payload_length -= 4; // This is the only reason we're doing all the buffering
-
-        return BaseModulePlugin::rspReadConfig(packet);
-    }
-   */
-    return BaseModulePlugin::rspReadConfig(packet);
+    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_ON);
+    return DasPacket::CMD_PM_PULSE_RQST_ON;
 }
+
+DasPacket::CommandType AdcRocPlugin::reqClearPulse()
+{
+    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_OFF);
+    return DasPacket::CMD_PM_PULSE_RQST_OFF;
+}
+
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
 // reasons:

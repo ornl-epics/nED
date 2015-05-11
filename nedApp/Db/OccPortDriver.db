@@ -1,6 +1,6 @@
 record(mbbi, "$(P)PortStatus")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:00:10, VAL")
     field(DESC, "Status of OccPortDriver")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -74,14 +74,14 @@ record(mbbi, "$(P)HwType")
 }
 record(stringin, "$(P)FpgaSn")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))FpgaSn")
     field(PINI, "YES")
 }
 record(longin, "$(P)HwVer")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     field(DESC, "OCC board hardware version")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -89,7 +89,7 @@ record(longin, "$(P)HwVer")
 }
 record(longin, "$(P)FwVer")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     field(DESC, "OCC board firmware version")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -97,7 +97,7 @@ record(longin, "$(P)FwVer")
 }
 record(longin, "$(P)FwDate")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     field(DESC, "OCC board firmware date")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -105,7 +105,7 @@ record(longin, "$(P)FwDate")
 }
 record(mbbi, "$(P)ConStatus")
 {
-    info(archive, "Monitor, 00:00:05")
+    info(archive, "Monitor, 00:00:05, VAL")
     field(DESC, "Optical signal status")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -128,7 +128,7 @@ record(mbbi, "$(P)ConStatus")
 }
 record(bo, "$(P)RxEn")
 {
-    info(archive, "Monitor, 00:00:05")
+    info(archive, "Monitor, 00:00:05, VAL")
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Enable incoming data")
@@ -141,6 +141,7 @@ record(bo, "$(P)RxEn")
 }
 record(bi, "$(P)RxEnRb")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "Incoming data enabled")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))RxEnRb")
@@ -148,6 +149,7 @@ record(bi, "$(P)RxEnRb")
     field(ONAM, "Enabled")
     field(ZSV,  "MAJOR")
     field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(bo, "$(P)ErrPktEn")
 {
@@ -172,7 +174,7 @@ record(bi, "$(P)ErrPktEnRb")
 }
 record(mbbi, "$(P)RxStalled")
 {
-    info(archive, "Monitor, 00:00:05")
+    info(archive, "Monitor, 00:00:05, VAL")
     field(DESC, "Incoming data stalled")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))RxStalled")
@@ -190,10 +192,11 @@ record(mbbi, "$(P)RxStalled")
     field(THST, "Copy stalled")
     field(THSV, "MAJOR")
     field(UNSV, "MINOR")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(ai, "$(P)FpgaTemp")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "FPGA temperature")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))FpgaTemp")
@@ -217,10 +220,11 @@ record(calcout, "$(P)FpgaTempAlarm")
     field(CALC, "(B>C)?0:A")
     field(OUT,  "$(P)RxEn PP")
     field(OOPT, "Transition To Zero")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(ai, "$(P)FpgaCoreV")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "FPGA core voltage")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))FpgaCoreV")
@@ -249,7 +253,7 @@ record(ai, "$(P)FpgaAuxV")
 }
 record(stringin, "$(P)SfpSerNo")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     field(DESC, "SFP serial number")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))SfpSerNo")
@@ -258,7 +262,7 @@ record(stringin, "$(P)SfpSerNo")
 }
 record(stringin, "$(P)SfpPartNo")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     field(DESC, "SFP part number")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))SfpPartNo")
@@ -267,7 +271,7 @@ record(stringin, "$(P)SfpPartNo")
 }
 record(mbbi, "$(P)SfpType")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     field(DESC, "SFP type")
     field(PINI, "YES")
     field(DTYP, "asynInt32")
@@ -284,7 +288,7 @@ record(mbbi, "$(P)SfpType")
 }
 record(ai, "$(P)SfpTemp")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     field(DESC, "SFP temperature")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpTemp")
@@ -299,7 +303,7 @@ record(ai, "$(P)SfpTemp")
 }
 record(ai, "$(P)SfpRxPower")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "SFP RX power")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpRxPower")
@@ -320,7 +324,7 @@ record(calcout, "$(P)SfpTxPowerLim")
 }
 record(ai, "$(P)SfpTxPower")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "SFP TX power")
     field(DTYP, "asynFloat64")
     field(INP,  "@asyn($(PORT))SfpTxPower")
@@ -353,7 +357,7 @@ record(ai, "$(P)SfpTxBiasC")
 }
 record(longin, "$(P)ErrCrc")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "FPGA detected CRC errors counter")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))ErrCrc")
@@ -361,7 +365,7 @@ record(longin, "$(P)ErrCrc")
 }
 record(longin, "$(P)ErrLength")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "FPGA detected length errors counter")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))ErrLength")
@@ -369,7 +373,7 @@ record(longin, "$(P)ErrLength")
 }
 record(longin, "$(P)ErrFrame")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "FPGA detected frame errors counter")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))ErrFrame")
@@ -391,7 +395,7 @@ record(calc, "$(P)DmaUsedMb")
     field(INPA, "$(P)DmaUsed NPP")
     field(CALC, "A/(1024*1024)")
     field(SCAN, "Passive")
-    field(EGU,  "MB")
+    field(EGU,  "MiB")
 }
 record(longin, "$(P)DmaSize")
 {
@@ -409,7 +413,7 @@ record(calc, "$(P)DmaSizeMb")
     field(INPA, "$(P)DmaSize NPP")
     field(CALC, "A/(1024*1024)")
     field(SCAN, "Passive")
-    field(EGU,  "MB")
+    field(EGU,  "MiB")
 }
 record(longin, "$(P)BufUsed")
 {
@@ -427,7 +431,7 @@ record(calc, "$(P)BufUsedMb")
     field(INPA, "$(P)BufUsed NPP")
     field(CALC, "A/(1024*1024)")
     field(SCAN, "Passive")
-    field(EGU,  "MB")
+    field(EGU,  "MiB")
 }
 record(longin, "$(P)BufSize")
 {
@@ -445,7 +449,7 @@ record(calc, "$(P)BufSizeMb")
     field(INPA, "$(P)BufSize NPP")
     field(CALC, "A/(1024*1024)")
     field(SCAN, "Passive")
-    field(EGU,  "MB")
+    field(EGU,  "MiB")
 }
 record(longout, "$(P)StatusInt")
 {
@@ -477,19 +481,19 @@ record(longin, "$(P)RecvRateBs")
 }
 record(calc, "$(P)RecvRateKBs")
 {
-    field(DESC, "OCC receive rate KB/s")
+    field(DESC, "OCC receive rate kB/s")
     field(INPA, "$(P)RecvRateBs NPP")
     field(FLNK, "$(P)RecvRateMBs")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
-    field(EGU,  "KB/s")
+    field(EGU,  "kB/s")
     field(PREC, "1")
 }
 record(calc, "$(P)RecvRateMBs")
 {
     field(DESC, "OCC receive rate MB/s")
     field(INPA, "$(P)RecvRateKBs NPP")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
     field(EGU,  "MB/s")
     field(PREC, "2")
@@ -506,19 +510,19 @@ record(longin, "$(P)CopyRateBs")
 }
 record(calc, "$(P)CopyRateKBs")
 {
-    field(DESC, "Copy to buffer rate KB/s")
+    field(DESC, "Copy to buffer rate kB/s")
     field(INPA, "$(P)CopyRateBs NPP")
     field(FLNK, "$(P)CopyRateMBs")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
-    field(EGU,  "KB/s")
+    field(EGU,  "kB/s")
     field(PREC, "1")
 }
 record(calc, "$(P)CopyRateMBs")
 {
     field(DESC, "Copy to buffer rate MB/s")
     field(INPA, "$(P)CopyRateKBs NPP")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
     field(EGU,  "MB/s")
     field(PREC, "2")
@@ -535,19 +539,19 @@ record(longin, "$(P)ProcRateBs")
 }
 record(calc, "$(P)ProcRateKBs")
 {
-    field(DESC, "Data processing rate KB/s")
+    field(DESC, "Data processing rate kB/s")
     field(INPA, "$(P)ProcRateBs NPP")
     field(FLNK, "$(P)ProcRateMBs")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
-    field(EGU,  "KB/s")
+    field(EGU,  "kB/s")
     field(PREC, "1")
 }
 record(calc, "$(P)ProcRateMBs")
 {
     field(DESC, "Data processing rate MB/s")
     field(INPA, "$(P)ProcRateKBs NPP")
-    field(CALC, "A/1024")
+    field(CALC, "A/1000")
     field(SCAN, "Passive")
     field(EGU,  "MB/s")
     field(PREC, "2")
@@ -616,6 +620,7 @@ record(calc, "$(P)StatusCalc")
 }
 record(bi, "$(P)Status")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "Global OCC status")
     field(ZNAM, "Not OK")
     field(ONAM, "OK")

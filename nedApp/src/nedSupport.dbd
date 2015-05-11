@@ -8,25 +8,32 @@ include "registerChannelProviderLocal.dbd"
 include "calcSupport.dbd"
 include "sCalcoutRecord.dbd"
 
-# A-Z sorted list of exported plugins
-registrar("AdaraPluginRegister")
-registrar("AdcRocPluginRegister")
-registrar("AcpcFemPluginRegister")
-registrar("AcpcPluginRegister")
-registrar("AcpcPvaPluginRegister")
-registrar("ArocPluginRegister")
-registrar("CmdDispatcherRegister")
-registrar("DebugPluginRegister")
-registrar("DiscoverPluginRegister")
-registrar("DspPluginRegister")
-registrar("DumpPluginRegister")
-registrar("FemPluginRegister")
-registrar("FlatFieldPluginRegister")
-registrar("GlobalConRegistrar")
 registrar("OccRegister")
+
+# Non-detector plugins (alphabetically)
+registrar("AcpcPvaPluginRegister")
+registrar("AdaraPluginRegister")
+registrar("CmdDispatcherRegister")
+registrar("DiscoverPluginRegister")
+registrar("DebugPluginRegister")
+registrar("DumpPluginRegister")
+registrar("TimingPluginRegister")
+registrar("FlatFieldPluginRegister")
 registrar("PixelMapPluginRegister")
 registrar("ProxyPluginRegister")
-registrar("RocPluginRegister")
 registrar("RocPvaPluginRegister")
 registrar("RtdlPluginRegister")
 registrar("StatPluginRegister")
+
+# Detector support plugins (alphabetically)
+registrar("AcpcFemPluginRegister")
+registrar("AcpcPluginRegister")
+registrar("AdcRocPluginRegister")
+registrar("ArocPluginRegister")
+registrar("DspPluginRegister")
+registrar("FemPluginRegister")
+registrar("RocPluginRegister")
+
+# Sequences
+registrar("GlobalConRegistrar")
+registrar("ApplyConfigRegistrar")

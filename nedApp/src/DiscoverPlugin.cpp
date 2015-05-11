@@ -274,7 +274,7 @@ void DiscoverPlugin::report(FILE *fp, int details)
 
 void DiscoverPlugin::reqDiscover(uint32_t hardwareId)
 {
-    DasPacket *packet = DasPacket::createOcc(DasPacket::HWID_SELF, hardwareId, DasPacket::CMD_DISCOVER, 0, 0);
+    DasPacket *packet = DasPacket::createOcc(DasPacket::HWID_SELF, hardwareId, DasPacket::CMD_DISCOVER, 0, 0, 0);
     if (!packet) {
         LOG_ERROR("Failed to allocate DISCOVER packet");
         return;
@@ -285,7 +285,7 @@ void DiscoverPlugin::reqDiscover(uint32_t hardwareId)
 
 void DiscoverPlugin::reqLvdsDiscover(uint32_t hardwareId)
 {
-    DasPacket *packet = DasPacket::createLvds(DasPacket::HWID_SELF, hardwareId, DasPacket::CMD_DISCOVER, 0, 0);
+    DasPacket *packet = DasPacket::createLvds(DasPacket::HWID_SELF, hardwareId, DasPacket::CMD_DISCOVER, 0, 0, 0);
     if (!packet) {
         LOG_ERROR("Failed to allocate DISCOVER LVDS packet");
         return;
@@ -296,7 +296,7 @@ void DiscoverPlugin::reqLvdsDiscover(uint32_t hardwareId)
 
 void DiscoverPlugin::reqVersion(uint32_t hardwareId)
 {
-    DasPacket *packet = DasPacket::createOcc(DasPacket::HWID_SELF, hardwareId, DasPacket::CMD_READ_VERSION, 0, 0);
+    DasPacket *packet = DasPacket::createOcc(DasPacket::HWID_SELF, hardwareId, DasPacket::CMD_READ_VERSION, 0, 0, 0);
     if (!packet) {
         LOG_ERROR("Failed to allocate READ_VERSION packet");
         return;
@@ -307,7 +307,7 @@ void DiscoverPlugin::reqVersion(uint32_t hardwareId)
 
 void DiscoverPlugin::reqLvdsVersion(uint32_t hardwareId)
 {
-    DasPacket *packet = DasPacket::createLvds(DasPacket::HWID_SELF, hardwareId, DasPacket::CMD_READ_VERSION, 0, 0);
+    DasPacket *packet = DasPacket::createLvds(DasPacket::HWID_SELF, hardwareId, DasPacket::CMD_READ_VERSION, 0, 0, 0);
     if (!packet) {
         LOG_ERROR("Failed to allocate READ_VERSION LVDS packet");
         return;

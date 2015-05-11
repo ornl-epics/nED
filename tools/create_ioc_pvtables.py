@@ -34,7 +34,6 @@ from optparse import OptionParser
 
 __version__ = "0.2.0"
 
-DEFAULT_NED_DIR = "/home/controls/epics/nED/master"
 PVTABLE_DIR_TMPL = "/home/controls/<beamline>/pvtable/<iocname>/"
 
 def parse_st_cmd_env(st_cmd_filepath):
@@ -210,10 +209,11 @@ def main():
             print "ERROR: {0} is not valid nED top level directory".format(options.ned_dir)
             sys.exit(1)
     else:
-        ned_dir = os.path.join(DEFAULT_NED_DIR, "nedApp", "src")
+        ned_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "nedApp", "src")
         if not os.path.isdir(ned_dir):
             print "ERROR: Can't detect nED root directory, use -n parameter to specify it"
             sys.exit(1)
+    print ned_dir
 
     plugins = parse_st_cmd_plugins(st_cmd, bl_prefix, options.verbose)
     if not plugins:

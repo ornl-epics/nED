@@ -57,9 +57,9 @@ void AdcRocPlugin::createStatusParams_v03()
       createStatusParam("ErrLength",            0x5,  1,  5);   // LVDS packet length error
       createStatusParam("ErrType",              0x5,  1,  4);   // LVDS data type error
       createStatusParam("ErrParity",            0x5,  1,  3);   // LVDS parity error
-      createStatusParam("Acquiring",            0x5,  1,  2);   // Acquiring data
-      createStatusParam("Configured",           0x5,  1,  1);   // Module configured
-      createStatusParam("Discovered",           0x5,  1,  0);   // Module discovered
+      createStatusParam("Acquiring",            0x5,  1,  2);   // Acquiring data                    (0=not acquiring [alarm],1=acquiring, archive:monitor)
+      createStatusParam("Configured",           0x5,  1,  1);   // Module configured                 (0=not configured [alarm],1=configured, archive:monitor)
+      createStatusParam("Discovered",           0x5,  1,  0);   // Module discovered                 (0=not discovered,1=discovered, archive:monitor)
 }
 
 void AdcRocPlugin::createCounterParams_v03()
@@ -150,7 +150,7 @@ void AdcRocPlugin::createConfigParams_v03()
       createConfigParam("Ch8:ADC:PositionIdx",  '1', 0x1E, 32, 0, 0x60070000); // Chan8 ADC position index
       createConfigParam("PositionIdxBus",       '1', 0x20, 32, 0, 0);          // Pos Index bus *** UNUSED ***
 
-      createConfigParam("Ch1:ADC:Threshold",    'C', 0x0, 16, 0, 10);  // Chan1 ADC Threshold 
+      createConfigParam("Ch1:ADC:Threshold",    'C', 0x0, 16, 0, 10);  // Chan1 ADC Threshold
       createConfigParam("Ch2:ADC:Threshold",    'C', 0x1, 16, 0, 10);  // Chan2 ADC Threshold
       createConfigParam("Ch3:ADC:Threshold",    'C', 0x2, 16, 0, 10);  // Chan3 ADC Threshold
       createConfigParam("Ch4:ADC:Threshold",    'C', 0x3, 16, 0, 10);  // Chan4 ADC Threshold
@@ -170,7 +170,8 @@ void AdcRocPlugin::createConfigParams_v03()
       createConfigParam("Ch8:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan8 Digital mode
 
       createConfigParam("AdcOversampling",      'D', 0x0, 3, 0, 0);     // ADC Oversampling
-      createConfigParam("AdcRange",             'D', 0x0, 1, 4, 1);     // ADC Range (0=5V,1=10V)
+      createConfigParam("MPAlwaysReady",        'D', 0x0, 1, 3, 0);     // MP Always Ready
+      createConfigParam("AdcRange",             'D', 0x0, 1, 4, 1);     // ADC Range (0=+/-5V,1=+/-10V)
       createConfigParam("PmEnable",             'D', 0x0, 1, 5, 1);     // Pulsed Magnet Enable
       createConfigParam("Ch1:ADC:Enable",       'D', 0x0, 1, 8, 1);     // Chan1 ADC Enable
       createConfigParam("Ch2:ADC:Enable",       'D', 0x0, 1, 9, 1);     // Chan2 ADC Enable
@@ -201,7 +202,7 @@ void AdcRocPlugin::createConfigParams_v03()
       createConfigParam("AcquireMode",          'F', 0x0,  2, 4, 2);    // Acquire Mode (0=idle,1=idle,2=normal,3=trigger)
       createConfigParam("OutputMode",           'F', 0x0,  1,10, 1);    // Output Mode (0=slow,1=40MHz)
       createConfigParam("TpCtrl",               'F', 0x0,  5,11, 0);    // TP Control *** UNUSED ***
-      
+
       createConfigParam("TestPatternEn",        'F', 0x1,  1, 15, 0);   // Test pattern enable (0=disable,1=enable)
       createConfigParam("TestPatternDebug",     'F', 0x1,  3, 12, 0);   // Engineering Use only
       createConfigParam("TestPatternId",        'F', 0x1, 12, 0,  0);   // Test pattern id

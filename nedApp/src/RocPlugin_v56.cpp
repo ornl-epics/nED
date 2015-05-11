@@ -47,9 +47,9 @@ void RocPlugin::createStatusParams_v56()
     createStatusParam("DataFifoEmpty",        0x1,  1,  6); // Data FIFO Empty flag.        (0=not empty,1=empty)
     createStatusParam("HVStatus",             0x1,  1,  5); // High Voltage Status bit      (0=not present,1=present)
     createStatusParam("CalcActive",           0x1,  1,  4); // Calculation: Active          (0=not active,1=active)
-    createStatusParam("Acquiring",            0x1,  1,  3); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
-    createStatusParam("Discovered",           0x1,  1,  2); // Discovered                   (0=not discovered,1=discovered)
-    createStatusParam("Configured",           0x1,  2,  0); // Configured                   (0=not configured [alarm],1=section 1 conf'd,2=section 2 conf'd,3=all conf'd)
+    createStatusParam("Acquiring",            0x1,  1,  3); // Acquiring data               (0=not acquiring [alarm],1=acquiring, archive:monitor)
+    createStatusParam("Discovered",           0x1,  1,  2); // Discovered                   (0=not discovered,1=discovered, archive:monitor)
+    createStatusParam("Configured",           0x1,  2,  0); // Configured                   (0=not configured [alarm],1=section 1 conf'd,2=section 2 conf'd,3=all conf'd, archive:monitor)
 
     createStatusParam("RiseEdgeA",            0x2,  8,  8); // Discriminator A set
     createStatusParam("SysrstBHigh",          0x2,  1,  7); // SYSRST_B Got HIGH            (0=no,1=yes)
@@ -628,7 +628,8 @@ void RocPlugin::createConfigParams_v56()
     createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
 
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
-    createConfigParam("TestPatternDebug", 'F', 0x1,  3, 12, 0);     // Engineering Use only
+    createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Alternate test pattern enable (0=disable,1=enable)
+    createConfigParam("TestPatternDebug", 'F', 0x1,  2, 12, 0);     // Engineering Use only
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
     createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
 }

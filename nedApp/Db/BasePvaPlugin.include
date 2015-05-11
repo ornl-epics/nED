@@ -1,7 +1,7 @@
 # Upgrade BasePlugin::Enable PV
 record(bo, "$(P)Enable")
 {
-    info(archive, "Monitor, 00:10:00")
+    info(archive, "Monitor, 00:10:00, VAL")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
 }

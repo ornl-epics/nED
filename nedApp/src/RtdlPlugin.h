@@ -39,18 +39,18 @@ class RtdlPlugin : public BasePlugin {
         #define FIRST_RTDLPLUGIN_PARAM Timestamp
         int Timestamp;
         int BadPulse;
-        int PulseFlav;
-        int PulseCharg;
-        int BadVetoFr;
-        int BadCycleFr;
+        int PulseFlavor;
+        int PulseCharge;
+        int BadVetoFrame;
+        int BadCycleFrame;
         int Tstat;
-        int Veto;
+        int PrevCycleVeto;
         int Cycle;
-        int IntraPTime;
-        int TofFullOff;
-        int FrameOff;
-        int TofFixOff;
-        #define LAST_RTDLPLUGIN_PARAM TofFixOff
+        int IntraPulseTime;
+        int TofFullOffset;
+        int FrameOffset;
+        int TofFixOffset;
+        #define LAST_RTDLPLUGIN_PARAM TofFixOffset
 };
 
 #endif // RTDL_PLUGIN_H

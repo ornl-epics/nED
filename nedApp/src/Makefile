@@ -14,11 +14,13 @@ include $(TOP)/configure/CONFIG
 # The C/C++ bitfield ordering in structs is platform AND compiler dependant
 # 
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
+#USR_CXXFLAGS += -DMAX_PACKET_LEN=36000 # Uncomment when dealing with legacy DSP
 USR_CXXFLAGS += -std=c++0x
+
 #USR_CXXFLAGS += -fopenmp
 #USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)
-#CXXFLAGS += -g -ggdb
+#CXXFLAGS += -g -ggdb -O0
 CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
 
 # Product
@@ -50,6 +52,7 @@ PROD_LIBS += calc
 PROD_SRCS  += ned_registerRecordDeviceDriver.cpp
 PROD_SRCS  += main.cpp
 PROD_SRCS  += GlobalCon.st
+PROD_SRCS  += ApplyConfig.st
 
 # Static library
 LIBRARY = ned
@@ -59,6 +62,7 @@ SHARED_LIBRARIES = NO
 INC += CircularBuffer.h
 
 LIB_SRCS  += GlobalCon.st
+LIB_SRCS  += ApplyConfig.st
 $(PROD_NAME)_SRCS  += Common.cpp
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp
@@ -84,6 +88,7 @@ $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
+$(PROD_NAME)_SRCS  += RocPlugin_v47.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp
@@ -112,6 +117,7 @@ $(PROD_NAME)_SRCS  += AcpcPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
+$(PROD_NAME)_SRCS  += TimingPlugin.cpp
 
 #===========================
 

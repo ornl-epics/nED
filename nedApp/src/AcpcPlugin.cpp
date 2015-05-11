@@ -59,7 +59,7 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, con
 
 bool AcpcPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    if (version.hw_version == 4) {
+    if (version.hw_version == 2 && version.hw_revision == 6) {
         char ver[10];
         snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
         if (m_version == ver)

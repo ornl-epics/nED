@@ -47,3 +47,10 @@ record(sel, "$(P)AcpcDS")
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")
 }
+record(calc, "$(P)HwStatus")
+{
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(CALC, "A=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+}
