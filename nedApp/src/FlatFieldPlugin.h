@@ -68,10 +68,10 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Type of the table being imported, also index in m_corrTables.
          */
         typedef enum {
-            TABLE_X_CORRECTION  = 0,
-            TABLE_Y_CORRECTION  = 1,
-            TABLE_X_PHOTOSUM    = 2,
-            TABLE_Y_PHOTOSUM    = 3,
+            TABLE_X_CORRECTION      = 0,
+            TABLE_Y_CORRECTION      = 1,
+            TABLE_X_PHOTOSUM_LOWER  = 2,
+            TABLE_X_PHOTOSUM_UPPER  = 3,
             TABLE_UNKNOWN, // This element must be the last one
         } TableType_t;
 
@@ -304,11 +304,12 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[out] size_y Y dimension size
          * @param[out] position_id Camera position id
          * @param[out] type Type of imported table
+         * @param[in] path File path name used for error reporting
          * @retval MAP_ERR_BAD_FORMAT Unrecognized file format
          * @retval MAP_ERR_PARSE File seems to be expected format but parse error.
          * @retval MAP_ERR_NONE Header parsed.
          */
-        ImportError parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, FlatFieldPlugin::TableType_t &type);
+        ImportError parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, FlatFieldPlugin::TableType_t &type, const std::string &path);
 
         /**
          * Find correction table.

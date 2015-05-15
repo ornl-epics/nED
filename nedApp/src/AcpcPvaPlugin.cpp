@@ -121,7 +121,7 @@ void AcpcPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
     // Go through events and append to cache
     while (nEvents-- > 0) {
         m_cache.time_of_flight.push_back(event->time_of_flight & 0x000FFFFF);
-        m_cache.position_index.push_back(event->position_index);
+        m_cache.position_index.push_back(event->position_index & 0x7FFFFFFF);
         // In UQm.n format
         m_cache.position_x.push_back((1.0 * event->position_x) / m_xyDivider);
         m_cache.position_y.push_back((1.0 * event->position_y) / m_xyDivider);
@@ -165,7 +165,7 @@ void AcpcPvaPlugin::processRawData(const uint32_t *data, uint32_t count)
     // Go through events and append to cache
     while (nEvents-- > 0) {
         m_cache.time_of_flight.push_back(events->time_of_flight & 0x000FFFFF);
-        m_cache.position_index.push_back(events->position_index);
+        m_cache.position_index.push_back(events->position_index & 0x7FFFFFFF);
 
         if (events->position_index & 0x10) {
             for (int i = 0; i < 8; i++)

@@ -265,31 +265,30 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
         }
 
         // Convert raw values into ones used by calculations
+        uint32_t tof = srcEvent->time_of_flight;
         uint32_t position_id = srcEvent->position_index & 0x3FFF;
         double x = srcEvent->position_x * m_xyScale;
         double y = srcEvent->position_y * m_xyScale;
         double photosum_x = srcEvent->photo_sum_x * m_psScale;
         // unused srcEvent->photo_sum_y
+        srcEvent++;
 
         // Check photo sum
         if (checkPhotoSumLimits(x, y, photosum_x, position_id) == false) {
             errors.nPhotoSum++;
-            srcEvent++;
             continue;
         }
 
         // Form TOF,pixelid tupple
-        destEvent->tof = srcEvent->time_of_flight;
+        destEvent->tof = tof;
         destEvent->pixelid  = position_id << 18;
         destEvent->pixelid |= xyToPixel(x, y, position_id);
 
         if ((destEvent->pixelid & 0x3FFFF) == 0) {
             errors.nUnmapped++;
-            srcEvent++;
             continue;
         }
 
-        srcEvent++;
         destEvent++;
         nDestEvents++;
     }
@@ -316,14 +315,14 @@ uint32_t FlatFieldPlugin::xyToPixel(double x, double y, uint32_t position_id)
         if (xtable.get() == 0 || ytable.get() == 0)
             return 0;
 
+        unsigned xp = x;
+        unsigned yp = y;
+
         // Tables are guaranteed to be MAX_PIXEL_SIZE elements in any direction
-        if (x < 0.0 || x >= xtable->size() || y < 0.0 || y >= ytable->size())
+        if (x < 0.0 || xp >= xtable->size() || y < 0.0 || yp >= ytable->size())
             return 0;
 
         // All checks passed - do the correction
-
-        unsigned xp = (int)x;
-        unsigned yp = (int)y;
 
         double dx = (xp == 0 || xp == (xtable->size()  - 1)) ? 0 : x - xp;
         double dy = (yp == 0 || yp == (ytable->size() - 1)) ? 0 : y - yp;
@@ -340,26 +339,21 @@ bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x,
     if (unlikely(m_ffMode != FF_FLATTEN))
         return true;
 
-    std::shared_ptr<CorrTable_t> xtable = findTable(position_id, TABLE_X_PHOTOSUM);
+    std::shared_ptr<CorrTable_t> upperLimits = findTable(position_id, TABLE_X_PHOTOSUM_UPPER);
+    std::shared_ptr<CorrTable_t> lowerLimits = findTable(position_id, TABLE_X_PHOTOSUM_LOWER);
 
-    if (xtable.get() == 0)
+    if (upperLimits.get() == 0 || lowerLimits.get() == 0)
         return false;
 
+    unsigned xp = x;
+    unsigned yp = y;
+
     // Tables are guaranteed to be MAX_PIXEL_SIZE elements in any direction
-    if (x < 0.0 || x >= xtable->size())
+    if (x < 0.0 || xp >= upperLimits->size() || y < 0.0 || yp >= upperLimits->size())
         return 0;
 
-    double mean = (*xtable)[int(x)][int(y)];
-    double upperLimit = mean + m_psLowDecBase;
-    double lowerLimit = 0;
-
-    // Code re-ordered from dcomserver to evaluate most-likely case first
-    if (photosum_x >= 1800)
-        lowerLimit = mean - m_psLowDecBase;
-    else if (photosum_x >= 1400)
-        lowerLimit = mean - m_psLowDecBase - (1800 - photosum_x)/4;
-    else
-        lowerLimit = mean - m_psLowDecLim;
+    double upperLimit = (*upperLimits)[xp][yp];
+    double lowerLimit = (*lowerLimits)[xp][yp];
 
     return (lowerLimit <= photosum_x && photosum_x <= upperLimit);
 }
@@ -413,7 +407,9 @@ bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::
     return false;
 }
 
-FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, FlatFieldPlugin::TableType_t &type)
+FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(
+    std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id,
+    FlatFieldPlugin::TableType_t &type, const std::string &path)
 {
     size_x = 0;
     size_y = 0;
@@ -427,27 +423,36 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
     while (parseHeader(infile, key, value)) {
         if (key == "Format version") {
             if (sscanf(value.c_str(), "%d", &version) != 1) {
-                LOG_ERROR("Failed to read file format version");
+                LOG_ERROR("Failed to read file format version: %s", path.c_str());
                 return FF_ERR_PARSE;
             }
             nHeaders++;
         }
         if (key == "Table size") {
             if (sscanf(value.c_str(), "%ux%u", &size_x, &size_y) != 2) {
-                LOG_ERROR("Failed to read table size");
+                LOG_ERROR("Failed to read table size: %s", path.c_str());
                 return FF_ERR_PARSE;
             }
             nHeaders++;
         }
         if (key == "Table type") {
             char dim;
-            if (sscanf(value.c_str(), "Photo Sum %c", &dim) == 1) {
+            if (sscanf(value.c_str(), "Photo Sum %c lower", &dim) == 1) {
                 if (dim == 'x' || dim == 'X') {
-                    type = TABLE_X_PHOTOSUM;
+                    type = TABLE_X_PHOTOSUM_LOWER;
                 } else if (dim == 'y' || dim == 'Y') {
-                    type = TABLE_Y_PHOTOSUM;
+                    LOG_WARN("Y photo sum table not implemented: %s", path.c_str());
                 } else {
-                    LOG_ERROR("Failed to parse table type");
+                    LOG_ERROR("Unknown photo sum dimension: %s", path.c_str());
+                    return FF_ERR_PARSE;
+                }
+            } else if (sscanf(value.c_str(), "Photo Sum %c upper", &dim) == 1) {
+                if (dim == 'x' || dim == 'X') {
+                    type = TABLE_X_PHOTOSUM_UPPER;
+                } else if (dim == 'y' || dim == 'Y') {
+                    LOG_WARN("Y photo sum table not implemented: %s", path.c_str());
+                } else {
+                    LOG_ERROR("Unknown photo sum dimension: %s", path.c_str());
                     return FF_ERR_PARSE;
                 }
             } else if (sscanf(value.c_str(), "Correction %c", &dim) == 1) {
@@ -456,18 +461,21 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
                 } else if (dim == 'y' || dim == 'Y') {
                     type = TABLE_Y_CORRECTION;
                 } else {
-                    LOG_ERROR("Failed to parse table type");
+                    LOG_ERROR("Failed to parse table type: %s", path.c_str());
                     return FF_ERR_PARSE;
                 }
             } else {
-                LOG_ERROR("Failed to read table type");
+                LOG_ERROR("Failed to read table type: %s", path.c_str());
                 return FF_ERR_PARSE;
             }
             nHeaders++;
         }
         if (key == "Position id") {
             if (sscanf(value.c_str(), "%u", &position_id) != 1) {
-                LOG_ERROR("Failed to read position id");
+                LOG_ERROR("Failed to read position id: %s", path.c_str());
+                return FF_ERR_PARSE;
+            } else if (position_id & ~0x7FFFFFFF) {
+                LOG_ERROR("Invalid position id %u: %s", position_id, path.c_str());
                 return FF_ERR_PARSE;
             }
             nHeaders++;
@@ -475,29 +483,29 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(std::ifstream &infile
     }
 
     if (nHeaders == 0) {
-        LOG_WARN("Unknown file format");
+        LOG_WARN("Unknown file format: %s", path.c_str());
         return FF_ERR_BAD_FORMAT;
     }
 
     // Make sure we got all required headers
     if (version == 0) {
-        LOG_ERROR("Invalid file format, missing version");
+        LOG_ERROR("Invalid file format, missing version: %s", path.c_str());
         return FF_ERR_PARSE;
     }
     if (version != 1) {
-        LOG_ERROR("Invalid file format, unsupported format version '%d'", version);
+        LOG_ERROR("Invalid file format, unsupported format version '%d': %s", version, path.c_str());
         return FF_ERR_PARSE;
     }
     if (size_x == 0 || size_y == 0 || size_x > MAX_PIXEL_SIZE || size_y > MAX_PIXEL_SIZE) {
-        LOG_ERROR("Invalid file format, missing table size header");
+        LOG_ERROR("Invalid file format, missing table size header: %s", path.c_str());
         return FF_ERR_PARSE;
     }
     if (type == TABLE_UNKNOWN) {
-        LOG_ERROR("Invalid file format, missing table type header");
+        LOG_ERROR("Invalid file format, missing table type header: %s", path.c_str());
         return FF_ERR_PARSE;
     }
     if (position_id == 0xFFFFFFFF) {
-        LOG_ERROR("Invalid file format, missing position id header");
+        LOG_ERROR("Invalid file format, missing position id header: %s", path.c_str());
         return FF_ERR_PARSE;
     }
 
@@ -524,7 +532,7 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path
             break;
         }
 
-        err = parseHeaders(infile, size_x, size_y, position_id, type);
+        err = parseHeaders(infile, size_x, size_y, position_id, type, path);
         if (err != FF_ERR_NONE)
             break;
 
@@ -604,7 +612,8 @@ FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &pat
         if (it->size() > 0) {
             if ((*it)[TABLE_X_CORRECTION].get() == 0 ||
                 (*it)[TABLE_Y_CORRECTION].get() == 0 ||
-                (*it)[TABLE_X_PHOTOSUM].get() == 0) {
+                (*it)[TABLE_X_PHOTOSUM_LOWER].get() == 0 ||
+                (*it)[TABLE_X_PHOTOSUM_UPPER].get() == 0) {
 
                 m_corrTables.clear();
                 return FF_ERR_INCOMPLETE;
