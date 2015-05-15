@@ -172,7 +172,7 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             LOG_ERROR("Failed to query OCC status: %s(%d)", strerror(-ret), ret);
         } else {
             char sn[20];
-            snprintf(sn, sizeof(sn), "%llX", occstatus.fpga_serial_number);
+            snprintf(sn, sizeof(sn), "%lX", occstatus.fpga_serial_number);
             setStringParam(FpgaSn,          sn);
 
             setIntegerParam(HwType,         occstatus.board);
