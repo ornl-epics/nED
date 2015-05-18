@@ -32,7 +32,7 @@ static const int asynStackSize     = 0;
 
 #define NUM_OCCPORTDRIVER_PARAMS ((int)(&LAST_OCCPORTDRIVER_PARAM - &FIRST_OCCPORTDRIVER_PARAM + 1))
 
-EPICS_REGISTER(Occ, OccPortDriver, 3, "Port name", string, "OCC device file", string, "Local buffer size", int);
+EPICS_REGISTER(Occ, OccPortDriver, 3, "Port name", string, "OCC connection string", string, "Local buffer size", int);
 
 OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize)
     : asynPortDriver(portName, asynMaxAddr, NUM_OCCPORTDRIVER_PARAMS, asynInterfaceMask,
@@ -81,8 +81,14 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
 
-    // Initialize OCC board
-    status = occ_open(devfile, OCC_INTERFACE_OPTICAL, &m_occ);
+    occ_interface_type occtype = OCC_INTERFACE_OPTICAL;
+    if (strchr(devfile, ',') != 0)
+        occtype = OCC_INTERFACE_PIPE;
+    else if (strchr(devfile, ':') != 0)
+        occtype = OCC_INTERFACE_SOCKET;
+
+    // Initialize OCC library
+    status = occ_open(devfile, occtype, &m_occ);
     setIntegerParam(LastErr, -status);
     if (status != 0) {
         setIntegerParam(Status, STAT_OCC_NOT_INIT);
