@@ -80,12 +80,6 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("RxEnRb",           asynParamInt32,     &RxEnRb);                   // READ - Incoming data enabled         (0=disabled,1=enabled)
     createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
-    createParam("AutoReset",        asynParamInt32,     &AutoReset,     0);         // WRITE - Auto reset on error switch    (0=disable,1=enable)
-    createParam("RstCntBad",        asynParamInt32,     &RstCntBad,     0);         // READ - Num corrupted queue auto-resets
-    createParam("RstCntOvr",        asynParamInt32,     &RstCntOvr,     0);         // READ - Num FIFO overflow auto-resets
-    createParam("RstCntDma",        asynParamInt32,     &RstCntDma,     0);         // READ - Num DMA full auto-resets
-    createParam("RstCntBuf",        asynParamInt32,     &RstCntCopy,    0);         // READ - Num buffer full auto-resets
-    createParam("RstCntErr",        asynParamInt32,     &RstCntErr,     0);         // READ - Num OCC error auto-resets
 
     // Initialize OCC board
     status = occ_open(devfile, OCC_INTERFACE_OPTICAL, &m_occ);
@@ -408,50 +402,32 @@ void OccPortDriver::reset() {
 
 void OccPortDriver::handleRecvError(int ret)
 {
-    int autoReset = 0;
-    int resetParam = 0;
-
     this->lock();
 
     if (ret == -EBADMSG) {
         setIntegerParam(Status, STAT_BAD_DATA);
-        resetParam = RstCntBad;
 
     } else if (ret == -EOVERFLOW) { // OCC FIFO overflow
         setIntegerParam(LastErr, EOVERFLOW);
         setIntegerParam(Status, STAT_BUFFER_FULL);
         setIntegerParam(RxStalled, STALL_FIFO);
-        resetParam = RstCntOvr;
 
     } else if (ret == -ENOSPC) { // OCC DMA full
         setIntegerParam(LastErr, ENOSPC);
         setIntegerParam(Status, STAT_BUFFER_FULL);
         setIntegerParam(RxStalled, STALL_DMA);
-        resetParam = RstCntDma;
 
     } else if (ret == -ENODATA) { // DmaCopier full
         setIntegerParam(Status, STAT_BUFFER_FULL);
         setIntegerParam(RxStalled, STALL_COPY);
-        resetParam = RstCntCopy;
 
     } else {
         setIntegerParam(LastErr, -ret);
         setIntegerParam(Status, STAT_OCC_ERROR);
-        resetParam = RstCntErr;
-    }
-
-    getIntegerParam(AutoReset, &autoReset);
-    if (autoReset) {
-        int value;
-        getIntegerParam(resetParam, &value);
-        setIntegerParam(resetParam, value+1);
     }
 
     callParamCallbacks();
     this->unlock();
-
-    if (autoReset)
-        reset();
 }
 
 void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
