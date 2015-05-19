@@ -40,11 +40,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
                  interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
     , m_hardwareId(ip2addr(hardwareId))
     , m_hardwareType(hardwareType)
-    , m_countersPayloadLength(0)
-    , m_upgradePayloadLength(0)
-    , m_temperaturePayloadLength(0)
     , m_waitingResponse(static_cast<DasPacket::CommandType>(0))
-    , m_configInitialized(false)
     , m_expectedChannel(0)
     , m_numChannels(0)
     , m_behindDsp(behindDsp)
@@ -79,8 +75,6 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     m_remoteUpgrade.buffer = 0;
     m_remoteUpgrade.bufferSize = 0;
     m_remoteUpgrade.position = 0;
-
-    m_statusPayloadLengths.push_back(0);
 }
 
 BaseModulePlugin::~BaseModulePlugin()
@@ -91,12 +85,6 @@ void BaseModulePlugin::setNumChannels(uint32_t n)
     assert(m_numChannels == 0); // Prevent running multiple times
     assert(n <= 16);
     m_numChannels = n;
-
-    // Only read status supports channels, read/write config is done differently
-    m_statusPayloadLengths.resize(n + 1);
-    for (uint32_t i = 1; i <= n; i++) {
-        m_statusPayloadLengths[i] = 0;
-    }
 }
 
 asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -219,15 +207,21 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         return asynSuccess;
     }
 
-    // Not a command, it's probably the new configuration option
-    std::map<int, struct ParamDesc>::iterator it = m_configParams.find(pasynUser->reason);
-    if (it != m_configParams.end()) {
-        uint32_t mask = (0x1ULL << it->second.width) - 1;
+    // Not a command, it's probably one of the writeable parameters
+    for (auto it = m_params.begin(); it != m_params.end(); it++) {
+        if (it->second.readonly)
+            continue;
+
+        std::map<int, struct ParamDesc>::iterator jt = it->second.mapping.find(pasynUser->reason);
+        if (jt == it->second.mapping.end())
+            continue;
+
+        uint32_t mask = (0x1ULL << jt->second.width) - 1;
         if (static_cast<int>(value & mask) != value) {
-            LOG_ERROR("Parameter %s value %d out of bounds", getParamName(it->first), value);
+            LOG_ERROR("Parameter %s value %d out of bounds", getParamName(jt->first), value);
             return asynError;
         } else {
-            setIntegerParam(it->first, value);
+            setIntegerParam(jt->first, value);
             callParamCallbacks();
             return asynSuccess;
         }
@@ -562,6 +556,11 @@ DasPacket::CommandType BaseModulePlugin::reqReadStatus(uint8_t channel)
         return static_cast<DasPacket::CommandType>(0);
     }
 
+    if (m_params["STATUS"].mapping.empty()) {
+        // Detector has no status parameters
+        return static_cast<DasPacket::CommandType>(0);
+    }
+
     sendToDispatcher(DasPacket::CMD_READ_STATUS, channel);
     return DasPacket::CMD_READ_STATUS;
 }
@@ -573,19 +572,27 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet, uint8_t channel)
         return false;
     }
 
-    if (packet->getPayloadLength() != ALIGN_UP(m_statusPayloadLengths[channel], 4)) {
+    uint32_t wordsize = (m_behindDsp ? 2 : 4);
+    uint32_t section = SECTION_ID(0x0, channel);
+    uint32_t length = ALIGN_UP(m_params["STATUS"].sizes[section]*wordsize, 4);
+    if (packet->getPayloadLength() != length) {
         LOG_ERROR("Received wrong READ_STATUS response based on length; "
                   "received %u, expected %u",
-                  packet->getPayloadLength(), ALIGN_UP(m_statusPayloadLengths[channel], 4));
+                  packet->getPayloadLength(), length);
         return false;
     }
 
-    extractParams(packet, m_statusParams);
+    unpackRegParams("STATUS", packet->getPayload(), packet->getPayloadLength());
     return true;
 }
 
 DasPacket::CommandType BaseModulePlugin::reqReadStatusCounters()
 {
+    if (m_params["COUNTERS"].mapping.empty()) {
+        // Detector has no status parameters
+        return static_cast<DasPacket::CommandType>(0);
+    }
+
     sendToDispatcher(DasPacket::CMD_READ_STATUS_COUNTERS);
     return DasPacket::CMD_READ_STATUS_COUNTERS;
 }
@@ -612,14 +619,16 @@ bool BaseModulePlugin::rspReadStatusCounters(const DasPacket *packet)
         return false;
     }
 
-    if (packet->getPayloadLength() != ALIGN_UP(m_countersPayloadLength, 4)) {
+    uint32_t wordsize = (m_behindDsp ? 2 : 4);
+    uint32_t length = ALIGN_UP(m_params["COUNTERS"].sizes[0]*wordsize, 4);
+    if (packet->getPayloadLength() != length) {
         LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; "
                   "received %u, expected %u",
-                  packet->getPayloadLength(), ALIGN_UP(m_countersPayloadLength, 4));
+                  packet->getPayloadLength(), length);
         return false;
     }
 
-    extractParams(packet, m_counterParams);
+    unpackRegParams("COUNTERS", packet->getPayload(), packet->getPayloadLength());
     return true;
 }
 
@@ -631,27 +640,26 @@ DasPacket::CommandType BaseModulePlugin::reqReadConfig(uint8_t channel)
         return static_cast<DasPacket::CommandType>(0);
     }
 
+    if (m_params["CONFIG"].mapping.empty()) {
+        // Detector has no configuration parameters
+        return static_cast<DasPacket::CommandType>(0);
+    }
+
     sendToDispatcher(DasPacket::CMD_READ_CONFIG, channel);
     return DasPacket::CMD_READ_CONFIG;
 }
 
 bool BaseModulePlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
 {
-    int wordsize = (m_behindDsp ? 2 : 4);
-
     if (!cancelTimeoutCallback()) {
         LOG_WARN("Received READ_CONFIG response after timeout");
         return false;
     }
 
-    if (!m_configInitialized) {
-        recalculateConfigParams();
-        m_configInitialized = true;
-    }
-
     // Response contains registers for all sections for a selected channel or global configuration
     uint32_t section_f = SECTION_ID(0xF, channel);
-    uint32_t length = m_configSectionOffsets[section_f] + m_configSectionSizes[section_f];
+    uint32_t length = m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f];
+    int wordsize = (m_behindDsp ? 2 : 4);
     length *= wordsize;
 
     if (packet->getPayloadLength() != ALIGN_UP(length, 4)) {
@@ -660,87 +668,17 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
         return false;
     }
 
-    extractParams(packet, m_configParams, m_configSectionOffsets);
+    unpackRegParams("CONFIG", packet->getPayload(), packet->getPayloadLength());
     return true;
 }
 
 DasPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t section, uint8_t channel)
 {
-    int wordsize = (m_behindDsp ? 2 : 4);
-
-    if (!m_configInitialized) {
-        recalculateConfigParams();
-        m_configInitialized = true;
-    }
-
-    // We can be called from anywhere, verify parameter
-    if (channel > m_numChannels) {
-        LOG_ERROR("Can not configure channel %u, module only supports %u channels", channel, m_numChannels);
+    uint32_t data[1024];
+    size_t len = packRegParams("CONFIG", data, sizeof(data), channel, section);
+    if (len == 0) {
+        LOG_WARN("Skipping sending write config packet");
         return static_cast<DasPacket::CommandType>(0);
-    }
-
-    uint32_t payloadLength;
-    if (section == 0x0) {
-        uint32_t section_f = SECTION_ID(0xF, channel);
-        payloadLength = m_configSectionOffsets[section_f] + m_configSectionSizes[section_f];
-    } else {
-        uint32_t sectionId = SECTION_ID(section, channel);
-        payloadLength = m_configSectionSizes[sectionId];
-    }
-    payloadLength *= wordsize;
-
-    // Skip empty sections
-    if (payloadLength == 0) {
-        return static_cast<DasPacket::CommandType>(0);
-    }
-
-    uint32_t length = ALIGN_UP(payloadLength, 4) / 4;
-    uint32_t data[length]; // length doesn't exceed 256B, safe to put on stack
-    for (uint32_t i=0; i<length; i++) {
-        data[i] = 0;
-    }
-
-    for (auto it=m_configParams.begin(); it != m_configParams.end(); it++) {
-        uint32_t mask = (0x1ULL << it->second.width) - 1;
-        int shift = it->second.shift;
-        int value = 0;
-        uint32_t offset = it->second.offset;
-
-        if (it->second.channel != channel) {
-            continue;
-        } else if (section == 0x0) {
-            uint32_t sectionId = SECTION_ID(it->second.section, it->second.channel);
-            offset += m_configSectionOffsets[sectionId];
-        } else if (section != it->second.section) {
-            continue;
-        }
-
-        if (getIntegerParam(it->first, &value) != asynSuccess) {
-            // This should not happen. It's certainly error when creating and parameters.
-            LOG_ERROR("Failed to get parameter %s value", getParamName(it->first));
-            return static_cast<DasPacket::CommandType>(0);
-        }
-        if (static_cast<int>(value & mask) != value) {
-            // This should not happen. It's certainly error when setting new value for parameter
-            LOG_WARN("Parameter %s value out of range", getParamName(it->first));
-        }
-        value &= mask;
-
-        if (m_behindDsp) {
-            shift += (offset % 2 == 0 ? 0 : 16);
-            offset /= 2;
-        }
-
-        if (offset >= length) {
-            // Unlikely, but rather sure than sorry
-            LOG_ERROR("Parameter %s offset out of range", getParamName(it->first));
-            continue;
-        }
-
-        data[offset] |= value << shift;
-        if ((it->second.width + shift) > 32) {
-            data[offset+1] |= value >> (it->second.width -(32 - shift + 1));
-        }
     }
 
     DasPacket::CommandType rsp;
@@ -764,7 +702,7 @@ DasPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t section, uint8_t
         default:
             return static_cast<DasPacket::CommandType>(0);
     }
-    sendToDispatcher(rsp, channel, data, payloadLength);
+    sendToDispatcher(rsp, channel, data, len);
     return rsp;
 }
 
@@ -871,12 +809,17 @@ bool BaseModulePlugin::rspUpgrade(const DasPacket *packet)
         return false;
     }
 
-    extractParams(packet, m_upgradeParams);
+    unpackRegParams("UPGRADE", packet->getPayload(), packet->getPayloadLength());
     return true;
 }
 
 DasPacket::CommandType BaseModulePlugin::reqReadTemperature()
 {
+    if (m_params["TEMPERATURE"].mapping.empty()) {
+        // Detector has no configuration parameters
+        return static_cast<DasPacket::CommandType>(0);
+    }
+
     sendToDispatcher(DasPacket::CMD_READ_TEMPERATURE);
     return DasPacket::CMD_READ_TEMPERATURE;
 }
@@ -888,74 +831,31 @@ bool BaseModulePlugin::rspReadTemperature(const DasPacket *packet)
         return false;
     }
 
-    if (packet->getPayloadLength() != ALIGN_UP(m_temperaturePayloadLength, 4)) {
+    uint32_t wordsize = (m_behindDsp ? 2 : 4);
+    uint32_t length = ALIGN_UP(m_params["TEMPERATURE"].sizes[0]*wordsize, 4);
+    if (packet->getPayloadLength() != ALIGN_UP(length, 4)) {
         LOG_ERROR("Received wrong READ_TEMP response based on length; "
                   "received %u, expected %u",
-                  packet->getPayloadLength(), ALIGN_UP(m_temperaturePayloadLength, 4));
+                  packet->getPayloadLength(), length);
         return false;
     }
 
-    extractParams(packet, m_temperatureParams);
+    unpackRegParams("TEMPERATURE", packet->getPayload(), packet->getPayloadLength());
     return true;
 }
 
 void BaseModulePlugin::createStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    int index;
-    if (createParam(name, asynParamInt32, &index) != asynSuccess) {
-        LOG_ERROR("Status parameter '%s' cannot be created (already exist?)", name);
-        return;
-    }
-
-    ParamDesc desc;
-    desc.section = 0;
-    desc.channel = channel;
-    desc.initVal = 0;
-    desc.offset  = offset;
-    desc.shift   = shift;
-    desc.width   = nBits;
-    m_statusParams[index] = desc;
-
-    uint32_t length = offset + 1;
-    if (m_behindDsp && nBits > 16)
-        length++;
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_statusPayloadLengths[channel] = std::max(m_statusPayloadLengths[channel], length*wordsize);
+    createRegParam("STATUS", name, true, channel, 0x0, offset, nBits, shift, 0);
 }
 
 void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    int index;
-    if (createParam(name, asynParamInt32, &index) != asynSuccess) {
-        LOG_ERROR("Counter parameter '%s' cannot be created (already exist?)", name);
-        return;
-    }
-
-    ParamDesc desc;
-    desc.section = 0;
-    desc.channel = 0;
-    desc.initVal = 0;
-    desc.offset  = offset;
-    desc.shift   = shift;
-    desc.width   = nBits;
-    m_counterParams[index] = desc;
-
-    uint32_t length = offset +1;
-    if (m_behindDsp && nBits > 16)
-        length++;
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_countersPayloadLength = std::max(m_countersPayloadLength, length*wordsize);
+    createRegParam("COUNTERS", name, true, 0, 0x0, offset, nBits, shift, 0);
 }
 
 void BaseModulePlugin::createConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
 {
-    int index;
-    if (createParam(name, asynParamInt32, &index) != asynSuccess) {
-        LOG_ERROR("Config parameter '%s' cannot be created (already exist?)", name);
-        return;
-    }
-    setIntegerParam(index, value);
-
     if (section >= '1' && section <= '9')
         section = section - '1' + 1;
     else if (section >= 'A' && section <= 'F')
@@ -965,71 +865,18 @@ void BaseModulePlugin::createConfigParam(const char *name, uint8_t channel, char
         return;
     }
 
-    ParamDesc desc;
-    desc.section = section;
-    desc.channel = channel;
-    desc.offset  = offset;
-    desc.shift   = shift;
-    desc.width   = nBits;
-    desc.initVal = value;
-    m_configParams[index] = desc;
-
-    uint32_t length = offset + 1;
-    if (m_behindDsp && nBits > 16)
-        length++;
-    // m_configPayloadLength is calculated *after* we create all sections
-    uint32_t sectionId = SECTION_ID(section, channel);
-    m_configSectionSizes[sectionId] = std::max(m_configSectionSizes[sectionId], length);
+    createRegParam("CONFIG", name, false, channel, section, offset, nBits, shift, value);
 }
 
 void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    int index;
-    if (createParam(name, asynParamInt32, &index) != asynSuccess) {
-        LOG_ERROR("Temperature parameter '%s' cannot be created (already exist?)", name);
-        return;
-    }
-
-    ParamDesc desc;
-    desc.section = 0;
-    desc.channel = 0;
-    desc.initVal = 0;
-    desc.offset  = offset;
-    desc.shift   = shift;
-    desc.width   = nBits;
-    m_temperatureParams[index] = desc;
-
-    uint32_t length = offset + 1;
-    if (m_behindDsp && nBits > 16)
-        length++;
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_temperaturePayloadLength = std::max(m_temperaturePayloadLength, length*wordsize);
+    createRegParam("TEMPERATURE", name, true, 0, 0x0, offset, nBits, shift, 0);
 }
 
 void BaseModulePlugin::linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    int index;
-    if (findParam(name, &index) != asynSuccess) {
-        LOG_ERROR("Can not find existing parameter '%s' to be linked", name);
-        return;
-    }
-
-    ParamDesc desc;
-    desc.section = 0;
-    desc.channel = 0;
-    desc.initVal = 0;
-    desc.offset  = offset;
-    desc.shift   = shift;
-    desc.width   = nBits;
-    m_upgradeParams[index] = desc;
-
-    uint32_t length = offset + 1;
-    if (m_behindDsp && nBits > 16)
-        length++;
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    m_upgradePayloadLength = std::max(m_upgradePayloadLength, length*wordsize);
+    linkRegParam("UPGRADE", name, true, 0, 0x0, offset, nBits, shift);
 }
-
 
 uint32_t BaseModulePlugin::ip2addr(const std::string &text)
 {
@@ -1195,16 +1042,97 @@ void BaseModulePlugin::remoteUpgradeStop()
     m_remoteUpgrade.inProgress = false;
 }
 
-void BaseModulePlugin::extractParams(const DasPacket *packet, const std::map<int, ParamDesc> &table, const std::map<int, uint32_t> &sectOffsets)
+size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, size_t size, uint8_t channel, uint8_t section)
 {
-    const uint32_t *payload = packet->getPayload();
+
+    // We can be called from anywhere, verify parameter
+    if (channel > m_numChannels) {
+        LOG_ERROR("Module only supports %u channels", m_numChannels);
+        return false;
+    }
+
+    uint32_t payloadLength;
+    if (section == 0x0) {
+        uint32_t section_f = SECTION_ID((m_params[group].sections ? 0xF : 0x0), channel);
+        payloadLength = m_params[group].offsets[section_f] + m_params[group].sizes[section_f];
+    } else {
+        uint32_t sectionId = SECTION_ID(section, channel);
+        payloadLength = m_params[group].sizes[sectionId];
+    }
+    int wordsize = (m_behindDsp ? 2 : 4);
+    payloadLength *= wordsize;
+
+    if (payloadLength > size) {
+        LOG_ERROR("Buffer not big enough to put register data into");
+        return false;
+    }
+
+    // Skip empty sections
+    if (payloadLength == 0) {
+        return false;
+    }
+
+    uint32_t length = ALIGN_UP(payloadLength, 4) / 4;
+    for (uint32_t i=0; i<length; i++) {
+        payload[i] = 0;
+    }
+
+    std::map<int, ParamDesc> &table = m_params[group].mapping;
+    std::map<int, uint32_t> &offsets = m_params[group].offsets;
+    for (auto it=table.begin(); it != table.end(); it++) {
+        uint32_t mask = (0x1ULL << it->second.width) - 1;
+        int shift = it->second.shift;
+        int value = 0;
+        uint32_t offset = it->second.offset;
+
+        if (it->second.channel != channel) {
+            continue;
+        } else if (section == 0x0) {
+            uint32_t sectionId = SECTION_ID(it->second.section, it->second.channel);
+            offset += offsets[sectionId];
+        } else if (section != it->second.section) {
+            continue;
+        }
+
+        if (getIntegerParam(it->first, &value) != asynSuccess) {
+            // This should not happen. It's certainly error when creating and parameters.
+            LOG_ERROR("Failed to get parameter %s value", getParamName(it->first));
+            return false;
+        }
+        if (static_cast<int>(value & mask) != value) {
+            // This should not happen. It's certainly error when setting new value for parameter
+            LOG_WARN("Parameter %s value out of range", getParamName(it->first));
+        }
+        value &= mask;
+
+        if (m_behindDsp) {
+            shift += (offset % 2 == 0 ? 0 : 16);
+            offset /= 2;
+        }
+
+        if (offset >= length) {
+            // Unlikely, but rather sure than sorry
+            LOG_ERROR("Parameter %s offset out of range", getParamName(it->first));
+            continue;
+        }
+
+        payload[offset] |= value << shift;
+        if ((it->second.width + shift) > 32) {
+            payload[offset+1] |= value >> (it->second.width -(32 - shift + 1));
+        }
+    }
+
+    return payloadLength;
+}
+
+void BaseModulePlugin::unpackRegParams(const char *group, const uint32_t *payload, size_t size, uint8_t channel)
+{
+    std::map<int, ParamDesc> &table = m_params[group].mapping;
+    std::map<int, uint32_t> &offsets = m_params[group].offsets;
+
     for (auto it=table.begin(); it != table.end(); it++) {
         int shift = it->second.shift;
         int offset = it->second.offset;
-        uint8_t channel = 0;
-
-        if (packet->cmdinfo.is_channel)
-            channel = packet->cmdinfo.channel + 1;
 
         // Skip parameters that are not included in this response
         if (it->second.channel != channel)
@@ -1213,8 +1141,8 @@ void BaseModulePlugin::extractParams(const DasPacket *packet, const std::map<int
         // Handle configuration parameters
         if (it->second.section != 0) {
 
-            auto jt = sectOffsets.find(SECTION_ID(it->second.section, it->second.channel));
-            if (jt != sectOffsets.end()) {
+            auto jt = offsets.find(SECTION_ID(it->second.section, it->second.channel));
+            if (jt != offsets.end()) {
                 offset += jt->second;
             }
         }
@@ -1231,4 +1159,102 @@ void BaseModulePlugin::extractParams(const DasPacket *packet, const std::map<int
         setIntegerParam(it->first, value);
     }
     callParamCallbacks();
-};
+}
+
+void BaseModulePlugin::createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value)
+{
+    int index;
+    if (createParam(name, asynParamInt32, &index) != asynSuccess) {
+        LOG_ERROR("%s parameter '%s' cannot be created (already exist?)", group, name);
+        return;
+    }
+    setIntegerParam(index, value);
+
+    if (m_params.find(group) == m_params.end()) {
+        m_params[group].readonly = true;
+        m_params[group].sections = false;
+    }
+
+    ParamDesc desc;
+    desc.section = section;
+    desc.channel = channel;
+    desc.initVal = value;
+    desc.offset  = offset;
+    desc.shift   = shift;
+    desc.width   = nBits;
+    m_params[group].mapping[index] = desc;
+
+    uint32_t length = offset + 1;
+    if (m_behindDsp && nBits > 16)
+        length++;
+
+    uint32_t sectionId = SECTION_ID(section, channel);
+    m_params[group].sizes[sectionId] = std::max(m_params[group].sizes[sectionId], length);
+
+    if (readonly == false)
+        m_params[group].readonly = false;
+    if (section != 0x0)
+        m_params[group].sections = true;
+}
+
+void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift)
+{
+    int index;
+    if (findParam(name, &index) != asynSuccess) {
+        LOG_ERROR("Can not find existing parameter '%s' to be linked", name);
+        return;
+    }
+
+    if (m_params.find(group) == m_params.end()) {
+        m_params[group].readonly = true;
+        m_params[group].sections = false;
+    }
+
+    ParamDesc desc;
+    desc.section = section;
+    desc.channel = channel;
+    desc.initVal = 0;
+    desc.offset  = offset;
+    desc.shift   = shift;
+    desc.width   = nBits;
+    m_params[group].mapping[index] = desc;
+
+    uint32_t length = offset + 1;
+    if (m_behindDsp && nBits > 16)
+        length++;
+    uint32_t wordsize = (m_behindDsp ? 2 : 4);
+    length *= wordsize;
+
+    uint32_t sectionId = SECTION_ID(section, channel);
+    m_params[group].sizes[sectionId] = std::max(m_params[group].sizes[sectionId], length);
+
+    if (readonly == false)
+        m_params[group].readonly = false;
+    if (section != 0x0)
+        m_params[group].sections = true;
+}
+
+void BaseModulePlugin::initParams()
+{
+    // Go through all groups and recalculate sections sizes and offsets
+    for (auto it = m_params.begin(); it != m_params.end(); it++) {
+
+        std::map<int, uint32_t> &sizes = it->second.sizes;
+        std::map<int, uint32_t> &offsets = it->second.offsets;
+
+        // Section sizes have already been calculated in createConfigParams()
+        for (uint32_t channel = 0; channel <= m_numChannels; channel++) {
+
+            if (it->second.sections == true) {
+                // Calculate section offsets
+                offsets[SECTION_ID(0x1, channel)] = 0x0;
+                for (uint8_t section=0x2; section<=0xF; section++) {
+                    uint32_t currSectionId = SECTION_ID(section, channel);
+                    uint32_t prevSectionId = SECTION_ID(section - 1, channel);
+                    offsets[currSectionId] = offsets[prevSectionId] + sizes[prevSectionId];
+                    LOG_DEBUG("Section 0x%01X channel %u size=%u offset=%u", section, channel, sizes[currSectionId], offsets[currSectionId]);
+                }
+            }
+        }
+    }
+}

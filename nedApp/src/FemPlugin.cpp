@@ -64,9 +64,8 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         LOG_ERROR("Unsupported FEM version '%s'", version);
     }
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
 }
 
 bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)

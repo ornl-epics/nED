@@ -56,9 +56,8 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
         LOG_ERROR("Unsupported ADC ROC version '%s'", version);
     }
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
 }
 
 bool AdcRocPlugin::checkVersion(const BaseModulePlugin::Version &version)

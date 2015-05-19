@@ -93,9 +93,8 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         LOG_ERROR("Unsupported ROC version '%s'", version);
     }
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
 }
 
 bool RocPlugin::processResponse(const DasPacket *packet)
@@ -239,7 +238,6 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
         buffer[i/2] |= data[i] << (16*(i%2));
     }
     sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
-fprintf(stderr, "Sending HV command: %s (%u)\n", data, length);
 }
 
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
@@ -249,7 +247,6 @@ bool RocPlugin::rspHvCmd(const DasPacket *packet)
     // Single character per OCC packet
     char byte = payload[0] & 0xFF;
     m_hvBuffer.enqueue(&byte, 1);
-fprintf(stderr, "Received HV response: %c\n", byte);
 
     return true;
 }

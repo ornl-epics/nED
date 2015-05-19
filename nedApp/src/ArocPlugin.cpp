@@ -46,9 +46,8 @@ ArocPlugin::ArocPlugin(const char *portName, const char *dispatcherPortName, con
         LOG_ERROR("Unsupported AROC version '%s'", version);
     }
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
 }
 
 bool ArocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)

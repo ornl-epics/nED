@@ -128,6 +128,17 @@ class BaseModulePlugin : public BasePlugin {
             int32_t initVal;        //!< Initial value after object is created or configuration reset is being requested (configuration params only)
         };
 
+        /**
+         * Structure describing parameter table.
+         */
+        struct ParamTable {
+            std::map<int, ParamDesc> mapping;   //!< Mapping table, int index is asyn parameter index
+            bool sections;                      //!< Are parameters split into sections
+            std::map<int, uint32_t> sizes;      //!< Section sizes in bytes
+            std::map<int, uint32_t> offsets;    //!< Section offsets in bytes
+            bool readonly;                      //!< Flag whether all parameters in this group are read-only
+        };
+
         struct Version {
             uint8_t hw_version;
             uint8_t hw_revision;
@@ -164,17 +175,8 @@ class BaseModulePlugin : public BasePlugin {
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
         DasPacket::ModuleType m_hardwareType;           //!< Hardware type
-        std::vector<uint32_t> m_statusPayloadLengths;   //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
-        uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
-        uint32_t m_upgradePayloadLength;                //!< Size in bytes of the PROGRAM response payload, calculated dynamically by linkUpgradeParam()
-        uint32_t m_temperaturePayloadLength;            //!< Size in bytes of the READ_TEMPERATURE response payload, calculated dynamically by createTempParam()
-        std::map<int, ParamDesc> m_statusParams;        //!< Map of exported status parameters
-        std::map<int, ParamDesc> m_counterParams;       //!< Map of exported status counter parameters
-        std::map<int, ParamDesc> m_configParams;        //!< Map of exported config parameters
-        std::map<int, ParamDesc> m_upgradeParams;       //!< Map of exported remote upgrade parameters
-        std::map<int, ParamDesc> m_temperatureParams;   //!< Map of exported temperature parameters
+        std::map<std::string, ParamTable> m_params;     //!< Maps of exported parameters
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
-        bool m_configInitialized;                       //!< Configuration sections sizes and offsets are calculated
         uint8_t m_expectedChannel;                      //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
         uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
         uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
@@ -800,28 +802,92 @@ class BaseModulePlugin : public BasePlugin {
          */
         virtual bool checkVersion(const BaseModulePlugin::Version &version) = 0;
 
+        /**
+         * Pack parameters into raw format
+         *
+         * Cached values of parameters are transformed into raw format suitable
+         * to be sent to detector.
+         *
+         * @param[in] group Parameters group
+         * @param[out] payload buffer to be populated
+         * @param[in] size of the payload buffer in bytes
+         * @param[in] channel
+         * @param[in] section
+         * @return Number of bytes pushed to payload or 0 on error.
+         */
+        size_t packRegParams(const char *group, uint32_t *payload, size_t size, uint8_t channel=0, uint8_t section=0x0);
+
+        /**
+         * Method parses packet payload and extracts parameter values.
+         *
+         * This generic method works for any group of parameters. For every
+         * parameter in the group table, it finds the matching
+         * value in the packet payload and assign it as new parameter value.
+         *
+         * @param[in] group of registers, like CONFIG, STATUS etc.
+         * @param[in] payload to be parsed
+         * @param[in] size of the payload
+         * @param[in] channel expected
+         */
+        void unpackRegParams(const char *group, const uint32_t *payload, size_t size, uint8_t channel=0);
+
+        /**
+         * Create a generic register parameter in specified group table.
+         *
+         * Device registers are mapped into software cached counterpars.
+         * Device register is an entity of variable bit width that is
+         * connected to particular functionality. Bit widths up to 32 bits
+         * are supported. No alignment is enforced.
+         *
+         * This function creates a mapping for one device register into
+         * software table of registers.
+         *
+         * @param[in] group of registers, like CONFIG, STATUS etc.
+         * @param[in] name of the register in software table
+         * @param[in] readonly flags whether the register value can be modified in software
+         * @param[in] channel addresses specific sub-fpga on device
+         * @param[in] section is an offset in the register table when supported by command (only config commands)
+         * @param[in] offset is a word offset from the start address, word being 2 or 4 depending on the device
+         * @param[in] nBits tells number of bits used by device register
+         * @param[in] shift tells bit offset within word
+         * @param[in] value represents initial value for writable registers
+         */
+        void createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0);
+
+        /**
+         * Link existing parameter to upgrade parameters table.
+         *
+         * Useful when two hardware registers in two different response types
+         * have the same meaning and need to be merged into one plugin parameter.
+         * When either of the responses is received, only one parameter gets
+         * updated.
+         *
+         * @param[in] group of registers, like CONFIG, STATUS etc.
+         * @param[in] name of the register in software table
+         * @param[in] readonly flags whether the register value can be modified in software
+         * @param[in] channel addresses specific sub-fpga on device
+         * @param[in] section is an offset in the register table when supported by command (only config commands)
+         * @param[in] offset is a word offset from the start address, word being 2 or 4 depending on the device
+         * @param[in] nBits tells number of bits used by device register
+         * @param[in] shift tells bit offset within word
+         */
+        void linkRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift);
+
+        /**
+         * Initialize parameters tables.
+         *
+         * Calculates offsets and sizes of the sections that are needed when
+         * receiving and sending packets. Must be called after any call to
+         * create*Param but before any packet can be received or sent. The
+         * safest is to put it in plugin constructor.
+         */
+        void initParams();
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.
          */
         void recalculateConfigParams();
-
-        /**
-         * Method parses packet payload and extracts parameter values.
-         *
-         * This generic method works for status, counter and configuration
-         * parameters. For every parameter in the table, it finds the matching
-         * value in the packet payload and assign it as new parameter value.
-         * When section offsets table is given, the parameter offset is
-         * considered relative to the section it belongs.
-         *
-         * @param[in] packet to be parsed
-         * @param[in] table of paramaters to be matched
-         * @param[in] sectOffsets is a able of section offsets.
-         */
-        void extractParams(const DasPacket *packet,
-                           const std::map<int, ParamDesc> &table,
-                           const std::map<int, uint32_t> &sectOffsets=std::map<int, uint32_t>());
 
     protected:
         #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
