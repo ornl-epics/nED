@@ -94,6 +94,7 @@ $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v56.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v57.cpp
+$(PROD_NAME)_SRCS  += RocPlugin_v58.cpp
 $(PROD_NAME)_SRCS  += FemPlugin.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v35.cpp

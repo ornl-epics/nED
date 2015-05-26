@@ -106,11 +106,13 @@ def parse_one(type, params_str, desc_str, extra_str):
     re_option = re.compile("^([^=]*)=([^\[]*)(.*)\]?")
 
     names = {
-        'status':  [ "name", "offset", "width", "bit_offset" ],
-        'counter': [ "name", "offset", "width", "bit_offset" ],
-        'config':  [ "name", "section", "section_offset", "width", "bit_offset", "default" ],
-        'config1': [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default" ],
-        'temp':    [ "name", "offset", "width", "bit_offset" ],
+        'status':     [ "name", "offset", "width", "bit_offset" ],
+        'counter':    [ "name", "offset", "width", "bit_offset" ],
+        'config':     [ "name", "section", "section_offset", "width", "bit_offset", "default" ],
+        'config1':    [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default" ],
+        'temp':       [ "name", "offset", "width", "bit_offset" ],
+        'preampcfg':  [ "name", "offset", "width", "bit_offset" ],
+        'preamptrig': [ "name", "offset", "width", "bit_offset" ],
     }
 
     params = map(lambda x: x.strip(" \t\"\'"), params_str.split(","))
@@ -169,10 +171,12 @@ def parse_src_file(path, verbose=False):
     params = []
 
     regexes = {
-        'status':  re.compile("createStatusParam\s*\((.*)\);(.*)$"),
-        'counter': re.compile("createCounterParam\s*\((.*)\);(.*)$"),
-        'config':  re.compile("createConfigParam\s*\((.*)\);(.*)$"),
-        'temp':    re.compile("createTempParam\s*\((.*)\);(.*)$"),
+        'status':     re.compile("createStatusParam\s*\((.*)\);(.*)$"),
+        'counter':    re.compile("createCounterParam\s*\((.*)\);(.*)$"),
+        'config':     re.compile("createConfigParam\s*\((.*)\);(.*)$"),
+        'temp':       re.compile("createTempParam\s*\((.*)\);(.*)$"),
+        'preampcfg':  re.compile("createPreAmpCfgParam\s*\((.*)\);(.*)$"),
+        'preamptrig': re.compile("createPreAmpTrigParam\s*\((.*)\);(.*)$"),
     }
     re_desc = re.compile("\s*//\s*([^\(]*)(.*)$")
 

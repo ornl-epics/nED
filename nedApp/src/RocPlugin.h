@@ -81,6 +81,26 @@ class RocPlugin : public BaseModulePlugin {
         bool processResponse(const DasPacket *packet);
 
         /**
+         * Process ROC custom commands.
+         *
+         * This includes handling pre-amp configuration and trigger responses.
+         *
+         * @param[in] command requested.
+         * @param[out] timeout before giving up waiting for response, default is 2.0
+         * @return Response to be waited for.
+         */
+        DasPacket::CommandType handleRequest(DasPacket::CommandType command, double &timeout);
+
+        /**
+         * Process ROC custom response commands.
+         *
+         * This includes handling pre-amp configuration and trigger responses.
+         *
+         * @param[in] packet to be handled
+         */
+        bool handleResponse(const DasPacket *packet);
+
+        /**
          * Send string/byte data to PVs
          */
         asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
@@ -178,6 +198,44 @@ class RocPlugin : public BaseModulePlugin {
          * @return true if packet was processed
          */
         bool rspHvCmd(const DasPacket *packet);
+
+        /**
+         * Sends pre-amp configuration.
+         *
+         * Functionality not implemented and always returns 0.
+         *
+         * @return Response to wait for.
+         */
+        DasPacket::CommandType reqConfigPreAmp();
+
+        /**
+         * Sends a pre-amp trigger command.
+         *
+         * Functionality not implemented and always returns 0.
+         *
+         * @return Response to wait for.
+         */
+        DasPacket::CommandType reqTriggerPreAmp();
+
+        /**
+         * Handle pre-amp configuration response.
+         */
+        bool rspConfigPreAmp(const DasPacket *packet);
+
+        /**
+         * Handle pre-amp trigger response.
+         */
+        bool rspTriggerPreAmp(const DasPacket *packet);
+
+        /**
+         * Create pre-amp config parameter.
+         */
+        void createPreAmpCfgParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
+
+        /**
+         * Create pre-amp trigger parameter.
+         */
+        void createPreAmpTrigParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
 
         /**
          * Create and register all status ROC v4.4/v4.5 parameters to be exposed to EPICS.
@@ -293,6 +351,11 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all temperature ROC v5.7 parameters to be exposed to EPICS.
          */
         void createTemperatureParams_v57();
+
+        /**
+         * Create and register all ROC v5.8 parameters.
+         */
+        void createParams_v58();
 
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring
