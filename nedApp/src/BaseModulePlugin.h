@@ -290,15 +290,73 @@ class BaseModulePlugin : public BasePlugin {
         virtual void processData(const DasPacketList * const packets);
 
         /**
-         * General response from modules handler.
+         * Check response packets before handling their content.
          *
-         * This generic response handler recognizes all well-known responses and calls corresponding
-         * handlers.
+         * Enforces several checks on response packets. When a command is sent
+         * out, expected response must be received or timeout occurred before
+         * another command can be issued. This function checks both conditions
+         * and skips the response if either not expected or received after
+         * timeout.
+         * After all checks have passed it invokes handleResponse() for actual
+         * response processing which can be overloaded.
+         *
+         * Function supports channel specific status and config responses.
+         *
+         * Override this function when either the command was not sent from
+         * handleRequest() or when you want to handle response checks
+         * yourself.
          *
          * @param[in] packet to be processed.
          * @return true if packet has been processed, false otherwise
          */
         virtual bool processResponse(const DasPacket *packet);
+
+        /**
+         * Handle common command requests.
+         *
+         * Command request is triggered from EPICS records and is handled by
+         * writeInt32 CmdReq parameter. Function is called form writeInt32()
+         * handler to send out corresponding command. Default implementation
+         * supports these commands:
+         * - DasPacket::CMD_READ_VERSION
+         * - DasPacket::CMD_READ_CONFIG
+         * - DasPacket::CMD_READ_STATUS
+         * - DasPacket::CMD_READ_TEMPERATURE
+         * - DasPacket::CMD_READ_STATUS_COUNTERS
+         * - DasPacket::CMD_RESET_STATUS_COUNTERS
+         * - DasPacket::CMD_WRITE_CONFIG
+         * - DasPacket::CMD_DISCOVER
+         * - DasPacket::CMD_RESET
+         * - DasPacket::CMD_START
+         * - DasPacket::CMD_STOP
+         * - DasPacket::CMD_UPGRADE
+         * Detector specific commands can be issued by overloading this function.
+         *
+         * @param[in] command requested.
+         * @param[out] timeout before giving up waiting for response, default is 2.0
+         * @return Response to be waited for.
+         */
+        virtual DasPacket::CommandType handleRequest(DasPacket::CommandType command, double &timeout);
+
+        /**
+         * Handles common responses.
+         *
+         * This function is called from processResponse() after response has
+         * been verified and checked for timeout. Handling response needs
+         * only verify contents of the response packet.
+         *
+         * Default implementation handles responses common to all modules.
+         * This includes status, config, version, discover and other responses.
+         * Derived plugin can overload this function to support custom
+         * commands/responses.
+         *
+         * Overload this function when command was sent from handleRequest()
+         * handler.
+         *
+         * @param[in] packet to be processed.
+         * @return true if packet has been processed successfuly, false otherwise
+         */
+        virtual bool handleResponse(const DasPacket *packet);
 
         /**
          * Send request to module to do a reset.
@@ -498,24 +556,6 @@ class BaseModulePlugin : public BasePlugin {
         virtual DasPacket::CommandType reqStart();
 
         /**
-         * Request one pulse for Pulsed Magnet.
-         *
-         * Functionality not implemented and always returns 0.
-         *
-         * @return Response to wait for.
-         */
-        virtual DasPacket::CommandType reqTriggerPulse();
-
-        /**
-         * Clears one pulse request for Pulsed Magnet.
-         *
-         * Functionality not implemented and always returns 0.
-         *
-         * @return Response to wait for.
-         */
-        virtual DasPacket::CommandType reqClearPulse();
-
-        /**
          * Default handler for START response.
          *
          * @param[in] packet with response to START
@@ -541,24 +581,6 @@ class BaseModulePlugin : public BasePlugin {
          * @retval false Timeout has occurred or NACK received.
          */
         virtual bool rspStop(const DasPacket *packet);
-
-        /**
-         * Default handler for CMD_PM_PULSE_RQST_ON response.
-         *
-         * @param[in] packet with response to pulse request
-         * @retval true Received command ACK in time.
-         * @retval false Timeout has occurred or NACK received.
-         */
-        virtual bool rspTriggerPulse(const DasPacket *packet);
-
-        /**
-         * Default handler for CMD_PM_PULSE_RQST_OFF response.
-         *
-         * @param[in] packet with response to pulse clear
-         * @retval true Received command ACK in time.
-         * @retval false Timeout has occurred or NACK received.
-         */
-        virtual bool rspClearPulse(const DasPacket *packet);
 
         /**
          * Send part of the new firmware image as one packet.

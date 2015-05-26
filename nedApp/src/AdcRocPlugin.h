@@ -93,6 +93,26 @@ class AdcRocPlugin : public BaseModulePlugin {
     private: // functions
 
         /**
+         * Process ADC ROC custom commands.
+         *
+         * This includes handling pulsed magnet trigger and clear commands.
+         *
+         * @param[in] command requested.
+         * @param[out] timeout before giving up waiting for response, default is 2.0
+         * @return Response to be waited for.
+         */
+        DasPacket::CommandType handleRequest(DasPacket::CommandType command, double &timeout);
+
+        /**
+         * Process ADC ROC custom response commands.
+         *
+         * This includes handling pulsed magnet trigger and clear commands.
+         *
+         * @param[in] packet to be handled
+         */
+        bool handleResponse(const DasPacket *packet);
+
+        /**
          * Request a single pulse magnet pulse
          *
          * Function sends a simple packet with request to trigger one pulse.
@@ -101,7 +121,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          *
          * Valid only on modified ADC ROC that supports pulse magnet interface.
          */
-        DasPacket::CommandType reqTriggerPulse();
+        DasPacket::CommandType reqTriggerPulseMagnet();
 
         /**
          * Request clearing previous pulse magnet pulse.
@@ -111,7 +131,25 @@ class AdcRocPlugin : public BaseModulePlugin {
          *
          * Valid only on modified ADC ROC that supports pulse magnet interface.
          */
-        DasPacket::CommandType reqClearPulse();
+        DasPacket::CommandType reqClearPulseMagnet();
+
+        /**
+         * Handle pulsed magnet trigger response.
+         *
+         * @param[in] packet with response to pulse request
+         * @retval true Received command ACK in time.
+         * @retval false Timeout has occurred or NACK received.
+         */
+        bool rspTriggerPulseMagnet(const DasPacket *packet);
+
+        /**
+         * Handle pulsed magnet clear response.
+         *
+         * @param[in] packet with response to pulse clear
+         * @retval true Received command ACK in time.
+         * @retval false Timeout has occurred or NACK received.
+         */
+        bool rspClearPulseMagnet(const DasPacket *packet);
 
         /**
          * Create and register all status ADCROC v0.2 parameters to be exposed to EPICS.
