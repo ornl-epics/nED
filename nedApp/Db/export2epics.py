@@ -111,8 +111,8 @@ def parse_one(type, params_str, desc_str, extra_str):
         'config':     [ "name", "section", "section_offset", "width", "bit_offset", "default" ],
         'config1':    [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default" ],
         'temp':       [ "name", "offset", "width", "bit_offset" ],
-        'preampcfg':  [ "name", "offset", "width", "bit_offset" ],
-        'preamptrig': [ "name", "offset", "width", "bit_offset" ],
+        'preampcfg':  [ "name", "offset", "width", "bit_offset", "default" ],
+        'preamptrig': [ "name", "offset", "width", "bit_offset", "default" ],
     }
 
     params = map(lambda x: x.strip(" \t\"\'"), params_str.split(","))
@@ -159,7 +159,7 @@ def parse_one(type, params_str, desc_str, extra_str):
                         d['alarm'] = True
                     param['options'].append(d)
 
-    if type is "config" or type is "config1":
+    if type in [ "config", "config1", "preampcfg", "preamptrig" ]:
         param['direction'] = "inout"
     else:
         param['direction'] = "in"
