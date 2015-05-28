@@ -6,6 +6,16 @@ record(bo, "$(P)Enable")
     field(PINI, "YES")
 }
 
+record(longin, "$(P)EventSize")
+{
+   # This should match corresponding dsp LvdsDataSize parameter value
+   info(autosaveFields, "VAL")
+   field(ASG,  "BEAMLINE")
+   field(DESC, "Event size in bytes")
+   field(VAL,  "8") # 4 TOF + 4 pixel id
+   field(EGU,  "bytes")
+   field(PINI, "YES")
+}
 record(longin, "$(P)CmdCnt")
 {
    field(DTYP,  "asynInt32")
@@ -155,7 +165,7 @@ record(calc, "$(P)DataEventRate")
    field(INPA,  "$(P)DataByteRate NPP")
    field(INPB,  "$(P)DataCntRate NPP")
    field(INPC,  "48") # 24 bytes for DAS header, 24 bytes for RTDL header
-   field(INPD,  "8") # TODO: Improve by reading dsp:LvdsDataSize
+   field(INPD,  "$(P)EventSize")
    field(CALC,  "(A-(B*C))/D")
    field(EGU,   "events/s")
    field(VAL,   "0")
@@ -182,7 +192,7 @@ record(calc, "$(P)MetaEventRate")
    field(INPA,  "$(P)MetaByteRate NPP")
    field(INPB,  "$(P)MetaCntRate NPP")
    field(INPC,  "48") # 24 bytes for DAS header, 24 bytes for RTDL header
-   field(INPD,  "8") # TODO: Improve by reading dsp:LvdsDataSize
+   field(INPD,  "8") # Metadata always in TOF,pixid format (8 bytes)
    field(CALC,  "(A-(B*C))/D")
    field(EGU,   "events/s")
    field(VAL,   "0")
