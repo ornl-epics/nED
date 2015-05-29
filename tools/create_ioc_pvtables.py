@@ -221,6 +221,7 @@ def main():
     elif options.verbose:
         print "Found {0} device plugins".format(len(plugins))
 
+    all_config = []
     for plugin in plugins:
 
         if options.verbose:
@@ -237,9 +238,21 @@ def main():
 
             if vars:
                 outpath = os.path.join(outdir, plugin["device"] + "_" + mode + ".pvs")
-                write_pvs_file(outpath, plugin["pv_prefix"], vars)
+                write_pvs_file(outpath, plugin['pv_prefix'], vars)
 
                 print "Created {0} from {1}".format(outpath, inpath)
+
+                if mode == "config":
+                    for var in vars:
+                        all_config.append({
+                            'name': plugin['pv_prefix'] + var['name'],
+                            'val': var['val']
+                        })
+
+    if all_config:
+        outpath = os.path.join(outdir, "all_config.pvs")
+        write_pvs_file(outpath, "", all_config)
+        print "Created {0}".format(outpath)
 
 if __name__ == "__main__":
     main()
