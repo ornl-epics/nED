@@ -1,5 +1,15 @@
 program GlobalCon
 
+/* GlobalCon.st
+ *
+ * Copyright (c) 2015 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Carl Lionberger
+ */
+
+
 /*
  * Global control sequencer for nED. Supports the operations of global stop,
  * start, check, write config, and clear from soft control records. Global 
