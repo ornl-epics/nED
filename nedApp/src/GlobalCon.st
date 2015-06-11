@@ -1,5 +1,15 @@
 program GlobalCon
 
+/* GlobalCon.st
+ *
+ * Copyright (c) 2015 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Carl Lionberger
+ */
+
+
 /*
  * Global control sequencer for nED. Supports the operations of global stop,
  * start, check, write config, and clear from soft control records. Global 
@@ -51,7 +61,10 @@ option -c;	/* do not wait for PVs to connect */
 #define TYPEMISVER	2
 #define VERSOKVER	3
 #define VERSMISVER	4
-#define BOTHOKVER	8
+#define BOTHMISVER	5
+#define BOTHOKVER	6
+#define VERSMISVER2	7
+#define TYPEMISVER2	8
 
 /*
  * define valid values for Acquiring PVs
@@ -64,7 +77,7 @@ option -c;	/* do not wait for PVs to connect */
  * GLOBALCON_MAXDEVICES is for static mem allocation and must be higher than 
  * number of devices expected. 
  */
-#define GLOBALCON_MAXDEVICES 100	
+#define GLOBALCON_MAXDEVICES 120	
 
 /*
  * set PV n to numeric value v and put. 
@@ -354,7 +367,7 @@ int severity;
           pvGet(PVNAME[i], SYNC);				\
           if (PVNAME[i] != DESIRED) {				\
              cmdFailed[i] = 1;					\
-             sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
+             sprintf(failMsg[i], "%s %d", #NAME, PVNAME[i]);	\
              pvPut(failMsg[i]);					\
           }							\
        } state NAME##0						\
