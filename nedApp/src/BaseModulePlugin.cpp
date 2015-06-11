@@ -540,7 +540,7 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet, uint8_t channel)
         return false;
     }
 
-    unpackRegParams("STATUS", packet->getPayload(), packet->getPayloadLength());
+    unpackRegParams("STATUS", packet->getPayload(), packet->getPayloadLength(), channel);
     return true;
 }
 
@@ -612,7 +612,7 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
         return false;
     }
 
-    unpackRegParams("CONFIG", packet->getPayload(), packet->getPayloadLength());
+    unpackRegParams("CONFIG", packet->getPayload(), packet->getPayloadLength(), channel);
     return true;
 }
 
