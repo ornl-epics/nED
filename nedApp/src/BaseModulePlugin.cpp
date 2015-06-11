@@ -93,7 +93,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         double timeout = NO_RESPONSE_TIMEOUT;
 
         if (m_waitingResponse != 0) {
-            LOG_WARN("Command '%d' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
+            LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
             return asynError;
         }
 
