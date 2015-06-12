@@ -443,73 +443,73 @@ void RocPlugin::createConfigParams_v51()
     createConfigParam("Ch7:ScaleFact",    '4', 0x6,  12, 0, 2048);  // Chan7 scale factor
     createConfigParam("Ch8:ScaleFact",    '4', 0x7,  12, 0, 2048);  // Chan8 scale factor
 
-    createConfigParam("Ch1:A:AvgMin",     'C', 0x0,  12, 0, 100);   // Chan1 A average minimum
-    createConfigParam("Ch2:A:AvgMin",     'C', 0x1,  12, 0, 100);   // Chan2 A average minimum
-    createConfigParam("Ch3:A:AvgMin",     'C', 0x2,  12, 0, 100);   // Chan3 A average minimum
-    createConfigParam("Ch4:A:AvgMin",     'C', 0x3,  12, 0, 100);   // Chan4 A average minimum
-    createConfigParam("Ch5:A:AvgMin",     'C', 0x4,  12, 0, 100);   // Chan5 A average minimum
-    createConfigParam("Ch6:A:AvgMin",     'C', 0x5,  12, 0, 100);   // Chan6 A average minimum
-    createConfigParam("Ch7:A:AvgMin",     'C', 0x6,  12, 0, 100);   // Chan7 A average minimum
-    createConfigParam("Ch8:A:AvgMin",     'C', 0x7,  12, 0, 100);   // Chan8 A average minimum
-    createConfigParam("Ch1:B:AvgMin",     'C', 0x8,  12, 0, 100);   // Chan1 B average minimum
-    createConfigParam("Ch2:B:AvgMin",     'C', 0x9,  12, 0, 100);   // Chan2 B average minimum
-    createConfigParam("Ch3:B:AvgMin",     'C', 0xA,  12, 0, 100);   // Chan3 B average minimum
-    createConfigParam("Ch4:B:AvgMin",     'C', 0xB,  12, 0, 100);   // Chan4 B average minimum
-    createConfigParam("Ch5:B:AvgMin",     'C', 0xC,  12, 0, 100);   // Chan5 B average minimum
-    createConfigParam("Ch6:B:AvgMin",     'C', 0xD,  12, 0, 100);   // Chan6 B average minimum
-    createConfigParam("Ch7:B:AvgMin",     'C', 0xE,  12, 0, 100);   // Chan7 B average minimum
-    createConfigParam("Ch8:B:AvgMin",     'C', 0xF,  12, 0, 100);   // Chan8 B average minimum
+    createConfigParam("Ch1:A:AvgMin",     'C', 0x0,  12, 0, 0);     // Chan1 A average minimum
+    createConfigParam("Ch2:A:AvgMin",     'C', 0x1,  12, 0, 0);     // Chan2 A average minimum
+    createConfigParam("Ch3:A:AvgMin",     'C', 0x2,  12, 0, 0);     // Chan3 A average minimum
+    createConfigParam("Ch4:A:AvgMin",     'C', 0x3,  12, 0, 0);     // Chan4 A average minimum
+    createConfigParam("Ch5:A:AvgMin",     'C', 0x4,  12, 0, 0);     // Chan5 A average minimum
+    createConfigParam("Ch6:A:AvgMin",     'C', 0x5,  12, 0, 0);     // Chan6 A average minimum
+    createConfigParam("Ch7:A:AvgMin",     'C', 0x6,  12, 0, 0);     // Chan7 A average minimum
+    createConfigParam("Ch8:A:AvgMin",     'C', 0x7,  12, 0, 0);     // Chan8 A average minimum
+    createConfigParam("Ch1:B:AvgMin",     'C', 0x8,  12, 0, 0);     // Chan1 B average minimum
+    createConfigParam("Ch2:B:AvgMin",     'C', 0x9,  12, 0, 0);     // Chan2 B average minimum
+    createConfigParam("Ch3:B:AvgMin",     'C', 0xA,  12, 0, 0);     // Chan3 B average minimum
+    createConfigParam("Ch4:B:AvgMin",     'C', 0xB,  12, 0, 0);     // Chan4 B average minimum
+    createConfigParam("Ch5:B:AvgMin",     'C', 0xC,  12, 0, 0);     // Chan5 B average minimum
+    createConfigParam("Ch6:B:AvgMin",     'C', 0xD,  12, 0, 0);     // Chan6 B average minimum
+    createConfigParam("Ch7:B:AvgMin",     'C', 0xE,  12, 0, 0);     // Chan7 B average minimum
+    createConfigParam("Ch8:B:AvgMin",     'C', 0xF,  12, 0, 0);     // Chan8 B average minimum
 
-    createConfigParam("Ch1:A:AvgMax",     'C', 0x10, 12, 0, 1000);  // Chan1 A average maximum
-    createConfigParam("Ch2:A:AvgMax",     'C', 0x11, 12, 0, 1000);  // Chan2 A average maximum
-    createConfigParam("Ch3:A:AvgMax",     'C', 0x12, 12, 0, 1000);  // Chan3 A average maximum
-    createConfigParam("Ch4:A:AvgMax",     'C', 0x13, 12, 0, 1000);  // Chan4 A average maximum
-    createConfigParam("Ch5:A:AvgMax",     'C', 0x14, 12, 0, 1000);  // Chan5 A average maximum
-    createConfigParam("Ch6:A:AvgMax",     'C', 0x15, 12, 0, 1000);  // Chan6 A average maximum
-    createConfigParam("Ch7:A:AvgMax",     'C', 0x16, 12, 0, 1000);  // Chan7 A average maximum
-    createConfigParam("Ch8:A:AvgMax",     'C', 0x17, 12, 0, 1000);  // Chan8 A average maximum
-    createConfigParam("Ch1:B:AvgMax",     'C', 0x18, 12, 0, 1000);  // Chan1 B average maximum
-    createConfigParam("Ch2:B:AvgMax",     'C', 0x19, 12, 0, 1000);  // Chan2 B average maximum
-    createConfigParam("Ch3:B:AvgMax",     'C', 0x1A, 12, 0, 1000);  // Chan3 B average maximum
-    createConfigParam("Ch4:B:AvgMax",     'C', 0x1B, 12, 0, 1000);  // Chan4 B average maximum
-    createConfigParam("Ch5:B:AvgMax",     'C', 0x1C, 12, 0, 1000);  // Chan5 B average maximum
-    createConfigParam("Ch6:B:AvgMax",     'C', 0x1D, 12, 0, 1000);  // Chan6 B average maximum
-    createConfigParam("Ch7:B:AvgMax",     'C', 0x1E, 12, 0, 1000);  // Chan7 B average maximum
-    createConfigParam("Ch8:B:AvgMax",     'C', 0x1F, 12, 0, 1000);  // Chan8 B average maximum
+    createConfigParam("Ch1:A:AvgMax",     'C', 0x10, 12, 0, 4095);  // Chan1 A average maximum
+    createConfigParam("Ch2:A:AvgMax",     'C', 0x11, 12, 0, 4095);  // Chan2 A average maximum
+    createConfigParam("Ch3:A:AvgMax",     'C', 0x12, 12, 0, 4095);  // Chan3 A average maximum
+    createConfigParam("Ch4:A:AvgMax",     'C', 0x13, 12, 0, 4095);  // Chan4 A average maximum
+    createConfigParam("Ch5:A:AvgMax",     'C', 0x14, 12, 0, 4095);  // Chan5 A average maximum
+    createConfigParam("Ch6:A:AvgMax",     'C', 0x15, 12, 0, 4095);  // Chan6 A average maximum
+    createConfigParam("Ch7:A:AvgMax",     'C', 0x16, 12, 0, 4095);  // Chan7 A average maximum
+    createConfigParam("Ch8:A:AvgMax",     'C', 0x17, 12, 0, 4095);  // Chan8 A average maximum
+    createConfigParam("Ch1:B:AvgMax",     'C', 0x18, 12, 0, 4095);  // Chan1 B average maximum
+    createConfigParam("Ch2:B:AvgMax",     'C', 0x19, 12, 0, 4095);  // Chan2 B average maximum
+    createConfigParam("Ch3:B:AvgMax",     'C', 0x1A, 12, 0, 4095);  // Chan3 B average maximum
+    createConfigParam("Ch4:B:AvgMax",     'C', 0x1B, 12, 0, 4095);  // Chan4 B average maximum
+    createConfigParam("Ch5:B:AvgMax",     'C', 0x1C, 12, 0, 4095);  // Chan5 B average maximum
+    createConfigParam("Ch6:B:AvgMax",     'C', 0x1D, 12, 0, 4095);  // Chan6 B average maximum
+    createConfigParam("Ch7:B:AvgMax",     'C', 0x1E, 12, 0, 4095);  // Chan7 B average maximum
+    createConfigParam("Ch8:B:AvgMax",     'C', 0x1F, 12, 0, 4095);  // Chan8 B average maximum
 
-    createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 100);   // Chan1 A sample minimum
-    createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 100);   // Chan2 A sample minimum
-    createConfigParam("Ch3:A:SampleMin",  'D', 0x2,  12, 0, 100);   // Chan3 A sample minimum
-    createConfigParam("Ch4:A:SampleMin",  'D', 0x3,  12, 0, 100);   // Chan4 A sample minimum
-    createConfigParam("Ch5:A:SampleMin",  'D', 0x4,  12, 0, 100);   // Chan5 A sample minimum
-    createConfigParam("Ch6:A:SampleMin",  'D', 0x5,  12, 0, 100);   // Chan6 A sample minimum
-    createConfigParam("Ch7:A:SampleMin",  'D', 0x6,  12, 0, 100);   // Chan7 A sample minimum
-    createConfigParam("Ch8:A:SampleMin",  'D', 0x7,  12, 0, 100);   // Chan8 A sample minimum
-    createConfigParam("Ch1:B:SampleMin",  'D', 0x8,  12, 0, 100);   // Chan1 B sample minimum
-    createConfigParam("Ch2:B:SampleMin",  'D', 0x9,  12, 0, 100);   // Chan2 B sample minimum
-    createConfigParam("Ch3:B:SampleMin",  'D', 0xA,  12, 0, 100);   // Chan3 B sample minimum
-    createConfigParam("Ch4:B:SampleMin",  'D', 0xB,  12, 0, 100);   // Chan4 B sample minimum
-    createConfigParam("Ch5:B:SampleMin",  'D', 0xC,  12, 0, 100);   // Chan5 B sample minimum
-    createConfigParam("Ch6:B:SampleMin",  'D', 0xD,  12, 0, 100);   // Chan6 B sample minimum
-    createConfigParam("Ch7:B:SampleMin",  'D', 0xE,  12, 0, 100);   // Chan7 B sample minimum
-    createConfigParam("Ch8:B:SampleMin",  'D', 0xF,  12, 0, 100);   // Chan8 B sample minimum
+    createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 0);     // Chan1 A sample minimum
+    createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 0);     // Chan2 A sample minimum
+    createConfigParam("Ch3:A:SampleMin",  'D', 0x2,  12, 0, 0);     // Chan3 A sample minimum
+    createConfigParam("Ch4:A:SampleMin",  'D', 0x3,  12, 0, 0);     // Chan4 A sample minimum
+    createConfigParam("Ch5:A:SampleMin",  'D', 0x4,  12, 0, 0);     // Chan5 A sample minimum
+    createConfigParam("Ch6:A:SampleMin",  'D', 0x5,  12, 0, 0);     // Chan6 A sample minimum
+    createConfigParam("Ch7:A:SampleMin",  'D', 0x6,  12, 0, 0);     // Chan7 A sample minimum
+    createConfigParam("Ch8:A:SampleMin",  'D', 0x7,  12, 0, 0);     // Chan8 A sample minimum
+    createConfigParam("Ch1:B:SampleMin",  'D', 0x8,  12, 0, 0);     // Chan1 B sample minimum
+    createConfigParam("Ch2:B:SampleMin",  'D', 0x9,  12, 0, 0);     // Chan2 B sample minimum
+    createConfigParam("Ch3:B:SampleMin",  'D', 0xA,  12, 0, 0);     // Chan3 B sample minimum
+    createConfigParam("Ch4:B:SampleMin",  'D', 0xB,  12, 0, 0);     // Chan4 B sample minimum
+    createConfigParam("Ch5:B:SampleMin",  'D', 0xC,  12, 0, 0);     // Chan5 B sample minimum
+    createConfigParam("Ch6:B:SampleMin",  'D', 0xD,  12, 0, 0);     // Chan6 B sample minimum
+    createConfigParam("Ch7:B:SampleMin",  'D', 0xE,  12, 0, 0);     // Chan7 B sample minimum
+    createConfigParam("Ch8:B:SampleMin",  'D', 0xF,  12, 0, 0);     // Chan8 B sample minimum
 
-    createConfigParam("Ch1:A:SampleMax",  'D', 0x10, 12, 0, 1000);  // Chan1 A sample maximum
-    createConfigParam("Ch2:A:SampleMax",  'D', 0x11, 12, 0, 1000);  // Chan2 A sample maximum
-    createConfigParam("Ch3:A:SampleMax",  'D', 0x12, 12, 0, 1000);  // Chan3 A sample maximum
-    createConfigParam("Ch4:A:SampleMax",  'D', 0x13, 12, 0, 1000);  // Chan4 A sample maximum
-    createConfigParam("Ch5:A:SampleMax",  'D', 0x14, 12, 0, 1000);  // Chan5 A sample maximum
-    createConfigParam("Ch6:A:SampleMax",  'D', 0x15, 12, 0, 1000);  // Chan6 A sample maximum
-    createConfigParam("Ch7:A:SampleMax",  'D', 0x16, 12, 0, 1000);  // Chan7 A sample maximum
-    createConfigParam("Ch8:A:SampleMax",  'D', 0x17, 12, 0, 1000);  // Chan8 A sample maximum
-    createConfigParam("Ch1:B:SampleMax",  'D', 0x18, 12, 0, 1000);  // Chan1 B sample maximum
-    createConfigParam("Ch2:B:SampleMax",  'D', 0x19, 12, 0, 1000);  // Chan2 B sample maximum
-    createConfigParam("Ch3:B:SampleMax",  'D', 0x1A, 12, 0, 1000);  // Chan3 B sample maximum
-    createConfigParam("Ch4:B:SampleMax",  'D', 0x1B, 12, 0, 1000);  // Chan4 B sample maximum
-    createConfigParam("Ch5:B:SampleMax",  'D', 0x1C, 12, 0, 1000);  // Chan5 B sample maximum
-    createConfigParam("Ch6:B:SampleMax",  'D', 0x1D, 12, 0, 1000);  // Chan6 B sample maximum
-    createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // Chan7 B sample maximum
-    createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // Chan8 B sample maximum
+    createConfigParam("Ch1:A:SampleMax",  'D', 0x10, 12, 0, 4095);  // Chan1 A sample maximum
+    createConfigParam("Ch2:A:SampleMax",  'D', 0x11, 12, 0, 4095);  // Chan2 A sample maximum
+    createConfigParam("Ch3:A:SampleMax",  'D', 0x12, 12, 0, 4095);  // Chan3 A sample maximum
+    createConfigParam("Ch4:A:SampleMax",  'D', 0x13, 12, 0, 4095);  // Chan4 A sample maximum
+    createConfigParam("Ch5:A:SampleMax",  'D', 0x14, 12, 0, 4095);  // Chan5 A sample maximum
+    createConfigParam("Ch6:A:SampleMax",  'D', 0x15, 12, 0, 4095);  // Chan6 A sample maximum
+    createConfigParam("Ch7:A:SampleMax",  'D', 0x16, 12, 0, 4095);  // Chan7 A sample maximum
+    createConfigParam("Ch8:A:SampleMax",  'D', 0x17, 12, 0, 4095);  // Chan8 A sample maximum
+    createConfigParam("Ch1:B:SampleMax",  'D', 0x18, 12, 0, 4095);  // Chan1 B sample maximum
+    createConfigParam("Ch2:B:SampleMax",  'D', 0x19, 12, 0, 4095);  // Chan2 B sample maximum
+    createConfigParam("Ch3:B:SampleMax",  'D', 0x1A, 12, 0, 4095);  // Chan3 B sample maximum
+    createConfigParam("Ch4:B:SampleMax",  'D', 0x1B, 12, 0, 4095);  // Chan4 B sample maximum
+    createConfigParam("Ch5:B:SampleMax",  'D', 0x1C, 12, 0, 4095);  // Chan5 B sample maximum
+    createConfigParam("Ch6:B:SampleMax",  'D', 0x1D, 12, 0, 4095);  // Chan6 B sample maximum
+    createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 4095);  // Chan7 B sample maximum
+    createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 4095);  // Chan8 B sample maximum
 
     createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // Maximum slope
 
@@ -532,7 +532,7 @@ void RocPlugin::createConfigParams_v51()
     createConfigParam("Ch8:VerboseEn",    'E', 0x0,  1, 15, 0);     // Chan8 verbose enable          (0=disable,1=enable)
 
     createConfigParam("TimeVetoLow",      'E', 0x1,  32, 0, 0);     // Timestamp veto low
-    createConfigParam("TimeVetoHigh",     'E', 0x3,  32, 0, 0);     // Timestamp veto high
+    createConfigParam("TimeVetoHigh",     'E', 0x3,  32, 0, 333333);// Timestamp veto high
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
     createConfigParam("MinAdc",           'E', 0x6,  14, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  14, 0, 1000);  // Maximum ADC

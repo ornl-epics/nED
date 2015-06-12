@@ -287,39 +287,39 @@ void RocPlugin::createConfigParams_v54()
     // There's an unused part of C section in v5.4 C:0x10 - C:0x1F
     createConfigParam("ConfigFiller",     'C', 0x1F, 16, 0, 0);     // Config filler
 
-    createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch3:A:SampleMin",  'D', 0x2,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch4:A:SampleMin",  'D', 0x3,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch5:A:SampleMin",  'D', 0x4,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch6:A:SampleMin",  'D', 0x5,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch7:A:SampleMin",  'D', 0x6,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch8:A:SampleMin",  'D', 0x7,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch1:B:SampleMin",  'D', 0x8,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch2:B:SampleMin",  'D', 0x9,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch3:B:SampleMin",  'D', 0xA,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch4:B:SampleMin",  'D', 0xB,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch5:B:SampleMin",  'D', 0xC,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch6:B:SampleMin",  'D', 0xD,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch7:B:SampleMin",  'D', 0xE,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch8:B:SampleMin",  'D', 0xF,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:A:SampleMin",  'D', 0x2,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:A:SampleMin",  'D', 0x3,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:A:SampleMin",  'D', 0x4,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:A:SampleMin",  'D', 0x5,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:A:SampleMin",  'D', 0x6,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:A:SampleMin",  'D', 0x7,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:B:SampleMin",  'D', 0x8,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:B:SampleMin",  'D', 0x9,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:B:SampleMin",  'D', 0xA,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:B:SampleMin",  'D', 0xB,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:B:SampleMin",  'D', 0xC,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:B:SampleMin",  'D', 0xD,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:B:SampleMin",  'D', 0xE,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:B:SampleMin",  'D', 0xF,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
 
-    createConfigParam("Ch1:A:SampleMax",  'D', 0x10, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch2:A:SampleMax",  'D', 0x11, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch3:A:SampleMax",  'D', 0x12, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch4:A:SampleMax",  'D', 0x13, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch5:A:SampleMax",  'D', 0x14, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch6:A:SampleMax",  'D', 0x15, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch7:A:SampleMax",  'D', 0x16, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch8:A:SampleMax",  'D', 0x17, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch1:B:SampleMax",  'D', 0x18, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch2:B:SampleMax",  'D', 0x19, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch3:B:SampleMax",  'D', 0x1A, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch4:B:SampleMax",  'D', 0x1B, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch5:B:SampleMax",  'D', 0x1C, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch6:B:SampleMax",  'D', 0x1D, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:A:SampleMax",  'D', 0x10, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:A:SampleMax",  'D', 0x11, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:A:SampleMax",  'D', 0x12, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:A:SampleMax",  'D', 0x13, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:A:SampleMax",  'D', 0x14, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:A:SampleMax",  'D', 0x15, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:A:SampleMax",  'D', 0x16, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:A:SampleMax",  'D', 0x17, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:B:SampleMax",  'D', 0x18, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:B:SampleMax",  'D', 0x19, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:B:SampleMax",  'D', 0x1A, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:B:SampleMax",  'D', 0x1B, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:B:SampleMax",  'D', 0x1C, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:B:SampleMax",  'D', 0x1D, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
 
     createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // *** UNUSED BY FIRMWARE ***
 
