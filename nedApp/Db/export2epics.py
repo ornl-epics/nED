@@ -50,7 +50,11 @@ def parse_one(type, params_str, desc_str, extra_str):
         for e in extra_str.split(","):
             e = e.strip(" \t")
             if e.startswith("calc:"):
-                param['calc'] = e[5:].strip(" ")
+                param['calcread'] = e[5:].strip(" ")
+            elif e.startswith("calcread:"):
+                param['calcread'] = e[9:].strip(" ")
+            elif e.startswith("calcwrite:"):
+                param['calcwrite'] = e[10:].strip(" ")
             elif e.startswith("prec:"):
                 param['prec'] = e[5:].strip(" ")
             elif e.startswith("unit:"):
@@ -219,51 +223,75 @@ def _longinlongout_val(param, outfile, default_value=None):
         outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
         outfile.write("    field(HSV,  \"MAJOR\")\n")
 
+def _calc_record(param, outfile):
+    flnk = None
+    if 'calcwrite' in param:
+        outfile.write("record(calcout, \"$(P){0}CW\")\n".format(param['name']))
+        outfile.write("{\n")
+        outfile.write("    field(INPA, \"$(P){0} NPP\")\n".format(param['name']))
+        outfile.write("    field(CALC, \"{0}\")\n".format(param['calcwrite']))
+        outfile.write("    field(OUT,  \"$(P){0}W PP\")\n".format(param['name']))
+        outfile.write("}\n")
+
+        outfile.write("record(longout, \"$(P){0}W\")\n".format(param['name']))
+        outfile.write("{\n")
+        outfile.write("    field(DTYP, \"asynInt32\")\n")
+        outfile.write("    field(OUT,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
+        if 'calcread' in param:
+            outfile.write("    field(SDIS, \"$(P){0}CR.PACT\")\n".format(param['name']))
+            outfile.write("    field(DISV, \"1\")\n")
+        outfile.write("}\n")
+        flnk = "$(P){0}CW".format(param['name'])
+
+    if 'calcread' in param:
+        outfile.write("record(longin, \"$(P){0}R\")\n".format(param['name']))
+        outfile.write("{\n")
+        outfile.write("    field(DTYP, \"asynInt32\")\n")
+        outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
+        outfile.write("    field(SCAN, \"I/O Intr\")\n")
+        outfile.write("    field(FLNK, \"$(P){0}CR\")\n".format(param['name']))
+        if 'calcwrite' in param:
+            outfile.write("    field(SDIS, \"$(P){0}CW.PACT\")\n".format(param['name']))
+            outfile.write("    field(DISV, \"1\")\n")
+        outfile.write("}\n")
+
+        outfile.write("record(calcout, \"$(P){0}CR\")\n".format(param['name']))
+        outfile.write("{\n")
+        outfile.write("    field(INPA, \"$(P){0}R NPP\")\n".format(param['name']))
+        outfile.write("    field(CALC, \"{0}\")\n".format(param['calcread']))
+        outfile.write("    field(OUT,  \"$(P){0} PP\")\n".format(param['name']))
+        outfile.write("}\n")
+    return flnk
+    
 def generate_db_record(param, outfile):
     if "options" in param:
         if len(param['options']) == 2 and param['width'] == 1:
             type="bi" if param['direction'] == "in" else "bo"
         else:
             type="mbbi" if param['direction'] == "in" else "mbbo"
-    elif "scalle" in param or "offset" in param:
+    elif "slope_scale" in param or "slope_offset" in param:
         type="ai" if param['direction'] == "in" else "ao"
     else:
         type="longin" if param['direction'] == "in" else "longout"
 
-    if "calc" in param:
-        outfile.write("record(calc, \"$(P){0}\")\n".format(param['name']))
+    if "calcread" in param or "calcwrite" in param:
+        flnk = _calc_record(param, outfile)
+        outfile.write("record(longout, \"$(P){0}\")\n".format(param['name']))
         outfile.write("{\n")
-        if "archive" in param and param['archive'] == "monitor":
-            outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
-        outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
-        outfile.write("    field(INPA, \"$(P){0}_Raw NPP\")\n".format(param['name']))
-        outfile.write("    field(CALC, \"{0}\")\n".format(param['calc']))
-        _longinlongout_val(param, outfile)
-        outfile.write("}\n")
 
-        outfile.write("record({0}, \"$(P){1}_Raw\")\n".format(type, param['name']))
-        outfile.write("{\n")
-        outfile.write("    field(FLNK, \"$(P){0}\")\n".format(param['name']))
+        if param['direction'] == 'in':
+            outfile.write("    field(OUT,  \"0\")\n")
+        elif flnk:
+            outfile.write("    info(autosaveFields, \"VAL\")\n")
+            outfile.write("    field(PINI, \"YES\")\n")
+            outfile.write("    field(FLNK, \"{0}\")\n".format(flnk))
+        _longinlongout_val(param, outfile, param['default'])
+
     else:
         outfile.write("record({0}, \"$(P){1}\")\n".format(type, param['name']))
         outfile.write("{\n")
-        if "archive" in param and param['archive'] == "monitor":
-            outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
+        outfile.write("    field(DTYP, \"asynInt32\")\n")
 
-    if param['direction'] == "in":
-        outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
-        outfile.write("    field(SCAN, \"I/O Intr\")\n")
-    else:
-        outfile.write("    info(autosaveFields, \"VAL\")\n")
-        outfile.write("    info(asyn:READBACK, \"1\")\n")
-        outfile.write("    field(PINI, \"YES\")\n")
-        outfile.write("    field(OUT,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
-
-    outfile.write("    field(ASG,  \"BEAMLINE\")\n")
-    outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
-    outfile.write("    field(DTYP, \"asynInt32\")\n")
-
-    if "calc" not in param:
         if type == "bi" or type == "bo":
             _bibo_val(param, outfile, param['default'])
         elif type == "mbbi" or type == "mbbo":
@@ -274,6 +302,21 @@ def generate_db_record(param, outfile):
             outfile.write("    field(LOPR, \"0\")\n")
             outfile.write("    field(HOPR, \"{0}\")\n".format(2**param['width'] - 1))
             _longinlongout_val(param, outfile, param['default'])
+
+        if param['direction'] == "in":
+            outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
+            outfile.write("    field(SCAN, \"I/O Intr\")\n")
+        else:
+            outfile.write("    info(autosaveFields, \"VAL\")\n")
+            outfile.write("    info(asyn:READBACK, \"1\")\n")
+            outfile.write("    field(PINI, \"YES\")\n")
+            outfile.write("    field(OUT,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
+
+    if "archive" in param and param['archive'] == "monitor":
+        outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
+
+    outfile.write("    field(ASG,  \"BEAMLINE\")\n")
+    outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
     outfile.write("}\n")
 
 def main():
