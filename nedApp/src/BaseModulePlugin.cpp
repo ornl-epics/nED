@@ -165,7 +165,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             continue;
 
         uint32_t mask = (0x1ULL << jt->second.width) - 1;
-        if (static_cast<int>(value & mask) != value && (value & ~mask) != ~mask) {
+        if (static_cast<int>(value & mask) != value) {
             LOG_ERROR("Parameter %s value %d out of bounds", getParamName(jt->first), value);
             return asynError;
         } else {
@@ -1049,10 +1049,7 @@ void BaseModulePlugin::unpackRegParams(const char *group, const uint32_t *payloa
         if ((shift + it->second.width) > 32) {
             value |= payload[offset + 1] << (32 - shift);
         }
-        // Extend sign - http://graphics.stanford.edu/~seander/bithacks.html#VariableSignExtend
         value &= (0x1ULL << it->second.width) - 1;
-        int mask = 1U << (it->second.width - 1);
-        value = (value ^ mask) - mask;
         setIntegerParam(it->first, value);
     }
     callParamCallbacks();
