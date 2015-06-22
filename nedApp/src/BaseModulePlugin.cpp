@@ -93,7 +93,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         double timeout = NO_RESPONSE_TIMEOUT;
 
         if (m_waitingResponse != 0) {
-            LOG_WARN("Command '%d' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
+            LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
             return asynError;
         }
 
@@ -540,7 +540,7 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet, uint8_t channel)
         return false;
     }
 
-    unpackRegParams("STATUS", packet->getPayload(), packet->getPayloadLength());
+    unpackRegParams("STATUS", packet->getPayload(), packet->getPayloadLength(), channel);
     return true;
 }
 
@@ -612,7 +612,7 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
         return false;
     }
 
-    unpackRegParams("CONFIG", packet->getPayload(), packet->getPayloadLength());
+    unpackRegParams("CONFIG", packet->getPayload(), packet->getPayloadLength(), channel);
     return true;
 }
 

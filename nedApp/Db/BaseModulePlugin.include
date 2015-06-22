@@ -129,7 +129,8 @@ record(calc, "$(P)MissCount")
     field(DESC, "Count missing responses")
     field(INPA, "$(P)CmdRsp NPP")
     field(INPB, "$(P)MissCount NPP")
-    field(CALC, "(A=3)?B+1:(A=2)?B:0")
+    field(INPC, "$(P)Enable NPP")
+    field(CALC, "C=0?0:(A=3)?B+1:(A=2)?B:0")
     field(HIGH, "2")
     field(HSV,  "MINOR")
     field(HIHI, "3")
@@ -138,15 +139,28 @@ record(calc, "$(P)MissCount")
 }
 # All status logic tries to use 1 = OK, 0 = Not OK
 # Summarize alarms.
-record(calc, "$(P)StatusCalc")
+record(calc, "$(P)HealthStatusCalc")
 {
-    field(DESC, "Turn MAJOR alarms into error")
+    field(DESC, "Aggregate alarms")
     field(INPA, "$(P)MissCount.SEVR")
     field(INPB, "$(P)Supported.SEVR")
     field(INPC, "$(P)Verified.SEVR")
     field(INPD, "$(P)HwStatus.SEVR")
-    field(INPE, "$(P)Acquiring.SEVR")
-    field(CALC, "(A+B+C+D+E)=0")
+    field(INPE, "$(P)Enable NPP")
+    field(CALC, "(A+B+C+D)=0||E=0")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
+    field(PINI, "YES") # For Supported link
+    field(FLNK, "$(P)StatusCalc")
+}
+record(calc, "$(P)StatusCalc")
+{
+    field(INPA, "$(P)Enable NPP")
+    field(INPB, "$(P)HealthStatusCalc PP")
+    field(INPC, "$(P)Acquiring.SEVR")
+    field(CALC, "A=1&&(B+C)#0")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
     field(PINI, "YES") # For Supported link
     field(FLNK, "$(P)Status")
 }
@@ -450,6 +464,8 @@ record(sseq, "$(P)PeriodicCheckUp")
     field(WAIT1, "Wait")
     field(WAIT2, "Wait")
     field(WAIT3, "Wait")
+    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
+    field(DISV, "0")
 }
 record(longin, "$(P)StatusRefreshInt")
 {

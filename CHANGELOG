@@ -1,0 +1,7 @@
+2015-06-12:
+* Db/export2epics.py uses asyn 4.26 feature asyn:READBACK
+2015-06-15
+* renamed DSP registers
+  LvdsTsyncDelay -> TsyncDelay
+  ChopTrefFreq   -> TsyncFreq
+  ChopRtdlOffset -> TsyncFrame

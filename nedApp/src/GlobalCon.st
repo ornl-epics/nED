@@ -16,7 +16,7 @@ program GlobalCon
  * success is indicated to the operator and the operation may be retried, in 
  * which case it is performed only on those devices which failed before. This 
  * accumulation behavior is reset when a different operation or the clear 
- * operation is requested. Each device has a disable PV allowing it to be 
+ * operation is requested. Each device has a enable PV allowing it to be 
  * skipped in non-clear operations.
  * 
  * The list of devices to operate on is obtained with seqGrep(), which looks
@@ -131,7 +131,7 @@ PVARRAY(int, cfgSection)
 /*
  * Groups of soft PVs, one per device
  */
-PVARRAY(int, disable)
+PVARRAY(int, enable)
 PVARRAY(int, cmdSucceeded)
 PVARRAY(string, failMsg)
 
@@ -204,7 +204,7 @@ int severity;
     state NAME {					\
        when() {						\
           for (i = 0; i< numFound; i++) {		\
-             disable[i] = VAL; pvPut(disable[i]);	\
+             enable[i] = !VAL; pvPut(enable[i]);	\
           }						\
           EVNAME = 0;	/* release busy record */	\
           pvPut(EVNAME);				\
@@ -232,7 +232,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       when (!enable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 #define CMD_END(NAME, COMMAND)					\
@@ -269,7 +269,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       when (!enable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 
@@ -359,7 +359,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       when (!enable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 #define TEST_PV_END(NAME, PVNAME, DESIRED)			\
@@ -401,7 +401,7 @@ int severity;
       when() {								\
           numSucceeded = 0; numEnabled = 0;				\
           for (i = 0; i< numFound; i++) {				\
-             if (!disable[i]) {						\
+             if (enable[i]) {						\
                 numEnabled++;						\
                 if (cmdFailed[i]) {					\
                    cmdFailed[i] = 0;	/* ready for next use */	\
@@ -441,7 +441,8 @@ int severity;
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {		\
           PVPUTSTR(statePV,NEXT)					\
           pvGet(accumSuccess);						\
-          if (!accumSuccess || strcmp(prevReq, #NEXT)) {               	\
+          if ((!accumSuccess || strcmp(prevReq, #NEXT)) &&		\
+              strcmp("Enabling", #NEXT) && strcmp("Disabling", #NEXT)) {\
              for (i = 0; i< numFound; i++) {				\
                 PVPUTNUM(cmdSucceeded[i], 0)				\
                 failMsg[i][0] = 0; pvPut(failMsg[i]);			\
@@ -478,9 +479,9 @@ ss GlobalControl {
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
             pvAssign(acquiring[i], namebuf);
-            sprintf(namebuf, "%s:Disable", deviceNames[i]);
-            pvAssign(disable[i], namebuf);
-            pvMonitor(disable[i]);
+            sprintf(namebuf, "%s:Enable", deviceNames[i]);
+            pvAssign(enable[i], namebuf);
+            pvMonitor(enable[i]);
             sprintf(namebuf, "%s:CmdSucceeded", deviceNames[i]);
             pvAssign(cmdSucceeded[i], namebuf);
             PVPUTNUM(cmdSucceeded[i], 0)
@@ -525,7 +526,7 @@ ss GlobalControl {
     state WritingConf {
        when() {
           for (i = 0; i< numFound; i++) {	
-             if (!disable[i]) {			
+             if (enable[i]) {			
                 cfgSection[i]= 0; pvPut(cfgSection[i], SYNC);		
              }
           }

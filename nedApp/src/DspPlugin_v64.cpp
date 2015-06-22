@@ -9,7 +9,7 @@
 
 #include "DspPlugin.h"
 
-void DspPlugin::createConfigParams_v64() {
+void DspPlugin::createParams_v64() {
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
     createConfigParam("PixIdOff",       'B', 0x0,  32,  0, 0); // Pixel id offset
 
@@ -34,7 +34,6 @@ void DspPlugin::createConfigParams_v64() {
 
     createConfigParam("ChopDutyCycle",  'C', 0x9,  32,  0, 83400); // N*100ns ref pulse high
     createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // N*100ns master/ref delay
-    // @TODO: make proper record links to chopper ioc
     createConfigParam("ChopFixOffset",  'C', 0xB,  32,  0, 0); // Chopper TOF fixed offset
 
     createConfigParam("ChopFr6",        'C', 0xC,   8,  0, 4); // RTDL Frame 6
@@ -63,12 +62,10 @@ void DspPlugin::createConfigParams_v64() {
     createConfigParam("ChopFr29",       'C', 0x11,  8, 24, 41); // RTDL Frame 29
     createConfigParam("ChopFr30",       'C', 0x12,  8,  0, 1); // RTDL Frame 30
     createConfigParam("ChopFr31",       'C', 0x12,  8,  8, 2); // RTDL Frame 31
-// dcomserver thinks this one is valid
-//    createConfigParam1("ChopRtdlFr32", 'C', 0x12,  8, 16, 3); // RTDL Frame 32
 
     createConfigParam("ChopTrefTrig",   'C', 0x13,  2,  0, 3); // Chopper TREF trigger select  (0=Extract,1=Cycle Start,2=Beam On,3=TREF event)
-    createConfigParam("ChopTrefFreq",   'C', 0x13,  4,  2, 1); // TREF frequency select        (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("ChopRtdlOffset", 'C', 0x13,  4,  8, 0); // Chopper RTDL frame offset
+    createConfigParam("TsyncFreq",      'C', 0x13,  4,  2, 1); // Out TSYNC frequency          (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("TsyncFrame",     'C', 0x13,  4,  8, 0); // TSYNC frame offset
     createConfigParam("ChopTrefEvent",  'C', 0x13,  8, 12, 39); // Chop TREF event trig [0:255]
     createConfigParam("ChopHystMinLow", 'C', 0x13,  4, 20, 4); // Chop HYST minimum low [0:7]
     createConfigParam("ChopHystMinHi",  'C', 0x13,  4, 24, 4); // Chop HYST minimum high [0:7]
@@ -270,9 +267,9 @@ void DspPlugin::createConfigParams_v64() {
     createConfigParam("Ch6:SrcCtrl",    'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
     createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB[0])
 
-    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 166660); // LVDS TSYNC generate divisor (166660=240Hz, 666800=60Hz, 800000=50Hz, 1333200=30Hz)
-    createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor     (0=10ns, 1=20ns, 106=1us, 1060=10us, 106250=1ms)
-    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (83330=8.3ms, 10=1us, 20=2us, 10000=1ms)
+    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 0); // LVDS TSYNC period
+    createConfigParam("TsyncDelay",     'E', 0x5, 32,  0, 0); // LVDS TSYNC delay             (scale:9.4,unit:ns)
+    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor
 
     createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
     createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
@@ -314,10 +311,7 @@ void DspPlugin::createConfigParams_v64() {
     createConfigParam("TestPatternDebug",'F',0x1,  3, 12, 0); // Engineering Use only
     createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // pattern enable               (0=disable,1=enable)
     createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern rate            (65535=1.6 Kev/s (lowest), 53124=2 Kev/s, 13280=8 Kev/s, 5311=20 Kev/s, 1061=100 Kev/s, 264=400 Kev/s, 105=1 Mev/s, 52=2 Mev/s, 34=3 Mev/s, 25=4 Mev/s, 20=5M ev/s, 16=6 Mev/s, 12=8 Mev/s, 9=10 Mev/s, 6=15 Mev/s)
-}
 
-void DspPlugin::createCounterParams_v64()
-{
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createCounterParam("PktLenErrCnt",     0x0, 16,  0); // TBD
     createCounterParam("SCntrs:1",         0x0, 16, 16); // x0111
@@ -397,10 +391,7 @@ void DspPlugin::createCounterParams_v64()
     createCounterParam("EvPL2WcAfCnt",    0x25, 16, 16); // Level 2 dff_wcnt_af
     createCounterParam("SCntrs:76",       0x26, 16,  0); // x0176
     createCounterParam("SCntrs:77",       0x26, 16, 16); // x0177
-}
 
-void DspPlugin::createStatusParams_v64()
-{
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured, archive:monitor)
     createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring [alarm],1=acquiring, archive:monitor)

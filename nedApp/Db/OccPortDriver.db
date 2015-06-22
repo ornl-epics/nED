@@ -633,5 +633,7 @@ record(bi, "$(P)Status")
     field(DESC, "Global OCC status")
     field(ZNAM, "Not OK")
     field(ONAM, "OK")
+    field(ZSV,  "MAJOR")
+    field(OSV,  "NO_ALARM")
     field(INP,  "$(P)StatusCalc")
 }

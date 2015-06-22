@@ -26,6 +26,8 @@ record(calc, "$(P)HwStatus")
     field(INPA, "$(P)Configured.SEVR PP")
     field(INPB, "$(P)Discovered.SEVR NPP")
     field(CALC, "(A+B)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
 }
 
 # Fanout records to synchronize channel configurations

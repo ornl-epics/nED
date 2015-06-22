@@ -294,12 +294,14 @@ DasPacket::CommandType RocPlugin::reqConfigPreAmp()
 
 DasPacket::CommandType RocPlugin::reqTriggerPreAmp()
 {
+    uint32_t recharge = 0xFFFF;
     uint32_t buffer[128];
     uint32_t length = packRegParams("PREAMP_TRIG", buffer, sizeof(buffer));
 
     if (length == 0)
         return static_cast<DasPacket::CommandType>(0);
 
+    sendToDispatcher(DasPacket::CMD_PREAMP_TEST_TRIGGER, 0, &recharge, length);
     sendToDispatcher(DasPacket::CMD_PREAMP_TEST_TRIGGER, 0, buffer, length);
     return DasPacket::CMD_PREAMP_TEST_TRIGGER;
 }
