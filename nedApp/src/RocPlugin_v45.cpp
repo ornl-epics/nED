@@ -432,10 +432,6 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch1:A:AvgMax",     1, '1', 0x10, 16, 0, 1581);   // Chan1 A average maximum
     createConfigParam("Ch1:B:AvgMax",     1, '1', 0x11, 16, 0, 1581);   // Chan1 B average maximum
     createConfigParam("Ch1:MaximumSlope", 1, '1', 0x12, 16, 0, 0);      // Chan1 Maximum slope
-    createConfigParam("Ch1:A:SampleMin",  1, '1', 0x13, 10, 0, 0);      // Chan1 A sample minimum
-    createConfigParam("Ch1:B:SampleMin",  1, '1', 0x14, 10, 0, 0);      // Chan1 B sample minimum
-    createConfigParam("Ch1:A:SampleMax",  1, '1', 0x15, 10, 0, 0);      // Chan1 A sample maximum
-    createConfigParam("Ch1:B:SampleMax",  1, '1', 0x16, 10, 0, 0);      // Chan1 B sample maximum
     createConfigParam("Ch1:MinAdc",       1, '8',  0x0, 14, 0, 100);    // Chan1 Minimum ADC
     createConfigParam("Ch1:MaxAdc",       1, '8',  0x1, 14, 0, 1000);   // Chan1 Maximum ADC
     createConfigParam("Ch1:IntRelease",   1, '8',  0x2,  9, 0, 506);    // Chan1 Integrator release p
@@ -463,10 +459,6 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch2:A:AvgMax",     2, '1', 0x10, 16, 0, 1690);   // Chan2 A average maximum
     createConfigParam("Ch2:B:AvgMax",     2, '1', 0x11, 16, 0, 1690);   // Chan2 B average maximum
     createConfigParam("Ch2:MaximumSlope", 2, '1', 0x12, 16, 0, 0);      // Chan2 Maximum slope
-    createConfigParam("Ch2:A:SampleMin",  2, '1', 0x13, 10, 0, 0);      // Chan2 A sample minimum
-    createConfigParam("Ch2:B:SampleMin",  2, '1', 0x14, 10, 0, 0);      // Chan2 B sample minimum
-    createConfigParam("Ch2:A:SampleMax",  2, '1', 0x15, 10, 0, 0);      // Chan2 A sample maximum
-    createConfigParam("Ch2:B:SampleMax",  2, '1', 0x16, 10, 0, 0);      // Chan2 B sample maximum
     createConfigParam("Ch2:MinAdc",       2, '8',  0x0, 14, 0, 100);    // Chan2 Minimum ADC
     createConfigParam("Ch2:MaxAdc",       2, '8',  0x1, 14, 0, 1000);   // Chan2 Maximum ADC
     createConfigParam("Ch2:IntRelease",   2, '8',  0x2,  9, 0, 506);    // Chan2 Integrator release p
@@ -494,10 +486,6 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch3:A:AvgMax",     3, '1', 0x10, 16, 0, 1593);   // Chan3 A average maximum
     createConfigParam("Ch3:B:AvgMax",     3, '1', 0x11, 16, 0, 1593);   // Chan3 B average maximum
     createConfigParam("Ch3:MaximumSlope", 3, '1', 0x12, 16, 0, 0);      // Chan3 Maximum slope
-    createConfigParam("Ch3:A:SampleMin",  3, '1', 0x13, 10, 0, 0);      // Chan3 A sample minimum
-    createConfigParam("Ch3:B:SampleMin",  3, '1', 0x14, 10, 0, 0);      // Chan3 B sample minimum
-    createConfigParam("Ch3:A:SampleMax",  3, '1', 0x15, 10, 0, 0);      // Chan3 A sample maximum
-    createConfigParam("Ch3:B:SampleMax",  3, '1', 0x16, 10, 0, 0);      // Chan3 B sample maximum
     createConfigParam("Ch3:MinAdc",       3, '8',  0x0, 14, 0, 100);    // Chan3 Minimum ADC
     createConfigParam("Ch3:MaxAdc",       3, '8',  0x1, 14, 0, 1000);   // Chan3 Maximum ADC
     createConfigParam("Ch3:IntRelease",   3, '8',  0x2,  9, 0, 506);    // Chan3 Integrator release p
@@ -525,10 +513,6 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch4:A:AvgMax",     4, '1', 0x10, 16, 0, 1396);   // Chan4 A average maximum
     createConfigParam("Ch4:B:AvgMax",     4, '1', 0x11, 16, 0, 1396);   // Chan4 B average maximum
     createConfigParam("Ch4:MaximumSlope", 4, '1', 0x12, 16, 0, 0);      // Chan4 Maximum slope
-    createConfigParam("Ch4:A:SampleMin",  4, '1', 0x13, 10, 0, 0);      // Chan4 A sample minimum
-    createConfigParam("Ch4:B:SampleMin",  4, '1', 0x14, 10, 0, 0);      // Chan4 B sample minimum
-    createConfigParam("Ch4:A:SampleMax",  4, '1', 0x15, 10, 0, 0);      // Chan4 A sample maximum
-    createConfigParam("Ch4:B:SampleMax",  4, '1', 0x16, 10, 0, 0);      // Chan4 B sample maximum
     createConfigParam("Ch4:MinAdc",       4, '8',  0x0, 14, 0, 100);    // Chan4 Minimum ADC
     createConfigParam("Ch4:MaxAdc",       4, '8',  0x1, 14, 0, 1000);   // Chan4 Maximum ADC
     createConfigParam("Ch4:IntRelease",   4, '8',  0x2,  9, 0, 506);    // Chan4 Integrator release p
@@ -556,10 +540,6 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch5:A:AvgMax",     5, '1', 0x10, 16, 0, 1567);   // Chan5 A average maximum
     createConfigParam("Ch5:B:AvgMax",     5, '1', 0x11, 16, 0, 1567);   // Chan5 B average maximum
     createConfigParam("Ch5:MaximumSlope", 5, '1', 0x12, 16, 0, 0);      // Chan5 Maximum slope
-    createConfigParam("Ch5:A:SampleMin",  5, '1', 0x13, 10, 0, 0);      // Chan5 A sample minimum
-    createConfigParam("Ch5:B:SampleMin",  5, '1', 0x14, 10, 0, 0);      // Chan5 B sample minimum
-    createConfigParam("Ch5:A:SampleMax",  5, '1', 0x15, 10, 0, 0);      // Chan5 A sample maximum
-    createConfigParam("Ch5:B:SampleMax",  5, '1', 0x16, 10, 0, 0);      // Chan5 B sample maximum
     createConfigParam("Ch5:MinAdc",       5, '8',  0x0, 14, 0, 100);    // Chan5 Minimum ADC
     createConfigParam("Ch5:MaxAdc",       5, '8',  0x1, 14, 0, 1000);   // Chan5 Maximum ADC
     createConfigParam("Ch5:IntRelease",   5, '8',  0x2,  9, 0, 506);    // Chan5 Integrator release p
@@ -587,10 +567,6 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch6:A:AvgMax",     6, '1', 0x10, 16, 0, 1561);   // Chan6 A average maximum
     createConfigParam("Ch6:B:AvgMax",     6, '1', 0x11, 16, 0, 1561);   // Chan6 B average maximum
     createConfigParam("Ch6:MaximumSlope", 6, '1', 0x12, 16, 0, 0);      // Chan6 Maximum slope
-    createConfigParam("Ch6:A:SampleMin",  6, '1', 0x13, 10, 0, 0);      // Chan6 A sample minimum
-    createConfigParam("Ch6:B:SampleMin",  6, '1', 0x14, 10, 0, 0);      // Chan6 B sample minimum
-    createConfigParam("Ch6:A:SampleMax",  6, '1', 0x15, 10, 0, 0);      // Chan6 A sample maximum
-    createConfigParam("Ch6:B:SampleMax",  6, '1', 0x16, 10, 0, 0);      // Chan6 B sample maximum
     createConfigParam("Ch6:MinAdc",       6, '8',  0x0, 14, 0, 100);    // Chan6 Minimum ADC
     createConfigParam("Ch6:MaxAdc",       6, '8',  0x1, 14, 0, 1000);   // Chan6 Maximum ADC
     createConfigParam("Ch6:IntRelease",   6, '8',  0x2,  9, 0, 506);    // Chan6 Integrator release p
@@ -618,10 +594,6 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch7:A:AvgMax",     7, '1', 0x10, 16, 0, 1483);   // Chan7 A average maximum
     createConfigParam("Ch7:B:AvgMax",     7, '1', 0x11, 16, 0, 1483);   // Chan7 B average maximum
     createConfigParam("Ch7:MaximumSlope", 7, '1', 0x12, 16, 0, 0);      // Chan7 Maximum slope
-    createConfigParam("Ch7:A:SampleMin",  7, '1', 0x13, 10, 0, 0);      // Chan7 A sample minimum
-    createConfigParam("Ch7:B:SampleMin",  7, '1', 0x14, 10, 0, 0);      // Chan7 B sample minimum
-    createConfigParam("Ch7:A:SampleMax",  7, '1', 0x15, 10, 0, 0);      // Chan7 A sample maximum
-    createConfigParam("Ch7:B:SampleMax",  7, '1', 0x16, 10, 0, 0);      // Chan7 B sample maximum
     createConfigParam("Ch7:MinAdc",       7, '8',  0x0, 14, 0, 100);    // Chan7 Minimum ADC
     createConfigParam("Ch7:MaxAdc",       7, '8',  0x1, 14, 0, 1000);   // Chan7 Maximum ADC
     createConfigParam("Ch7:IntRelease",   7, '8',  0x2,  9, 0, 506);    // Chan7 Integrator release p
@@ -649,10 +621,6 @@ void RocPlugin::createConfigParams_v45()
     createConfigParam("Ch8:A:AvgMax",     8, '1', 0x10, 16, 0, 1373);   // Chan8 A average maximum
     createConfigParam("Ch8:B:AvgMax",     8, '1', 0x11, 16, 0, 1373);   // Chan8 B average maximum
     createConfigParam("Ch8:MaximumSlope", 8, '1', 0x12, 16, 0, 0);      // Chan8 Maximum slope
-    createConfigParam("Ch8:A:SampleMin",  8, '1', 0x13, 10, 0, 0);      // Chan8 A sample minimum
-    createConfigParam("Ch8:B:SampleMin",  8, '1', 0x14, 10, 0, 0);      // Chan8 B sample minimum
-    createConfigParam("Ch8:A:SampleMax",  8, '1', 0x15, 10, 0, 0);      // Chan8 A sample maximum
-    createConfigParam("Ch8:B:SampleMax",  8, '1', 0x16, 10, 0, 0);      // Chan8 B sample maximum
     createConfigParam("Ch8:MinAdc",       8, '8',  0x0, 14, 0, 100);    // Chan8 Minimum ADC
     createConfigParam("Ch8:MaxAdc",       8, '8',  0x1, 14, 0, 1000);   // Chan8 Maximum ADC
     createConfigParam("Ch8:IntRelease",   8, '8',  0x2,  9, 0, 506);    // Chan8 Integrator release p
