@@ -63,13 +63,13 @@ void DspPlugin::createParams_v64() {
     createConfigParam("ChopFr30",       'C', 0x12,  8,  0, 1); // RTDL Frame 30
     createConfigParam("ChopFr31",       'C', 0x12,  8,  8, 2); // RTDL Frame 31
 
-    createConfigParam("ChopTrefTrig",   'C', 0x13,  2,  0, 3); // Chopper TREF trigger select  (0=Extract,1=Cycle Start,2=Beam On,3=TREF event)
+    createConfigParam("TrefTrigger",    'C', 0x13,  2,  0, 3); // TREF RTDL Strobe trigger     (0=Extract,1=Cycle Start,2=Beam On,3=TREF event)
     createConfigParam("TsyncFreq",      'C', 0x13,  4,  2, 1); // Out TSYNC frequency          (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
     createConfigParam("TsyncFrame",     'C', 0x13,  4,  8, 0); // TSYNC frame offset
-    createConfigParam("ChopTrefEvent",  'C', 0x13,  8, 12, 39); // Chop TREF event trig [0:255]
-    createConfigParam("ChopHystMinLow", 'C', 0x13,  4, 20, 4); // Chop HYST minimum low [0:7]
-    createConfigParam("ChopHystMinHi",  'C', 0x13,  4, 24, 4); // Chop HYST minimum high [0:7]
-    createConfigParam("ChopFreqCntCtrl", 'C', 0x13,  2, 28, 1); // Chop frequency count control (0=strobe at X, 1=strobe at X-1, 2=strobe at X-2)
+    createConfigParam("TrefEvent",      'C', 0x13,  8, 12, 39); // TREF event number
+    createConfigParam("HystMinLow",     'C', 0x13,  4, 20, 4); // Chop HYST minimum low
+    createConfigParam("HystMinHi",      'C', 0x13,  4, 24, 4); // Chop HYST minimum high
+    createConfigParam("ChopFreqCtrl",   'C', 0x13,  2, 28, 1); // Chop frequency count mode    (0=strobe at X, 1=strobe at X-1, 2=strobe at X-2)
     createConfigParam("ChopFreqCycle",  'C', 0x13,  1, 30, 1); // Chop frequency cycle select  (0=Present cycle number, 1=Next cycle number)
     createConfigParam("ChopSweepEn",    'C', 0x13,  1, 31, 0); // Chop sweep enable            (0=TOF fixed off,1=TOF fract off)
 
@@ -269,7 +269,7 @@ void DspPlugin::createParams_v64() {
 
     createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 0); // LVDS TSYNC period
     createConfigParam("TsyncDelay",     'E', 0x5, 32,  0, 0); // LVDS TSYNC delay             (scale:9.4,unit:ns)
-    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor
+    createConfigParam("TsyncWidth",     'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (scale:100,unit:ns)
 
     createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
     createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
