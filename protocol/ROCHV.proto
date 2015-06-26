@@ -39,6 +39,17 @@ getNum {
 }
 
 #
+# Trying to split up request and receive of the voltage 
+#
+reqNum {
+   out "?\$1";
+}
+
+recNum {
+   in "?\$1%05d";
+}
+
+#
 # Set voltage (#), set DAC (&), set ramp rate (SR) with ao records
 # 
 # code seems to have write max hv (M)

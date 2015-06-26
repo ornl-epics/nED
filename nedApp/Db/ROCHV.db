@@ -170,25 +170,47 @@ record(calcout, "$(P)hv:VoltCmd") {
    field(INPA, "$(P)hv:OnOff CPP MS")
    field(INPB, "$(P)hv:VoltSet CPP NMS")
 }
+
+#
+# sequence voltage readback instead of using I/O Intr
+#
+#record(seq, "$(P)hv:VoltScan") {
+#   field(DESC, "request and read voltage")
+#   field(SCAN, "5 second")
+#   field(OUT1, "$(P)hv:VoltReq.PROC PP")
+#   field(DLY1, "0.1")
+#   field(OUT2, "$(P)hv:Volt.PROC PP")
+#}
+
+#
+# Ask for voltage readback
+#
+record(bo, "$(P)hv:VoltReq") {
+   field(DTYP, "stream")
+   field(SCAN, "5 second")
+   field(DESC, "Req readback in volts")
+   field(OUT, "@ROCHV.proto reqNum(LV) $(PORT) 0")
+}
   
 #
 # Voltage Readback in volts. 
-#
+"#
 record(ai, "$(P)hv:Volt") {
    field(DTYP, "stream")
    field(DESC, "Readback in volts")
-   field(INP, "@ROCHV.proto getNum(LV) $(PORT) 0")
+   field(INP, "@ROCHV.proto recNum(LV) $(PORT) 0")
    field(LOPR, "-100")
    field(HOPR, "2300")
    field(HSV, "MAJOR")
    field(LSV, "MAJOR")
    field(EGU, "V")
-   field(SCAN, "5 second")
+   field(SCAN, "I/O Intr")
    field(SDIS, "$(P)Enable NPP") # Prevent CommAlarm
    field(DISV, "0")
    field(FLNK, "$(P)hv:VoltAlarm")
    info(autosaveFields, "HIGH LOW")
 }
+
 record(calc, "$(P)hv:VoltAlarm") {
    field(DESC, "Volt alarm")
    field(INPA, "$(P)hv:Volt.SEVR NPP")
