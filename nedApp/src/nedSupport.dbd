@@ -39,4 +39,5 @@ registrar("RocPluginRegister")
 
 # Sequences
 registrar("GlobalConRegistrar")
+registrar("HVScanRegistrar")
 registrar("ApplyConfigRegistrar")

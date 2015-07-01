@@ -1,4 +1,4 @@
-program HVScan("winterval=0.1")
+program HVScan("DELAY=0.1")
 
 
 
@@ -82,7 +82,7 @@ ss HVScan {
             pvAssign(readVolt[i], deviceNames[i]);
 	    readVolt[i] = 1; /* just for show */
          }
-         delayval = strtod(macValueGet("winterval"), 0);
+         delayval = strtod(macValueGet("DELAY"), 0);
          if (delayval > -0.001 && delayval < 0.001) {
             printf("Defaulting delay to 0.1 seconds\n");
             delayval = 0.1;
