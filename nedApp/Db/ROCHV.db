@@ -32,6 +32,7 @@ record(fanout, "$(P)hv:InitProc") {
 record(fanout, "$(P)hv:InitProc1") {
    field(LNK1, "$(P)hv:ReadADC") 
    field(LNK2, "$(P)hv:ErrorInp") 
+   field(LNK3, "$(P)hv:OnOffWait")
 }
 
 #
@@ -159,34 +160,16 @@ record(calc, "$(P)hv:OnOffRbv") {
 }
 
 #
-# The next three records are intended to initialize the Enable and OnOff PVs
-# to match the state of the hardware.  OnOffInit drives its output only
-# if OnOffInit1 is 0 and a valid input from OnOffRbv has been obtained. 
-# The output value that OnOffInit drives is obtained from OnOffRbv.
-# The output is driven to a data fanout record, which drives Enable, OnOff,
-# and OnOffInit1. OnOffInit1 goes to 1 when processed, disabling any further
-# output from the system.
-#
+record(seq, "$(P)hv:OnOffWait") {
+   field(LNKA, "$(P)hv:OnOffInit PP")
+   field(DLYA, "10.0")
+}
+
 record(calcout, "$(P)hv:OnOffInit") {
-   field(INPA, "$(P)hv:OnOffRbv CPP MS")
-   field(INPB, "$(P)hv:OnOffInit1 NPP NMS")
-   field(OUT, "$(P)hv:OnOffDFan PP")
+   field(INPA, "$(P)hv:OnOffRbv NPP MS")
+   field(OUT, "$(P)hv:OnOff PP")
    field(IVOA, "Don't drive outputs")
-   field(DOPT, "Use OCAL")
-   field(OOPT, "When Zero")
-   field(CALC, "B")
-   field(OCAL, "A")
-}
-
-record(dfanout, "$(P)hv:OnOffDFan") {
-   field(OUTA, "$(P)hv:OnOffInit1 PP")
-   field(OUTB, "$(P)hv:OnOff PP")
-   field(OUTC, "$(P)hv:Enable PP")
-}
-
-record(calc, "$(P)hv:OnOffInit1") {
-   field(DESC, "OnOff and Enable inited")
-   field(CALC, "1")
+   field(CALC, "A")
 }
 
 #
