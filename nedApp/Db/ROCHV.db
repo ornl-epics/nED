@@ -32,7 +32,6 @@ record(fanout, "$(P)hv:InitProc") {
 record(fanout, "$(P)hv:InitProc1") {
    field(LNK1, "$(P)hv:ReadADC") 
    field(LNK2, "$(P)hv:ErrorInp") 
-   field(LNK3, "$(P)hv:OnOffWait")
 }
 
 #
@@ -157,19 +156,6 @@ record(calc, "$(P)hv:OnOffRbv") {
    field(DESC, "HV on/off readback")
    field(INPA, "$(P)hv:Volt NPP")
    field(CALC, "A<35?0:1")
-}
-
-#
-record(seq, "$(P)hv:OnOffWait") {
-   field(LNKA, "$(P)hv:OnOffInit PP")
-   field(DLYA, "10.0")
-}
-
-record(calcout, "$(P)hv:OnOffInit") {
-   field(INPA, "$(P)hv:OnOffRbv NPP MS")
-   field(OUT, "$(P)hv:OnOff PP")
-   field(IVOA, "Don't drive outputs")
-   field(CALC, "A")
 }
 
 #
