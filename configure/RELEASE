@@ -21,9 +21,9 @@
 
 SUPPORT=/home/controls/epics
 
-ASYN=           $(SUPPORT)/asyn/master
+ASYN=           $(SUPPORT)/asyn/rel4-26
 AUTOSAVE=       $(SUPPORT)/autosave/master
-STREAMDEVICE=   $(SUPPORT)/StreamDevice/master
+STREAMDEVICE=   $(SUPPORT)/StreamDevice/asyn-rel4-26
 OCCLIB=         /home/controls/occ/master/lib
 SNCSEQ=		$(SUPPORT)/seq/master
 PVMEDIATOR=	$(SUPPORT)/pvMediator/master
