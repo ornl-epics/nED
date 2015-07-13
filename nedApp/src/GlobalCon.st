@@ -433,9 +433,8 @@ int severity;
    }
 /* 
  * Macro to define a global operation request-monitor when clause. EVNAME is
- * the base name of the event (ie, the variable name), OP_NAME is the operation
- * code from the "OP_xxx" command defines above, and NEXT is the destination
- * state to perform the operation.
+ * the base name of the event (ie, the variable name) and NEXT is the 
+ * destination state to perform the operation.
  */
 #define CMD_WHEN(EVNAME, NEXT) 						\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {		\
@@ -444,8 +443,10 @@ int severity;
           if ((!accumSuccess || strcmp(prevReq, #NEXT)) &&		\
               strcmp("Enabling", #NEXT) && strcmp("Disabling", #NEXT)) {\
              for (i = 0; i< numFound; i++) {				\
-                PVPUTNUM(cmdSucceeded[i], 0)				\
-                failMsg[i][0] = 0; pvPut(failMsg[i]);			\
+                if (enable[i]) {					\
+                   PVPUTNUM(cmdSucceeded[i], 0)				\
+                   failMsg[i][0] = 0; pvPut(failMsg[i]);		\
+                }							\
              }								\
           }								\
        } state NEXT
@@ -532,7 +533,8 @@ ss GlobalControl {
           }
        } state DoWriting
     }
-    CMD_RSP(DoWriting, WRITECONFCMD, DoneWriting)
+    CMD_RSP(DoWriting, WRITECONFCMD, ReadStatConfigure)
+    CMD_RSP(ReadStatConfigure, READSTATCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
 }       
        
