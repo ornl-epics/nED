@@ -319,7 +319,7 @@ record(bo, "$(P)hv:ResetDAC") {
    field(DESC, "Yes reset the DAC")
    field(ASG, "BEAMLINE")
    field(DTYP, "stream")
-   field(OUT, "@ROCHV.proto sendCmd(X) $(PORT) 0")
+   field(OUT, "@ROCHV.proto sendCmd(Y) $(PORT) 0")
    field(DOL, "1")
    field(ONAM, "Reset")
    field(ZNAM, "Reset")
