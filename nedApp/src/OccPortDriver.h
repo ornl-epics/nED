@@ -41,21 +41,13 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          */
         enum Status {
             STAT_OK             = 0,    //!< No error
-            STAT_BUFFER_FULL    = 1,    //!< Receive buffer is full, acquisition was stopped
-            STAT_OCC_ERROR      = 2,    //!< OCC error was detected
+            STAT_BUFFER_FULL    = 1,    //!< Copy buffer full
+            STAT_OCC_ERROR      = 2,    //!< OCC error, check logs
             STAT_BAD_DATA       = 3,    //!< Bad or corrupted data detected in queue
             STAT_RESETTING      = 4,    //!< Resetting OCC and internal OccPortDriver state
             STAT_OCC_NOT_INIT   = 5,    //!< OCC device not initialized, check LastErr for details
-        };
-
-        /**
-         * Stall events used to create a bitmask
-         */
-        enum StallEvent {
-            STALL_NONE          = 0,    //!< Not stalled
-            STALL_DMA           = 1,    //!< DMA buffer stalled
-            STALL_FIFO          = 2,    //!< Internal OCC FIFO overflowed
-            STALL_COPY          = 3,    //!< Copy buffer stalled
+            STAT_OCC_STALL      = 6,    //!< OCC DMA stalled
+            STAT_OCC_FIFO_FULL  = 7,    //!< OCC FIFO overrun
         };
 
         /**

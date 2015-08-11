@@ -50,7 +50,6 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("FwVer",            asynParamInt32,     &FwVer);                    // READ - OCC board firmware version
     createParam("FwDate",           asynParamInt32,     &FwDate);                   // READ - OCC board firmware date
     createParam("ConStatus",        asynParamInt32,     &ConStatus);                // READ - Optical connection status     (0=connected,1=no SFP,2=no cable,3=laser fault)
-    createParam("RxStalled",        asynParamInt32,     &RxStalled,     STALL_NONE);// READ - Incoming data stalled         (see OccPortDriver::StallEvent)
     createParam("Command",          asynParamInt32,     &Command);                  // WRITE - Issue OccPortDriver command  (see OccPortDriver::Command)
     createParam("FpgaSn",           asynParamOctet,     &FpgaSn);                   // READ - FPGA serial number in hex str
     createParam("FpgaTemp",         asynParamFloat64,   &FpgaTemp);                 // READ - FPGA temperature in Celsius
@@ -202,9 +201,9 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             setIntegerParam(RecvRate,       occstatus.rx_rate);
 
             if (occstatus.stalled)
-                setIntegerParam(RxStalled,  STALL_DMA);
+                setIntegerParam(Status,     STAT_OCC_STALL);
             else if (occstatus.overflowed)
-                setIntegerParam(RxStalled,  STALL_FIFO);
+                setIntegerParam(Status,     STAT_OCC_FIFO_FULL);
         }
 
         callParamCallbacks();
@@ -269,6 +268,16 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
     } else if (pasynUser->reason == RxEn) {
+
+        if (value == 1) {
+            // RX could be switched off in the middle of the incoming packet.
+            // Second half of that packet would show up in the queue next time
+            // enabled. Calling occ_reset() to avoid it.
+            this->unlock();
+            reset();
+            this->lock();
+        }
+
         if ((ret = occ_enable_rx(m_occ, value > 0)) != 0) {
             LOG_ERROR("Unable to %s optical link - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
             setIntegerParam(LastErr, -ret);
@@ -277,17 +286,9 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
         }
 
         setIntegerParam(RxEn, value);
-        if (value == 0) {
-            // RX could be switched off in the middle of the incoming packet.
-            // Second half of that packet would show up in the queue next time
-            // enabled. Calling occ_reset() to avoid it.
-            this->unlock();
-            reset();
-            this->lock();
-        } else {
-            // There's a thread to refresh OCC status, including RX enabled
-            m_statusEvent.signal();
-        }
+        // There's a thread to refresh OCC status, including RX enabled
+        m_statusEvent.signal();
+
     } else if (pasynUser->reason == ErrPktEn) {
         if ((ret = occ_enable_error_packets(m_occ, value > 0)) != 0) {
             LOG_ERROR("Unable to %s error packets output - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
@@ -401,7 +402,6 @@ void OccPortDriver::reset() {
     // Flag resetting mode, status thread will recover
     this->lock();
     setIntegerParam(Status, STAT_OK);
-    setIntegerParam(RxStalled, STALL_NONE);
     callParamCallbacks();
     this->unlock();
 }
@@ -415,17 +415,14 @@ void OccPortDriver::handleRecvError(int ret)
 
     } else if (ret == -EOVERFLOW) { // OCC FIFO overflow
         setIntegerParam(LastErr, EOVERFLOW);
-        setIntegerParam(Status, STAT_BUFFER_FULL);
-        setIntegerParam(RxStalled, STALL_FIFO);
+        setIntegerParam(Status, STAT_OCC_FIFO_FULL);
 
     } else if (ret == -ENOSPC) { // OCC DMA full
         setIntegerParam(LastErr, ENOSPC);
-        setIntegerParam(Status, STAT_BUFFER_FULL);
-        setIntegerParam(RxStalled, STALL_DMA);
+        setIntegerParam(Status, STAT_OCC_STALL);
 
     } else if (ret == -ENODATA) { // DmaCopier full
         setIntegerParam(Status, STAT_BUFFER_FULL);
-        setIntegerParam(RxStalled, STALL_COPY);
 
     } else {
         setIntegerParam(LastErr, -ret);
