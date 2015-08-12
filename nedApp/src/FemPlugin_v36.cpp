@@ -258,7 +258,7 @@ void FemPlugin::createCounterParams_v36()
     createCounterParam("Ch9:UpRxParityCnt",     0x1F, 16,  0); // Ch9 upstream parity counter
     createCounterParam("DownRxParityCnt",       0x20, 16,  0); // Downstream RX parity count
 
-    createCounterParam("DieTemp",               0x21, 12,  0); // On die temperature
+    createCounterParam("DieTemp",               0x21, 12,  0); // On die temperature           (calc:(A*503.975/4096)-273.15,unit:Celsius,prec:1,low:-50,high:50)
     createCounterParam("DieTempAlarm",          0x21,  1, 13); // On die temp alarm - high     (0=low,1=high)
     createCounterParam("BoardTempAlarm",        0x21,  1, 14); // On board temp alarm - high   (0=low,1=high)
     createCounterParam("BoardTemp",             0x22, 16,  0); // On board temperature

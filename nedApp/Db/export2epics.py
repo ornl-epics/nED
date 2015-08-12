@@ -276,8 +276,11 @@ def generate_db_record(param, outfile):
 
     if "calcread" in param or "calcwrite" in param:
         flnk = _calc_record(param, outfile)
-        outfile.write("record(longout, \"$(P){0}\")\n".format(param['name']))
+        outfile.write("record(ao, \"$(P){0}\")\n".format(param['name']))
         outfile.write("{\n")
+        if "prec" not in param:
+            param['prec'] = 0
+        outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
 
         if param['direction'] == 'in':
             outfile.write("    field(OUT,  \"0\")\n")
