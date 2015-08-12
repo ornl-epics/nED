@@ -8,9 +8,12 @@
 # Summary alarm status
 #
 record(calc, "$(P)hv:AlarmSum") {
-   field(CALC, "1")
+   field(CALC, "abs(A-B)>50.0")
    field(INPA, "$(P)hv:Volt CP MS")
+   field(INPB, "$(P)hv:VoltCmd CP MS")
    field(INPC, "$(P)hv:CommAlarm CP MS")
+   field(HIHI, "0.5")
+   field(HHSV, "MAJOR")
    info(archive, "Monitor, 00:00:10, VAL")
 }
 
@@ -319,7 +322,7 @@ record(bo, "$(P)hv:ResetDAC") {
    field(DESC, "Yes reset the DAC")
    field(ASG, "BEAMLINE")
    field(DTYP, "stream")
-   field(OUT, "@ROCHV.proto sendCmd(X) $(PORT) 0")
+   field(OUT, "@ROCHV.proto sendCmd(Y) $(PORT) 0")
    field(DOL, "1")
    field(ONAM, "Reset")
    field(ZNAM, "Reset")
