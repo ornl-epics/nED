@@ -8,15 +8,23 @@
 # Summary alarm status
 #
 record(calc, "$(P)hv:AlarmSum") {
-   field(CALC, "((abs(A-B)>50.0)||C||D)&E")
+   field(CALC, "((abs(A-B)>50.0)||C||D)&&E&&F")
    field(INPA, "$(P)hv:Volt CP NMS")
    field(INPB, "$(P)hv:VoltCmd CP NMS")
    field(INPC, "$(P)hv:CommAlarm.SEVR CP NMS")
    field(INPD, "$(P)hv:Volt.SEVR CP NMS")
    field(INPE, "$(P)Enable CP NMS")
+   field(INPF, "$(P)hv:AlarmEna CP NMS")
    field(HIHI, "0.5")
    field(HHSV, "MAJOR")
    info(archive, "Monitor, 00:00:10, VAL")
+}
+
+record(bo, "$(P)hv:AlarmEna") {
+   field(ONAM, "Enabled")
+   field(ZNAM, "Disabled")
+   field(DOL, "1")
+   info(autosaveFields, "VAL")
 }
 
 #
@@ -219,42 +227,6 @@ record(mbbi, "$(P)hv:Status") {
    field(TWST, "On")
    field(SCAN, "1 second")
 }
-
-#
-# Converted current readback is in one document but not in legacy code.
-# Also there are conversion parameters in the document, but not the code.
-#
-#record(ai, "$(P)hv:Current") {
-#   field(DTYP, "stream")
-#   field(DESC, "converted current Readback")
-#   field(INP, "@ROCHV.proto getNum(LC) $(PORT) 0)
-#   field(EGU, "ma")
-#   field(SCAN, "1 second")
-#}
-
-#
-# Current readback.  Do it the ordinary EPICS way.  
-#
-# This has been removed because according to Loren Funk the current readback
-# is useless.  Not only that, not all ROC HV boards seem to even answer the
-# RC query.
-#
-# ESLO = .33 ma / 1023 bits  (for now)
-#
-#record(ai, "$(P)hv:Curr") {
-#   field(DTYP, "stream")
-#   field(DESC, "Current Readback")
-#   field(INP, "@ROCHV.proto getNum(RC) $(PORT) 0")
-#   field(LINR, "SLOPE")
-#   field(PREC, "4")
-#   field(ESLO, "0.000322581")
-#   field(EOFF, "0")
-#   field(EGU, "ma")
-#   field(HSV, "MAJOR")
-#   field(LSV, "MAJOR")
-#   info(autosaveFields, "HIGH LOW")
-#   field(SCAN, "1 second")
-#}
 
 #
 # Max Voltage readback. 
