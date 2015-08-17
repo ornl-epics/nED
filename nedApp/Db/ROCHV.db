@@ -23,6 +23,7 @@ record(calc, "$(P)hv:AlarmSum") {
 record(bo, "$(P)hv:AlarmEna") {
    field(ONAM, "Enabled")
    field(ZNAM, "Disabled")
+   field(ASG, "BEAMLINE")
    field(DOL, "1")
    info(autosaveFields, "VAL")
 }
