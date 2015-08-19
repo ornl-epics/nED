@@ -159,8 +159,6 @@ record(calc, "$(P)StatusCalc")
     field(INPB, "$(P)HealthStatusCalc.SEVR PP")
     field(INPC, "$(P)Acquiring.SEVR NPP")
     field(CALC, "A=0||(B+C)=0")
-    field(HIGH, "1")
-    field(HSV,  "MAJOR")
     field(PINI, "YES") # For Supported link
     field(FLNK, "$(P)Status")
 }
