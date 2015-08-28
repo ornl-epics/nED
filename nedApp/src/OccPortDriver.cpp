@@ -410,8 +410,11 @@ void OccPortDriver::handleRecvError(int ret)
 {
     this->lock();
 
-    if (ret == -EBADMSG) {
+    if (ret == -EBADMSG) { // Corrupted data based on length check
         setIntegerParam(Status, STAT_BAD_DATA);
+
+    } else if (ret == -ERANGE) { // Not enough data for packet
+        setIntegerParam(Status, STAT_PARTIAL_DATA);
 
     } else if (ret == -EOVERFLOW) { // OCC FIFO overflow
         setIntegerParam(LastErr, EOVERFLOW);
@@ -485,7 +488,7 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             } else {
                 LOG_ERROR("Partial data from OCC, aborting process thread");
             }
-            handleRecvError(-EBADMSG);
+            handleRecvError(-ERANGE);
             break;
         }
     }

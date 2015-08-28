@@ -41,13 +41,14 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          */
         enum Status {
             STAT_OK             = 0,    //!< No error
-            STAT_BUFFER_FULL    = 1,    //!< Copy buffer full
-            STAT_OCC_ERROR      = 2,    //!< OCC error, check logs
+            STAT_RESETTING      = 1,    //!< Resetting OCC and internal OccPortDriver state
+            STAT_BUFFER_FULL    = 2,    //!< Copy buffer full
             STAT_BAD_DATA       = 3,    //!< Bad or corrupted data detected in queue
-            STAT_RESETTING      = 4,    //!< Resetting OCC and internal OccPortDriver state
-            STAT_OCC_NOT_INIT   = 5,    //!< OCC device not initialized, check LastErr for details
-            STAT_OCC_STALL      = 6,    //!< OCC DMA stalled
-            STAT_OCC_FIFO_FULL  = 7,    //!< OCC FIFO overrun
+            STAT_PARTIAL_DATA   = 4,    //!< Partial data received, no more data afterwards
+            STAT_OCC_NOT_INIT   = 11,   //!< OCC device not initialized, check LastErr for details
+            STAT_OCC_ERROR      = 12,   //!< OCC error, check logs
+            STAT_OCC_STALL      = 13,   //!< OCC DMA stalled
+            STAT_OCC_FIFO_FULL  = 14,   //!< OCC FIFO overrun
         };
 
         /**
