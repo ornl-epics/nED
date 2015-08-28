@@ -69,7 +69,7 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
             if ( (m_rtdlEn     && packet->isRtdl()        ) ||
                  (m_neutronEn  && packet->isNeutronData() ) ||
                  (m_metadataEn && packet->isMetaData()    ) ||
-                 (m_cmdEn      && packet->isCommand()     ) ||
+                 (m_cmdEn      && packet->isCommand() && !packet->isRtdl() && packet->cmdinfo.command != DasPacket::CMD_TSYNC) ||
                  (m_unknwnEn) ) {
 
                 nProcessed++;
