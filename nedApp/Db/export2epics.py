@@ -138,10 +138,10 @@ def _aiao_val(param, outfile, default_value=None):
         outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
         outfile.write("    field(HSV,  \"MAJOR\")\n")
     if "slope_scale" in param:
-        outfile.write("    field(ASLO, \"{0}\")\n".format(param['slope_scale']))
+        outfile.write("    field(ESLO, \"{0}\")\n".format(param['slope_scale']))
         outfile.write("    field(LINR, \"SLOPE\")\n")
     if "slope_offset" in param:
-        outfile.write("    field(AOFF, \"{0}\")\n".format(param['slope_offset']))
+        outfile.write("    field(EOFF, \"{0}\")\n".format(param['slope_offset']))
         if "scale" not in param:
             outfile.write("    field(LINR, \"SLOPE\")\n")
 
