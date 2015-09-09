@@ -2,6 +2,7 @@ record(bo, "$(P)Enable")
 {
     field(VAL,  "1")
     field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(stringin, "$(P)HwId")
 {
