@@ -34,7 +34,7 @@ void DspPlugin::createParams_v64() {
 
     createConfigParam("ChopDutyCycle",  'C', 0x9,  32,  0, 83400); // Ref pulse hold time      (scale:100,unit:ns)
     createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // Ref pulse delay         (scale:100,unit:ns)
-    createConfigParam("ChopFixOffset",  'C', 0xB,  32,  0, 0); // Chopper TOF fixed offset     (scale:100,unit:ns)
+    createConfigParam("TofFixOffset",   'C', 0xB,  32,  0, 0); // TOF fixed offset             (scale:100,unit:ns)
 
     createConfigParam("ChopFr6",        'C', 0xC,   8,  0, 4); // RTDL Frame 6
     createConfigParam("ChopFr7",        'C', 0xC,   8,  8, 5); // RTDL Frame 7
