@@ -50,7 +50,6 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
     , m_nTransmitted(0)
     , m_nProcessed(0)
     , m_nReceived(0)
-    , m_nPacketsPrevPulse(0)
     , m_heartbeatActive(true)
     , m_dataPktType(ADARA_PKT_TYPE_RAW_EVENT)
 {
@@ -59,7 +58,6 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
     m_neutronSeq.sourceId = g_sourceList.get();
     m_metadataSeq.sourceId = g_sourceList.get();
 
-    createParam("BadPulsCnt",   asynParamInt32, &BadPulsCnt, 0); // READ - Num dropped packets associated to already completed pulse
     createParam("PixelsMapped", asynParamInt32, &PixelsMapped, 0); // WRITE - Tells whether data packets are flagged as raw or mapped pixel data
     createParam("NeutronsEn",   asynParamInt32, &NeutronsEn, 0); // WRITE - Enable forwarding neutron events
     createParam("MetadataEn",   asynParamInt32, &MetadataEn, 0); // WRITE - Enable forwarding metadata events
@@ -146,13 +144,6 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 prevTs.secPastEpoch = seq->rtdl.timestamp_sec;
                 prevTs.nsec         = seq->rtdl.timestamp_nsec;
 
-                // Account and drop packets from already completed pulses - should always be 0
-                if (epicsTimeGreaterThan(&prevTs, &currentTs) != 0) {
-                    m_nPacketsPrevPulse++;
-                    LOG_ERROR("Received a packet associated to an already completed pulse, dropping packet");
-                    continue;
-                }
-
                 // When transition to new pulse is detected, inject EOP packet for previous pulse
                 if (epicsTimeEqual(&currentTs, &prevTs) == 0) {
                     if (prevTs.secPastEpoch > 0 && prevTs.nsec > 0) {
@@ -202,7 +193,6 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
     setIntegerParam(TxCount,        m_nTransmitted);
     setIntegerParam(ProcCount,      m_nProcessed);
     setIntegerParam(RxCount,        m_nReceived);
-    setIntegerParam(BadPulsCnt,     m_nPacketsPrevPulse);
     callParamCallbacks();
 }
 

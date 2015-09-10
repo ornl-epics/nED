@@ -32,36 +32,6 @@ record(stringin, "$(P)ClientIp")
     field(FLNK, "$(P)StatusCalc.PROC")
 }
 
-record(longin, "$(P)BadPulsCnt")
-{
-   field(DESC,  "Prev pulse dropped packets")
-   field(DTYP,  "asynInt32")
-   field(INP,   "@asyn($(PORT))BadPulsCnt")
-   field(SCAN,  "I/O Intr")
-   field(PINI,  "YES")
-   field(HIGH,  "1")
-   field(HSV,   "MAJOR")
-   field(FLNK,  "$(P)BadPulsRunCnt")
-}
-# When processed it retrieves current value of old packets
-# and schedules calculation of difference record. When scheduled before
-# each run start, BadPulsRunCnt keeps counter per run.
-record(longin, "$(P)PreStart")
-{
-   field(DESC,  "Last completed run dropped packets")
-   field(INP,   "$(P)BadPulsCnt NPP")
-   field(FLNK,  "$(P)BadPulsRunCnt")
-   field(VAL,   "0")
-   field(PINI,  "YES")
-}
-record(calc, "$(P)BadPulsRunCnt")
-{
-   field(DESC,  "Prev pulse dropped packets per run")
-   field(INPA,  "$(P)LastBadPulsCnt NPP")
-   field(INPB,  "$(P)BadPulsCnt NPP")
-   field(CALC,  "B-A")
-   field(PINI,  "YES")
-}
 record(scalcout, "$(P)StatusCalc")
 {
     field(DESC, "Determine global OCC status")
