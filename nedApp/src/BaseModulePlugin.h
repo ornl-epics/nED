@@ -169,8 +169,8 @@ class BaseModulePlugin : public BasePlugin {
         static const float RESET_NO_RESPONSE_TIMEOUT;   //!< Number of seconds to wait for module RESET response
 
     public: // variables
-        static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask;
-        static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask;
+        static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask | asynFloat64Mask;
+        static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask | asynFloat64Mask;
 
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
@@ -933,7 +933,8 @@ class BaseModulePlugin : public BasePlugin {
         int UpgradeSize;    //!< Total firmware size in bytes
         int UpgradePos;     //!< Bytes already sent to remote party
         int UpgradeAbort;   //!< Abort current upgrade sequence
-        #define LAST_BASEMODULEPLUGIN_PARAM UpgradeAbort
+        int NoRspTimeout;   //!< Time to wait for response
+        #define LAST_BASEMODULEPLUGIN_PARAM NoRspTimeout
 };
 
 #endif // BASE_MODULE_PLUGIN_H

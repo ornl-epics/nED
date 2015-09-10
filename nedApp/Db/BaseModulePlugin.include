@@ -536,3 +536,11 @@ record(calcout, "$(P)TempRefresh")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
 }
+record(ao, "$(P)NoRspTimeout")
+{
+    field(DESC, "Time to wait for response")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))NoRspTimeout")
+    field(EGU,  "seconds")
+    field(PREC, "1")
+}
