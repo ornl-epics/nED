@@ -51,43 +51,27 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
     } else if (m_version == "v45" || m_version == "v44") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
-        createStatusParams_v45();
-        createConfigParams_v45();
-        createTemperatureParams_v45();
+        createParams_v45();
     } else if (m_version == "v47") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
-        createStatusParams_v47();
-        createConfigParams_v47();
-        createTemperatureParams_v47();
+        createParams_v47();
     } else if (m_version == "v51") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v51();
-        createConfigParams_v51();
-        createTemperatureParams_v51();
+        createParams_v51();
     } else if (m_version == "v52") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v52();
-        createConfigParams_v52();
-        createTemperatureParams_v52();
+        createParams_v52();
     } else if (m_version == "v54" || m_version == "v55") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v54();
-        createConfigParams_v54();
-        createTemperatureParams_v54();
+        createParams_v54();
         createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
     } else if (m_version == "v56") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v56();
-        createCounterParams_v56();
-        createConfigParams_v56();
-        createTemperatureParams_v56();
+        createParams_v56();
     } else if (m_version == "v57") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v57();
-        createCounterParams_v57();
-        createConfigParams_v57();
-        createTemperatureParams_v57();
+        createParams_v57();
     } else if (m_version == "v58") {
         setIntegerParam(Supported, 1);
         createParams_v58();
@@ -269,12 +253,17 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
     sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
 }
 
+#include <stdlib.h>
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
 {
     const uint32_t *payload = packet->getPayload();
 
     // Single character per OCC packet
     char byte = payload[0] & 0xFF;
+
+    if (rand() % 20 == 2 && (byte >= '0' && byte <= '9'))
+        return true;
+
     m_hvBuffer.enqueue(&byte, 1);
 
     return true;

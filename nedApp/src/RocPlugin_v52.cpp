@@ -18,7 +18,7 @@
  * sources are available and it's installed to most beam-lines.
  */
 
-void RocPlugin::createStatusParams_v52()
+void RocPlugin::createParams_v52()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrUartByte",          0x0,  1, 13); // UART: Byte error             (0=no error,1=error)
@@ -301,10 +301,7 @@ void RocPlugin::createStatusParams_v52()
     createStatusParam("Ch8:B:AutoAdjOffset",  0x1F, 1,  3); // Chan8 B Auto-Adjust Offset l (0=not active,1=active)
     createStatusParam("Ch8:B:AutoAdjSlope1",  0x1F, 1,  2); // Chan8 B Auto-Adjust Slope? l (0=not active,1=active)
     createStatusParam("Ch8:B:AutoAdjOverflow",0x1F, 1,  1); // Chan8 B Auto-Adjust overflow (0=no,1=yes)
-}
 
-void RocPlugin::createConfigParams_v52()
-{
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:PositionIdx",  '1', 0x0,  32, 0, 0);     // Chan1 position index
     createConfigParam("Ch2:PositionIdx",  '1', 0x2,  32, 0, 256);   // Chan2 position index
@@ -560,14 +557,11 @@ void RocPlugin::createConfigParams_v52()
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
-    createConfigParam("TxEnable",         'F', 0x0,  1, 3,  1);     // TX enable                     (0=external,1=always enabled)
-    createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
-    createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
-    createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
-}
+    createConfigParam("TcTxEnMode",       'F', 0x0,  1, 3,  1);     // T&C TX enable mode            (0=external,1=internal)
+    createConfigParam("TcTsyncMode",      'F', 0x0,  1, 2,  0);     // T&C TSYNC mode                (0=external,1=internal 60Hz)
+    createConfigParam("TcTclkMode",       'F', 0x0,  1, 1,  0);     // T&C TCLK mode                 (0=external,1=internal 10MHz)
+    createConfigParam("TcResetMode",      'F', 0x0,  1, 0,  0);     // T&C Reset mode                (0=internal,1=external)
 
-void RocPlugin::createTemperatureParams_v52()
-{
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
     createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
     createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)

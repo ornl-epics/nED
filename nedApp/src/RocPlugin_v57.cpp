@@ -20,7 +20,7 @@
  *
  */
 
-void RocPlugin::createStatusParams_v57()
+void RocPlugin::createParams_v57()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                         | EPICS record description  | (bi and mbbi description)
     createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring mode.               (0=not acquiring [alarm],1=acquiring, archive:monitor)
@@ -116,10 +116,7 @@ void RocPlugin::createStatusParams_v57()
     // data but the packet length is 64 bytes => 20 bytes or 10 registers
     // We only need to define the last one which defines the packet length
     createStatusParam("StatFill",         0x1F,15,  0);
-}
 
-void RocPlugin::createCounterParams_v57()
-{
     createCounterParam("CntParity",        0x0, 16,  0); // LVDS parity error counter
     createCounterParam("CntUartParity",    0x1, 16,  0); // UART parity error counter
     createCounterParam("CntUartByte",      0x2, 16,  0); // UART byte error counter
@@ -149,10 +146,7 @@ void RocPlugin::createCounterParams_v57()
     createCounterParam("Ch6:CntRate",      0x1A, 16,  0); // Ch6 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
     createCounterParam("Ch7:CntRate",      0x1B, 16,  0); // Ch7 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
     createCounterParam("CntOutRate",       0x1C, 16,  0); // Total outrate counter (calc:1000*A/52.4288,unit:counts/s,prec:0)
-}
 
-void RocPlugin::createConfigParams_v57()
-{
 //    BLXXX:Det:RocXXX:| sig nam |                                    | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:PositionIdx",  '1', 0x0,  32, 0, 0);     // Chan1 position index
     createConfigParam("Ch2:PositionIdx",  '1', 0x2,  32, 0, 256);   // Chan2 position index
@@ -394,20 +388,17 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
-    createConfigParam("TxEnable",         'F', 0x0,  1, 3,  1);     // TX enable                     (0=external,1=always enabled)
-    createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
-    createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
-    createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
+    createConfigParam("TcTxEnMode",       'F', 0x0,  1, 3,  1);     // T&C TX enable  mode           (0=external,1=internal)
+    createConfigParam("TcTsyncMode",      'F', 0x0,  1, 2,  0);     // T&C TSYNC mode                (0=external,1=internal 60Hz)
+    createConfigParam("TcTclkMode",       'F', 0x0,  1, 1,  0);     // T&C TCLK mode                 (0=external,1=internal 10MHz)
+    createConfigParam("TcResetMode",      'F', 0x0,  1, 0,  0);     // T&C Reset mode                (0=internal,1=external)
 
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
     createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Alternate test pattern enable (0=disable,1=enable)
     createConfigParam("TestPatternDebug", 'F', 0x1,  2, 12, 0);     // Engineering Use only
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
     createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
-}
 
-void RocPlugin::createTemperatureParams_v57()
-{
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
     createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
     createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
