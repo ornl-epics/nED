@@ -253,16 +253,12 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
     sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
 }
 
-#include <stdlib.h>
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
 {
     const uint32_t *payload = packet->getPayload();
 
     // Single character per OCC packet
     char byte = payload[0] & 0xFF;
-
-    if (rand() % 20 == 2 && (byte >= '0' && byte <= '9'))
-        return true;
 
     m_hvBuffer.enqueue(&byte, 1);
 
