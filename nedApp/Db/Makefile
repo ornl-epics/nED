@@ -13,7 +13,6 @@ include $(TOP)/configure/CONFIG
 DB += nEDCommon.db
 DB += OccPortDriver.db
 DB += DiscoverPlugin.db
-DB += RocHv.template
 DB += ROCHV.db
 DB += ROCHVSumBL16b.db
 DB += DumpPlugin.db

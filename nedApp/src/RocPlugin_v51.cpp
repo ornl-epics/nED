@@ -9,7 +9,7 @@
 
 #include "RocPlugin.h"
 
-void RocPlugin::createStatusParams_v51()
+void RocPlugin::createParams_v51()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrUartByte",          0x0,  1, 13); // UART: Byte error             (0=no error,1=error)
@@ -292,10 +292,7 @@ void RocPlugin::createStatusParams_v51()
     createStatusParam("Ch8:B:AutoAdjOffset",  0x1F, 1,  3); // Chan8 B Auto-Adjust Offset l (0=not active,1=active)
     createStatusParam("Ch8:B:AutoAdjSlope1",  0x1F, 1,  2); // Chan8 B Auto-Adjust Slope? l (0=not active,1=active)
     createStatusParam("Ch8:B:AutoAdjOverflow",0x1F, 1,  1); // Chan8 B Auto-Adjust overflow (0=no,1=yes)
-}
 
-void RocPlugin::createConfigParams_v51()
-{
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:PositionIdx",  '1', 0x0,  32, 0, 0);     // Chan1 position index
     createConfigParam("Ch2:PositionIdx",  '1', 0x2,  32, 0, 256);   // Chan2 position index
@@ -401,38 +398,38 @@ void RocPlugin::createConfigParams_v51()
     createConfigParam("Ch8:B:GainAdj",    '2', 0x57, 12, 0, 0);     // Chan8 B gain adjust
 
     createConfigParam("Ch1:A:Scale",      '3', 0x0,  12, 0, 2048);  // Chan1 A scale
-    createConfigParam("Ch1:A:Offset",     '3', 0x1,  16, 0, 1600);  // Chan1 A offset
+    createConfigParam("Ch1:A:Offset",     '3', 0x1,  12, 0, 1600);  // Chan1 A offset
     createConfigParam("Ch1:B:Scale",      '3', 0x2,  12, 0, 2048);  // Chan1 B scale
-    createConfigParam("Ch1:B:Offset",     '3', 0x3,  16, 0, 1600);  // Chan1 B offset
+    createConfigParam("Ch1:B:Offset",     '3', 0x3,  12, 0, 1600);  // Chan1 B offset
     createConfigParam("Ch2:A:Scale",      '3', 0x4,  12, 0, 2048);  // Chan2 A scale
-    createConfigParam("Ch2:A:Offset",     '3', 0x5,  16, 0, 1600);  // Chan2 A offset
+    createConfigParam("Ch2:A:Offset",     '3', 0x5,  12, 0, 1600);  // Chan2 A offset
     createConfigParam("Ch2:B:Scale",      '3', 0x6,  12, 0, 2048);  // Chan2 B scale
-    createConfigParam("Ch2:B:Offset",     '3', 0x7,  16, 0, 1600);  // Chan2 B offset
+    createConfigParam("Ch2:B:Offset",     '3', 0x7,  12, 0, 1600);  // Chan2 B offset
     createConfigParam("Ch3:A:Scale",      '3', 0x8,  12, 0, 2048);  // Chan3 A scale
-    createConfigParam("Ch3:A:Offset",     '3', 0x9,  16, 0, 1600);  // Chan3 A offset
+    createConfigParam("Ch3:A:Offset",     '3', 0x9,  12, 0, 1600);  // Chan3 A offset
     createConfigParam("Ch3:B:Scale",      '3', 0xA,  12, 0, 2048);  // Chan3 B scale
-    createConfigParam("Ch3:B:Offset",     '3', 0xB,  16, 0, 1600);  // Chan3 B offset
+    createConfigParam("Ch3:B:Offset",     '3', 0xB,  12, 0, 1600);  // Chan3 B offset
     createConfigParam("Ch4:A:Scale",      '3', 0xC,  12, 0, 2048);  // Chan4 A scale
-    createConfigParam("Ch4:A:Offset",     '3', 0xD,  16, 0, 1600);  // Chan4 A offset
+    createConfigParam("Ch4:A:Offset",     '3', 0xD,  12, 0, 1600);  // Chan4 A offset
     createConfigParam("Ch4:B:Scale",      '3', 0xE,  12, 0, 2048);  // Chan4 B scale
-    createConfigParam("Ch4:B:Offset",     '3', 0xF,  16, 0, 1600);  // Chan4 B offset
+    createConfigParam("Ch4:B:Offset",     '3', 0xF,  12, 0, 1600);  // Chan4 B offset
 
     createConfigParam("Ch5:A:Scale",      '3', 0x10, 12, 0, 2048);  // Chan5 A scale
-    createConfigParam("Ch5:A:Offset",     '3', 0x11, 16, 0, 1600);  // Chan5 A offset
+    createConfigParam("Ch5:A:Offset",     '3', 0x11, 12, 0, 1600);  // Chan5 A offset
     createConfigParam("Ch5:B:Scale",      '3', 0x12, 12, 0, 2048);  // Chan5 B scale
-    createConfigParam("Ch5:B:Offset",     '3', 0x13, 16, 0, 1600);  // Chan5 B offset
+    createConfigParam("Ch5:B:Offset",     '3', 0x13, 12, 0, 1600);  // Chan5 B offset
     createConfigParam("Ch6:A:Scale",      '3', 0x14, 12, 0, 2048);  // Chan6 A scale
-    createConfigParam("Ch6:A:Offset",     '3', 0x15, 16, 0, 1600);  // Chan6 A offset
+    createConfigParam("Ch6:A:Offset",     '3', 0x15, 12, 0, 1600);  // Chan6 A offset
     createConfigParam("Ch6:B:Scale",      '3', 0x16, 12, 0, 2048);  // Chan6 B scale
-    createConfigParam("Ch6:B:Offset",     '3', 0x17, 16, 0, 1600);  // Chan6 B offset
+    createConfigParam("Ch6:B:Offset",     '3', 0x17, 12, 0, 1600);  // Chan6 B offset
     createConfigParam("Ch7:A:Scale",      '3', 0x18, 12, 0, 2048);  // Chan7 A scale
-    createConfigParam("Ch7:A:Offset",     '3', 0x19, 16, 0, 1600);  // Chan7 A offset
+    createConfigParam("Ch7:A:Offset",     '3', 0x19, 12, 0, 1600);  // Chan7 A offset
     createConfigParam("Ch7:B:Scale",      '3', 0x1A, 12, 0, 2048);  // Chan7 B scale
-    createConfigParam("Ch7:B:Offset",     '3', 0x1B, 16, 0, 1600);  // Chan7 B offset
+    createConfigParam("Ch7:B:Offset",     '3', 0x1B, 12, 0, 1600);  // Chan7 B offset
     createConfigParam("Ch8:A:Scale",      '3', 0x1C, 12, 0, 2048);  // Chan8 A scale
-    createConfigParam("Ch8:A:Offset",     '3', 0x1D, 16, 0, 1600);  // Chan8 A offset
+    createConfigParam("Ch8:A:Offset",     '3', 0x1D, 12, 0, 1600);  // Chan8 A offset
     createConfigParam("Ch8:B:Scale",      '3', 0x1E, 12, 0, 2048);  // Chan8 B scale
-    createConfigParam("Ch8:B:Offset",     '3', 0x1F, 16, 0, 1600);  // Chan8 B offset
+    createConfigParam("Ch8:B:Offset",     '3', 0x1F, 12, 0, 1600);  // Chan8 B offset
 
     createConfigParam("Ch1:ScaleFact",    '4', 0x0,  12, 0, 2048);  // Chan1 scale factor
     createConfigParam("Ch2:ScaleFact",    '4', 0x1,  12, 0, 2048);  // Chan2 scale factor
@@ -536,30 +533,27 @@ void RocPlugin::createConfigParams_v51()
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
     createConfigParam("MinAdc",           'E', 0x6,  14, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  14, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",       'E', 0x8,  9,  0, 506);   // Integrator release point
-    createConfigParam("MinDiscrimWidth",  'E', 0x9,  9,  0, 1);     // Minimum discriminator width
-    createConfigParam("Sample1",          'E', 0xA,  9,  0, 2);     // Sample 1 point [0:10]
-    createConfigParam("Sample2",          'E', 0xB,  9,  0, 14);    // Sample 1 point [2:50]
+    createConfigParam("IntRelease",       'E', 0x8,   9, 0, 506);   // Integrator release point
+    createConfigParam("MinDiscrimWidth",  'E', 0x9,   9, 0, 1);     // Minimum discriminator width
+    createConfigParam("Sample1",          'E', 0xA,   9, 0, 2);     // Sample 1 point [0:10]
+    createConfigParam("Sample2",          'E', 0xB,   9, 0, 14);    // Sample 1 point [2:50]
 
     createConfigParam("LvdsRate",         'F', 0x0,  1, 15, 1);     // LVDS output rate              (0=20Mhz,1=40Mhz)
     createConfigParam("AutoCorrectMode",  'F', 0x0,  1, 14, 0);     // Auto correction sample mode   (0=TSYNC,1=fake trigger)
     createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // Edge detect enable            (0=disable,1=enable)
     createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
     createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
-    createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
+    createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  1);     // Auto correction mode          (0=enabled,1=disabled)
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
-    createConfigParam("TxEnable",         'F', 0x0,  1, 3,  1);     // TX enable                     (0=external,1=always enabled)
-    createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
-    createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
-    createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
-}
+    createConfigParam("TcTxEnMode",       'F', 0x0,  1, 3,  1);     // T&C TX enable mode            (0=external,1=internal)
+    createConfigParam("TcTsyncMode",      'F', 0x0,  1, 2,  0);     // T&C TSYNC mode                (0=external,1=internal 60Hz)
+    createConfigParam("TcTclkMode",       'F', 0x0,  1, 1,  0);     // T&C TCLK mode                 (0=external,1=internal 10MHz)
+    createConfigParam("TcResetMode",      'F', 0x0,  1, 0,  0);     // T&C Reset mode                (0=internal,1=external)
 
-void RocPlugin::createTemperatureParams_v51()
-{
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
-    createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
-    createTempParam("TempPreampB",      0x2, 16, 0); // Preamp B temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
+    createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempPreampB",      0x2, 16, 0); // Preamp B temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
 }

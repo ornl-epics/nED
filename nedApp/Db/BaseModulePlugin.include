@@ -2,6 +2,7 @@ record(bo, "$(P)Enable")
 {
     field(VAL,  "1")
     field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(stringin, "$(P)HwId")
 {
@@ -159,8 +160,6 @@ record(calc, "$(P)StatusCalc")
     field(INPB, "$(P)HealthStatusCalc.SEVR PP")
     field(INPC, "$(P)Acquiring.SEVR NPP")
     field(CALC, "A=0||(B+C)=0")
-    field(HIGH, "1")
-    field(HSV,  "MAJOR")
     field(PINI, "YES") # For Supported link
     field(FLNK, "$(P)Status")
 }
@@ -536,4 +535,12 @@ record(calcout, "$(P)TempRefresh")
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
+}
+record(ao, "$(P)NoRspTimeout")
+{
+    field(DESC, "Time to wait for response")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))NoRspTimeout")
+    field(EGU,  "seconds")
+    field(PREC, "1")
 }

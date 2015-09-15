@@ -214,7 +214,7 @@ const uint32_t *DasPacket::getData(uint32_t *count) const
     *count = 0;
     if (!datainfo.is_command) {
         start = reinterpret_cast<const uint8_t *>(payload);
-        if (datainfo.rtdl_present)
+        if (datainfo.rtdl_present && payload_length >= sizeof(RtdlHeader))
             start += sizeof(RtdlHeader);
         *count = (payload_length - (start - reinterpret_cast<const uint8_t*>(payload)));
         *count /= sizeof(uint32_t);

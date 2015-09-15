@@ -138,10 +138,10 @@ def _aiao_val(param, outfile, default_value=None):
         outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
         outfile.write("    field(HSV,  \"MAJOR\")\n")
     if "slope_scale" in param:
-        outfile.write("    field(ASLO, \"{0}\")\n".format(param['slope_scale']))
+        outfile.write("    field(ESLO, \"{0}\")\n".format(param['slope_scale']))
         outfile.write("    field(LINR, \"SLOPE\")\n")
     if "slope_offset" in param:
-        outfile.write("    field(AOFF, \"{0}\")\n".format(param['slope_offset']))
+        outfile.write("    field(EOFF, \"{0}\")\n".format(param['slope_offset']))
         if "scale" not in param:
             outfile.write("    field(LINR, \"SLOPE\")\n")
 
@@ -276,8 +276,11 @@ def generate_db_record(param, outfile):
 
     if "calcread" in param or "calcwrite" in param:
         flnk = _calc_record(param, outfile)
-        outfile.write("record(longout, \"$(P){0}\")\n".format(param['name']))
+        outfile.write("record(ao, \"$(P){0}\")\n".format(param['name']))
         outfile.write("{\n")
+        if "prec" not in param:
+            param['prec'] = 0
+        outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
 
         if param['direction'] == 'in':
             outfile.write("    field(OUT,  \"0\")\n")

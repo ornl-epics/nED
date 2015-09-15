@@ -37,7 +37,6 @@ class AdaraPlugin : public BaseSocketPlugin {
         uint64_t m_nTransmitted;    //!< Number of packets sent to BASESOCKET
         uint64_t m_nProcessed;      //!< Number of processed packets
         uint64_t m_nReceived;       //!< Number of packets received from dispatcher
-        uint64_t m_nPacketsPrevPulse;       //!< Number of dropped packets associated to already complete pulse
         epicsTimeStamp m_lastSentTimestamp; //!< Timestamp of last packet sent to Adara
         epicsTimeStamp m_lastRtdlTimestamp; //!< Timestamp of last RTDL packet sent to Adara
         bool m_heartbeatActive;     //!< Allow to temporarily disable heartbeat to prevent interleaved writes on socket
@@ -101,8 +100,7 @@ class AdaraPlugin : public BaseSocketPlugin {
         float checkClient();
 
     protected:
-        #define FIRST_ADARAPLUGIN_PARAM BadPulsCnt
-        int BadPulsCnt;
+        #define FIRST_ADARAPLUGIN_PARAM PixelsMapped
         int PixelsMapped;
         int NeutronsEn;
         int MetadataEn;

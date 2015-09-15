@@ -29,8 +29,8 @@
  */
 #define SECTION_ID(section, channel) (((channel) * 0x10) + ((section) & 0xF))
 
-const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 2.0;
-const float BaseModulePlugin::RESET_NO_RESPONSE_TIMEOUT = 5.0;
+const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 1.0; // Default value, user can override
+const float BaseModulePlugin::RESET_NO_RESPONSE_TIMEOUT = 5.0; // Overrides m_noResponseTimeout for CMD_RESET
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherPortName,
                                    const char *hardwareId, DasPacket::ModuleType hardwareType,
@@ -65,6 +65,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("UpgradeSize",  asynParamInt32, &UpgradeSize, 0);           // READ - Total firmware size in bytes
     createParam("UpgradePos",   asynParamInt32, &UpgradePos, 0);            // READ - Bytes already sent to remote porty
     createParam("UpgradeAbort", asynParamInt32, &UpgradeAbort, 0);          // WRITE - Abort current upgrade sequence
+    createParam("NoRspTimeout", asynParamFloat64, &NoRspTimeout, NO_RESPONSE_TIMEOUT); // WRITE - Time to wait for response
 
     std::string hardwareIp = addr2ip(m_hardwareId);
     setStringParam(HwId, hardwareIp.c_str());
@@ -90,7 +91,8 @@ void BaseModulePlugin::setNumChannels(uint32_t n)
 asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == CmdReq) {
-        double timeout = NO_RESPONSE_TIMEOUT;
+        double timeout;
+        getDoubleParam(NoRspTimeout, &timeout);
 
         if (m_waitingResponse != 0) {
             LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
@@ -365,7 +367,9 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
         }
         if (processed) {
             if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
-                if (!scheduleTimeoutCallback(m_waitingResponse, NO_RESPONSE_TIMEOUT))
+                double timeout;
+                getDoubleParam(NoRspTimeout, &timeout);
+                if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
                    LOG_WARN("Failed to schedule CmdRsp timeout callback");
                 setIntegerParam(CmdRsp, LAST_CMD_WAIT);
 

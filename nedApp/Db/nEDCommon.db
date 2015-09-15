@@ -11,5 +11,4 @@ record(dfanout, "$(P)nED:PreStart")
     field(VAL,  "1")
     # A placeholder record that can be used by beamlines
     # specific records
-    #field(OUTA, "$(P):pm:ResetCnt")
 }

@@ -69,7 +69,7 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
             if ( (m_rtdlEn     && packet->isRtdl()        ) ||
                  (m_neutronEn  && packet->isNeutronData() ) ||
                  (m_metadataEn && packet->isMetaData()    ) ||
-                 (m_cmdEn      && packet->isCommand()     ) ||
+                 (m_cmdEn      && packet->isCommand() && !packet->isRtdl() && packet->cmdinfo.command != DasPacket::CMD_TSYNC) ||
                  (m_unknwnEn) ) {
 
                 nProcessed++;
@@ -192,7 +192,7 @@ bool DumpPlugin::openFile(const std::string &path, bool overwrite)
     }
 
     // Create new file if necessary, truncate existing file, works with named pipes
-    m_fd = open(path.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
+    m_fd = open(path.c_str(), O_CREAT | O_WRONLY | O_TRUNC | O_NONBLOCK, 0644);
     if (m_fd == -1) {
         LOG_ERROR("Can not open dump file '%s': %s", path.c_str(), strerror(errno));
         return false;

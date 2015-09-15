@@ -9,7 +9,7 @@
 
 #include "RocPlugin.h"
 
-void RocPlugin::createStatusParams_v47()
+void RocPlugin::createParams_v47()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrParity",            0x0,  1,  0); // LVDS parity error.           (0=no error,1=error)
@@ -334,10 +334,7 @@ void RocPlugin::createStatusParams_v47()
     createStatusParam("Ch8:ErrCmdBad",        8, 0x3,  1, 13); // Chan8 bad command error      (0=no error,1=error)
     createStatusParam("Ch8:Event",            8, 0x3,  1, 14); // Chan8 got event              (0=no,1=yes)
     createStatusParam("Ch8:MultiDiscEvent",   8, 0x3,  1, 15); // Chan8 got multi-discrim ev   (0=no,1=yes)
-}
 
-void RocPlugin::createConfigParams_v47()
-{
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:A:Scale",      '8',  0x0, 12, 0, 2048);  // Chan1 A scale
     createConfigParam("Ch1:A:Offset",     '8',  0x1, 12, 0, 1600);  // Chan1 A offset
@@ -406,12 +403,12 @@ void RocPlugin::createConfigParams_v47()
 
     createConfigParam("LvdsRate",         'F',  0x0,  1, 15, 0);    // LVDS output rate              (0=20Mhz,1=10Mhz)
     createConfigParam("HighResMode",      'F',  0x0,  1, 9,  0);    // High resolution mode          (0=low res 0-127,1=high res 0-255)
-    createConfigParam("TxEnable",         'F',  0x0,  1, 8,  1);    // TX enable                     (0=external,1=always enabled)
+    createConfigParam("TcTxEnMode",       'F',  0x0,  1, 8,  1);    // T&C TX enable mode            (0=external,1=internal)
     createConfigParam("OutputMode",       'F',  0x0,  2, 6,  0);    // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireEn",        'F',  0x0,  1, 5,  1);    // ROC enable acquisition        (0=disable,1=enable)
-    createConfigParam("TsyncSelect",      'F',  0x0,  1, 4,  0);    // TSYNC select                  (0=external,1=internal 60Hz)
-    createConfigParam("TclkSelect",       'F',  0x0,  1, 3,  0);    // TCLK select                   (0=external,1=internal 10MHz)
-    createConfigParam("Reset",            'F',  0x0,  1, 2,  0);    // Reset enable                  (0=disable,1=enable)
+    createConfigParam("TcTsyncMode",      'F',  0x0,  1, 4,  0);    // T&C TSYNC mode                (0=external,1=internal 60Hz)
+    createConfigParam("TcTclkMode",       'F',  0x0,  1, 3,  0);    // T&C TCLK mode                 (0=external,1=internal 10MHz)
+    createConfigParam("TcResetMode",      'F',  0x0,  1, 2,  0);    // T&C Reset mode                (0=internal,1=external)
     createConfigParam("AcquireMode",      'F',  0x0,  2, 0,  0);    // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
 
     // Now channel parameters - note the extra channel parameter
@@ -678,12 +675,9 @@ void RocPlugin::createConfigParams_v47()
     createConfigParam("Ch8:Sample2",      8, '8',  0x7,  9, 0, 15);     // Chan8 Sample 2 point [0:10]
     createConfigParam("Ch8:CorrectRate",  8, '8',  0x8,  2, 0, 1);      // Chan8 Auto correction rate     (0=off, 1=TSYNC, 2=approx 1.2ms, 3=unknown)
     createConfigParam("Ch8:TpCtrl",       8, '8',  0x8,  4,12, 3);      // Chan8 TP control
-}
 
-void RocPlugin::createTemperatureParams_v47()
-{
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
-    createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
-    createTempParam("TempPreampB",      0x2, 16, 0); // Preamp B temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
+    createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempPreampB",      0x2, 16, 0); // Preamp B temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
 }
