@@ -22,6 +22,8 @@ transferValue('VConvX', 'VConvSetX')
 transferValue('VConvY', 'VConvSetY')
 transferValue('VConvZ', 'VConvSetZ')
 
+transferValue('MaxV',   'MaxVSet')
+
 transferValue('RampRate', 'RampRateSet')
 
 caput(prefix + 'Volt.HIGH', 2300)
