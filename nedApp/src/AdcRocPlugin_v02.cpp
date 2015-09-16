@@ -57,7 +57,7 @@ void AdcRocPlugin::createStatusParams_v02()
       createStatusParam("ErrLength",            0x5,  1,  5);   // LVDS packet length error
       createStatusParam("ErrType",              0x5,  1,  4);   // LVDS data type error
       createStatusParam("ErrParity",            0x5,  1,  3);   // LVDS parity error
-      createStatusParam("Acquiring",            0x5,  1,  2);   // Acquiring data                    (0=not acquiring [alarm],1=acquiring, archive:monitor)
+      createStatusParam("Acquiring",            0x5,  1,  2);   // Acquiring data                    (0=not acquiring,1=acquiring, archive:monitor)
       createStatusParam("Configured",           0x5,  1,  1);   // Module configured                 (0=not configured [alarm],1=configured, archive:monitor)
       createStatusParam("Discovered",           0x5,  1,  0);   // Module discovered                 (0=not discovered,1=discovered, archive:monitor)
 }

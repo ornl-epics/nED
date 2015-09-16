@@ -60,7 +60,7 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("EvFifoAlmostFull",   0x3,  1, 10); // Event FIFO almost full       (0=has space,1=almost full)
     createStatusParam("RawFifoHasData",     0x3,  1, 11); // Raw FIFO has data            (0=no data,1=has data)
     createStatusParam("RawFifoAlmostFull",  0x3,  1, 12); // Raw FIFO almost full         (0=has space,1=almost full)
-    createStatusParam("Acquiring",          0x3,  1, 13); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
+    createStatusParam("Acquiring",          0x3,  1, 13); // Acquiring data               (0=not acquiring,1=acquiring)
     createStatusParam("LvdsVerify",         0x3,  1, 14); // LVDS VERIFY detected         (0=not detected,1=detected)
 
     createStatusParam("YFifoHasData",       0x4,  8,  0); // Y FIFO has data

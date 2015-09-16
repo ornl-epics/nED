@@ -125,7 +125,7 @@ void AcpcFemPlugin::createStatusParams_v22()
 
     createStatusParam("CntFilterAck",         0x7,  8,  8); // Filtered ACKS
     createStatusParam("OutputMode",           0x7,  2,  6); // Data mode TODO verify values (0=normal mode,1=off,2=raw mode,3=verbose mode)
-    createStatusParam("Acquiring",            0x7,  1,  5); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
+    createStatusParam("Acquiring",            0x7,  1,  5); // Acquiring data               (0=not acquiring,1=acquiring)
     createStatusParam("FoundHw",              0x7,  1,  4); // Found new hardware           (0=no,1=yes)
     createStatusParam("Ctr:GotCmd",           0x7,  1,  3); // CTRL got command packet      (0=no,1=yes)
     createStatusParam("Ctr:FifoHasData",      0x7,  1,  2); // CTRL got data packet         (0=no,1=yes)

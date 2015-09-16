@@ -171,7 +171,7 @@ void AcpcPlugin::createStatusParams_v144()
     createStatusParam("FilteredNack",        0x1D,  1,  5); // Filtered NACK                 (0=not action,1=filtered)
     createStatusParam("NewHwId",             0x1D,  1,  6); // Found new hardware id         (0=not found,1=found)
     createStatusParam("CntFilteredNacks",    0x1D,  8,  7); // Number of filtered NACKs
-    createStatusParam("Acquiring",           0x1D,  1, 15); // Acquiring data                (0=not acquiring [alarm],1=acquiring, archive:monitor)
+    createStatusParam("Acquiring",           0x1D,  1, 15); // Acquiring data                (0=not acquiring,1=acquiring, archive:monitor)
 
     createStatusParam("OutputModeRB",        0x1E,  2,  0); // Data mode                     (0=normal,1=raw,2=extended)
     createStatusParam("CntFilteredAcks",     0x1E,  8,  2); // Number of filtered ACKs

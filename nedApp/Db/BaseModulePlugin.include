@@ -112,6 +112,38 @@ record(fanout, "$(P)RspCheck")
     field(DESC, "Response check fanout")
     field(LNK1, "$(P)MissCount PP")
     field(LNK2, "$(P)HwStatus PP")
+    field(LNK3, "$(P)AcquiringCalc PP")
+}
+# Monitor CmdReq for start/stop commands and set AcquireSet to yes/no
+record(calcout, "$(P)AcquiringCalc")
+{
+    field(INPA, "$(P)CmdReq NPP")
+    field(INPB, "$(P)CmdRsp NPP")
+    field(CALC, "B=1&&(A=6||A=7)")
+    field(OOPT, "When Non-zero")
+    field(OCAL, "A=6")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)AcquiringSet PP")
+}
+record(bi, "$(P)AcquiringSet")
+{
+    field(ZNAM, "not acquiring")
+    field(ONAM, "acquiring")
+    field(FLNK, "$(P)AcquiringCheck")
+}
+record(calc, "$(P)AcquiringCheck")
+{
+    field(INPA, "$(P)Acquiring NPP")
+    field(INPB, "$(P)AcquiringSet NPP")
+    field(INPC, "$(P)AcquiringSet.SEVR NPP")
+    field(CALC, "A=B&&C=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(bi, "$(P)Acquiring")
+{
+    field(FLNK, "$(P)AcquiringCheck")
 }
 # Placeholder record, may be extended by module.
 # MAJOR alarm is captured in overall status.
@@ -132,9 +164,9 @@ record(calc, "$(P)MissCount")
     field(INPB, "$(P)MissCount NPP")
     field(INPC, "$(P)Enable NPP")
     field(CALC, "C=0?0:(A=3)?B+1:(A=2)?B:0")
-    field(HIGH, "2")
+    field(HIGH, "3")
     field(HSV,  "MINOR")
-    field(HIHI, "3")
+    field(HIHI, "5")
     field(HHSV, "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
@@ -158,7 +190,7 @@ record(calc, "$(P)StatusCalc")
 {
     field(INPA, "$(P)Enable NPP")
     field(INPB, "$(P)HealthStatusCalc.SEVR PP")
-    field(INPC, "$(P)Acquiring.SEVR NPP")
+   field(INPC, "$(P)AcquiringCheck.SEVR NPP")
     field(CALC, "A=0||(B+C)=0")
     field(PINI, "YES") # For Supported link
     field(FLNK, "$(P)Status")
