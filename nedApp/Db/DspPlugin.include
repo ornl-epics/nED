@@ -3,7 +3,7 @@ record(mbbo, "$(P)DataMode")
     field(FLNK, "$(P)DataSize")
 }
 record(longout, "$(P)DataSize") {
-    field(DESC, "Something")
+    field(ASG,  "BEAMLINE")
     field(DOL,  "$(P)DataSizeSel.VAL PP")
     field(OMSL, "closed_loop")
     field(DTYP, "Soft Channel")

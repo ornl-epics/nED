@@ -61,6 +61,7 @@ record(ao, "$(P)InactiveTimeout")
 }
 record(calcout, "$(P)AutoReset")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Auto disconnect client")
     field(INPA, "$(P)InactiveTimeout NPP")
     field(INPB, "$(P)ClientInactive NPP")

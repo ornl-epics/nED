@@ -228,6 +228,7 @@ def _calc_record(param, outfile):
     if 'calcwrite' in param:
         outfile.write("record(calcout, \"$(P){0}CW\")\n".format(param['name']))
         outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
         outfile.write("    field(INPA, \"$(P){0} NPP\")\n".format(param['name']))
         outfile.write("    field(CALC, \"{0}\")\n".format(param['calcwrite']))
         outfile.write("    field(OUT,  \"$(P){0}W PP\")\n".format(param['name']))
@@ -235,6 +236,7 @@ def _calc_record(param, outfile):
 
         outfile.write("record(longout, \"$(P){0}W\")\n".format(param['name']))
         outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
         outfile.write("    field(DTYP, \"asynInt32\")\n")
         outfile.write("    field(OUT,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
         if 'calcread' in param:
@@ -246,6 +248,7 @@ def _calc_record(param, outfile):
     if 'calcread' in param:
         outfile.write("record(longin, \"$(P){0}R\")\n".format(param['name']))
         outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
         outfile.write("    field(DTYP, \"asynInt32\")\n")
         outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
         outfile.write("    field(SCAN, \"I/O Intr\")\n")
@@ -257,6 +260,7 @@ def _calc_record(param, outfile):
 
         outfile.write("record(calcout, \"$(P){0}CR\")\n".format(param['name']))
         outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
         outfile.write("    field(INPA, \"$(P){0}R NPP\")\n".format(param['name']))
         outfile.write("    field(CALC, \"{0}\")\n".format(param['calcread']))
         outfile.write("    field(OUT,  \"$(P){0} PP\")\n".format(param['name']))
@@ -278,6 +282,7 @@ def generate_db_record(param, outfile):
         flnk = _calc_record(param, outfile)
         outfile.write("record(ao, \"$(P){0}\")\n".format(param['name']))
         outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
         if "prec" not in param:
             param['prec'] = 0
         outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
@@ -293,6 +298,7 @@ def generate_db_record(param, outfile):
     else:
         outfile.write("record({0}, \"$(P){1}\")\n".format(type, param['name']))
         outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
         outfile.write("    field(DTYP, \"asynInt32\")\n")
 
         if type == "bi" or type == "bo":
