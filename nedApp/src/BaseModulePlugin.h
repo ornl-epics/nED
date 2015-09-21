@@ -905,6 +905,14 @@ class BaseModulePlugin : public BasePlugin {
          */
         void initParams();
 
+        /**
+         * Convert command into a string.
+         *
+         * @parma[in] command to be converted.
+         * @return String describing the command.
+         */
+        const char *cmd2str(DasPacket::CommandType command);
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.

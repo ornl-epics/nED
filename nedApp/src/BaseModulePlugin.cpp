@@ -186,33 +186,45 @@ DasPacket::CommandType BaseModulePlugin::handleRequest(DasPacket::CommandType co
     int cfgSection;
     switch (command) {
     case DasPacket::CMD_RESET:
+        LOG_INFO("Sending %s command", cmd2str(command));
         timeout = RESET_NO_RESPONSE_TIMEOUT;
         return reqReset();
     case DasPacket::CMD_DISCOVER:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqDiscover();
     case DasPacket::CMD_READ_VERSION:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqReadVersion();
     case DasPacket::CMD_READ_STATUS:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqReadStatus(m_expectedChannel);
     case DasPacket::CMD_READ_STATUS_COUNTERS:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqReadStatusCounters();
     case DasPacket::CMD_RESET_STATUS_COUNTERS:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqResetStatusCounters();
     case DasPacket::CMD_READ_CONFIG:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqReadConfig(m_expectedChannel);
     case DasPacket::CMD_WRITE_CONFIG:
         getIntegerParam(CfgSection, &cfgSection);
+        LOG_INFO("Sending %s command (section=%X)", cmd2str(command), (char)cfgSection);
         return reqWriteConfig(cfgSection, m_expectedChannel);
     case DasPacket::CMD_START:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqStart();
     case DasPacket::CMD_STOP:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqStop();
     case DasPacket::CMD_UPGRADE:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqUpgrade();
     case DasPacket::CMD_READ_TEMPERATURE:
+        LOG_INFO("Sending %s command", cmd2str(command));
         return reqReadTemperature();
     default:
-        LOG_WARN("Unrecognized '%d' command", command);
+        LOG_ERROR("Skip unrecognized 0x%02X command", command);
         return static_cast<DasPacket::CommandType>(0);
     }
 }
@@ -276,15 +288,22 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
 {
     DasPacket::CommandType command = packet->getResponseType();
     if (m_waitingResponse != command) {
-        LOG_WARN("Response '0x%02X' not allowed while waiting for 0x%02X", command, m_waitingResponse);
+        LOG_ERROR("Response %s (0x%02X) not allowed while waiting for %s", cmd2str(command), command, cmd2str(m_waitingResponse));
         return false;
     }
     m_waitingResponse = static_cast<DasPacket::CommandType>(0);
 
     if (!cancelTimeoutCallback()) {
-        LOG_WARN("Received response after timeout");
+        LOG_WARN("Received %s response after timeout", cmd2str(command));
         return false;
     }
+
+    if (packet->cmdinfo.command == DasPacket::RSP_ACK)
+        LOG_INFO("Received %s ACK", cmd2str(packet->getResponseType()));
+    else if (packet->cmdinfo.command == DasPacket::RSP_NACK)
+        LOG_INFO("Received %s NACK", cmd2str(packet->getResponseType()));
+    else
+        LOG_INFO("Received %s response", cmd2str(packet->getResponseType()));
 
     bool ack = handleResponse(packet);
 
@@ -370,7 +389,7 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
                 double timeout;
                 getDoubleParam(NoRspTimeout, &timeout);
                 if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
-                   LOG_WARN("Failed to schedule CmdRsp timeout callback");
+                    LOG_WARN("Failed to schedule CmdRsp timeout callback");
                 setIntegerParam(CmdRsp, LAST_CMD_WAIT);
 
                 m_cfgSectionCnt++;
@@ -412,14 +431,14 @@ bool BaseModulePlugin::handleResponse(const DasPacket *packet)
     case DasPacket::CMD_READ_CONFIG:
         if (! ((m_expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
                (packet->cmdinfo.is_channel == (m_expectedChannel > 0) && packet->cmdinfo.channel == (m_expectedChannel - 1))) ) {
-            LOG_WARN("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
+            LOG_ERROR("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
             return false;
         }
         return rspReadConfig(packet, m_expectedChannel);
     case DasPacket::CMD_READ_STATUS:
         if (! ((m_expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
                (packet->cmdinfo.is_channel == (m_expectedChannel > 0) && packet->cmdinfo.channel == (m_expectedChannel - 1))) ) {
-            LOG_WARN("Expecting read status response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
+            LOG_ERROR("Expecting read status response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
             return false;
         }
         return rspReadStatus(packet, m_expectedChannel);
@@ -445,7 +464,7 @@ bool BaseModulePlugin::handleResponse(const DasPacket *packet)
     case DasPacket::CMD_WRITE_CONFIG_F:
         if (! ((m_expectedChannel == 0 && packet->cmdinfo.is_channel == 0 && packet->cmdinfo.channel == 0) ||
                (packet->cmdinfo.is_channel == (m_expectedChannel > 0) && packet->cmdinfo.channel == (m_expectedChannel - 1))) ) {
-            LOG_WARN("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
+            LOG_ERROR("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmdinfo.channel + 1);
             return false;
         }
         return rspWriteConfig(packet, m_expectedChannel);
@@ -458,7 +477,7 @@ bool BaseModulePlugin::handleResponse(const DasPacket *packet)
     case DasPacket::CMD_READ_TEMPERATURE:
         return rspReadTemperature(packet);
     default:
-        LOG_WARN("Received unhandled response 0x%02X", command);
+        LOG_WARN("Unhandled %s response (0x%02X)", cmd2str(command), command);
         return false;
     }
 }
@@ -1154,5 +1173,95 @@ void BaseModulePlugin::initParams()
                 }
             }
         }
+    }
+}
+
+const char *BaseModulePlugin::cmd2str(const DasPacket::CommandType cmd)
+{
+    switch (cmd) {
+    case DasPacket::CMD_READ_VERSION:
+        return "READ_VERSION";
+    case DasPacket::CMD_READ_CONFIG:
+        return "READ_CONFIG";
+    case DasPacket::CMD_READ_STATUS:
+        return "READ_STATUS";
+    case DasPacket::CMD_READ_TEMPERATURE:
+        return "READ_TEMPERATURE";
+    case DasPacket::CMD_READ_STATUS_COUNTERS:
+        return "READ_COUNTERS";
+    case DasPacket::CMD_RESET_STATUS_COUNTERS:
+        return "RESET_COUNTERS";
+    case DasPacket::CMD_WRITE_CONFIG:
+        return "WRITE_CONFIG";
+    case DasPacket::CMD_WRITE_CONFIG_1:
+        return "WRITE_CONFIG_1";
+    case DasPacket::CMD_WRITE_CONFIG_2:
+        return "WRITE_CONFIG_2";
+    case DasPacket::CMD_WRITE_CONFIG_3:
+        return "WRITE_CONFIG_3";
+    case DasPacket::CMD_WRITE_CONFIG_4:
+        return "WRITE_CONFIG_4";
+    case DasPacket::CMD_WRITE_CONFIG_5:
+        return "WRITE_CONFIG_5";
+    case DasPacket::CMD_WRITE_CONFIG_6:
+        return "WRITE_CONFIG_6";
+    case DasPacket::CMD_WRITE_CONFIG_7:
+        return "WRITE_CONFIG_7";
+    case DasPacket::CMD_WRITE_CONFIG_8:
+        return "WRITE_CONFIG_8";
+    case DasPacket::CMD_WRITE_CONFIG_9:
+        return "WRITE_CONFIG_9";
+    case DasPacket::CMD_WRITE_CONFIG_A:
+        return "WRITE_CONFIG_A";
+    case DasPacket::CMD_WRITE_CONFIG_B:
+        return "WRITE_CONFIG_B";
+    case DasPacket::CMD_WRITE_CONFIG_C:
+        return "WRITE_CONFIG_C";
+    case DasPacket::CMD_WRITE_CONFIG_D:
+        return "WRITE_CONFIG_D";
+    case DasPacket::CMD_WRITE_CONFIG_E:
+        return "WRITE_CONFIG_E";
+    case DasPacket::CMD_WRITE_CONFIG_F:
+        return "WRITE_CONFIG";
+    case DasPacket::CMD_HV_SEND:
+        return "HV_SEND";
+    case DasPacket::CMD_HV_RECV:
+        return "HV_RECV";
+    case DasPacket::CMD_EEPROM_ERASE:
+        return "EEPROM_ERASE";
+    case DasPacket::CMD_EEPROM_LOAD:
+        return "EEPROM_LOAD";
+    case DasPacket::CMD_EEPROM_READ:
+        return "EEPROM_READ";
+    case DasPacket::CMD_EEPROM_WRITE:
+        return "EEPROM_WRITE";
+    case DasPacket::CMD_EEPROM_READ_WORD:
+        return "EEPROM_READ_WORD";
+    case DasPacket::CMD_EEPROM_WRITE_WORD:
+        return "EEPROM_WRITE_WORD";
+    case DasPacket::CMD_UPGRADE:
+        return "UPGRADE";
+    case DasPacket::CMD_DISCOVER:
+        return "DISCOVER";
+    case DasPacket::CMD_RESET:
+        return "RESET";
+    case DasPacket::CMD_START:
+        return "START";
+    case DasPacket::CMD_STOP:
+        return "STOP";
+    case DasPacket::CMD_TSYNC:
+        return "TSYNC";
+    case DasPacket::CMD_RTDL:
+        return "RTDL";
+    case DasPacket::CMD_PM_PULSE_RQST_ON:
+        return "PM_PULSE_ON";
+    case DasPacket::CMD_PM_PULSE_RQST_OFF:
+        return "PM_PULSE_OFF";
+    case DasPacket::CMD_PREAMP_TEST_CONFIG:
+        return "PREAMP_TEST_CONFIG";
+    case DasPacket::CMD_PREAMP_TEST_TRIGGER:
+        return "PREAMP_TEST_TRIGGER";
+    default:
+        return "<unknown>";
     }
 }

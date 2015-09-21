@@ -1,5 +1,6 @@
 record(bo, "$(P)Enable")
 {
+    info(autosaveFields, "VAL")
     field(FLNK, "$(P)StatusCalc")
 }
 record(stringin, "$(P)HwId")
