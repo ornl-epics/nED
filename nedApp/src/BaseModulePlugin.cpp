@@ -288,7 +288,7 @@ bool BaseModulePlugin::processResponse(const DasPacket *packet)
 {
     DasPacket::CommandType command = packet->getResponseType();
     if (m_waitingResponse != command) {
-        LOG_ERROR("Response %s (0x%02X) not allowed while waiting for %s", cmd2str(command), command, cmd2str(m_waitingResponse));
+        LOG_WARN("Ignoring unexpected response %s (0x%02X)", cmd2str(command), command);
         return false;
     }
     m_waitingResponse = static_cast<DasPacket::CommandType>(0);
