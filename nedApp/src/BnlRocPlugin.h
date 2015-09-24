@@ -59,21 +59,6 @@ class BnlRocPlugin : public BaseModulePlugin {
         BnlRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
 
         /**
-         * Process RS232 packets only, let base implementation do the rest.
-         */
-        bool processResponse(const DasPacket *packet);
-
-        /**
-         * Send string/byte data to PVs
-         */
-        asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
-
-        /**
-         * Receive string/byte data to PVs
-         */
-        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
-
-        /**
          * Try to parse the BNLROC version response packet an populate the structure.
          *
          * Function will parse all known BNLROC version responses and populate the
@@ -106,15 +91,6 @@ class BnlRocPlugin : public BaseModulePlugin {
         bool checkVersion(const BaseModulePlugin::Version &version);
 
     private: // functions
-
-        /**
-         * Handle READ_CONFIG response.
-         *
-         * For normal firmwares the function simply invokes BaseModulePlugin::rspReadConfig()
-         * passing it the original packet.
-         */
-        bool rspReadConfig(const DasPacket *packet);
-
         /**
          * Create and register all status BNLROC v0.0 parameters to be exposed to EPICS.
          */
