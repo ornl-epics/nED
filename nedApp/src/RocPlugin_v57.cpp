@@ -115,7 +115,7 @@ void RocPlugin::createParams_v57()
     // ROC lies about the length of the packet. It returns 44 bytes of valid
     // data but the packet length is 64 bytes => 20 bytes or 10 registers
     // We only need to define the last one which defines the packet length
-    createStatusParam("StatFill",         0x1F,15,  0);
+    createStatusParam("StatFill",         0x1F,15,  0); // Status padding
 
     createCounterParam("CntParity",        0x0, 16,  0); // LVDS parity error counter
     createCounterParam("CntUartParity",    0x1, 16,  0); // UART parity error counter
