@@ -115,7 +115,7 @@ def parse_src_file(path, verbose=False):
                     desc = ""
                     extra = ""
                     if not match_d or not match_d.group(1):
-                        sys.stderr.write("ERROR: No description for {0}\n".format(match.group(1).split(",")[0]))
+                        sys.stderr.write("WARNING: No description for {0}\n".format(match.group(1).split(",")[0]))
                     else:
                         desc = match_d.group(1)
                         extra = match_d.group(2)

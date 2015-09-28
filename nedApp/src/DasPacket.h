@@ -116,7 +116,7 @@ struct DasPacket
             MOD_TYPE_ROC                = 0x20,   //!< ROC (or LPSD) module
             MOD_TYPE_AROC               = 0x21,   //!< AROC
             MOD_TYPE_HROC               = 0x22,
-            MOD_TYPE_BLNROC             = 0x25,
+            MOD_TYPE_BNLROC             = 0x25,
             MOD_TYPE_CROC               = 0x29,
             MOD_TYPE_IROC               = 0x2A,
             MOD_TYPE_BIDIMROC           = 0x2B,
