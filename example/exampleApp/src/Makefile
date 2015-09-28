@@ -15,7 +15,7 @@ R_INCLUDES = -I$(OCCLIB_DIR)
 occ_DIR = $(OCCLIB_DIR)
 
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
-USR_CXXFLAGS += -std=c++0x
+USR_CXXFLAGS += -std=c++0x -g -ggdb -O0
 #USR_LDFLAGS  += -fopenmp
 
 PROD_IOC = example

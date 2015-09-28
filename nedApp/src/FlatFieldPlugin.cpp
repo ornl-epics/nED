@@ -27,7 +27,6 @@ FlatFieldPlugin::~FlatFieldPlugin()
 
 void FlatFieldPlugin::initTable()
 {
-    double coef[6] = { 0 };
 }
 
 asynStatus FlatFieldPlugin::writeInt32Array(asynUser *pasynUser, epicsInt32 *value, size_t nElements)
