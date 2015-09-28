@@ -407,7 +407,7 @@ int severity;
                    cmdFailed[i] = 0;	/* ready for next use */	\
                    PVPUTNUM(cmdSucceeded[i],0)				\
                 } else {						\
-                   failMsg[i][0] = 0;					\
+                   sprintf(failMsg[i], "OK");                           \
                    pvPut(failMsg[i]);					\
                    PVPUTNUM(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
@@ -445,7 +445,8 @@ int severity;
              for (i = 0; i< numFound; i++) {				\
                 if (enable[i]) {					\
                    PVPUTNUM(cmdSucceeded[i], 0)				\
-                   failMsg[i][0] = 0; pvPut(failMsg[i]);		\
+                   sprintf(failMsg[i], "OK");				\
+                   pvPut(failMsg[i]);					\
                 }							\
              }								\
           }								\
