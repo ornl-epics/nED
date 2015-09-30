@@ -12,9 +12,11 @@
 
 #include "BasePlugin.h"
 #include "Timer.h"
+#include "ValueConvert.h"
 
 #include <fstream>
 #include <map>
+#include <memory>
 
 /**
  * Base class for all plugins working with particular module.
@@ -117,6 +119,15 @@ class BaseModulePlugin : public BasePlugin {
         };
 
         /**
+         * Valid register raw value converters
+         */
+        enum ValueConverter {
+            CONV_UNSIGN             = 0,
+            CONV_SIGN_2COMP         = 1,
+            CONV_SIGN_MAGN          = 2,
+        };
+
+        /**
          * Structure describing the status parameters obtained from modules.
          */
         struct ParamDesc {
@@ -126,6 +137,7 @@ class BaseModulePlugin : public BasePlugin {
             uint8_t section;        //!< Section name, valid values [0x0..0xF] (configuration params only)
             uint8_t channel;        //!< Channel number in range [1..8], 0 means global configuration (configuration params only)
             int32_t initVal;        //!< Initial value after object is created or configuration reset is being requested (configuration params only)
+            std::shared_ptr<BaseConvert> convert; //!< Selected from/to raw value converter
         };
 
         /**
@@ -668,14 +680,14 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Create and register single integer config parameter.
          */
-        void createConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
+        void createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, ValueConverter conv=CONV_UNSIGN);
 
         /**
          * Convenience function for modules that don't split configuration for channels.
          */
-        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
+        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, ValueConverter conv=CONV_UNSIGN)
         {
-            createConfigParam(name, 0, section, offset, nBits, shift, value);
+            createChanConfigParam(name, 0, section, offset, nBits, shift, value, conv);
         }
 
         /**
@@ -683,7 +695,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * Temperature values are returned in READ_TEMPERATURE response payload.
          */
-        void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
+        void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, ValueConverter conv=CONV_UNSIGN);
 
         /**
          * Link existing parameter to upgrade parameters table.
@@ -873,8 +885,9 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] nBits tells number of bits used by device register
          * @param[in] shift tells bit offset within word
          * @param[in] value represents initial value for writable registers
+         * @param[in] conv selects from/to raw value converter
          */
-        void createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0);
+        void createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, ValueConverter conv=CONV_UNSIGN);
 
         /**
          * Link existing parameter to upgrade parameters table.

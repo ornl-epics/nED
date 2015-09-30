@@ -392,22 +392,22 @@ void RocPlugin::createParams_v58()
     createConfigParam("Ch7:PositionIdx",  '1', 0xC,  32, 0, 1536);  // Chan7 position index
     createConfigParam("Ch8:PositionIdx",  '1', 0xE,  32, 0, 1792);  // Chan8 position index
 
-    createConfigParam("Ch1:A:InOffset",   '2', 0x0,  12, 0, 100);   // Chan1 A input offset
-    createConfigParam("Ch2:A:InOffset",   '2', 0x1,  12, 0, 100);   // Chan2 A input offset
-    createConfigParam("Ch3:A:InOffset",   '2', 0x2,  12, 0, 100);   // Chan3 A input offset
-    createConfigParam("Ch4:A:InOffset",   '2', 0x3,  12, 0, 100);   // Chan4 A input offset
-    createConfigParam("Ch5:A:InOffset",   '2', 0x4,  12, 0, 100);   // Chan5 A input offset
-    createConfigParam("Ch6:A:InOffset",   '2', 0x5,  12, 0, 100);   // Chan6 A input offset
-    createConfigParam("Ch7:A:InOffset",   '2', 0x6,  12, 0, 100);   // Chan7 A input offset
-    createConfigParam("Ch8:A:InOffset",   '2', 0x7,  12, 0, 100);   // Chan8 A input offset
-    createConfigParam("Ch1:B:InOffset",   '2', 0x8,  12, 0, 100);   // Chan1 B input offset
-    createConfigParam("Ch2:B:InOffset",   '2', 0x9,  12, 0, 100);   // Chan2 B input offset
-    createConfigParam("Ch3:B:InOffset",   '2', 0xA,  12, 0, 100);   // Chan3 B input offset
-    createConfigParam("Ch4:B:InOffset",   '2', 0xB,  12, 0, 100);   // Chan4 B input offset
-    createConfigParam("Ch5:B:InOffset",   '2', 0xC,  12, 0, 100);   // Chan5 B input offset
-    createConfigParam("Ch6:B:InOffset",   '2', 0xD,  12, 0, 100);   // Chan6 B input offset
-    createConfigParam("Ch7:B:InOffset",   '2', 0xE,  12, 0, 100);   // Chan7 B input offset
-    createConfigParam("Ch8:B:InOffset",   '2', 0xF,  12, 0, 100);   // Chan8 B input offset
+    createConfigParam("Ch1:A:InOffset",   '2', 0x0,   9, 0, 100, CONV_SIGN_MAGN); // Chan1 A input offset
+    createConfigParam("Ch2:A:InOffset",   '2', 0x1,   9, 0, 100, CONV_SIGN_MAGN); // Chan2 A input offset
+    createConfigParam("Ch3:A:InOffset",   '2', 0x2,   9, 0, 100, CONV_SIGN_MAGN); // Chan3 A input offset
+    createConfigParam("Ch4:A:InOffset",   '2', 0x3,   9, 0, 100, CONV_SIGN_MAGN); // Chan4 A input offset
+    createConfigParam("Ch5:A:InOffset",   '2', 0x4,   9, 0, 100, CONV_SIGN_MAGN); // Chan5 A input offset
+    createConfigParam("Ch6:A:InOffset",   '2', 0x5,   9, 0, 100, CONV_SIGN_MAGN); // Chan6 A input offset
+    createConfigParam("Ch7:A:InOffset",   '2', 0x6,   9, 0, 100, CONV_SIGN_MAGN); // Chan7 A input offset
+    createConfigParam("Ch8:A:InOffset",   '2', 0x7,   9, 0, 100, CONV_SIGN_MAGN); // Chan8 A input offset
+    createConfigParam("Ch1:B:InOffset",   '2', 0x8,   9, 0, 100, CONV_SIGN_MAGN); // Chan1 B input offset
+    createConfigParam("Ch2:B:InOffset",   '2', 0x9,   9, 0, 100, CONV_SIGN_MAGN); // Chan2 B input offset
+    createConfigParam("Ch3:B:InOffset",   '2', 0xA,   9, 0, 100, CONV_SIGN_MAGN); // Chan3 B input offset
+    createConfigParam("Ch4:B:InOffset",   '2', 0xB,   9, 0, 100, CONV_SIGN_MAGN); // Chan4 B input offset
+    createConfigParam("Ch5:B:InOffset",   '2', 0xC,   9, 0, 100, CONV_SIGN_MAGN); // Chan5 B input offset
+    createConfigParam("Ch6:B:InOffset",   '2', 0xD,   9, 0, 100, CONV_SIGN_MAGN); // Chan6 B input offset
+    createConfigParam("Ch7:B:InOffset",   '2', 0xE,   9, 0, 100, CONV_SIGN_MAGN); // Chan7 B input offset
+    createConfigParam("Ch8:B:InOffset",   '2', 0xF,   9, 0, 100, CONV_SIGN_MAGN); // Chan8 B input offset
 
     createConfigParam("Ch1:A:AdcOffset",  '2', 0x10, 12, 0, 100);   // Chan1 A ADC offset
     createConfigParam("Ch2:A:AdcOffset",  '2', 0x11, 12, 0, 100);   // Chan2 A ADC offset
@@ -622,7 +622,7 @@ void RocPlugin::createParams_v58()
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
     createConfigParam("MinAdc",           'E', 0x6,  14, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  14, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",       'E', 0x8,   9, 0, 506);   // Integrator release point
+    createConfigParam("IntRelease",       'E', 0x8,   9, 0, -6, CONV_SIGN_2COMP); // Integrator release point
     createConfigParam("MinDiscrimWidth",  'E', 0x9,   9, 0, 1);     // Minimum discriminator width
     createConfigParam("Sample1",          'E', 0xA,   9, 0, 2);     // Sample 1 point [0:10]
     createConfigParam("Sample2",          'E', 0xB,   9, 0, 14);    // Sample 1 point [2:50]
@@ -651,9 +651,9 @@ void RocPlugin::createParams_v58()
     // Temperature registers
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
-    createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
-    createTempParam("TempPreampB",      0x2, 16, 0); // Preamp B temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempPreampA",      0x1, 16, 0, CONV_SIGN_2COMP); // Preamp A temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
 
     // Pre-amp registers
 

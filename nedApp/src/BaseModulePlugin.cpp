@@ -10,6 +10,7 @@
 #include "BaseModulePlugin.h"
 #include "Common.h"
 #include "Log.h"
+#include "ValueConvert.h"
 
 #include <osiSock.h>
 #include <string.h>
@@ -166,8 +167,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         if (jt == it->second.mapping.end())
             continue;
 
-        uint32_t mask = (0x1ULL << jt->second.width) - 1;
-        if (static_cast<int>(value & mask) != value) {
+        if (jt->second.convert->checkBounds(value) == false) {
             LOG_ERROR("Parameter %s value %d out of bounds", getParamName(jt->first), value);
             return asynError;
         } else {
@@ -771,7 +771,7 @@ void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uin
     createRegParam("COUNTERS", name, true, 0, 0x0, offset, nBits, shift, 0);
 }
 
-void BaseModulePlugin::createConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
+void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, BaseModulePlugin::ValueConverter conv)
 {
     if (section >= '1' && section <= '9')
         section = section - '1' + 1;
@@ -782,12 +782,12 @@ void BaseModulePlugin::createConfigParam(const char *name, uint8_t channel, char
         return;
     }
 
-    createRegParam("CONFIG", name, false, channel, section, offset, nBits, shift, value);
+    createRegParam("CONFIG", name, false, channel, section, offset, nBits, shift, value, conv);
 }
 
-void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
+void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, BaseModulePlugin::ValueConverter conv)
 {
-    createRegParam("TEMPERATURE", name, true, 0, 0x0, offset, nBits, shift, 0);
+    createRegParam("TEMPERATURE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
 }
 
 void BaseModulePlugin::linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
@@ -997,7 +997,6 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
     std::map<int, ParamDesc> &table = m_params[group].mapping;
     std::map<int, uint32_t> &offsets = m_params[group].offsets;
     for (auto it=table.begin(); it != table.end(); it++) {
-        uint32_t mask = (0x1ULL << it->second.width) - 1;
         int shift = it->second.shift;
         int value = 0;
         uint32_t offset = it->second.offset;
@@ -1016,11 +1015,6 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
             LOG_ERROR("Failed to get parameter %s value", getParamName(it->first));
             return false;
         }
-        if (static_cast<int>(value & mask) != value) {
-            // This should not happen. It's certainly error when setting new value for parameter
-            LOG_WARN("Parameter %s value out of range", getParamName(it->first));
-        }
-        value &= mask;
 
         if (m_behindDsp) {
             shift += (offset % 2 == 0 ? 0 : 16);
@@ -1033,6 +1027,7 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
             continue;
         }
 
+        value = it->second.convert->toRaw(value);
         payload[offset] |= value << shift;
         if ((it->second.width + shift) > 32) {
             payload[offset+1] |= value >> (it->second.width -(32 - shift + 1));
@@ -1073,12 +1068,13 @@ void BaseModulePlugin::unpackRegParams(const char *group, const uint32_t *payloa
             value |= payload[offset + 1] << (32 - shift);
         }
         value &= (0x1ULL << it->second.width) - 1;
+        value = it->second.convert->fromRaw(value);
         setIntegerParam(it->first, value);
     }
     callParamCallbacks();
 }
 
-void BaseModulePlugin::createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value)
+void BaseModulePlugin::createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value, BaseModulePlugin::ValueConverter conv)
 {
     int index;
     if (createParam(name, asynParamInt32, &index) != asynSuccess) {
@@ -1099,6 +1095,12 @@ void BaseModulePlugin::createRegParam(const char *group, const char *name, bool 
     desc.offset  = offset;
     desc.shift   = shift;
     desc.width   = nBits;
+    if (conv == CONV_SIGN_2COMP)
+        desc.convert.reset(new Sign2sComplementConvert(nBits));
+    else if (conv == CONV_SIGN_MAGN)
+        desc.convert.reset(new SignMagnitudeConvert(nBits));
+    else
+        desc.convert.reset(new UnsignConvert(nBits));
     m_params[group].mapping[index] = desc;
 
     uint32_t length = offset + 1;
@@ -1134,6 +1136,7 @@ void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool re
     desc.offset  = offset;
     desc.shift   = shift;
     desc.width   = nBits;
+    desc.convert.reset(new UnsignConvert(nBits));
     m_params[group].mapping[index] = desc;
 
     uint32_t length = offset + 1;

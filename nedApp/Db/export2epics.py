@@ -22,16 +22,14 @@ def parse_one(type, params_str, desc_str, extra_str):
     names = {
         'status':     [ "name", "offset", "width", "bit_offset" ],
         'counter':    [ "name", "offset", "width", "bit_offset" ],
-        'config':     [ "name", "section", "section_offset", "width", "bit_offset", "default" ],
-        'config1':    [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default" ],
+        'config':     [ "name", "section", "section_offset", "width", "bit_offset", "default", "convert" ],
+        'config_ch':  [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default", "convert" ],
         'temp':       [ "name", "offset", "width", "bit_offset" ],
         'preampcfg':  [ "name", "offset", "width", "bit_offset", "default" ],
         'preamptrig': [ "name", "offset", "width", "bit_offset", "default" ],
     }
 
     params = map(lambda x: x.strip(" \t\"\'"), params_str.split(","))
-    if type is 'config' and len(params) == 7:
-        type = 'config1'
     param = dict(zip(names[type], params))
 
     for item in [ "width", "bit_offset", "default" ]:
@@ -83,7 +81,7 @@ def parse_one(type, params_str, desc_str, extra_str):
                         d['alarm'] = True
                     param['options'].append(d)
 
-    if type in [ "config", "config1", "preampcfg", "preamptrig" ]:
+    if type in [ "config", "config_ch", "preampcfg", "preamptrig" ]:
         param['direction'] = "inout"
     else:
         param['direction'] = "in"
@@ -98,6 +96,7 @@ def parse_src_file(path, verbose=False):
         'status':     re.compile("createStatusParam\s*\((.*)\);(.*)$"),
         'counter':    re.compile("createCounterParam\s*\((.*)\);(.*)$"),
         'config':     re.compile("createConfigParam\s*\((.*)\);(.*)$"),
+        'config_ch':  re.compile("createChanConfigParam\s*\((.*)\);(.*)$"),
         'temp':       re.compile("createTempParam\s*\((.*)\);(.*)$"),
         'preampcfg':  re.compile("createPreAmpCfgParam\s*\((.*)\);(.*)$"),
         'preamptrig': re.compile("createPreAmpTrigParam\s*\((.*)\);(.*)$"),
@@ -236,7 +235,7 @@ def _calc_record(param, outfile):
 
         outfile.write("record(longout, \"$(P){0}W\")\n".format(param['name']))
         outfile.write("{\n")
-        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
         outfile.write("    field(DTYP, \"asynInt32\")\n")
         outfile.write("    field(OUT,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
         if 'calcread' in param:
@@ -248,7 +247,7 @@ def _calc_record(param, outfile):
     if 'calcread' in param:
         outfile.write("record(longin, \"$(P){0}R\")\n".format(param['name']))
         outfile.write("{\n")
-        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
         outfile.write("    field(DTYP, \"asynInt32\")\n")
         outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
         outfile.write("    field(SCAN, \"I/O Intr\")\n")
@@ -298,7 +297,7 @@ def generate_db_record(param, outfile):
     else:
         outfile.write("record({0}, \"$(P){1}\")\n".format(type, param['name']))
         outfile.write("{\n")
-        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
         outfile.write("    field(DTYP, \"asynInt32\")\n")
 
         if type == "bi" or type == "bo":
@@ -308,8 +307,19 @@ def generate_db_record(param, outfile):
         elif type == "ai" or type == "ao":
             _aiao_val(param, outfile, param['default'])
         else:
-            outfile.write("    field(LOPR, \"0\")\n")
-            outfile.write("    field(HOPR, \"{0}\")\n".format(2**param['width'] - 1))
+            high = 2**param['width'] - 1
+            low = 0
+            # Check for signed converters, not so strict search as callback
+            # can be specified in multiple ways
+            if 'convert' in param:
+                if "CONV_SIGN_MAGN" in param['convert']:
+                    high = 2**(param['width'] - 1) - 1
+                    low = -1 * high
+                elif "CONV_SIGN_2COMP" in param['convert']:
+                    high = 2**(param['width'] - 1) - 1
+                    low = -1 * high + 1
+            outfile.write("    field(LOPR, \"{0}\")\n".format(low))
+            outfile.write("    field(HOPR, \"{0}\")\n".format(high))
             _longinlongout_val(param, outfile, param['default'])
 
         if param['direction'] == "in":

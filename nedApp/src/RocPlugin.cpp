@@ -303,12 +303,12 @@ bool RocPlugin::rspTriggerPreAmp(const DasPacket *packet)
 
 void RocPlugin::createPreAmpCfgParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
 {
-    createRegParam("PREAMP_CFG", name, false, 0, 0x0, offset, nBits, shift, value);
+    createRegParam("PREAMP_CFG", name, false, 0, 0x0, offset, nBits, shift, value, CONV_UNSIGN);
 }
 
 void RocPlugin::createPreAmpTrigParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
 {
-    createRegParam("PREAMP_TRIG", name, false, 0, 0x0, offset, nBits, shift, value);
+    createRegParam("PREAMP_TRIG", name, false, 0, 0x0, offset, nBits, shift, value, CONV_UNSIGN);
 }
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
