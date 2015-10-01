@@ -22,7 +22,7 @@ BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherP
                            int numParams, int maxAddr, int interfaceMask, int interruptMask,
                            int asynFlags, int autoConnect, int priority, int stackSize)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_BASESOCKETPLUGIN_PARAMS + numParams,
-                 maxAddr, interfaceMask, interruptMask, asynFlags, autoConnect, priority, stackSize)
+                 maxAddr, interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask, asynFlags, autoConnect, priority, stackSize)
     , m_listenSock(-1)
     , m_clientSock(-1)
 {
