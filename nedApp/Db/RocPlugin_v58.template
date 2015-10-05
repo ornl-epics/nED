@@ -1,0 +1,42 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "RocPlugin_v58.generated"
+include "RocPlugin.include"
+include "GlobalConD.include"
+
+record(longin, "$(P)HwVer")
+{
+    field(HIGH, "6")
+    field(LOW,  "4")
+}
+record(longin, "$(P)HwRev")
+{
+    field(HIGH, "4")
+    field(LOW,  "1")
+}
+record(longin, "$(P)FwVer")
+{
+    field(HIGH, "6")
+    field(LOW,  "4")
+}
+record(longin, "$(P)FwRev")
+{
+    field(HIGH, "9")
+    field(LOW,  "7")
+}
+record(calc, "$(P)HwStatus")
+{
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
+    field(CALC, "(A+B)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+}
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TVVL, "146")
+    field(TVST, "Pre-amp config")
+    field(TTVL, "147")
+    field(TTST, "Pre-amp trigger")
+}

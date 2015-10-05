@@ -26,6 +26,8 @@ record(calc, "$(P)HwStatus")
     field(INPA, "$(P)Configured.SEVR PP")
     field(INPB, "$(P)Discovered.SEVR NPP")
     field(CALC, "(A+B)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
 }
 
 # Fanout records to synchronize channel configurations
@@ -80,9 +82,9 @@ record(dfanout, "$(P)IntRelease")
     field(OUTF, "$(P)Ch6:IntRelease PP")
     field(OUTG, "$(P)Ch7:IntRelease PP")
     field(OUTH, "$(P)Ch8:IntRelease PP")
-    field(LOPR, "0")
-    field(HOPR, "511")
-    field(VAL,  "506")
+    field(LOPR, "-256")
+    field(HOPR, "255")
+    field(VAL,  "-6")
 }
 record(dfanout, "$(P)MinAdc")
 {

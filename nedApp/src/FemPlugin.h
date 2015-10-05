@@ -66,59 +66,24 @@ class FemPlugin : public BaseModulePlugin {
 
     private: // functions
         /**
-         * Create and register all status FEM10 parameters to be exposed to EPICS.
+         * Create and register all FEM10 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v32();
+        void createParams_v32();
 
         /**
-         * Create and register all config FEM10 parameters to be exposed to EPICS.
+         * Create and register all FEM9 v35 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v32();
+        void createParams_v35();
 
         /**
-         * Create and register all status FEM9 v35 parameters to be exposed to EPICS.
+         * Create and register all FEM9 v36 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v35();
+        void createParams_v36();
 
         /**
-         * Create and register all config FEM9 v35 parameters to be exposed to EPICS.
+         * Create and register all FEM9 v37 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v35();
-
-        /**
-         * Create and register all status FEM9 v36 parameters to be exposed to EPICS.
-         */
-        void createStatusParams_v36();
-
-        /**
-         * Create and register all config FEM9 v36 parameters to be exposed to EPICS.
-         */
-        void createConfigParams_v36();
-
-        /**
-         * Create and register all counter FEM9 v36 parameters to be exposed to EPICS.
-         */
-        void createCounterParams_v36();
-
-        /**
-         * Create and register all status FEM9 v37 parameters to be exposed to EPICS.
-         */
-        void createStatusParams_v37();
-
-        /**
-         * Create and register all config FEM9 v37 parameters to be exposed to EPICS.
-         */
-        void createConfigParams_v37();
-
-        /**
-         * Create and register all counter FEM9 v37 parameters to be exposed to EPICS.
-         */
-        void createCounterParams_v37();
-
-        /**
-         * Link all upgrade FEM9 v37 parameters to be exposed to EPICS.
-         */
-        void createUpgradeParams_v37();
+        void createParams_v37();
 };
 
 #endif // DSP_PLUGIN_H

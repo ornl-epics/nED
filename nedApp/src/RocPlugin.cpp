@@ -51,51 +51,37 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
     } else if (m_version == "v45" || m_version == "v44") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
-        createStatusParams_v45();
-        createConfigParams_v45();
-        createTemperatureParams_v45();
+        createParams_v45();
     } else if (m_version == "v47") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
-        createStatusParams_v47();
-        createConfigParams_v47();
-        createTemperatureParams_v47();
+        createParams_v47();
     } else if (m_version == "v51") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v51();
-        createConfigParams_v51();
-        createTemperatureParams_v51();
+        createParams_v51();
     } else if (m_version == "v52") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v52();
-        createConfigParams_v52();
-        createTemperatureParams_v52();
+        createParams_v52();
     } else if (m_version == "v54" || m_version == "v55") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v54();
-        createConfigParams_v54();
-        createTemperatureParams_v54();
+        createParams_v54();
         createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
     } else if (m_version == "v56") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v56();
-        createCounterParams_v56();
-        createConfigParams_v56();
-        createTemperatureParams_v56();
+        createParams_v56();
     } else if (m_version == "v57") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v57();
-        createCounterParams_v57();
-        createConfigParams_v57();
-        createTemperatureParams_v57();
+        createParams_v57();
+    } else if (m_version == "v58") {
+        setIntegerParam(Supported, 1);
+        createParams_v58();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);
     }
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
 }
 
 bool RocPlugin::processResponse(const DasPacket *packet)
@@ -113,6 +99,32 @@ bool RocPlugin::processResponse(const DasPacket *packet)
         return asynSuccess;
     default:
         return BaseModulePlugin::processResponse(packet);
+    }
+}
+
+DasPacket::CommandType RocPlugin::handleRequest(DasPacket::CommandType command, double &timeout)
+{
+    switch (command) {
+    case DasPacket::CMD_PREAMP_TEST_CONFIG:
+        return reqConfigPreAmp();
+    case DasPacket::CMD_PREAMP_TEST_TRIGGER:
+        return reqTriggerPreAmp();
+    default:
+        return BaseModulePlugin::handleRequest(command, timeout);
+    }
+}
+
+bool RocPlugin::handleResponse(const DasPacket *packet)
+{
+    DasPacket::CommandType command = packet->getResponseType();
+
+    switch (command) {
+    case DasPacket::CMD_PREAMP_TEST_CONFIG:
+        return rspConfigPreAmp(packet);
+    case DasPacket::CMD_PREAMP_TEST_TRIGGER:
+        return rspTriggerPreAmp(packet);
+    default:
+        return BaseModulePlugin::handleResponse(packet);
     }
 }
 
@@ -239,7 +251,6 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
         buffer[i/2] |= data[i] << (16*(i%2));
     }
     sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
-fprintf(stderr, "Sending HV command: %s (%u)\n", data, length);
 }
 
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
@@ -248,10 +259,56 @@ bool RocPlugin::rspHvCmd(const DasPacket *packet)
 
     // Single character per OCC packet
     char byte = payload[0] & 0xFF;
+
     m_hvBuffer.enqueue(&byte, 1);
-fprintf(stderr, "Received HV response: %c\n", byte);
 
     return true;
+}
+
+DasPacket::CommandType RocPlugin::reqConfigPreAmp()
+{
+    uint32_t buffer[128];
+    uint32_t length = packRegParams("PREAMP_CFG", buffer, sizeof(buffer));
+
+    if (length == 0)
+        return static_cast<DasPacket::CommandType>(0);
+
+    sendToDispatcher(DasPacket::CMD_PREAMP_TEST_CONFIG, 0, buffer, length);
+    return DasPacket::CMD_PREAMP_TEST_CONFIG;
+}
+
+DasPacket::CommandType RocPlugin::reqTriggerPreAmp()
+{
+    uint32_t recharge = 0xFFFF;
+    uint32_t buffer[128];
+    uint32_t length = packRegParams("PREAMP_TRIG", buffer, sizeof(buffer));
+
+    if (length == 0)
+        return static_cast<DasPacket::CommandType>(0);
+
+    sendToDispatcher(DasPacket::CMD_PREAMP_TEST_TRIGGER, 0, &recharge, length);
+    sendToDispatcher(DasPacket::CMD_PREAMP_TEST_TRIGGER, 0, buffer, length);
+    return DasPacket::CMD_PREAMP_TEST_TRIGGER;
+}
+
+bool RocPlugin::rspConfigPreAmp(const DasPacket *packet)
+{
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
+
+bool RocPlugin::rspTriggerPreAmp(const DasPacket *packet)
+{
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
+
+void RocPlugin::createPreAmpCfgParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
+{
+    createRegParam("PREAMP_CFG", name, false, 0, 0x0, offset, nBits, shift, value, CONV_UNSIGN);
+}
+
+void RocPlugin::createPreAmpTrigParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
+{
+    createRegParam("PREAMP_TRIG", name, false, 0, 0x0, offset, nBits, shift, value, CONV_UNSIGN);
 }
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two

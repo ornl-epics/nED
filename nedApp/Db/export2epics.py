@@ -2,93 +2,7 @@
 #
 # The script generates EPICS databases files for the selected module.
 #
-# Parse lines like this and transform them into EPICS records:
-# * createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
-#   produces read/write field:
-#   record(mbbo, "$(P)AcquireMode")
-#   {
-#       info(autosaveFields, "VAL")
-#       field(ASG,  "BEAMLINE")
-#       field(DESC, "Acquire mode")
-#       field(PINI, "YES")
-#       field(VAL,  "0")
-#       field(OUT,  "$(P)AcquireModeW PP")
-#       field(ZRVL, "0")
-#       field(ZRST, "normal")
-#       field(ONVL, "1")
-#       field(ONST, "verbose")
-#       field(TWVL, "2")
-#       field(TWST, "fakedata")
-#       field(THVL, "3")
-#       field(THST, "trigger")
-#   }
-#   record(mbbo, "$(P)AcquireModeW")
-#   {
-#       field(ASG,  "BEAMLINE")
-#       field(DESC, "Acquire mode")
-#       field(DTYP, "asynInt32")
-#       field(OUT,  "@asyn($(PORT))AcquireMode")
-#       field(SDIS, "$(P)AcquireModeS.PACT")
-#       field(DISV, "1")
-#       field(ZRVL, "0")
-#       field(ZRST, "normal")
-#       field(ONVL, "1")
-#       field(ONST, "verbose")
-#       field(TWVL, "2")
-#       field(TWST, "fakedata")
-#       field(THVL, "3")
-#       field(THST, "trigger")
-#   }
-#   record(mbbi, "$(P)AcquireModeR")
-#   {
-#       field(DTYP, "asynInt32")
-#       field(DESC, "Acquire mode")
-#       field(INP,  "@asyn($(PORT))AcquireMode")
-#       field(SCAN, "I/O Intr")
-#       field(FLNK, "$(P)AcquireModeS")
-#       field(ZRVL, "0")
-#       field(ZRST, "normal")
-#       field(ONVL, "1")
-#       field(ONST, "verbose")
-#       field(TWVL, "2")
-#       field(TWST, "fakedata")
-#       field(THVL, "3")
-#       field(THST, "trigger")
-#   }
-#   record(mbbo, "$(P)AcquireModeS")
-#   {
-#       field(DOL,  "$(P)AcquireModeR NPP")
-#       field(OMSL, "closed_loop")
-#       field(OUT,  "$(P)AcquireMode PP")
-#       field(ZRVL, "0")
-#       field(ZRST, "normal")
-#       field(ONVL, "1")
-#       field(ONST, "verbose")
-#       field(TWVL, "2")
-#       field(TWST, "fakedata")
-#       field(THVL, "3")
-#       field(THST, "trigger")
-#   }
-#
-# * createStatusParam("Acquiring",            0x1,  1,  3); // Acquiring data               (0=not acquiring [alarm],1=acquiring)
-#   produces:
-#   record(bi, "$(P)Acquiring")
-#   {
-#      field(DESC, "Acquiring data")
-#      field(DTYP, "asynInt32")
-#      field(INP,  "@asyn($(PORT))Acquiring")
-#      field(SCAN, "I/O Intr")
-#      field(ZNAM, "not acquiring")
-#      field(ZSV,  "MAJOR")
-#      field(ONAM, "acquiring")
-#   }
-#
 # The description is truncated to match EPICS string specifications
-#
-# asyn device support doesn't support bi-directional EPICS records. We use a trick
-# from Mark Rivers (http://www.aps.anl.gov/epics/tech-talk/2014/msg00057.php)
-# and create 3 additional records to support reading and writing to a single
-# record.
 #
 # Copyright (c) 2014 Oak Ridge National Laboratory.
 # All rights reserved.
@@ -106,21 +20,23 @@ def parse_one(type, params_str, desc_str, extra_str):
     re_option = re.compile("^([^=]*)=([^\[]*)(.*)\]?")
 
     names = {
-        'status':  [ "name", "offset", "width", "bit_offset" ],
-        'counter': [ "name", "offset", "width", "bit_offset" ],
-        'config':  [ "name", "section", "section_offset", "width", "bit_offset", "default" ],
-        'config1': [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default" ],
-        'temp':    [ "name", "offset", "width", "bit_offset" ],
+        'status':     [ "name", "offset", "width", "bit_offset" ],
+        'counter':    [ "name", "offset", "width", "bit_offset" ],
+        'config':     [ "name", "section", "section_offset", "width", "bit_offset", "default", "convert" ],
+        'config_ch':  [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default", "convert" ],
+        'temp':       [ "name", "offset", "width", "bit_offset" ],
+        'preampcfg':  [ "name", "offset", "width", "bit_offset", "default" ],
+        'preamptrig': [ "name", "offset", "width", "bit_offset", "default" ],
     }
 
     params = map(lambda x: x.strip(" \t\"\'"), params_str.split(","))
-    if type is 'config' and len(params) == 7:
-        type = 'config1'
     param = dict(zip(names[type], params))
 
     for item in [ "width", "bit_offset", "default" ]:
         if item in param:
             param[item] = int(param[item], 0)
+    if 'default' not in param:
+        param['default'] = None
 
     param['desc'] = desc_str.strip(" \t\n").replace("\"", "\\\"")
     if param['desc'][:28] != param['desc']:
@@ -132,7 +48,11 @@ def parse_one(type, params_str, desc_str, extra_str):
         for e in extra_str.split(","):
             e = e.strip(" \t")
             if e.startswith("calc:"):
-                param['calc'] = e[5:].strip(" ")
+                param['calcread'] = e[5:].strip(" ")
+            elif e.startswith("calcread:"):
+                param['calcread'] = e[9:].strip(" ")
+            elif e.startswith("calcwrite:"):
+                param['calcwrite'] = e[10:].strip(" ")
             elif e.startswith("prec:"):
                 param['prec'] = e[5:].strip(" ")
             elif e.startswith("unit:"):
@@ -143,6 +63,10 @@ def parse_one(type, params_str, desc_str, extra_str):
                 param['high'] = e[5:].strip(" ")
             elif e.startswith("archive:"):
                 param['archive'] = e[8:].strip(" ")
+            elif e.startswith("scale:"):
+                param['slope_scale'] = e[6:].strip(" ")
+            elif e.startswith("offset:"):
+                param['slope_offset'] = e[7:].strip(" ")
             elif "=" in e:
                 if "options" not in param:
                     param['options'] = []
@@ -157,7 +81,7 @@ def parse_one(type, params_str, desc_str, extra_str):
                         d['alarm'] = True
                     param['options'].append(d)
 
-    if type is "config" or type is "config1":
+    if type in [ "config", "config_ch", "preampcfg", "preamptrig" ]:
         param['direction'] = "inout"
     else:
         param['direction'] = "in"
@@ -169,10 +93,13 @@ def parse_src_file(path, verbose=False):
     params = []
 
     regexes = {
-        'status':  re.compile("createStatusParam\s*\((.*)\);(.*)$"),
-        'counter': re.compile("createCounterParam\s*\((.*)\);(.*)$"),
-        'config':  re.compile("createConfigParam\s*\((.*)\);(.*)$"),
-        'temp':    re.compile("createTempParam\s*\((.*)\);(.*)$"),
+        'status':     re.compile("createStatusParam\s*\((.*)\);(.*)$"),
+        'counter':    re.compile("createCounterParam\s*\((.*)\);(.*)$"),
+        'config':     re.compile("createConfigParam\s*\((.*)\);(.*)$"),
+        'config_ch':  re.compile("createChanConfigParam\s*\((.*)\);(.*)$"),
+        'temp':       re.compile("createTempParam\s*\((.*)\);(.*)$"),
+        'preampcfg':  re.compile("createPreAmpCfgParam\s*\((.*)\);(.*)$"),
+        'preamptrig': re.compile("createPreAmpTrigParam\s*\((.*)\);(.*)$"),
     }
     re_desc = re.compile("\s*//\s*([^\(]*)(.*)$")
 
@@ -187,7 +114,7 @@ def parse_src_file(path, verbose=False):
                     desc = ""
                     extra = ""
                     if not match_d or not match_d.group(1):
-                        sys.stderr.write("ERROR: No description for {0}\n".format(match.group(1).split(",")[0]))
+                        sys.stderr.write("WARNING: No description for {0}\n".format(match.group(1).split(",")[0]))
                     else:
                         desc = match_d.group(1)
                         extra = match_d.group(2)
@@ -195,6 +122,27 @@ def parse_src_file(path, verbose=False):
                     params.append( parse_one(type, match.group(1), desc, extra) )
 
     return params
+
+def _aiao_val(param, outfile, default_value=None):
+    if default_value is not None:
+        outfile.write("    field(VAL,  \"{0}\")\n".format(param['default']))
+    if "prec" in param:
+        outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
+    if "unit" in param:
+        outfile.write("    field(EGU,  \"{0}\")\n".format(param['unit']))
+    if "low" in param:
+        outfile.write("    field(LOW,  \"{0}\")\n".format(param['low']))
+        outfile.write("    field(LSV,  \"MAJOR\")\n")
+    if "high" in param:
+        outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
+        outfile.write("    field(HSV,  \"MAJOR\")\n")
+    if "slope_scale" in param:
+        outfile.write("    field(ESLO, \"{0}\")\n".format(param['slope_scale']))
+        outfile.write("    field(LINR, \"SLOPE\")\n")
+    if "slope_offset" in param:
+        outfile.write("    field(EOFF, \"{0}\")\n".format(param['slope_offset']))
+        if "scale" not in param:
+            outfile.write("    field(LINR, \"SLOPE\")\n")
 
 def _bibo_val(param, outfile, default_value=None):
     for i in range(0, 1):
@@ -274,124 +222,120 @@ def _longinlongout_val(param, outfile, default_value=None):
         outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
         outfile.write("    field(HSV,  \"MAJOR\")\n")
 
-def generate_out_db_record(param, outfile):
-    if "options" in param:
-        if len(param['options']) == 2 and param['width'] == 1:
-            type="bo"
-            intype="bi"
-        else:
-            type="mbbo"
-            intype="mbbi"
-    else:
-        type="longout"
-        intype="longin"
-
-    outfile.write("record({0}, \"$(P){1}\")\n".format(type, param['name']))
-    outfile.write("{\n")
-    if "archive" in param and param['archive'] == "monitor":
-        outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
-    outfile.write("    info(autosaveFields, \"VAL\")\n")
-    outfile.write("    field(ASG,  \"BEAMLINE\")\n")
-    outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
-    outfile.write("    field(PINI, \"YES\")\n")
-    outfile.write("    field(OUT,  \"$(P){0}W PP\")\n".format(param['name']))
-    if type == "bo":
-        _bibo_val(param, outfile, param['default'])
-    elif type == "mbbo":
-        _mbbimbbo_val(param, outfile, param['default'])
-    else:
-        outfile.write("    field(LOPR, \"0\")\n")
-        outfile.write("    field(HOPR, \"{0}\")\n".format(2**param['width'] - 1))
-        _longinlongout_val(param, outfile, param['default'])
-    outfile.write("}\n")
-
-    outfile.write("record({0}, \"$(P){1}W\")\n".format(type, param['name']))
-    outfile.write("{\n")
-    outfile.write("    field(ASG,  \"BEAMLINE\")\n")
-    outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
-    outfile.write("    field(DTYP, \"asynInt32\")\n")
-    outfile.write("    field(OUT,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
-    outfile.write("    field(SDIS, \"$(P){0}S.PACT\")\n".format(param['name']))
-    outfile.write("    field(DISV, \"1\")\n")
-    if type == "bo":
-        _bibo_val(param, outfile)
-    elif type == "mbbo":
-        _mbbimbbo_val(param, outfile)
-    else:
-        _longinlongout_val(param, outfile)
-    outfile.write("}\n")
-
-    outfile.write("record({0}, \"$(P){1}R\")\n".format(intype, param['name']))
-    outfile.write("{\n")
-    outfile.write("    field(DTYP, \"asynInt32\")\n")
-    outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
-    outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
-    outfile.write("    field(SCAN, \"I/O Intr\")\n")
-    outfile.write("    field(FLNK, \"$(P){0}S\")\n".format(param['name']))
-    if type == "bo":
-        _bibo_val(param, outfile)
-    elif type == "mbbo":
-        _mbbimbbo_val(param, outfile)
-    else:
-        _longinlongout_val(param, outfile)
-    outfile.write("}\n")
-
-    outfile.write("record({0}, \"$(P){1}S\")\n".format(type, param['name']))
-    outfile.write("{\n")
-    outfile.write("    field(DOL,  \"$(P){0}R NPP\")\n".format(param['name']))
-    outfile.write("    field(OMSL, \"closed_loop\")\n")
-    outfile.write("    field(OUT,  \"$(P){0} PP\")\n".format(param['name']))
-    if type == "bo":
-        _bibo_val(param, outfile)
-    elif type == "mbbo":
-        _mbbimbbo_val(param, outfile)
-    else:
-        _longinlongout_val(param, outfile)
-    outfile.write("}\n")
-
-def generate_in_db_record(param, outfile):
-    if "options" in param:
-        if len(param['options']) == 2 and param['width'] == 1:
-            type="bi"
-        else:
-            type="mbbi"
-    else:
-        type="longin"
-
-    if "calc" in param:
-        outfile.write("record(calc, \"$(P){0}\")\n".format(param['name']))
+def _calc_record(param, outfile):
+    flnk = None
+    if 'calcwrite' in param:
+        outfile.write("record(calcout, \"$(P){0}CW\")\n".format(param['name']))
         outfile.write("{\n")
-        if "archive" in param and param['archive'] == "monitor":
-            outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
-        outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
-        outfile.write("    field(INPA, \"$(P){0}_Raw NPP\")\n".format(param['name']))
-        outfile.write("    field(CALC, \"{0}\")\n".format(param['calc']))
-        _longinlongout_val(param, outfile)
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        outfile.write("    field(INPA, \"$(P){0} NPP\")\n".format(param['name']))
+        outfile.write("    field(CALC, \"{0}\")\n".format(param['calcwrite']))
+        outfile.write("    field(OUT,  \"$(P){0}W PP\")\n".format(param['name']))
         outfile.write("}\n")
 
-        outfile.write("record({0}, \"$(P){1}_Raw\")\n".format(type, param['name']))
+        outfile.write("record(longout, \"$(P){0}W\")\n".format(param['name']))
         outfile.write("{\n")
-        outfile.write("    field(FLNK, \"$(P){0}\")\n".format(param['name']))
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
+        outfile.write("    field(DTYP, \"asynInt32\")\n")
+        outfile.write("    field(OUT,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
+        if 'calcread' in param:
+            outfile.write("    field(SDIS, \"$(P){0}CR.PACT\")\n".format(param['name']))
+            outfile.write("    field(DISV, \"1\")\n")
+        outfile.write("}\n")
+        flnk = "$(P){0}CW".format(param['name'])
+
+    if 'calcread' in param:
+        outfile.write("record(longin, \"$(P){0}R\")\n".format(param['name']))
+        outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
+        outfile.write("    field(DTYP, \"asynInt32\")\n")
+        outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
+        outfile.write("    field(SCAN, \"I/O Intr\")\n")
+        outfile.write("    field(FLNK, \"$(P){0}CR\")\n".format(param['name']))
+        if 'calcwrite' in param:
+            outfile.write("    field(SDIS, \"$(P){0}CW.PACT\")\n".format(param['name']))
+            outfile.write("    field(DISV, \"1\")\n")
+        outfile.write("}\n")
+
+        outfile.write("record(calcout, \"$(P){0}CR\")\n".format(param['name']))
+        outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        outfile.write("    field(INPA, \"$(P){0}R NPP\")\n".format(param['name']))
+        outfile.write("    field(CALC, \"{0}\")\n".format(param['calcread']))
+        outfile.write("    field(OUT,  \"$(P){0} PP\")\n".format(param['name']))
+        outfile.write("}\n")
+    return flnk
+    
+def generate_db_record(param, outfile):
+    if "options" in param:
+        if len(param['options']) == 2 and param['width'] == 1:
+            type="bi" if param['direction'] == "in" else "bo"
+        else:
+            type="mbbi" if param['direction'] == "in" else "mbbo"
+    elif "slope_scale" in param or "slope_offset" in param:
+        type="ai" if param['direction'] == "in" else "ao"
+    else:
+        type="longin" if param['direction'] == "in" else "longout"
+
+    if "calcread" in param or "calcwrite" in param:
+        flnk = _calc_record(param, outfile)
+        outfile.write("record(ao, \"$(P){0}\")\n".format(param['name']))
+        outfile.write("{\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        if "prec" not in param:
+            param['prec'] = 0
+        outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))
+
+        if param['direction'] == 'in':
+            outfile.write("    field(OUT,  \"0\")\n")
+        elif flnk:
+            outfile.write("    info(autosaveFields, \"VAL\")\n")
+            outfile.write("    field(PINI, \"YES\")\n")
+            outfile.write("    field(FLNK, \"{0}\")\n".format(flnk))
+        _longinlongout_val(param, outfile, param['default'])
+
     else:
         outfile.write("record({0}, \"$(P){1}\")\n".format(type, param['name']))
         outfile.write("{\n")
-        if "archive" in param and param['archive'] == "monitor":
-            outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
+        outfile.write("    field(DTYP, \"asynInt32\")\n")
 
-    outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
-    outfile.write("    field(DTYP, \"asynInt32\")\n")
-    outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
-    outfile.write("    field(SCAN, \"I/O Intr\")\n")
-#    outfile.write("    field(VAL,  \"0\")\n")
-#    outfile.write("    field(PINI, \"YES\")\n")
-
-    if "calc" not in param:
-        if type == "bi":
-            _bibo_val(param, outfile)
-        elif type == "mbbi":
-            _mbbimbbo_val(param, outfile)
+        if type == "bi" or type == "bo":
+            _bibo_val(param, outfile, param['default'])
+        elif type == "mbbi" or type == "mbbo":
+            _mbbimbbo_val(param, outfile, param['default'])
+        elif type == "ai" or type == "ao":
+            _aiao_val(param, outfile, param['default'])
         else:
-            _longinlongout_val(param, outfile)
+            high = 2**param['width'] - 1
+            low = 0
+            # Check for signed converters, not so strict search as callback
+            # can be specified in multiple ways
+            if 'convert' in param:
+                if "CONV_SIGN_MAGN" in param['convert']:
+                    high = 2**(param['width'] - 1) - 1
+                    low = -1 * high
+                elif "CONV_SIGN_2COMP" in param['convert']:
+                    high = 2**(param['width'] - 1) - 1
+                    low = -1 * high + 1
+            outfile.write("    field(LOPR, \"{0}\")\n".format(low))
+            outfile.write("    field(HOPR, \"{0}\")\n".format(high))
+            _longinlongout_val(param, outfile, param['default'])
+
+        if param['direction'] == "in":
+            outfile.write("    field(INP,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
+            outfile.write("    field(SCAN, \"I/O Intr\")\n")
+        else:
+            outfile.write("    info(autosaveFields, \"VAL\")\n")
+            outfile.write("    info(asyn:READBACK, \"1\")\n")
+            outfile.write("    field(PINI, \"YES\")\n")
+            outfile.write("    field(OUT,  \"@asyn($(PORT)){0}\")\n".format(param['name']))
+
+    if "archive" in param and param['archive'] == "monitor":
+        outfile.write("    info(archive, \"Monitor, 00:00:01, VAL\")\n")
+
+    outfile.write("    field(ASG,  \"BEAMLINE\")\n")
+    outfile.write("    field(DESC, \"{0}\")\n".format(param['desc'][:28]))
     outfile.write("}\n")
 
 def main():
@@ -410,10 +354,7 @@ def main():
     outfile = open(options.outfile, "w")
     params = parse_src_file(options.infile, options.verbose)
     for param in params:
-        if param['direction'] == "in":
-            generate_in_db_record(param, outfile)
-        else:
-            generate_out_db_record(param, outfile)
+        generate_db_record(param, outfile)
 
 if __name__ == "__main__":
     main()

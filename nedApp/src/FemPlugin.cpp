@@ -41,32 +41,24 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
 {
     if (m_version == "v32" || m_version == "v34") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v32();
-        createConfigParams_v32();
+        createParams_v32();
     } else if (m_version == "v35") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v35();
-        createConfigParams_v35();
+        createParams_v35();
     } else if (m_version == "v36") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v36();
-        createConfigParams_v36();
-        createCounterParams_v36();
+        createParams_v36();
     } else if (m_version == "v37") {
         setIntegerParam(Supported, 1);
         setIntegerParam(UpgradeStatus, UPGRADE_NOT_STARTED); // supported but not started
-        createStatusParams_v37();
-        createConfigParams_v37();
-        createCounterParams_v37();
-        createUpgradeParams_v37();
+        createParams_v37();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);
     }
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
 }
 
 bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)

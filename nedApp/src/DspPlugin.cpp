@@ -58,13 +58,10 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
     , m_version(version)
 {
     if (m_version == "v63") {
-        createConfigParams_v63();
-        createStatusParams_v63();
+        createParams_v63();
         setIntegerParam(Supported, 1);
     } else if (m_version == "v64") {
-        createConfigParams_v64();
-        createStatusParams_v64();
-        createCounterParams_v64();
+        createParams_v64();
         setIntegerParam(Supported, 1);
     } else {
         setIntegerParam(Supported, 0);
@@ -72,6 +69,7 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
     }
 
     callParamCallbacks();
+    initParams();
 }
 
 bool DspPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)

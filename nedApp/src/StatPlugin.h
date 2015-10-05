@@ -31,6 +31,22 @@ class StatPlugin : public BasePlugin {
          */
         void processData(const DasPacketList * const packetList);
 
+        /**
+         * Overloaded function
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+    private: // function
+
+        /**
+         * Calculate accumulated proton charge for selected source.
+         *
+         * @param[out] pcharge Variable to add current proton charge to
+         * @param[in] lastPulseTime Timestamp of last proton charge added, used to determine new pulse
+         * @param[in] rtdl header from packet
+         */
+        void accumulatePCharge(epicsTimeStamp &lastPulseTime, const RtdlHeader *rtdl, double &pcharge);
+
     private:
         uint64_t m_receivedCount;
         uint64_t m_receivedBytes;
@@ -46,6 +62,11 @@ class StatPlugin : public BasePlugin {
         uint64_t m_tsyncBytes;
         uint64_t m_badCount;
         uint64_t m_badBytes;
+        double m_neutronPCharge;
+        double m_rtdlPCharge;
+        epicsTimeStamp m_neutronPulseTime;
+        epicsTimeStamp m_rtdlPulseTime;
+        RtdlHeader::PulseFlavor m_pulseType;
 
     private: // asyn parameters
         #define FIRST_STATPLUGIN_PARAM Reset
@@ -64,7 +85,10 @@ class StatPlugin : public BasePlugin {
         int TsyncByte;          //!< Bytes of TSYNC packets
         int BadByte;            //!< Bytes of bad packets
         int TotByte;            //!< Total number of packets
-        #define LAST_STATPLUGIN_PARAM TotByte
+        int NeutronPCharge;     //!< Accumulated neutron proton charge since last reset
+        int RtdlPCharge;        //!< Accumulated RTDL (accelerator) proton charge since last reset
+        int PulseType;          //!< Select pulse type to collect proton charge for
+        #define LAST_STATPLUGIN_PARAM PulseType
 };
 
 #endif // STAT_PLUGIN_H

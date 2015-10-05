@@ -32,7 +32,7 @@ static const int asynStackSize     = 0;
 
 #define NUM_OCCPORTDRIVER_PARAMS ((int)(&LAST_OCCPORTDRIVER_PARAM - &FIRST_OCCPORTDRIVER_PARAM + 1))
 
-EPICS_REGISTER(Occ, OccPortDriver, 3, "Port name", string, "OCC device file", string, "Local buffer size", int);
+EPICS_REGISTER(Occ, OccPortDriver, 3, "Port name", string, "OCC connection string", string, "Local buffer size", int);
 
 OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize)
     : asynPortDriver(portName, asynMaxAddr, NUM_OCCPORTDRIVER_PARAMS, asynInterfaceMask,
@@ -50,7 +50,6 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("FwVer",            asynParamInt32,     &FwVer);                    // READ - OCC board firmware version
     createParam("FwDate",           asynParamInt32,     &FwDate);                   // READ - OCC board firmware date
     createParam("ConStatus",        asynParamInt32,     &ConStatus);                // READ - Optical connection status     (0=connected,1=no SFP,2=no cable,3=laser fault)
-    createParam("RxStalled",        asynParamInt32,     &RxStalled,     STALL_NONE);// READ - Incoming data stalled         (see OccPortDriver::StallEvent)
     createParam("Command",          asynParamInt32,     &Command);                  // WRITE - Issue OccPortDriver command  (see OccPortDriver::Command)
     createParam("FpgaSn",           asynParamOctet,     &FpgaSn);                   // READ - FPGA serial number in hex str
     createParam("FpgaTemp",         asynParamFloat64,   &FpgaTemp);                 // READ - FPGA temperature in Celsius
@@ -80,15 +79,15 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("RxEnRb",           asynParamInt32,     &RxEnRb);                   // READ - Incoming data enabled         (0=disabled,1=enabled)
     createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
-    createParam("AutoReset",        asynParamInt32,     &AutoReset,     0);         // WRITE - Auto reset on error switch    (0=disable,1=enable)
-    createParam("RstCntBad",        asynParamInt32,     &RstCntBad,     0);         // READ - Num corrupted queue auto-resets
-    createParam("RstCntOvr",        asynParamInt32,     &RstCntOvr,     0);         // READ - Num FIFO overflow auto-resets
-    createParam("RstCntDma",        asynParamInt32,     &RstCntDma,     0);         // READ - Num DMA full auto-resets
-    createParam("RstCntBuf",        asynParamInt32,     &RstCntCopy,    0);         // READ - Num buffer full auto-resets
-    createParam("RstCntErr",        asynParamInt32,     &RstCntErr,     0);         // READ - Num OCC error auto-resets
 
-    // Initialize OCC board
-    status = occ_open(devfile, OCC_INTERFACE_OPTICAL, &m_occ);
+    occ_interface_type occtype = OCC_INTERFACE_OPTICAL;
+    if (strchr(devfile, ',') != 0)
+        occtype = OCC_INTERFACE_PIPE;
+    else if (strchr(devfile, ':') != 0)
+        occtype = OCC_INTERFACE_SOCKET;
+
+    // Initialize OCC library
+    status = occ_open(devfile, occtype, &m_occ);
     setIntegerParam(LastErr, -status);
     if (status != 0) {
         setIntegerParam(Status, STAT_OCC_NOT_INIT);
@@ -172,7 +171,7 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             LOG_ERROR("Failed to query OCC status: %s(%d)", strerror(-ret), ret);
         } else {
             char sn[20];
-            snprintf(sn, sizeof(sn), "%lX", occstatus.fpga_serial_number);
+            snprintf(sn, sizeof(sn), "%jX", occstatus.fpga_serial_number);
             setStringParam(FpgaSn,          sn);
 
             setIntegerParam(HwType,         occstatus.board);
@@ -202,9 +201,9 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
             setIntegerParam(RecvRate,       occstatus.rx_rate);
 
             if (occstatus.stalled)
-                setIntegerParam(RxStalled,  STALL_DMA);
+                setIntegerParam(Status,     STAT_OCC_STALL);
             else if (occstatus.overflowed)
-                setIntegerParam(RxStalled,  STALL_FIFO);
+                setIntegerParam(Status,     STAT_OCC_FIFO_FULL);
         }
 
         callParamCallbacks();
@@ -269,6 +268,16 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
     } else if (pasynUser->reason == RxEn) {
+
+        if (value == 1) {
+            // RX could be switched off in the middle of the incoming packet.
+            // Second half of that packet would show up in the queue next time
+            // enabled. Calling occ_reset() to avoid it.
+            this->unlock();
+            reset();
+            this->lock();
+        }
+
         if ((ret = occ_enable_rx(m_occ, value > 0)) != 0) {
             LOG_ERROR("Unable to %s optical link - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
             setIntegerParam(LastErr, -ret);
@@ -277,17 +286,9 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
         }
 
         setIntegerParam(RxEn, value);
-        if (value == 0) {
-            // RX could be switched off in the middle of the incoming packet.
-            // Second half of that packet would show up in the queue next time
-            // enabled. Calling occ_reset() to avoid it.
-            this->unlock();
-            reset();
-            this->lock();
-        } else {
-            // There's a thread to refresh OCC status, including RX enabled
-            m_statusEvent.signal();
-        }
+        // There's a thread to refresh OCC status, including RX enabled
+        m_statusEvent.signal();
+
     } else if (pasynUser->reason == ErrPktEn) {
         if ((ret = occ_enable_error_packets(m_occ, value > 0)) != 0) {
             LOG_ERROR("Unable to %s error packets output - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
@@ -401,57 +402,38 @@ void OccPortDriver::reset() {
     // Flag resetting mode, status thread will recover
     this->lock();
     setIntegerParam(Status, STAT_OK);
-    setIntegerParam(RxStalled, STALL_NONE);
     callParamCallbacks();
     this->unlock();
 }
 
 void OccPortDriver::handleRecvError(int ret)
 {
-    int autoReset = 0;
-    int resetParam = 0;
-
     this->lock();
 
-    if (ret == -EBADMSG) {
+    if (ret == -EBADMSG) { // Corrupted data based on length check
         setIntegerParam(Status, STAT_BAD_DATA);
-        resetParam = RstCntBad;
+
+    } else if (ret == -ERANGE) { // Not enough data for packet
+        setIntegerParam(Status, STAT_PARTIAL_DATA);
 
     } else if (ret == -EOVERFLOW) { // OCC FIFO overflow
         setIntegerParam(LastErr, EOVERFLOW);
-        setIntegerParam(Status, STAT_BUFFER_FULL);
-        setIntegerParam(RxStalled, STALL_FIFO);
-        resetParam = RstCntOvr;
+        setIntegerParam(Status, STAT_OCC_FIFO_FULL);
 
     } else if (ret == -ENOSPC) { // OCC DMA full
         setIntegerParam(LastErr, ENOSPC);
-        setIntegerParam(Status, STAT_BUFFER_FULL);
-        setIntegerParam(RxStalled, STALL_DMA);
-        resetParam = RstCntDma;
+        setIntegerParam(Status, STAT_OCC_STALL);
 
     } else if (ret == -ENODATA) { // DmaCopier full
         setIntegerParam(Status, STAT_BUFFER_FULL);
-        setIntegerParam(RxStalled, STALL_COPY);
-        resetParam = RstCntCopy;
 
     } else {
         setIntegerParam(LastErr, -ret);
         setIntegerParam(Status, STAT_OCC_ERROR);
-        resetParam = RstCntErr;
-    }
-
-    getIntegerParam(AutoReset, &autoReset);
-    if (autoReset) {
-        int value;
-        getIntegerParam(resetParam, &value);
-        setIntegerParam(resetParam, value+1);
     }
 
     callParamCallbacks();
     this->unlock();
-
-    if (autoReset)
-        reset();
 }
 
 void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
@@ -506,7 +488,7 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             } else {
                 LOG_ERROR("Partial data from OCC, aborting process thread");
             }
-            handleRecvError(-EBADMSG);
+            handleRecvError(-ERANGE);
             break;
         }
     }

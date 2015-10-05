@@ -20,8 +20,8 @@ USR_CXXFLAGS += -std=c++0x
 #USR_CXXFLAGS += -fopenmp
 #USR_LDFLAGS  += -fopenmp
 CXXFLAGS = -Wall $(USR_CXXFLAGS)
-#CXXFLAGS += -g -ggdb -O0
-CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
+CXXFLAGS += -g -ggdb -O0
+#CXXFLAGS += -O2 # Improve std::vector iteration times by factor 30 or so
 
 # Product
 PROD_NAME = ned
@@ -52,6 +52,7 @@ PROD_LIBS += calc
 PROD_SRCS  += ned_registerRecordDeviceDriver.cpp
 PROD_SRCS  += main.cpp
 PROD_SRCS  += GlobalCon.st
+PROD_SRCS  += HVScan.st
 PROD_SRCS  += ApplyConfig.st
 
 # Static library
@@ -62,8 +63,10 @@ SHARED_LIBRARIES = NO
 INC += CircularBuffer.h
 
 LIB_SRCS  += GlobalCon.st
+LIB_SRCS  += HVScan.st
 LIB_SRCS  += ApplyConfig.st
 $(PROD_NAME)_SRCS  += Common.cpp
+$(PROD_NAME)_SRCS  += ValueConvert.cpp
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp
 $(PROD_NAME)_SRCS  += OccPortDriver.cpp
@@ -87,6 +90,8 @@ $(PROD_NAME)_SRCS  += RocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
+$(PROD_NAME)_SRCS  += BnlRocPlugin.cpp
+$(PROD_NAME)_SRCS  += BnlRocPlugin_v00.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v47.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
@@ -94,6 +99,7 @@ $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v56.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v57.cpp
+$(PROD_NAME)_SRCS  += RocPlugin_v58.cpp
 $(PROD_NAME)_SRCS  += FemPlugin.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
 $(PROD_NAME)_SRCS  += FemPlugin_v35.cpp

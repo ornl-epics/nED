@@ -1,7 +1,7 @@
 #!/bin/env python
 #
 # Parse st.cmd file, extract archived records from DB template files and 
-# archiver compatible XML.
+# produce archiver compatible section of XML.
 #
 # Copyright (c) 2015 Oak Ridge National Laboratory.
 # All rights reserved.

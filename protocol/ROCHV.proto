@@ -13,9 +13,9 @@
 ##################################################
 
 Terminator = CR;
-ReplyTimeout = 1000;
-locktimeout = 5000;
-readtimeout  = 1000;
+ReplyTimeout = 150;
+locktimeout = 500;
+readtimeout  = 150;
 extrainput   = Ignore;
 
 #
@@ -35,6 +35,17 @@ extrainput   = Ignore;
 #
 getNum {
    out "?\$1";
+   in "?\$1%05d";
+}
+
+#
+# Trying to split up request and receive of the voltage 
+#
+reqNum {
+   out "?\$1";
+}
+
+recNum {
    in "?\$1%05d";
 }
 

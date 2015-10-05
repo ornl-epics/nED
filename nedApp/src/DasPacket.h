@@ -105,6 +105,8 @@ struct DasPacket
             CMD_RTDL                    = 0x85, //!< RTDL is a command packet, but can also be data packet if info == 0xFC
             CMD_PM_PULSE_RQST_ON        = 0x90, //!< Request one pulse for Pulsed Magnet
             CMD_PM_PULSE_RQST_OFF       = 0x91, //!< Clears one pulse request for Pulsed Magnet
+            CMD_PREAMP_TEST_CONFIG      = 0x92, //!< Send pulse settings
+            CMD_PREAMP_TEST_TRIGGER     = 0x93, //!< Send a single pre-amp pulse request
         };
 
         /**
@@ -114,7 +116,7 @@ struct DasPacket
             MOD_TYPE_ROC                = 0x20,   //!< ROC (or LPSD) module
             MOD_TYPE_AROC               = 0x21,   //!< AROC
             MOD_TYPE_HROC               = 0x22,
-            MOD_TYPE_BLNROC             = 0x25,
+            MOD_TYPE_BNLROC             = 0x25,
             MOD_TYPE_CROC               = 0x29,
             MOD_TYPE_IROC               = 0x2A,
             MOD_TYPE_BIDIMROC           = 0x2B,

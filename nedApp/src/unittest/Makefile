@@ -6,13 +6,17 @@ PROD_LIBS += Com
 PROD_LIBS += asyn
 PROD_LIBS += ned
 
-CXXFLAGS = -g -ggdb
+CXXFLAGS = -std=c++0x -g -ggdb
+
+USR_INCLUDES += -I../..
 
 # Tests for the parameters
 TESTPROD_HOST += testCircularBuffer
+TESTPROD_HOST += testValueConvert
 testCircularBuffer_SRCS += testCircularBuffer.cpp
-testCircularBuffer_INCLUDES += -I../..
+testValueConvert_SRCS += testValueConvert.cpp
 TESTS += testCircularBuffer
+TESTS += testValueConvert
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 

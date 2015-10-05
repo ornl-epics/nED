@@ -20,10 +20,10 @@
  *
  */
 
-void RocPlugin::createStatusParams_v57()
+void RocPlugin::createParams_v57()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                         | EPICS record description  | (bi and mbbi description)
-    createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring mode.               (0=not acquiring [alarm],1=acquiring, archive:monitor)
+    createStatusParam("Acquiring",        0x0,  1, 11); // Acquiring mode.               (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("ErrParity",        0x0,  1, 10); // LVDS parity error.            (0=no error,1=error)
     createStatusParam("Configured",       0x0,  1,  9); // Configured                    (0=configured,1=not configured [alarm], archive:monitor)
     createStatusParam("Discovered",       0x0,  1,  8); // Discovered                    (0=discovered,1=not discovered, archive:monitor)
@@ -115,11 +115,8 @@ void RocPlugin::createStatusParams_v57()
     // ROC lies about the length of the packet. It returns 44 bytes of valid
     // data but the packet length is 64 bytes => 20 bytes or 10 registers
     // We only need to define the last one which defines the packet length
-    createStatusParam("StatFill",         0x1F,15,  0);
-}
+    createStatusParam("StatFill",         0x1F,15,  0); // Status padding
 
-void RocPlugin::createCounterParams_v57()
-{
     createCounterParam("CntParity",        0x0, 16,  0); // LVDS parity error counter
     createCounterParam("CntUartParity",    0x1, 16,  0); // UART parity error counter
     createCounterParam("CntUartByte",      0x2, 16,  0); // UART byte error counter
@@ -149,10 +146,7 @@ void RocPlugin::createCounterParams_v57()
     createCounterParam("Ch6:CntRate",      0x1A, 16,  0); // Ch6 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
     createCounterParam("Ch7:CntRate",      0x1B, 16,  0); // Ch7 outrate counter   (calc:1000*A/52.4288,unit:counts/s)
     createCounterParam("CntOutRate",       0x1C, 16,  0); // Total outrate counter (calc:1000*A/52.4288,unit:counts/s,prec:0)
-}
 
-void RocPlugin::createConfigParams_v57()
-{
 //    BLXXX:Det:RocXXX:| sig nam |                                    | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:PositionIdx",  '1', 0x0,  32, 0, 0);     // Chan1 position index
     createConfigParam("Ch2:PositionIdx",  '1', 0x2,  32, 0, 256);   // Chan2 position index
@@ -163,22 +157,22 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("Ch7:PositionIdx",  '1', 0xC,  32, 0, 1536);  // Chan7 position index
     createConfigParam("Ch8:PositionIdx",  '1', 0xE,  32, 0, 1792);  // Chan8 position index
 
-    createConfigParam("Ch1:A:InOffset",   '2', 0x0,  12, 0, 100);   // Chan1 A input offset
-    createConfigParam("Ch2:A:InOffset",   '2', 0x1,  12, 0, 100);   // Chan2 A input offset
-    createConfigParam("Ch3:A:InOffset",   '2', 0x2,  12, 0, 100);   // Chan3 A input offset
-    createConfigParam("Ch4:A:InOffset",   '2', 0x3,  12, 0, 100);   // Chan4 A input offset
-    createConfigParam("Ch5:A:InOffset",   '2', 0x4,  12, 0, 100);   // Chan5 A input offset
-    createConfigParam("Ch6:A:InOffset",   '2', 0x5,  12, 0, 100);   // Chan6 A input offset
-    createConfigParam("Ch7:A:InOffset",   '2', 0x6,  12, 0, 100);   // Chan7 A input offset
-    createConfigParam("Ch8:A:InOffset",   '2', 0x7,  12, 0, 100);   // Chan8 A input offset
-    createConfigParam("Ch1:B:InOffset",   '2', 0x8,  12, 0, 100);   // Chan1 B input offset
-    createConfigParam("Ch2:B:InOffset",   '2', 0x9,  12, 0, 100);   // Chan2 B input offset
-    createConfigParam("Ch3:B:InOffset",   '2', 0xA,  12, 0, 100);   // Chan3 B input offset
-    createConfigParam("Ch4:B:InOffset",   '2', 0xB,  12, 0, 100);   // Chan4 B input offset
-    createConfigParam("Ch5:B:InOffset",   '2', 0xC,  12, 0, 100);   // Chan5 B input offset
-    createConfigParam("Ch6:B:InOffset",   '2', 0xD,  12, 0, 100);   // Chan6 B input offset
-    createConfigParam("Ch7:B:InOffset",   '2', 0xE,  12, 0, 100);   // Chan7 B input offset
-    createConfigParam("Ch8:B:InOffset",   '2', 0xF,  12, 0, 100);   // Chan8 B input offset
+    createConfigParam("Ch1:A:InOffset",   '2', 0x0,   9, 0, 100, CONV_SIGN_MAGN); // Chan1 A input offset
+    createConfigParam("Ch2:A:InOffset",   '2', 0x1,   9, 0, 100, CONV_SIGN_MAGN); // Chan2 A input offset
+    createConfigParam("Ch3:A:InOffset",   '2', 0x2,   9, 0, 100, CONV_SIGN_MAGN); // Chan3 A input offset
+    createConfigParam("Ch4:A:InOffset",   '2', 0x3,   9, 0, 100, CONV_SIGN_MAGN); // Chan4 A input offset
+    createConfigParam("Ch5:A:InOffset",   '2', 0x4,   9, 0, 100, CONV_SIGN_MAGN); // Chan5 A input offset
+    createConfigParam("Ch6:A:InOffset",   '2', 0x5,   9, 0, 100, CONV_SIGN_MAGN); // Chan6 A input offset
+    createConfigParam("Ch7:A:InOffset",   '2', 0x6,   9, 0, 100, CONV_SIGN_MAGN); // Chan7 A input offset
+    createConfigParam("Ch8:A:InOffset",   '2', 0x7,   9, 0, 100, CONV_SIGN_MAGN); // Chan8 A input offset
+    createConfigParam("Ch1:B:InOffset",   '2', 0x8,   9, 0, 100, CONV_SIGN_MAGN); // Chan1 B input offset
+    createConfigParam("Ch2:B:InOffset",   '2', 0x9,   9, 0, 100, CONV_SIGN_MAGN); // Chan2 B input offset
+    createConfigParam("Ch3:B:InOffset",   '2', 0xA,   9, 0, 100, CONV_SIGN_MAGN); // Chan3 B input offset
+    createConfigParam("Ch4:B:InOffset",   '2', 0xB,   9, 0, 100, CONV_SIGN_MAGN); // Chan4 B input offset
+    createConfigParam("Ch5:B:InOffset",   '2', 0xC,   9, 0, 100, CONV_SIGN_MAGN); // Chan5 B input offset
+    createConfigParam("Ch6:B:InOffset",   '2', 0xD,   9, 0, 100, CONV_SIGN_MAGN); // Chan6 B input offset
+    createConfigParam("Ch7:B:InOffset",   '2', 0xE,   9, 0, 100, CONV_SIGN_MAGN); // Chan7 B input offset
+    createConfigParam("Ch8:B:InOffset",   '2', 0xF,   9, 0, 100, CONV_SIGN_MAGN); // Chan8 B input offset
 
     createConfigParam("Ch1:A:AdcOffset",  '2', 0x10, 12, 0, 100);   // Chan1 A ADC offset
     createConfigParam("Ch2:A:AdcOffset",  '2', 0x11, 12, 0, 100);   // Chan2 A ADC offset
@@ -320,39 +314,39 @@ void RocPlugin::createConfigParams_v57()
     // There's an unused part of C section in v5.4 C:0x10 - C:0x1F
     createConfigParam("ConfigFiller",     'C', 0x1F, 16, 0, 0);     // Config filler
 
-    createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch3:A:SampleMin",  'D', 0x2,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch4:A:SampleMin",  'D', 0x3,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch5:A:SampleMin",  'D', 0x4,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch6:A:SampleMin",  'D', 0x5,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch7:A:SampleMin",  'D', 0x6,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch8:A:SampleMin",  'D', 0x7,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch1:B:SampleMin",  'D', 0x8,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch2:B:SampleMin",  'D', 0x9,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch3:B:SampleMin",  'D', 0xA,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch4:B:SampleMin",  'D', 0xB,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch5:B:SampleMin",  'D', 0xC,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch6:B:SampleMin",  'D', 0xD,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch7:B:SampleMin",  'D', 0xE,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch8:B:SampleMin",  'D', 0xF,  12, 0, 100);   // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:A:SampleMin",  'D', 0x0,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:A:SampleMin",  'D', 0x1,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:A:SampleMin",  'D', 0x2,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:A:SampleMin",  'D', 0x3,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:A:SampleMin",  'D', 0x4,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:A:SampleMin",  'D', 0x5,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:A:SampleMin",  'D', 0x6,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:A:SampleMin",  'D', 0x7,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:B:SampleMin",  'D', 0x8,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:B:SampleMin",  'D', 0x9,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:B:SampleMin",  'D', 0xA,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:B:SampleMin",  'D', 0xB,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:B:SampleMin",  'D', 0xC,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:B:SampleMin",  'D', 0xD,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:B:SampleMin",  'D', 0xE,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:B:SampleMin",  'D', 0xF,  12, 0, 0);     // *** UNUSED BY FIRMWARE ***
 
-    createConfigParam("Ch1:A:SampleMax",  'D', 0x10, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch2:A:SampleMax",  'D', 0x11, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch3:A:SampleMax",  'D', 0x12, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch4:A:SampleMax",  'D', 0x13, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch5:A:SampleMax",  'D', 0x14, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch6:A:SampleMax",  'D', 0x15, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch7:A:SampleMax",  'D', 0x16, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch8:A:SampleMax",  'D', 0x17, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch1:B:SampleMax",  'D', 0x18, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch2:B:SampleMax",  'D', 0x19, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch3:B:SampleMax",  'D', 0x1A, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch4:B:SampleMax",  'D', 0x1B, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch5:B:SampleMax",  'D', 0x1C, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch6:B:SampleMax",  'D', 0x1D, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
-    createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 1000);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:A:SampleMax",  'D', 0x10, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:A:SampleMax",  'D', 0x11, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:A:SampleMax",  'D', 0x12, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:A:SampleMax",  'D', 0x13, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:A:SampleMax",  'D', 0x14, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:A:SampleMax",  'D', 0x15, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:A:SampleMax",  'D', 0x16, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:A:SampleMax",  'D', 0x17, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch1:B:SampleMax",  'D', 0x18, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch2:B:SampleMax",  'D', 0x19, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch3:B:SampleMax",  'D', 0x1A, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch4:B:SampleMax",  'D', 0x1B, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch5:B:SampleMax",  'D', 0x1C, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch6:B:SampleMax",  'D', 0x1D, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch7:B:SampleMax",  'D', 0x1E, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
+    createConfigParam("Ch8:B:SampleMax",  'D', 0x1F, 12, 0, 4095);  // *** UNUSED BY FIRMWARE ***
 
     createConfigParam("MaximumSlope",     'D', 0x20, 12, 0, 0);     // *** UNUSED BY FIRMWARE ***
 
@@ -379,7 +373,7 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
     createConfigParam("MinAdc",           'E', 0x6,  12, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  12, 0, 1000);  // Maximum ADC
-    createConfigParam("IntRelease",       'E', 0x8,  8,  0, 65530); // Integrator release point
+    createConfigParam("IntRelease",       'E', 0x8,  8,  0, -6, CONV_SIGN_2COMP); // Integrator release point
     createConfigParam("MinDiscrimWidth",  'E', 0x9,  8,  0, 1);     // Minimum discriminator width
     createConfigParam("Sample1",          'E', 0xA,  4,  0, 2);     // Sample 1 point [0:10]
     createConfigParam("Sample2",          'E', 0xB,  6,  0, 14);    // Sample 1 point [2:50]
@@ -390,26 +384,23 @@ void RocPlugin::createConfigParams_v57()
     createConfigParam("EdgeDetectEn",     'F', 0x0,  1, 13, 1);     // *** UNUSED BY FIRMWARE ***    (0=disable,1=enable)
     createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // *** UNUSED BY FIRMWARE ***    (0=SUM discr,1=A discr,2=B discr,3=all)
     createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // *** UNUSED BY FIRMWARE ***    (0=disable,1=enable)
-    createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=enabled,1=disabled)
+    createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  0);     // Auto correction mode          (0=disabled,1=enabled)
     createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw,2=extended)
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
-    createConfigParam("TxEnable",         'F', 0x0,  1, 3,  1);     // TX enable                     (0=external,1=always enabled)
-    createConfigParam("TsyncSelect",      'F', 0x0,  1, 2,  0);     // TSYNC select                  (0=external,1=internal 60Hz)
-    createConfigParam("TclkSelect",       'F', 0x0,  1, 1,  0);     // TCLK select                   (0=external,1=internal 10MHz)
-    createConfigParam("Reset",            'F', 0x0,  1, 0,  0);     // Reset enable                  (0=disable,1=enable)
+    createConfigParam("TcTxEnMode",       'F', 0x0,  1, 3,  1);     // T&C TX enable  mode           (0=external,1=internal)
+    createConfigParam("TcTsyncMode",      'F', 0x0,  1, 2,  0);     // T&C TSYNC mode                (0=external,1=internal 60Hz)
+    createConfigParam("TcTclkMode",       'F', 0x0,  1, 1,  0);     // T&C TCLK mode                 (0=external,1=internal 10MHz)
+    createConfigParam("TcResetMode",      'F', 0x0,  1, 0,  0);     // T&C Reset mode                (0=internal,1=external)
 
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
     createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Alternate test pattern enable (0=disable,1=enable)
     createConfigParam("TestPatternDebug", 'F', 0x1,  2, 12, 0);     // Engineering Use only
     createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
     createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
-}
 
-void RocPlugin::createTemperatureParams_v57()
-{
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0); // ROC board temperature in 'C   (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
-    createTempParam("TempPreampA",      0x1, 16, 0); // Preamp A temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
-    createTempParam("TempPreampB",      0x2, 16, 0); // Preamp B temperature in 'C    (calc:(A>=512)?0.25*(1024-A):0.25*A,unit:Celsius,low:-50,high:50)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempPreampA",      0x1, 16, 0, CONV_SIGN_2COMP); // Preamp A temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
 }

@@ -81,6 +81,26 @@ class RocPlugin : public BaseModulePlugin {
         bool processResponse(const DasPacket *packet);
 
         /**
+         * Process ROC custom commands.
+         *
+         * This includes handling pre-amp configuration and trigger responses.
+         *
+         * @param[in] command requested.
+         * @param[out] timeout before giving up waiting for response, default is 2.0
+         * @return Response to be waited for.
+         */
+        DasPacket::CommandType handleRequest(DasPacket::CommandType command, double &timeout);
+
+        /**
+         * Process ROC custom response commands.
+         *
+         * This includes handling pre-amp configuration and trigger responses.
+         *
+         * @param[in] packet to be handled
+         */
+        bool handleResponse(const DasPacket *packet);
+
+        /**
          * Send string/byte data to PVs
          */
         asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
@@ -180,119 +200,82 @@ class RocPlugin : public BaseModulePlugin {
         bool rspHvCmd(const DasPacket *packet);
 
         /**
-         * Create and register all status ROC v4.4/v4.5 parameters to be exposed to EPICS.
+         * Sends pre-amp configuration.
+         *
+         * Functionality not implemented and always returns 0.
+         *
+         * @return Response to wait for.
          */
-        void createStatusParams_v45();
+        DasPacket::CommandType reqConfigPreAmp();
 
         /**
-         * Create and register all config ROC v4.4/v4.5 parameters to be exposed to EPICS.
+         * Sends a pre-amp trigger command.
+         *
+         * Functionality not implemented and always returns 0.
+         *
+         * @return Response to wait for.
          */
-        void createConfigParams_v45();
+        DasPacket::CommandType reqTriggerPreAmp();
 
         /**
-         * Create and register all temperature ROC v5.1 parameters to be exposed to EPICS.
+         * Handle pre-amp configuration response.
          */
-        void createTemperatureParams_v45();
+        bool rspConfigPreAmp(const DasPacket *packet);
 
         /**
-         * Create and register all status ROC v4.7 parameters to be exposed to EPICS.
+         * Handle pre-amp trigger response.
          */
-        void createStatusParams_v47();
+        bool rspTriggerPreAmp(const DasPacket *packet);
 
         /**
-         * Create and register all config ROC v4.7 parameters to be exposed to EPICS.
+         * Create pre-amp config parameter.
          */
-        void createConfigParams_v47();
+        void createPreAmpCfgParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
 
         /**
-         * Create and register all temperature ROC v5.1 parameters to be exposed to EPICS.
+         * Create pre-amp trigger parameter.
          */
-        void createTemperatureParams_v47();
+        void createPreAmpTrigParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
 
         /**
-         * Create and register all status ROC v5.1 parameters to be exposed to EPICS.
+         * Create and register all ROC v4.4/v4.5 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v51();
+        void createParams_v45();
 
         /**
-         * Create and register all config ROC v5.1 parameters to be exposed to EPICS.
+         * Create and register all ROC v4.7 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v51();
+        void createParams_v47();
 
         /**
-         * Create and register all temperature ROC v5.1 parameters to be exposed to EPICS.
+         * Create and register all ROC v5.1 parameters to be exposed to EPICS.
          */
-        void createTemperatureParams_v51();
+        void createParams_v51();
 
         /**
-         * Create and register all status ROC v5.2 parameters to be exposed to EPICS.
+         * Create and register all ROC v5.2 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v52();
+        void createParams_v52();
 
         /**
-         * Create and register all config ROC v5.2 parameters to be exposed to EPICS.
+         * Create and register all ROC v5.4/v5.5 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v52();
+        void createParams_v54();
 
         /**
-         * Create and register all temperature ROC v5.2 parameters to be exposed to EPICS.
+         * Create and register all ROC v5.6 parameters to be exposed to EPICS.
          */
-        void createTemperatureParams_v52();
+        void createParams_v56();
 
         /**
-         * Create and register all status ROC v5.4/v5.5 parameters to be exposed to EPICS.
+         * Create and register all ROC v5.7 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v54();
+        void createParams_v57();
 
         /**
-         * Create and register all config ROC v5.4/v5.5 parameters to be exposed to EPICS.
+         * Create and register all ROC v5.8 parameters.
          */
-        void createConfigParams_v54();
-
-        /**
-         * Create and register all temperature ROC v5.4 parameters to be exposed to EPICS.
-         */
-        void createTemperatureParams_v54();
-
-        /**
-         * Create and register all status ROC v5.6 parameters to be exposed to EPICS.
-         */
-        void createStatusParams_v56();
-
-        /**
-         * Create and register all status counter ROC v5.6 parameters to be exposed to EPICS.
-         */
-        void createCounterParams_v56();
-
-        /**
-         * Create and register all config ROC v5.6 parameters to be exposed to EPICS.
-         */
-        void createConfigParams_v56();
-
-        /**
-         * Create and register all temperature ROC v5.6 parameters to be exposed to EPICS.
-         */
-        void createTemperatureParams_v56();
-
-        /**
-         * Create and register all status ROC v5.7 parameters to be exposed to EPICS.
-         */
-        void createStatusParams_v57();
-
-        /**
-         * Create and register all status counter ROC v5.7 parameters to be exposed to EPICS.
-         */
-        void createCounterParams_v57();
-
-        /**
-         * Create and register all config ROC v5.7 parameters to be exposed to EPICS.
-         */
-        void createConfigParams_v57();
-
-        /**
-         * Create and register all temperature ROC v5.7 parameters to be exposed to EPICS.
-         */
-        void createTemperatureParams_v57();
+        void createParams_v58();
 
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring

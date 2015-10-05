@@ -52,9 +52,8 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, con
         LOG_ERROR("Unsupported ACPC version '%s'", version);
     }
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
 }
 
 bool AcpcPlugin::checkVersion(const BaseModulePlugin::Version &version)

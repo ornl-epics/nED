@@ -56,9 +56,34 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
         LOG_ERROR("Unsupported ADC ROC version '%s'", version);
     }
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
+}
+
+DasPacket::CommandType AdcRocPlugin::handleRequest(DasPacket::CommandType command, double &timeout)
+{
+    switch (command) {
+    case DasPacket::CMD_PM_PULSE_RQST_ON:
+        return reqTriggerPulseMagnet();
+    case DasPacket::CMD_PM_PULSE_RQST_OFF:
+        return reqClearPulseMagnet();
+    default:
+        return BaseModulePlugin::handleRequest(command, timeout);
+    }
+}
+
+bool AdcRocPlugin::handleResponse(const DasPacket *packet)
+{
+    DasPacket::CommandType command = packet->getResponseType();
+
+    switch (command) {
+    case DasPacket::CMD_PM_PULSE_RQST_ON:
+        return rspTriggerPulseMagnet(packet);
+    case DasPacket::CMD_PM_PULSE_RQST_OFF:
+        return rspClearPulseMagnet(packet);
+    default:
+        return BaseModulePlugin::handleResponse(packet);
+    }
 }
 
 bool AdcRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
@@ -95,18 +120,27 @@ bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Ve
     return true;
 }
 
-DasPacket::CommandType AdcRocPlugin::reqTriggerPulse()
+DasPacket::CommandType AdcRocPlugin::reqTriggerPulseMagnet()
 {
     sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_ON);
     return DasPacket::CMD_PM_PULSE_RQST_ON;
 }
 
-DasPacket::CommandType AdcRocPlugin::reqClearPulse()
+DasPacket::CommandType AdcRocPlugin::reqClearPulseMagnet()
 {
     sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_OFF);
     return DasPacket::CMD_PM_PULSE_RQST_OFF;
 }
 
+bool AdcRocPlugin::rspTriggerPulseMagnet(const DasPacket *packet)
+{
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
+
+bool AdcRocPlugin::rspClearPulseMagnet(const DasPacket *packet)
+{
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
 // reasons:

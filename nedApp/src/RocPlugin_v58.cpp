@@ -1,6 +1,6 @@
-/* RocPlugin_v52.cpp
+/* RocPlugin_v58.cpp
  *
- * Copyright (c) 2014 Oak Ridge National Laboratory.
+ * Copyright (c) 2015 Oak Ridge National Laboratory.
  * All rights reserved.
  * See file LICENSE that is included with this distribution.
  *
@@ -10,16 +10,15 @@
 #include "RocPlugin.h"
 
 /**
- * @file RocPlugin_v52.cpp
+ * @file RocPlugin_v58.cpp
  *
- * ROC 5.2 parameters
- *
- * ROC 5.2 is golden firmware (September 2014). It's being well tested, firmware
- * sources are available and it's installed to most beam-lines.
+ * ROC 5.8 is based on ROC 5.6, it adds pre-amp commands.
  */
 
-void RocPlugin::createParams_v52()
+void RocPlugin::createParams_v58()
 {
+    // Status registers
+
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrUartByte",          0x0,  1, 13); // UART: Byte error             (0=no error,1=error)
     createStatusParam("ErrUartParity",        0x0,  1, 12); // UART: Parity error           (0=no error,1=error)
@@ -302,6 +301,87 @@ void RocPlugin::createParams_v52()
     createStatusParam("Ch8:B:AutoAdjSlope1",  0x1F, 1,  2); // Chan8 B Auto-Adjust Slope? l (0=not active,1=active)
     createStatusParam("Ch8:B:AutoAdjOverflow",0x1F, 1,  1); // Chan8 B Auto-Adjust overflow (0=no,1=yes)
 
+    createStatusParam("PreampA:Family",       0x20, 8,  0); // Pre-amp A family
+    createStatusParam("PreampA:Mac1",         0x20, 8,  8); // Pre-amp A MAC byte 1
+    createStatusParam("PreampA:Mac2",         0x21, 8,  0); // Pre-amp A MAC byte 2
+    createStatusParam("PreampA:Mac3",         0x21, 8,  8); // Pre-amp A MAC byte 3
+    createStatusParam("PreampA:Mac4",         0x22, 8,  0); // Pre-amp A MAC byte 4
+    createStatusParam("PreampA:Mac5",         0x22, 8,  8); // Pre-amp A MAC byte 5
+    createStatusParam("PreampA:Mac6",         0x23, 8,  0); // Pre-amp A MAC byte 6
+    createStatusParam("PreampA:Crc",          0x23, 8,  8); // Pre-amp A CRC
+    createStatusParam("PreampA:Config",       0x24, 8,  0); // Pre-amp A configuration
+    createStatusParam("PreampB:Family",       0x24, 8,  8); // Pre-amp B family
+    createStatusParam("PreampB:Mac1",         0x25, 8,  0); // Pre-amp B MAC byte 1
+    createStatusParam("PreampB:Mac2",         0x25, 8,  8); // Pre-amp B MAC byte 2
+    createStatusParam("PreampB:Mac3",         0x26, 8,  0); // Pre-amp B MAC byte 3
+    createStatusParam("PreampB:Mac4",         0x26, 8,  8); // Pre-amp B MAC byte 4
+    createStatusParam("PreampB:Mac5",         0x27, 8,  0); // Pre-amp B MAC byte 5
+    createStatusParam("PreampB:Mac6",         0x27, 8,  8); // Pre-amp B MAC byte 6
+    createStatusParam("PreampB:Crc",          0x28, 8,  0); // Pre-amp B CRC
+    createStatusParam("PreampB:Config",       0x28, 8,  8); // Pre-amp B configuration
+
+    // Counters registers
+
+//     BLXXX:Det:RocXXX:| sig name       |                    | EPICS record description  | (bi and mbbi description)
+    createCounterParam("CntParity",          0x0, 16,  0); // LVDS parity error counter
+    createCounterParam("CntType",            0x1, 16,  0); // LVDS data type error counter
+    createCounterParam("CntLength",          0x2, 16,  0); // LVDS length error counter
+    createCounterParam("CntTimeout",         0x3, 16,  0); // LVDS timeout counter
+    createCounterParam("CntNoStart",         0x4, 16,  0); // LVDS no start error counter
+    createCounterParam("CntPreStart",        0x5, 16,  0); // LVDS start before stop cnt
+    createCounterParam("CntFifoFull",        0x6, 16,  0); // LVDS FIFO full error counter
+    createCounterParam("CntNoTsync",         0x7, 16,  0); // Timestamp overflow counter
+    createCounterParam("CntCmdBad",          0x8, 16,  0); // Unknown command counter
+    createCounterParam("CntCmdLength",       0x9, 16,  0); // Command length error counter
+    createCounterParam("CntProgramming",     0xA, 16,  0); // Write cnfg disallowed cnt
+    createCounterParam("CntUartParity",      0xB, 16,  0); // UART parity error counter
+    createCounterParam("CntUartByte",        0xC, 16,  0); // UART byte error counter
+    createCounterParam("CntDataAlmostFull" , 0xD, 16,  0); // Data almost full counter
+    createCounterParam("Ch0:CntFifoFull",    0xE, 16,  0); // Ch0 ADC FIFO full counter
+    createCounterParam("Ch1:CntFifoFull",    0xF, 16,  0); // Ch1 ADC FIFO full counter
+    createCounterParam("Ch2:CntFifoFull",   0x10, 16,  0); // Ch2 ADC FIFO full counter
+    createCounterParam("Ch3:CntFifoFull",   0x11, 16,  0); // Ch3 ADC FIFO full counter
+    createCounterParam("Ch4:CntFifoFull",   0x12, 16,  0); // Ch4 ADC FIFO full counter
+    createCounterParam("Ch5:CntFifoFull",   0x13, 16,  0); // Ch5 ADC FIFO full counter
+    createCounterParam("Ch6:CntFifoFull",   0x14, 16,  0); // Ch6 ADC FIFO full counter
+    createCounterParam("Ch7:CntFifoFull",   0x15, 16,  0); // Ch7 ADC FIFO full counter
+    createCounterParam("CntMissClk",        0x16, 16,  0); // Link RX clock missing cnt
+    createCounterParam("Ch0:RatePosEdge",   0x17, 16,  0); // Ch0 positive edge rate      (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch1:RatePosEdge",   0x18, 16,  0); // Ch1 positive edge rate      (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch2:RatePosEdge",   0x19, 16,  0); // Ch2 positive edge rate      (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch3:RatePosEdge",   0x1A, 16,  0); // Ch3 positive edge rate      (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch4:RatePosEdge",   0x1B, 16,  0); // Ch4 positive edge rate      (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch5:RatePosEdge",   0x1C, 16,  0); // Ch5 positive edge rate      (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch6:RatePosEdge",   0x1D, 16,  0); // Ch6 positive edge rate      (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch7:RatePosEdge",   0x1E, 16,  0); // Ch7 positive edge rate      (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch0:RateSumHigh",   0x1F, 16,  0); // Ch0 SUM high rate           (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch1:RateSumHigh",   0x20, 16,  0); // Ch1 SUM high rate           (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch2:RateSumHigh",   0x21, 16,  0); // Ch2 SUM high rate           (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch3:RateSumHigh",   0x22, 16,  0); // Ch3 SUM high rate           (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch4:RateSumHigh",   0x23, 16,  0); // Ch4 SUM high rate           (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch5:RateSumHigh",   0x24, 16,  0); // Ch5 SUM high rate           (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch6:RateSumHigh",   0x25, 16,  0); // Ch6 SUM high rate           (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch7:RateSumHigh",   0x26, 16,  0); // Ch7 SUM high rate           (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch0:RateSumLow",    0x27, 16,  0); // Ch0 SUM low rate            (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch1:RateSumLow",    0x28, 16,  0); // Ch1 SUM low rate            (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch2:RateSumLow",    0x29, 16,  0); // Ch2 SUM low rate            (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch3:RateSumLow",    0x2A, 16,  0); // Ch3 SUM low rate            (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch4:RateSumLow",    0x2B, 16,  0); // Ch4 SUM low rate            (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch5:RateSumLow",    0x2C, 16,  0); // Ch5 SUM low rate            (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch6:RateSumLow",    0x2D, 16,  0); // Ch6 SUM low rate            (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch7:RateSumLow",    0x2E, 16,  0); // Ch7 SUM low rate            (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch0:RateOut",       0x2F, 16,  0); // Ch0 outrate                 (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch1:RateOut",       0x30, 16,  0); // Ch1 outrate                 (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch2:RateOut",       0x31, 16,  0); // Ch2 outrate                 (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch3:RateOut",       0x32, 16,  0); // Ch3 outrate                 (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch4:RateOut",       0x33, 16,  0); // Ch4 outrate                 (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch5:RateOut",       0x34, 16,  0); // Ch5 outrate                 (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch6:RateOut",       0x35, 16,  0); // Ch6 outrate                 (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("Ch7:RateOut",       0x36, 16,  0); // Ch7 outrate                 (scale:19.0735,unit:counts/s,prec:0)
+    createCounterParam("RateOut",           0x37, 16,  0); // Total outrate               (scale:19.0735,unit:counts/s,prec:0)
+
+    // Configuration registers
+
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:PositionIdx",  '1', 0x0,  32, 0, 0);     // Chan1 position index
     createConfigParam("Ch2:PositionIdx",  '1', 0x2,  32, 0, 256);   // Chan2 position index
@@ -562,8 +642,38 @@ void RocPlugin::createParams_v52()
     createConfigParam("TcTclkMode",       'F', 0x0,  1, 1,  0);     // T&C TCLK mode                 (0=external,1=internal 10MHz)
     createConfigParam("TcResetMode",      'F', 0x0,  1, 0,  0);     // T&C Reset mode                (0=internal,1=external)
 
+    createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Alternate test pattern enable (0=disable,1=enable)
+    createConfigParam("TestPatternDebug", 'F', 0x1,  2, 12, 0);     // Engineering Use only
+    createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
+    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
+
+    // Temperature registers
+
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
     createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
     createTempParam("TempPreampA",      0x1, 16, 0, CONV_SIGN_2COMP); // Preamp A temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
     createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+
+    // Pre-amp registers
+
+    createPreAmpCfgParam("PreampA:Dac",         0x0, 16,  0, 32768); // Pre-amp A DAC code
+    createPreAmpCfgParam("PreampB:Dac",         0x1, 16,  0, 32768); // Pre-amp B DAC code
+
+    createPreAmpTrigParam("PreampA:Tube1:En",   0x0,  1,  0, 0); // Pre-amp A tube 1 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube2:En",   0x0,  1,  1, 0); // Pre-amp A tube 2 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube3:En",   0x0,  1,  2, 0); // Pre-amp A tube 3 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube4:En",   0x0,  1,  3, 0); // Pre-amp A tube 4 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube5:En",   0x0,  1,  4, 0); // Pre-amp A tube 5 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube6:En",   0x0,  1,  5, 0); // Pre-amp A tube 6 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube7:En",   0x0,  1,  6, 0); // Pre-amp A tube 7 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube8:En",   0x0,  1,  7, 0); // Pre-amp A tube 8 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube4:En",   0x0,  1,  8, 0); // Pre-amp B tube 1 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube3:En",   0x0,  1,  9, 0); // Pre-amp B tube 2 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube2:En",   0x0,  1, 10, 0); // Pre-amp B tube 3 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube1:En",   0x0,  1, 11, 0); // Pre-amp B tube 4 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube8:En",   0x0,  1, 12, 0); // Pre-amp B tube 5 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube7:En",   0x0,  1, 13, 0); // Pre-amp B tube 6 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube6:En",   0x0,  1, 14, 0); // Pre-amp B tube 7 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube5:En",   0x0,  1, 15, 0); // Pre-amp B tube 8 enable (0=charge,1=discharge)
 }

@@ -1,12 +1,22 @@
 program GlobalCon
 
+/* GlobalCon.st
+ *
+ * Copyright (c) 2015 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ * @author Carl Lionberger
+ */
+
+
 /*
  * Global control sequencer for nED. Supports the operations of global stop,
  * start, check, write config, and clear from soft control records. Global 
  * success is indicated to the operator and the operation may be retried, in 
  * which case it is performed only on those devices which failed before. This 
  * accumulation behavior is reset when a different operation or the clear 
- * operation is requested. Each device has a disable PV allowing it to be 
+ * operation is requested. Each device has a enable PV allowing it to be 
  * skipped in non-clear operations.
  * 
  * The list of devices to operate on is obtained with seqGrep(), which looks
@@ -51,7 +61,10 @@ option -c;	/* do not wait for PVs to connect */
 #define TYPEMISVER	2
 #define VERSOKVER	3
 #define VERSMISVER	4
-#define BOTHOKVER	8
+#define BOTHMISVER	5
+#define BOTHOKVER	6
+#define VERSMISVER2	7
+#define TYPEMISVER2	8
 
 /*
  * define valid values for Acquiring PVs
@@ -64,7 +77,7 @@ option -c;	/* do not wait for PVs to connect */
  * GLOBALCON_MAXDEVICES is for static mem allocation and must be higher than 
  * number of devices expected. 
  */
-#define GLOBALCON_MAXDEVICES 100	
+#define GLOBALCON_MAXDEVICES 500
 
 /*
  * set PV n to numeric value v and put. 
@@ -118,7 +131,7 @@ PVARRAY(int, cfgSection)
 /*
  * Groups of soft PVs, one per device
  */
-PVARRAY(int, disable)
+PVARRAY(int, enable)
 PVARRAY(int, cmdSucceeded)
 PVARRAY(string, failMsg)
 
@@ -191,7 +204,7 @@ int severity;
     state NAME {					\
        when() {						\
           for (i = 0; i< numFound; i++) {		\
-             disable[i] = VAL; pvPut(disable[i]);	\
+             enable[i] = !VAL; pvPut(enable[i]);	\
           }						\
           EVNAME = 0;	/* release busy record */	\
           pvPut(EVNAME);				\
@@ -219,7 +232,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       when (!enable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 #define CMD_END(NAME, COMMAND)					\
@@ -256,7 +269,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       when (!enable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 
@@ -346,7 +359,7 @@ int severity;
        } 							\
        when (i >= numFound) { 					\
        } state NEXT						\
-       when (disable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
+       when (!enable[i] || cmdSucceeded[i] || cmdFailed[i]) 	\
        {} state NAME##0	
 
 #define TEST_PV_END(NAME, PVNAME, DESIRED)			\
@@ -354,7 +367,7 @@ int severity;
           pvGet(PVNAME[i], SYNC);				\
           if (PVNAME[i] != DESIRED) {				\
              cmdFailed[i] = 1;					\
-             sprintf(failMsg[i], "%s %d", #NAME, cmdRsp[i]);	\
+             sprintf(failMsg[i], "%s %d", #NAME, PVNAME[i]);	\
              pvPut(failMsg[i]);					\
           }							\
        } state NAME##0						\
@@ -388,13 +401,13 @@ int severity;
       when() {								\
           numSucceeded = 0; numEnabled = 0;				\
           for (i = 0; i< numFound; i++) {				\
-             if (!disable[i]) {						\
+             if (enable[i]) {						\
                 numEnabled++;						\
                 if (cmdFailed[i]) {					\
                    cmdFailed[i] = 0;	/* ready for next use */	\
                    PVPUTNUM(cmdSucceeded[i],0)				\
                 } else {						\
-                   failMsg[i][0] = 0;					\
+                   sprintf(failMsg[i], "OK");                           \
                    pvPut(failMsg[i]);					\
                    PVPUTNUM(cmdSucceeded[i],1)				\
                    numSucceeded++;					\
@@ -420,18 +433,21 @@ int severity;
    }
 /* 
  * Macro to define a global operation request-monitor when clause. EVNAME is
- * the base name of the event (ie, the variable name), OP_NAME is the operation
- * code from the "OP_xxx" command defines above, and NEXT is the destination
- * state to perform the operation.
+ * the base name of the event (ie, the variable name) and NEXT is the 
+ * destination state to perform the operation.
  */
 #define CMD_WHEN(EVNAME, NEXT) 						\
        when (efTestAndClear(EVNAME##Event) && EVNAME == 1) {		\
           PVPUTSTR(statePV,NEXT)					\
           pvGet(accumSuccess);						\
-          if (!accumSuccess || strcmp(prevReq, #NEXT)) {               	\
+          if ((!accumSuccess || strcmp(prevReq, #NEXT)) &&		\
+              strcmp("Enabling", #NEXT) && strcmp("Disabling", #NEXT)) {\
              for (i = 0; i< numFound; i++) {				\
-                PVPUTNUM(cmdSucceeded[i], 0)				\
-                failMsg[i][0] = 0; pvPut(failMsg[i]);			\
+                if (enable[i]) {					\
+                   PVPUTNUM(cmdSucceeded[i], 0)				\
+                   sprintf(failMsg[i], "OK");				\
+                   pvPut(failMsg[i]);					\
+                }							\
              }								\
           }								\
        } state NEXT
@@ -465,9 +481,9 @@ ss GlobalControl {
             pvAssign(verified[i], namebuf);
             sprintf(namebuf, "%s:Acquiring", deviceNames[i]);
             pvAssign(acquiring[i], namebuf);
-            sprintf(namebuf, "%s:Disable", deviceNames[i]);
-            pvAssign(disable[i], namebuf);
-            pvMonitor(disable[i]);
+            sprintf(namebuf, "%s:Enable", deviceNames[i]);
+            pvAssign(enable[i], namebuf);
+            pvMonitor(enable[i]);
             sprintf(namebuf, "%s:CmdSucceeded", deviceNames[i]);
             pvAssign(cmdSucceeded[i], namebuf);
             PVPUTNUM(cmdSucceeded[i], 0)
@@ -512,13 +528,14 @@ ss GlobalControl {
     state WritingConf {
        when() {
           for (i = 0; i< numFound; i++) {	
-             if (!disable[i]) {			
+             if (enable[i]) {			
                 cfgSection[i]= 0; pvPut(cfgSection[i], SYNC);		
              }
           }
        } state DoWriting
     }
-    CMD_RSP(DoWriting, WRITECONFCMD, DoneWriting)
+    CMD_RSP(DoWriting, WRITECONFCMD, ReadStatConfigure)
+    CMD_RSP(ReadStatConfigure, READSTATCMD, DoneWriting)
     OP_DONE(DoneWriting, globalWriteConf)
 }       
        

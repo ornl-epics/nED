@@ -11,6 +11,11 @@ record(bi, "$(P)Acquiring")
     field(ONAM, "acquiring")
     field(ZSV,  "MAJOR")
 }
+record(bi, "$(P)AcquiringSet")
+{
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")

@@ -10,6 +10,7 @@
 #include "AcpcFemPlugin.h"
 #include "AcpcPlugin.h"
 #include "AdcRocPlugin.h"
+#include "BnlRocPlugin.h"
 #include "ArocPlugin.h"
 #include "DiscoverPlugin.h"
 #include "DspPlugin.h"
@@ -117,6 +118,9 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                 case DasPacket::MOD_TYPE_ADCROC:
                     AdcRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
+                case DasPacket::MOD_TYPE_BNLROC:
+                    BnlRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
                 case DasPacket::MOD_TYPE_ACPC:
                     AcpcPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
@@ -162,7 +166,7 @@ uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_ACPCFEM:   type = "ACPC FEM";  break;
             case DasPacket::MOD_TYPE_AROC:      type = "AROC";      break;
             case DasPacket::MOD_TYPE_BIDIMROC:  type = "BIDIMROC";  break;
-            case DasPacket::MOD_TYPE_BLNROC:    type = "BLNROC";    break;
+            case DasPacket::MOD_TYPE_BNLROC:    type = "BNLROC";    break;
             case DasPacket::MOD_TYPE_CROC:      type = "CROC";      break;
             case DasPacket::MOD_TYPE_DSP:       type = "DSP";       break;
             case DasPacket::MOD_TYPE_FFC:       type = "FFC";       break;
@@ -215,6 +219,7 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_ACPCFEM:   plugin = "AcpcFemPlugin";   type = "afem";    break;
             case DasPacket::MOD_TYPE_ACPC:      plugin = "AcpcPlugin";      type = "acpc";    break;
             case DasPacket::MOD_TYPE_ADCROC:    plugin = "AdcRocPlugin";    type = "adcroc";  break;
+            case DasPacket::MOD_TYPE_BNLROC:    plugin = "BnlRocPlugin";    type = "broc";    break;
             case DasPacket::MOD_TYPE_AROC:      plugin = "ArocPlugin";      type = "aroc";    break;
             case DasPacket::MOD_TYPE_DSP:       plugin = "DspPlugin";       type = "dsp";     break;
             case DasPacket::MOD_TYPE_FEM:       plugin = "FemPlugin";       type = "fem";     break;
@@ -222,7 +227,6 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
 /*
  * These are not yet supported
             case DasPacket::MOD_TYPE_BIDIMROC:  plugin = "BidimRocPlugin";  type = "Broc";    break;
-            case DasPacket::MOD_TYPE_BLNROC:    plugin = "BnlRocPlugin";    type = "broc";    break;
             case DasPacket::MOD_TYPE_CROC:      plugin = "CrocPlugin";      type = "croc";    break;
             case DasPacket::MOD_TYPE_FFC:       plugin = "FfcPlugin";       type = "ffc";     break;
             case DasPacket::MOD_TYPE_HROC:      plugin = "HrocPlugin";      type = "hroc";    break;

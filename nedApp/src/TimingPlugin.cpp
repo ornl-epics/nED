@@ -338,7 +338,7 @@ bool TimingPlugin::recvRtdlFromEtc(DasPacket *packet)
             rtdl->tsync_delay = 0x80000000;
 
             // Ring revolution period frame id is 4
-            data[0] = 0x04 | message.ring_period & 0xFFFFFF;
+            data[0] = 0x04 | (message.ring_period & 0xFFFFFF);
 
             return true;
         }

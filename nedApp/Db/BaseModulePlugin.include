@@ -1,7 +1,8 @@
 record(bo, "$(P)Enable")
 {
-    field(VAL,  "1")
+    info(autosaveFields, "VAL")
     field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(stringin, "$(P)HwId")
 {
@@ -111,6 +112,38 @@ record(fanout, "$(P)RspCheck")
     field(DESC, "Response check fanout")
     field(LNK1, "$(P)MissCount PP")
     field(LNK2, "$(P)HwStatus PP")
+    field(LNK3, "$(P)AcquiringCalc PP")
+}
+# Monitor CmdReq for start/stop commands and set AcquireSet to yes/no
+record(calcout, "$(P)AcquiringCalc")
+{
+    field(INPA, "$(P)CmdReq NPP")
+    field(INPB, "$(P)CmdRsp NPP")
+    field(CALC, "B=1&&(A=6||A=7)")
+    field(OOPT, "When Non-zero")
+    field(OCAL, "A=6")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)AcquiringSet PP")
+}
+record(bi, "$(P)AcquiringSet")
+{
+    field(ZNAM, "not acquiring")
+    field(ONAM, "acquiring")
+    field(FLNK, "$(P)AcquiringCheck")
+}
+record(calc, "$(P)AcquiringCheck")
+{
+    field(INPA, "$(P)Acquiring NPP")
+    field(INPB, "$(P)AcquiringSet NPP")
+    field(INPC, "$(P)AcquiringSet.SEVR NPP")
+    field(CALC, "A=B&&C=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(bi, "$(P)Acquiring")
+{
+    field(FLNK, "$(P)AcquiringCheck")
 }
 # Placeholder record, may be extended by module.
 # MAJOR alarm is captured in overall status.
@@ -129,24 +162,36 @@ record(calc, "$(P)MissCount")
     field(DESC, "Count missing responses")
     field(INPA, "$(P)CmdRsp NPP")
     field(INPB, "$(P)MissCount NPP")
-    field(CALC, "(A=3)?B+1:(A=2)?B:0")
-    field(HIGH, "2")
+    field(INPC, "$(P)Enable NPP")
+    field(CALC, "C=0?0:(A=3)?B+1:(A=2)?B:0")
+    field(HIGH, "3")
     field(HSV,  "MINOR")
-    field(HIHI, "3")
+    field(HIHI, "5")
     field(HHSV, "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
 # All status logic tries to use 1 = OK, 0 = Not OK
 # Summarize alarms.
-record(calc, "$(P)StatusCalc")
+record(calc, "$(P)HealthStatusCalc")
 {
-    field(DESC, "Turn MAJOR alarms into error")
+    field(DESC, "Aggregate alarms")
     field(INPA, "$(P)MissCount.SEVR")
     field(INPB, "$(P)Supported.SEVR")
     field(INPC, "$(P)Verified.SEVR")
     field(INPD, "$(P)HwStatus.SEVR")
-    field(INPE, "$(P)Acquiring.SEVR")
-    field(CALC, "(A+B+C+D+E)=0")
+    field(INPE, "$(P)Enable NPP")
+    field(CALC, "(A+B+C+D)=0||E=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(PINI, "YES") # For Supported link
+    field(FLNK, "$(P)StatusCalc")
+}
+record(calc, "$(P)StatusCalc")
+{
+    field(INPA, "$(P)Enable NPP")
+    field(INPB, "$(P)HealthStatusCalc.SEVR PP")
+   field(INPC, "$(P)AcquiringCheck.SEVR NPP")
+    field(CALC, "A=0||(B+C)=0")
     field(PINI, "YES") # For Supported link
     field(FLNK, "$(P)Status")
 }
@@ -450,6 +495,8 @@ record(sseq, "$(P)PeriodicCheckUp")
     field(WAIT1, "Wait")
     field(WAIT2, "Wait")
     field(WAIT3, "Wait")
+    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
+    field(DISV, "0")
 }
 record(longin, "$(P)StatusRefreshInt")
 {
@@ -520,4 +567,12 @@ record(calcout, "$(P)TempRefresh")
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
+}
+record(ao, "$(P)NoRspTimeout")
+{
+    field(DESC, "Time to wait for response")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))NoRspTimeout")
+    field(EGU,  "seconds")
+    field(PREC, "1")
 }

@@ -44,9 +44,8 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
 
     setIntegerParam(Supported, 1);
 
-    LOG_DEBUG("Number of configured dynamic parameters: %zu", m_statusParams.size() + m_configParams.size());
-
     callParamCallbacks();
+    initParams();
 }
 
 bool AcpcFemPlugin::checkVersion(const BaseModulePlugin::Version &version)

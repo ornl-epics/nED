@@ -12,9 +12,11 @@
 
 #include "BasePlugin.h"
 #include "Timer.h"
+#include "ValueConvert.h"
 
 #include <fstream>
 #include <map>
+#include <memory>
 
 /**
  * Base class for all plugins working with particular module.
@@ -117,6 +119,15 @@ class BaseModulePlugin : public BasePlugin {
         };
 
         /**
+         * Valid register raw value converters
+         */
+        enum ValueConverter {
+            CONV_UNSIGN             = 0,
+            CONV_SIGN_2COMP         = 1,
+            CONV_SIGN_MAGN          = 2,
+        };
+
+        /**
          * Structure describing the status parameters obtained from modules.
          */
         struct ParamDesc {
@@ -126,6 +137,18 @@ class BaseModulePlugin : public BasePlugin {
             uint8_t section;        //!< Section name, valid values [0x0..0xF] (configuration params only)
             uint8_t channel;        //!< Channel number in range [1..8], 0 means global configuration (configuration params only)
             int32_t initVal;        //!< Initial value after object is created or configuration reset is being requested (configuration params only)
+            std::shared_ptr<BaseConvert> convert; //!< Selected from/to raw value converter
+        };
+
+        /**
+         * Structure describing parameter table.
+         */
+        struct ParamTable {
+            std::map<int, ParamDesc> mapping;   //!< Mapping table, int index is asyn parameter index
+            bool sections;                      //!< Are parameters split into sections
+            std::map<int, uint32_t> sizes;      //!< Section sizes in bytes
+            std::map<int, uint32_t> offsets;    //!< Section offsets in bytes
+            bool readonly;                      //!< Flag whether all parameters in this group are read-only
         };
 
         struct Version {
@@ -158,23 +181,14 @@ class BaseModulePlugin : public BasePlugin {
         static const float RESET_NO_RESPONSE_TIMEOUT;   //!< Number of seconds to wait for module RESET response
 
     public: // variables
-        static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask;
-        static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask;
+        static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask | asynFloat64Mask;
+        static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask | asynFloat64Mask;
 
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
         DasPacket::ModuleType m_hardwareType;           //!< Hardware type
-        std::vector<uint32_t> m_statusPayloadLengths;   //!< Size in bytes of the READ_STATUS request/response payload, calculated dynamically by createStatusParam()
-        uint32_t m_countersPayloadLength;               //!< Size in bytes of the READ_STATUS_COUNTERS request/response payload, calculated dynamically by createCounterParam()
-        uint32_t m_upgradePayloadLength;                //!< Size in bytes of the PROGRAM response payload, calculated dynamically by linkUpgradeParam()
-        uint32_t m_temperaturePayloadLength;            //!< Size in bytes of the READ_TEMPERATURE response payload, calculated dynamically by createTempParam()
-        std::map<int, ParamDesc> m_statusParams;        //!< Map of exported status parameters
-        std::map<int, ParamDesc> m_counterParams;       //!< Map of exported status counter parameters
-        std::map<int, ParamDesc> m_configParams;        //!< Map of exported config parameters
-        std::map<int, ParamDesc> m_upgradeParams;       //!< Map of exported remote upgrade parameters
-        std::map<int, ParamDesc> m_temperatureParams;   //!< Map of exported temperature parameters
+        std::map<std::string, ParamTable> m_params;     //!< Maps of exported parameters
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
-        bool m_configInitialized;                       //!< Configuration sections sizes and offsets are calculated
         uint8_t m_expectedChannel;                      //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
         uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
         uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
@@ -288,15 +302,73 @@ class BaseModulePlugin : public BasePlugin {
         virtual void processData(const DasPacketList * const packets);
 
         /**
-         * General response from modules handler.
+         * Check response packets before handling their content.
          *
-         * This generic response handler recognizes all well-known responses and calls corresponding
-         * handlers.
+         * Enforces several checks on response packets. When a command is sent
+         * out, expected response must be received or timeout occurred before
+         * another command can be issued. This function checks both conditions
+         * and skips the response if either not expected or received after
+         * timeout.
+         * After all checks have passed it invokes handleResponse() for actual
+         * response processing which can be overloaded.
+         *
+         * Function supports channel specific status and config responses.
+         *
+         * Override this function when either the command was not sent from
+         * handleRequest() or when you want to handle response checks
+         * yourself.
          *
          * @param[in] packet to be processed.
          * @return true if packet has been processed, false otherwise
          */
         virtual bool processResponse(const DasPacket *packet);
+
+        /**
+         * Handle common command requests.
+         *
+         * Command request is triggered from EPICS records and is handled by
+         * writeInt32 CmdReq parameter. Function is called form writeInt32()
+         * handler to send out corresponding command. Default implementation
+         * supports these commands:
+         * - DasPacket::CMD_READ_VERSION
+         * - DasPacket::CMD_READ_CONFIG
+         * - DasPacket::CMD_READ_STATUS
+         * - DasPacket::CMD_READ_TEMPERATURE
+         * - DasPacket::CMD_READ_STATUS_COUNTERS
+         * - DasPacket::CMD_RESET_STATUS_COUNTERS
+         * - DasPacket::CMD_WRITE_CONFIG
+         * - DasPacket::CMD_DISCOVER
+         * - DasPacket::CMD_RESET
+         * - DasPacket::CMD_START
+         * - DasPacket::CMD_STOP
+         * - DasPacket::CMD_UPGRADE
+         * Detector specific commands can be issued by overloading this function.
+         *
+         * @param[in] command requested.
+         * @param[out] timeout before giving up waiting for response, default is 2.0
+         * @return Response to be waited for.
+         */
+        virtual DasPacket::CommandType handleRequest(DasPacket::CommandType command, double &timeout);
+
+        /**
+         * Handles common responses.
+         *
+         * This function is called from processResponse() after response has
+         * been verified and checked for timeout. Handling response needs
+         * only verify contents of the response packet.
+         *
+         * Default implementation handles responses common to all modules.
+         * This includes status, config, version, discover and other responses.
+         * Derived plugin can overload this function to support custom
+         * commands/responses.
+         *
+         * Overload this function when command was sent from handleRequest()
+         * handler.
+         *
+         * @param[in] packet to be processed.
+         * @return true if packet has been processed successfuly, false otherwise
+         */
+        virtual bool handleResponse(const DasPacket *packet);
 
         /**
          * Send request to module to do a reset.
@@ -496,24 +568,6 @@ class BaseModulePlugin : public BasePlugin {
         virtual DasPacket::CommandType reqStart();
 
         /**
-         * Request one pulse for Pulsed Magnet.
-         *
-         * Functionality not implemented and always returns 0.
-         *
-         * @return Response to wait for.
-         */
-        virtual DasPacket::CommandType reqTriggerPulse();
-
-        /**
-         * Clears one pulse request for Pulsed Magnet.
-         *
-         * Functionality not implemented and always returns 0.
-         *
-         * @return Response to wait for.
-         */
-        virtual DasPacket::CommandType reqClearPulse();
-
-        /**
          * Default handler for START response.
          *
          * @param[in] packet with response to START
@@ -539,24 +593,6 @@ class BaseModulePlugin : public BasePlugin {
          * @retval false Timeout has occurred or NACK received.
          */
         virtual bool rspStop(const DasPacket *packet);
-
-        /**
-         * Default handler for CMD_PM_PULSE_RQST_ON response.
-         *
-         * @param[in] packet with response to pulse request
-         * @retval true Received command ACK in time.
-         * @retval false Timeout has occurred or NACK received.
-         */
-        virtual bool rspTriggerPulse(const DasPacket *packet);
-
-        /**
-         * Default handler for CMD_PM_PULSE_RQST_OFF response.
-         *
-         * @param[in] packet with response to pulse clear
-         * @retval true Received command ACK in time.
-         * @retval false Timeout has occurred or NACK received.
-         */
-        virtual bool rspClearPulse(const DasPacket *packet);
 
         /**
          * Send part of the new firmware image as one packet.
@@ -644,14 +680,14 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Create and register single integer config parameter.
          */
-        void createConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
+        void createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, ValueConverter conv=CONV_UNSIGN);
 
         /**
          * Convenience function for modules that don't split configuration for channels.
          */
-        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
+        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, ValueConverter conv=CONV_UNSIGN)
         {
-            createConfigParam(name, 0, section, offset, nBits, shift, value);
+            createChanConfigParam(name, 0, section, offset, nBits, shift, value, conv);
         }
 
         /**
@@ -659,7 +695,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * Temperature values are returned in READ_TEMPERATURE response payload.
          */
-        void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
+        void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, ValueConverter conv=CONV_UNSIGN);
 
         /**
          * Link existing parameter to upgrade parameters table.
@@ -800,28 +836,101 @@ class BaseModulePlugin : public BasePlugin {
          */
         virtual bool checkVersion(const BaseModulePlugin::Version &version) = 0;
 
+        /**
+         * Pack parameters into raw format
+         *
+         * Cached values of parameters are transformed into raw format suitable
+         * to be sent to detector.
+         *
+         * @param[in] group Parameters group
+         * @param[out] payload buffer to be populated
+         * @param[in] size of the payload buffer in bytes
+         * @param[in] channel
+         * @param[in] section
+         * @return Number of bytes pushed to payload or 0 on error.
+         */
+        size_t packRegParams(const char *group, uint32_t *payload, size_t size, uint8_t channel=0, uint8_t section=0x0);
+
+        /**
+         * Method parses packet payload and extracts parameter values.
+         *
+         * This generic method works for any group of parameters. For every
+         * parameter in the group table, it finds the matching
+         * value in the packet payload and assign it as new parameter value.
+         *
+         * @param[in] group of registers, like CONFIG, STATUS etc.
+         * @param[in] payload to be parsed
+         * @param[in] size of the payload
+         * @param[in] channel expected
+         */
+        void unpackRegParams(const char *group, const uint32_t *payload, size_t size, uint8_t channel=0);
+
+        /**
+         * Create a generic register parameter in specified group table.
+         *
+         * Device registers are mapped into software cached counterpars.
+         * Device register is an entity of variable bit width that is
+         * connected to particular functionality. Bit widths up to 32 bits
+         * are supported. No alignment is enforced.
+         *
+         * This function creates a mapping for one device register into
+         * software table of registers.
+         *
+         * @param[in] group of registers, like CONFIG, STATUS etc.
+         * @param[in] name of the register in software table
+         * @param[in] readonly flags whether the register value can be modified in software
+         * @param[in] channel addresses specific sub-fpga on device
+         * @param[in] section is an offset in the register table when supported by command (only config commands)
+         * @param[in] offset is a word offset from the start address, word being 2 or 4 depending on the device
+         * @param[in] nBits tells number of bits used by device register
+         * @param[in] shift tells bit offset within word
+         * @param[in] value represents initial value for writable registers
+         * @param[in] conv selects from/to raw value converter
+         */
+        void createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, ValueConverter conv=CONV_UNSIGN);
+
+        /**
+         * Link existing parameter to upgrade parameters table.
+         *
+         * Useful when two hardware registers in two different response types
+         * have the same meaning and need to be merged into one plugin parameter.
+         * When either of the responses is received, only one parameter gets
+         * updated.
+         *
+         * @param[in] group of registers, like CONFIG, STATUS etc.
+         * @param[in] name of the register in software table
+         * @param[in] readonly flags whether the register value can be modified in software
+         * @param[in] channel addresses specific sub-fpga on device
+         * @param[in] section is an offset in the register table when supported by command (only config commands)
+         * @param[in] offset is a word offset from the start address, word being 2 or 4 depending on the device
+         * @param[in] nBits tells number of bits used by device register
+         * @param[in] shift tells bit offset within word
+         */
+        void linkRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift);
+
+        /**
+         * Initialize parameters tables.
+         *
+         * Calculates offsets and sizes of the sections that are needed when
+         * receiving and sending packets. Must be called after any call to
+         * create*Param but before any packet can be received or sent. The
+         * safest is to put it in plugin constructor.
+         */
+        void initParams();
+
+        /**
+         * Convert command into a string.
+         *
+         * @parma[in] command to be converted.
+         * @return String describing the command.
+         */
+        const char *cmd2str(DasPacket::CommandType command);
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.
          */
         void recalculateConfigParams();
-
-        /**
-         * Method parses packet payload and extracts parameter values.
-         *
-         * This generic method works for status, counter and configuration
-         * parameters. For every parameter in the table, it finds the matching
-         * value in the packet payload and assign it as new parameter value.
-         * When section offsets table is given, the parameter offset is
-         * considered relative to the section it belongs.
-         *
-         * @param[in] packet to be parsed
-         * @param[in] table of paramaters to be matched
-         * @param[in] sectOffsets is a able of section offsets.
-         */
-        void extractParams(const DasPacket *packet,
-                           const std::map<int, ParamDesc> &table,
-                           const std::map<int, uint32_t> &sectOffsets=std::map<int, uint32_t>());
 
     protected:
         #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
@@ -845,7 +954,8 @@ class BaseModulePlugin : public BasePlugin {
         int UpgradeSize;    //!< Total firmware size in bytes
         int UpgradePos;     //!< Bytes already sent to remote party
         int UpgradeAbort;   //!< Abort current upgrade sequence
-        #define LAST_BASEMODULEPLUGIN_PARAM UpgradeAbort
+        int NoRspTimeout;   //!< Time to wait for response
+        #define LAST_BASEMODULEPLUGIN_PARAM NoRspTimeout
 };
 
 #endif // BASE_MODULE_PLUGIN_H

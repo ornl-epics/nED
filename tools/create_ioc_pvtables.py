@@ -183,9 +183,6 @@ def main():
     # Verify output directory
     if options.outdir:
         outdir = options.outdir
-        if not os.path.isdir(outdir):
-            print "ERROR: Output directory '{0}' doesn't exist".format(outdir)
-            sys.exit(1)
     elif 'IOCNAME' in env:
         if options.verbose:
             print "Found IOC name '{0}' in {1}".format(env['IOCNAME'], st_cmd)
@@ -193,14 +190,16 @@ def main():
         outdir = os.path.normpath(PVTABLE_DIR_TMPL)
         outdir = outdir.replace("<beamline>", beamline)
         outdir = outdir.replace("<iocname>", env['IOCNAME'])
-        if not os.path.isdir(outdir):
-            print "ERROR: Output directory '{0}' doesn't exist".format(outdir)
-            sys.exit(1)
         if options.verbose:
             print "Set output directory to '{0}'".format(outdir)
     else:
         print "ERROR: Can't detect output directory from IOC startup file, use -o parameter to specify it"
         sys.exit(1)
+
+    outdir = os.path.normpath(outdir)
+    if not os.path.isdir(outdir):
+        print "Creating output directory '{0}'".format(outdir)
+        os.makedirs(outdir)
 
     # Verify nED directory
     if options.ned_dir:
@@ -213,6 +212,7 @@ def main():
         if not os.path.isdir(ned_dir):
             print "ERROR: Can't detect nED root directory, use -n parameter to specify it"
             sys.exit(1)
+    ned_dir = os.path.normpath(ned_dir)
     print ned_dir
 
     plugins = parse_st_cmd_plugins(st_cmd, bl_prefix, options.verbose)
@@ -221,6 +221,7 @@ def main():
     elif options.verbose:
         print "Found {0} device plugins".format(len(plugins))
 
+    all_config = []
     for plugin in plugins:
 
         if options.verbose:
@@ -237,9 +238,21 @@ def main():
 
             if vars:
                 outpath = os.path.join(outdir, plugin["device"] + "_" + mode + ".pvs")
-                write_pvs_file(outpath, plugin["pv_prefix"], vars)
+                write_pvs_file(outpath, plugin['pv_prefix'], vars)
 
                 print "Created {0} from {1}".format(outpath, inpath)
+
+                if mode == "config":
+                    for var in vars:
+                        all_config.append({
+                            'name': plugin['pv_prefix'] + var['name'],
+                            'val': var['val']
+                        })
+
+    if all_config:
+        outpath = os.path.join(outdir, "all_config.pvs")
+        write_pvs_file(outpath, "", all_config)
+        print "Created {0}".format(outpath)
 
 if __name__ == "__main__":
     main()

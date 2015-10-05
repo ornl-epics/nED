@@ -9,7 +9,7 @@
 
 #include "DspPlugin.h"
 
-void DspPlugin::createConfigParams_v63() {
+void DspPlugin::createParams_v63() {
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
     createConfigParam("PixIdOff",       'B', 0x0,  32,  0, 0); // Pixel id offset
 
@@ -32,10 +32,9 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("Chop6:Freq",     'C', 0x8,   4, 24, 6); // Chop6 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
     createConfigParam("Chop7:Freq",     'C', 0x8,   4, 28, 7); // Chop7 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
 
-    createConfigParam("ChopDutyCycle",  'C', 0x9,  32,  0, 83400); // N*100ns ref pulse high
-    createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // N*100ns master/ref delay
-    // @TODO: make proper record links to chopper ioc
-    createConfigParam("ChopFixOffset",  'C', 0xB,  32,  0, 0); // Chopper TOF fixed offset
+    createConfigParam("ChopDutyCycle",  'C', 0x9,  32,  0, 83400); // Ref pulse hold time      (scale:100,unit:ns)
+    createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // Ref pulse delay         (scale:100,unit:ns)
+    createConfigParam("TofFixOffset",   'C', 0xB,  32,  0, 0); // TOF fixed offset             (scale:100,unit:ns)
 
     createConfigParam("ChopFr6",        'C', 0xC,   8,  0, 4); // RTDL Frame 6
     createConfigParam("ChopFr7",        'C', 0xC,   8,  8, 5); // RTDL Frame 7
@@ -63,16 +62,14 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("ChopFr29",       'C', 0x11,  8, 24, 41); // RTDL Frame 29
     createConfigParam("ChopFr30",       'C', 0x12,  8,  0, 1); // RTDL Frame 30
     createConfigParam("ChopFr31",       'C', 0x12,  8,  8, 2); // RTDL Frame 31
-// dcomserver thinks this one is valid
-//    createConfigParam1("ChopRtdlFr32", 'C', 0x12,  8, 16, 3); // RTDL Frame 32
 
-    createConfigParam("ChopTrefTrig",   'C', 0x13,  2,  0, 3); // Chopper TREF trigger select  (0=Extract,1=Cycle Start,2=Beam On,3=TREF event)
-    createConfigParam("ChopTrefFreq",   'C', 0x13,  4,  2, 1); // TREF frequency select        (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("ChopRtdlOffset", 'C', 0x13,  4,  8, 0); // Chopper RTDL frame offset
-    createConfigParam("ChopTrefEvent",  'C', 0x13,  8, 12, 39); // Chop TREF event trig [0:255]
-    createConfigParam("ChopHystMinLow", 'C', 0x13,  4, 20, 4); // Chop HYST minimum low [0:7]
-    createConfigParam("ChopHystMinHi",  'C', 0x13,  4, 24, 4); // Chop HYST minimum high [0:7]
-    createConfigParam("ChopFreqCntCtrl", 'C', 0x13,  2, 28, 1); // Chop frequency count control (0=strobe at X, 1=strobe at X-1, 2=strobe at X-2)
+    createConfigParam("TrefTrigger",    'C', 0x13,  2,  0, 3); // TREF RTDL Strobe trigger     (0=Extract,1=Cycle Start,2=Beam On,3=TREF event)
+    createConfigParam("TsyncFreq",      'C', 0x13,  4,  2, 1); // Out TSYNC frequency          (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("TsyncFrame",     'C', 0x13,  4,  8, 0); // TSYNC frame offset
+    createConfigParam("TrefEvent",      'C', 0x13,  8, 12, 39); // TREF event number
+    createConfigParam("HystMinLow",     'C', 0x13,  4, 20, 4); // Chop HYST minimum low
+    createConfigParam("HystMinHi",      'C', 0x13,  4, 24, 4); // Chop HYST minimum high
+    createConfigParam("ChopFreqCtrl",   'C', 0x13,  2, 28, 1); // Chop frequency count mode    (0=strobe at X, 1=strobe at X-1, 2=strobe at X-2)
     createConfigParam("ChopFreqCycle",  'C', 0x13,  1, 30, 1); // Chop frequency cycle select  (0=Present cycle number, 1=Next cycle number)
     createConfigParam("ChopSweepEn",    'C', 0x13,  1, 31, 0); // Chop sweep enable            (0=TOF fixed off,1=TOF fract off)
 
@@ -82,157 +79,157 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("FakeTimeHigh",   'C', 0x17, 32,  0, 0); // Fake mode time high DWord
 
     // Meta parameters
-    createConfigParam("Ch0:Mode",       'D', 0x0,   2,  0, 0); // Chan0 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch1:Mode",       'D', 0x0,   2,  2, 0); // Chan1 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch2:Mode",       'D', 0x0,   2,  4, 0); // Chan2 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch3:Mode",       'D', 0x0,   2,  6, 0); // Chan3 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch4:Mode",       'D', 0x0,   2,  8, 0); // Chan4 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch5:Mode",       'D', 0x0,   2, 10, 0); // Chan5 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch6:Mode",       'D', 0x0,   2, 12, 0); // Chan6 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch7:Mode",       'D', 0x0,   2, 14, 0); // Chan7 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch8:Mode",       'D', 0x0,   2, 16, 0); // Chan8 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch9:Mode",       'D', 0x0,   2, 18, 0); // Chan9 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch10:Mode",      'D', 0x0,   2, 20, 0); // Chan10 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch11:Mode",      'D', 0x0,   2, 22, 0); // Chan11 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch12:Mode",      'D', 0x0,   2, 24, 0); // Chan12 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch13:Mode",      'D', 0x0,   2, 26, 0); // Chan13 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch14:Mode",      'D', 0x0,   2, 28, 0); // Chan14 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch15:Mode",      'D', 0x0,   2, 30, 0); // Chan15 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch16:Mode",      'D', 0x1,   2,  0, 0); // Chan16 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch17:Mode",      'D', 0x1,   2,  2, 0); // Chan17 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch18:Mode",      'D', 0x1,   2,  4, 0); // Chan18 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch19:Mode",      'D', 0x1,   2,  6, 0); // Chan19 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch20:Mode",      'D', 0x1,   2,  8, 0); // Chan20 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch21:Mode",      'D', 0x1,   2, 10, 0); // Chan21 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch22:Mode",      'D', 0x1,   2, 12, 0); // Chan22 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch23:Mode",      'D', 0x1,   2, 14, 0); // Chan23 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch24:Mode",      'D', 0x1,   2, 16, 0); // Chan24 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch25:Mode",      'D', 0x1,   2, 18, 0); // Chan25 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch26:Mode",      'D', 0x1,   2, 20, 0); // Chan26 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch27:Mode",      'D', 0x1,   2, 22, 0); // Chan27 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch28:Mode",      'D', 0x1,   2, 24, 0); // Chan28 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch29:Mode",      'D', 0x1,   2, 26, 0); // Chan29 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch30:Mode",      'D', 0x1,   2, 28, 0); // Chan30 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Ch31:Mode",      'D', 0x1,   2, 30, 0); // Chan31 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta0:Mode",     'D', 0x0,   2,  0, 0); // ODB0 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta1:Mode",     'D', 0x0,   2,  2, 0); // ODB1 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta2:Mode",     'D', 0x0,   2,  4, 0); // ODB2 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta3:Mode",     'D', 0x0,   2,  6, 0); // ODB3 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta4:Mode",     'D', 0x0,   2,  8, 0); // ODB4 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta5:Mode",     'D', 0x0,   2, 10, 0); // ODB5 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta6:Mode",     'D', 0x0,   2, 12, 0); // ODB6 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta7:Mode",     'D', 0x0,   2, 14, 0); // ODB7 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta8:Mode",     'D', 0x0,   2, 16, 0); // ODB8 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta9:Mode",     'D', 0x0,   2, 18, 0); // ODB9 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta10:Mode",    'D', 0x0,   2, 20, 0); // ODB10 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta11:Mode",    'D', 0x0,   2, 22, 0); // ODB11 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta12:Mode",    'D', 0x0,   2, 24, 0); // ODB12 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta13:Mode",    'D', 0x0,   2, 26, 0); // ODB13 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta14:Mode",    'D', 0x0,   2, 28, 0); // ODB14 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta15:Mode",    'D', 0x0,   2, 30, 0); // ODB15 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta16:Mode",    'D', 0x1,   2,  0, 0); // Meta16 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta17:Mode",    'D', 0x1,   2,  2, 0); // Meta17 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta18:Mode",    'D', 0x1,   2,  4, 0); // Meta18 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta19:Mode",    'D', 0x1,   2,  6, 0); // Meta19 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta20:Mode",    'D', 0x1,   2,  8, 0); // Meta20 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta21:Mode",    'D', 0x1,   2, 10, 0); // Meta21 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta22:Mode",    'D', 0x1,   2, 12, 0); // Meta22 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta23:Mode",    'D', 0x1,   2, 14, 0); // Meta23 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta24:Mode",    'D', 0x1,   2, 16, 0); // Meta24 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta25:Mode",    'D', 0x1,   2, 18, 0); // Meta25 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta26:Mode",    'D', 0x1,   2, 20, 0); // Meta26 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta27:Mode",    'D', 0x1,   2, 22, 0); // Meta27 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta28:Mode",    'D', 0x1,   2, 24, 0); // Meta28 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta29:Mode",    'D', 0x1,   2, 26, 0); // Meta29 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta30:Mode",    'D', 0x1,   2, 28, 0); // Meta30 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    createConfigParam("Meta31:Mode",    'D', 0x1,   2, 30, 0); // Meta31 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
 
-    createConfigParam("Ch0:PixId",      'D', 0x2,  32,  0, 0x50000000); // Chan0 edge pixel id
-    createConfigParam("Ch1:PixId",      'D', 0x3,  32,  0, 0x50000002); // Chan1 edge pixel id
-    createConfigParam("Ch2:PixId",      'D', 0x4,  32,  0, 0x50000004); // Chan2 edge pixel id
-    createConfigParam("Ch3:PixId",      'D', 0x5,  32,  0, 0x50000006); // Chan3 edge pixel id
-    createConfigParam("Ch4:PixId",      'D', 0x6,  32,  0, 0x50000008); // Chan4 edge pixel id
-    createConfigParam("Ch5:PixId",      'D', 0x7,  32,  0, 0x5000000a); // Chan5 edge pixel id
-    createConfigParam("Ch6:PixId",      'D', 0x8,  32,  0, 0x5000000c); // Chan6 edge pixel id
-    createConfigParam("Ch7:PixId",      'D', 0x9,  32,  0, 0x5000000e); // Chan7 edge pixel id
-    createConfigParam("Ch8:PixId",      'D', 0xA,  32,  0, 0x50000010); // Chan8 edge pixel id
-    createConfigParam("Ch9:PixId",      'D', 0xB,  32,  0, 0x50000012); // Chan9 edge pixel id
-    createConfigParam("Ch10:PixId",     'D', 0xC,  32,  0, 0x50000014); // Chan10 edge pixel id
-    createConfigParam("Ch11:PixId",     'D', 0xD,  32,  0, 0x50000016); // Chan11 edge pixel id
-    createConfigParam("Ch12:PixId",     'D', 0xE,  32,  0, 0x50000018); // Chan12 edge pixel id
-    createConfigParam("Ch13:PixId",     'D', 0xF,  32,  0, 0x5000001a); // Chan13 edge pixel id
-    createConfigParam("Ch14:PixId",     'D', 0x10, 32,  0, 0x5000001c); // Chan14 edge pixel id
-    createConfigParam("Ch15:PixId",     'D', 0x11, 32,  0, 0x5000001e); // Chan15 edge pixel id
-    createConfigParam("Ch16:PixId",     'D', 0x12, 32,  0, 0x50000020); // Chan16 edge pixel id
-    createConfigParam("Ch17:PixId",     'D', 0x13, 32,  0, 0x50000022); // Chan17 edge pixel id
-    createConfigParam("Ch18:PixId",     'D', 0x14, 32,  0, 0x50000024); // Chan18 edge pixel id
-    createConfigParam("Ch19:PixId",     'D', 0x15, 32,  0, 0x50000026); // Chan19 edge pixel id
-    createConfigParam("Ch20:PixId",     'D', 0x16, 32,  0, 0x50000028); // Chan20 edge pixel id
-    createConfigParam("Ch21:PixId",     'D', 0x17, 32,  0, 0x5000002a); // Chan21 edge pixel id
-    createConfigParam("Ch22:PixId",     'D', 0x18, 32,  0, 0x5000002c); // Chan22 edge pixel id
-    createConfigParam("Ch23:PixId",     'D', 0x19, 32,  0, 0x5000002e); // Chan23 edge pixel id
-    createConfigParam("Ch24:PixId",     'D', 0x1A, 32,  0, 0x50000030); // Chan24 edge pixel id
-    createConfigParam("Ch25:PixId",     'D', 0x1B, 32,  0, 0x50000032); // Chan25 edge pixel id
-    createConfigParam("Ch26:PixId",     'D', 0x1C, 32,  0, 0x50000034); // Chan26 edge pixel id
-    createConfigParam("Ch27:PixId",     'D', 0x1D, 32,  0, 0x50000036); // Chan27 edge pixel id
-    createConfigParam("Ch28:PixId",     'D', 0x1E, 32,  0, 0x50000038); // Chan28 edge pixel id
-    createConfigParam("Ch29:PixId",     'D', 0x1F, 32,  0, 0x5000003a); // Chan29 edge pixel id
-    createConfigParam("Ch30:PixId",     'D', 0x20, 32,  0, 0x5000003c); // Chan30 edge pixel id
-    createConfigParam("Ch31:PixId",     'D', 0x21, 32,  0, 0x5000003e); // Chan31 edge pixel id
+    createConfigParam("Meta0:PixId",    'D', 0x2,  32,  0, 0x50000000); // ODB0 edge pixel id
+    createConfigParam("Meta1:PixId",    'D', 0x3,  32,  0, 0x50000002); // ODB1 edge pixel id
+    createConfigParam("Meta2:PixId",    'D', 0x4,  32,  0, 0x50000004); // ODB2 edge pixel id
+    createConfigParam("Meta3:PixId",    'D', 0x5,  32,  0, 0x50000006); // ODB3 edge pixel id
+    createConfigParam("Meta4:PixId",    'D', 0x6,  32,  0, 0x50000008); // ODB4 edge pixel id
+    createConfigParam("Meta5:PixId",    'D', 0x7,  32,  0, 0x5000000a); // ODB5 edge pixel id
+    createConfigParam("Meta6:PixId",    'D', 0x8,  32,  0, 0x5000000c); // ODB6 edge pixel id
+    createConfigParam("Meta7:PixId",    'D', 0x9,  32,  0, 0x5000000e); // ODB7 edge pixel id
+    createConfigParam("Meta8:PixId",    'D', 0xA,  32,  0, 0x50000010); // ODB8 edge pixel id
+    createConfigParam("Meta9:PixId",    'D', 0xB,  32,  0, 0x50000012); // ODB9 edge pixel id
+    createConfigParam("Meta10:PixId",   'D', 0xC,  32,  0, 0x50000014); // ODB10 edge pixel id
+    createConfigParam("Meta11:PixId",   'D', 0xD,  32,  0, 0x50000016); // ODB11 edge pixel id
+    createConfigParam("Meta12:PixId",   'D', 0xE,  32,  0, 0x50000018); // ODB12 edge pixel id
+    createConfigParam("Meta13:PixId",   'D', 0xF,  32,  0, 0x5000001a); // ODB13 edge pixel id
+    createConfigParam("Meta14:PixId",   'D', 0x10, 32,  0, 0x5000001c); // ODB14 edge pixel id
+    createConfigParam("Meta15:PixId",   'D', 0x11, 32,  0, 0x5000001e); // ODB15 edge pixel id
+    createConfigParam("Meta16:PixId",   'D', 0x12, 32,  0, 0x50000020); // Meta16 edge pixel id
+    createConfigParam("Meta17:PixId",   'D', 0x13, 32,  0, 0x50000022); // Meta17 edge pixel id
+    createConfigParam("Meta18:PixId",   'D', 0x14, 32,  0, 0x50000024); // Meta18 edge pixel id
+    createConfigParam("Meta19:PixId",   'D', 0x15, 32,  0, 0x50000026); // Meta19 edge pixel id
+    createConfigParam("Meta20:PixId",   'D', 0x16, 32,  0, 0x50000028); // Meta20 edge pixel id
+    createConfigParam("Meta21:PixId",   'D', 0x17, 32,  0, 0x5000002a); // Meta21 edge pixel id
+    createConfigParam("Meta22:PixId",   'D', 0x18, 32,  0, 0x5000002c); // Meta22 edge pixel id
+    createConfigParam("Meta23:PixId",   'D', 0x19, 32,  0, 0x5000002e); // Meta23 edge pixel id
+    createConfigParam("Meta24:PixId",   'D', 0x1A, 32,  0, 0x50000030); // Meta24 edge pixel id
+    createConfigParam("Meta25:PixId",   'D', 0x1B, 32,  0, 0x50000032); // Meta25 edge pixel id
+    createConfigParam("Meta26:PixId",   'D', 0x1C, 32,  0, 0x50000034); // Meta26 edge pixel id
+    createConfigParam("Meta27:PixId",   'D', 0x1D, 32,  0, 0x50000036); // Meta27 edge pixel id
+    createConfigParam("Meta28:PixId",   'D', 0x1E, 32,  0, 0x50000038); // Meta28 edge pixel id
+    createConfigParam("Meta29:PixId",   'D', 0x1F, 32,  0, 0x5000003a); // Meta29 edge pixel id
+    createConfigParam("Meta30:PixId",   'D', 0x20, 32,  0, 0x5000003c); // Meta30 edge pixel id
+    createConfigParam("Meta31:PixId",   'D', 0x21, 32,  0, 0x5000003e); // Meta31 edge pixel id
 
-    createConfigParam("Ch0:Cycle",      'D', 0x22,  5,  0, 0); // Chan0 edge cycle number adj
-    createConfigParam("Ch1:Cycle",      'D', 0x22,  5,  5, 0); // Chan1 edge cycle number adj
-    createConfigParam("Ch2:Cycle",      'D', 0x22,  5, 10, 0); // Chan2 edge cycle number adj
-    createConfigParam("Ch3:Cycle",      'D', 0x22,  5, 15, 0); // Chan3 edge cycle number adj
-    createConfigParam("Ch4:Cycle",      'D', 0x22,  5, 20, 0); // Chan4 edge cycle number adj
-    createConfigParam("Ch5:Cycle",      'D', 0x22,  5, 25, 0); // Chan5 edge cycle number adj
-    createConfigParam("Ch6:Cycle",      'D', 0x23,  5,  0, 0); // Chan6 edge cycle number adj
-    createConfigParam("Ch7:Cycle",      'D', 0x23,  5,  5, 0); // Chan7 edge cycle number adj
-    createConfigParam("Ch8:Cycle",      'D', 0x23,  5, 10, 0); // Chan8 edge cycle number adj
-    createConfigParam("Ch9:Cycle",      'D', 0x23,  5, 15, 0); // Chan9 edge cycle number adj
-    createConfigParam("Ch10:Cycle",     'D', 0x23,  5, 20, 0); // Chan10 edge cycle number adj
-    createConfigParam("Ch11:Cycle",     'D', 0x23,  5, 25, 0); // Chan11 edge cycle number adj
-    createConfigParam("Ch12:Cycle",     'D', 0x24,  5,  0, 0); // Chan12 edge cycle number adj
-    createConfigParam("Ch13:Cycle",     'D', 0x24,  5,  5, 0); // Chan13 edge cycle number adj
-    createConfigParam("Ch14:Cycle",     'D', 0x24,  5, 10, 0); // Chan14 edge cycle number adj
-    createConfigParam("Ch15:Cycle",     'D', 0x24,  5, 15, 0); // Chan15 edge cycle number adj
-    createConfigParam("Ch16:Cycle",     'D', 0x24,  5, 20, 0); // Chan16 edge cycle number adj
-    createConfigParam("Ch17:Cycle",     'D', 0x24,  5, 25, 0); // Chan17 edge cycle number adj
-    createConfigParam("Ch18:Cycle",     'D', 0x25,  5,  0, 0); // Chan18 edge cycle number adj
-    createConfigParam("Ch19:Cycle",     'D', 0x25,  5,  5, 0); // Chan19 edge cycle number adj
-    createConfigParam("Ch20:Cycle",     'D', 0x25,  5, 10, 0); // Chan20 edge cycle number adj
-    createConfigParam("Ch21:Cycle",     'D', 0x25,  5, 15, 0); // Chan21 edge cycle number adj
-    createConfigParam("Ch22:Cycle",     'D', 0x25,  5, 20, 0); // Chan22 edge cycle number adj
-    createConfigParam("Ch23:Cycle",     'D', 0x25,  5, 25, 0); // Chan23 edge cycle number adj
-    createConfigParam("Ch24:Cycle",     'D', 0x26,  5,  0, 0); // Chan24 edge cycle number adj
-    createConfigParam("Ch25:Cycle",     'D', 0x26,  5,  5, 0); // Chan25 edge cycle number adj
-    createConfigParam("Ch26:Cycle",     'D', 0x26,  5, 10, 0); // Chan26 edge cycle number adj
-    createConfigParam("Ch27:Cycle",     'D', 0x26,  5, 15, 0); // Chan27 edge cycle number adj
-    createConfigParam("Ch28:Cycle",     'D', 0x26,  5, 20, 0); // Chan28 edge cycle number adj
-    createConfigParam("Ch29:Cycle",     'D', 0x26,  5, 25, 0); // Chan29 edge cycle number adj
-    createConfigParam("Ch30:Cycle",     'D', 0x27,  5,  0, 0); // Chan30 edge cycle number adj
-    createConfigParam("Ch31:Cycle",     'D', 0x27,  5,  5, 0); // Chan31 edge cycle number adj
+    createConfigParam("Meta0:Cycle",    'D', 0x22,  5,  0, 0); // ODB0 edge cycle number adj
+    createConfigParam("Meta1:Cycle",    'D', 0x22,  5,  5, 0); // ODB1 edge cycle number adj
+    createConfigParam("Meta2:Cycle",    'D', 0x22,  5, 10, 0); // ODB2 edge cycle number adj
+    createConfigParam("Meta3:Cycle",    'D', 0x22,  5, 15, 0); // ODB3 edge cycle number adj
+    createConfigParam("Meta4:Cycle",    'D', 0x22,  5, 20, 0); // ODB4 edge cycle number adj
+    createConfigParam("Meta5:Cycle",    'D', 0x22,  5, 25, 0); // ODB5 edge cycle number adj
+    createConfigParam("Meta6:Cycle",    'D', 0x23,  5,  0, 0); // ODB6 edge cycle number adj
+    createConfigParam("Meta7:Cycle",    'D', 0x23,  5,  5, 0); // ODB7 edge cycle number adj
+    createConfigParam("Meta8:Cycle",    'D', 0x23,  5, 10, 0); // ODB8 edge cycle number adj
+    createConfigParam("Meta9:Cycle",    'D', 0x23,  5, 15, 0); // ODB9 edge cycle number adj
+    createConfigParam("Meta10:Cycle",   'D', 0x23,  5, 20, 0); // ODB10 edge cycle number adj
+    createConfigParam("Meta11:Cycle",   'D', 0x23,  5, 25, 0); // ODB11 edge cycle number adj
+    createConfigParam("Meta12:Cycle",   'D', 0x24,  5,  0, 0); // ODB12 edge cycle number adj
+    createConfigParam("Meta13:Cycle",   'D', 0x24,  5,  5, 0); // ODB13 edge cycle number adj
+    createConfigParam("Meta14:Cycle",   'D', 0x24,  5, 10, 0); // ODB14 edge cycle number adj
+    createConfigParam("Meta15:Cycle",   'D', 0x24,  5, 15, 0); // ODB15 edge cycle number adj
+    createConfigParam("Meta16:Cycle",   'D', 0x24,  5, 20, 0); // Meta16 edge cycle number adj
+    createConfigParam("Meta17:Cycle",   'D', 0x24,  5, 25, 0); // Meta17 edge cycle number adj
+    createConfigParam("Meta18:Cycle",   'D', 0x25,  5,  0, 0); // Meta18 edge cycle number adj
+    createConfigParam("Meta19:Cycle",   'D', 0x25,  5,  5, 0); // Meta19 edge cycle number adj
+    createConfigParam("Meta20:Cycle",   'D', 0x25,  5, 10, 0); // Meta20 edge cycle number adj
+    createConfigParam("Meta21:Cycle",   'D', 0x25,  5, 15, 0); // Meta21 edge cycle number adj
+    createConfigParam("Meta22:Cycle",   'D', 0x25,  5, 20, 0); // Meta22 edge cycle number adj
+    createConfigParam("Meta23:Cycle",   'D', 0x25,  5, 25, 0); // Meta23 edge cycle number adj
+    createConfigParam("Meta24:Cycle",   'D', 0x26,  5,  0, 0); // Meta24 edge cycle number adj
+    createConfigParam("Meta25:Cycle",   'D', 0x26,  5,  5, 0); // Meta25 edge cycle number adj
+    createConfigParam("Meta26:Cycle",   'D', 0x26,  5, 10, 0); // Meta26 edge cycle number adj
+    createConfigParam("Meta27:Cycle",   'D', 0x26,  5, 15, 0); // Meta27 edge cycle number adj
+    createConfigParam("Meta28:Cycle",   'D', 0x26,  5, 20, 0); // Meta28 edge cycle number adj
+    createConfigParam("Meta29:Cycle",   'D', 0x26,  5, 25, 0); // Meta29 edge cycle number adj
+    createConfigParam("Meta30:Cycle",   'D', 0x27,  5,  0, 0); // Meta30 edge cycle number adj
+    createConfigParam("Meta31:Cycle",   'D', 0x27,  5,  5, 0); // Meta31 edge cycle number adj
 
-    createConfigParam("Ch0:Delay",      'D', 0x28, 32,  0, 0); // Chan0 edge delay
-    createConfigParam("Ch1:Delay",      'D', 0x29, 32,  0, 0); // Chan1 edge delay
-    createConfigParam("Ch2:Delay",      'D', 0x2A, 32,  0, 0); // Chan2 edge delay
-    createConfigParam("Ch3:Delay",      'D', 0x2B, 32,  0, 0); // Chan3 edge delay
-    createConfigParam("Ch4:Delay",      'D', 0x2C, 32,  0, 0); // Chan4 edge delay
-    createConfigParam("Ch5:Delay",      'D', 0x2D, 32,  0, 0); // Chan5 edge delay
-    createConfigParam("Ch6:Delay",      'D', 0x2E, 32,  0, 0); // Chan6 edge delay
-    createConfigParam("Ch7:Delay",      'D', 0x2F, 32,  0, 0); // Chan7 edge delay
-    createConfigParam("Ch8:Delay",      'D', 0x30, 32,  0, 0); // Chan8 edge delay
-    createConfigParam("Ch9:Delay",      'D', 0x31, 32,  0, 0); // Chan9 edge delay
-    createConfigParam("Ch10:Delay",     'D', 0x32, 32,  0, 0); // Chan10 edge delay
-    createConfigParam("Ch11:Delay",     'D', 0x33, 32,  0, 0); // Chan11 edge delay
-    createConfigParam("Ch12:Delay",     'D', 0x34, 32,  0, 0); // Chan12 edge delay
-    createConfigParam("Ch13:Delay",     'D', 0x35, 32,  0, 0); // Chan13 edge delay
-    createConfigParam("Ch14:Delay",     'D', 0x36, 32,  0, 0); // Chan14 edge delay
-    createConfigParam("Ch15:Delay",     'D', 0x37, 32,  0, 0); // Chan15 edge delay
-    createConfigParam("Ch16:Delay",     'D', 0x38, 32,  0, 0); // Chan16 edge delay
-    createConfigParam("Ch17:Delay",     'D', 0x39, 32,  0, 0); // Chan17 edge delay
-    createConfigParam("Ch18:Delay",     'D', 0x3A, 32,  0, 0); // Chan18 edge delay
-    createConfigParam("Ch19:Delay",     'D', 0x3B, 32,  0, 0); // Chan19 edge delay
-    createConfigParam("Ch20:Delay",     'D', 0x3C, 32,  0, 0); // Chan20 edge delay
-    createConfigParam("Ch21:Delay",     'D', 0x3D, 32,  0, 0); // Chan21 edge delay
-    createConfigParam("Ch22:Delay",     'D', 0x3E, 32,  0, 0); // Chan22 edge delay
-    createConfigParam("Ch23:Delay",     'D', 0x3F, 32,  0, 0); // Chan23 edge delay
-    createConfigParam("Ch24:Delay",     'D', 0x40, 32,  0, 0); // Chan24 edge delay
-    createConfigParam("Ch25:Delay",     'D', 0x41, 32,  0, 0); // Chan25 edge delay
-    createConfigParam("Ch26:Delay",     'D', 0x42, 32,  0, 0); // Chan26 edge delay
-    createConfigParam("Ch27:Delay",     'D', 0x43, 32,  0, 0); // Chan27 edge delay
-    createConfigParam("Ch28:Delay",     'D', 0x44, 32,  0, 0); // Chan28 edge delay
-    createConfigParam("Ch29:Delay",     'D', 0x45, 32,  0, 0); // Chan29 edge delay
-    createConfigParam("Ch30:Delay",     'D', 0x46, 32,  0, 0); // Chan30 edge delay
-    createConfigParam("Ch31:Delay",     'D', 0x47, 32,  0, 0); // Chan31 edge delay
+    createConfigParam("Meta0:Delay",    'D', 0x28, 32,  0, 0); // ODB0 edge delay
+    createConfigParam("Meta1:Delay",    'D', 0x29, 32,  0, 0); // ODB1 edge delay
+    createConfigParam("Meta2:Delay",    'D', 0x2A, 32,  0, 0); // ODB2 edge delay
+    createConfigParam("Meta3:Delay",    'D', 0x2B, 32,  0, 0); // ODB3 edge delay
+    createConfigParam("Meta4:Delay",    'D', 0x2C, 32,  0, 0); // ODB4 edge delay
+    createConfigParam("Meta5:Delay",    'D', 0x2D, 32,  0, 0); // ODB5 edge delay
+    createConfigParam("Meta6:Delay",    'D', 0x2E, 32,  0, 0); // ODB6 edge delay
+    createConfigParam("Meta7:Delay",    'D', 0x2F, 32,  0, 0); // ODB7 edge delay
+    createConfigParam("Meta8:Delay",    'D', 0x30, 32,  0, 0); // ODB8 edge delay
+    createConfigParam("Meta9:Delay",    'D', 0x31, 32,  0, 0); // ODB9 edge delay
+    createConfigParam("Meta10:Delay",   'D', 0x32, 32,  0, 0); // ODB10 edge delay
+    createConfigParam("Meta11:Delay",   'D', 0x33, 32,  0, 0); // ODB11 edge delay
+    createConfigParam("Meta12:Delay",   'D', 0x34, 32,  0, 0); // ODB12 edge delay
+    createConfigParam("Meta13:Delay",   'D', 0x35, 32,  0, 0); // ODB13 edge delay
+    createConfigParam("Meta14:Delay",   'D', 0x36, 32,  0, 0); // ODB14 edge delay
+    createConfigParam("Meta15:Delay",   'D', 0x37, 32,  0, 0); // ODB15 edge delay
+    createConfigParam("Meta16:Delay",   'D', 0x38, 32,  0, 0); // Meta16 edge delay
+    createConfigParam("Meta17:Delay",   'D', 0x39, 32,  0, 0); // Meta17 edge delay
+    createConfigParam("Meta18:Delay",   'D', 0x3A, 32,  0, 0); // Meta18 edge delay
+    createConfigParam("Meta19:Delay",   'D', 0x3B, 32,  0, 0); // Meta19 edge delay
+    createConfigParam("Meta20:Delay",   'D', 0x3C, 32,  0, 0); // Meta20 edge delay
+    createConfigParam("Meta21:Delay",   'D', 0x3D, 32,  0, 0); // Meta21 edge delay
+    createConfigParam("Meta22:Delay",   'D', 0x3E, 32,  0, 0); // Meta22 edge delay
+    createConfigParam("Meta23:Delay",   'D', 0x3F, 32,  0, 0); // Meta23 edge delay
+    createConfigParam("Meta24:Delay",   'D', 0x40, 32,  0, 0); // Meta24 edge delay
+    createConfigParam("Meta25:Delay",   'D', 0x41, 32,  0, 0); // Meta25 edge delay
+    createConfigParam("Meta26:Delay",   'D', 0x42, 32,  0, 0); // Meta26 edge delay
+    createConfigParam("Meta27:Delay",   'D', 0x43, 32,  0, 0); // Meta27 edge delay
+    createConfigParam("Meta28:Delay",   'D', 0x44, 32,  0, 0); // Meta28 edge delay
+    createConfigParam("Meta29:Delay",   'D', 0x45, 32,  0, 0); // Meta29 edge delay
+    createConfigParam("Meta30:Delay",   'D', 0x46, 32,  0, 0); // Meta30 edge delay
+    createConfigParam("Meta31:Delay",   'D', 0x47, 32,  0, 0); // Meta31 edge delay
 
     // LVDS & optical parameters
-    createConfigParam("Ch1:Flow",       'E', 0x0,  1,  0, 0); // LVDS chan0 TXEN control       (0=flow control,1=no flow control)
-    createConfigParam("Ch2:Flow",       'E', 0x0,  1,  3, 0); // LVDS chan1 TXEN control       (0=flow control,1=no flow control)
-    createConfigParam("Ch3:Flow",       'E', 0x0,  1,  6, 0); // LVDS chan2 TXEX control       (0=flow control,1=no flow control)
-    createConfigParam("Ch4:Flow",       'E', 0x0,  1,  9, 0); // LVDS chan3 TXEX control       (0=flow control,1=no flow control)
-    createConfigParam("Ch5:Flow",       'E', 0x0,  1, 12, 0); // LVDS chan4 TXEX control       (0=flow control,1=no flow control)
-    createConfigParam("Ch6:Flow",       'E', 0x0,  1, 15, 0); // LVDS chan5 TXEX control       (0=flow control,1=no flow control)
-    createConfigParam("Ch1:IgnE",       'E', 0x0,  1,  1, 0); // LVDS chan0 ignore error pkts  (0=ignore,1=keep)
-    createConfigParam("Ch2:IgnE",       'E', 0x0,  1,  4, 0); // LVDS chan1 ignore error pkts  (0=ignore,1=keep)
-    createConfigParam("Ch3:IgnE",       'E', 0x0,  1,  7, 0); // LVDS chan2 ignore error pkts  (0=ignore,1=keep)
-    createConfigParam("Ch4:IgnE",       'E', 0x0,  1, 10, 0); // LVDS chan3 ignore error pkts  (0=ignore,1=keep)
-    createConfigParam("Ch5:IgnE",       'E', 0x0,  1, 13, 0); // LVDS chan4 ignore error pkts  (0=ignore,1=keep)
-    createConfigParam("Ch6:IgnE",       'E', 0x0,  1, 16, 0); // LVDS chan5 ignore error pkts  (0=ignore,1=keep)
-    createConfigParam("Ch1:Dis",        'E', 0x0,  1,  2, 0); // LVDS chan0 disable            (0=enable,1=disable)
-    createConfigParam("Ch2:Dis",        'E', 0x0,  1,  5, 0); // LVDS chan1 disable            (0=enable,1=disable)
-    createConfigParam("Ch3:Dis",        'E', 0x0,  1,  8, 0); // LVDS chan2 disable            (0=enable,1=disable)
-    createConfigParam("Ch4:Dis",        'E', 0x0,  1, 11, 0); // LVDS chan3 disable            (0=enable,1=disable)
-    createConfigParam("Ch5:Dis",        'E', 0x0,  1, 14, 0); // LVDS chan4 disable            (0=enable,1=disable)
-    createConfigParam("Ch6:Dis",        'E', 0x0,  1, 17, 0); // LVDS chan5 disable            (0=enable,1=disable)
+    createConfigParam("Lvds1:FlowCtrl", 'E', 0x0,  1,  0, 0); // LVDS chan1 TXEN control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds2:FlowCtrl", 'E', 0x0,  1,  3, 0); // LVDS chan2 TXEN control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds3:FlowCtrl", 'E', 0x0,  1,  6, 0); // LVDS chan3 TXEX control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds4:FlowCtrl", 'E', 0x0,  1,  9, 0); // LVDS chan4 TXEX control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds5:FlowCtrl", 'E', 0x0,  1, 12, 0); // LVDS chan5 TXEX control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds6:FlowCtrl", 'E', 0x0,  1, 15, 0); // LVDS chan6 TXEX control       (0=flow control,1=no flow control)
+    createConfigParam("Lvds1:ErrPkts",  'E', 0x0,  1,  1, 0); // LVDS chan1 ignore error pkts  (0=ignore,1=keep)
+    createConfigParam("Lvds2:ErrPkts",  'E', 0x0,  1,  4, 0); // LVDS chan2 ignore error pkts  (0=ignore,1=keep)
+    createConfigParam("Lvds3:ErrPkts",  'E', 0x0,  1,  7, 0); // LVDS chan3 ignore error pkts  (0=ignore,1=keep)
+    createConfigParam("Lvds4:ErrPkts",  'E', 0x0,  1, 10, 0); // LVDS chan4 ignore error pkts  (0=ignore,1=keep)
+    createConfigParam("Lvds5:ErrPkts",  'E', 0x0,  1, 13, 0); // LVDS chan5 ignore error pkts  (0=ignore,1=keep)
+    createConfigParam("Lvds6:ErrPkts",  'E', 0x0,  1, 16, 0); // LVDS chan6 ignore error pkts  (0=ignore,1=keep)
+    createConfigParam("Lvds1:En",       'E', 0x0,  1,  2, 0); // LVDS chan1 disable            (0=enable,1=disable)
+    createConfigParam("Lvds2:En",       'E', 0x0,  1,  5, 0); // LVDS chan2 disable            (0=enable,1=disable)
+    createConfigParam("Lvds3:En",       'E', 0x0,  1,  8, 0); // LVDS chan3 disable            (0=enable,1=disable)
+    createConfigParam("Lvds4:En",       'E', 0x0,  1, 11, 0); // LVDS chan4 disable            (0=enable,1=disable)
+    createConfigParam("Lvds5:En",       'E', 0x0,  1, 14, 0); // LVDS chan5 disable            (0=enable,1=disable)
+    createConfigParam("Lvds6:En",       'E', 0x0,  1, 17, 0); // LVDS chan6 disable            (0=enable,1=disable)
     createConfigParam("LvdsCmdMode",    'E', 0x0,  1, 18, 0); // LVDS command parser mode      (0=as command,1=as data)
     createConfigParam("LvdsDataMode",   'E', 0x0,  1, 19, 0); // LVDS data parser mode         (0=as data,1=as command)
     createConfigParam("LvdsDataSize",   'E', 0x0,  8, 20, 4); // LVDS data pkt num words
@@ -252,27 +249,27 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("LvdsTxenCtrl",   'E', 0x2,  2, 10, 0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
     createConfigParam("LvdsOutClck",    'E', 0x2,  2, 16, 0); // LVDS output clock mode
     createConfigParam("LvdsNRetry",     'E', 0x2,  2, 18, 3); // LVDS downstream retrys
-    createConfigParam("Ch1:WordLen",    'E', 0x2,  1, 20, 0); // LVDS chan1 data word length  (0=RX FIFO data,1=set to 4)
-    createConfigParam("Ch2:WordLen",    'E', 0x2,  1, 21, 0); // LVDS chan2 data word length  (0=RX FIFO data,1=set to 4)
-    createConfigParam("Ch3:WordLen",    'E', 0x2,  1, 22, 0); // LVDS chan3 data word length  (0=RX FIFO data,1=set to 4)
-    createConfigParam("Ch4:WordLen",    'E', 0x2,  1, 23, 0); // LVDS chan4 data word length  (0=RX FIFO data,1=set to 4)
-    createConfigParam("Ch5:WordLen",    'E', 0x2,  1, 24, 0); // LVDS chan5 data word length  (0=RX FIFO data,1=set to 4)
-    createConfigParam("Ch6:WordLen",    'E', 0x2,  1, 25, 0); // LVDS chan6 data word length  (0=RX FIFO data,1=set to 4)
+    createConfigParam("Lvds1:WordLen",  'E', 0x2,  1, 20, 0); // LVDS chan1 data word length  (0=RX FIFO data,1=set to 4)
+    createConfigParam("Lvds2:WordLen",  'E', 0x2,  1, 21, 0); // LVDS chan2 data word length  (0=RX FIFO data,1=set to 4)
+    createConfigParam("Lvds3:WordLen",  'E', 0x2,  1, 22, 0); // LVDS chan3 data word length  (0=RX FIFO data,1=set to 4)
+    createConfigParam("Lvds4:WordLen",  'E', 0x2,  1, 23, 0); // LVDS chan4 data word length  (0=RX FIFO data,1=set to 4)
+    createConfigParam("Lvds5:WordLen",  'E', 0x2,  1, 24, 0); // LVDS chan5 data word length  (0=RX FIFO data,1=set to 4)
+    createConfigParam("Lvds6:WordLen",  'E', 0x2,  1, 25, 0); // LVDS chan6 data word length  (0=RX FIFO data,1=set to 4)
     createConfigParam("LvdsClkMargin",  'E', 0x2,  2, 26, 0); // LVDS clock margin
     createConfigParam("LvdsTstPattern", 'E', 0x2,  1, 30, 0); // LVDS T&C test pattern        (0=disable,1=enable)
     createConfigParam("LvdsTestEn",     'E', 0x2,  1, 31, 0); // LVDS test enable             (0=disable,1=enable)
 
-    createConfigParam("Ch1:SrcCtrl",    'E', 0x3,  2,  0, 0); // LVDS ch1 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Ch2:SrcCtrl",    'E', 0x3,  2,  2, 0); // LVDS ch2 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Ch3:SrcCtrl",    'E', 0x3,  2,  4, 0); // LVDS ch3 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Ch4:SrcCtrl",    'E', 0x3,  2,  6, 0); // LVDS ch4 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Ch5:SrcCtrl",    'E', 0x3,  2,  8, 0); // LVDS ch5 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Ch6:SrcCtrl",    'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB)
+    createConfigParam("Lvds1:SrcCtrl",  'E', 0x3,  2,  0, 0); // LVDS ch1 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
+    createConfigParam("Lvds2:SrcCtrl",  'E', 0x3,  2,  2, 0); // LVDS ch2 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
+    createConfigParam("Lvds3:SrcCtrl",  'E', 0x3,  2,  4, 0); // LVDS ch3 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
+    createConfigParam("Lvds4:SrcCtrl",  'E', 0x3,  2,  6, 0); // LVDS ch4 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
+    createConfigParam("Lvds5:SrcCtrl",  'E', 0x3,  2,  8, 0); // LVDS ch5 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
+    createConfigParam("Lvds6:SrcCtrl",  'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
+    createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB[0])
 
-    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 166660); // LVDS TSYNC generate divisor (166660=240Hz, 666800=60Hz, 800000=50Hz, 1333200=30Hz)
-    createConfigParam("LvdsTsyncDelay", 'E', 0x5, 32,  0, 0); // LVDS TSYNC delay divisor     (0=10ns, 1=20ns, 106=1us, 1060=10us, 106250=1ms)
-    createConfigParam("LvdsTsyncWidth", 'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (83330=8.3ms, 10=1us, 20=2us, 10000=1ms)
+    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 0); // LVDS TSYNC period
+    createConfigParam("TsyncDelay",     'E', 0x5, 32,  0, 0); // LVDS TSYNC delay             (scale:9.4,unit:ns)
+    createConfigParam("TsyncWidth",     'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (scale:100,unit:ns)
 
     createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
     createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
@@ -309,13 +306,10 @@ void DspPlugin::createConfigParams_v63() {
     createConfigParam("SysFixRtdlEn",   'F', 0x0,  1, 19, 1); // Correct RTDL information     (0=disable,1=enable)
     createConfigParam("SysBadPktEn",    'F', 0x0,  1, 30, 0); // Send bad packets             (0=disable,1=enable)
     createConfigParam("SysReset",       'F', 0x0,  1, 31, 0); // Force system reset           (0=disable,1=enable)
-}
 
-void DspPlugin::createStatusParams_v63()
-{
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring [alarm],1=acquiring, archive:monitor)
+    createStatusParam("Acquiring",     0x0,  1,  1); // Acquiring data               (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("ErrProgram",    0x0,  1,  2); // WRITE_CNFG during ACQ        (0=no error,1=error)
     createStatusParam("ErrLength",     0x0,  1,  3); // Packet length error          (0=no error,1=error)
     createStatusParam("ErrCmdBad",     0x0,  1,  4); // Unrecognized command error   (0=no error,1=error)
@@ -353,65 +347,64 @@ void DspPlugin::createStatusParams_v63()
     createStatusParam("OptB:Stack",    0x2,  1, 30); // RX pkt while stack almost fu (0=no,1=yes)
     createStatusParam("OptB:Fifo",     0x2,  1, 31); // RX while the FIFO almost ful
 
-    createStatusParam("Ch1:RxFlg",     0x3,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch1:RxStat",    0x3,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
-    createStatusParam("Ch1:RxData",    0x3,  1, 10); // External FIFO has data       (0=empty,1=has data)
-    createStatusParam("Ch1:RxAF",      0x3,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
-    createStatusParam("Ch1:RxParD",    0x3,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
-    createStatusParam("Ch1:RxParF",    0x3,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
-    createStatusParam("Ch1:ExtEn",     0x3,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
-    createStatusParam("Ch1:ParsEn",    0x3,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
-    createStatusParam("Ch1:ErrCnt",    0x3, 16, 16); // Data packet errors count
+    createStatusParam("Lvds1:RxFlg",   0x3,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
+    createStatusParam("Lvds1:RxStat",  0x3,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
+    createStatusParam("Lvds1:RxData",  0x3,  1, 10); // External FIFO has data       (0=empty,1=has data)
+    createStatusParam("Lvds1:RxAF",    0x3,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
+    createStatusParam("Lvds1:RxParD",  0x3,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
+    createStatusParam("Lvds1:RxParF",  0x3,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
+    createStatusParam("Lvds1:ExtEn",   0x3,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
+    createStatusParam("Lvds1:ParsEn",  0x3,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
+    createStatusParam("Lvds1:ErrCnt",  0x3, 16, 16); // Data packet errors count
 
-    createStatusParam("Ch2:RxFlags",   0x4,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch2:RxStat",    0x4,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
-    createStatusParam("Ch2:RxData",    0x4,  1, 10); // External FIFO has data       (0=empty,1=has data)
-    createStatusParam("Ch2:RxAF",      0x4,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
-    createStatusParam("Ch2:RxParD",    0x4,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
-    createStatusParam("Ch2:RxParF",    0x4,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
-    createStatusParam("Ch2:ExtEn",     0x4,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
-    createStatusParam("Ch2:ParsEn",    0x4,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
-    createStatusParam("Ch2:ErrCnt",    0x4, 16, 16); // Data packet errors count
+    createStatusParam("Lvds2:RxFlags", 0x4,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
+    createStatusParam("Lvds2:RxStat",  0x4,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
+    createStatusParam("Lvds2:RxData",  0x4,  1, 10); // External FIFO has data       (0=empty,1=has data)
+    createStatusParam("Lvds2:RxAF",    0x4,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
+    createStatusParam("Lvds2:RxParD",  0x4,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
+    createStatusParam("Lvds2:RxParF",  0x4,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
+    createStatusParam("Lvds2:ExtEn",   0x4,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
+    createStatusParam("Lvds2:ParsEn",  0x4,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
+    createStatusParam("Lvds2:ErrCnt",  0x4, 16, 16); // Data packet errors count
+    createStatusParam("Lvds3:RxFlags", 0x5,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
+    createStatusParam("Lvds3:RxStat",  0x5,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
+    createStatusParam("Lvds3:RxData",  0x5,  1, 10); // External FIFO has data       (0=empty,1=has data)
+    createStatusParam("Lvds3:RxAF",    0x5,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
+    createStatusParam("Lvds3:RxParD",  0x5,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
+    createStatusParam("Lvds3:RxParF",  0x5,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
+    createStatusParam("Lvds3:ExtEn",   0x5,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
+    createStatusParam("Lvds3:ParsEn",  0x5,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
+    createStatusParam("Lvds3:ErrCnt",  0x5, 16, 16); // Data packet errors count
 
-    createStatusParam("Ch3:RxFlags",   0x5,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch3:RxStat",    0x5,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
-    createStatusParam("Ch3:RxData",    0x5,  1, 10); // External FIFO has data       (0=empty,1=has data)
-    createStatusParam("Ch3:RxAF",      0x5,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
-    createStatusParam("Ch3:RxParD",    0x5,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
-    createStatusParam("Ch3:RxParF",    0x5,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
-    createStatusParam("Ch3:ExtEn",     0x5,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
-    createStatusParam("Ch3:ParsEn",    0x5,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
-    createStatusParam("Ch3:ErrCnt",    0x5, 16, 16); // Data packet errors count
+    createStatusParam("Lvds4:RxFlags", 0x6,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
+    createStatusParam("Lvds4:RxStat",  0x6,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
+    createStatusParam("Lvds4:RxData",  0x6,  1, 10); // External FIFO has data       (0=empty,1=has data)
+    createStatusParam("Lvds4:RxAF",    0x6,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
+    createStatusParam("Lvds4:RxParD",  0x6,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
+    createStatusParam("Lvds4:RxParF",  0x6,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
+    createStatusParam("Lvds4:ExtEn",   0x6,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
+    createStatusParam("Lvds4:ParsEn",  0x6,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
+    createStatusParam("Lvds4:ErrCnt",  0x6, 16, 16); // Data packet errors count
 
-    createStatusParam("Ch4:RxFlags",   0x6,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch4:RxStat",    0x6,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
-    createStatusParam("Ch4:RxData",    0x6,  1, 10); // External FIFO has data       (0=empty,1=has data)
-    createStatusParam("Ch4:RxAF",      0x6,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
-    createStatusParam("Ch4:RxParD",    0x6,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
-    createStatusParam("Ch4:RxParF",    0x6,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
-    createStatusParam("Ch4:ExtEn",     0x6,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
-    createStatusParam("Ch4:ParsEn",    0x6,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
-    createStatusParam("Ch4:ErrCnt",    0x6, 16, 16); // Data packet errors count
+    createStatusParam("Lvds5:RxFlags", 0x7,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
+    createStatusParam("Lvds5:RxStat",  0x7,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
+    createStatusParam("Lvds5:RxData",  0x7,  1, 10); // External FIFO has data       (0=empty,1=has data)
+    createStatusParam("Lvds5:RxAF",    0x7,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
+    createStatusParam("Lvds5:RxParD",  0x7,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
+    createStatusParam("Lvds5:RxParF",  0x7,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
+    createStatusParam("Lvds5:ExtEn",   0x7,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
+    createStatusParam("Lvds5:ParsEn",  0x7,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
+    createStatusParam("Lvds5:ErrCnt",  0x7, 16, 16); // Data packet errors count
 
-    createStatusParam("Ch5:RxFlags",   0x7,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch5:RxStat",    0x7,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
-    createStatusParam("Ch5:RxData",    0x7,  1, 10); // External FIFO has data       (0=empty,1=has data)
-    createStatusParam("Ch5:RxAF",      0x7,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
-    createStatusParam("Ch5:RxParD",    0x7,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
-    createStatusParam("Ch5:RxParF",    0x7,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
-    createStatusParam("Ch5:ExtEn",     0x7,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
-    createStatusParam("Ch5:ParsEn",    0x7,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
-    createStatusParam("Ch5:ErrCnt",    0x7, 16, 16); // Data packet errors count
-
-    createStatusParam("Ch6:RxFlags",   0x8,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
-    createStatusParam("Ch6:RxStat",    0x8,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
-    createStatusParam("Ch6:RxData",    0x8,  1, 10); // External FIFO has data       (0=empty,1=has data)
-    createStatusParam("Ch6:RxAF",      0x8,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
-    createStatusParam("Ch6:RxParD",    0x8,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
-    createStatusParam("Ch6:RxParF",    0x8,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
-    createStatusParam("Ch6:ExtEn",     0x8,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
-    createStatusParam("Ch6:ParsEn",    0x8,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
-    createStatusParam("Ch6:ErrCnt",    0x8, 16, 16); // Data packet errors count
+    createStatusParam("Lvds6:RxFlags", 0x8,  8,  0); // Error flags                  (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
+    createStatusParam("Lvds6:RxStat",  0x8,  2,  8); // Status OK                    (0=good cmd packet,1=good data packet)
+    createStatusParam("Lvds6:RxData",  0x8,  1, 10); // External FIFO has data       (0=empty,1=has data)
+    createStatusParam("Lvds6:RxAF",    0x8,  1, 11); // External FIFO almost full    (0=not full,1=almost full)
+    createStatusParam("Lvds6:RxParD",  0x8,  1, 12); // ChLnk pkt pars FIFO has data (0=empty,1=has data)
+    createStatusParam("Lvds6:RxParF",  0x8,  1, 13); // ChLnk pkt pars FIFO almost f (0=not full,1=almost full)
+    createStatusParam("Lvds6:ExtEn",   0x8,  1, 14); // External FIFO Read enabled   (0=disabled,1=enabled)
+    createStatusParam("Lvds6:ParsEn",  0x8,  1, 15); // ChLnk pkt pars FIFO Write en (0=disabled,1=enabled)
+    createStatusParam("Lvds6:ErrCnt",  0x8, 16, 16); // Data packet errors count
 
     createStatusParam("CntGood",       0x9, 32,  0); // Good data packet count
 

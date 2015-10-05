@@ -96,7 +96,7 @@ void BasePvaPlugin::processData(const DasPacketList * const packetList)
         const RtdlHeader *rtdl = packet->getRtdlHeader();
         const uint32_t *data = packet->getData(&dataLen);
 
-        if (packet->isData() == false || rtdl == 0 || dataLen == 0)
+        if (packet->isData() == false || rtdl == 0)
             continue;
 
         // Extract timestamp and proton charge from RTDL
