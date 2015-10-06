@@ -27,7 +27,43 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("sample_a1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_a2",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_a8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
-        ->add("sample_a19",     standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_x1",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x2",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x3",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x4",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x5",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x6",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x7",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x8",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x9",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x10",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x11",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x12",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x13",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x14",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x15",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x16",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x17",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x18",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x19",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_x20",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y1",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y2",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y3",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y4",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y5",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y6",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y7",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y8",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y9",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y10",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y11",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y12",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y13",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y14",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y15",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y16",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_y17",     standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_a48",     standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_b1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_b8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
@@ -82,8 +118,152 @@ bool PvaNeutronData::init()
     if (sample_a8.get() == NULL)
         return false;
 
-    sample_a19 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a19.value");
-    if (sample_a19.get() == NULL)
+    sample_x1 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x1.value");
+    if (sample_x1.get() == NULL)
+        return false;
+
+    sample_x2 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x2.value");
+    if (sample_x2.get() == NULL)
+        return false;
+
+    sample_x3 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x3.value");
+    if (sample_x3.get() == NULL)
+        return false;
+
+    sample_x4 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x4.value");
+    if (sample_x4.get() == NULL)
+        return false;
+
+    sample_x5 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x5.value");
+    if (sample_x5.get() == NULL)
+        return false;
+
+    sample_x6 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x6.value");
+    if (sample_x6.get() == NULL)
+        return false;
+
+    sample_x7 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x7.value");
+    if (sample_x7.get() == NULL)
+        return false;
+
+    sample_x8 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x8.value");
+    if (sample_x8.get() == NULL)
+        return false;
+
+    sample_x9 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x9.value");
+    if (sample_x9.get() == NULL)
+        return false;
+
+    sample_x10 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x10.value");
+    if (sample_x10.get() == NULL)
+        return false;
+
+    sample_x11 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x11.value");
+    if (sample_x11.get() == NULL)
+        return false;
+
+    sample_x12 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x12.value");
+    if (sample_x12.get() == NULL)
+        return false;
+
+    sample_x13 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x13.value");
+    if (sample_x13.get() == NULL)
+        return false;
+
+    sample_x14 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x14.value");
+    if (sample_x14.get() == NULL)
+        return false;
+
+    sample_x15 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x15.value");
+    if (sample_x15.get() == NULL)
+        return false;
+
+    sample_x16 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x16.value");
+    if (sample_x16.get() == NULL)
+        return false;
+
+    sample_x17 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x17.value");
+    if (sample_x17.get() == NULL)
+        return false;
+
+    sample_x18 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x18.value");
+    if (sample_x18.get() == NULL)
+        return false;
+
+    sample_x19 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x19.value");
+    if (sample_x19.get() == NULL)
+        return false;
+
+    sample_x20 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x20.value");
+    if (sample_x20.get() == NULL)
+        return false;
+
+    sample_y1 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y1.value");
+    if (sample_y1.get() == NULL)
+        return false;
+
+    sample_y2 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y2.value");
+    if (sample_y2.get() == NULL)
+        return false;
+
+    sample_y3 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y3.value");
+    if (sample_y3.get() == NULL)
+        return false;
+
+    sample_y4 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y4.value");
+    if (sample_y4.get() == NULL)
+        return false;
+
+    sample_y5 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y5.value");
+    if (sample_y5.get() == NULL)
+        return false;
+
+    sample_y6 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y6.value");
+    if (sample_y6.get() == NULL)
+        return false;
+
+    sample_y7 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y7.value");
+    if (sample_y7.get() == NULL)
+        return false;
+
+    sample_y8 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y8.value");
+    if (sample_y8.get() == NULL)
+        return false;
+
+    sample_y9 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y9.value");
+    if (sample_y9.get() == NULL)
+        return false;
+
+    sample_y10 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y10.value");
+    if (sample_y10.get() == NULL)
+        return false;
+
+    sample_y11 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y11.value");
+    if (sample_y11.get() == NULL)
+        return false;
+
+    sample_y12 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y12.value");
+    if (sample_y12.get() == NULL)
+        return false;
+
+    sample_y13 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y13.value");
+    if (sample_y13.get() == NULL)
+        return false;
+
+    sample_y14 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y14.value");
+    if (sample_y14.get() == NULL)
+        return false;
+
+    sample_y15 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y15.value");
+    if (sample_y15.get() == NULL)
+        return false;
+
+    sample_y16 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y16.value");
+    if (sample_y16.get() == NULL)
+        return false;
+
+    sample_y17 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_y17.value");
+    if (sample_y17.get() == NULL)
         return false;
 
     sample_a48 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a48.value");

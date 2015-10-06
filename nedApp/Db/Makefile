@@ -26,6 +26,7 @@ DB += ProxyPlugin.db
 DB += PixelMapPlugin.db
 DB += RocPvaPlugin.db
 DB += AcpcPvaPlugin.db
+DB += BnlRocPvaPlugin.db
 DB += GlobalConG.db
 DB += ApplyConfig.db
 DB += PulsedMagnet.db
