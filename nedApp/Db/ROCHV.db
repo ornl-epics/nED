@@ -26,6 +26,7 @@ record(bo, "$(P)hv:AlarmEna") {
    field(ASG, "BEAMLINE")
    field(DOL, "1")
    info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
 }
 
 #
@@ -105,7 +106,6 @@ record(ai, "$(P)hv:ReadADC") {
    field(LOPR, 0)
    field(HOPR, 4096)
    field(EGU, "Counts")
-   info(archive, "Monitor, 00:00:10, VAL")
 } 
 
 #
@@ -121,6 +121,7 @@ record(ao, "$(P)hv:VoltSet") {
    field(EGU, "V")
    field(FLNK, "$(P)hv:VoltCmd PP")
    info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
 }
 
 #
@@ -135,6 +136,7 @@ record(bo, "$(G):OnOff") {
    field(ONAM, "ON")
    field(ZNAM, "OFF")
    info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
 }
 
 #
@@ -160,6 +162,7 @@ record(bo, "$(P)hv:OnOff") {
    field(ONAM, "ON")
    field(ZNAM, "OFF")
    info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
 }
 
 #
@@ -183,6 +186,7 @@ record(calcout, "$(P)hv:VoltCmd") {
    field(CALC, "A?B:0")
    field(INPA, "$(P)hv:OnOff CPP MS")
    field(INPB, "$(P)hv:VoltSet CPP NMS")
+   info(archive, "Monitor, 00:00:10, VAL")
 }
   
 #
@@ -202,6 +206,7 @@ record(ai, "$(P)hv:Volt") {
    field(DISV, "0")
    field(FLNK, "$(P)hv:VoltAlarm")
    info(autosaveFields, "HIGH LOW")
+   info(archive, "Monitor, 00:00:10, VAL")
 }
 record(calc, "$(P)hv:VoltAlarm") {
    field(DESC, "Volt alarm")
@@ -267,6 +272,7 @@ record(bo, "$(P)hv:Enable") {
    field(ONAM, "ON")
    field(ZNAM, "OFF")
    info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
 }
 
 #
@@ -329,6 +335,7 @@ record(bi, "$(P)hv:CommAlarm") {
    field(INP, "$(P)hv:ErrorBits.RVAL CPP NMS")
    field(OSV, "MAJOR")
    field(ZSV, "NO_ALARM")
+   info(archive, "Monitor, 00:00:10, VAL")
 }
 
 #

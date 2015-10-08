@@ -16,7 +16,7 @@ record(longin, "$(P)HwRev")
 record(longin, "$(P)FwVer")
 {
     field(HIGH, "1")
-    field(LOW,  "-")
+    field(LOW,  "-1")
 }
 record(longin, "$(P)FwRev")
 {
