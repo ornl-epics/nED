@@ -381,6 +381,19 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspReset(const DasPacket *packet);
 
         /**
+         * Send request to reset LVDS chips.
+         *
+         * ROC boards does a full power-cycle of all LVDS chips when it receives
+         * this command.
+         */
+        virtual DasPacket::CommandType reqResetLvds();
+
+        /**
+         * Handle RESET_LVDS response.
+         */
+        virtual bool rspResetLvds(const DasPacket *packet);
+
+        /**
          * Called when discover request to the module should be made.
          *
          * Base implementation simply sends a DISCOVER command and sets up
