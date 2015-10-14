@@ -1,4 +1,4 @@
-/* BnlRocPlugin_v03.cpp
+/* BnlRocPlugin_v20.cpp
  *
  *
  * Copyright (c) 2015 Oak Ridge National Laboratory.
@@ -10,7 +10,7 @@
 
 #include "BnlRocPlugin.h"
 
-void BnlRocPlugin::createStatusParams_v00()
+void BnlRocPlugin::createStatusParams_v20()
 {
 //    BLXXX:Det:RocXXX:| sig nam|      | EPICS record description | (bi and mbbi description)
       createStatusParam("DateCode",             0x0, 16,  0);   // EEPROM Date Code
@@ -24,7 +24,7 @@ void BnlRocPlugin::createStatusParams_v00()
       createStatusParam("ErrParity",            0x1,  1,  7);   // LVDS Parity Error
       createStatusParam("TimerErr",             0x1,  1,  6);   // Timer Error
       createStatusParam("EventAcq",             0x1,  1,  5);   // Data Acquisition unit acquiring event
-      createStatusParam("Acquiring",            0x1,  1,  4);   // Acquiring Data    (0=not acquiring, 1=acquiring)
+      createStatusParam("Acquiring",            0x1,  1,  4);   // Acquiring Data   (0=not acquiring, 1=acquiring)
       createStatusParam("EEPROMValid",          0x1,  1,  3);   // EEPROM Valid
       createStatusParam("Configured",           0x1,  1,  2);   // Configured
       createStatusParam("Discovered",           0x1,  1,  1);   // Discovered
@@ -44,7 +44,7 @@ void BnlRocPlugin::createStatusParams_v00()
       createStatusParam("ParserStatus",         0x2,  4,  3);   // Parser Status
 }
 
-void BnlRocPlugin::createConfigParams_v00()
+void BnlRocPlugin::createConfigParams_v20()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
       createConfigParam("ConfigID",            '1',  0x0,  16,  0,   0);  // Configuration ID
@@ -128,19 +128,20 @@ void BnlRocPlugin::createConfigParams_v00()
       createConfigParam("LowerTimeVeto",       'E',  0x0,  32,  0,   0);  // Lower Time Veto
       createConfigParam("UpperTimeVeto",       'E',  0x2,  32,  0,   0);  // Upper Time Veto
       createConfigParam("PosLatchValue",       'E',  0x4,  16,  0,   0);  // Position Latch Value
-      createConfigParam("CentroidMin",         'E',  0x5,  16,  0,   0);  // Centroid minimum
-      createConfigParam("XCentroidScale",      'E',  0x6,  16,  0,   0);  // X Centroid Scale
-      createConfigParam("YCentroidScale",      'E',  0x7,  16,  0,   0);  // Y Centroid Scale
+      createConfigParam("FakeTrigDelay",       'E',  0x5,  16,  0,   0);  // Fake Trigger Delay
+      createConfigParam("CentroidMin",         'E',  0x6,  32,  0,   0);  // Centroid minimum
+      createConfigParam("XCentroidScale",      'E',  0x8,  16,  0,   0);  // X Centroid Scale
+      createConfigParam("YCentroidScale",      'E',  0x9,  16,  0,   0);  // Y Centroid Scale
+      createConfigParam("AlwaysSet",           'F',  0x0,   1, 15,   1);  // Always 1
       createConfigParam("HighResMode",         'F',  0x0,   1, 14,   0);  // High Resolution Mode (0=normal,1=highres)
       createConfigParam("CathodePulseEn",      'F',  0x0,   1, 13,   0);  // Cathode Test pulse Enable (0=off,1=on)
       createConfigParam("AnodePulseEn",        'F',  0x0,   1, 12,   0);  // Anode Test pulse Enable (0=off,1=on)
       createConfigParam("Gain",                'F',  0x0,   2, 10,   0);  // Gain Setting (0=4X,1=8X,2=12X,3=16X)
-      createConfigParam("IgnoreVeto",          'F',  0x0,   1,  9,   0);  // Ignore Veto (0=False,1=True) 
-      createConfigParam("IgnoreMultStarts",    'F',  0x0,   1,  8,   0);  // Ignore Multiple Starts (0=False,1=True)
-      createConfigParam("TxEnable",            'F',  0x0,   1,  7,   0);  // TXEN internal
-      createConfigParam("OutputMode",          'F',  0x0,   2,  5,   0);  // Output Format (0=Normal,1=Raw,2=Ext)
-      createConfigParam("TsyncSelect",         'F',  0x0,   1,  4,   0);  // TSYNC interal
-      createConfigParam("TclkSelect",          'F',  0x0,   1,  3,   0);  // TCLK internal
-      createConfigParam("Reset",               'F',  0x0,   1,  2,   0);  // RESET external
-      createConfigParam("AcquireMode",         'F',  0x0,   2,  0,   2);  // Acquisition Mode (0=idle,1=fakedata,2=normal,3=trigger)
+      createConfigParam("Unused",              'F',  0x0,   2,  8,   0);  // Unused
+      createConfigParam("OutputMode",          'F',  0x0,   2,  6,   0);  // Output Format (0=Normal,1=Raw,2=Ext)
+      createConfigParam("AcquireMode",         'F',  0x0,   2,  4,   2);  // Acquisition Mode (0=idle,1=fakedata,2=normal,3=trigger)
+      createConfigParam("IgnoreFF",            'F',  0x0,   1,  3,   0);  // Ignore FF
+      createConfigParam("TsyncSelect",         'F',  0x0,   1,  2,   0);  // TSYNC interal
+      createConfigParam("TclkSelect",          'F',  0x0,   1,  1,   0);  // TCLK internal
+      createConfigParam("Reset",               'F',  0x0,   1,  0,   0);  // RESET external
 }
