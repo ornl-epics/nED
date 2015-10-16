@@ -13,35 +13,46 @@
 void BnlRocPlugin::createStatusParams_v20()
 {
 //    BLXXX:Det:RocXXX:| sig nam|      | EPICS record description | (bi and mbbi description)
-      createStatusParam("DateCode",             0x0, 16,  0);   // EEPROM Date Code
-      createStatusParam("OptRxErr",             0x1,  1, 14);   // Optical RX Error
-      createStatusParam("OptRxCrcErr",          0x1,  1, 13);   // Optical RX CRC Error
-      createStatusParam("ProgErr",              0x1,  1, 12);   // Programming Error
-      createStatusParam("ProgTimeoutErr",       0x1,  1, 11);   // Programming Timeout Error
-      createStatusParam("PktLenErr",            0x1,  1, 10);   // Packet Length Error
-      createStatusParam("UnkCmdErr",            0x1,  1,  9);   // Unknown command Error
-      createStatusParam("LvdsCmdErr",           0x1,  1,  8);   // LVDS Command/Data Type Error
-      createStatusParam("ErrParity",            0x1,  1,  7);   // LVDS Parity Error
-      createStatusParam("TimerErr",             0x1,  1,  6);   // Timer Error
-      createStatusParam("EventAcq",             0x1,  1,  5);   // Data Acquisition unit acquiring event
-      createStatusParam("Acquiring",            0x1,  1,  4);   // Acquiring Data   (0=not acquiring, 1=acquiring)
-      createStatusParam("EEPROMValid",          0x1,  1,  3);   // EEPROM Valid
-      createStatusParam("Configured",           0x1,  1,  2);   // Configured
-      createStatusParam("Discovered",           0x1,  1,  1);   // Discovered
-      createStatusParam("HwIDValid",            0x1,  1,  0);   // Hardware ID valid
-      createStatusParam("AOKN",                 0x2,  1, 15);   // Brookhaven AOKN Signal
-      createStatusParam("YSAT",                 0x2,  1, 14);   // Got YSAT Signal
-      createStatusParam("XSAT",                 0x2,  1, 13);   // Got XSAT Signal
-      createStatusParam("Start",                0x2,  1, 12);   // Got a START
-      createStatusParam("LVDS",                 0x2,  1, 11);   // Got LVDS Signal
-      createStatusParam("OptBActive",           0x2,  1, 10);   // Optical B port is active
-      createStatusParam("OptAActive",           0x2,  1,  9);   // Optical A port is active
-      createStatusParam("ExtFifoFull",          0x2,  1,  8);   // Got external FIFO full
-      createStatusParam("CntFifoFull",          0x2,  1,  7);   // Got Work count FIFO full
-      createStatusParam("AcqFifoFull",          0x2,  1,  6);   // Got Acquistion FIFO full
-      createStatusParam("CntOverflow",          0x2,  1,  5);   // Got data word count overflow
-      createStatusParam("DataOverflow",         0x2,  1,  4);   // Got data overflow
-      createStatusParam("ParserStatus",         0x2,  4,  3);   // Parser Status
+     
+      createStatusParam("GotStart",             0x0,  1,  15);   // Got START
+      createStatusParam("Start",                0x0,  2,  13);   // START
+      createStatusParam("StartHigh",            0x0,  1,  12);   // START high
+      createStatusParam("YSAT",                 0x0,  2,  10);   // YSAT
+      createStatusParam("YSATHigh",             0x0,  1,  9);    // YSAT high
+      createStatusParam("XSAT",                 0x0,  2,  7);    // XSAT
+      createStatusParam("XSATHigh",             0x0,  1,  6);    // XSAT high
+      createStatusParam("ABGOUT",               0x0,  2,  4);    // ABGOUT
+      createStatusParam("ABGOUTHigh",           0x0,  1,  3);    // ABGOUT high
+      createStatusParam("AOKN",                 0x0,  2,  1);    // AOKN
+      createStatusParam("AOKNHigh",             0x0,  1,  0);    // AOKN high
+
+      createStatusParam("RESFF_RCH_AF",         0x1,  1,  5);    // RESFF reached almost Full
+      createStatusParam("RESFF_AF",             0x1,  1,  4);    // RESFF almost Full
+      createStatusParam("RESFF_DataReady",      0x1,  1,  3);    // RESFF data ready
+      createStatusParam("ACQFF_RCH_AF",         0x1,  1,  2);    // ACQFF reached almost Full
+      createStatusParam("ACQFF_AF",             0x1,  1,  1);    // ACQFF almost Full
+      createStatusParam("ACQFF_DataReady",      0x1,  1,  0);    // ACQFF data ready
+
+      createStatusParam("LvdsVerify",           0x2,  1,  8);    // Detected LVDS Verify
+      createStatusParam("SYSRST_B",             0x2,  2,  6);    // SYSRST_B
+      createStatusParam("TXEN_B",               0x2,  2,  4);    // TXEN_B
+      createStatusParam("TSYNC",                0x2,  2,  2);    // TSYNC
+      createStatusParam("TCLK",                 0x2,  2,  0);    // TCLK
+
+      createStatusParam("ProgErr",              0x3,  1, 14);   // Programming Error
+      createStatusParam("CmdLenErr",            0x3,  1, 13);   // Command length error
+      createStatusParam("UnkCmdErr",            0x3,  1, 12);   // Unrecognized command error
+      createStatusParam("TimestampOvfl",        0x3,  1, 11);   // Timestamp overflow
+      createStatusParam("ErrFifoFull",          0x3,  1, 9);    // LVDS FIFO went full
+      createStatusParam("ErrPreStart",          0x3,  1, 8);    // LVDS start before stop bit
+      createStatusParam("ErrNoStart",           0x3,  1, 7);    // LVDS data without start
+      createStatusParam("ErrTimeout",           0x3,  1, 6);    // LVDS packet timeout
+      createStatusParam("ErrLength",            0x3,  1, 5);    // LVDS packet length error
+      createStatusParam("ErrType",              0x3,  1, 4);    // LVDS data type error
+      createStatusParam("ErrParity",            0x3,  1, 3);    // LVDS parity error
+      createStatusParam("Acquiring",            0x3,  1, 2);    // Acquiring Data   (0=not acquiring, 1=acquiring)
+      createStatusParam("Configured",           0x3,  1, 1);    // Configured (1=configured, 0=not configured)
+      createStatusParam("Discovered",           0x3,  1, 0);    // Discovered (1=discovered, 0=not discovered) 
 }
 
 void BnlRocPlugin::createConfigParams_v20()
