@@ -17,8 +17,7 @@
 #include <asynPortDriver.h>
 #include <epicsThread.h>
 
-// Forward declaration of the OCC API handler
-struct occ_handle;
+#include <occlib.h>
 
 /**
  * OCC interface and top level data dispatcher
@@ -81,6 +80,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         int m_test;
 
         struct occ_handle *m_occ;
+        occ_status_t m_occStatusCache;
         BaseCircularBuffer *m_circularBuffer;
         Thread *m_occBufferReadThread;
         Thread *m_occStatusRefreshThread;
@@ -151,6 +151,15 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          * to update but are not required to refresh frequently.
          */
         void refreshOccStatusThread(epicsEvent *shutdown);
+
+        /**
+         * Retrieve OCC status and update relevant PVs.
+         *
+         * Full OCC status is slow and may take time in order of ms. When set,
+         * basic_status parameter forces fast OCC status. Only PVs that change
+         * for a given mode are updated.
+         */
+        void refreshOccStatus(bool basic_status);
 
     private:
         #define FIRST_OCCPORTDRIVER_PARAM Status

@@ -31,6 +31,7 @@ DB += GlobalConG.db
 DB += ApplyConfig.db
 DB += PulsedMagnet.db
 DB += TimingPlugin.db
+DB += BnlFlatFieldPlugin.db
 
 DB += DspPlugin_v63.db
 DB += DspPlugin_v64.db
