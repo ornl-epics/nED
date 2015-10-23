@@ -140,7 +140,7 @@ void StatPlugin::accumulatePCharge(epicsTimeStamp &lastPulseTime, const RtdlHead
         epicsTimeStamp time = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
         if (epicsTimeNotEqual(&time, &lastPulseTime)) {
             lastPulseTime = time;
-            pcharge += rtdl->charge;
+            pcharge += 0.00000000001 * rtdl->pulse.charge;
         }
     }
 }

@@ -32,15 +32,14 @@ option -c;	/* do not wait for PVs to connect */
 /*
  * define valid values for CmdReq PVs
  */
-#define RESETCMD	0
-#define DISCOVERCMD 	1
-#define READVERCMD 	2
-#define READSTATCMD 	3
-#define READCONFCMD	4
-#define WRITECONFCMD	5
-#define STARTACQCMD	6
-#define STOPACQCMD	7
-#define READCTRSCMD	8
+#define DISCOVERCMD 	0
+#define READVERCMD 	1
+#define READSTATCMD 	2
+#define READCONFCMD	3
+#define WRITECONFCMD	4
+#define STARTACQCMD	5
+#define STOPACQCMD	6
+#define READCTRSCMD	7
 
 /*
  * define valid values for CmdRsp PVs
