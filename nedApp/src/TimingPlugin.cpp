@@ -169,8 +169,8 @@ const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlH
     packet->datainfo.rtdl_present = 1;
 
     // And finally copy the payload
-    const uint32_t *srcPayload = src->getData(&nDwords);
     uint32_t *destPayload = packet->getData(&nDwords);
+    const uint32_t *srcPayload = src->getData(&nDwords);
     memcpy(destPayload, srcPayload, nDwords * 4);
     packet->payload_length += nDwords * 4;
 
@@ -207,28 +207,32 @@ void TimingPlugin::freePacket(DasPacket *packet)
 
 double TimingPlugin::updateRtdl()
 {
-    bool sendRtdlPacket = false;
-    int mode;
+    int enabled;
+    getIntegerParam(Enable, &enabled);
 
-    getIntegerParam(Mode, &mode);
-
-    this->lock();
-    // Must not block
-    if (mode == 0)
-        sendRtdlPacket = createFakeRtdl(m_rtdlPacket);
-    else if (mode == 1)
-        sendRtdlPacket = recvRtdlFromEtc(m_rtdlPacket);
-    this->unlock();
-
-    // NOTE: No guarantee that there's a new RTDL data in 16ms.
-    //       Data for two pulses can be merged together in that case.
-
-    if (sendRtdlPacket) {
-        m_mutex.lock();
-        DasPacketList packetList;
-        packetList.reset(m_rtdlPacket);
-        BaseDispatcherPlugin::sendToPlugins(&packetList);
-        m_mutex.unlock();
+    if (enabled == 1) {
+        bool sendRtdlPacket = false;
+        int mode;
+        getIntegerParam(Mode, &mode);
+    
+        this->lock();
+        // Must not block
+        if (mode == 0)
+            sendRtdlPacket = createFakeRtdl(m_rtdlPacket);
+        else if (mode == 1)
+            sendRtdlPacket = recvRtdlFromEtc(m_rtdlPacket);
+        this->unlock();
+    
+        // NOTE: No guarantee that there's a new RTDL data in 16ms.
+        //       Data for two pulses can be merged together in that case.
+    
+        if (sendRtdlPacket) {
+            m_mutex.lock();
+            DasPacketList packetList;
+            packetList.reset(m_rtdlPacket);
+            BaseDispatcherPlugin::sendToPlugins(&packetList);
+            m_mutex.unlock();
+        }
     }
 
     return 0.001;

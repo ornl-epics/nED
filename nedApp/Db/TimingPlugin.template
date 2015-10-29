@@ -17,13 +17,6 @@ record(bo, "$(P)Mode")
     field(ZNAM, "Fake RTDL")
     field(ONAM, "RTDL from network")
 }
-record(stringout, "$(P)RecvIp")
-{
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Server IP address")
-    field(DTYP, "asynOctetWrite")
-    field(OUT,  "@asyn($(PORT))RecvIp")
-}
 record(longout, "$(P)RecvPort")
 {
     field(ASG,  "BEAMLINE")
