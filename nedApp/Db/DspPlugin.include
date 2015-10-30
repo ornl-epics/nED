@@ -13,9 +13,10 @@ record(sel, "$(P)DataSizeSel")
 {
     field(INPA, "$(P)RocDS.VAL PP")
     field(INPB, "$(P)AcpcDS.VAL PP")
-    field(NVL,  "$(P)DataSizeTyp.VAL PP")
+    field(INPC, "$(P)BnlDS.VAL PP")
+    field(NVL,  "$(P)DetTypeSel.VAL PP")
 }
-record(mbbo, "$(P)DataSizeTyp")
+record(mbbo, "$(P)DetTypeSel")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
@@ -28,6 +29,8 @@ record(mbbo, "$(P)DataSizeTyp")
     field(ZRST, "ROC")
     field(ONVL, "1")
     field(ONST, "ACPC")
+    field(TWVL, "2")
+    field(TWST, "BNL")
 }
 record(sel, "$(P)RocDS")
 {
@@ -44,6 +47,15 @@ record(sel, "$(P)AcpcDS")
     field(INPB, "16")
     field(INPC, "12")
     field(INPD, "12")
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+record(sel, "$(P)BnlDS")
+{
+    field(INPA, "4") # Normal mode
+    field(INPB, "42") # Raw mode
+    field(INPC, "42") # Extended mode
+    field(INPD, "42") # Verbose mode
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")
 }
