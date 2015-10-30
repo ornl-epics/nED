@@ -52,7 +52,7 @@ record(sel, "$(P)AcpcDS")
 }
 record(sel, "$(P)BnlDS")
 {
-    field(INPA, "4") # Normal mode
+    field(INPA, "12") # Normal mode
     field(INPB, "42") # Raw mode
     field(INPC, "42") # Extended mode
     field(INPD, "42") # Verbose mode

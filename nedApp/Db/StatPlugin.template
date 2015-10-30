@@ -384,7 +384,7 @@ record(sel, "$(P)AcpcDS")
 }
 record(sel, "$(P)BnlDS")
 {
-    field(INPA, "8") # Normal mode
+    field(INPA, "24") # Normal mode
     field(INPB, "84") # Raw mode
     field(INPC, "84") # Extended mode
     field(INPD, "84") # Verbose mode
