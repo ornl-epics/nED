@@ -1,3 +1,11 @@
+/* BnlRocPvaPlugin.h
+ *
+ * Copyright (c) 2015 Oak Ridge National Laboratory.
+ * All rights reserved.
+ * See file LICENSE that is included with this distribution.
+ *
+ */
+
 #ifndef BNLROC_PVA_PLUGIN_H
 #define BNLROC_PVA_PLUGIN_H
 
@@ -13,8 +21,9 @@ class BnlRocPvaPlugin : public BasePvaPlugin {
          */
         struct {
             epics::pvData::PVUIntArray::svector time_of_flight;
-            epics::pvData::PVUIntArray::svector pixel;
             epics::pvData::PVUIntArray::svector position_index;
+            epics::pvData::PVFloatArray::svector position_x;
+            epics::pvData::PVFloatArray::svector position_y;
             epics::pvData::PVUShortArray::svector sample_x1;
             epics::pvData::PVUShortArray::svector sample_x2;
             epics::pvData::PVUShortArray::svector sample_x3;
@@ -52,15 +61,15 @@ class BnlRocPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVUShortArray::svector sample_y15;
             epics::pvData::PVUShortArray::svector sample_y16;
             epics::pvData::PVUShortArray::svector sample_y17;
-
-            epics::pvData::PVUIntArray::svector meta_time_of_flight;
-            epics::pvData::PVUIntArray::svector meta_pixel;
         } m_cache;
 
         /**
          * Number of elements in each cache array.
          */
         static const uint32_t CACHE_SIZE;
+
+        float m_xyDivider; //!< X,Y is in UQm.n format, divider is (1 << n)
+
     public:
         /**
          * Constructor
@@ -119,20 +128,6 @@ class BnlRocPvaPlugin : public BasePvaPlugin {
         }
 
         /**
-         * Process incoming data as meta data.
-         *
-         * @param[in] packet Packet to be processed
-         */
-        void processMetaData(const uint32_t *data, uint32_t count);
-
-        /**
-         * Static C callable wrapper for member function of the same name
-         */
-        static void processMetaData(BasePvaPlugin *this_, const uint32_t *data, uint32_t count) {
-            reinterpret_cast<BnlRocPvaPlugin *>(this_)->processMetaData(data, count);
-        }
-
-        /**
          * Post data received (normal mode) and clear cache
          *
          * Cached data is posted as a single event to EPICSv4 PV.
@@ -184,16 +179,20 @@ class BnlRocPvaPlugin : public BasePvaPlugin {
         }
 
         /**
-         * Post meta data received and clear cache
-         *
-         * Cached meta data is posted as a single event to EPICSv4 PV.
-         * Caller must ensure plugin is locked while calling this function.
-         *
-         * @param[in] pulseTime     Timestamp of pulse to be posted.
-         * @param[in] pulseCharge   Pulse charge
-         * @param[in] pulseSeq      Pulse seq number, monotonically increasing
+         * Clear internal cache
          */
-        void postMetaData();
+        void flushData();
+
+        /**
+         * Resize internal cache vectors.
+         */
+        void reserve();
+
+    private:
+        #define FIRST_BNLROCPVAPLUGIN_PARAM NormalDataFormat
+        int NormalDataFormat;
+        int XyFractWidth;
+        #define LAST_BNLROCPVAPLUGIN_PARAM XyFractWidth
 };
 
 #endif // BNLROC_PVA_PLUGIN_H

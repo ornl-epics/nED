@@ -14,7 +14,7 @@ EPICS_REGISTER_PLUGIN(AcpcPvaPlugin, 3, "port name", string, "dispatcher port", 
 const uint32_t AcpcPvaPlugin::CACHE_SIZE = 32*1024;
 
 AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
-    : BasePvaPlugin(portName, dispatcherPortName, pvPrefix)
+    : BasePvaPlugin(portName, dispatcherPortName, pvPrefix, 0)
 {
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
@@ -86,4 +86,23 @@ void AcpcPvaPlugin::postNormalData(const PvaNeutronData::shared_pointer& pvRecor
     m_cache.position_y.reserve(CACHE_SIZE);
     m_cache.photo_sum_x.reserve(CACHE_SIZE);
     m_cache.photo_sum_y.reserve(CACHE_SIZE);
+}
+
+void AcpcPvaPlugin::flushData()
+{
+    m_cache.time_of_flight.clear();
+    m_cache.position_index.clear();
+    m_cache.position_x.clear();
+    m_cache.position_y.clear();
+    m_cache.photo_sum_x.clear();
+    m_cache.photo_sum_y.clear();
+
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.position_index.reserve(CACHE_SIZE);
+    m_cache.position_x.reserve(CACHE_SIZE);
+    m_cache.position_y.reserve(CACHE_SIZE);
+    m_cache.photo_sum_x.reserve(CACHE_SIZE);
+    m_cache.photo_sum_y.reserve(CACHE_SIZE);
+
+    BasePvaPlugin::flushData();
 }

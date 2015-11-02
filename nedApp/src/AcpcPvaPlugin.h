@@ -85,6 +85,11 @@ class AcpcPvaPlugin : public BasePvaPlugin {
             reinterpret_cast<AcpcPvaPlugin *>(this_)->postNormalData(pvRecord);
         }
 
+        /**
+         * Clear internal cache
+         */
+        void flushData();
+
     private:
         /**
          * A cache to store data until it's posted.
@@ -93,10 +98,10 @@ class AcpcPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVUIntArray::svector time_of_flight;
             epics::pvData::PVUIntArray::svector pixel;
             epics::pvData::PVUIntArray::svector position_index;
-            epics::pvData::PVUIntArray::svector position_x;
-            epics::pvData::PVUIntArray::svector position_y;
-            epics::pvData::PVUIntArray::svector photo_sum_x;
-            epics::pvData::PVUIntArray::svector photo_sum_y;
+            epics::pvData::PVFloatArray::svector position_x;
+            epics::pvData::PVFloatArray::svector position_y;
+            epics::pvData::PVFloatArray::svector photo_sum_x;
+            epics::pvData::PVFloatArray::svector photo_sum_y;
         } m_cache;
 
         /**

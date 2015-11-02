@@ -69,10 +69,10 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("sample_b8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_b12",     standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_index", standardField->scalarArray(epics::pvData::pvUInt, ""))
-        ->add("position_x",     standardField->scalarArray(epics::pvData::pvUInt, ""))
-        ->add("position_y",     standardField->scalarArray(epics::pvData::pvUInt, ""))
-        ->add("photo_sum_x",    standardField->scalarArray(epics::pvData::pvUInt, ""))
-        ->add("photo_sum_y",    standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("position_x",     standardField->scalarArray(epics::pvData::pvFloat, ""))
+        ->add("position_y",     standardField->scalarArray(epics::pvData::pvFloat, ""))
+        ->add("photo_sum_x",    standardField->scalarArray(epics::pvData::pvFloat, ""))
+        ->add("photo_sum_y",    standardField->scalarArray(epics::pvData::pvFloat, ""))
         ->createStructure()
     );
 
@@ -286,19 +286,19 @@ bool PvaNeutronData::init()
     if (position_index.get() == NULL)
         return false;
 
-    position_x = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("position_x.value");
+    position_x = getPVStructure()->getSubField<epics::pvData::PVFloatArray>("position_x.value");
     if (position_x.get() == NULL)
         return false;
 
-    position_y = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("position_y.value");
+    position_y = getPVStructure()->getSubField<epics::pvData::PVFloatArray>("position_y.value");
     if (position_y.get() == NULL)
         return false;
 
-    photo_sum_x = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("photo_sum_x.value");
+    photo_sum_x = getPVStructure()->getSubField<epics::pvData::PVFloatArray>("photo_sum_x.value");
     if (photo_sum_x.get() == NULL)
         return false;
 
-    photo_sum_y = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("photo_sum_y.value");
+    photo_sum_y = getPVStructure()->getSubField<epics::pvData::PVFloatArray>("photo_sum_y.value");
     if (photo_sum_y.get() == NULL)
         return false;
 

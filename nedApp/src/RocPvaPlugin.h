@@ -17,9 +17,6 @@ class RocPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVUIntArray::svector position_index;
             epics::pvData::PVUIntArray::svector sample_a1;
             epics::pvData::PVUIntArray::svector sample_b1;
-
-            epics::pvData::PVUIntArray::svector meta_time_of_flight;
-            epics::pvData::PVUIntArray::svector meta_pixel;
         } m_cache;
 
         /**
@@ -70,51 +67,6 @@ class RocPvaPlugin : public BasePvaPlugin {
         }
 
         /**
-         * Process incoming data as normal neutron data.
-         *
-         * @param[in] packet Packet to be processed
-         */
-        void processNormalData(const uint32_t *data, uint32_t count);
-
-        /**
-         * Static C callable wrapper for member function of the same name
-         */
-        static void processNormalData(BasePvaPlugin *this_, const uint32_t *data, uint32_t count) {
-            reinterpret_cast<RocPvaPlugin *>(this_)->processNormalData(data, count);
-        }
-
-        /**
-         * Process incoming data as meta data.
-         *
-         * @param[in] packet Packet to be processed
-         */
-        void processMetaData(const uint32_t *data, uint32_t count);
-
-        /**
-         * Static C callable wrapper for member function of the same name
-         */
-        static void processMetaData(BasePvaPlugin *this_, const uint32_t *data, uint32_t count) {
-            reinterpret_cast<RocPvaPlugin *>(this_)->processMetaData(data, count);
-        }
-
-        /**
-         * Post data received (normal mode) and clear cache
-         *
-         * Cached data is posted as a single event to EPICSv4 PV.
-         * Caller must ensure plugin is locked while calling this function.
-         *
-         * @param[in] pvRecord Structure to update.
-         */
-        void postNormalData(const PvaNeutronData::shared_pointer& pvRecord);
-
-        /**
-         * Static C callable wrapper for member function of the same name
-         */
-        static void postNormalData(BasePvaPlugin *this_, const PvaNeutronData::shared_pointer& pvRecord) {
-            reinterpret_cast<RocPvaPlugin *>(this_)->postNormalData(pvRecord);
-        }
-
-        /**
          * Post data received (raw mode) and clear cache
          *
          * Cached data is posted as a single event to EPICSv4 PV.
@@ -149,16 +101,9 @@ class RocPvaPlugin : public BasePvaPlugin {
         }
 
         /**
-         * Post meta data received and clear cache
-         *
-         * Cached meta data is posted as a single event to EPICSv4 PV.
-         * Caller must ensure plugin is locked while calling this function.
-         *
-         * @param[in] pulseTime     Timestamp of pulse to be posted.
-         * @param[in] pulseCharge   Pulse charge
-         * @param[in] pulseSeq      Pulse seq number, monotonically increasing
+         * Clear internal cache
          */
-        void postMetaData();
+        void flushData();
 };
 
 #endif // ROC_PVA_PLUGIN_H

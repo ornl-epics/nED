@@ -1,2 +1,16 @@
 include "BasePlugin.include"
 include "BasePvaPlugin.include"
+
+record(bo, "$(P)NormalDataFormat")
+{
+    info(archive, "Monitor, 00:00:05, VAL")
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Switch normal data mode")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))NormalDataFormat")
+    field(ZNAM, "common")
+    field(ONAM, "native")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
