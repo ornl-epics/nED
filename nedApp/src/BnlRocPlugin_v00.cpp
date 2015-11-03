@@ -47,8 +47,7 @@ void BnlRocPlugin::createStatusParams_v00()
 void BnlRocPlugin::createConfigParams_v00()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-      createConfigParam("ConfigID",            '1',  0x0,  16,  0,   0);  // Configuration ID
-      createConfigParam("PositionIdx",         '1',  0x1,  16,  0,   0);  // Position Index
+      createConfigParam("PositionIdx",         '1',  0x0,  32,  0,   0);  // Position Index
       createConfigParam("MainThreshold",       '1',  0x2,  16,  0,   0);  // DAC Value for Main Threshold
       createConfigParam("MainPeakThreshold",   '1',  0x3,  16,  0,   0);  // DAC value for Main Peak Threshold
       createConfigParam("X1Scale",             '2',  0x0,  16,  0,   0);  // X1 Scale
