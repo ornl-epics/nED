@@ -7,6 +7,7 @@
  * @author Klemen Vodopivec
  */
 
+#include "BnlDataPacket.h"
 #include "BnlFlatFieldPlugin.h"
 #include "Common.h"
 #include "Log.h"
@@ -19,8 +20,6 @@
 EPICS_REGISTER_PLUGIN(BnlFlatFieldPlugin, 5, "Port name", string, "Dispatcher port name", string, "Parameter file path", string, "Values file path", string, "Buffer size in bytes", int);
 
 #define NUM_BNLFLATFIELDPLUGIN_PARAMS      ((int)(&LAST_BNLFLATFIELDPLUGIN_PARAM - &FIRST_BNLFLATFIELDPLUGIN_PARAM + 1)) + (20 + 17)*2
-
-#define POS_SPECIAL     (1 << 30)
 
 BnlFlatFieldPlugin::BnlFlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *paramFile, const char *valFile, int bufSize)
     : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_BNLFLATFIELDPLUGIN_PARAMS, asynOctetMask, asynOctetMask)
@@ -47,33 +46,16 @@ BnlFlatFieldPlugin::BnlFlatFieldPlugin(const char *portName, const char *dispatc
             err = MAP_ERR_VALUES;
     }
 
-    createParam("ParamsPath",   asynParamOctet, &ParamsPath, paramFile); // Path to parameters file
-    createParam("ValPath",      asynParamOctet, &ValPath, valFile); // Path to correction values file
-    createParam("ErrImport",    asynParamInt32, &ErrImport, err); // Last mapping import error
-    createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels
-    createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
-    createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
-    createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
-    createParam("CorrectMode",  asynParamInt32, &CorrectMode, MODE_PASSTHRU); // Event correction mode
-    createParam("CentroidMin",  asynParamInt32, &CentroidMin, 0); // Centroid minimum parameter for X,Y calculation
-    createParam("XCentroidScale", asynParamInt32, &XCentroidScale, 100); // X centroid scale factor
-    createParam("YCentroidScale", asynParamInt32, &YCentroidScale, 70); // Y centroid scale factor
-    createParam("HighResEn",    asynParamInt32, &HighResEn, 0);   // Switch between high and low resolution
-
-    for (int i = 1; i <= 20; i++) {
-        char buf[20];
-        snprintf(buf, sizeof(buf), "X%dScale", i);
-        createParam(buf,        asynParamInt32, &XScales[i], 0);
-        snprintf(buf, sizeof(buf), "X%dOffset", i);
-        createParam(buf,        asynParamInt32, &XOffsets[i], 0);
-    }
-    for (int i = 1; i <= 17; i++) {
-        char buf[20];
-        snprintf(buf, sizeof(buf), "Y%dScale", i);
-        createParam(buf,        asynParamInt32, &YScales[i], 0);
-        snprintf(buf, sizeof(buf), "Y%dOffset", i);
-        createParam(buf,        asynParamInt32, &YOffsets[i], 0);
-    }
+    createParam("ParamsPath",   asynParamOctet, &ParamsPath, paramFile);      // Path to parameters file
+    createParam("ValPath",      asynParamOctet, &ValPath, valFile);           // Path to correction values file
+    createParam("ErrImport",    asynParamInt32, &ErrImport, err);             // Last mapping import error
+    createParam("XyFractWidth", asynParamInt32, &XyFractWidth, 11);           // WRITE - Number of fraction bits in X,Y data
+    createParam("CntVetoEvents",asynParamInt32, &CntVetoEvents, 0);           // Number of vetoed events
+    createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);           // Number of calculated events
+    createParam("CntSplit",     asynParamInt32, &CntSplit,  0);               // Number of packet train splits
+    createParam("ResetCnt",     asynParamInt32, &ResetCnt);                   // Reset counters
+    createParam("ProcessMode",  asynParamInt32, &ProcessMode, MODE_PASSTHRU); // Event correction mode
+    createParam("HighResEn",    asynParamInt32, &HighResEn, 0);               // Switch between high and low resolution
     callParamCallbacks();
 }
 
@@ -82,42 +64,30 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     int nReceived = 0;
     int nProcessed = 0;
     int nSplits = 0;
-    int nErrors = 0;
-    int correctMode = MODE_PASSTHRU;
-    int val;
+    int nVeto = 0;
+    int nGood = 0;
+    int processMode = 0;
+    int xyFractWidth = 0;
+    float xyDivider = 1;
+    uint32_t nGoodTmp, nVetoTmp;
 
     this->lock();
-    getIntegerParam(RxCount,    &nReceived);
-    getIntegerParam(ProcCount,  &nProcessed);
-    getIntegerParam(CntError,   &nErrors);
-    getIntegerParam(CntSplit,   &nSplits);
-    getIntegerParam(CorrectMode,&correctMode);
-    if (getDataMode() != BasePlugin::DATA_MODE_RAW || !m_tableX.initialized || !m_tableY.initialized)
-        correctMode = MODE_PASSTHRU;
-    // Although these are class variables, only set them here and not from writeInt32().
-    // This prevents thread race conditions since the code below is not in thread safe section.
-    getIntegerParam(CentroidMin,&m_centroidMin);
-    getIntegerParam(XCentroidScale,&val);
-    m_xCentroidScale = 1.0 + val/2048.0;
-    getIntegerParam(YCentroidScale,&val);
-    m_yCentroidScale = 1.0 + val/2048.0;
-    getIntegerParam(HighResEn,  &val);
-    m_highRes = (val > 0);
-
-    if (getDataMode() == BasePlugin::DATA_MODE_RAW && correctMode != MODE_PASSTHRU) {
-        for (int i = 0; i < 20; i++) {
-            getIntegerParam(XScales[i+1],  &m_xScales[i]);
-            getIntegerParam(XOffsets[i+1], &m_xOffsets[i]);
-        }
-        for (int i = 0; i < 17; i++) {
-            getIntegerParam(YScales[i+1],  &m_yScales[i]);
-            getIntegerParam(YOffsets[i+1], &m_yOffsets[i]);
-        }
-    }
+    getIntegerParam(RxCount,        &nReceived);
+    getIntegerParam(ProcCount,      &nProcessed);
+    getIntegerParam(CntVetoEvents,  &nVeto);
+    getIntegerParam(CntGoodEvents,  &nGood);
+    getIntegerParam(CntSplit,       &nSplits);
+    getIntegerParam(ProcessMode,    &processMode);
+    if (getDataMode() != BasePlugin::DATA_MODE_NORMAL || !m_tableX.initialized || !m_tableY.initialized)
+        processMode = MODE_PASSTHRU;
+    getIntegerParam(xyFractWidth, &xyFractWidth);
+    if (xyFractWidth < 0) xyFractWidth = 0;
+    if (xyFractWidth > 15) xyFractWidth = 15;
+    xyDivider = 1 << xyFractWidth;
     this->unlock();
 
     // Optimize pass thru mode
-    if (correctMode == MODE_PASSTHRU) {
+    if (processMode == MODE_PASSTHRU) {
         m_packetList.reset(packetList); // reset() automatically reserves
         sendToPlugins(&m_packetList);
         m_packetList.release();
@@ -155,7 +125,9 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
                 bufferOffset += packet->length();
 
                 // Process the packet - only raw mode supported for now
-                nErrors = processPacketRaw(packet, newPacket);
+                processPacket(packet, newPacket, xyDivider, (ProcessMode_t)processMode, nGoodTmp, nVetoTmp);
+                nGood += nGoodTmp;
+                nVeto += nVetoTmp;
             }
 
             sendToPlugins(&m_packetList);
@@ -168,103 +140,55 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     setIntegerParam(RxCount,    nReceived   % std::numeric_limits<int32_t>::max());
     setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntError,   nErrors);
+    setIntegerParam(CntVetoEvents, nVeto    % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntGoodEvents, nGood    % std::numeric_limits<int32_t>::max());
     callParamCallbacks();
     this->unlock();
 }
 
-int BnlFlatFieldPlugin::processPacketRaw(const DasPacket *srcPacket, DasPacket *destPacket)
+void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, uint32_t &nCorr, uint32_t &nVetoed)
 {
-    typedef struct {
-        uint32_t tof;
-        uint32_t position;
-        uint32_t samples[(20+17+1)/2];
-    } RawEvent;
+    bool convert = (processMode == MODE_CONVERT || processMode == MODE_CORRECT_CONVERT);
+    bool correct = (processMode == MODE_CORRECT || processMode == MODE_CORRECT_CONVERT);
 
     // destPacket is guaranteed to be at least the size of srcPacket
     (void)srcPacket->copyHeader(destPacket, srcPacket->length());
 
     uint32_t nEvents, nDestEvents;
-    const RawEvent *srcEvent= reinterpret_cast<const RawEvent *>(srcPacket->getData(&nEvents));
+    const BnlDataPacket::NormalEvent *srcEvent= reinterpret_cast<const BnlDataPacket::NormalEvent *>(srcPacket->getData(&nEvents));
     DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(destPacket->getData(&nDestEvents));
-    nEvents /= (sizeof(RawEvent) / sizeof(uint32_t));
+    nEvents /= (sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t));
 
     while (nEvents-- > 0) {
-        if (likely((srcEvent->position & POS_SPECIAL) == 0)) {
-            double x,y;
-            if (calculatePositionRaw(srcEvent->samples, &x, &y) == true &&
-                correctPosition(&x, &y) == true) {
+        double x = srcEvent->x / xyDivider;
+        double y = srcEvent->y / xyDivider;
+        bool vetoed = false;
 
-                uint16_t xd, yd;
+        if (likely(correct == true)) {
+            vetoed = (correctPosition(&x, &y) == false);
+        }
 
-                if (m_highRes) {
-                    xd = ((uint16_t)(32 * x + 0.5) & 0x1FF) << 9;
-                    yd = ((uint16_t)(32 * y + 0.5) & 0x1FF) << 9;
-                } else {
-                    xd = ((uint16_t)(16 * x + 0.5) & 0xFF)  << 8;
-                    yd = ((uint16_t)(16 * y + 0.5) & 0xFF)  << 8;
-                }
+        if (likely(convert == true) && vetoed == false) {
 
-                destEvent->tof = srcEvent->tof;
-                destEvent->pixelid = (srcEvent->position & 0xFFFC0000) | xd | yd;
-                destEvent++;
-                nDestEvents++;
+            destEvent->tof = srcEvent->tof & 0xFFFFFFF; // TODO: +timeoffset?
+            if (m_highRes) {
+                destEvent->pixelid  = (srcEvent->position & 0x3FFF) << 18;
+                destEvent->pixelid |= ((uint16_t)(32 * x + 0.5) & 0x1FF) << 9;
+                destEvent->pixelid |= ((uint16_t)(32 * y + 0.5) & 0x1FF);
+            } else {
+                destEvent->pixelid  = (srcEvent->position & 0x3FFF) << 16;
+                destEvent->pixelid |= ((uint16_t)(16 * x + 0.5) & 0x1FF) << 8;
+                destEvent->pixelid |= ((uint16_t)(16 * y + 0.5) & 0x1FF);
             }
+
+            destEvent++;
+            nDestEvents++;
         }
         srcEvent++;
     }
     destPacket->payload_length += nDestEvents * sizeof(DasPacket::Event);
-    return (nEvents - nDestEvents);
-}
-
-bool BnlFlatFieldPlugin::calculatePositionRaw(const uint32_t *samples, double *x, double *y)
-{
-    uint16_t *raw = (uint16_t *)samples;
-    uint16_t xSamples[20];
-    uint16_t ySamples[17];
-    uint8_t xMaxIndex = 0; // [0..19]
-    uint8_t yMaxIndex = 0; // [0..16]
-    int denom;
-
-    // The BNL raw format produces 20 X samples and 17 Y samples. In the raw
-    // event data they alternate between X and Y up to position 17, then only
-    // X follow.
-    for (int i = 0; i < 17; i++) {
-        xSamples[i] = m_xScales[i] * (16 * (raw[i]   & 0xFFF) - m_xOffsets[i]);
-        ySamples[i] = m_yScales[i] * (16 * (raw[i+1] & 0xFFF) - m_yOffsets[i]);
-    }
-    for (int i = 17; i < 20; i++) {
-        xSamples[i] = m_xScales[i] * (16 * (raw[i]   & 0xFFF) - m_xOffsets[i]);
-    }
-
-    // For code sanity, don't optimize finding max position into data parsing
-    // above. Any good compiler will roll-out the for loop anyway.
-    for (int i = 1; i < 20; i++) {
-        if (xSamples[i] > xSamples[xMaxIndex])
-            xMaxIndex = i;
-    }
-    for (int i = 1; i < 17; i++) {
-        if (ySamples[i] > ySamples[yMaxIndex])
-            yMaxIndex = i;
-    }
-
-    // Filter out common vetoes early
-    if (xMaxIndex == 0 || xMaxIndex == 19 || yMaxIndex == 0 || yMaxIndex == 16)
-        return false;
-
-    // Interpolate X position
-    denom = xSamples[xMaxIndex+1] + xSamples[xMaxIndex] + xSamples[xMaxIndex-1];
-    if (denom < m_centroidMin)
-        return false;
-    *x = xMaxIndex + (1.0 * m_xCentroidScale * (xSamples[xMaxIndex+1] - xSamples[xMaxIndex-1]) / denom);
-
-    // Interpolate Y position
-    denom = ySamples[yMaxIndex+1] + ySamples[yMaxIndex] + ySamples[yMaxIndex-1];
-    if (denom < m_centroidMin)
-        return false;
-    *y = xMaxIndex + (1.0 * m_yCentroidScale * (ySamples[yMaxIndex+1] - ySamples[yMaxIndex-1]) / denom);
-
-    return true;
+    nCorr = nDestEvents;
+    nVetoed = (nEvents - nDestEvents);
 }
 
 bool BnlFlatFieldPlugin::correctPosition(double *x, double *y)

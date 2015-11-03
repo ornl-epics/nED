@@ -72,8 +72,15 @@
 		<Unit filename="BasePvaPlugin.h" />
 		<Unit filename="BaseSocketPlugin.cpp" />
 		<Unit filename="BaseSocketPlugin.h" />
+		<Unit filename="BnlDataPacket.h" />
 		<Unit filename="BnlFlatFieldPlugin.cpp" />
 		<Unit filename="BnlFlatFieldPlugin.h" />
+		<Unit filename="BnlPosCalcPlugin.cpp" />
+		<Unit filename="BnlPosCalcPlugin.h" />
+		<Unit filename="BnlRocPlugin.cpp" />
+		<Unit filename="BnlRocPlugin.h" />
+		<Unit filename="BnlRocPlugin_v00.cpp" />
+		<Unit filename="BnlRocPlugin_v20.cpp" />
 		<Unit filename="BnlRocPvaPlugin.cpp" />
 		<Unit filename="BnlRocPvaPlugin.h" />
 		<Unit filename="CircularBuffer.cpp" />

@@ -1,0 +1,805 @@
+include "BasePlugin.include"
+
+record(bo, "$(P)Enable")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(calc, "$(P)StatusCalc")
+{
+    field(DESC, "BNL FF plugin status")
+    field(INPA, "$(P)ErrMem.SEVR")
+    field(CALC, "A=0")
+    field(FLNK, "$(P)Status")
+}
+record(bi, "$(P)Status")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(ZNAM, "Not OK")
+    field(ONAM, "OK")
+    field(ZSV,  "MAJOR")
+    field(INP,  "$(P)StatusCalc")
+}
+record(bi, "$(P)ErrMem")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DESC, "Buffer allocation error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrMem")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(ZNAM, "Allocated")
+    field(ONAM, "Not allocated")
+    field(OSV,  "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(longout, "$(P)XyFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "X,Y UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))XyFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "15")
+}
+record(longin, "$(P)CntGoodEvents")
+{
+    field(DESC, "Number good events")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntGoodEvents")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntVetoEvents")
+{
+    field(DESC, "Number veto events")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoEvents")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntSplit")
+{
+    field(DESC, "Number of splits occurred")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntSplit")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bo, "$(P)ResetCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset counters")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetCnt")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(mbbo, "$(P)ProcessMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Event processing mode")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ProcessMode")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "passthru")
+    field(ONVL, "1")
+    field(ONST, "convert")
+    field(TWVL, "2")
+    field(TWST, "correct")
+    field(THVL, "3")
+    field(THST, "correct&convert")
+}
+record(longout, "$(P)XCentroidScale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "X centroid scale factor")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))XCentroidScale")
+    field(VAL,  "100")
+    field(PINI, "YES")
+}
+record(longout, "$(P)YCentroidScale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Y centroid scale factor")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))YCentroidScale")
+    field(VAL,  "70")
+    field(PINI, "YES")
+}
+record(longout, "$(P)CentroidMin")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Centroid minimum threshold")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CentroidMin")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bo, "$(P)HighResEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "High resolution switch")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))HighResEn")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(longout, "$(P)X1Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X1Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X1Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X1Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X2Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X2Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X2Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X2Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X3Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X3Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X3Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X3Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X4Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X4Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X4Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X4Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X5Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X5Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X5Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X5Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X6Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X6Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X6Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X6Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X7Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X7Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X7Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X7Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X8Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X8Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X8Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X8Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X9Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X9Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X9Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X9Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X10Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X10Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X10Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X10Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X11Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X11Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X11Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X11Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X12Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X12Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X12Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X12Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X13Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X13Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X13Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X13Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X14Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X14Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X14Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X14Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X15Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X15Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X15Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X15Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X16Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X16Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X16Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X16Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X17Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X17Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X17Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X17Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X18Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X18Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X18Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X18Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X19Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X19Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X19Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X19Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X20Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X20Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)X20Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))X20Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y1Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y1Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y1Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y1Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y2Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y2Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y2Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y2Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y3Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y3Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y3Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y3Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y4Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y4Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y4Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y4Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y5Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y5Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y5Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y5Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y6Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y6Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y6Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y6Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y7Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y7Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y7Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y7Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y8Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y8Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y8Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y8Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y9Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y9Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y9Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y9Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y10Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y10Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y10Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y10Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y11Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y11Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y11Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y11Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y12Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y12Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y12Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y12Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y13Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y13Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y13Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y13Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y14Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y14Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y14Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y14Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y15Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y15Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y15Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y15Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y16Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y16Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y16Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y16Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y17Scale")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y17Scale")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Y17Offset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Y17Offset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}

@@ -42,14 +42,16 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
          */
         typedef enum {
             MODE_PASSTHRU       = 0, //!< Don't correct any events
-            MODE_CALC_ONLY      = 1, //!< Only calculate X,Y position from raw samples
-            MODE_CORRECT        = 2, //!< Calculate X,Y if needed, use flat-field to correct
-        } CorrectMode_t;
+            MODE_CONVERT        = 1, //!< Convert to generic normal data format
+            MODE_CORRECT        = 2, //!< Apply flat-field correction
+            MODE_CORRECT_CONVERT= 3, //!< Apply correction and convert data format
+        } ProcessMode_t;
 
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
         uint32_t m_bufferSize;      //!< Size of buffer
         DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins
 
+        float m_xyDivider;          //!< Fixed point Qm.n -> double converter
         double m_correctionScale;   //!< Correction parameter
         double m_correctionResolution;  //!< Correction parameter
         double m_boundaryLowX;      //!< Calculated X low boundary
@@ -200,9 +202,12 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
          *
          * @param[in] srcPacket Original packet to be processed
          * @param[out] destPacket output packet with all events processed.
-         * @return number of error events skipped.
+         * @param[in] xyDivider used to convert Qm.n unsigned -> double
+         * @param[in] processMode event processing mode
+         * @param[out] nCorr number of corrected events
+         * @param[out] nVetoed number of vetoed events
          */
-        int processPacketRaw(const DasPacket *srcPacket, DasPacket *destPacket);
+        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, uint32_t &nCorr, uint32_t &nVetoed);
 
         /**
          * Calculate X,Y position from raw samples.
@@ -243,20 +248,14 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
         int ParamsPath;     //!< Absolute path to parameters file
         int ValPath;        //!< Absolute path to correction values file
         int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
-        int CntUnmap;       //!< Number of unmapped pixels
-        int CntError;       //!< Number of generic error pixel ids detected
+        int XyFractWidth;   //!< Number of fraction bits in X,Y Qm.n format
+        int CntGoodEvents;  //!< Number of calculated events
+        int CntVetoEvents;  //!< Number of vetoed events
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
-        int CorrectMode;    //!< Event correction mode
-        int CentroidMin;    //!< Centroid minimum parameter for X,Y calculation
-        int XCentroidScale; //!< Centroid X scale factor
-        int YCentroidScale; //!< Centroid Y scale factor
+        int ProcessMode;    //!< Event processing mode
         int HighResEn;      //!< Switch between high and low resolution
         #define LAST_BNLFLATFIELDPLUGIN_PARAM HighResEn
-        int XScales[20];
-        int YScales[17];
-        int XOffsets[20];
-        int YOffsets[20];
 };
 
 #endif // BNL_FLAT_FIELD_PLUGIN_H

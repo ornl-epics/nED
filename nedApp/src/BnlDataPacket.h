@@ -70,6 +70,7 @@ class BnlDataPacket {
             uint16_t sample_x18;
             uint16_t sample_x19;
             uint16_t sample_x20;
+            uint16_t _padding;
 #endif
         } RawEvent;
 };

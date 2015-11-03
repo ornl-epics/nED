@@ -14,3 +14,13 @@ record(bo, "$(P)NormalDataFormat")
     field(VAL,  "0")
     field(PINI, "YES")
 }
+record(longout, "$(P)XyFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "X,Y UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))XyFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "15")
+}

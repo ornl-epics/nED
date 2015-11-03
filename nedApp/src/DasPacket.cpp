@@ -17,7 +17,7 @@
 const uint32_t DasPacket::MinLength = sizeof(DasPacket);
 
 #ifndef MAX_PACKET_LEN
-#define MAX_PACKET_LEN 4000 // DPS-T limit is 3600, can be changes from Makefile
+#define MAX_PACKET_LEN 4000 // DSP-T limit is 3600, can be changed from Makefile
 #endif // MAX_PACKET_LEN
 const uint32_t DasPacket::MaxLength = MAX_PACKET_LEN + MinLength;
 
