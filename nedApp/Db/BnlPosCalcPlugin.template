@@ -92,11 +92,7 @@ record(mbbo, "$(P)ProcessMode")
     field(ZRVL, "0")
     field(ZRST, "passthru")
     field(ONVL, "1")
-    field(ONST, "convert")
-    field(TWVL, "2")
-    field(TWST, "correct")
-    field(THVL, "3")
-    field(THST, "correct&convert")
+    field(ONST, "calculate")
 }
 record(longout, "$(P)XCentroidScale")
 {
