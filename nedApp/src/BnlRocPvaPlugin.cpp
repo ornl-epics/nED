@@ -25,42 +25,42 @@ struct ExtendedEvent {
     uint32_t time_of_flight;
     uint32_t position_index;
     uint16_t sample_x1;
+    uint16_t sample_y1;
     uint16_t sample_x2;
+    uint16_t sample_y2;
     uint16_t sample_x3;
+    uint16_t sample_y3;
     uint16_t sample_x4;
+    uint16_t sample_y4;
     uint16_t sample_x5;
+    uint16_t sample_y5;
     uint16_t sample_x6;
+    uint16_t sample_y6;
     uint16_t sample_x7;
+    uint16_t sample_y7;
     uint16_t sample_x8;
+    uint16_t sample_y8;
     uint16_t sample_x9;
+    uint16_t sample_y9;
     uint16_t sample_x10;
+    uint16_t sample_y10;
     uint16_t sample_x11;
+    uint16_t sample_y11;
     uint16_t sample_x12;
+    uint16_t sample_y12;
     uint16_t sample_x13;
+    uint16_t sample_y13;
     uint16_t sample_x14;
+    uint16_t sample_y14;
     uint16_t sample_x15;
+    uint16_t sample_y15;
     uint16_t sample_x16;
+    uint16_t sample_y16;
     uint16_t sample_x17;
+    uint16_t sample_y17;
     uint16_t sample_x18;
     uint16_t sample_x19;
     uint16_t sample_x20;
-    uint16_t sample_y1;
-    uint16_t sample_y2;
-    uint16_t sample_y3;
-    uint16_t sample_y4;
-    uint16_t sample_y5;
-    uint16_t sample_y6;
-    uint16_t sample_y7;
-    uint16_t sample_y8;
-    uint16_t sample_y9;
-    uint16_t sample_y10;
-    uint16_t sample_y11;
-    uint16_t sample_y12;
-    uint16_t sample_y13;
-    uint16_t sample_y14;
-    uint16_t sample_y15;
-    uint16_t sample_y16;
-    uint16_t sample_y17;
 };
 
 
@@ -129,6 +129,19 @@ void BnlRocPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
     uint32_t nEvents = count / (sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t));
     const BnlDataPacket::NormalEvent *events = reinterpret_cast<const BnlDataPacket::NormalEvent *>(data);
 
+    const uint32_t *dataptr = data;
+    uint32_t i = 0;
+   
+    /*
+    printf("New data\n");
+    while (i<6) {
+        printf("  hex out %08x\n", *dataptr);
+        //cout << hex << *dataptr << endl;
+        dataptr++;
+        i++;
+    }
+    */
+
     // Go through events and append to cache
     while (nEvents-- > 0) {
         m_cache.time_of_flight.push_back(events->tof);
@@ -196,6 +209,18 @@ void BnlRocPvaPlugin::processExtendedData(const uint32_t *data, uint32_t count)
 {
     uint32_t nEvents = count / (sizeof(ExtendedEvent) / sizeof(uint32_t));
     const ExtendedEvent *events = reinterpret_cast<const ExtendedEvent *>(data);
+    const uint32_t *dataptr = data;
+    uint32_t i = 0;
+
+    /*
+    printf("New data\n");
+    while (i<26) {
+        printf("  hex out %08x\n", *dataptr);
+        //cout << hex << *dataptr << endl;
+        dataptr++;
+        i++;
+    }
+    */
 
     /* Pull the least significant 16bits from sample1 and sample2 and
      * package them together as sample_a1; this combines the 1-A and 2-A
