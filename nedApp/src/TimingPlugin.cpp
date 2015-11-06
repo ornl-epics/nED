@@ -12,6 +12,7 @@
 
 #include <cstring> // memcpy
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
@@ -208,6 +209,10 @@ void TimingPlugin::freePacket(DasPacket *packet)
 double TimingPlugin::updateRtdl()
 {
     int enabled;
+    epicsTimeStamp t1, t2;
+
+    epicsTimeGetCurrent(&t1);
+
     getIntegerParam(Enable, &enabled);
 
     if (enabled == 1) {
@@ -235,7 +240,12 @@ double TimingPlugin::updateRtdl()
         }
     }
 
-    return 0.001;
+    epicsTimeGetCurrent(&t2);
+    double wait = 1.0/60 - epicsTimeDiffInSeconds(&t2, &t1);
+    if (wait < 0.0)
+        wait = 1.0/60;
+
+    return wait;
 }
 
 bool TimingPlugin::createFakeRtdl(DasPacket *packet)
