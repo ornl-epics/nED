@@ -55,7 +55,7 @@ BnlFlatFieldPlugin::BnlFlatFieldPlugin(const char *portName, const char *dispatc
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);               // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);                   // Reset counters
     createParam("ProcessMode",  asynParamInt32, &ProcessMode, MODE_PASSTHRU); // Event correction mode
-    createParam("HighResEn",    asynParamInt32, &HighResEn, 0);               // Switch between high and low resolution
+    createParam("PixelRes",     asynParamInt32, &PixelRes, 8);                // How many bits to use for X,Y resolution
     callParamCallbacks();
 }
 
@@ -67,9 +67,9 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     int nVeto = 0;
     int nGood = 0;
     int processMode = 0;
-    int xyFractWidth = 0;
     float xyDivider = 1;
     uint32_t nGoodTmp, nVetoTmp;
+    int val;
 
     this->lock();
     getIntegerParam(RxCount,        &nReceived);
@@ -80,10 +80,14 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     getIntegerParam(ProcessMode,    &processMode);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL || !m_tableX.initialized || !m_tableY.initialized)
         processMode = MODE_PASSTHRU;
-    getIntegerParam(xyFractWidth, &xyFractWidth);
-    if (xyFractWidth < 0) xyFractWidth = 0;
-    if (xyFractWidth > 15) xyFractWidth = 15;
-    xyDivider = 1 << xyFractWidth;
+    getIntegerParam(XyFractWidth,   &val);
+    if (val < 0)       xyDivider = 1 << 0;
+    else if (val > 15) xyDivider = 1 << 15;
+    else               xyDivider = 1 << val;
+    getIntegerParam(PixelRes,       &val);
+    if (val < 0)       m_pixelRes = 8;
+    else if (val > 14) m_pixelRes = 15;
+    else               m_pixelRes = val;
     this->unlock();
 
     // Optimize pass thru mode
@@ -146,7 +150,7 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     this->unlock();
 }
 
-void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, uint32_t &nCorr, uint32_t &nVetoed)
+void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, uint32_t &nGood, uint32_t &nVeto)
 {
     bool convert = (processMode == MODE_CONVERT || processMode == MODE_CORRECT_CONVERT);
     bool correct = (processMode == MODE_CORRECT || processMode == MODE_CORRECT_CONVERT);
@@ -154,10 +158,21 @@ void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *de
     // destPacket is guaranteed to be at least the size of srcPacket
     (void)srcPacket->copyHeader(destPacket, srcPacket->length());
 
-    uint32_t nEvents, nDestEvents;
+    uint32_t nEvents;
     const BnlDataPacket::NormalEvent *srcEvent= reinterpret_cast<const BnlDataPacket::NormalEvent *>(srcPacket->getData(&nEvents));
-    DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(destPacket->getData(&nDestEvents));
-    nEvents /= (sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t));
+    if (convert == true)
+        nEvents /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
+    else
+        nEvents /= (sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t));
+
+    uint32_t nDestEvents;
+    uint32_t *newPayload = reinterpret_cast<uint32_t *>(destPacket->getData(&nDestEvents));
+    nDestEvents = 0;
+
+    nGood = 0;
+    nVeto = 0;
+
+    uint32_t pixelResMask = (1 << m_pixelRes) - 1;
 
     while (nEvents-- > 0) {
         double x = srcEvent->x / xyDivider;
@@ -168,27 +183,37 @@ void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *de
             vetoed = (correctPosition(&x, &y) == false);
         }
 
-        if (likely(convert == true) && vetoed == false) {
+        if (vetoed == false) {
+            if (likely(convert == true)) {
+                DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(newPayload);
 
-            destEvent->tof = srcEvent->tof & 0xFFFFFFF; // TODO: +timeoffset?
-            if (m_highRes) {
-                destEvent->pixelid  = (srcEvent->position & 0x3FFF) << 18;
-                destEvent->pixelid |= ((uint16_t)(32 * x + 0.5) & 0x1FF) << 9;
-                destEvent->pixelid |= ((uint16_t)(32 * y + 0.5) & 0x1FF);
+                destEvent->tof = srcEvent->tof & 0xFFFFFFF; // TODO: +timeoffset?
+                destEvent->pixelid = (srcEvent->position & 0x3) << 28; // incompatible with dcomserver, he shifts for 16 or 18 bits depending on HighRes
+                destEvent->pixelid |= ((uint16_t)(32 * x + 0.5) & pixelResMask) << m_pixelRes;
+                destEvent->pixelid |= ((uint16_t)(32 * y + 0.5) & pixelResMask);
+
+                newPayload += sizeof(DasPacket::Event) / sizeof(uint32_t);
+                destPacket->payload_length += sizeof(BnlDataPacket::NormalEvent);
             } else {
-                destEvent->pixelid  = (srcEvent->position & 0x3FFF) << 16;
-                destEvent->pixelid |= ((uint16_t)(16 * x + 0.5) & 0x1FF) << 8;
-                destEvent->pixelid |= ((uint16_t)(16 * y + 0.5) & 0x1FF);
+                BnlDataPacket::NormalEvent *destEvent = reinterpret_cast<BnlDataPacket::NormalEvent *>(newPayload);
+
+                destEvent->tof = srcEvent->tof & 0xFFFFFFF; // TODO: +timeoffset?
+                destEvent->position = srcEvent->position;
+                destEvent->x = x * xyDivider;
+                destEvent->y = y * xyDivider;
+                destEvent->unused1 = 0;
+                destEvent->unused2 = 0;
+
+                newPayload += sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t);
+                destPacket->payload_length += sizeof(DasPacket::Event);
             }
 
-            destEvent++;
-            nDestEvents++;
+            nGood++;
+        } else {
+            nVeto++;
         }
         srcEvent++;
     }
-    destPacket->payload_length += nDestEvents * sizeof(DasPacket::Event);
-    nCorr = nDestEvents;
-    nVetoed = (nEvents - nDestEvents);
 }
 
 bool BnlFlatFieldPlugin::correctPosition(double *x, double *y)
@@ -479,7 +504,8 @@ bool BnlFlatFieldPlugin::correctPosition(double *x, double *y)
 
 bool BnlFlatFieldPlugin::loadParamFile(const std::string &paramFile)
 {
-    double maxX, maxY;
+    double maxX = 1;
+    double maxY = 1;
 
     FILE *fp = fopen(paramFile.c_str(), "r");
     if (!fp) {

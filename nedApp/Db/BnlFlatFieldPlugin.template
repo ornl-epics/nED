@@ -124,3 +124,13 @@ record(longout, "$(P)XyFractWidth")
     field(PINI, "YES")
     field(HOPR, "15")
 }
+record(longout, "$(P)PixelRes")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of bits for X,Y")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PixelRes")
+    field(PINI, "YES")
+    field(HOPR, "15")
+}

@@ -129,19 +129,6 @@ void BnlRocPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
     uint32_t nEvents = count / (sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t));
     const BnlDataPacket::NormalEvent *events = reinterpret_cast<const BnlDataPacket::NormalEvent *>(data);
 
-    const uint32_t *dataptr = data;
-    uint32_t i = 0;
-   
-    /*
-    printf("New data\n");
-    while (i<6) {
-        printf("  hex out %08x\n", *dataptr);
-        //cout << hex << *dataptr << endl;
-        dataptr++;
-        i++;
-    }
-    */
-
     // Go through events and append to cache
     while (nEvents-- > 0) {
         m_cache.time_of_flight.push_back(events->tof);
@@ -209,18 +196,6 @@ void BnlRocPvaPlugin::processExtendedData(const uint32_t *data, uint32_t count)
 {
     uint32_t nEvents = count / (sizeof(ExtendedEvent) / sizeof(uint32_t));
     const ExtendedEvent *events = reinterpret_cast<const ExtendedEvent *>(data);
-    const uint32_t *dataptr = data;
-    uint32_t i = 0;
-
-    /*
-    printf("New data\n");
-    while (i<26) {
-        printf("  hex out %08x\n", *dataptr);
-        //cout << hex << *dataptr << endl;
-        dataptr++;
-        i++;
-    }
-    */
 
     /* Pull the least significant 16bits from sample1 and sample2 and
      * package them together as sample_a1; this combines the 1-A and 2-A

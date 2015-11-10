@@ -124,15 +124,6 @@ record(longout, "$(P)CentroidMin")
     field(VAL,  "0")
     field(PINI, "YES")
 }
-record(bo, "$(P)HighResEn")
-{
-    field(ASG,  "BEAMLINE")
-    field(DESC, "High resolution switch")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))HighResEn")
-    field(ZNAM, "disabled")
-    field(ONAM, "enabled")
-}
 record(longout, "$(P)X1Scale")
 {
     info(autosaveFields, "VAL")

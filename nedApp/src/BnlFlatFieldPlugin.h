@@ -61,7 +61,7 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
         int m_centroidMin;          //!< Used by X,Y calculation for vetoing certain events
         double m_xCentroidScale;    //!< Used by X,Y calculation
         double m_yCentroidScale;    //!< Used by X,Y calculation
-        bool m_highRes;             //!< Switch between low and high resolution
+        uint8_t m_pixelRes;         //!< How many bits to use for X,Y resolution
         int m_xScales[20];          //!< X calculation parameter
         int m_yScales[17];          //!< Y calculation parameter
         int m_xOffsets[20];         //!< X calculation parameter
@@ -254,8 +254,8 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int ProcessMode;    //!< Event processing mode
-        int HighResEn;      //!< Switch between high and low resolution
-        #define LAST_BNLFLATFIELDPLUGIN_PARAM HighResEn
+        int PixelRes;       //!< How many bits to use for X,Y resolution
+        #define LAST_BNLFLATFIELDPLUGIN_PARAM PixelRes
 };
 
 #endif // BNL_FLAT_FIELD_PLUGIN_H
