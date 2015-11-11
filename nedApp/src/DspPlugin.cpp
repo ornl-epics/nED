@@ -63,6 +63,9 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
     } else if (m_version == "v64") {
         createParams_v64();
         setIntegerParam(Supported, 1);
+    } else if (m_version == "v65") {
+        createParams_v65();
+        setIntegerParam(Supported, 1);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported DSP version '%s'", version);
@@ -99,6 +102,8 @@ bool DspPlugin::checkVersion(const BaseModulePlugin::Version &version)
         if (version.fw_version == 6 && version.fw_revision == 3 && m_version == "v63")
             return true;
         if (version.fw_version == 6 && version.fw_revision == 4 && m_version == "v64")
+            return true;
+        if (version.fw_version == 6 && version.fw_revision == 5 && m_version == "v65")
             return true;
     }
 
