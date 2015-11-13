@@ -1,11 +1,22 @@
 include "BasePlugin.include"
 
-record(mbbo, "$(P)ReqCmd")
+record(bo, "$(P)ReqSend")
 {
     field(ASG,  "BEAMLINE")
-    field(DESC, "Issue command to module")
+    field(DESC, "Send current packet")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))ReqCmd")
+    field(OUT,  "@asyn($(PORT))ReqSend")
+    field(ZNAM, "none")
+    field(ONAM, "send")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(mbbo, "$(P)ReqCmdMenu")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select command to be sent")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)ReqCmd PP")
     field(ZRVL, "128")
     field(ZRST, "Discover")
     field(ONVL, "32")
@@ -32,6 +43,14 @@ record(mbbo, "$(P)ReqCmd")
     field(ELST, "Down reset")
     field(TVVL, "40")
     field(TVST, "Down reset LVDS")
+    field(PINI, "YES")
+}
+record(longout, "$(P)ReqCmd")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Issue raw command to module")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqCmd")
 }
 record(stringout, "$(P)ReqDest")
 {
@@ -222,4 +241,166 @@ record(mbbo, "$(P)Channel")
     field(SVST, "Channel 7")
     field(EIVL, "8")
     field(EIST, "Channel 8")
+}
+record(longout, "$(P)RawPkt0")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt0")
+}
+record(longout, "$(P)RawPkt1")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt1")
+}
+record(longout, "$(P)RawPkt2")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt2")
+}
+record(longout, "$(P)RawPkt3")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt3")
+}
+record(longout, "$(P)RawPkt4")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt4")
+}
+record(longout, "$(P)RawPkt5")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt5")
+}
+record(longout, "$(P)RawPkt6")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt6")
+}
+record(longout, "$(P)RawPkt7")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt7")
+}
+record(longout, "$(P)RawPkt8")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt8")
+}
+record(longout, "$(P)RawPkt9")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt9")
+}
+record(longout, "$(P)RawPkt10")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt10")
+}
+record(longout, "$(P)RawPkt11")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt11")
+}
+record(longout, "$(P)RawPkt12")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt12")
+}
+record(longout, "$(P)RawPkt13")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt13")
+}
+record(longout, "$(P)RawPkt14")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt14")
+}
+record(longout, "$(P)RawPkt15")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt15")
+}
+record(longout, "$(P)RawPkt16")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt16")
+}
+record(longout, "$(P)RawPkt17")
+{
+    info(autosaveFields, "VAL")
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))RawPkt17")
 }
