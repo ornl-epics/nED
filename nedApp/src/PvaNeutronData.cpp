@@ -58,7 +58,7 @@ bool PvaNeutronData::init()
     if (!timeStamp.attach(getPVStructure()->getSubField("timeStamp")))
         return false;
 
-    proton_charge = getPVStructure()->getDoubleField("proton_charge.value");
+    proton_charge = getPVStructure()->getSubField<epics::pvData::PVDouble>("proton_charge.value");
     if (proton_charge.get() == NULL)
         return false;
 
