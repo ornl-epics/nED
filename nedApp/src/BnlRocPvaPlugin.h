@@ -24,6 +24,8 @@ class BnlRocPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVUIntArray::svector position_index;
             epics::pvData::PVFloatArray::svector position_x;
             epics::pvData::PVFloatArray::svector position_y;
+            epics::pvData::PVFloatArray::svector photo_sum_x;
+            epics::pvData::PVFloatArray::svector photo_sum_y;
             epics::pvData::PVUShortArray::svector sample_x1;
             epics::pvData::PVUShortArray::svector sample_x2;
             epics::pvData::PVUShortArray::svector sample_x3;

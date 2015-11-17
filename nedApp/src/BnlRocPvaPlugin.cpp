@@ -18,51 +18,6 @@ EPICS_REGISTER_PLUGIN(BnlRocPvaPlugin, 3, "port name", string, "dispatcher port"
 
 const uint32_t BnlRocPvaPlugin::CACHE_SIZE = 32*1024;
 
-/**
- * Structure representing extended mode data packet
- */
-struct ExtendedEvent {
-    uint32_t time_of_flight;
-    uint32_t position_index;
-    uint16_t sample_x1;
-    uint16_t sample_y1;
-    uint16_t sample_x2;
-    uint16_t sample_y2;
-    uint16_t sample_x3;
-    uint16_t sample_y3;
-    uint16_t sample_x4;
-    uint16_t sample_y4;
-    uint16_t sample_x5;
-    uint16_t sample_y5;
-    uint16_t sample_x6;
-    uint16_t sample_y6;
-    uint16_t sample_x7;
-    uint16_t sample_y7;
-    uint16_t sample_x8;
-    uint16_t sample_y8;
-    uint16_t sample_x9;
-    uint16_t sample_y9;
-    uint16_t sample_x10;
-    uint16_t sample_y10;
-    uint16_t sample_x11;
-    uint16_t sample_y11;
-    uint16_t sample_x12;
-    uint16_t sample_y12;
-    uint16_t sample_x13;
-    uint16_t sample_y13;
-    uint16_t sample_x14;
-    uint16_t sample_y14;
-    uint16_t sample_x15;
-    uint16_t sample_y15;
-    uint16_t sample_x16;
-    uint16_t sample_y16;
-    uint16_t sample_x17;
-    uint16_t sample_y17;
-    uint16_t sample_x18;
-    uint16_t sample_x19;
-    uint16_t sample_x20;
-};
-
 
 BnlRocPvaPlugin::BnlRocPvaPlugin(const char *portName, const char *dispatcherPortName, const char *pvPrefix)
     : BasePvaPlugin(portName, dispatcherPortName, pvPrefix, NUM_BNLROCPVAPLUGIN_PARAMS)
@@ -135,6 +90,8 @@ void BnlRocPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
         m_cache.position_index.push_back(events->position);
         m_cache.position_x.push_back(events->x / m_xyDivider);
         m_cache.position_y.push_back(events->y / m_xyDivider);
+        m_cache.photo_sum_x.push_back(events->unused1);
+        m_cache.photo_sum_y.push_back(events->unused2);
         events++;
     }
 }
@@ -194,16 +151,16 @@ void BnlRocPvaPlugin::processRawData(const uint32_t *data, uint32_t count)
 
 void BnlRocPvaPlugin::processExtendedData(const uint32_t *data, uint32_t count)
 {
-    uint32_t nEvents = count / (sizeof(ExtendedEvent) / sizeof(uint32_t));
-    const ExtendedEvent *events = reinterpret_cast<const ExtendedEvent *>(data);
+    uint32_t nEvents = count / (sizeof(BnlDataPacket::ExtendedEvent) / sizeof(uint32_t));
+    const BnlDataPacket::ExtendedEvent *events = reinterpret_cast<const BnlDataPacket::ExtendedEvent *>(data);
 
     /* Pull the least significant 16bits from sample1 and sample2 and
      * package them together as sample_a1; this combines the 1-A and 2-A
      * samples.  Repeat for the B samples.  Append each event to cache.
      */
     while (nEvents-- > 0) {
-        m_cache.time_of_flight.push_back(events->time_of_flight & 0x000FFFFF);
-        m_cache.position_index.push_back(events->position_index);
+        m_cache.time_of_flight.push_back(events->tof & 0x000FFFFF);
+        m_cache.position_index.push_back(events->position);
         m_cache.sample_x1.push_back(events->sample_x1);
         m_cache.sample_x2.push_back(events->sample_x2);
         m_cache.sample_x3.push_back(events->sample_x3);
@@ -241,6 +198,8 @@ void BnlRocPvaPlugin::processExtendedData(const uint32_t *data, uint32_t count)
         m_cache.sample_y15.push_back(events->sample_y15);
         m_cache.sample_y16.push_back(events->sample_y16);
         m_cache.sample_y17.push_back(events->sample_y17);
+        m_cache.position_x.push_back(events->x / m_xyDivider);
+        m_cache.position_y.push_back(events->y / m_xyDivider);
         events++;
     }
 }
@@ -251,17 +210,22 @@ void BnlRocPvaPlugin::postNormalData(const PvaNeutronData::shared_pointer& pvRec
     m_pvNeutrons->position_index->replace(freeze(m_cache.position_index));
     m_pvNeutrons->position_x->replace(freeze(m_cache.position_x));
     m_pvNeutrons->position_y->replace(freeze(m_cache.position_y));
+    m_pvNeutrons->photo_sum_x->replace(freeze(m_cache.photo_sum_x));
+    m_pvNeutrons->photo_sum_y->replace(freeze(m_cache.photo_sum_y));
 
     // Reduce gradual memory reallocation by pre-allocating instead of clear()
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
     m_cache.position_x.reserve(CACHE_SIZE);
     m_cache.position_y.reserve(CACHE_SIZE);
+    m_cache.photo_sum_x.reserve(CACHE_SIZE);
+    m_cache.photo_sum_y.reserve(CACHE_SIZE);
 }
 
 void BnlRocPvaPlugin::postRawData(const PvaNeutronData::shared_pointer& pvRecord)
 {
     m_pvNeutrons->time_of_flight->replace(freeze(m_cache.time_of_flight));
+
     m_pvNeutrons->position_index->replace(freeze(m_cache.position_index));
     m_pvNeutrons->sample_x1->replace(freeze(m_cache.sample_x1));
     m_pvNeutrons->sample_x2->replace(freeze(m_cache.sample_x2));
@@ -346,6 +310,8 @@ void BnlRocPvaPlugin::postExtendedData(const PvaNeutronData::shared_pointer& pvR
     m_pvNeutrons->sample_y15->replace(freeze(m_cache.sample_y15));
     m_pvNeutrons->sample_y16->replace(freeze(m_cache.sample_y16));
     m_pvNeutrons->sample_y17->replace(freeze(m_cache.sample_y17));
+    m_pvNeutrons->position_x->replace(freeze(m_cache.position_x));
+    m_pvNeutrons->position_y->replace(freeze(m_cache.position_y));
 
     // Reduce gradual memory reallocation by pre-allocating instead of clear()
     reserve();
@@ -357,6 +323,8 @@ void BnlRocPvaPlugin::flushData()
     m_cache.position_index.clear();
     m_cache.position_x.clear();
     m_cache.position_y.clear();
+    m_cache.photo_sum_x.clear();
+    m_cache.photo_sum_y.clear();
     m_cache.sample_x1.clear();
     m_cache.sample_x2.clear();
     m_cache.sample_x3.clear();
@@ -371,6 +339,7 @@ void BnlRocPvaPlugin::flushData()
     m_cache.sample_x12.clear();
     m_cache.sample_x13.clear();
     m_cache.sample_x14.clear();
+    
     m_cache.sample_x15.clear();
     m_cache.sample_x16.clear();
     m_cache.sample_x17.clear();
@@ -406,6 +375,8 @@ void BnlRocPvaPlugin::reserve()
     m_cache.position_index.reserve(CACHE_SIZE);
     m_cache.position_x.reserve(CACHE_SIZE);
     m_cache.position_y.reserve(CACHE_SIZE);
+    m_cache.photo_sum_x.reserve(CACHE_SIZE);
+    m_cache.photo_sum_y.reserve(CACHE_SIZE);
     m_cache.sample_x1.reserve(CACHE_SIZE);
     m_cache.sample_x2.reserve(CACHE_SIZE);
     m_cache.sample_x3.reserve(CACHE_SIZE);
