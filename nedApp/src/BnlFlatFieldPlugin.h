@@ -178,6 +178,11 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
         void toArray(const std::string &str, std::vector<int> &vals);
 
         /**
+         * Override writing integer parameters
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
          * Overloaded function to process incoming OCC packets.
          *
          * Function receives all packets and invokes processPacket*()
@@ -207,7 +212,7 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[out] nCorr number of corrected events
          * @param[out] nVetoed number of vetoed events
          */
-        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, uint32_t &nCorr, uint32_t &nVetoed);
+        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, int &nCorr, int &nVetoed);
 
         /**
          * Calculate X,Y position from raw samples.

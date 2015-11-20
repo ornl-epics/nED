@@ -59,6 +59,19 @@ BnlFlatFieldPlugin::BnlFlatFieldPlugin(const char *portName, const char *dispatc
     callParamCallbacks();
 }
 
+asynStatus BnlFlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (pasynUser->reason == ResetCnt) {
+        setIntegerParam(RxCount, 0);
+        setIntegerParam(ProcCount, 0);
+        setIntegerParam(CntVetoEvents, 0);
+        setIntegerParam(CntGoodEvents, 0);
+        setIntegerParam(CntSplit, 0);
+        return asynSuccess;
+    }
+    return BasePlugin::writeInt32(pasynUser, value);
+}
+
 void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList)
 {
     int nReceived = 0;
@@ -68,7 +81,6 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     int nGood = 0;
     int processMode = 0;
     float xyDivider = 1;
-    uint32_t nGoodTmp, nVetoTmp;
     int val;
 
     this->lock();
@@ -129,9 +141,7 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
                 bufferOffset += packet->length();
 
                 // Process the packet - only raw mode supported for now
-                processPacket(packet, newPacket, xyDivider, (ProcessMode_t)processMode, nGoodTmp, nVetoTmp);
-                nGood += nGoodTmp;
-                nVeto += nVetoTmp;
+                processPacket(packet, newPacket, xyDivider, (ProcessMode_t)processMode, nGood, nVeto);
             }
 
             sendToPlugins(&m_packetList);
@@ -150,7 +160,7 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     this->unlock();
 }
 
-void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, uint32_t &nGood, uint32_t &nVeto)
+void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, int &nGood, int &nVeto)
 {
     bool convert = (processMode == MODE_CONVERT || processMode == MODE_CORRECT_CONVERT);
     bool correct = (processMode == MODE_CORRECT || processMode == MODE_CORRECT_CONVERT);
@@ -160,17 +170,11 @@ void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *de
 
     uint32_t nEvents;
     const BnlDataPacket::NormalEvent *srcEvent= reinterpret_cast<const BnlDataPacket::NormalEvent *>(srcPacket->getData(&nEvents));
-    if (convert == true)
-        nEvents /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
-    else
-        nEvents /= (sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t));
+    nEvents /= (sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t));
 
     uint32_t nDestEvents;
     uint32_t *newPayload = reinterpret_cast<uint32_t *>(destPacket->getData(&nDestEvents));
     nDestEvents = 0;
-
-    nGood = 0;
-    nVeto = 0;
 
     uint32_t pixelResMask = (1 << m_pixelRes) - 1;
 
@@ -189,11 +193,11 @@ void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *de
 
                 destEvent->tof = srcEvent->tof & 0xFFFFFFF; // TODO: +timeoffset?
                 destEvent->pixelid = (srcEvent->position & 0x3) << 28; // incompatible with dcomserver, he shifts for 16 or 18 bits depending on HighRes
-                destEvent->pixelid |= ((uint16_t)(32 * x + 0.5) & pixelResMask) << m_pixelRes;
-                destEvent->pixelid |= ((uint16_t)(32 * y + 0.5) & pixelResMask);
+                destEvent->pixelid |= ((uint16_t)(16 * x + 0.5) & ((1 << (m_pixelRes+1)) - 1)) << m_pixelRes;
+                destEvent->pixelid |= ((uint16_t)(16 * y + 0.5) & ((1 << m_pixelRes) - 1));
 
                 newPayload += sizeof(DasPacket::Event) / sizeof(uint32_t);
-                destPacket->payload_length += sizeof(BnlDataPacket::NormalEvent);
+                destPacket->payload_length += sizeof(DasPacket::Event);
             } else {
                 BnlDataPacket::NormalEvent *destEvent = reinterpret_cast<BnlDataPacket::NormalEvent *>(newPayload);
 
@@ -205,7 +209,7 @@ void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *de
                 destEvent->unused2 = 0;
 
                 newPayload += sizeof(BnlDataPacket::NormalEvent) / sizeof(uint32_t);
-                destPacket->payload_length += sizeof(DasPacket::Event);
+                destPacket->payload_length += sizeof(BnlDataPacket::NormalEvent);
             }
 
             nGood++;
