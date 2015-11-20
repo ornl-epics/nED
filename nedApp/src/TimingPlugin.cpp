@@ -47,6 +47,33 @@ TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     createParam("RecvPort",     asynParamInt32, &RecvPort, 8055); // WRITE - Remote port
 
     createFakeRtdl(m_rtdlPacket);
+    // Use static values for RTDL frames
+    m_rtdlPacket->payload[6] = 0x040e927d;
+    m_rtdlPacket->payload[7] = 0x05db4924;
+    m_rtdlPacket->payload[8] = 0x06363186;
+    m_rtdlPacket->payload[9] = 0x070003c3;
+    m_rtdlPacket->payload[10] = 0x080927c0;
+    m_rtdlPacket->payload[11] = 0x0f000000;
+    m_rtdlPacket->payload[12] = 0x11000001;
+    m_rtdlPacket->payload[13] = 0x18000004;
+    m_rtdlPacket->payload[14] = 0x19000029;
+    m_rtdlPacket->payload[15] = 0x1a00003c;
+    m_rtdlPacket->payload[16] = 0x1c07c000;
+    m_rtdlPacket->payload[17] = 0x1d000062;
+    m_rtdlPacket->payload[18] = 0x1e01435f;
+    m_rtdlPacket->payload[19] = 0x1f000b12;
+    m_rtdlPacket->payload[20] = 0x2000105a;
+    m_rtdlPacket->payload[21] = 0x21000000;
+    m_rtdlPacket->payload[22] = 0x22000000;
+    m_rtdlPacket->payload[23] = 0x231e0deb;
+    m_rtdlPacket->payload[24] = 0x24000f7b;
+    m_rtdlPacket->payload[25] = 0x2503b056;
+    m_rtdlPacket->payload[26] = 0x26041086;
+    m_rtdlPacket->payload[27] = 0x27000000;
+    m_rtdlPacket->payload[28] = 0x2800fffe;
+    m_rtdlPacket->payload[29] = 0x29000002;
+    m_rtdlPacket->payload[30] = 0x012fe9ea;
+    m_rtdlPacket->payload[31] = 0x02fa1e2d;
     std::function<float(void)> timerCb = std::bind(&TimingPlugin::updateRtdl, this);
     m_timer.schedule(timerCb, 0.01);
 }
