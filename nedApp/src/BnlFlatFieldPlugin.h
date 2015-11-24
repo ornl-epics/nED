@@ -37,16 +37,6 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
             MAP_ERR_NO_MEM      = 3, //!< Failed to allocate internal buffer
         } ImportError;
 
-        /**
-         * Processing mode
-         */
-        typedef enum {
-            MODE_PASSTHRU       = 0, //!< Don't correct any events
-            MODE_CONVERT        = 1, //!< Convert to generic normal data format
-            MODE_CORRECT        = 2, //!< Apply flat-field correction
-            MODE_CORRECT_CONVERT= 3, //!< Apply correction and convert data format
-        } ProcessMode_t;
-
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
         uint32_t m_bufferSize;      //!< Size of buffer
         DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins
@@ -208,11 +198,12 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[in] srcPacket Original packet to be processed
          * @param[out] destPacket output packet with all events processed.
          * @param[in] xyDivider used to convert Qm.n unsigned -> double
-         * @param[in] processMode event processing mode
+         * @param[in] correct Toggle applying flat field correction
+         * @param[in] convert Convert from native normal to common normal event
          * @param[out] nCorr number of corrected events
          * @param[out] nVetoed number of vetoed events
          */
-        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, int &nCorr, int &nVetoed);
+        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, bool correct, bool convert, int &nCorr, int &nVetoed);
 
         /**
          * Calculate X,Y position from raw samples.
@@ -258,7 +249,8 @@ class BnlFlatFieldPlugin : public BaseDispatcherPlugin {
         int CntVetoEvents;  //!< Number of vetoed events
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
-        int ProcessMode;    //!< Event processing mode
+        int CorrEn;         //!< Toggle flat field correction
+        int ConvEn;         //!< Toggle event mode conversion
         int PixelRes;       //!< How many bits to use for X,Y resolution
         #define LAST_BNLFLATFIELDPLUGIN_PARAM PixelRes
 };

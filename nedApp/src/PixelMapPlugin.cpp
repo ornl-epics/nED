@@ -50,7 +50,8 @@ PixelMapPlugin::PixelMapPlugin(const char *portName, const char *dispatcherPortN
     createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
-    createParam("MapMode",      asynParamInt32, &MapMode, MAP_NONE); // Event map mode (see PixelMapPlugin::MapMode_t)
+    createParam("MapEn",        asynParamInt32, &MapEn, 0);       // Toggle pixel mapping
+    createParam("VetoMode",     asynParamInt32, &VetoMode, 1);    // Toggle discarding veto events
     callParamCallbacks();
 }
 
@@ -70,11 +71,6 @@ asynStatus PixelMapPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             callParamCallbacks();
         }
         return asynSuccess;
-    } else if (pasynUser->reason == MapMode) {
-        if ((value & MAP_ALL) != value) {
-            LOG_ERROR("Invalid MapMode value '%d'", value);
-            return asynError;
-        }
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
 }
@@ -84,7 +80,8 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     int nReceived = 0;
     int nProcessed = 0;
     int nSplits = 0;
-    int mapMode = MAP_NONE;
+    bool mapEn = false;
+    bool passVetoes = false;
     PixelMapErrors errors;
 
     if (m_buffer == 0) {
@@ -98,9 +95,10 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     getIntegerParam(CntUnmap,   &errors.nUnmapped);
     getIntegerParam(CntError,   &errors.nErrors);
     getIntegerParam(CntSplit,   &nSplits);
-    getIntegerParam(MapMode,    &mapMode);
-    if (getDataMode() != BasePlugin::DATA_MODE_NORMAL || m_map.empty())
-        mapMode = MAP_NONE;
+    getBooleanParam(MapEn,      &mapEn);
+    getBooleanParam(VetoMode,   &passVetoes);
+    if (m_map.empty())
+        mapEn = false;
     this->unlock();
 
     nReceived += packetList->size();
@@ -110,7 +108,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     // wait until they're done processing before sending them some more data.
 
     // Optimize pass thru mode
-    if (mapMode == MAP_NONE) {
+    if (mapEn == false) {
         m_packetList.reset(packetList); // reset() automatically reserves
         sendToPlugins(&m_packetList);
         m_packetList.release();
@@ -155,7 +153,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
 
                     // Do the pixel id mapping - this can be parallelized
                     #pragma omp task firstprivate(packet, newPacket) shared(errors)
-                    errors += packetMap(packet, newPacket, static_cast<MapMode_t>(mapMode));
+                    errors += packetMap(packet, newPacket, passVetoes);
                 }
 
                 // Synchronize threads
@@ -178,7 +176,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     this->unlock();
 }
 
-PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPacket, DasPacket *destPacket, MapMode_t mode)
+PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPacket, DasPacket *destPacket, bool passVetos)
 {
     PixelMapErrors errors;
 
@@ -196,30 +194,25 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPac
     while (nEvents-- > 0) {
 
         if (likely((srcEvent->pixelid & PIXID_ERR) == 0 && srcEvent->pixelid < m_map.size())) {
-            if (mode & MAP_GOOD) {
-                // Gaps in pixel map table resolve to error pixels,
-                // no need to care here
-                destEvent->tof = srcEvent->tof;
-                destEvent->pixelid = m_map[srcEvent->pixelid];
-                destEvent++;
-                nDestEvents++;
-            }
-        } else if (srcEvent->pixelid & PIXID_ERR) { // Already tagged as error
-            if (mode & MAP_BAD) {
-                destEvent->tof = srcEvent->tof;
-                destEvent->pixelid = srcEvent->pixelid;
+            // Gaps in pixel map table resolve to error pixels,
+            // no need to care here
+            destEvent->tof = srcEvent->tof;
+            destEvent->pixelid = m_map[srcEvent->pixelid];
+            destEvent++;
+            nDestEvents++;
+        } else if (passVetos == true) {
+            destEvent->tof = srcEvent->tof;
+            destEvent->pixelid = srcEvent->pixelid;
+
+            if (srcEvent->pixelid & PIXID_ERR) { // Already tagged as error
                 errors.nErrors++;
-                destEvent++;
-                nDestEvents++;
-            }
-        } else {
-            if (mode & MAP_BAD) {
-                destEvent->tof = srcEvent->tof;
-                destEvent->pixelid = srcEvent->pixelid | PIXID_ERR_MAP;
+            } else {
+                destEvent->pixelid |= PIXID_ERR_MAP;
                 errors.nUnmapped++;
-                destEvent++;
-                nDestEvents++;
             }
+
+            destEvent++;
+            nDestEvents++;
         }
 
         srcEvent++;

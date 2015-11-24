@@ -54,7 +54,8 @@ BnlFlatFieldPlugin::BnlFlatFieldPlugin(const char *portName, const char *dispatc
     createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);           // Number of calculated events
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);               // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);                   // Reset counters
-    createParam("ProcessMode",  asynParamInt32, &ProcessMode, MODE_PASSTHRU); // Event correction mode
+    createParam("ConvEn",       asynParamInt32, &ConvEn, 0);                  // Toggle converting events to LPSD normal mode
+    createParam("CorrEn",       asynParamInt32, &CorrEn, 0);                  // Toggle flat field correction
     createParam("PixelRes",     asynParamInt32, &PixelRes, 8);                // How many bits to use for X,Y resolution
     callParamCallbacks();
 }
@@ -79,9 +80,10 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     int nSplits = 0;
     int nVeto = 0;
     int nGood = 0;
-    int processMode = 0;
     float xyDivider = 1;
     int val;
+    bool convEn = false;
+    bool corrEn = false;
 
     this->lock();
     getIntegerParam(RxCount,        &nReceived);
@@ -89,9 +91,12 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     getIntegerParam(CntVetoEvents,  &nVeto);
     getIntegerParam(CntGoodEvents,  &nGood);
     getIntegerParam(CntSplit,       &nSplits);
-    getIntegerParam(ProcessMode,    &processMode);
-    if (getDataMode() != BasePlugin::DATA_MODE_NORMAL || !m_tableX.initialized || !m_tableY.initialized)
-        processMode = MODE_PASSTHRU;
+    getBooleanParam(ConvEn,         &convEn);
+    getBooleanParam(CorrEn,         &corrEn);
+    if (!m_tableX.initialized || !m_tableY.initialized) {
+        convEn = false;
+        corrEn = false;
+    }
     getIntegerParam(XyFractWidth,   &val);
     if (val < 0)       xyDivider = 1 << 0;
     else if (val > 15) xyDivider = 1 << 15;
@@ -103,7 +108,7 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     this->unlock();
 
     // Optimize pass thru mode
-    if (processMode == MODE_PASSTHRU) {
+    if (corrEn == false && convEn == false) {
         m_packetList.reset(packetList); // reset() automatically reserves
         sendToPlugins(&m_packetList);
         m_packetList.release();
@@ -141,7 +146,7 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
                 bufferOffset += packet->length();
 
                 // Process the packet - only raw mode supported for now
-                processPacket(packet, newPacket, xyDivider, (ProcessMode_t)processMode, nGood, nVeto);
+                processPacket(packet, newPacket, xyDivider, corrEn, convEn, nGood, nVeto);
             }
 
             sendToPlugins(&m_packetList);
@@ -160,11 +165,8 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
     this->unlock();
 }
 
-void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, ProcessMode_t processMode, int &nGood, int &nVeto)
+void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, bool correct, bool convert, int &nGood, int &nVeto)
 {
-    bool convert = (processMode == MODE_CONVERT || processMode == MODE_CORRECT_CONVERT);
-    bool correct = (processMode == MODE_CORRECT || processMode == MODE_CORRECT_CONVERT);
-
     // destPacket is guaranteed to be at least the size of srcPacket
     (void)srcPacket->copyHeader(destPacket, srcPacket->length());
 
@@ -175,8 +177,6 @@ void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *de
     uint32_t nDestEvents;
     uint32_t *newPayload = reinterpret_cast<uint32_t *>(destPacket->getData(&nDestEvents));
     nDestEvents = 0;
-
-    uint32_t pixelResMask = (1 << m_pixelRes) - 1;
 
     while (nEvents-- > 0) {
         double x = srcEvent->x / xyDivider;

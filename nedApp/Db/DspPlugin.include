@@ -54,8 +54,8 @@ record(sel, "$(P)BnlDS")
 {
     field(INPA, "12") # Normal mode
     field(INPB, "42") # Raw mode
-    field(INPC, "42") # Extended mode
-    field(INPD, "42") # Verbose mode
+    field(INPC, "46") # Extended mode
+    field(INPD, "46") # Verbose mode
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")
 }

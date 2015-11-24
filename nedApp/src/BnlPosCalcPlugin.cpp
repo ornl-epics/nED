@@ -41,7 +41,7 @@ BnlPosCalcPlugin::BnlPosCalcPlugin(const char *portName, const char *dispatcherP
     createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);        // Number of calculated events
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);            // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);                // Reset counters
-    createParam("ProcessMode",  asynParamInt32, &ProcessMode, MODE_CALC);  // Event processing mode
+    createParam("CalcEn",       asynParamInt32, &CalcEn, 0);               // Toggle position calculation
     createParam("CentroidMin",  asynParamInt32, &CentroidMin, 0);          // Centroid minimum parameter for X,Y calculation
     createParam("XCentroidScale", asynParamInt32, &XCentroidScale, 100);   // X centroid scale factor
     createParam("YCentroidScale", asynParamInt32, &YCentroidScale, 70);    // Y centroid scale factor
@@ -70,7 +70,7 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
     int nSplits = 0;
     int nVeto = 0;
     int nGood = 0;
-    int processMode = 0;
+    bool calcEn = false;
     int val;
 
     this->lock();
@@ -79,9 +79,7 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
     getIntegerParam(CntVetoEvents,  &nVeto);
     getIntegerParam(CntGoodEvents,  &nGood);
     getIntegerParam(CntSplit,       &nSplits);
-    getIntegerParam(ProcessMode,    &processMode);
-    if (getDataMode() != BasePlugin::DATA_MODE_RAW)
-        processMode = MODE_PASSTHRU; // over-ride user setting if not in raw mode
+    getBooleanParam(CalcEn,         &calcEn);
     // Although these are class variables, only set them here and not from writeInt32().
     // This prevents thread race conditions since the code below is not in thread safe section.
     getIntegerParam(XyFractWidth,   &val);
@@ -93,9 +91,8 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
     m_xCentroidScale = 1.0 + val/2048.0;
     getIntegerParam(YCentroidScale, &val);
     m_yCentroidScale = 1.0 + val/2048.0;
-    m_highRes = (val > 0);
 
-    if (getDataMode() == BasePlugin::DATA_MODE_RAW && processMode != MODE_PASSTHRU) {
+    if (calcEn == true) {
         for (int i = 0; i < 20; i++) {
             getIntegerParam(XScales[i],  &m_xScales[i]);
             getIntegerParam(XOffsets[i], &m_xOffsets[i]);
@@ -110,7 +107,7 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
     nReceived += packetList->size();
 
     // Optimize pass thru mode
-    if (processMode == MODE_PASSTHRU) {
+    if (calcEn == false) {
         m_packetList.reset(packetList); // reset() automatically reserves
         sendToPlugins(&m_packetList);
         m_packetList.release();

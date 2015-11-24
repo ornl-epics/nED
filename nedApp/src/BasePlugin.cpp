@@ -145,6 +145,14 @@ asynStatus BasePlugin::createParam(const char *name, asynParamType type, int *in
     return status;
 }
 
+asynStatus BasePlugin::getBooleanParam(int index, bool *value)
+{
+    int val;
+    asynStatus ret = getIntegerParam(index, &val);
+    *value = (val > 0);
+    return ret;
+}
+
 void BasePlugin::dispatcherCallback(asynUser *pasynUser, void *genericPointer)
 {
     DasPacketList *packetList = reinterpret_cast<DasPacketList *>(genericPointer);

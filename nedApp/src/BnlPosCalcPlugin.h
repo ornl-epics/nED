@@ -43,21 +43,12 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         int m_centroidMin;          //!< Used by X,Y calculation for vetoing certain events
         double m_xCentroidScale;    //!< Used by X,Y calculation
         double m_yCentroidScale;    //!< Used by X,Y calculation
-        bool m_highRes;             //!< Switch between low and high resolution
         int m_xScales[20];          //!< X calculation parameter
         int m_yScales[17];          //!< Y calculation parameter
         int m_xOffsets[20];         //!< X calculation parameter
         int m_yOffsets[17];         //!< Y calculation parameter
 
     public: // structures and defines
-
-        /**
-         * Processing mode
-         */
-        typedef enum {
-            MODE_PASSTHRU       = 0, //!< Don't process any events
-            MODE_CALC           = 1, //!< Calculate X,Y position from raw samples
-        } ProcessMode_t;
 
         /**
          * Constructor for BnlPosCalcPlugin
@@ -129,7 +120,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         int CntVetoEvents;  //!< Number of vetoed events
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
-        int ProcessMode;    //!< Event processing mode
+        int CalcEn;         //!< Toggle position calculation
         int CentroidMin;    //!< Centroid minimum parameter for X,Y calculation
         int XCentroidScale; //!< Centroid X scale factor
         int YCentroidScale; //!< Centroid Y scale factor

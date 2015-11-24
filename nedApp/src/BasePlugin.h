@@ -194,6 +194,13 @@ class BasePlugin : public asynPortDriver {
         using asynPortDriver::createParam;
 
         /**
+         * Wrapper around getIntegerParam to retrieve parameter as boolean value
+         *
+         * A positive value is converted to true, false otherwise.
+         */
+        asynStatus getBooleanParam(int index, bool *value);
+
+        /**
          * Send single packet to the dispatcher to transmit it through optics.
          *
          * This is always blocking call, it will only return when the dispatcher
