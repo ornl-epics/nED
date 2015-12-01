@@ -49,40 +49,6 @@ class AcpcPvaPlugin : public BasePvaPlugin {
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
-         * Process incoming packet as flat-field pre-processed data.
-         *
-         * The FlatFieldPlugin pre-preprocessed data and transformed it into
-         * tof,pixel event format:
-         *   - time of flight
-         *   - pixel id
-         */
-        void processFlatfieldedData(const uint32_t *data, uint32_t count);
-
-        /**
-         * Static C callable wrapper for member function of the same name.
-         */
-        static void processFlatfieldedData(BasePvaPlugin *this_, const uint32_t *data, uint32_t count) {
-            reinterpret_cast<AcpcPvaPlugin *>(this_)->processFlatfieldedData(data, count);
-        }
-
-        /**
-         * Post data received so far and clear cache
-         *
-         * Cached data is posted as a single update to EPICSv4 PV.
-         * Caller must ensure plugin is locked while calling this function.
-         *
-         * @param[in] pvRecord to be updated
-         */
-        void postFlatfieldedData(const PvaNeutronData::shared_pointer& pvRecord);
-
-        /**
-         * Static C callable wrapper for member function of the same name.
-         */
-        static void postFlatfieldedData(BasePvaPlugin *this_, const PvaNeutronData::shared_pointer& pvRecord) {
-            reinterpret_cast<AcpcPvaPlugin *>(this_)->postFlatfieldedData(pvRecord);
-        }
-
-        /**
          * Process incoming packet as normal ACPC neutron data.
          *
          * Iterate through packet events and save their data to cache.

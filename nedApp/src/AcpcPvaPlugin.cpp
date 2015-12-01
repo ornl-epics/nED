@@ -43,7 +43,7 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         switch (value) {
         case DATA_MODE_NORMAL:
             if (flatfieldEn == 1) {
-                setCallbacks(&AcpcPvaPlugin::processFlatfieldedData, &AcpcPvaPlugin::postFlatfieldedData);
+                setCallbacks(&AcpcPvaPlugin::processTofPixelData, &AcpcPvaPlugin::postTofPixelData);
             } else {
                 setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
             }
@@ -58,13 +58,14 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             LOG_ERROR("Ignoring invalid output mode %d", value);
             return asynError;
         }
+        flushData();
     } else if (pasynUser->reason == FlatFieldEn) {
         int dataMode = DATA_MODE_NORMAL;
         getIntegerParam(DataModeP, &dataMode);
 
         if (dataMode == DATA_MODE_NORMAL) {
             if (value == 1) {
-                setCallbacks(&AcpcPvaPlugin::processFlatfieldedData, &AcpcPvaPlugin::postFlatfieldedData);
+                setCallbacks(&AcpcPvaPlugin::processTofPixelData, &AcpcPvaPlugin::postTofPixelData);
             } else {
                 setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
             }
@@ -78,29 +79,6 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         return asynSuccess;
     }
     return BasePvaPlugin::writeInt32(pasynUser, value);
-}
-
-void AcpcPvaPlugin::processFlatfieldedData(const uint32_t *data, uint32_t count)
-{
-    uint32_t nEvents = count / (sizeof(DasPacket::Event) / sizeof(uint32_t));
-    const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(data);
-
-    // Go through events and append to cache
-    while (nEvents-- > 0) {
-        m_cache.time_of_flight.push_back(events->tof);
-        m_cache.pixel.push_back(events->pixelid);
-        events++;
-    }
-}
-
-void AcpcPvaPlugin::postFlatfieldedData(const PvaNeutronData::shared_pointer& pvRecord)
-{
-    m_pvNeutrons->time_of_flight->replace(freeze(m_cache.time_of_flight));
-    m_pvNeutrons->pixel->replace(freeze(m_cache.pixel));
-
-    // Reduce gradual memory reallocation by pre-allocating instead of clear()
-    m_cache.time_of_flight.reserve(CACHE_SIZE);
-    m_cache.pixel.reserve(CACHE_SIZE);
 }
 
 void AcpcPvaPlugin::processNormalData(const uint32_t *data, uint32_t count)
