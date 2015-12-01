@@ -20,7 +20,9 @@
 #define NUM_FLATFIELDPLUGIN_PARAMS ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1))
 
 #define PIXID_ERR       (1 << 31)
-#define MAX_PIXEL_SIZE  512
+#define POSITION_BITS   9
+#define MAX_PIXEL_SIZE  (1 << POSITION_BITS)
+#define POSITION_MASK   (MAX_PIXEL_SIZE - 1)
 
 #if defined(WIN32) || defined(_WIN32)
 #   define PATH_SEPARATOR "\\"
@@ -279,10 +281,9 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
             continue;
         }
 
-        // Form TOF,pixelid tupple
+        // Convert to TOF,pixelid tupple
         destEvent->tof = tof;
-        destEvent->pixelid  = position_id << 18;
-        destEvent->pixelid |= xyToPixel(x, y, position_id);
+        destEvent->pixelid = xyToPixel(x, y, position_id);
 
         if ((destEvent->pixelid & 0x3FFFF) == 0) {
             errors.nUnmapped++;
@@ -331,7 +332,7 @@ uint32_t FlatFieldPlugin::xyToPixel(double x, double y, uint32_t position_id)
         y -= (dy * (*ytable)[xp][yp+1]) + ((1 - dy) * (*ytable)[xp][yp]);
     }
 
-    return (MAX_PIXEL_SIZE * (int)x) + (int)y;
+    return (position_id << (2*POSITION_BITS)) | (((int)x & POSITION_MASK) << POSITION_BITS) | (((int)y & POSITION_MASK));
 }
 
 bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position_id)
