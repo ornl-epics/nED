@@ -120,6 +120,7 @@ $(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlRocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += PvaMetaData.cpp
+$(PROD_NAME)_SRCS  += PvaCalcVerifyData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp

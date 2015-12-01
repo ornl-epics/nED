@@ -13,7 +13,7 @@ record(mbbo, "$(P)DataMode")
 record(calcout, "$(P)DataModeCalc")
 {
     field(INPA, "$(P)DataMode")
-    field(CALC, "A=1")
+    field(CALC, "A=1||A=2")
     field(OOPT, "When Zero")
     field(OUT,  "$(P)CalcEn PP")
 }
@@ -952,4 +952,11 @@ record(longout, "$(P)Y17Offset")
     field(OUT,  "@asyn($(PORT))Y17Offset")
     field(VAL,  "0")
     field(PINI, "YES")
+}
+record(stringout, "$(P)PvaName")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))PvaName")
 }

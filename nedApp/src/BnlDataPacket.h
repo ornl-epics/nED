@@ -20,8 +20,8 @@ class BnlDataPacket {
         typedef struct {
             uint32_t tof;       // Regular format
             uint32_t position;  // BNL ROC position index
-            uint32_t x;         // Interpolated X position in Q8.24 format
-            uint32_t y;         // Interpolated Y position in Q8.24 format
+            uint32_t x;         // Interpolated X position in Q5.11 format
+            uint32_t y;         // Interpolated Y position in Q5.11 format
             uint32_t unused1;   // Placeholder for photosum, not applicable for BNL
             uint32_t unused2;   // Placeholder for photosum, not applicable for BNL
         } NormalEvent;
@@ -73,7 +73,7 @@ class BnlDataPacket {
             uint16_t _padding;
 #endif
         } RawEvent;
-        
+
         /**
          * Structure representing Extended mode data packet
          */
@@ -120,8 +120,8 @@ class BnlDataPacket {
             uint16_t sample_x20;
             uint16_t _padding;
 #endif
-            uint32_t x;         // Interpolated X position in Q8.24 format
-            uint32_t y;         // Interpolated Y position in Q8.24 format
+            uint32_t x;         // Interpolated X position in Q5.11 format
+            uint32_t y;         // Interpolated Y position in Q5.11 format
         } ExtendedEvent;
 };
 

@@ -21,7 +21,7 @@ EPICS_REGISTER_PLUGIN(BnlPosCalcPlugin, 3, "Port name", string, "Dispatcher port
 #define POS_SPECIAL     (1 << 30)
 
 BnlPosCalcPlugin::BnlPosCalcPlugin(const char *portName, const char *dispatcherPortName, int bufSize)
-    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_DATACONVERTPLUGIN_PARAMS)
+    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_DATACONVERTPLUGIN_PARAMS, asynOctetMask, asynOctetMask)
     , m_correctionScale(1.0)
 {
     if (bufSize > 0) {
@@ -45,6 +45,7 @@ BnlPosCalcPlugin::BnlPosCalcPlugin(const char *portName, const char *dispatcherP
     createParam("CentroidMin",  asynParamInt32, &CentroidMin, 0);          // Centroid minimum parameter for X,Y calculation
     createParam("XCentroidScale", asynParamInt32, &XCentroidScale, 100);   // X centroid scale factor
     createParam("YCentroidScale", asynParamInt32, &YCentroidScale, 70);    // Y centroid scale factor
+    createParam("PvaName",      asynParamOctet, &PvaName);                 // PVA name for calculation verification data
 
     for (int i = 0; i < 20; i++) {
         char buf[20];
@@ -61,6 +62,20 @@ BnlPosCalcPlugin::BnlPosCalcPlugin(const char *portName, const char *dispatcherP
         createParam(buf,        asynParamInt32, &YOffsets[i], 0);
     }
     callParamCallbacks();
+}
+
+
+asynStatus BnlPosCalcPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+{
+    if (pasynUser->reason == PvaName) {
+        PvaCalcVerifyData::destroy(m_pva);
+        if (nChars > 0) {
+            m_pva = PvaCalcVerifyData::create(value);
+            if (!m_pva)
+                LOG_ERROR("Cannot create PVA record '%s'", value);
+        }
+    }
+    return BaseDispatcherPlugin::writeOctet(pasynUser, value, nChars, nActual);;
 }
 
 void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetList)
@@ -114,6 +129,8 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
         m_packetList.waitAllReleased();
         m_packetList.clear();
     } else {
+        bool extendedMode = (getDataMode() == BasePlugin::DATA_MODE_EXTENDED);
+
         // Break single loop into two parts to have single point of sending data
         for (auto it = packetList->cbegin(); it != packetList->cend(); ) {
             uint32_t bufferOffset = 0;
@@ -146,7 +163,7 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
                 bufferOffset += packet->length();
 
                 // Process the packet - only raw mode supported for now
-                processPacket(packet, newPacket, nGoodTmp, nVetoTmp);
+                processPacket(packet, newPacket, extendedMode, nGoodTmp, nVetoTmp);
                 nGood += nGoodTmp;
                 nVeto += nVetoTmp;
             }
@@ -155,6 +172,10 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
             m_packetList.release();
             m_packetList.waitAllReleased();
         }
+
+        if (extendedMode && m_pva)
+            m_pva->post();
+
     }
 
     this->lock();
@@ -167,18 +188,22 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
     this->unlock();
 }
 
-void BnlPosCalcPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, uint32_t &nCalced, uint32_t &nVetoed)
+void BnlPosCalcPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool extendedMode, uint32_t &nCalced, uint32_t &nVetoed)
 {
+    uint32_t eventSize = (extendedMode ? sizeof(BnlDataPacket::ExtendedEvent) : sizeof(BnlDataPacket::RawEvent));
+
     // destPacket is guaranteed to be at least the size of srcPacket
     (void)srcPacket->copyHeader(destPacket, srcPacket->length());
 
     uint32_t nEvents, nDestEvents, nTemp;
-    const BnlDataPacket::RawEvent *srcEvent= reinterpret_cast<const BnlDataPacket::RawEvent *>(srcPacket->getData(&nEvents));
+    const char *data = reinterpret_cast<const char *>(srcPacket->getData(&nEvents));
     BnlDataPacket::NormalEvent *destEvent = reinterpret_cast<BnlDataPacket::NormalEvent *>(destPacket->getData(&nDestEvents));
-    nEvents /= (sizeof(BnlDataPacket::RawEvent) / sizeof(uint32_t));
+    nEvents /= (eventSize / sizeof(uint32_t));
 
     nTemp = nEvents;
     while (nTemp-- > 0) {
+        const BnlDataPacket::RawEvent *srcEvent= reinterpret_cast<const BnlDataPacket::RawEvent *>(data);
+
         if (likely((srcEvent->position & POS_SPECIAL) == 0)) {
             double x,y;
             if (calculatePosition(srcEvent, &x, &y) == true) {
@@ -189,8 +214,18 @@ void BnlPosCalcPlugin::processPacket(const DasPacket *srcPacket, DasPacket *dest
                 destEvent++;
                 nDestEvents++;
             }
+
+            if (unlikely(extendedMode && m_pva)) {
+                const BnlDataPacket::ExtendedEvent *extEvent = reinterpret_cast<const BnlDataPacket::ExtendedEvent *>(data);
+                m_pva->time_of_flight.push_back(extEvent->tof);
+                m_pva->firmware_x.push_back(extEvent->x / m_xyDivider);
+                m_pva->firmware_y.push_back(extEvent->y / m_xyDivider);
+                m_pva->software_x.push_back(x);
+                m_pva->software_y.push_back(y);
+            }
         }
-        srcEvent++;
+
+        data += eventSize;
     }
     destPacket->payload_length += nDestEvents * sizeof(BnlDataPacket::NormalEvent);
     nCalced = nDestEvents;

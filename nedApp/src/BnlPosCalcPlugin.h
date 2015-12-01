@@ -12,6 +12,7 @@
 
 #include "BaseDispatcherPlugin.h"
 #include "BnlDataPacket.h"
+#include "PvaCalcVerifyData.h"
 
 /**
  * BnlPosCalcPlugin canverts detector raw data into detector normal data
@@ -25,6 +26,10 @@
  * already implemented in the software so they stopped using normal mode
  * altogether and dcomserver only used raw mode. There is an effort to
  * update firmware and do the calculation there.
+ *
+ * In extended data format mode, the plugin can calculate X,Y position
+ * the same way as in raw mode. It will push firmware calculated and
+ * software calculated X,Y positions to PVA channel.
  */
 class BnlPosCalcPlugin : public BaseDispatcherPlugin {
     private: // variables
@@ -48,6 +53,8 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         int m_xOffsets[20];         //!< X calculation parameter
         int m_yOffsets[17];         //!< Y calculation parameter
 
+        PvaCalcVerifyData::shared_pointer m_pva;    //!< PVA channel for position calculated data verification
+
     public: // structures and defines
 
         /**
@@ -64,6 +71,11 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
     private:
 
         /**
+         * Register to asyn string writes.
+         */
+        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
+
+        /**
          * Overloaded function to process incoming OCC packets.
          *
          * Function receives all packets and invokes processPacket*()
@@ -77,22 +89,24 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         /**
          * Process single neutron data packet in BNL ROC raw output format.
          *
-         * Takes one raw event at a time and first calculate X,Y position from
-         * raw samples. If successful, then run correction on X,Y position.
-         * And finally encode it to tof,pixelid format. All events that fail
-         * to produce good X,Y position or the flat-field correction fails on
-         * them is tossed. Number of tossed events is returned at the end.
-         * Events that got converted and corrected are put into output packet.
-         * Output packet header is copied from original one and relevant field
-         * (like payload length) are adjusted.
+         * Allocate output packet to hold all calculated positions. Size of
+         * the destination packet is always less than source packet based on
+         * structure sizes for different data formats. Header is byte copied.
+         * Run X,Y position calculation function on all events in a packet
+         * except those marked with special flag and put them into destination
+         * packet. Return number of calculated packets and number of vetoes.
+         *
+         * If m_pva is ready and extendedMode is true, also push data into PVA
+         * channel.
          *
          * @param[in] srcPacket Original packet to be processed
          * @param[out] destPacket output packet with all events processed.
+         * @param[in] extendedMode Data is in extended mode.
          * @param[out] nCalced number of calculated events
          * @param[out] nVetoed number of vetoed events
          * @return number of error events skipped.
          */
-        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, uint32_t &nCalced, uint32_t &nVetoed);
+        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool extendedMode, uint32_t &nCalced, uint32_t &nVetoed);
 
         /**
          * Calculate X,Y position from raw samples.
@@ -124,7 +138,8 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         int CentroidMin;    //!< Centroid minimum parameter for X,Y calculation
         int XCentroidScale; //!< Centroid X scale factor
         int YCentroidScale; //!< Centroid Y scale factor
-        #define LAST_DATACONVERTPLUGIN_PARAM YCentroidScale
+        int PvaName;        //!< Name of PVA channel for position calculation data
+        #define LAST_DATACONVERTPLUGIN_PARAM PvaName
         int XScales[20];
         int YScales[17];
         int XOffsets[20];
