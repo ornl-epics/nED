@@ -394,6 +394,29 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspResetLvds(const DasPacket *packet);
 
         /**
+         * Send request to LVDS switch to send a long T&C SysReset signal.
+         */
+        virtual DasPacket::CommandType reqTcReset();
+
+        /**
+         * Handle T&C_RESET response.
+         */
+        virtual bool rspTcReset(const DasPacket *packet);
+
+        /**
+         * Send request to LVDS switch to send a short T&C SysReset signal.
+         *
+         * ROC boards does a full power-cycle of all LVDS chips when it receives
+         * this command.
+         */
+        virtual DasPacket::CommandType reqTcResetLvds();
+
+        /**
+         * Handle T&C_RESET_LVDS response.
+         */
+        virtual bool rspTcResetLvds(const DasPacket *packet);
+
+        /**
          * Called when discover request to the module should be made.
          *
          * Base implementation simply sends a DISCOVER command and sets up

@@ -46,12 +46,10 @@ class DebugPlugin : public BasePlugin {
         static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask;
         static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask;
 
-        uint32_t m_hardwareId;      //!< Currently set module address
+        uint32_t m_rawPacket[18];   //!< Cached packet data to be sent out
         uint32_t m_payload[256];    //!< Last packet payload
         uint32_t m_payloadLen;      //!< Last packet payload length, in number of elements in m_payload
         DasPacket::CommandType m_expectedResponse; //!< Used to filter our responses that we didn't request
-        uint32_t m_lastConfigPayload[256]; //!< Last READ_CONFIG response payload, useful for resending configuration
-        uint32_t m_lastConfigPayloadLen;   //!< Length of last READ_CONFIG response, in bytes
 
     public: // structures and defines
         /**
@@ -96,11 +94,22 @@ class DebugPlugin : public BasePlugin {
          */
         bool response(const DasPacket *packet);
 
+        /**
+         * Generate raw packet in cache from high level (ReqCmd, ReqIsDsp, etc.) parameters
+         */
+        void generatePacket();
+
+        /**
+         * Send cached raw packet
+         */
+        void sendPacket();
+
     protected:
         #define FIRST_GENERICMODULEPLUGIN_PARAM ReqDest
         int ReqDest;        //!< Module address to communicate with
         int ReqCmd;         //!< Command to be sent
         int ReqIsDsp;       //!< Is the module we communicate with behinds the DSP, using LVDS link
+        int ReqSend;        //!< Send cached packet
         int RspCmd;         //!< Response command, see DasPacket::CommandType
         int RspCmdAck;      //!< Response ACK/NACK
         int RspHwType;      //!< Hardware type, see DasPacket::ModuleType
@@ -111,8 +120,26 @@ class DebugPlugin : public BasePlugin {
         int RspDataLen;     //!< Response payload length in bytes
         int RspData;        //!< Response payload
         int ByteGrp;        //!< How many byte to group
-        int Channel;        //!< Select channel to send command to (read/write config only
-        #define LAST_GENERICMODULEPLUGIN_PARAM Channel
+        int Channel;        //!< Select channel to send command to (read/write config only)
+        int RawPkt0;        //!< Raw packet data, dword 0
+        int RawPkt1;        //!< Raw packet data, dword 1
+        int RawPkt2;        //!< Raw packet data, dword 2
+        int RawPkt3;        //!< Raw packet data, dword 3
+        int RawPkt4;        //!< Raw packet data, dword 4
+        int RawPkt5;        //!< Raw packet data, dword 5
+        int RawPkt6;        //!< Raw packet data, dword 6
+        int RawPkt7;        //!< Raw packet data, dword 7
+        int RawPkt8;        //!< Raw packet data, dword 8
+        int RawPkt9;        //!< Raw packet data, dword 9
+        int RawPkt10;       //!< Raw packet data, dword 10
+        int RawPkt11;       //!< Raw packet data, dword 11
+        int RawPkt12;       //!< Raw packet data, dword 12
+        int RawPkt13;       //!< Raw packet data, dword 13
+        int RawPkt14;       //!< Raw packet data, dword 14
+        int RawPkt15;       //!< Raw packet data, dword 15
+        int RawPkt16;       //!< Raw packet data, dword 16
+        int RawPkt17;       //!< Raw packet data, dword 17
+        #define LAST_GENERICMODULEPLUGIN_PARAM RawPkt17
 };
 
 #endif // GENERIC_MODULE_PLUGIN_H
