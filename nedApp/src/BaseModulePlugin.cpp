@@ -189,6 +189,15 @@ DasPacket::CommandType BaseModulePlugin::handleRequest(DasPacket::CommandType co
         LOG_INFO("Sending %s command", cmd2str(command));
         timeout = RESET_NO_RESPONSE_TIMEOUT;
         return reqReset();
+    case DasPacket::CMD_RESET_LVDS:
+        LOG_INFO("Sending %s command", cmd2str(command));
+        return reqResetLvds();
+    case DasPacket::CMD_TC_RESET:
+        LOG_INFO("Sending %s command", cmd2str(command));
+        return reqTcReset();
+    case DasPacket::CMD_TC_RESET_LVDS:
+        LOG_INFO("Sending %s command", cmd2str(command));
+        return reqTcResetLvds();
     case DasPacket::CMD_DISCOVER:
         LOG_INFO("Sending %s command", cmd2str(command));
         return reqDiscover();
@@ -416,6 +425,8 @@ bool BaseModulePlugin::handleResponse(const DasPacket *packet)
     switch (command) {
     case DasPacket::CMD_RESET:
         return rspReset(packet);
+    case DasPacket::CMD_RESET_LVDS:
+        return rspResetLvds(packet);
     case DasPacket::CMD_DISCOVER:
         ack = rspDiscover(packet);
         verified &= ~VERIFY_DISCOVER_MASK;
@@ -489,6 +500,39 @@ DasPacket::CommandType BaseModulePlugin::reqReset()
 }
 
 bool BaseModulePlugin::rspReset(const DasPacket *packet)
+{
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
+
+DasPacket::CommandType BaseModulePlugin::reqResetLvds()
+{
+    sendToDispatcher(DasPacket::CMD_RESET_LVDS);
+    return DasPacket::CMD_RESET_LVDS;
+}
+
+bool BaseModulePlugin::rspResetLvds(const DasPacket *packet)
+{
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
+
+DasPacket::CommandType BaseModulePlugin::reqTcReset()
+{
+    sendToDispatcher(DasPacket::CMD_TC_RESET);
+    return DasPacket::CMD_TC_RESET;
+}
+
+bool BaseModulePlugin::rspTcReset(const DasPacket *packet)
+{
+    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+}
+
+DasPacket::CommandType BaseModulePlugin::reqTcResetLvds()
+{
+    sendToDispatcher(DasPacket::CMD_TC_RESET_LVDS);
+    return DasPacket::CMD_TC_RESET_LVDS;
+}
+
+bool BaseModulePlugin::rspTcResetLvds(const DasPacket *packet)
 {
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
@@ -1248,6 +1292,12 @@ const char *BaseModulePlugin::cmd2str(const DasPacket::CommandType cmd)
         return "DISCOVER";
     case DasPacket::CMD_RESET:
         return "RESET";
+    case DasPacket::CMD_RESET_LVDS:
+        return "RESET_LVDS";
+    case DasPacket::CMD_TC_RESET:
+        return "T&C_RESET";
+    case DasPacket::CMD_TC_RESET_LVDS:
+        return "T&C_RESET_LVDS";
     case DasPacket::CMD_START:
         return "START";
     case DasPacket::CMD_STOP:

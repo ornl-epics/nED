@@ -95,7 +95,8 @@ def parse_src_file(path, mode):
     types = {
       'status':  re.compile("createStatusParam\s*\(\s*\"([\w:]+)\"\s*,"),
       'counter': re.compile("createCounterParam\s*\(\s*\"([\w:]+)\"\s*,"),
-      'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\".*,\s*(\S+)\s*\);.*"),
+      'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
+      'config_ch': re.compile("createChanConfigParam\s*\(\s*\"([\w:]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
       'temp':    re.compile("createTempParam\s*\(\s*\"([\w:]+)\"\s*,"),
     }
 
@@ -106,6 +107,8 @@ def parse_src_file(path, mode):
 
             for line in infile:
                 for type,regex in types.items():
+                    if type == "config_ch":
+                        type = "config"
                     match = regex.search(line)
                     if match:
                         val = 0

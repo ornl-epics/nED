@@ -24,7 +24,7 @@ void BnlRocPlugin::createStatusParams_v00()
       createStatusParam("ErrParity",            0x1,  1,  7);   // LVDS Parity Error
       createStatusParam("TimerErr",             0x1,  1,  6);   // Timer Error
       createStatusParam("EventAcq",             0x1,  1,  5);   // Data Acquisition unit acquiring event
-      createStatusParam("Acquiring",            0x1,  1,  4);   // Acquiring Data
+      createStatusParam("Acquiring",            0x1,  1,  4);   // Acquiring Data    (0=not acquiring, 1=acquiring)
       createStatusParam("EEPROMValid",          0x1,  1,  3);   // EEPROM Valid
       createStatusParam("Configured",           0x1,  1,  2);   // Configured
       createStatusParam("Discovered",           0x1,  1,  1);   // Discovered
@@ -47,8 +47,7 @@ void BnlRocPlugin::createStatusParams_v00()
 void BnlRocPlugin::createConfigParams_v00()
 {
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-      createConfigParam("ConfigID",            '1',  0x0,  16,  0,   0);  // Configuration ID
-      createConfigParam("PositionIdx",         '1',  0x1,  16,  0,   0);  // Position Index
+      createConfigParam("PositionIdx",         '1',  0x0,  32,  0,   0);  // Position Index
       createConfigParam("MainThreshold",       '1',  0x2,  16,  0,   0);  // DAC Value for Main Threshold
       createConfigParam("MainPeakThreshold",   '1',  0x3,  16,  0,   0);  // DAC value for Main Peak Threshold
       createConfigParam("X1Scale",             '2',  0x0,  16,  0,   0);  // X1 Scale

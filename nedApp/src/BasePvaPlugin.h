@@ -96,6 +96,38 @@ class BasePvaPlugin : public BasePlugin {
         void processMetaData(const uint32_t *data, uint32_t count);
 
         /**
+         * Default callback for TOF,pixel id data
+         *
+         * This callback processes generic data. All detectors' data is
+         * ultimately converted to this format.
+         * Derived plugins can use this function instead of reimplementing it
+         * every time.
+         *
+         * @param[in] data Raw data to be parsed.
+         * @param[in] count Number of 4-byte elements in raw data.
+         */
+        void processTofPixelData(const uint32_t *data, uint32_t count);
+
+        /**
+         * Static C callable wrapper for member function of the same name
+         */
+        static void processTofPixelData(BasePvaPlugin *this_, const uint32_t *data, uint32_t count) {
+            this_->processTofPixelData(data, count);
+        }
+
+        /**
+         * Post TOF,pixel id data
+         */
+        void postTofPixelData(const PvaNeutronData::shared_pointer& pvRecord);
+
+        /**
+         * Static C callable wrapper for member function of the same name
+         */
+        static void postTofPixelData(BasePvaPlugin *this_, const PvaNeutronData::shared_pointer& pvRecord) {
+            this_->postTofPixelData(pvRecord);
+        }
+
+        /**
          * Flushes any data in Neutrons and Metadata PVRecord except for timestamp.
          *
          * Data currently in any of the PVRecord fields except for timestamp
@@ -104,7 +136,7 @@ class BasePvaPlugin : public BasePlugin {
          * modes, otherwise data from old mode would show up with every PVRecord
          * update as if it was new data.
          */
-        void flushData();
+        virtual void flushData();
 
         /**
          * Set callback functions for processing neutrons packet and posting data.
@@ -141,6 +173,14 @@ class BasePvaPlugin : public BasePlugin {
             epics::pvData::PVUIntArray::svector time_of_flight;
             epics::pvData::PVUIntArray::svector pixel;
         } m_cacheMeta;
+
+        /**
+         * A cache to store TOF,pixel data until it's posted.
+         */
+        struct {
+            epics::pvData::PVUIntArray::svector time_of_flight;
+            epics::pvData::PVUIntArray::svector pixel;
+        } m_cacheTofPixel;
 
         /**
          * Invoke derived plugin callback to send data.

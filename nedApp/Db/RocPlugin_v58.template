@@ -35,8 +35,8 @@ record(calc, "$(P)HwStatus")
 
 record(mbbo, "$(P)CmdReq")
 {
-    field(TVVL, "146")
-    field(TVST, "Pre-amp config")
-    field(TTVL, "147")
-    field(TTST, "Pre-amp trigger")
+    field(TTVL, "146")
+    field(TTST, "Pre-amp config")
+    field(FTVL, "147")
+    field(FTST, "Pre-amp trigger")
 }

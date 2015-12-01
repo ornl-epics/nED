@@ -12,6 +12,7 @@
 
 #include <cstring> // memcpy
 #include <fcntl.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
@@ -46,6 +47,33 @@ TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     createParam("RecvPort",     asynParamInt32, &RecvPort, 8055); // WRITE - Remote port
 
     createFakeRtdl(m_rtdlPacket);
+    // Use static values for RTDL frames
+    m_rtdlPacket->payload[6] = 0x040e927d;
+    m_rtdlPacket->payload[7] = 0x05db4924;
+    m_rtdlPacket->payload[8] = 0x06363186;
+    m_rtdlPacket->payload[9] = 0x070003c3;
+    m_rtdlPacket->payload[10] = 0x080927c0;
+    m_rtdlPacket->payload[11] = 0x0f000000;
+    m_rtdlPacket->payload[12] = 0x11000001;
+    m_rtdlPacket->payload[13] = 0x18000004;
+    m_rtdlPacket->payload[14] = 0x19000029;
+    m_rtdlPacket->payload[15] = 0x1a00003c;
+    m_rtdlPacket->payload[16] = 0x1c07c000;
+    m_rtdlPacket->payload[17] = 0x1d000062;
+    m_rtdlPacket->payload[18] = 0x1e01435f;
+    m_rtdlPacket->payload[19] = 0x1f000b12;
+    m_rtdlPacket->payload[20] = 0x2000105a;
+    m_rtdlPacket->payload[21] = 0x21000000;
+    m_rtdlPacket->payload[22] = 0x22000000;
+    m_rtdlPacket->payload[23] = 0x231e0deb;
+    m_rtdlPacket->payload[24] = 0x24000f7b;
+    m_rtdlPacket->payload[25] = 0x2503b056;
+    m_rtdlPacket->payload[26] = 0x26041086;
+    m_rtdlPacket->payload[27] = 0x27000000;
+    m_rtdlPacket->payload[28] = 0x2800fffe;
+    m_rtdlPacket->payload[29] = 0x29000002;
+    m_rtdlPacket->payload[30] = 0x012fe9ea;
+    m_rtdlPacket->payload[31] = 0x02fa1e2d;
     std::function<float(void)> timerCb = std::bind(&TimingPlugin::updateRtdl, this);
     m_timer.schedule(timerCb, 0.01);
 }
@@ -169,8 +197,8 @@ const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlH
     packet->datainfo.rtdl_present = 1;
 
     // And finally copy the payload
-    const uint32_t *srcPayload = src->getData(&nDwords);
     uint32_t *destPayload = packet->getData(&nDwords);
+    const uint32_t *srcPayload = src->getData(&nDwords);
     memcpy(destPayload, srcPayload, nDwords * 4);
     packet->payload_length += nDwords * 4;
 
@@ -207,31 +235,44 @@ void TimingPlugin::freePacket(DasPacket *packet)
 
 double TimingPlugin::updateRtdl()
 {
-    bool sendRtdlPacket = false;
-    int mode;
+    int enabled;
+    epicsTimeStamp t1, t2;
 
-    getIntegerParam(Mode, &mode);
+    epicsTimeGetCurrent(&t1);
 
-    this->lock();
-    // Must not block
-    if (mode == 0)
-        sendRtdlPacket = createFakeRtdl(m_rtdlPacket);
-    else if (mode == 1)
-        sendRtdlPacket = recvRtdlFromEtc(m_rtdlPacket);
-    this->unlock();
+    getIntegerParam(Enable, &enabled);
 
-    // NOTE: No guarantee that there's a new RTDL data in 16ms.
-    //       Data for two pulses can be merged together in that case.
-
-    if (sendRtdlPacket) {
-        m_mutex.lock();
-        DasPacketList packetList;
-        packetList.reset(m_rtdlPacket);
-        BaseDispatcherPlugin::sendToPlugins(&packetList);
-        m_mutex.unlock();
+    if (enabled == 1) {
+        bool sendRtdlPacket = false;
+        int mode;
+        getIntegerParam(Mode, &mode);
+    
+        this->lock();
+        // Must not block
+        if (mode == 0)
+            sendRtdlPacket = createFakeRtdl(m_rtdlPacket);
+        else if (mode == 1)
+            sendRtdlPacket = recvRtdlFromEtc(m_rtdlPacket);
+        this->unlock();
+    
+        // NOTE: No guarantee that there's a new RTDL data in 16ms.
+        //       Data for two pulses can be merged together in that case.
+    
+        if (sendRtdlPacket) {
+            m_mutex.lock();
+            DasPacketList packetList;
+            packetList.reset(m_rtdlPacket);
+            BaseDispatcherPlugin::sendToPlugins(&packetList);
+            m_mutex.unlock();
+        }
     }
 
-    return 0.001;
+    epicsTimeGetCurrent(&t2);
+    double wait = 1.0/60 - epicsTimeDiffInSeconds(&t2, &t1);
+    if (wait < 0.0)
+        wait = 1.0/60;
+
+    return wait;
 }
 
 bool TimingPlugin::createFakeRtdl(DasPacket *packet)

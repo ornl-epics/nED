@@ -7,26 +7,42 @@ include "registerChannelProviderLocal.dbd"
 #include "dbPv.dbd"
 include "calcSupport.dbd"
 include "sCalcoutRecord.dbd"
+
+# Make system() command available
+registrar(iocshSystemCommand)
+
+# OCC plugin is special
 registrar("OccRegister")
+
+# Non-detector plugins (alphabetically)
+registrar("AcpcPvaPluginRegister")
+registrar("AdaraPluginRegister")
+registrar("BnlFlatFieldPluginRegister")
+registrar("BnlPosCalcPluginRegister")
+registrar("BnlRocPvaPluginRegister")
 registrar("CmdDispatcherRegister")
 registrar("DiscoverPluginRegister")
-registrar("ProxyPluginRegister")
-registrar("AdaraPluginRegister")
-registrar("DspPluginRegister")
-registrar("RocPluginRegister")
-registrar("AdcRocPluginRegister")
-registrar("BnlRocPluginRegister")
-registrar("FemPluginRegister")
-registrar("AcpcFemPluginRegister")
-registrar("DumpPluginRegister")
-registrar("StatPluginRegister")
-registrar("RtdlPluginRegister")
 registrar("DebugPluginRegister")
-registrar("RocPvaPluginRegister")
+registrar("DumpPluginRegister")
 registrar("FlatFieldPluginRegister")
-registrar("AcpcPvaPluginRegister")
 registrar("PixelMapPluginRegister")
+registrar("ProxyPluginRegister")
+registrar("RocPvaPluginRegister")
+registrar("RtdlPluginRegister")
+registrar("StatPluginRegister")
 registrar("TimingPluginRegister")
-registrar("GlobalConRegistrar")
+
+# Detector support plugins (alphabetically)
+registrar("AcpcFemPluginRegister")
 registrar("AcpcPluginRegister")
+registrar("AdcRocPluginRegister")
 registrar("ArocPluginRegister")
+registrar("BnlRocPluginRegister")
+registrar("DspPluginRegister")
+registrar("FemPluginRegister")
+registrar("RocPluginRegister")
+
+# Sequences
+registrar("GlobalConRegistrar")
+registrar("HVScanRegistrar")
+registrar("ApplyConfigRegistrar")

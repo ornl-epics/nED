@@ -35,7 +35,7 @@ extrainput   = Ignore;
 #
 getNum {
    out "?\$1";
-   in "?\$1%05d";
+   in "?\$1%!5d";
 }
 
 #
@@ -46,7 +46,7 @@ reqNum {
 }
 
 recNum {
-   in "?\$1%05d";
+   in "?\$1%!5d";
 }
 
 #
@@ -56,7 +56,7 @@ recNum {
 #
 setNum {
    out "*\$1%05d";
-   in "*\$1%05d";
+   in "*\$1%!5d";
 }
 
 #

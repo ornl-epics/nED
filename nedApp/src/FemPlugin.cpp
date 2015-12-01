@@ -50,8 +50,11 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         createParams_v36();
     } else if (m_version == "v37") {
         setIntegerParam(Supported, 1);
-        setIntegerParam(UpgradeStatus, UPGRADE_NOT_STARTED); // supported but not started
         createParams_v37();
+    } else if (m_version == "v38") {
+        setIntegerParam(Supported, 1);
+        setIntegerParam(UpgradeStatus, UPGRADE_NOT_STARTED); // supported but not started
+        createParams_v38();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);

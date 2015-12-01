@@ -9,7 +9,7 @@ record(bi, "$(P)nED:Running")
 record(stringin, "$(P)nED:Version")
 {
     field(DESC, "nED Version")
-    field(VAL,  "1.5")
+    field(VAL,  "1.6")
     field(PINI, "YES")
 }
 record(dfanout, "$(P)nED:PreStart")

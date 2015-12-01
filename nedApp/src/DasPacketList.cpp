@@ -20,14 +20,16 @@ DasPacketList::DasPacketList()
 const DasPacket *DasPacketList::verifyPacket(const uint8_t *data, uint32_t dataLen) const
 {
     const DasPacket *packet = reinterpret_cast<const DasPacket *>(data);
+    uint32_t packetLen;
 
     if (dataLen < DasPacket::MinLength)
         return 0;
 
-    if (packet->length() < DasPacket::MinLength || packet->length() > DasPacket::MaxLength)
+    packetLen = packet->length();
+    if (packetLen < DasPacket::MinLength || packetLen > DasPacket::MaxLength)
         return 0;
 
-    if (packet->length() > dataLen)
+    if (packetLen > dataLen)
         return 0;
 
     return packet;
@@ -59,23 +61,20 @@ uint32_t DasPacketList::reset(const uint8_t *data, uint32_t dataLen)
 
         clear();
 
-        if (dataLen >= DasPacket::MinLength) {
+        const DasPacket *packet = verifyPacket(data, dataLen);
+        while (packet) {
+            // Calculate length only once
+            uint32_t packetLen = packet->length();
 
-            const DasPacket *packet = verifyPacket(data, dataLen);
-            while (packet) {
-                // Calculate length only once
-                uint32_t packetLen = packet->length();
+            if (packetLen > dataLen || packetLen == 0)
+                break;
 
-                if (packetLen > dataLen || packetLen == 0)
-                    break;
+            dataLen  -= packetLen;
+            data     += packetLen;
+            consumed += packetLen;
 
-                dataLen  -= packetLen;
-                data     += packetLen;
-                consumed += packetLen;
-
-                push_back(packet);
-                packet = verifyPacket(data, dataLen);
-            }
+            push_back(packet);
+            packet = verifyPacket(data, dataLen);
         }
 
         m_refcount = 1;

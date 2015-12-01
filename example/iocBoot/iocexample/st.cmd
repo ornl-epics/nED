@@ -78,6 +78,9 @@ dbLoadRecords("$(NED)/db/DebugPlugin.db","P=$(PREFIX)dbg1:,PORT=dbg")
 #PixelMapPluginConfigure("pixmap", "occ", 1, "/tmp/test.pixelmap", 4194304)
 #dbLoadRecords("$(NED)/db/PixelMapPlugin.db","P=$(PREFIX)pm1:,PORT=pixmap")
 
+#BnlFlatFieldPluginConfigure("ff", "occ", "$(NED)/FlatField/9_152_37_177.prmcalc", "$(NED)/FlatField/9_152_37_177.val", 41836544)
+#dbLoadRecords("$(NED)/db/BnlFlatFieldPlugin.db","P=$(PREFIX)ff:,PORT=ff")
+
 
 ### PV Access Plugins
 

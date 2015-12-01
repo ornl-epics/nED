@@ -128,10 +128,10 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          *
          * @param[in] srcPacket Original packet from OCC
          * @param[out] destPacket Copied packet with pixel ids mapped
-         * @param[in] mode Event output mode switch.
+         * @param[in] passVetoes Should vetoed events be included in dest packet
          * @return Number of unmapped pixel ids.
          */
-        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket, MapMode_t mode);
+        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket, bool passVetoes);
 
         /**
          * Read mapping table from a file.
@@ -156,8 +156,9 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         int CntError;       //!< Number of generic error pixel ids detected
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
-        int MapMode;        //!< Event mapping mode (see PixelMapPlugin::MapMode_t)
-        #define LAST_PIXELMAPPLUGIN_PARAM MapMode
+        int MapEn;          //!< Toggle pixel mapping
+        int VetoMode;       //!< Select what to do with veto events
+        #define LAST_PIXELMAPPLUGIN_PARAM VetoMode
 };
 
 #endif // PIXEL_MAP_PLUGIN_H

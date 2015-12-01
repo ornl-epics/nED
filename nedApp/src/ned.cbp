@@ -4,7 +4,7 @@
 	<Project>
 		<Option title="ned" />
 		<Option makefile_is_custom="1" />
-		<Option execution_dir="../../../master" />
+		<Option execution_dir="../../../bnlroc_dev" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
@@ -72,6 +72,17 @@
 		<Unit filename="BasePvaPlugin.h" />
 		<Unit filename="BaseSocketPlugin.cpp" />
 		<Unit filename="BaseSocketPlugin.h" />
+		<Unit filename="BnlDataPacket.h" />
+		<Unit filename="BnlFlatFieldPlugin.cpp" />
+		<Unit filename="BnlFlatFieldPlugin.h" />
+		<Unit filename="BnlPosCalcPlugin.cpp" />
+		<Unit filename="BnlPosCalcPlugin.h" />
+		<Unit filename="BnlRocPlugin.cpp" />
+		<Unit filename="BnlRocPlugin.h" />
+		<Unit filename="BnlRocPlugin_v00.cpp" />
+		<Unit filename="BnlRocPlugin_v20.cpp" />
+		<Unit filename="BnlRocPvaPlugin.cpp" />
+		<Unit filename="BnlRocPvaPlugin.h" />
 		<Unit filename="CircularBuffer.cpp" />
 		<Unit filename="CircularBuffer.h" />
 		<Unit filename="CmdDispatcher.cpp" />
@@ -114,6 +125,8 @@
 		<Unit filename="PixelMapPlugin.h" />
 		<Unit filename="ProxyPlugin.cpp" />
 		<Unit filename="ProxyPlugin.h" />
+		<Unit filename="PvaCalcVerifyData.cpp" />
+		<Unit filename="PvaCalcVerifyData.h" />
 		<Unit filename="PvaMetaData.cpp" />
 		<Unit filename="PvaMetaData.h" />
 		<Unit filename="PvaNeutronData.cpp" />

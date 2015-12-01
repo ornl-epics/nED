@@ -105,6 +105,20 @@ class BnlRocPlugin : public BaseModulePlugin {
          * Create and register all status counter BNLROC v0.0 parameters to be exposed to EPICS.
          */
         //void createCounterParams_v00();
+        /**
+         * Create and register all status BNLROC v2.0 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v20();
+
+        /**
+         * Create and register all config BNLROC v2.0 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v20();
+
+        /**
+         * Create and register all status counter BNLROC v2.0 parameters to be exposed to EPICS.
+         */
+        //void createCounterParams_v20();
 
     protected:
 };

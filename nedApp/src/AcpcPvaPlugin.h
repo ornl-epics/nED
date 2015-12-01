@@ -159,6 +159,11 @@ class AcpcPvaPlugin : public BasePvaPlugin {
             reinterpret_cast<AcpcPvaPlugin *>(this_)->postRawData(pvRecord);
         }
 
+        /**
+         * Clear internal cache
+         */
+        void flushData();
+
     private:
         /**
          * A cache to store data until it's posted.

@@ -200,3 +200,22 @@ void AcpcPvaPlugin::postRawData(const PvaNeutronData::shared_pointer& pvRecord)
     m_cache.sample_a8.reserve(8 * CACHE_SIZE);
     m_cache.sample_b8.reserve(8 * CACHE_SIZE);
 }
+
+void AcpcPvaPlugin::flushData()
+{
+    m_cache.time_of_flight.clear();
+    m_cache.position_index.clear();
+    m_cache.position_x.clear();
+    m_cache.position_y.clear();
+    m_cache.photo_sum_x.clear();
+    m_cache.photo_sum_y.clear();
+
+    m_cache.time_of_flight.reserve(CACHE_SIZE);
+    m_cache.position_index.reserve(CACHE_SIZE);
+    m_cache.position_x.reserve(CACHE_SIZE);
+    m_cache.position_y.reserve(CACHE_SIZE);
+    m_cache.photo_sum_x.reserve(CACHE_SIZE);
+    m_cache.photo_sum_y.reserve(CACHE_SIZE);
+
+    BasePvaPlugin::flushData();
+}

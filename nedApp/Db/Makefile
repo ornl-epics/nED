@@ -26,10 +26,13 @@ DB += ProxyPlugin.db
 DB += PixelMapPlugin.db
 DB += RocPvaPlugin.db
 DB += AcpcPvaPlugin.db
+DB += BnlRocPvaPlugin.db
 DB += GlobalConG.db
 DB += ApplyConfig.db
 DB += PulsedMagnet.db
 DB += TimingPlugin.db
+DB += BnlFlatFieldPlugin.db
+DB += BnlPosCalcPlugin.db
 
 DB += DspPlugin_v63.db
 DB += DspPlugin_v64.db
@@ -37,6 +40,7 @@ DB += FemPlugin_v32.db
 DB += FemPlugin_v35.db
 DB += FemPlugin_v36.db
 DB += FemPlugin_v37.db
+DB += FemPlugin_v38.db
 DB += AcpcFemPlugin_v22.db
 DB += RocPlugin_v44.db
 DB += RocPlugin_v45.db
@@ -49,6 +53,8 @@ DB += RocPlugin_v57.db
 DB += RocPlugin_v58.db
 DB += AdcRocPlugin_v02.db
 DB += AdcRocPlugin_v03.db
+DB += BnlRocPlugin_v00.db
+DB += BnlRocPlugin_v20.db
 DB += AcpcPlugin_v144.db
 DB += ArocPlugin_v23.db
 
@@ -79,6 +85,8 @@ RocPlugin_v57.template: RocPlugin_v57.generated
 RocPlugin_v58.template: RocPlugin_v58.generated
 AdcRocPlugin_v02.template: AdcRocPlugin_v02.generated
 AdcRocPlugin_v03.template: AdcRocPlugin_v03.generated
+BnlRocPlugin_v00.template: BnlRocPlugin_v00.generated
+BnlRocPlugin_v20.template: BnlRocPlugin_v20.generated
 AcpcPlugin_v144.template: AcpcPlugin_v144.generated
 ArocPlugin_v23.template: ArocPlugin_v23.generated
 

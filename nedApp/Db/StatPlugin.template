@@ -329,3 +329,66 @@ record(mbbo, "$(P)PulseType")
     field(SVVL, "7")
     field(SVST, "Physics 2")
 }
+
+record(mbbo, "$(P)DataMode")
+{
+    field(FLNK, "$(P)DataSize")
+}
+record(longout, "$(P)DataSize") {
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)DataSizeSel.VAL PP")
+    field(OMSL, "closed_loop")
+    field(DTYP, "Soft Channel")
+    field(OUT,  "$(P)EventSize.VAL PP")
+}
+record(sel, "$(P)DataSizeSel")
+{
+    field(INPA, "$(P)RocDS.VAL PP")
+    field(INPB, "$(P)AcpcDS.VAL PP")
+    field(INPC, "$(P)BnlDS.VAL PP")
+    field(NVL,  "$(P)DetTypeSel.VAL PP")
+}
+record(mbbo, "$(P)DetTypeSel")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select detector type")
+    field(FLNK, "$(P)DataSize")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "ROC")
+    field(ONVL, "1")
+    field(ONST, "ACPC")
+    field(TWVL, "2")
+    field(TWST, "BNL")
+}
+record(sel, "$(P)RocDS")
+{
+    field(INPA, "8") # Normal mode
+    field(INPB, "16") # Raw mode
+    field(INPC, "20") # Extended mode
+    field(INPD, "20") # Verbose mode
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+record(sel, "$(P)AcpcDS")
+{
+    field(INPA, "24")
+    field(INPB, "32")
+    field(INPC, "24")
+    field(INPD, "24")
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+record(sel, "$(P)BnlDS")
+{
+    field(INPA, "24") # Normal mode
+    field(INPB, "84") # Raw mode
+    field(INPC, "84") # Extended mode
+    field(INPD, "84") # Verbose mode
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+
