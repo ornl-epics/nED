@@ -27,6 +27,7 @@ CircularBuffer::CircularBuffer(uint32_t size)
     , m_size(_align(size, m_unit))
     , m_rolloverSize(min(m_size - m_unit, 2 * DasPacket::MaxLength))
     , m_error(0)
+    , m_prevError(0)
     , m_consumer(0)
     , m_producer(0)
 {
@@ -125,7 +126,9 @@ int CircularBuffer::wait(void **data, uint32_t *len, double timeout)
     else
         m_event.wait();
 
-    if (m_error != 0)
+    // Tolerate first occurance of the error to allow processing rest of the
+    // data in buffer.
+    if (m_error != 0 && m_prevError == 0)
         return m_error;
     if (empty())
         return -ETIME;
