@@ -128,8 +128,9 @@ int CircularBuffer::wait(void **data, uint32_t *len, double timeout)
 
     // Tolerate first occurance of the error to allow processing rest of the
     // data in buffer.
-    if (m_error != 0 && m_prevError == 0)
+    if (m_error != 0 && m_prevError != 0)
         return m_error;
+    m_prevError = m_error;
     if (empty())
         return -ETIME;
 
