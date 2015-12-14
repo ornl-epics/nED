@@ -39,7 +39,7 @@ class CircularBuffer : public BaseCircularBuffer {
         void clear();
 
         /**
-         * Copy data from memory area data to the circular buffer.
+         * Copy data from memory area data to the circular buffer and wake up consumer.
          *
          * @param[in] data Pointer to the start of the source buffer.
          * @param[out] len Number of bytes available in data.
@@ -107,6 +107,7 @@ class CircularBuffer : public BaseCircularBuffer {
         void *m_rollover;           //!< Rollover buffer for the last packet in circular buffer that is cut in two parts
         const uint32_t m_rolloverSize; //!< Size of the rollover buffer in bytes
         int m_error;                //!< Non-zero error value
+        int m_prevError;            //!< A cached error used only in wait() function to detect the error first time
 
         // These change frequently and should be secured by a lock
         uint32_t m_consumer;        //!< Index into circular buffer where consumer is

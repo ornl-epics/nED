@@ -39,6 +39,7 @@ void DmaCopier::copyWorker(epicsEvent *shutdown)
             break;
         }
 
+        // Successful push() will wake up consumer
         len = CircularBuffer::push(data, len);
         if (len == 0) {
             wakeUpConsumer(-ENODATA);
