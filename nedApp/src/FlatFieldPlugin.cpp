@@ -12,6 +12,7 @@
 #include "Log.h"
 
 #include <dirent.h>
+#include <cstring> // strerror()
 
 #include <fstream>
 #include <limits>
@@ -33,10 +34,14 @@
 EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Dispatcher port name", string, "Correction tables file", string, "Buffer size", int);
 
 FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importDir, int bufSize)
-    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_FLATFIELDPLUGIN_PARAMS, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
+    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_FLATFIELDPLUGIN_PARAMS, asynOctetMask | asynInt8ArrayMask | asynFloat64Mask, asynOctetMask | asynInt8ArrayMask | asynFloat64Mask)
+    , m_tablesErr(1)
+    , m_psEn(0)
+    , m_corrEn(0)
+    , m_convEn(0)
+    , m_tableSizeX(0)
+    , m_tableSizeY(0)
 {
-    ImportError err = FF_ERR_NONE;
-
     if (bufSize > 0) {
         m_bufferSize = bufSize;
     } else {
@@ -45,16 +50,19 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     }
     m_buffer = reinterpret_cast<uint8_t *>(malloc(m_bufferSize));
     if (m_buffer == 0) {
-        m_bufferSize = 0;
-        err = FF_ERR_NO_MEM;
+        LOG_ERROR("Failed to allocate transformation buffer");
     }
 
-    if (err == FF_ERR_NONE)
-        err = importFiles(importDir);
+    importFiles(importDir);
 
     createParam("ImportReport", asynParamOctet, &ImportReport);   // Generate textual file import report
     createParam("ImportDir",    asynParamOctet, &ImportDir, importDir); // Path to correction tables directory
-    createParam("ErrImport",    asynParamInt32, &ErrImport, err); // Last mapping import error
+    createParam("BufferSize",   asynParamInt32, &BufferSize, (int)m_bufferSize); // Allocated buffer size
+    createParam("Positions",    asynParamInt8Array, &Positions);  // Array of configured positions
+    createParam("TablesErr",    asynParamInt32, &TablesErr, m_tablesErr); // Default is 1 until expected positions are configured and checked
+    createParam("PsEn",         asynParamInt32, &PsEn, 0);        // Switch to toggle photosum elimination
+    createParam("CorrEn",       asynParamInt32, &CorrEn, 0);      // Switch to toggle applying flat field correction
+    createParam("ConvEn",       asynParamInt32, &ConvEn, 0);      // Switch to toggle converting data to pixel id format
     createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels, probably due to missing correction tables
     createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
     createParam("CntPhotoSum",  asynParamInt32, &CntPhotoSum, 0); // Number of photo sum eliminated pixels
@@ -64,7 +72,8 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     // Next two params are in UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
     createParam("XyFractWidth",  asynParamInt32, &XyFractWidth, 24); // WRITE - Number of fraction bits in X,Y data
     createParam("PsFractWidth",  asynParamInt32, &PsFractWidth, 15); // WRITE - Number of fraction bits in PhotoSum data
-    createParam("XyRange",      asynParamFloat64, &XyRange, 158.0); // WRITE - Maximum X and Y values from detector
+    createParam("XRange",       asynParamFloat64, &XRange, 158.0); // WRITE - Maximum X values from detector
+    createParam("YRange",       asynParamFloat64, &YRange, 158.0); // WRITE - Maximum Y values from detector
     createParam("PsLowDecBase", asynParamFloat64, &PsLowDecBase, 300.0); // WRITE - PhotoSum lower decrement base
     createParam("PsLowDecLim",  asynParamFloat64, &PsLowDecLim, 400.0); // WRITE - PhotoSum lower decrement limit
     callParamCallbacks();
@@ -101,37 +110,101 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 asynStatus FlatFieldPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
-    if (pasynUser->reason == XyRange) {
-        if (value <= 0.0 || value >= MAX_PIXEL_SIZE)
+    if (pasynUser->reason == XRange || pasynUser->reason == YRange) {
+        if (value <= 0.0)
             return asynError;
     }
     return BaseDispatcherPlugin::writeFloat64(pasynUser, value);
 }
 
+asynStatus FlatFieldPlugin::writeInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements)
+{
+    if (pasynUser->reason == Positions) {
+        // asyn will try to initialize the record with 0 elements
+        if (nElements > 0) {
+            // Disable all tables first
+            for (auto it = m_tables.begin(); it != m_tables.end(); it++) {
+                it->enabled = false;
+            }
+
+            // Enable only tables that meet requirements and are in the user list
+            m_tablesErr = 0;
+            int psEn, corrEn;
+            getIntegerParam(PsEn,   &psEn);
+            getIntegerParam(CorrEn, &corrEn);
+            for (size_t i = 0; i < nElements; i++) {
+                uint32_t position = values[i];
+                if (position >= m_tables.size()) {
+                    m_tablesErr = 1;
+                    LOG_ERROR("Position %d not loaded", position);
+                    continue;
+                }
+                if (psEn == 1 && (m_tables[position].psLowX.get() == 0 || m_tables[position].psUpX.get() == 0)) {
+                    m_tablesErr = 1;
+                    LOG_ERROR("Photosum tables for position %d not laded", position);
+                    continue;
+                }
+                if (corrEn == 1 && (m_tables[position].corrX.get() == 0 || m_tables[position].corrY.get() == 0)) {
+                    m_tablesErr = 1;
+                    LOG_ERROR("X and Y correction tables for position %d not laded", position);
+                    continue;
+                }
+                m_tables[position].enabled = true;
+            }
+
+            // If there's a request to enable a table but there was a problen meeting
+            // the requirements, flag an error - user can use asynReport to diagnoze
+            // what tables are loaded
+            setIntegerParam(TablesErr, m_tablesErr);
+            callParamCallbacks();
+        }
+        return asynSuccess;
+    }
+    return BaseDispatcherPlugin::writeInt8Array(pasynUser, values, nElements);
+}
+
+asynStatus FlatFieldPlugin::readInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements, size_t *nIn)
+{
+    if (pasynUser->reason == Positions) {
+        int psEn, corrEn;
+        getIntegerParam(PsEn, &psEn);
+        getIntegerParam(CorrEn, &corrEn);
+        *nIn = 0;
+        for (size_t i = 0; i < m_tables.size(); i++) {
+            bool loaded = false;
+            if (corrEn && psEn) {
+                // all 4 tables must be loaded
+                if (m_tables[i].corrX.get()  != 0 && m_tables[i].corrY.get()  != 0 &&
+                    m_tables[i].psLowX.get() != 0 && m_tables[i].psUpX.get() != 0) {
+                    loaded = true;
+                }
+            } else if (corrEn) {
+                // X and Y correction tables must be loaded
+                if (m_tables[i].corrX.get()  != 0 && m_tables[i].corrY.get()  != 0) {
+                    loaded = true;
+                }
+            } else if (psEn) {
+                // X and Y correction tables must be loaded
+                if (m_tables[i].psLowX.get() != 0 && m_tables[i].psUpX.get() != 0) {
+                    loaded = true;
+                }
+            }
+
+            if (loaded == true && *nIn < nElements) {
+                *values = (uint8_t)i;
+                values++;
+                *nIn += 1;
+            }
+        }
+        return asynSuccess;
+    }
+    return BaseDispatcherPlugin::writeInt8Array(pasynUser, values, nElements);
+}
+
 asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
 {
     if (pasynUser->reason == ImportReport) {
-
-        const char *importErrMap[] = {
-            "imported",                     // FF_ERR_NONE
-            "no such file",                 // FF_ERR_NO_FILE
-            "parse error",                  // FF_ERR_PARSE
-            "no memory",                    // FF_ERR_NO_MEM
-            "duplicate data for position",  // FF_ERR_EXIST
-            "unrecognized file format",     // FF_ERR_BAD_FORMAT
-            "table size mismatch",          // FF_ERR_BAD_SIZE
-        };
-
-        *nActual = 0;
-        for (auto it = m_filesStatus.begin(); it != m_filesStatus.end(); it++) {
-            int ret = snprintf(value, nChars, "%-20s - %s\n", it->first.c_str(), importErrMap[it->second]);
-            if (ret == -1 || (size_t)ret > nChars)
-                break;
-
-            nChars -= ret;
-            value += ret;
-            *nActual += ret;
-        }
+        *nActual = snprintf(value, nChars, "%s", m_reportText.str().c_str());
         return asynSuccess;
     }
     return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
@@ -146,11 +219,12 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     DasPacketList newPacketList;
 
     // Parametrise calculating algorithms based on detector.
-    double xyRange = 0.0;
+    double xRange = 0.0;
+    double yRange = 0.0;
     int xyFractWidth = 0;
     int psFractWidth = 0;
 
-    if (m_buffer == 0) {
+    if (m_buffer == 0 || m_tablesErr == 1) {
         LOG_ERROR("Flat field correction disabled due to import error");
         return;
     }
@@ -167,14 +241,17 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
         m_ffMode = FF_PASS_THRU;
     getIntegerParam(XyFractWidth, &xyFractWidth);
     getIntegerParam(PsFractWidth, &psFractWidth);
-    getDoubleParam(XyRange,     &xyRange);
+    getDoubleParam(XRange,      &xRange);
+    getDoubleParam(YRange,      &yRange);
 
     // This is a trick to avoid locking access to member variables. Since
     // plugin design ensures a single instance of processDataUnlocked()
     // function at any time, we read in values and store them as class members.
     // This makes member variables const for the duration of this function.
-    m_xyScale = 1.0 * m_tablesSize / ((1 << xyFractWidth) * xyRange);
+    m_xScale = 1.0 * m_tableSizeX / ((1 << xyFractWidth) * xRange);
+    m_yScale = 1.0 * m_tableSizeY / ((1 << xyFractWidth) * yRange);
     m_psScale = 1.0 / (1 << psFractWidth);
+    // TODO: PsEn, CorrEn, ConvEn
     getDoubleParam(PsLowDecBase,&m_psLowDecBase);
     getDoubleParam(PsLowDecLim, &m_psLowDecLim);
 
@@ -268,22 +345,22 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
 
         // Convert raw values into ones used by calculations
         uint32_t tof = srcEvent->time_of_flight;
-        uint32_t position_id = srcEvent->position_index & 0x3FFF;
-        double x = srcEvent->position_x * m_xyScale;
-        double y = srcEvent->position_y * m_xyScale;
+        uint32_t position = srcEvent->position_index & 0x3FFF;
+        double x = srcEvent->position_x * m_xScale;
+        double y = srcEvent->position_y * m_yScale;
         double photosum_x = srcEvent->photo_sum_x * m_psScale;
         // unused srcEvent->photo_sum_y
         srcEvent++;
 
         // Check photo sum
-        if (checkPhotoSumLimits(x, y, photosum_x, position_id) == false) {
+        if (checkPhotoSumLimits(x, y, photosum_x, position) == false) {
             errors.nPhotoSum++;
             continue;
         }
 
         // Convert to TOF,pixelid tupple
         destEvent->tof = tof;
-        destEvent->pixelid = xyToPixel(x, y, position_id);
+        destEvent->pixelid = xyToPixel(x, y, position);
 
         if ((destEvent->pixelid & 0x3FFFF) == 0) {
             errors.nUnmapped++;
@@ -299,336 +376,207 @@ FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacke
     return errors;
 }
 
-std::shared_ptr<FlatFieldPlugin::CorrTable_t> FlatFieldPlugin::findTable(uint32_t position_id, TableType_t type)
-{
-    if (m_corrTables.size() > position_id && m_corrTables[position_id].size() > (unsigned)type)
-        return m_corrTables[position_id][type];
-
-    return std::shared_ptr<CorrTable_t>();
-}
-
-uint32_t FlatFieldPlugin::xyToPixel(double x, double y, uint32_t position_id)
+uint32_t FlatFieldPlugin::xyToPixel(double x, double y, uint32_t position)
 {
     if (likely(m_ffMode == FF_FLATTEN)) {
-        std::shared_ptr<CorrTable_t> xtable = findTable(position_id, TABLE_X_CORRECTION);
-        std::shared_ptr<CorrTable_t> ytable = findTable(position_id, TABLE_Y_CORRECTION);
+        if (position >= m_tables.size())
+            return 0;
 
-        if (xtable.get() == 0 || ytable.get() == 0)
+        std::shared_ptr<FlatFieldTable> xtable = m_tables[position].corrX;
+        std::shared_ptr<FlatFieldTable> ytable = m_tables[position].corrY;
+        if (m_tables[position].enabled == false || xtable.get() == 0 || ytable.get() == 0)
             return 0;
 
         unsigned xp = x;
         unsigned yp = y;
 
-        // Tables are guaranteed to be MAX_PIXEL_SIZE elements in any direction
-        if (x < 0.0 || xp >= xtable->size() || y < 0.0 || yp >= ytable->size())
+        // All tables of the same size, safe to compare against just one
+        if (x < 0.0 || xp >= xtable->sizeX || y < 0.0 || yp >= xtable->sizeY)
             return 0;
 
         // All checks passed - do the correction
+        double dx = (xp == 0 || xp == (xtable->sizeX - 1)) ? 0 : x - xp;
+        double dy = (yp == 0 || yp == (ytable->sizeY - 1)) ? 0 : y - yp;
 
-        double dx = (xp == 0 || xp == (xtable->size()  - 1)) ? 0 : x - xp;
-        double dy = (yp == 0 || yp == (ytable->size() - 1)) ? 0 : y - yp;
-
-        x -= (dx * (*xtable)[xp+1][yp]) + ((1 - dx) * (*xtable)[xp][yp]);
-        y -= (dy * (*ytable)[xp][yp+1]) + ((1 - dy) * (*ytable)[xp][yp]);
+        x -= (dx * xtable->data[xp+1][yp]) + ((1 - dx) * xtable->data[xp][yp]);
+        y -= (dy * ytable->data[xp][yp+1]) + ((1 - dy) * ytable->data[xp][yp]);
     }
 
-    return (position_id << (2*POSITION_BITS)) | (((int)x & POSITION_MASK) << POSITION_BITS) | (((int)y & POSITION_MASK));
+    return (position << (2*POSITION_BITS)) | (((int)x & POSITION_MASK) << POSITION_BITS) | (((int)y & POSITION_MASK));
 }
 
-bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position_id)
+bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position)
 {
     if (unlikely(m_ffMode != FF_FLATTEN))
         return true;
 
-    std::shared_ptr<CorrTable_t> upperLimits = findTable(position_id, TABLE_X_PHOTOSUM_UPPER);
-    std::shared_ptr<CorrTable_t> lowerLimits = findTable(position_id, TABLE_X_PHOTOSUM_LOWER);
+    if (position >= m_tables.size())
+        return false;
 
-    if (upperLimits.get() == 0 || lowerLimits.get() == 0)
+    std::shared_ptr<FlatFieldTable> upperLimits = m_tables[position].psUpX;
+    std::shared_ptr<FlatFieldTable> lowerLimits = m_tables[position].psLowX;
+    if (m_tables[position].enabled == false || upperLimits.get() == 0 || lowerLimits.get() == 0)
         return false;
 
     unsigned xp = x;
     unsigned yp = y;
 
-    // Tables are guaranteed to be MAX_PIXEL_SIZE elements in any direction
-    if (x < 0.0 || xp >= upperLimits->size() || y < 0.0 || yp >= upperLimits->size())
+    // All tables of the same size, safe to compare against just one
+    if (x < 0.0 || xp >= upperLimits->sizeX || y < 0.0 || yp >= upperLimits->sizeY)
         return 0;
 
-    double upperLimit = (*upperLimits)[xp][yp];
-    double lowerLimit = (*lowerLimits)[xp][yp];
+    double upperLimit = upperLimits->data[xp][yp];
+    double lowerLimit = lowerLimits->data[xp][yp];
 
     return (lowerLimit <= photosum_x && photosum_x <= upperLimit);
 }
-
-bool FlatFieldPlugin::parseHeader(std::ifstream &infile, std::string &key, std::string &value)
-{
-    std::string line;
-
-    while (std::getline(infile, line)) {
-        // Skip leading blanks
-        size_t pos = line.find_first_not_of(' ');
-
-        // Eat empty lines
-        if (pos == std::string::npos)
-            continue;
-
-        line = line.substr(pos);
-
-        // Put line back when not a header line
-        if (line.at(0) != '#') {
-            infile.seekg(-1 * (line.length() + 1), std::ifstream::cur);
-            break;
-        }
-
-        // Skip # and blanks
-        pos = line.find_first_not_of(" \t#");
-
-        // Empty comment line
-        if (pos == std::string::npos)
-            continue;
-
-        line = line.substr(pos);
-
-        // Parse comment line, stripped text before ':' is key, value is after ':'
-        pos = line.find_first_of(':');
-        if (pos == std::string::npos) {
-            key = line;
-            value = "";
-        } else {
-            key = line.substr(0, line.find_last_not_of(" \t", pos));
-            pos = line.find_first_not_of(" \t:", pos);
-            if (pos == std::string::npos) {
-                value = "";
-            } else {
-                value = line.substr(pos);
-            }
-        }
-        return true;
-    }
-
-    return false;
-}
-
-FlatFieldPlugin::ImportError FlatFieldPlugin::parseHeaders(
-    std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id,
-    FlatFieldPlugin::TableType_t &type, const std::string &path)
-{
-    size_x = 0;
-    size_y = 0;
-    position_id = 0xFFFFFFFF;
-    type = TABLE_UNKNOWN;
-    int version = 0;
-    uint32_t nHeaders = 0;
-
-    std::string key, value;
-
-    while (parseHeader(infile, key, value)) {
-        if (key == "Format version") {
-            if (sscanf(value.c_str(), "%d", &version) != 1) {
-                LOG_ERROR("Failed to read file format version: %s", path.c_str());
-                return FF_ERR_PARSE;
-            }
-            nHeaders++;
-        }
-        if (key == "Table size") {
-            if (sscanf(value.c_str(), "%ux%u", &size_x, &size_y) != 2) {
-                LOG_ERROR("Failed to read table size: %s", path.c_str());
-                return FF_ERR_PARSE;
-            }
-            nHeaders++;
-        }
-        if (key == "Table type") {
-            char dim;
-            if (sscanf(value.c_str(), "Photo Sum %c lower", &dim) == 1) {
-                if (dim == 'x' || dim == 'X') {
-                    type = TABLE_X_PHOTOSUM_LOWER;
-                } else if (dim == 'y' || dim == 'Y') {
-                    LOG_WARN("Y photo sum table not implemented: %s", path.c_str());
-                } else {
-                    LOG_ERROR("Unknown photo sum dimension: %s", path.c_str());
-                    return FF_ERR_PARSE;
-                }
-            } else if (sscanf(value.c_str(), "Photo Sum %c upper", &dim) == 1) {
-                if (dim == 'x' || dim == 'X') {
-                    type = TABLE_X_PHOTOSUM_UPPER;
-                } else if (dim == 'y' || dim == 'Y') {
-                    LOG_WARN("Y photo sum table not implemented: %s", path.c_str());
-                } else {
-                    LOG_ERROR("Unknown photo sum dimension: %s", path.c_str());
-                    return FF_ERR_PARSE;
-                }
-            } else if (sscanf(value.c_str(), "Correction %c", &dim) == 1) {
-                if (dim == 'x' || dim == 'X') {
-                    type = TABLE_X_CORRECTION;
-                } else if (dim == 'y' || dim == 'Y') {
-                    type = TABLE_Y_CORRECTION;
-                } else {
-                    LOG_ERROR("Failed to parse table type: %s", path.c_str());
-                    return FF_ERR_PARSE;
-                }
-            } else {
-                LOG_ERROR("Failed to read table type: %s", path.c_str());
-                return FF_ERR_PARSE;
-            }
-            nHeaders++;
-        }
-        if (key == "Position id") {
-            if (sscanf(value.c_str(), "%u", &position_id) != 1) {
-                LOG_ERROR("Failed to read position id: %s", path.c_str());
-                return FF_ERR_PARSE;
-            } else if (position_id & ~0x7FFFFFFF) {
-                LOG_ERROR("Invalid position id %u: %s", position_id, path.c_str());
-                return FF_ERR_PARSE;
-            }
-            nHeaders++;
-        }
-    }
-
-    if (nHeaders == 0) {
-        LOG_WARN("Unknown file format: %s", path.c_str());
-        return FF_ERR_BAD_FORMAT;
-    }
-
-    // Make sure we got all required headers
-    if (version == 0) {
-        LOG_ERROR("Invalid file format, missing version: %s", path.c_str());
-        return FF_ERR_PARSE;
-    }
-    if (version != 1) {
-        LOG_ERROR("Invalid file format, unsupported format version '%d': %s", version, path.c_str());
-        return FF_ERR_PARSE;
-    }
-    if (size_x == 0 || size_y == 0 || size_x > MAX_PIXEL_SIZE || size_y > MAX_PIXEL_SIZE) {
-        LOG_ERROR("Invalid file format, missing table size header: %s", path.c_str());
-        return FF_ERR_PARSE;
-    }
-    if (type == TABLE_UNKNOWN) {
-        LOG_ERROR("Invalid file format, missing table type header: %s", path.c_str());
-        return FF_ERR_PARSE;
-    }
-    if (position_id == 0xFFFFFFFF) {
-        LOG_ERROR("Invalid file format, missing position id header: %s", path.c_str());
-        return FF_ERR_PARSE;
-    }
-
-    return FF_ERR_NONE;
-}
-
-FlatFieldPlugin::ImportError FlatFieldPlugin::importFile(const std::string &path, uint32_t &tableSize)
-{
-    ImportError err = FF_ERR_NONE;
-    std::ifstream infile(path.c_str());
-
-    if (infile.fail()) {
-        LOG_ERROR("Failed to open input file");
-        return FF_ERR_NO_FILE;
-    }
-
-    while (!infile.eof()) {
-        uint32_t size_x, size_y, position_id;
-        TableType_t type;
-        std::shared_ptr<CorrTable_t> table(new CorrTable_t);
-
-        if (table.get() == 0) {
-            err = FF_ERR_NO_MEM;
-            break;
-        }
-
-        err = parseHeaders(infile, size_x, size_y, position_id, type, path);
-        if (err != FF_ERR_NONE)
-            break;
-
-        if (tableSize == 0)
-            tableSize = size_x;
-        if (tableSize == 0 || size_x != tableSize || size_y != tableSize) {
-            err = FF_ERR_BAD_SIZE;
-            break;
-        }
-
-        // Correction factors should follow as doubles, X rows and Y columns.
-        // Table size must match the one defined in header.
-        table->resize(size_x, std::vector<double>(size_y, 0.0));
-        for (uint32_t i = 0; i < size_x; i++) {
-            for (uint32_t j = 0; j < size_y; j++) {
-                double value;
-                infile >> value;
-                (*table)[i][j] = value;
-
-                if (infile.eof()) {
-                    LOG_ERROR("Premature end of file");
-                    err = FF_ERR_PARSE;
-                    break;
-                }
-            }
-        }
-
-        // Make sure there's enough place in the m_corrTables
-        if (m_corrTables.size() <= position_id)
-            m_corrTables.resize(position_id + 1);
-        if (m_corrTables[position_id].size() < TABLE_UNKNOWN)
-            m_corrTables[position_id].resize(TABLE_UNKNOWN);
-
-        if (m_corrTables[position_id][type].get() != 0) {
-            err = FF_ERR_EXIST;
-        } else {
-            m_corrTables[position_id][type] = table;
-        }
-
-        break;
-    }
-
-    infile.close();
-
-    return err;
-}
-
-FlatFieldPlugin::ImportError FlatFieldPlugin::importFiles(const std::string &path)
+void FlatFieldPlugin::importFiles(const std::string &path)
 {
     struct dirent entry, *result;
+    bool foundCorrTables = false;
+    bool foundPsTables = false;
+
+    m_reportText << "Importing files from " << path << ":" << std::endl;
+
     DIR *dir = opendir(path.c_str());
-    uint32_t nImported = 0;
-    uint32_t nErrors = 0;
-
-    m_tablesSize = 0;
-
-    if (dir == NULL)
-        return FF_ERR_NO_FILE;
+    if (dir == NULL) {
+        LOG_ERROR("Failed to read import directory '%s': %s", path.c_str(), strerror(errno));
+        m_reportText << "none (failed to read directory)" << std::endl;
+        return;
+    }
 
     while (readdir_r(dir, &entry, &result) == 0 && result != NULL) {
         std::string filename = entry.d_name;
         if (filename != ".." && filename != ".") {
-            ImportError err = importFile(path + PATH_SEPARATOR + filename, m_tablesSize);
-            m_filesStatus[filename] = err;
+            std::shared_ptr<FlatFieldTable> table(new FlatFieldTable());
+            if (table.get() == 0) {
+                LOG_ERROR("Failed to initialize table");
+                m_reportText << " * " << filename << ": error - failed to allocate table" << std::endl;
+                continue;
+            }
+            if (table->import(path + PATH_SEPARATOR + filename) == false) {
+                LOG_ERROR("Failed to import file '%s': %s", filename.c_str(), table->getImportError().c_str());
+                m_reportText << " * " << filename << ": error - " << table->getImportError() << std::endl;
+                continue;
+            }
 
-            if (err == FF_ERR_NONE)
-                nImported++;
-            else if (err != FF_ERR_BAD_FORMAT)
-                nErrors++;
+            // Initialize the common table size variable
+            if (m_tableSizeX == 0) {
+                m_tableSizeX = table->sizeX;
+                m_tableSizeY = table->sizeY;
+            }
+
+            // Ensure all tables are of the same size
+            if (m_tableSizeX != table->sizeX || m_tableSizeY != table->sizeY) {
+                LOG_ERROR("Table size mismatch");
+                m_reportText << " * " << filename << ": error - table size mismatch" << std::endl;
+                continue;
+            }
+
+            // Make sure there's enough place in the m_corrTables
+            if (m_tables.size() <= table->position)
+                m_tables.resize(table->position + 1);
+
+            // Push table to tables vector
+            if (table->type == FlatFieldTable::TYPE_X_CORR) {
+                if (m_tables[table->position].corrX.get() == 0) {
+                    m_tables[table->position].corrX = table;
+                    foundCorrTables = true;
+                } else {
+                    LOG_ERROR("Correction X table already loaded for position %u", table->position);
+                    m_reportText << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    continue;
+                }
+            } else if (table->type == FlatFieldTable::TYPE_Y_CORR) {
+                if (m_tables[table->position].corrY.get() == 0) {
+                    m_tables[table->position].corrY = table;
+                    foundCorrTables = true;
+                } else {
+                    LOG_ERROR("Correction Y table already loaded for position %u", table->position);
+                    m_reportText << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    continue;
+                }
+            } else if (table->type == FlatFieldTable::TYPE_X_PS_LOW) {
+                if (m_tables[table->position].psLowX.get() == 0) {
+                    m_tables[table->position].psLowX = table;
+                    foundPsTables = true;
+                } else {
+                    LOG_ERROR("Photosum low X table already loaded for position %u", table->position);
+                    m_reportText << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    continue;
+                }
+            } else if (table->type == FlatFieldTable::TYPE_X_PS_UP) {
+                if (m_tables[table->position].psUpX.get() == 0) {
+                    m_tables[table->position].psUpX = table;
+                    foundPsTables = true;
+                } else {
+                    LOG_ERROR("Photosum upper X table already loaded for position %u", table->position);
+                    m_reportText << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    continue;
+                }
+            }
+
+            LOG_INFO("Imported file '%s'", filename.c_str());
+            m_reportText << " * " << filename << ": imported" << std::endl;
         }
     }
-
     closedir(dir);
 
-    // Check that each position has X,Y and X photosum table at least
-    for (auto it = m_corrTables.begin(); it != m_corrTables.end(); it++) {
-        if (it->size() > 0) {
-            if ((*it)[TABLE_X_CORRECTION].get() == 0 ||
-                (*it)[TABLE_Y_CORRECTION].get() == 0 ||
-                (*it)[TABLE_X_PHOTOSUM_LOWER].get() == 0 ||
-                (*it)[TABLE_X_PHOTOSUM_UPPER].get() == 0) {
+    m_reportText << std::endl << "Position loaded:" << std::endl;
 
-                m_corrTables.clear();
-                return FF_ERR_INCOMPLETE;
+    // Check tables constraints for each position:
+    // * all tables of the same size - already checked when tables created
+    // * X and Y correction tables loaded if using correction (foundCorrTables==true)
+    // * Lower and upper X photosum tables loaded if using photosum (foundPsTable==true)
+    bool nPositions = 0;
+    for (uint32_t i = 0; i < m_tables.size(); i++) {
+
+        if (m_tables[i].corrX.get() == 0 && m_tables[i].corrY.get() == 0 && m_tables[i].psLowX.get() == 0 && m_tables[i].psUpX.get() == 0)
+            continue;
+
+        nPositions++;
+        m_reportText << " * position " << i << ":" << std::endl;
+
+        if (foundCorrTables == true) {
+            if (m_tables[i].corrX.get() == 0) {
+                LOG_ERROR("Missing X correction table for position %u", i);
+                m_reportText << "   - X correction table missing" << std::endl;
+            } else {
+                m_reportText << "   - X correction table loaded" << std::endl;
+            }
+            if (m_tables[i].corrY.get() == 0) {
+                LOG_ERROR("Missing Y correction table for position %u", i);
+                m_reportText << "   - Y correction table missing" << std::endl;
+            } else {
+                m_reportText << "   - Y correction table loaded" << std::endl;
+            }
+        }
+
+        if (foundPsTables == true) {
+            if (m_tables[i].psLowX.get() == 0) {
+                LOG_ERROR("Missing lower X photosum correction table for position %u", i);
+                m_reportText << "   - lower X photosum table missing" << std::endl;
+            } else {
+                m_reportText << "   - lower X photosum table loaded" << std::endl;
+            }
+            if (m_tables[i].psUpX.get() == 0) {
+                LOG_ERROR("Missing upper X photosum correction table for position %u", i);
+                m_reportText << "   - upper X photosum table missing" << std::endl;
+            } else {
+                m_reportText << "   - upper X photosum table loaded" << std::endl;
             }
         }
     }
 
-    if (nErrors > 0) {
-        m_corrTables.clear();
-        return FF_ERR_PARSE;
+    if (nPositions == 0) {
+        LOG_ERROR("Found imported positions");
+        m_reportText << std::endl << " * none loaded" << std::endl;
     }
+}
 
-    if (nImported == 0)
-        return FF_ERR_NO_FILE;
-
-    return FF_ERR_NONE;
+void FlatFieldPlugin::report(FILE *fp, int details)
+{
+    std::string text = m_reportText.str();
+    fwrite(text.c_str(), 1, text.length(), fp);
+    return BasePlugin::report(fp, details);
 }

@@ -11,8 +11,10 @@
 #define FLAT_FIELD_PLUGIN_H
 
 #include "BaseDispatcherPlugin.h"
+#include "FlatFieldTable.h"
 
 #include <limits>
+#include <sstream>
 
 /**
  * FlatFieldPlugin applies flat-field correction to pre-calculated X,Y events.
@@ -59,21 +61,20 @@
  */
 class FlatFieldPlugin : public BaseDispatcherPlugin {
     private: // structures & typedefs
-        /**
-         * Single correction table, need one for X and one fo Y
-         */
-        typedef std::vector< std::vector<double> > CorrTable_t;
 
         /**
-         * Type of the table being imported, also index in m_corrTables.
+         * Contain all tables for a give detector position
+         *
+         * Structure used in m_tables variable. Not all tables need to be
+         * present -> use std::shared_ptr.
          */
-        typedef enum {
-            TABLE_X_CORRECTION      = 0,
-            TABLE_Y_CORRECTION      = 1,
-            TABLE_X_PHOTOSUM_LOWER  = 2,
-            TABLE_X_PHOTOSUM_UPPER  = 3,
-            TABLE_UNKNOWN, // This element must be the last one
-        } TableType_t;
+        struct PositionTables {
+            bool enabled;
+            std::shared_ptr<FlatFieldTable> corrX;  //!< Pointer to X correction table
+            std::shared_ptr<FlatFieldTable> corrY;  //!< Pointer to Y correction table
+            std::shared_ptr<FlatFieldTable> psLowX; //!< Pointer to lower X photosum table
+            std::shared_ptr<FlatFieldTable> psUpX;  //!< Pointer to upper X photosum table
+        };
 
         /**
          * Structure used for returning error counters from transform function.
@@ -167,7 +168,17 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
 
         /**
-         * Handle reading octet (string) data from plugin.
+         * Handle writing array of Int8
+         */
+        asynStatus writeInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements);
+
+        /**
+         * Handle reading array of Int8
+         */
+        asynStatus readInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements, size_t *nIn);
+
+        /**
+         * Handle reading octets
          */
         asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
 
@@ -175,6 +186,11 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Overloaded function to process incoming OCC packets.
          */
         void processDataUnlocked(const DasPacketList * const packetList);
+
+        /**
+         * Reports all import errors when asynReport() is called.
+         */
+        void report(FILE *fp, int details);
 
     private:
         /**
@@ -194,10 +210,10 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          *
          * @param[in] x Calculated position X, in range [0.0 .. X table size)
          * @param[in] y Calculated position Y, in range [0.0 .. Y table size)
-         * @param[in] position_id Detector position id to find corresponding correction tables.
+         * @param[in] position Detector position id to find corresponding correction tables.
          * @return Calculated pixel id, 0 when X,Y out of range or no table found.
          */
-        uint32_t xyToPixel(double x, double y, uint32_t position_id);
+        uint32_t xyToPixel(double x, double y, uint32_t position);
 
         /**
          * Determine whether the X,Y position is within photo sum limits.
@@ -208,127 +224,51 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[in] x Calculate position X, in range [0.0 .. X table size)
          * @param[in] y Calculate position Y, in range [0.0 .. X table size)
          * @param[in] photosum_x Photo sum X value
-         * @param[in] position_id Detector position id to find corresponding correction tables.
+         * @param[in] position Detector position id to find corresponding correction tables.
          * @return true when X,Y position is within photosum checks, false otherwise
          */
-        bool checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position_id);
-
-        /**
-         * Parse the flat-field file and populate the tables.
-         *
-         * All correction tables are single ASCII file. Correction table file
-         * starts with mandatory header and optional comments. Header and
-         * comment lines start with character '#'. Header lines are key,value
-         * tupples separated by ':'. Unknown header lines are treated as
-         * comment. Valid header keys are:
-         * - Format version
-         * - Table size
-         * - Table dimension
-         * - Position id
-         *
-         * ASCII file has several advantages over binary file. It's cross
-         * platform independent, it's easy to read and debug, it can be saved
-         * to version control repository more efficiently due to compression.
-         *
-         * Example file:
-         * @code {.txt}
-         * # FlatField correction table: X correction
-         * # File created on 2015-02-09 09:28:06
-         * # Format version: 1
-         * # Table size: 3x3
-         * # Table dimension: X
-         * # Position id: 17
-         *
-         * -0.12 +6.81 +3.55
-         * +0.44 +5.09 +12.11
-         * +0.79 -9.10 -3.61
-         * @endcode
-         *
-         * @param[in] path Relative or absolute path to a file to parse.
-         * @param[out] tableSize Both table dimensions must match this one,
-         *                       initialized to size_x if 0.
-         * @retval MAP_ERR_NO_FILE No such file or file can not be opened.
-         * @retval MAP_ERR_BAD_FORMAT File doesn't look like valid correction
-         *         table file.
-         * @retval MAP_ERR_PARSE File seems to be valid correction table but
-         *         there was problem parsing it.
-         * @retval MAP_ERR_EXIST Data for this position already imported.
-         * @retval MAP_ERR_NONE No error, file was successfully imported.
-         */
-        ImportError importFile(const std::string &path, uint32_t &tableSize);
+        bool checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position);
 
         /**
          * Try to import all files in given directory.
          *
-         * Function calls importFile() function for every file it finds in
-         * specified directory. Member variables m_corrTables is populated
-         * with one pair of X,Y correction tables per detector (position).
-         * In case of any error m_corrTables is emptied.
+         * Walk through all files in the specified directory and try to import
+         * them. All errors are printed to the log.
          *
-         * It also populates m_tablesSize variable which represents a single
-         * dimension size for any given correction table.
+         * Several checks are performed to ensure tables integrity before table is
+         * accepted:
+         * - file must be parsed correctly
+         * - all tables must be of the same size
+         * - all detected positions mut have the same set of files
+         *   - X and Y correction if at least one detector has those
+         *   - lower and upper X photosum limits if at least one detector has those
+         *
+         * All tables are kept in m_tables vector. std::vector was used
+         * for performance reasons, as up to 4 tables needs to be found for
+         * each event processed. Configured positions should start at 0 and
+         * be contigues but that is not the requirement.
          *
          * @note Should work on WIN32 as well, but not tested.
          * @param[in] dir Relative or absolute path to a directory with
          *                correction table files.
-         * @retval FF_ERR_NONE All files imported succesfully.
-         * @retval FF_ERR_NO_FILE No files found to import.
-         * @retval FF_ERR_PARSE Failed to parse some files.
          */
-        ImportError importFiles(const std::string &dir);
-
-        /**
-         * Parse single header from the current file position.
-         *
-         * @param[in] infile Opened file
-         * @param[out] key Text up to the first ':' character in line
-         * @param[out] value Text after the first ':' character in line
-         * @return True when parsed, false otherwise.
-         */
-        bool parseHeader(std::ifstream &infile, std::string &key, std::string &value);
-
-        /**
-         * Parse all headers from the current file position.
-         *
-         * Process all lines starting with # character and tries to parse them
-         * to obtain required fields. Blank lines are truncated. Header line
-         * can be of any. Function succeeds only if it finds all required
-         * headers and parses them. Required header lines:
-         * - Format version: <ver>
-         * - Table size: <X>x<Y>
-         * - Table type: Correction <x or y>
-         * - Position id: <id>
-         *
-         * @param[in] infile Opened file to parse headers from.
-         * @param[out] size_x X dimension size
-         * @param[out] size_y Y dimension size
-         * @param[out] position_id Camera position id
-         * @param[out] type Type of imported table
-         * @param[in] path File path name used for error reporting
-         * @retval MAP_ERR_BAD_FORMAT Unrecognized file format
-         * @retval MAP_ERR_PARSE File seems to be expected format but parse error.
-         * @retval MAP_ERR_NONE Header parsed.
-         */
-        ImportError parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, FlatFieldPlugin::TableType_t &type, const std::string &path);
-
-        /**
-         * Find correction table.
-         *
-         * @param[in] position_id Detector position
-         * @param[in] type Table type.
-         * @return Pointer to table or empty pointer if not found.
-         */
-        std::shared_ptr<CorrTable_t> findTable(uint32_t position_id, TableType_t type);
+        void importFiles(const std::string &dir);
 
     private: // variables
+        int m_tablesErr;            //!< Flag whether all required tables are ready
+        int m_psEn;                 //!< Switch to toggle photosum elimination process
+        int m_corrEn;               //!< Switch to toggle applying flat field correction
+        int m_convEn;               //!< Switch to toggle converting data to pixel id format
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
         uint32_t m_bufferSize;      //!< Size of buffer
-        std::vector< std::vector<std::shared_ptr<CorrTable_t> > > m_corrTables; //!< First dimension is detector, second dimension is table type (X,Y, photosum X,Y = 4 tables per detector)
-        uint32_t m_tablesSize;       //!< X (or Y) dimension of all tables, all tables must be the same size, X and Y dimension must equal
-        std::map<std::string, ImportError> m_filesStatus; //!< Import file status
+        uint32_t m_tableSizeX;      //!< X dimension size of all tables
+        uint32_t m_tableSizeY;      //!< Y dimension size of all tables
+        std::vector<PositionTables> m_tables;    //!< Array of lookup tables, detector position is index
+        std::ostringstream m_reportText; //!< Text to be printed when asynReport() is called
 
         // Following member variables must be carefully set since they're used un-locked
-        double m_xyScale;           //!< Scaling factor to transform raw X,Y range to [0.0 .. m_tablesSize)
+        double m_xScale;            //!< Scaling factor to transform raw X range to [0 .. m_tableSizeX)
+        double m_yScale;            //!< Scaling factor to transform raw Y range to [0 .. m_tableSizeY)
         double m_psScale;           //!< Scaling factor to convert unsigned UQm.n 32 bit value into double
         double m_psLowDecBase;      //!< PhotoSum lower decrement base
         double m_psLowDecLim;       //!< PhotoSum lower decrement limit
@@ -338,7 +278,12 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         #define FIRST_FLATFIELDPLUGIN_PARAM ImportReport
         int ImportReport;   //!< Generate textual file import report
         int ImportDir;      //!< Absolute path to pixel map file
-        int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
+        int BufferSize;     //!< Size of allocated buffer, 0 means alocation error
+        int Positions;      //!< Array of configured positions
+        int TablesErr;      //!< At least one table was not imported properly, check for reason with asynReport()
+        int PsEn;           //!< Switch to toggle photosum elimination
+        int CorrEn;         //!< Switch to toggle applying flat field correction
+        int ConvEn;         //!< Switch to toggle converting data to pixel id format
         int CntUnmap;       //!< Number of unmapped pixels
         int CntError;       //!< Number of generic error pixel ids detected
         int CntPhotoSum;    //!< Number of photo sum eliminated pixels
@@ -346,7 +291,8 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int ResetCnt;       //!< Reset counters
         int FfMode;         //!< Flat-field transformation mode (see FlatFieldPlugin::FfMode_t)
         int XyFractWidth;   //!< X,Y is in UQm.n format, n is fraction width
-        int XyRange;        //!< Maximum X and Y values from detector
+        int XRange;         //!< Maximum X values from detector
+        int YRange;         //!< Maximum Y values from detector
         int PsFractWidth;   //!< Photo sum is in UQm.n format, n is fraction width
         int PsLowDecBase;   //!< PhotoSum lower decrement base
         int PsLowDecLim;    //!< PhotoSum lower decrement limit
