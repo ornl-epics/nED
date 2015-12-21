@@ -4,16 +4,16 @@
 	<Project>
 		<Option title="ned" />
 		<Option makefile_is_custom="1" />
-		<Option execution_dir="../../../bnlroc_dev" />
+		<Option execution_dir="." />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<MakeCommands>
-			<Build command="$make -f $makefile $target" />
+			<Build command="$make all" />
 			<CompileFile command="$make -f $makefile $file" />
-			<Clean command="$make -f $makefile clean" />
+			<Clean command="$make clean" />
 			<DistClean command="$make -f $makefile distclean$target" />
 			<AskRebuildNeeded command="$make -q -f $makefile $target" />
-			<SilentBuild command="$make -f $makefile $target &gt; $(CMD_NULL)" />
+			<SilentBuild command="$make all &gt; $(CMD_NULL)" />
 		</MakeCommands>
 		<Build>
 			<Target title="Release">
@@ -72,6 +72,7 @@
 		<Unit filename="BasePvaPlugin.h" />
 		<Unit filename="BaseSocketPlugin.cpp" />
 		<Unit filename="BaseSocketPlugin.h" />
+		<Unit filename="Bits.h" />
 		<Unit filename="BnlDataPacket.h" />
 		<Unit filename="BnlFlatFieldPlugin.cpp" />
 		<Unit filename="BnlFlatFieldPlugin.h" />
@@ -117,6 +118,8 @@
 		<Unit filename="Fifo.h" />
 		<Unit filename="FlatFieldPlugin.cpp" />
 		<Unit filename="FlatFieldPlugin.h" />
+		<Unit filename="FlatFieldTable.cpp" />
+		<Unit filename="FlatFieldTable.h" />
 		<Unit filename="GlobalCon.st" />
 		<Unit filename="Log.h" />
 		<Unit filename="OccPortDriver.cpp" />

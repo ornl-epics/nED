@@ -7,11 +7,13 @@
  * @author Klemen Vodopivec
  */
 
+#include "Bits.h"
 #include "FlatFieldPlugin.h"
 #include "likely.h"
 #include "Log.h"
 
 #include <dirent.h>
+#include <cmath>
 #include <cstring> // strerror()
 
 #include <fstream>
@@ -19,11 +21,6 @@
 #include <string>
 
 #define NUM_FLATFIELDPLUGIN_PARAMS ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1))
-
-#define PIXID_ERR       (1 << 31)
-#define POSITION_BITS   9
-#define MAX_PIXEL_SIZE  (1 << POSITION_BITS)
-#define POSITION_MASK   (MAX_PIXEL_SIZE - 1)
 
 #if defined(WIN32) || defined(_WIN32)
 #   define PATH_SEPARATOR "\\"
@@ -36,9 +33,6 @@ EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Dispatcher port 
 FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importDir, int bufSize)
     : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_FLATFIELDPLUGIN_PARAMS, asynOctetMask | asynInt8ArrayMask | asynFloat64Mask, asynOctetMask | asynInt8ArrayMask | asynFloat64Mask)
     , m_tablesErr(1)
-    , m_psEn(0)
-    , m_corrEn(0)
-    , m_convEn(0)
     , m_tableSizeX(0)
     , m_tableSizeY(0)
 {
@@ -55,27 +49,25 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
 
     importFiles(importDir);
 
-    createParam("ImportReport", asynParamOctet, &ImportReport);   // Generate textual file import report
+    createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
     createParam("ImportDir",    asynParamOctet, &ImportDir, importDir); // Path to correction tables directory
     createParam("BufferSize",   asynParamInt32, &BufferSize, (int)m_bufferSize); // Allocated buffer size
-    createParam("Positions",    asynParamInt8Array, &Positions);  // Array of configured positions
+    createParam("Positions",    asynParamInt8Array, &Positions);        // Array of configured positions
     createParam("TablesErr",    asynParamInt32, &TablesErr, m_tablesErr); // Default is 1 until expected positions are configured and checked
-    createParam("PsEn",         asynParamInt32, &PsEn, 0);        // Switch to toggle photosum elimination
-    createParam("CorrEn",       asynParamInt32, &CorrEn, 0);      // Switch to toggle applying flat field correction
-    createParam("ConvEn",       asynParamInt32, &ConvEn, 0);      // Switch to toggle converting data to pixel id format
-    createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels, probably due to missing correction tables
-    createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
-    createParam("CntPhotoSum",  asynParamInt32, &CntPhotoSum, 0); // Number of photo sum eliminated pixels
-    createParam("CntSplit",     asynParamInt32, &CntSplit,  0);   // Number of packet train splits
-    createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
-    createParam("FfMode",       asynParamInt32, &FfMode, FF_PASS_THRU); // FlatField transformation mode (see FlatFieldPlugin::FfMode_t)
+    createParam("PsEn",         asynParamInt32, &PsEn, 0);              // Switch to toggle photosum elimination
+    createParam("CorrEn",       asynParamInt32, &CorrEn, 0);            // Switch to toggle applying flat field correction
+    createParam("ConvEn",       asynParamInt32, &ConvEn, 0);            // Switch to toggle converting data to pixel id format
+    createParam("CntVetoEvents",asynParamInt32, &CntVetoEvents, 0);     // Number of vetoed events
+    createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);     // Number of calculated events
+    createParam("CntSplit",     asynParamInt32, &CntSplit,  0);         // Number of packet train splits
+    createParam("ResetCnt",     asynParamInt32, &ResetCnt);             // Reset counters
     // Next two params are in UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
-    createParam("XyFractWidth",  asynParamInt32, &XyFractWidth, 24); // WRITE - Number of fraction bits in X,Y data
-    createParam("PsFractWidth",  asynParamInt32, &PsFractWidth, 15); // WRITE - Number of fraction bits in PhotoSum data
-    createParam("XRange",       asynParamFloat64, &XRange, 158.0); // WRITE - Maximum X values from detector
-    createParam("YRange",       asynParamFloat64, &YRange, 158.0); // WRITE - Maximum Y values from detector
-    createParam("PsLowDecBase", asynParamFloat64, &PsLowDecBase, 300.0); // WRITE - PhotoSum lower decrement base
-    createParam("PsLowDecLim",  asynParamFloat64, &PsLowDecLim, 400.0); // WRITE - PhotoSum lower decrement limit
+    createParam("XyFractWidth", asynParamInt32, &XyFractWidth, 24);     // WRITE - Number of fraction bits in X,Y data
+    createParam("PsFractWidth", asynParamInt32, &PsFractWidth, 15);     // WRITE - Number of fraction bits in PhotoSum data
+    createParam("XMaxIn",       asynParamFloat64, &XMaxIn, 158.0);      // WRITE - Defines input X range
+    createParam("YMaxIn",       asynParamFloat64, &YMaxIn, 158.0);      // WRITE - Defines input Y range
+    createParam("XMaxOut",      asynParamInt32, &XMaxOut, 511);         // WRITE - Converted max X value
+    createParam("YMaxOut",      asynParamInt32, &YMaxOut, 511);         // WRITE - Converted max Y value
     callParamCallbacks();
 }
 
@@ -89,8 +81,10 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == ResetCnt) {
         if (value > 0) {
-            setIntegerParam(CntUnmap, 0);
-            setIntegerParam(CntError, 0);
+            setIntegerParam(RxCount, 0);
+            setIntegerParam(ProcCount, 0);
+            setIntegerParam(CntGoodEvents, 0);
+            setIntegerParam(CntVetoEvents, 0);
             setIntegerParam(CntSplit, 0);
             callParamCallbacks();
         }
@@ -101,8 +95,8 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == PsFractWidth) {
         if (value < 1 || value > 30)
             return asynError;
-    } else if (pasynUser->reason == FfMode) {
-        if (value != FF_PASS_THRU && value != FF_FLATTEN && value != FF_CONVERT_ONLY)
+    } else if (pasynUser->reason == XMaxOut || pasynUser->reason == YMaxOut) {
+        if (value < 1 || value >= 1024)
             return asynError;
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
@@ -110,7 +104,7 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 asynStatus FlatFieldPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 {
-    if (pasynUser->reason == XRange || pasynUser->reason == YRange) {
+    if (pasynUser->reason == XMaxIn || pasynUser->reason == YMaxIn) {
         if (value <= 0.0)
             return asynError;
     }
@@ -215,12 +209,18 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     int nReceived = 0;
     int nProcessed = 0;
     TransformErrors errors;
+    int nVeto = 0;
+    int nGood = 0;
     int nSplits = 0;
     DasPacketList newPacketList;
+    bool psEn = false;
+    bool corrEn = false;
+    bool convEn = false;
+    double xMaxIn, yMaxIn;
+    int xMaxOut, yMaxOut;
+    bool passthru = false;
 
     // Parametrise calculating algorithms based on detector.
-    double xRange = 0.0;
-    double yRange = 0.0;
     int xyFractWidth = 0;
     int psFractWidth = 0;
 
@@ -230,41 +230,47 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     }
 
     this->lock();
-    getIntegerParam(RxCount,    &nReceived);
-    getIntegerParam(ProcCount,  &nProcessed);
-    getIntegerParam(CntUnmap,   &errors.nUnmapped);
-    getIntegerParam(CntError,   &errors.nErrors);
-    getIntegerParam(CntPhotoSum,&errors.nPhotoSum);
-    getIntegerParam(CntSplit,   &nSplits);
-    getIntegerParam(FfMode,     &m_ffMode);
+    getIntegerParam(RxCount,        &nReceived);
+    getIntegerParam(ProcCount,      &nProcessed);
+    getIntegerParam(CntVetoEvents,  &nVeto);
+    getIntegerParam(CntGoodEvents,  &nGood);
+    getIntegerParam(CntSplit,       &nSplits);
+    getIntegerParam(XyFractWidth,   &xyFractWidth);
+    getIntegerParam(PsFractWidth,   &psFractWidth);
+    getDoubleParam(XMaxIn,          &xMaxIn);
+    getDoubleParam(YMaxIn,          &yMaxIn);
+    getIntegerParam(XMaxOut,        &xMaxOut); // Guaranteed to be in 10-bit range
+    getIntegerParam(YMaxOut,        &yMaxOut); // Guaranteed to be in 10-bit range
+    getBooleanParam(PsEn,           &psEn);
+    getBooleanParam(ConvEn,         &convEn);
+    getBooleanParam(CorrEn,         &corrEn);
     if (getDataMode() != BasePlugin::DATA_MODE_NORMAL)
-        m_ffMode = FF_PASS_THRU;
-    getIntegerParam(XyFractWidth, &xyFractWidth);
-    getIntegerParam(PsFractWidth, &psFractWidth);
-    getDoubleParam(XRange,      &xRange);
-    getDoubleParam(YRange,      &yRange);
+        passthru = true;
 
     // This is a trick to avoid locking access to member variables. Since
     // plugin design ensures a single instance of processDataUnlocked()
     // function at any time, we read in values and store them as class members.
     // This makes member variables const for the duration of this function.
-    m_xScale = 1.0 * m_tableSizeX / ((1 << xyFractWidth) * xRange);
-    m_yScale = 1.0 * m_tableSizeY / ((1 << xyFractWidth) * yRange);
     m_psScale = 1.0 / (1 << psFractWidth);
-    // TODO: PsEn, CorrEn, ConvEn
-    getDoubleParam(PsLowDecBase,&m_psLowDecBase);
-    getDoubleParam(PsLowDecLim, &m_psLowDecLim);
-
+    m_xScaleIn = 1.0 * (m_tableSizeX - 1) / ((1 << xyFractWidth) * xMaxIn);
+    m_yScaleIn = 1.0 * (m_tableSizeY - 1) / ((1 << xyFractWidth) * yMaxIn);
+    m_xScaleOut = 1.0 * Bits::roundUpPower2(yMaxOut) * xMaxOut / (m_tableSizeX - 1);
+    m_yScaleOut = 1.0 *                                yMaxOut / (m_tableSizeY - 1);
+    m_xMaskOut = (Bits::roundUpPower2(xMaxOut) - 1) * Bits::roundUpPower2(yMaxOut);
+    m_yMaskOut = (Bits::roundUpPower2(yMaxOut) - 1);
     this->unlock();
 
-    if (m_ffMode == FF_PASS_THRU) {
+    if (psEn == false && corrEn == false && convEn == false)
+        passthru = true;
+
+    // Optimize passthru mode
+    if (passthru == true) {
         sendToPlugins(packetList);
-        nProcessed += packetList->size();
     } else {
         // Break single loop into two parts to have single point of sending data
         for (auto it = packetList->cbegin(); it != packetList->cend(); ) {
             uint32_t bufferOffset = 0;
-
+            DasPacketList newPacketList;
             newPacketList.reserve();
 
             for (; it != packetList->cend(); it++) {
@@ -290,8 +296,8 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
                 newPacketList.push_back(newPacket);
                 bufferOffset += packet->length();
 
-                // Do the X,Y -> pixid transformation - this could be parallelized
-                errors += transformPacket(packet, newPacket);
+                // Process the packet
+                processPacket(packet, newPacket, corrEn, psEn, convEn, nGood, nVeto);
             }
 
             sendToPlugins(&newPacketList);
@@ -306,110 +312,116 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     setIntegerParam(RxCount,    nReceived   % std::numeric_limits<int32_t>::max());
     setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntUnmap,   errors.nUnmapped);
-    setIntegerParam(CntPhotoSum,errors.nPhotoSum);
-    setIntegerParam(CntError,   errors.nErrors);
+    setIntegerParam(CntVetoEvents, nVeto);
+    setIntegerParam(CntGoodEvents, nGood);
     callParamCallbacks();
     this->unlock();
 }
 
-FlatFieldPlugin::TransformErrors FlatFieldPlugin::transformPacket(const DasPacket *srcPacket, DasPacket *destPacket)
+void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool correct, bool photosum, bool convert, int &nGood, int &nVeto)
 {
-    TransformErrors errors;
 
-    struct AcpcNormalData {
-        uint32_t time_of_flight;
-        uint32_t position_index;
-        uint32_t position_x;
-        uint32_t position_y;
-        uint32_t photo_sum_x;
-        uint32_t photo_sum_y;
+    // This structure represents an event from 2D detectors. It
+    // matches AcpcDataPacket::NormalEvent and BnlDataPacket::NormalEvent.
+    struct Event {
+        uint32_t tof;
+        uint32_t position;
+        uint32_t x;
+        uint32_t y;
+        uint32_t photosum_x;
+        uint32_t photosum_y;
     };
 
     // destPacket is guaranteed to be at least the size of srcPacket
     (void)srcPacket->copyHeader(destPacket, srcPacket->length());
 
-    uint32_t nEvents, nDestEvents;
-    const AcpcNormalData *srcEvent= reinterpret_cast<const AcpcNormalData *>(srcPacket->getData(&nEvents));
-    DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(destPacket->getData(&nDestEvents));
-    nEvents /= (sizeof(AcpcNormalData) / sizeof(uint32_t));
+    uint32_t nEvents;
+    const Event *srcEvent= reinterpret_cast<const Event *>(srcPacket->getData(&nEvents));
+    nEvents /= (sizeof(Event) / sizeof(uint32_t));
+
+    uint32_t nDestEvents;
+    uint32_t *newPayload = reinterpret_cast<uint32_t *>(destPacket->getData(&nDestEvents));
     nDestEvents = 0;
 
     while (nEvents-- > 0) {
-        // Skip error pixels
-        if (srcEvent->position_index & PIXID_ERR) {
-            errors.nErrors++;
+        double x = srcEvent->x * m_xScaleIn;
+        double y = srcEvent->y * m_yScaleIn;
+        double photosum_x = srcEvent->photosum_x * m_psScale;
+        uint32_t position = srcEvent->position;
+
+        // Check photo sum first
+        if (photosum == true && checkPhotoSumLimits(x, y, photosum_x, position) == false) {
+            nVeto++;
             srcEvent++;
-            continue;;
+            continue;
         }
 
-        // Convert raw values into ones used by calculations
-        uint32_t tof = srcEvent->time_of_flight;
-        uint32_t position = srcEvent->position_index & 0x3FFF;
-        double x = srcEvent->position_x * m_xScale;
-        double y = srcEvent->position_y * m_yScale;
-        double photosum_x = srcEvent->photo_sum_x * m_psScale;
-        // unused srcEvent->photo_sum_y
+        // Apply flat field correction
+        if (correct == true && correctPosition(x, y, position) == false) {
+            nVeto++;
+            srcEvent++;
+            continue;
+        }
+
+        // Not a veto, check what output format should we do
+        if (convert == true) {
+            DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(newPayload);
+
+            destEvent->tof = srcEvent->tof & 0xFFFFFFF;
+            destEvent->pixelid = (srcEvent->position & 0xFF) << 20; // incompatible with dcomserver, he shifts for 16 or 18 bits depending on HighRes
+            destEvent->pixelid |= ((uint32_t)round(x * m_xScaleOut) & m_xMaskOut);
+            destEvent->pixelid |= ((uint32_t)round(y * m_yScaleOut) & m_yMaskOut);
+
+            newPayload += sizeof(DasPacket::Event) / sizeof(uint32_t);
+            destPacket->payload_length += sizeof(DasPacket::Event);
+        } else {
+            Event *destEvent = reinterpret_cast<Event *>(newPayload);
+
+            destEvent->tof = srcEvent->tof & 0xFFFFFFF;
+            destEvent->position = srcEvent->position;
+            destEvent->x = x / m_xScaleIn;
+            destEvent->y = y / m_yScaleIn;
+            destEvent->photosum_x = srcEvent->photosum_x;
+            destEvent->photosum_y = srcEvent->photosum_y;
+
+            newPayload += sizeof(Event) / sizeof(uint32_t);
+            destPacket->payload_length += sizeof(Event);
+        }
+
+        nGood++;
         srcEvent++;
-
-        // Check photo sum
-        if (checkPhotoSumLimits(x, y, photosum_x, position) == false) {
-            errors.nPhotoSum++;
-            continue;
-        }
-
-        // Convert to TOF,pixelid tupple
-        destEvent->tof = tof;
-        destEvent->pixelid = xyToPixel(x, y, position);
-
-        if ((destEvent->pixelid & 0x3FFFF) == 0) {
-            errors.nUnmapped++;
-            continue;
-        }
-
-        destEvent++;
-        nDestEvents++;
     }
-
-    destPacket->payload_length += nDestEvents * sizeof(DasPacket::Event);
-
-    return errors;
 }
 
-uint32_t FlatFieldPlugin::xyToPixel(double x, double y, uint32_t position)
+bool FlatFieldPlugin::correctPosition(double &x, double &y, uint32_t position)
 {
-    if (likely(m_ffMode == FF_FLATTEN)) {
-        if (position >= m_tables.size())
-            return 0;
+    if (position >= m_tables.size())
+        return false;
 
-        std::shared_ptr<FlatFieldTable> xtable = m_tables[position].corrX;
-        std::shared_ptr<FlatFieldTable> ytable = m_tables[position].corrY;
-        if (m_tables[position].enabled == false || xtable.get() == 0 || ytable.get() == 0)
-            return 0;
+    std::shared_ptr<FlatFieldTable> xtable = m_tables[position].corrX;
+    std::shared_ptr<FlatFieldTable> ytable = m_tables[position].corrY;
+    if (m_tables[position].enabled == false || xtable.get() == 0 || ytable.get() == 0)
+        return false;
 
-        unsigned xp = x;
-        unsigned yp = y;
+    unsigned xp = x;
+    unsigned yp = y;
 
-        // All tables of the same size, safe to compare against just one
-        if (x < 0.0 || xp >= xtable->sizeX || y < 0.0 || yp >= xtable->sizeY)
-            return 0;
+    // All tables of the same size, safe to compare against just one
+    if (x < 0.0 || xp >= xtable->sizeX || y < 0.0 || yp >= xtable->sizeY)
+        return false;
 
-        // All checks passed - do the correction
-        double dx = (xp == 0 || xp == (xtable->sizeX - 1)) ? 0 : x - xp;
-        double dy = (yp == 0 || yp == (ytable->sizeY - 1)) ? 0 : y - yp;
+    // All checks passed - do the correction
+    double dx = (xp == 0 || xp == (xtable->sizeX - 1)) ? 0 : x - xp;
+    double dy = (yp == 0 || yp == (ytable->sizeY - 1)) ? 0 : y - yp;
 
-        x -= (dx * xtable->data[xp+1][yp]) + ((1 - dx) * xtable->data[xp][yp]);
-        y -= (dy * ytable->data[xp][yp+1]) + ((1 - dy) * ytable->data[xp][yp]);
-    }
+    x -= (dx * xtable->data[xp+1][yp]) + ((1 - dx) * xtable->data[xp][yp]);
+    y -= (dy * ytable->data[xp][yp+1]) + ((1 - dy) * ytable->data[xp][yp]);
 
-    return (position << (2*POSITION_BITS)) | (((int)x & POSITION_MASK) << POSITION_BITS) | (((int)y & POSITION_MASK));
+    return true;
 }
 
 bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position)
 {
-    if (unlikely(m_ffMode != FF_FLATTEN))
-        return true;
-
     if (position >= m_tables.size())
         return false;
 

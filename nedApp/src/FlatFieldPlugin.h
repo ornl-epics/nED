@@ -194,26 +194,46 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
 
     private:
         /**
-         * Transform source X,Y packet into tof,pixid output packet.
+         * Process single packet, potentially thread-safe.
          *
-         * normal data only
-         * no locking required, only class variable is m_tables which is const
+         * Events from srcPacket are processed one by one and good events are
+         * copied to destPacket. The three input parameters define the
+         * processing done on each event.
+         *
+         * Events from srcPacket are expected to be in format compatible with
+         * ACPC normal data. Raw X and Y are in Qn.m where m is defined through
+         * XyFractWidth EPICS parameter. Raw values are transformed into
+         * real X,Y double values and then scaled to match correction table
+         * sizes. The integral part of such calculated values is used as an
+         * index into all correction tables. Flat field correction and
+         * photosum elimination is done using these.
+         *
+         * When convert mode is specified, double X,Y values must be down
+         * scaled to fit into the requested number of bits (usually 8 or 9, max 10).
+         * After scaling, the value is rounded to closest integer value.
+         *
+         * @param[in] srcPacket Original packet to be processed
+         * @param[out] destPacket output packet with all events processed.
+         * @param[in] xyDivider used to convert Qm.n unsigned -> double
+         * @param[in] correct Toggle applying flat field correction
+         * @param[in] photosum Toggle checking photosum
+         * @param[in] convert Convert from native normal to common normal event
+         * @param[out] nCorr number of corrected events
+         * @param[out] nVetoed number of vetoed events
          */
-        TransformErrors transformPacket(const DasPacket *srcPacket, DasPacket *destPacket);
+        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool correct, bool photosum, bool convert, int &nGood, int &nVeto);
 
         /**
-         * Correct single event X,Y positions and convert it to pixel id.
+         * Apply flat field correction on X,Y event
          *
-         * Each position is adjusted using the corresponding correction table.
-         * Pixel id is calculated and returned. It's filling in lower 18 bits.
-         * Correction tables up to size 512x512 are supported.
+         * Use X and Y correction tables to adjust x and y parameters.
          *
-         * @param[in] x Calculated position X, in range [0.0 .. X table size)
-         * @param[in] y Calculated position Y, in range [0.0 .. Y table size)
+         * @param[in] x value to be corrected, in range [0.0 .. m_tableSizeX)
+         * @param[in] y value to be corrected, in range [0.0 .. m_tableSizeY)
          * @param[in] position Detector position id to find corresponding correction tables.
-         * @return Calculated pixel id, 0 when X,Y out of range or no table found.
+         * @return true when X,Y position was corrected, false if out of range
          */
-        uint32_t xyToPixel(double x, double y, uint32_t position);
+        bool correctPosition(double &x, double &y, uint32_t position);
 
         /**
          * Determine whether the X,Y position is within photo sum limits.
@@ -256,9 +276,6 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
 
     private: // variables
         int m_tablesErr;            //!< Flag whether all required tables are ready
-        int m_psEn;                 //!< Switch to toggle photosum elimination process
-        int m_corrEn;               //!< Switch to toggle applying flat field correction
-        int m_convEn;               //!< Switch to toggle converting data to pixel id format
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
         uint32_t m_bufferSize;      //!< Size of buffer
         uint32_t m_tableSizeX;      //!< X dimension size of all tables
@@ -267,12 +284,13 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         std::ostringstream m_reportText; //!< Text to be printed when asynReport() is called
 
         // Following member variables must be carefully set since they're used un-locked
-        double m_xScale;            //!< Scaling factor to transform raw X range to [0 .. m_tableSizeX)
-        double m_yScale;            //!< Scaling factor to transform raw Y range to [0 .. m_tableSizeY)
+        double m_xScaleIn;          //!< Scaling factor to transform raw X range to [0 .. m_tableSizeX)
+        double m_yScaleIn;          //!< Scaling factor to transform raw Y range to [0 .. m_tableSizeY)
+        double m_xScaleOut;         //!< Scaling factor to convert X to pixel id format
+        double m_yScaleOut;         //!< Scaling factor to convert Y to pixel id format
+        uint32_t m_xMaskOut;        //!< Mask to be applied to X when converting to pixel id format
+        uint32_t m_yMaskOut;        //!< Mask to be applied to Y when converting to pixel id format
         double m_psScale;           //!< Scaling factor to convert unsigned UQm.n 32 bit value into double
-        double m_psLowDecBase;      //!< PhotoSum lower decrement base
-        double m_psLowDecLim;       //!< PhotoSum lower decrement limit
-        int m_ffMode;               //!< Mode of operation
 
     protected:
         #define FIRST_FLATFIELDPLUGIN_PARAM ImportReport
@@ -284,19 +302,17 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int PsEn;           //!< Switch to toggle photosum elimination
         int CorrEn;         //!< Switch to toggle applying flat field correction
         int ConvEn;         //!< Switch to toggle converting data to pixel id format
-        int CntUnmap;       //!< Number of unmapped pixels
-        int CntError;       //!< Number of generic error pixel ids detected
-        int CntPhotoSum;    //!< Number of photo sum eliminated pixels
+        int CntGoodEvents;  //!< Number of calculated events
+        int CntVetoEvents;  //!< Number of vetoed events
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
-        int FfMode;         //!< Flat-field transformation mode (see FlatFieldPlugin::FfMode_t)
-        int XyFractWidth;   //!< X,Y is in UQm.n format, n is fraction width
-        int XRange;         //!< Maximum X values from detector
-        int YRange;         //!< Maximum Y values from detector
         int PsFractWidth;   //!< Photo sum is in UQm.n format, n is fraction width
-        int PsLowDecBase;   //!< PhotoSum lower decrement base
-        int PsLowDecLim;    //!< PhotoSum lower decrement limit
-        #define LAST_FLATFIELDPLUGIN_PARAM PsLowDecLim
+        int XyFractWidth;   //!< X,Y is in UQm.n format, n is fraction width
+        int XMaxIn;         //!< Maximum X values from detector
+        int YMaxIn;         //!< Maximum Y values from detector
+        int XMaxOut;        //!< Maximum X values when converted to pixel id format
+        int YMaxOut;        //!< Maximum Y values when converted to pixel id format
+        #define LAST_FLATFIELDPLUGIN_PARAM YMaxOut
 };
 
 #endif // FLAT_FIELD_PLUGIN_H
