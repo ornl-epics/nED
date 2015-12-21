@@ -53,6 +53,7 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("ImportDir",    asynParamOctet, &ImportDir, importDir); // Path to correction tables directory
     createParam("BufferSize",   asynParamInt32, &BufferSize, (int)m_bufferSize); // Allocated buffer size
     createParam("Positions",    asynParamInt8Array, &Positions);        // Array of configured positions
+    createParam("PositionsReport", asynParamOctet, &PositionsReport);   // Array of configured positions
     createParam("TablesErr",    asynParamInt32, &TablesErr, m_tablesErr); // Default is 1 until expected positions are configured and checked
     createParam("PsEn",         asynParamInt32, &PsEn, 0);              // Switch to toggle photosum elimination
     createParam("CorrEn",       asynParamInt32, &CorrEn, 0);            // Switch to toggle applying flat field correction
@@ -68,6 +69,8 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("YMaxIn",       asynParamFloat64, &YMaxIn, 158.0);      // WRITE - Defines input Y range
     createParam("XMaxOut",      asynParamInt32, &XMaxOut, 511);         // WRITE - Converted max X value
     createParam("YMaxOut",      asynParamInt32, &YMaxOut, 511);         // WRITE - Converted max Y value
+    createParam("TablesSizeX",  asynParamInt32, &TablesSizeX, (int)m_tableSizeX); // READ - All tables X size
+    createParam("TablesSizeY",  asynParamInt32, &TablesSizeY, (int)m_tableSizeY); // READ - All tables Y size
     callParamCallbacks();
 }
 
@@ -117,22 +120,29 @@ asynStatus FlatFieldPlugin::writeInt8Array(asynUser *pasynUser, epicsInt8 *value
         // asyn will try to initialize the record with 0 elements
         if (nElements > 0) {
             // Disable all tables first
-            for (auto it = m_tables.begin(); it != m_tables.end(); it++) {
-                it->enabled = false;
+            for (size_t i = 0; i < m_tables.size(); i++) {
+                m_tables[i].enabled = false;
+                if (m_tables[i].psLowX.get() == 0 && m_tables[i].psUpX.get() == 0 &&
+                    m_tables[i].corrX.get()  == 0 && m_tables[i].corrY.get() == 0) {
+                    m_tables[i].init = false;
+                }
             }
 
-            // Enable only tables that meet requirements and are in the user list
+            // Copy list of enabled list to m_tables
             m_tablesErr = 0;
-            int psEn, corrEn;
-            getIntegerParam(PsEn,   &psEn);
-            getIntegerParam(CorrEn, &corrEn);
+            bool psEn, corrEn;
+            getBooleanParam(PsEn,   &psEn);
+            getBooleanParam(CorrEn, &corrEn);
             for (size_t i = 0; i < nElements; i++) {
                 uint32_t position = values[i];
                 if (position >= m_tables.size()) {
                     m_tablesErr = 1;
                     LOG_ERROR("Position %d not loaded", position);
-                    continue;
+                    m_tables.resize(position+1);
                 }
+                m_tables[position].enabled = true;
+                m_tables[position].init = true;
+
                 if (psEn == 1 && (m_tables[position].psLowX.get() == 0 || m_tables[position].psUpX.get() == 0)) {
                     m_tablesErr = 1;
                     LOG_ERROR("Photosum tables for position %d not laded", position);
@@ -143,7 +153,6 @@ asynStatus FlatFieldPlugin::writeInt8Array(asynUser *pasynUser, epicsInt8 *value
                     LOG_ERROR("X and Y correction tables for position %d not laded", position);
                     continue;
                 }
-                m_tables[position].enabled = true;
             }
 
             // If there's a request to enable a table but there was a problen meeting
@@ -160,9 +169,9 @@ asynStatus FlatFieldPlugin::writeInt8Array(asynUser *pasynUser, epicsInt8 *value
 asynStatus FlatFieldPlugin::readInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements, size_t *nIn)
 {
     if (pasynUser->reason == Positions) {
-        int psEn, corrEn;
-        getIntegerParam(PsEn, &psEn);
-        getIntegerParam(CorrEn, &corrEn);
+        bool psEn, corrEn;
+        getBooleanParam(PsEn, &psEn);
+        getBooleanParam(CorrEn, &corrEn);
         *nIn = 0;
         for (size_t i = 0; i < m_tables.size(); i++) {
             bool loaded = false;
@@ -198,7 +207,14 @@ asynStatus FlatFieldPlugin::readInt8Array(asynUser *pasynUser, epicsInt8 *values
 asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
 {
     if (pasynUser->reason == ImportReport) {
-        *nActual = snprintf(value, nChars, "%s", m_reportText.str().c_str());
+        *nActual = snprintf(value, nChars, "%s", m_importReport.c_str());
+        return asynSuccess;
+    } else if (pasynUser->reason == PositionsReport) {
+        bool psEn, corrEn;
+        getBooleanParam(PsEn, &psEn);
+        getBooleanParam(CorrEn, &corrEn);
+        std::string report = generatePositionsReport(psEn, corrEn);
+        *nActual = snprintf(value, nChars, "%s", report.c_str());
         return asynSuccess;
     }
     return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
@@ -447,13 +463,14 @@ void FlatFieldPlugin::importFiles(const std::string &path)
     struct dirent entry, *result;
     bool foundCorrTables = false;
     bool foundPsTables = false;
+    std::ostringstream importReport;
 
-    m_reportText << "Importing files from " << path << ":" << std::endl;
+    importReport << "Importing files from " << path << ":" << std::endl;
 
     DIR *dir = opendir(path.c_str());
     if (dir == NULL) {
         LOG_ERROR("Failed to read import directory '%s': %s", path.c_str(), strerror(errno));
-        m_reportText << "none (failed to read directory)" << std::endl;
+        importReport << "none (failed to read directory)" << std::endl;
         return;
     }
 
@@ -463,12 +480,12 @@ void FlatFieldPlugin::importFiles(const std::string &path)
             std::shared_ptr<FlatFieldTable> table(new FlatFieldTable());
             if (table.get() == 0) {
                 LOG_ERROR("Failed to initialize table");
-                m_reportText << " * " << filename << ": error - failed to allocate table" << std::endl;
+                importReport << " * " << filename << ": error - failed to allocate table" << std::endl;
                 continue;
             }
             if (table->import(path + PATH_SEPARATOR + filename) == false) {
                 LOG_ERROR("Failed to import file '%s': %s", filename.c_str(), table->getImportError().c_str());
-                m_reportText << " * " << filename << ": error - " << table->getImportError() << std::endl;
+                importReport << " * " << filename << ": error - " << table->getImportError() << std::endl;
                 continue;
             }
 
@@ -481,13 +498,15 @@ void FlatFieldPlugin::importFiles(const std::string &path)
             // Ensure all tables are of the same size
             if (m_tableSizeX != table->sizeX || m_tableSizeY != table->sizeY) {
                 LOG_ERROR("Table size mismatch");
-                m_reportText << " * " << filename << ": error - table size mismatch" << std::endl;
+                importReport << " * " << filename << ": error - table size mismatch" << std::endl;
                 continue;
             }
 
             // Make sure there's enough place in the m_corrTables
-            if (m_tables.size() <= table->position)
+            if (m_tables.size() <= table->position) {
                 m_tables.resize(table->position + 1);
+                m_tables[table->position].init = true;
+            }
 
             // Push table to tables vector
             if (table->type == FlatFieldTable::TYPE_X_CORR) {
@@ -496,7 +515,7 @@ void FlatFieldPlugin::importFiles(const std::string &path)
                     foundCorrTables = true;
                 } else {
                     LOG_ERROR("Correction X table already loaded for position %u", table->position);
-                    m_reportText << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_Y_CORR) {
@@ -505,7 +524,7 @@ void FlatFieldPlugin::importFiles(const std::string &path)
                     foundCorrTables = true;
                 } else {
                     LOG_ERROR("Correction Y table already loaded for position %u", table->position);
-                    m_reportText << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_X_PS_LOW) {
@@ -514,7 +533,7 @@ void FlatFieldPlugin::importFiles(const std::string &path)
                     foundPsTables = true;
                 } else {
                     LOG_ERROR("Photosum low X table already loaded for position %u", table->position);
-                    m_reportText << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_X_PS_UP) {
@@ -523,18 +542,17 @@ void FlatFieldPlugin::importFiles(const std::string &path)
                     foundPsTables = true;
                 } else {
                     LOG_ERROR("Photosum upper X table already loaded for position %u", table->position);
-                    m_reportText << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
                     continue;
                 }
             }
 
             LOG_INFO("Imported file '%s'", filename.c_str());
-            m_reportText << " * " << filename << ": imported" << std::endl;
+            importReport << " * " << filename << ": imported" << std::endl;
         }
     }
     closedir(dir);
-
-    m_reportText << std::endl << "Position loaded:" << std::endl;
+    m_importReport = importReport.str();
 
     // Check tables constraints for each position:
     // * all tables of the same size - already checked when tables created
@@ -547,48 +565,56 @@ void FlatFieldPlugin::importFiles(const std::string &path)
             continue;
 
         nPositions++;
-        m_reportText << " * position " << i << ":" << std::endl;
 
         if (foundCorrTables == true) {
             if (m_tables[i].corrX.get() == 0) {
                 LOG_ERROR("Missing X correction table for position %u", i);
-                m_reportText << "   - X correction table missing" << std::endl;
-            } else {
-                m_reportText << "   - X correction table loaded" << std::endl;
             }
             if (m_tables[i].corrY.get() == 0) {
                 LOG_ERROR("Missing Y correction table for position %u", i);
-                m_reportText << "   - Y correction table missing" << std::endl;
-            } else {
-                m_reportText << "   - Y correction table loaded" << std::endl;
             }
         }
 
         if (foundPsTables == true) {
             if (m_tables[i].psLowX.get() == 0) {
                 LOG_ERROR("Missing lower X photosum correction table for position %u", i);
-                m_reportText << "   - lower X photosum table missing" << std::endl;
-            } else {
-                m_reportText << "   - lower X photosum table loaded" << std::endl;
             }
             if (m_tables[i].psUpX.get() == 0) {
                 LOG_ERROR("Missing upper X photosum correction table for position %u", i);
-                m_reportText << "   - upper X photosum table missing" << std::endl;
-            } else {
-                m_reportText << "   - upper X photosum table loaded" << std::endl;
             }
         }
     }
+}
 
-    if (nPositions == 0) {
-        LOG_ERROR("Found imported positions");
-        m_reportText << std::endl << " * none loaded" << std::endl;
+std::string FlatFieldPlugin::generatePositionsReport(bool psEn, bool corrEn)
+{
+    std::ostringstream report;
+    for (size_t i = 0; i < m_tables.size(); i++) {
+        // Skip sparse vector entries
+        if (m_tables[i].init == false)
+            continue;
+
+        report << "Position " << i << (m_tables[i].enabled == false ? " NOT " : " ") << "enabled:" << std::endl;
+        if (psEn) {
+            report << " * upper X photosum table " << (m_tables[i].psUpX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
+            report << " * lower X photosum table " << (m_tables[i].psLowX.get() != 0 ? "loaded" : "MISSING") << std::endl;
+        }
+        if (corrEn) {
+            report << " * X correction table " << (m_tables[i].corrX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
+            report << " * Y correction table " << (m_tables[i].corrY.get()  != 0 ? "loaded" : "MISSING") << std::endl;
+        }
     }
+    return report.str();
 }
 
 void FlatFieldPlugin::report(FILE *fp, int details)
 {
-    std::string text = m_reportText.str();
-    fwrite(text.c_str(), 1, text.length(), fp);
+    bool psEn, corrEn;
+    getBooleanParam(PsEn, &psEn);
+    getBooleanParam(CorrEn, &corrEn);
+
+    std::string positionsReport = generatePositionsReport(psEn, corrEn);
+    fwrite(positionsReport.c_str(), 1, positionsReport.length(), fp);
+    fwrite(m_importReport.c_str(), 1, m_importReport.length(), fp);
     return BasePlugin::report(fp, details);
 }

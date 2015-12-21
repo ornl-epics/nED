@@ -118,6 +118,7 @@ record(waveform, "$(P)Positions")
     field(PINI, "YES")
     field(FTVL, "CHAR")
     field(NELM, "100")
+    field(FLNK, "$(P)PositionsReport")
 }
 record(waveform, "$(P)Positions_RB")
 {
@@ -128,6 +129,15 @@ record(waveform, "$(P)Positions_RB")
     field(FTVL, "CHAR")
     field(NELM, "100")
     field(FLNK, "$(P)Positions")
+}
+record(waveform, "$(P)PositionsReport")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))PositionsReport")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(PINI, "YES")
 }
 
 record(longin, "$(P)CntGoodEvents")
@@ -229,4 +239,18 @@ record(longout, "$(P)PsFractWidth")
     field(OUT,  "@asyn($(PORT))PsFractWidth")
     field(PINI, "YES")
     field(HOPR, "30")
+}
+record(longin, "$(P)TablesSizeX")
+{
+    field(DESC, "All tables number of Xs")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TablesSizeX")
+    field(PINI, "YES")
+}
+record(longin, "$(P)TablesSizeY")
+{
+    field(DESC, "All tables number of Ys")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TablesSizeY")
+    field(PINI, "YES")
 }

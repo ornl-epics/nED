@@ -69,7 +69,8 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * present -> use std::shared_ptr.
          */
         struct PositionTables {
-            bool enabled;
+            bool init;                              //!< When set, the position is not sparse
+            bool enabled;                           //!< User has enabled this position - may not have other field
             std::shared_ptr<FlatFieldTable> corrX;  //!< Pointer to X correction table
             std::shared_ptr<FlatFieldTable> corrY;  //!< Pointer to Y correction table
             std::shared_ptr<FlatFieldTable> psLowX; //!< Pointer to lower X photosum table
@@ -274,6 +275,19 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          */
         void importFiles(const std::string &dir);
 
+        /**
+         * Generate printable report of loaded positions
+         *
+         * Walks through m_tables table and lists all known positions.
+         * Position is sparse when no files have been loaded for that position
+         * and user hasn't enabled it.
+         *
+         * @param[in] psEn toggles printing photosum table information
+         * @param[in] corrEn toggles printing flat field correction table information
+         * @return printable text
+         */
+        std::string generatePositionsReport(bool psEn, bool corrEn);
+
     private: // variables
         int m_tablesErr;            //!< Flag whether all required tables are ready
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
@@ -281,7 +295,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         uint32_t m_tableSizeX;      //!< X dimension size of all tables
         uint32_t m_tableSizeY;      //!< Y dimension size of all tables
         std::vector<PositionTables> m_tables;    //!< Array of lookup tables, detector position is index
-        std::ostringstream m_reportText; //!< Text to be printed when asynReport() is called
+        std::string m_importReport; //!< Text to be printed when asynReport() is called
 
         // Following member variables must be carefully set since they're used un-locked
         double m_xScaleIn;          //!< Scaling factor to transform raw X range to [0 .. m_tableSizeX)
@@ -298,6 +312,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int ImportDir;      //!< Absolute path to pixel map file
         int BufferSize;     //!< Size of allocated buffer, 0 means alocation error
         int Positions;      //!< Array of configured positions
+        int PositionsReport;//!< Generate textual configured positions report
         int TablesErr;      //!< At least one table was not imported properly, check for reason with asynReport()
         int PsEn;           //!< Switch to toggle photosum elimination
         int CorrEn;         //!< Switch to toggle applying flat field correction
@@ -312,7 +327,9 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int YMaxIn;         //!< Maximum Y values from detector
         int XMaxOut;        //!< Maximum X values when converted to pixel id format
         int YMaxOut;        //!< Maximum Y values when converted to pixel id format
-        #define LAST_FLATFIELDPLUGIN_PARAM YMaxOut
+        int TablesSizeX;    //!< All tables size X
+        int TablesSizeY;    //!< All tables size Y
+        #define LAST_FLATFIELDPLUGIN_PARAM TablesSizeY
 };
 
 #endif // FLAT_FIELD_PLUGIN_H
