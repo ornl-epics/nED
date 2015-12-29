@@ -53,6 +53,10 @@ BnlRocPlugin::BnlRocPlugin(const char *portName, const char *dispatcherPortName,
         createStatusParams_v00();
         createConfigParams_v00();
         // createCounterParams_v00();
+    } else if (m_version == "v20") {
+        setIntegerParam(Supported, 1);
+        createStatusParams_v20();
+        createConfigParams_v20();
     } else if (m_version == "v21") {
         setIntegerParam(Supported, 1);
         createStatusParams_v20();

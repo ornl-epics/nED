@@ -50,8 +50,8 @@ void BnlRocPlugin::createStatusParams_v20()
       createStatusParam("ErrType",              0x3,  1, 4);     // LVDS data type error
       createStatusParam("ErrParity",            0x3,  1, 3);     // LVDS parity error
       createStatusParam("Acquiring",            0x3,  1, 2);     // Acquiring Data               (0=not acquiring, 1=acquiring)
-      createStatusParam("Configured",           0x3,  1, 1);     // Configured                   (1=configured, 0=not configured)
-      createStatusParam("Discovered",           0x3,  1, 0);     // Discovered                   (1=discovered, 0=not discovered)
+      createStatusParam("Configured",           0x3,  1, 1);     // Configured                   (0=not configured [alarm], 1=configured, archive:monitor)
+      createStatusParam("Discovered",           0x3,  1, 0);     // Discovered                   (0=not discovered [alarm], 1=discovered, archive:monitor)
 }
 
 void BnlRocPlugin::createConfigParams_v20()
