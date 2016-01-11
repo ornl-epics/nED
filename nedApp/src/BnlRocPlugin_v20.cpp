@@ -12,8 +12,7 @@
 
 void BnlRocPlugin::createStatusParams_v20()
 {
-//    BLXXX:Det:RocXXX:| sig nam|      | EPICS record description | (bi and mbbi description)
-
+//    BLXXX:Det:RocXXX:| sig nam|                                   | EPICS record description | (bi and mbbi description)
       createStatusParam("GotStart",             0x0,  1,  15);   // Got START
       createStatusParam("Start",                0x0,  2,  13);   // START
       createStatusParam("StartHigh",            0x0,  1,  12);   // START high
@@ -39,28 +38,28 @@ void BnlRocPlugin::createStatusParams_v20()
       createStatusParam("TSYNC",                0x2,  2,  2);    // TSYNC
       createStatusParam("TCLK",                 0x2,  2,  0);    // TCLK
 
-      createStatusParam("ProgErr",              0x3,  1, 14);   // Programming Error
-      createStatusParam("CmdLenErr",            0x3,  1, 13);   // Command length error
-      createStatusParam("UnkCmdErr",            0x3,  1, 12);   // Unrecognized command error
-      createStatusParam("TimestampOvfl",        0x3,  1, 11);   // Timestamp overflow
-      createStatusParam("ErrFifoFull",          0x3,  1, 9);    // LVDS FIFO went full
-      createStatusParam("ErrPreStart",          0x3,  1, 8);    // LVDS start before stop bit
-      createStatusParam("ErrNoStart",           0x3,  1, 7);    // LVDS data without start
-      createStatusParam("ErrTimeout",           0x3,  1, 6);    // LVDS packet timeout
-      createStatusParam("ErrLength",            0x3,  1, 5);    // LVDS packet length error
-      createStatusParam("ErrType",              0x3,  1, 4);    // LVDS data type error
-      createStatusParam("ErrParity",            0x3,  1, 3);    // LVDS parity error
-      createStatusParam("Acquiring",            0x3,  1, 2);    // Acquiring Data   (0=not acquiring, 1=acquiring)
-      createStatusParam("Configured",           0x3,  1, 1);    // Configured (1=configured, 0=not configured)
-      createStatusParam("Discovered",           0x3,  1, 0);    // Discovered (1=discovered, 0=not discovered)
+      createStatusParam("ProgErr",              0x3,  1, 14);    // Programming Error
+      createStatusParam("CmdLenErr",            0x3,  1, 13);    // Command length error
+      createStatusParam("UnkCmdErr",            0x3,  1, 12);    // Unrecognized command error
+      createStatusParam("TimestampOvfl",        0x3,  1, 11);    // Timestamp overflow
+      createStatusParam("ErrFifoFull",          0x3,  1, 9);     // LVDS FIFO went full
+      createStatusParam("ErrPreStart",          0x3,  1, 8);     // LVDS start before stop bit
+      createStatusParam("ErrNoStart",           0x3,  1, 7);     // LVDS data without start
+      createStatusParam("ErrTimeout",           0x3,  1, 6);     // LVDS packet timeout
+      createStatusParam("ErrLength",            0x3,  1, 5);     // LVDS packet length error
+      createStatusParam("ErrType",              0x3,  1, 4);     // LVDS data type error
+      createStatusParam("ErrParity",            0x3,  1, 3);     // LVDS parity error
+      createStatusParam("Acquiring",            0x3,  1, 2);     // Acquiring Data               (0=not acquiring, 1=acquiring)
+      createStatusParam("Configured",           0x3,  1, 1);     // Configured                   (0=not configured [alarm], 1=configured, archive:monitor)
+      createStatusParam("Discovered",           0x3,  1, 0);     // Discovered                   (0=not discovered [alarm], 1=discovered, archive:monitor)
 }
 
 void BnlRocPlugin::createConfigParams_v20()
 {
-//    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-      createConfigParam("PositionIdx",         '1',  0x0,  32,  0,   0);  // Configuration ID
+//    BLXXX:Det:RocXXX:| sig nam |                                           | EPICS record description  | (bi and mbbi description)
+      createConfigParam("PositionIdx",         '1',  0x0,  32,  0,   0);  // Position index
       createConfigParam("MainThreshold",       '1',  0x2,  16,  0,   0);  // DAC Value for Main Threshold
-      createConfigParam("MainPeakThreshold",   '1',  0x3,  16,  0,   0);  // DAC value for Main Peak Threshold
+      createConfigParam("MainPeakThreshold",   '1',  0x3,  16,  0,   0);  // DAC value for Main Peak Thre
       createConfigParam("X1Scale",             '2',  0x0,  16,  0,   0);  // X1 Scale
       createConfigParam("X1Offset",            '2',  0x1,  16,  0,   0);  // X1 Offset
       createConfigParam("X2Scale",             '2',  0x2,  16,  0,   0);  // X2 Scale
@@ -143,15 +142,14 @@ void BnlRocPlugin::createConfigParams_v20()
       createConfigParam("XCentroidScale",      'E',  0x8,  16,  0,   0);  // X Centroid Scale
       createConfigParam("YCentroidScale",      'E',  0x9,  16,  0,   0);  // Y Centroid Scale
       createConfigParam("AlwaysSet",           'F',  0x0,   1, 15,   1);  // Always 1
-      createConfigParam("HighResMode",         'F',  0x0,   1, 14,   0);  // High Resolution Mode (0=normal,1=highres)
-      createConfigParam("CathodePulseEn",      'F',  0x0,   1, 13,   0);  // Cathode Test pulse Enable (0=off,1=on)
-      createConfigParam("AnodePulseEn",        'F',  0x0,   1, 12,   0);  // Anode Test pulse Enable (0=off,1=on)
-      createConfigParam("Gain",                'F',  0x0,   2, 10,   0);  // Gain Setting (0=4X,1=8X,2=12X,3=16X)
-      createConfigParam("Unused",              'F',  0x0,   2,  8,   0);  // Unused
-      createConfigParam("OutputMode",          'F',  0x0,   2,  6,   0);  // Output Format (0=Normal,1=Raw,2=Ext)
-      createConfigParam("AcquireMode",         'F',  0x0,   2,  4,   2);  // Acquisition Mode (0=idle,1=fakedata,2=normal,3=trigger)
-      createConfigParam("IgnoreFF",            'F',  0x0,   1,  3,   0);  // Ignore FF
-      createConfigParam("TsyncSelect",         'F',  0x0,   1,  2,   0);  // TSYNC interal
-      createConfigParam("TclkSelect",          'F',  0x0,   1,  1,   0);  // TCLK internal
-      createConfigParam("Reset",               'F',  0x0,   1,  0,   0);  // RESET external
+      createConfigParam("HighResMode",         'F',  0x0,   1, 14,   0);  // High Resolution Mode          (0=normal,1=highres)
+      createConfigParam("CathodePulseEn",      'F',  0x0,   1, 13,   0);  // Cathode Test pulse Enable     (0=off,1=on)
+      createConfigParam("AnodePulseEn",        'F',  0x0,   1, 12,   0);  // Anode Test pulse Enable       (0=off,1=on)
+      createConfigParam("Gain",                'F',  0x0,   2, 10,   0);  // Gain Setting                  (0=4X,1=8X,2=12X,3=16X)
+      createConfigParam("OutputMode",          'F',  0x0,   2,  6,   0);  // Output Format                 (0=normal,1=raw,2=extended)
+      createConfigParam("AcquireMode",         'F',  0x0,   2,  4,   2);  // Acquisition Mode              (0=idle,1=fakedata,2=normal,3=trigger)
+      createConfigParam("TcTxEnMode",          'F',  0x0,   1,  3,   1);  // T&C TX enable mode            (0=external,1=internal)
+      createConfigParam("TcTsyncMode",         'F',  0x0,   1,  2,   0);  // T&C TSYNC mode                (0=external,1=internal 60Hz)
+      createConfigParam("TcTclkMode",          'F',  0x0,   1,  1,   0);  // T&C TCLK mode                 (0=external,1=internal 10MHz)
+      createConfigParam("TcResetMode",         'F',  0x0,   1,  0,   0);  // T&C Reset mode                (0=internal,1=external)
 }
