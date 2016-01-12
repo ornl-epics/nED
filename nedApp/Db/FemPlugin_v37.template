@@ -26,8 +26,8 @@ record(longin, "$(P)FwRev")
 }
 record(mbbo, "$(P)CmdReq")
 {
-    field(TVVL, "129")
+    field(TVVL, "41")
     field(TVST, "Down reset")
-    field(TTVL, "39")
+    field(TTVL, "40")
     field(TTST, "Down reset LVDS")
 }
