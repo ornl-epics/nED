@@ -95,6 +95,10 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         double m_boundaryHighX;     //!< Calculated X high boundary
         double m_boundaryLowY;      //!< Calculated Y low boundary
         double m_boundaryHighY;     //!< Calculated Y high boundary
+        int m_nCalcValues;          //!< Number of values used in calculation
+        bool m_lowChargeVetoEn;     //!< Toggle low charge rejection
+        bool m_overflowVetoEn;      //!< Toggle overflow rejection
+        bool m_edgeVetoEn;          //!< Toggle edge rejection
         int m_centroidMin;          //!< Used by X,Y calculation for vetoing certain events
         double m_xCentroidScale;    //!< Used by X,Y calculation
         double m_yCentroidScale;    //!< Used by X,Y calculation
@@ -186,6 +190,9 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         #define FIRST_DATACONVERTPLUGIN_PARAM ErrMem
         int ErrMem;         //!< Error allocating buffer
         int XyFractWidth;   //!< Number of fraction bits in X,Y Qm.n format
+        int LowChargeVetoEn;//!< Switch for toggle low charge rejection
+        int OverflowVetoEn; //!< Switch for toggle overflow rejection
+        int EdgeVetoEn;     //!< Switch for toggle edge rejection
         int CntTotalEvents; //!< Number of total events
         int CntGoodEvents;  //!< Number of calculated events
         int CntEdgeVetos;   //!< Number of vetoed events due to close to edge
@@ -194,6 +201,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int CalcEn;         //!< Toggle position calculation
+        int NumCalcValues;  //!< Number of values to use in calculation
         int CentroidMin;    //!< Centroid minimum parameter for X,Y calculation
         int XCentroidScale; //!< Centroid X scale factor
         int YCentroidScale; //!< Centroid Y scale factor
