@@ -427,6 +427,10 @@ bool BaseModulePlugin::handleResponse(const DasPacket *packet)
         return rspReset(packet);
     case DasPacket::CMD_RESET_LVDS:
         return rspResetLvds(packet);
+    case DasPacket::CMD_TC_RESET:
+        return rspTcReset(packet);
+    case DasPacket::CMD_TC_RESET_LVDS:
+        return rspTcResetLvds(packet);
     case DasPacket::CMD_DISCOVER:
         ack = rspDiscover(packet);
         verified &= ~VERIFY_DISCOVER_MASK;
