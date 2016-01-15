@@ -1,7 +1,7 @@
 include "BasePlugin.include"
 include "BaseModulePlugin.include"
 include "FemPlugin.include"
-include "FemPlugin_v36.generated"
+include "FemPlugin_v37.generated"
 include "GlobalConD.include"
 
 record(longin, "$(P)HwVer")
@@ -26,8 +26,8 @@ record(longin, "$(P)FwRev")
 }
 record(mbbo, "$(P)CmdReq")
 {
-    field(TVVL, "129")
+    field(TVVL, "41")
     field(TVST, "Down reset")
-    field(TTVL, "39")
+    field(TTVL, "40")
     field(TTST, "Down reset LVDS")
 }
