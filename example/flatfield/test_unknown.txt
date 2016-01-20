@@ -1,0 +1,2 @@
+# This is some random file
+with non flat-field correction data.

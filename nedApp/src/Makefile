@@ -116,6 +116,7 @@ $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += DebugPlugin.cpp
 $(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
+$(PROD_NAME)_SRCS  += FlatFieldTable.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
 $(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp

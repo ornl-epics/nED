@@ -84,8 +84,8 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
     bool passVetoes = false;
     PixelMapErrors errors;
 
-    if (m_buffer == 0) {
-        LOG_ERROR("No buffer allocated, skipping pixel mapping");
+    if (m_buffer == 0 || m_map.empty()) {
+        LOG_ERROR("Pixel mapping disabled due to import error");
         return;
     }
 
