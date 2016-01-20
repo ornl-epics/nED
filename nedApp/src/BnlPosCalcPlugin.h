@@ -44,6 +44,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
             CALC_OVERFLOW_FLAG,     //!< Error code, over-flow flag was detected in one or many raw values
             CALC_EDGE,              //!< Error code, event to close to the edge
             CALC_LOW_CHARGE,        //!< Error code, event charge below threshold
+            CALC_MULTI_EVENT,       //!< Error code, multiple events detected
         } calc_return_t;
 
         /**
@@ -58,6 +59,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
                 int32_t nOverflow;      //!< Number of over-flow flagged events - vetoed
                 int32_t nEdge;          //!< Number of events on the edge - vetoed
                 int32_t nLowCharge;     //!< Number of events with low charge - vetoed
+                int32_t nMultiEvent;    //!< Number of multiple events - vetoed
 
                 Stats()
                     : nTotal(0)
@@ -65,6 +67,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
                     , nOverflow(0)
                     , nEdge(0)
                     , nLowCharge(0)
+                    , nMultiEvent(0)
                 {}
 
                 Stats &operator+=(const Stats &rhs)
@@ -74,8 +77,9 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
                     nOverflow += rhs.nOverflow;
                     nEdge += rhs.nEdge;
                     nLowCharge += rhs.nLowCharge;
+                    nMultiEvent += rhs.nMultiEvent;
                     if (nTotal > std::numeric_limits<int32_t>::max()) {
-                        nTotal = nGood = nOverflow = nEdge = nLowCharge = 0;
+                        nTotal = nGood = nOverflow = nEdge = nLowCharge = nMultiEvent = 0;
                     }
                     return *this;
                 }
@@ -99,6 +103,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         bool m_lowChargeVetoEn;     //!< Toggle low charge rejection
         bool m_overflowVetoEn;      //!< Toggle overflow rejection
         bool m_edgeVetoEn;          //!< Toggle edge rejection
+        bool m_multiEventVetoEn;    //!< Toggle multi-event rejection
         int m_centroidMin;          //!< Used by X,Y calculation for vetoing certain events
         double m_xCentroidScale;    //!< Used by X,Y calculation
         double m_yCentroidScale;    //!< Used by X,Y calculation
@@ -179,10 +184,38 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
          * event is rejected.
          * X and Y positions are finally calculated in double precision.
          *
+         * When CALC_ALTERNATIVE pre-processor switch is enabled, the
+         * implementation of this function is different. The alternative
+         * approach tries to more precisely calculate the position using more
+         * than 3 raw values.
+         * The calculation algorithm begins with converting 20 X and 17 Y raw
+         * samples with 12 bit precision to scaled values for better precision.
+         * Any converted value below the sample threshold is considered 0.
+         * It then finds a single peak in each direction. If more than one
+         * local maxima is observed, event is rejected as multi-event veto.
+         * If no peak is found for each dimension, event is rejected as
+         * low charge veto.
+         * Samples are next smoothed so that they form a single triangle
+         * along axis. Any smaller peaks that don't qualify as an event
+         * are removed by smoothening.
+         * Number of values used in calculation is defined by user but can
+         * be reduced around the edges. If number is reduced to 1, event is
+         * rejected as edge veto unless user requested 1 value for calculation.
+         * Finally the X and Y positions are calculated based on centroid
+         * finding method.
+         *
+         * When number of values used for calculation is low, events are pulled
+         * towards the integer values and causing a sharp dip in the center
+         * between two integer values.
+         * It was empirically observed that 5 values in calculation already
+         * give good results with flood data. 6 values was sufficiently good
+         * for lab experiment but does have undesiried effect around edges.
+         * Values greater than 7 don't bring further improvements.
+         *
          * @param[in] raw event data
          * @param[out] x calculated position
          * @param[out] y calculated position
-         * @return true if X,Y was calculated, false when event was rejected
+         * @return calculation status
          */
         calc_return_t calculatePosition(const BnlDataPacket::RawEvent *event, double *x, double *y);
 
@@ -193,11 +226,13 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         int LowChargeVetoEn;//!< Switch for toggle low charge rejection
         int OverflowVetoEn; //!< Switch for toggle overflow rejection
         int EdgeVetoEn;     //!< Switch for toggle edge rejection
+        int MultiEventVetoEn;  //!< Switch for toggle multi-event rejection
         int CntTotalEvents; //!< Number of total events
         int CntGoodEvents;  //!< Number of calculated events
         int CntEdgeVetos;   //!< Number of vetoed events due to close to edge
         int CntLowChargeVetos; //!< Number of vetoed events due to low charge
         int CntOverflowVetos;  //!< Number of vetoed events due to overflow flag
+        int CntMultiEventVetos;//!< Number of vetoed events due to multiple peaks
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int CalcEn;         //!< Toggle position calculation

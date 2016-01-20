@@ -14,7 +14,7 @@
 #include <limits>
 #include <cmath>
 
-//#define CALC_ALTERNATIVE
+#define CALC_ALTERNATIVE
 
 EPICS_REGISTER_PLUGIN(BnlPosCalcPlugin, 3, "Port name", string, "Dispatcher port name", string, "Buffer size in bytes", int);
 
@@ -42,9 +42,15 @@ BnlPosCalcPlugin::BnlPosCalcPlugin(const char *portName, const char *dispatcherP
     createParam("LowChargeVetoEn",  asynParamInt32, &LowChargeVetoEn, 1);  // Toggle low charge vetos
     createParam("EdgeVetoEn",       asynParamInt32, &EdgeVetoEn, 1);       // Toggle edge vetos
     createParam("OverflowVetoEn",   asynParamInt32, &OverflowVetoEn, 1);   // Toggle overflow vetos
+#ifdef CALC_ALTERNATIVE
+    createParam("MultiEventVetoEn", asynParamInt32, &MultiEventVetoEn, 1); // Toggle multi-event vetos
+#endif
     createParam("CntEdgeVetos",     asynParamInt32, &CntEdgeVetos, 0);     // Number of vetoed events due to close to edge
     createParam("CntLowChargeVetos",asynParamInt32, &CntLowChargeVetos, 0);// Number of vetoed events doe to low charge
     createParam("CntOverflowVetos", asynParamInt32, &CntOverflowVetos, 0); // Number of vetoed events due to overflow flag
+#ifdef CALC_ALTERNATIVE
+    createParam("CntMultiEventVetos", asynParamInt32, &CntMultiEventVetos, 0); // Number of vetoed events due to multiple peaks
+#endif
     createParam("CntGoodEvents",    asynParamInt32, &CntGoodEvents, 0);    // Number of calculated events
     createParam("CntTotalEvents",   asynParamInt32, &CntTotalEvents, 0);   // Number of events
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);            // Number of packet train splits
@@ -91,6 +97,16 @@ asynStatus BnlPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         m_stats.nLowCharge = 0;
         m_stats.nEdge = 0;
         m_stats.nOverflow = 0;
+        m_stats.nMultiEvent = 0;
+        setIntegerParam(CntEdgeVetos,      0);
+        setIntegerParam(CntLowChargeVetos, 0);
+        setIntegerParam(CntOverflowVetos,  0);
+#ifdef CALC_ALTERNATIVE
+        setIntegerParam(CntMultiEventVetos,0);
+#endif
+        setIntegerParam(CntGoodEvents,     0);
+        setIntegerParam(CntTotalEvents,    0);
+        callParamCallbacks();
         return asynSuccess;
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
@@ -127,6 +143,7 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
     getBooleanParam(LowChargeVetoEn,&m_lowChargeVetoEn);
     getBooleanParam(EdgeVetoEn,     &m_edgeVetoEn);
     getBooleanParam(OverflowVetoEn, &m_overflowVetoEn);
+    getBooleanParam(MultiEventVetoEn, &m_multiEventVetoEn);
     getIntegerParam(NumCalcValues,  &m_nCalcValues);
     if (m_nCalcValues < 1) m_nCalcValues = 1;
     getIntegerParam(XyFractWidth,   &val);
@@ -221,6 +238,7 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
     setIntegerParam(CntEdgeVetos,      m_stats.nEdge);
     setIntegerParam(CntLowChargeVetos, m_stats.nLowCharge);
     setIntegerParam(CntOverflowVetos,  m_stats.nOverflow);
+    setIntegerParam(CntMultiEventVetos,m_stats.nMultiEvent);
     setIntegerParam(CntGoodEvents,     m_stats.nGood);
     setIntegerParam(CntTotalEvents,    m_stats.nTotal);
     callParamCallbacks();
@@ -263,6 +281,8 @@ BnlPosCalcPlugin::Stats BnlPosCalcPlugin::processPacket(const DasPacket *srcPack
                 stats.nEdge++;
             } else if (ret == CALC_LOW_CHARGE) {
                 stats.nLowCharge++;
+            } else if (ret == CALC_MULTI_EVENT) {
+                stats.nMultiEvent++;
             }
 
             if (unlikely(extendedMode && m_pva)) {
@@ -295,6 +315,8 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
     int32_t yCalcGrade;
     int32_t left;
     int32_t right;
+    uint32_t nMaxima;
+    int prevGradient;
 #endif
 
     // Check for overflow bit in any raw sample
@@ -410,20 +432,67 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
 
 #else // CALC_ALTERNATIVE
 
-    // Normalize raw data and find peaks
-    for (int i = 0; i < 20; i++) {
+    // Normalize samples and find peaks
+    nMaxima = 0;
+    if (xSamples[0] < m_xMinThresholds[0])
+        xSamples[0] = 0;
+    prevGradient = xSamples[0];
+    for (int i = 1; i < 20; i++) {
+        // eliminate raw values below the threshold
         if (xSamples[i] < m_xMinThresholds[i])
             xSamples[i] = 0;
 
+        // find the global maximum
         if (xSamples[i] > xSamples[xPeakIndex])
             xPeakIndex = i;
+
+        // find number of local maxima by detecting when gradient crosses 0
+        // in positive-to-negative direction
+        int gradient = xSamples[i] - xSamples[i-1];
+        if (gradient < 0 && prevGradient >= 0) {
+            // we found a local maxima at i-1
+            if ((xSamples[i-1] + xSamples[i]) > m_centroidMin)
+                nMaxima++;
+        }
+        prevGradient = gradient;
     }
-    for (int i = 0; i < 17; i++) {
+    if (nMaxima != 1) { // optimize for most likely case
+        if (m_multiEventVetoEn == true && nMaxima > 1) {
+            return CALC_MULTI_EVENT;
+        } else if (m_lowChargeVetoEn == true && nMaxima == 0) {
+            return CALC_LOW_CHARGE;
+        }
+    }
+
+    nMaxima = 0;
+    if (ySamples[0] < m_yMinThresholds[0])
+        ySamples[0] = 0;
+    prevGradient = ySamples[0];
+    for (int i = 1; i < 17; i++) {
+        // eliminate raw values below the threshold
         if (ySamples[i] < m_yMinThresholds[i])
             ySamples[i] = 0;
 
+        // find the global maximum
         if (ySamples[i] > ySamples[yPeakIndex])
             yPeakIndex = i;
+
+        // find number of local maxima by detecting when gradient crosses 0
+        // in positive->negative direction
+        int gradient = ySamples[i] - ySamples[i-1];
+        if (gradient < 0 && prevGradient >= 0) {
+            // we found a local maxima at i-1
+            if ((ySamples[i-1] + ySamples[i]) > m_centroidMin)
+                nMaxima++;
+        }
+        prevGradient = gradient;
+    }
+    if (nMaxima != 1) { // optimize for most likely case
+        if (m_multiEventVetoEn == true && nMaxima > 1) {
+            return CALC_MULTI_EVENT;
+        } else if (m_lowChargeVetoEn == true && nMaxima == 0) {
+            return CALC_LOW_CHARGE;
+        }
     }
 
     // Determine number of valid neighbours
@@ -434,7 +503,8 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
     if (m_edgeVetoEn == true && m_nCalcValues > 1 && (xCalcGrade == 0 || yCalcGrade == 0))
         return CALC_EDGE;
 
-    // Tails must be continuosly falling, eliminate any turn arounds
+    // Tails must be continuosly falling, eliminate any (small) turn arounds
+    // Big turn arounds are considered multi-event and were already rejected.
     left = right = xSamples[xPeakIndex];
     for (int i=1; i<=xCalcGrade; i++) {
         if (xSamples[xPeakIndex+i] > right)
@@ -456,8 +526,8 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
         left = ySamples[yPeakIndex-i];
     }
 
-    // Odd number of calculation values
-    if (m_nCalcValues % 2 == 1) {
+    // Calculate X,Y position
+    if (m_nCalcValues % 2 == 1) { // Odd number of calculation values
         // Interpolate X position using centroid method
         denom = xSamples[xPeakIndex];
         num = 0.0;
@@ -465,8 +535,6 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
             denom +=   (xSamples[xPeakIndex+i] + xSamples[xPeakIndex-i]);
             num   += i*(xSamples[xPeakIndex+i] - xSamples[xPeakIndex-i]);
         }
-        if (m_lowChargeVetoEn == true && denom < m_centroidMin)
-            return CALC_LOW_CHARGE;
         *x = xPeakIndex + (num / denom);
 
         // Interpolate Y position using centroid method
@@ -476,8 +544,6 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
             denom +=   (ySamples[yPeakIndex+i] + ySamples[yPeakIndex-i]);
             num   += i*(ySamples[yPeakIndex+i] - ySamples[yPeakIndex-i]);
         }
-        if (m_lowChargeVetoEn == true && denom < m_centroidMin)
-            return CALC_LOW_CHARGE;
         *y = yPeakIndex + (num / denom);
     } else { // or even number of calculation values
 
@@ -490,8 +556,6 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
             denom +=         (xSamples[xPeakIndex+i] + xSamples[xPeakIndex-i+1]);
             num   += (i-0.5)*(xSamples[xPeakIndex+i] - xSamples[xPeakIndex-i+1]);
         }
-        if (m_lowChargeVetoEn == true && denom < m_centroidMin)
-            return CALC_LOW_CHARGE;
         *x = xPeakIndex + 0.5 + (num / denom);
 
         // Interpolate Y position using centroid method
@@ -503,8 +567,6 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
             denom +=         (ySamples[yPeakIndex+i] + ySamples[yPeakIndex-i+1]);
             num   += (i-0.5)*(ySamples[yPeakIndex+i] - ySamples[yPeakIndex-i+1]);
         }
-        if (m_lowChargeVetoEn == true && denom < m_centroidMin)
-            return CALC_LOW_CHARGE;
         *y = yPeakIndex + 0.5 + (num / denom);
     }
 
