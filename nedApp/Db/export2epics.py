@@ -53,6 +53,8 @@ def parse_one(type, params_str, desc_str, extra_str):
                 param['calcread'] = e[9:].strip(" ")
             elif e.startswith("calcwrite:"):
                 param['calcwrite'] = e[10:].strip(" ")
+            elif e.startswith("calclink:"):
+                param['calcread_link'] = e[9:].strip(" ")
             elif e.startswith("prec:"):
                 param['prec'] = e[5:].strip(" ")
             elif e.startswith("unit:"):
@@ -222,12 +224,12 @@ def _longinlongout_val(param, outfile, default_value=None):
         outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
         outfile.write("    field(HSV,  \"MAJOR\")\n")
 
-def _calc_record(param, outfile):
+def _calc_record(param, outfile, link=None):
     flnk = None
     if 'calcwrite' in param:
         outfile.write("record(calcout, \"$(P){0}CW\")\n".format(param['name']))
         outfile.write("{\n")
-        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
         outfile.write("    field(INPA, \"$(P){0} NPP\")\n".format(param['name']))
         outfile.write("    field(CALC, \"{0}\")\n".format(param['calcwrite']))
         outfile.write("    field(OUT,  \"$(P){0}W PP\")\n".format(param['name']))
@@ -259,8 +261,10 @@ def _calc_record(param, outfile):
 
         outfile.write("record(calcout, \"$(P){0}CR\")\n".format(param['name']))
         outfile.write("{\n")
-        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
         outfile.write("    field(INPA, \"$(P){0}R NPP\")\n".format(param['name']))
+        if link:
+            outfile.write("    field(INPB, \"$(P){0} NPP\")\n".format(link))
         outfile.write("    field(CALC, \"{0}\")\n".format(param['calcread']))
         outfile.write("    field(OUT,  \"$(P){0} PP\")\n".format(param['name']))
         outfile.write("}\n")
@@ -278,10 +282,11 @@ def generate_db_record(param, outfile):
         type="longin" if param['direction'] == "in" else "longout"
 
     if "calcread" in param or "calcwrite" in param:
-        flnk = _calc_record(param, outfile)
+        calclink = param['calcread_link'] if "calcread_link" in param else None
+        flnk = _calc_record(param, outfile, calclink)
         outfile.write("record(ao, \"$(P){0}\")\n".format(param['name']))
         outfile.write("{\n")
-        outfile.write("    field(ASG,  \"BEAMLINE\")")
+        outfile.write("    field(ASG,  \"BEAMLINE\")\n")
         if "prec" not in param:
             param['prec'] = 0
         outfile.write("    field(PREC, \"{0}\")\n".format(param['prec']))

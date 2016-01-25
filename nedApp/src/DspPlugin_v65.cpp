@@ -307,10 +307,29 @@ void DspPlugin::createParams_v65() {
     createConfigParam("SysBadPktEn",    'F', 0x0,  1, 30, 0); // Send bad packets             (0=disable,1=enable)
     createConfigParam("SysReset",       'F', 0x0,  1, 31, 0); // Force system reset           (0=disable,1=enable)
 
-    createConfigParam("TestPatternId",  'F', 0x1, 12, 0,  0); // Test pattern id
-    createConfigParam("TestPatternDebug",'F',0x1,  3, 12, 0); // Engineering Use only
-    createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // pattern enable               (0=disable,1=enable)
+    createConfigParam("TestPatternId",  'F', 0x1, 12,  0, 0); // Test pattern id
+    createConfigParam("TestPatternSel", 'F', 0x1,  2, 12, 0); // Test pattern select          (0=optic,1=alternate 1,2=alternate 2,3=alternate 3)
+    createConfigParam("TestPatternRtdlEn",'F',0x1, 1, 14, 1); // Test pattern RTDL enable     (0=disable,1=enable)
+    createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // Test pattern enable          (0=disable,1=enable)
     createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern rate            (65535=1.6 Kev/s (lowest), 53124=2 Kev/s, 13280=8 Kev/s, 5311=20 Kev/s, 1061=100 Kev/s, 264=400 Kev/s, 105=1 Mev/s, 52=2 Mev/s, 34=3 Mev/s, 25=4 Mev/s, 20=5M ev/s, 16=6 Mev/s, 12=8 Mev/s, 9=10 Mev/s, 6=15 Mev/s)
+
+    createConfigParam("TestPatPktSize", 'F', 0x2,  4,  0, 0); // Test pattern sub-packet size
+    createConfigParam("TestPatAlt1Rate",'F', 0x2, 12,  4, 0); // Test pattern sub-packet size
+    createConfigParam("RateMeterInt",   'F', 0x2,  2, 16, 0); // Rate meter counting interval (0=0.001 sec,1=0.01 sec,2=0.1 sec,3=1.0 sec)
+    createConfigParam("TestPatAlt2ChEn",'F', 0x2,  2, 18, 0); // Needs desc and values
+    createConfigParam("TestPatAlt2Rate",'F', 0x2, 12, 20, 0); // Alt2 test pattern rate
+
+    createConfigParam("ChopSubFreqSel", 'F', 0x3,  2,  0, 0); // Map upper 8 bits on ODB
+    createConfigParam("GCtrlReg3Dbg2",  'F', 0x3,  1,  2, 0); // TBD
+    createConfigParam("GCtrlReg3Dbg3",  'F', 0x3,  1,  3, 0); // TBD
+    createConfigParam("GCtrlReg3Dbg4",  'F', 0x3,  4,  4, 0); // TBD
+    createConfigParam("GCtrlReg3Dbg5",  'F', 0x3,  8,  8, 0); // TBD
+    createConfigParam("GCtrlReg3Dbg6",  'F', 0x3, 16, 16, 0); // TBD
+
+    createConfigParam("GCtrlReg4Dbg1",  'F', 0x4,  4,  0, 0); // TBD
+    createConfigParam("GCtrlReg4Dbg2",  'F', 0x4,  4,  4, 0); // TBD
+    createConfigParam("GCtrlReg4Dbg3",  'F', 0x4,  8,  8, 0); // TBD
+    createConfigParam("GCtrlReg4Dbg4",  'F', 0x4, 16, 16, 0); // TBD
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createCounterParam("PktLenErrCnt",     0x0, 16,  0); // TBD
@@ -391,6 +410,24 @@ void DspPlugin::createParams_v65() {
     createCounterParam("EvPL2WcAfCnt",    0x25, 16, 16); // Level 2 dff_wcnt_af
     createCounterParam("SCntrs:76",       0x26, 16,  0); // x0176
     createCounterParam("SCntrs:77",       0x26, 16, 16); // x0177
+
+    createCounterParam("Lvds1:Rate",      0x27, 24,  0); // LVDS Ch1 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds2:Rate",      0x28, 24,  0); // LVDS Ch2 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds3:Rate",      0x29, 24,  0); // LVDS Ch3 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds4:Rate",      0x2A, 24,  0); // LVDS Ch4 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds5:Rate",      0x2B, 24,  0); // LVDS Ch5 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds6:Rate",      0x2C, 24,  0); // LVDS Ch6 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds7:Rate",      0x2D, 24,  0); // LVDS Ch7 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("OptA:Rate",       0x2E, 24,  0); // Optic A rate             (calc:2*A*10^(3-B), calclink:RateMeterInt, unit:byte/s, prec:2)
+    createCounterParam("OptB:Rate",       0x2F, 24,  0); // Optic B rate             (calc:2*A*10^(3-B), calclink:RateMeterInt, unit:byte/s, prec:2)
+    createCounterParam("SCounters96",     0x30, 32,  0); // TBD
+    createCounterParam("SCounters98",     0x31, 32,  0); // TBD
+    createCounterParam("SCounters100",    0x32, 16,  0); // TBD
+    createCounterParam("SCounters101",    0x32, 16, 16); // TBD
+    createCounterParam("SCounters102",    0x33, 16,  0); // TBD
+    createCounterParam("SCounters103",    0x33, 16, 16); // TBD
+    createCounterParam("SCounters104",    0x34, 16,  0); // TBD
+    createCounterParam("SCounters105",    0x34, 16, 16); // TBD
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured, archive:monitor)
