@@ -41,6 +41,8 @@ class DasPacketList : public std::vector<const DasPacket *>
          *
          * After making the reservation, data pointed to by this class
          * is guaranteed not to change until a release() is called.
+         *
+         * Not to be confused with std::vector<>::reserve() function.
          */
         void reserve();
 

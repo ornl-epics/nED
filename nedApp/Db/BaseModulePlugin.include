@@ -563,7 +563,7 @@ record(calcout, "$(P)TempRefresh")
     field(INPC, "$(P)CmdRsp NPP")
     # Possibly delay Transition To Zero for 1 second if CmdRsp=Waiting
     field(CALC, "(C=2||A=0||((B+1)<(2*A)))?B+1:0")
-    field(OCAL, "10") # Send Read temperatures
+    field(OCAL, "9") # Send Read temperatures
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")

@@ -69,15 +69,11 @@ class BaseDispatcherPlugin : public BasePlugin {
          * Send a list of packets to registered plugins.
          *
          * Plugin must not be locked when calling this function. Plugins callbacks
-         * are invoked in context of this thread if they're not blocking. Function
-         * returns \b after all plugins completed their processing.
-         *
-         * Input packet list is assumed to have single reference count. Function
-         * releases the single reference counter before it returns.
+         * are invoked in context of this thread if they're not blocking.
          *
          * @param packetList List of packet to be sent to plugins
          */
-        virtual void sendToPlugins(DasPacketList *packetList);
+        virtual void sendToPlugins(const DasPacketList *packetList);
 
         /**
          * Overloaded incoming data handler.

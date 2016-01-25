@@ -1,0 +1,10 @@
+# Testing correction table file
+#
+# Format version: 1
+# Table size: 3x3
+# Table dimension: X
+# Position id: 17
+
+-0.12 +6.81 +3.55
++0.44 +5.09 +12.11
++0.79 -9.10 -3.61

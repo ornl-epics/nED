@@ -36,10 +36,8 @@ asynStatus BaseDispatcherPlugin::writeGenericPointer(asynUser *pasynUser, void *
     return asynSuccess;
 }
 
-void BaseDispatcherPlugin::sendToPlugins(DasPacketList *packetList)
+void BaseDispatcherPlugin::sendToPlugins(const DasPacketList *packetList)
 {
-    void *ptr = reinterpret_cast<void *>(packetList);
+    void *ptr = const_cast<void *>(reinterpret_cast<const void *>(packetList));
     doCallbacksGenericPointer(ptr, REASON_OCCDATA, 0);
-    packetList->release();
-    packetList->waitAllReleased();
 }

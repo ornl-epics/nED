@@ -8,6 +8,7 @@ record(bo, "$(P)Enable")
 }
 record(longin, "$(P)ProcCount")
 {
+    field(DESC, "Number of processed pkts")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))ProcCount")
     field(VAL,  "0")
@@ -16,6 +17,7 @@ record(longin, "$(P)ProcCount")
 }
 record(longin, "$(P)RxCount")
 {
+    field(DESC, "Number of received pkts")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))RxCount")
     field(VAL,  "0")
