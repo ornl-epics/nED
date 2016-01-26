@@ -36,6 +36,7 @@ DB += BnlPosCalcPlugin.db
 
 DB += DspPlugin_v63.db
 DB += DspPlugin_v64.db
+DB += DspPlugin_v65.db
 DB += FemPlugin_v32.db
 DB += FemPlugin_v35.db
 DB += FemPlugin_v36.db
@@ -69,6 +70,7 @@ include $(TOP)/configure/RULES
 
 DspPlugin_v63.template: DspPlugin_v63.generated
 DspPlugin_v64.template: DspPlugin_v64.generated
+DspPlugin_v65.template: DspPlugin_v65.generated
 FemPlugin_v32.template: FemPlugin_v32.generated
 FemPlugin_v35.template: FemPlugin_v35.generated
 FemPlugin_v36.template: FemPlugin_v36.generated
