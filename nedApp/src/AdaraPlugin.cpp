@@ -61,6 +61,7 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
     createParam("PixelsMapped", asynParamInt32, &PixelsMapped, 0); // WRITE - Tells whether data packets are flagged as raw or mapped pixel data
     createParam("NeutronsEn",   asynParamInt32, &NeutronsEn, 0); // WRITE - Enable forwarding neutron events
     createParam("MetadataEn",   asynParamInt32, &MetadataEn, 0); // WRITE - Enable forwarding metadata events
+    createParam("Reset",        asynParamInt32, &Reset, 0);      // WRITE - Reset internal logic
     callParamCallbacks();
 }
 
@@ -72,6 +73,10 @@ asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == PixelsMapped) {
         m_dataPktType = (value == 0 ? ADARA_PKT_TYPE_RAW_EVENT : ADARA_PKT_TYPE_MAPPED_EVENT);
+    } else if (pasynUser->reason == Reset) {
+        m_metadataSeq.reset();
+        m_neutronSeq.reset();
+        return asynSuccess;
     }
     return BaseSocketPlugin::writeInt32(pasynUser, value);
 }

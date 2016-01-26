@@ -54,6 +54,10 @@ class AdaraPlugin : public BaseSocketPlugin {
                 : pulseSeq(0)
                 , totalSeq(0)
             {
+                reset();
+            }
+            void reset()
+            {
                 rtdl.timestamp_sec  = 0;
                 rtdl.timestamp_nsec = 0;
             }
@@ -104,7 +108,8 @@ class AdaraPlugin : public BaseSocketPlugin {
         int PixelsMapped;
         int NeutronsEn;
         int MetadataEn;
-        #define LAST_ADARAPLUGIN_PARAM MetadataEn
+        int Reset;;
+        #define LAST_ADARAPLUGIN_PARAM Reset
 };
 
 #endif // ADARA_PLUGIN_H

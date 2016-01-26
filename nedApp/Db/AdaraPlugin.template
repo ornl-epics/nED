@@ -105,3 +105,13 @@ record(bo, "$(P)MetadataEn")
     field(ONAM, "Yes")
     field(PINI, "YES")
 }
+record(bo, "$(P)Reset")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Reset internal counters")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))Reset")
+    field(VAL,   "0")
+    field(ZNAM,  "No reset")
+    field(ONAM,  "Reset")
+}
