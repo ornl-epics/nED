@@ -104,6 +104,7 @@
 		<Unit filename="DmaCopier.h" />
 		<Unit filename="DspPlugin.cpp" />
 		<Unit filename="DspPlugin.h" />
+		<Unit filename="DspPlugin_v51.cpp" />
 		<Unit filename="DspPlugin_v63.cpp" />
 		<Unit filename="DspPlugin_v64.cpp" />
 		<Unit filename="DumpPlugin.cpp" />

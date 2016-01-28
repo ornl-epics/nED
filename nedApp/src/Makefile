@@ -84,6 +84,7 @@ $(PROD_NAME)_SRCS  += BaseDispatcherPlugin.cpp
 $(PROD_NAME)_SRCS  += CmdDispatcher.cpp
 $(PROD_NAME)_SRCS  += BaseModulePlugin.cpp
 $(PROD_NAME)_SRCS  += DspPlugin.cpp
+$(PROD_NAME)_SRCS  += DspPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v64.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v65.cpp

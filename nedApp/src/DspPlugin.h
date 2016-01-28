@@ -65,6 +65,13 @@ class DspPlugin : public BaseModulePlugin {
     private:
 
         /**
+         * Create and register all 5.1 parameters to be exposed to EPICS.
+         *
+         * DSP 5.1 is not DSP-T and can not do timing.
+         */
+        void createParams_v51();
+
+        /**
          * Create and register all 6.3 parameters to be exposed to EPICS.
          */
         void createParams_v63();
