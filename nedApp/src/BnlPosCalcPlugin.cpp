@@ -14,7 +14,7 @@
 #include <limits>
 #include <cmath>
 
-#define CALC_ALTERNATIVE
+//#define CALC_ALTERNATIVE
 
 EPICS_REGISTER_PLUGIN(BnlPosCalcPlugin, 3, "Port name", string, "Dispatcher port name", string, "Buffer size in bytes", int);
 
@@ -42,15 +42,11 @@ BnlPosCalcPlugin::BnlPosCalcPlugin(const char *portName, const char *dispatcherP
     createParam("LowChargeVetoEn",  asynParamInt32, &LowChargeVetoEn, 1);  // Toggle low charge vetos
     createParam("EdgeVetoEn",       asynParamInt32, &EdgeVetoEn, 1);       // Toggle edge vetos
     createParam("OverflowVetoEn",   asynParamInt32, &OverflowVetoEn, 1);   // Toggle overflow vetos
-#ifdef CALC_ALTERNATIVE
     createParam("MultiEventVetoEn", asynParamInt32, &MultiEventVetoEn, 1); // Toggle multi-event vetos
-#endif
     createParam("CntEdgeVetos",     asynParamInt32, &CntEdgeVetos, 0);     // Number of vetoed events due to close to edge
     createParam("CntLowChargeVetos",asynParamInt32, &CntLowChargeVetos, 0);// Number of vetoed events doe to low charge
     createParam("CntOverflowVetos", asynParamInt32, &CntOverflowVetos, 0); // Number of vetoed events due to overflow flag
-#ifdef CALC_ALTERNATIVE
     createParam("CntMultiEventVetos", asynParamInt32, &CntMultiEventVetos, 0); // Number of vetoed events due to multiple peaks
-#endif
     createParam("CntGoodEvents",    asynParamInt32, &CntGoodEvents, 0);    // Number of calculated events
     createParam("CntTotalEvents",   asynParamInt32, &CntTotalEvents, 0);   // Number of events
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);            // Number of packet train splits
@@ -101,9 +97,7 @@ asynStatus BnlPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         setIntegerParam(CntEdgeVetos,      0);
         setIntegerParam(CntLowChargeVetos, 0);
         setIntegerParam(CntOverflowVetos,  0);
-#ifdef CALC_ALTERNATIVE
         setIntegerParam(CntMultiEventVetos,0);
-#endif
         setIntegerParam(CntGoodEvents,     0);
         setIntegerParam(CntTotalEvents,    0);
         callParamCallbacks();
