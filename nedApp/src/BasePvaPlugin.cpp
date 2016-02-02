@@ -44,7 +44,7 @@ BasePvaPlugin::BasePvaPlugin(const char *portName, const char *dispatcherPortNam
     }
 
     std::string pvNameMetadata = pvPrefix + PV_METADATA;
-    m_pvMetadata = PvaNeutronData::create(pvNameMetadata);
+    m_pvMetadata = PvaMetaData::create(pvNameMetadata);
     if (!m_pvMetadata)
         LOG_ERROR("Cannot create PVA record '%s%s'", pvPrefix, PV_METADATA.c_str());
     else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_pvMetadata) == false) {
@@ -134,7 +134,7 @@ void BasePvaPlugin::postData(bool postNeutrons, bool postMetadata)
 {
     // 32 bit sequence number is good for around 18 months.
     // (based 5mio events/s, IRQ coallescing = 40, max OCC packet size = 3600B)
-    // In worst case client will skip one packet on rollover and than recover
+    // In worst case client will skip one packet on rollover and then recover
     // the sequence.
 
     if (postNeutrons && m_postNeutronsCb) {
