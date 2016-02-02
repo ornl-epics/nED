@@ -66,6 +66,13 @@ class BnlRocPvaPlugin : public BasePvaPlugin {
         } m_cache;
 
         /**
+         * Extended detector data mode.
+         */
+        typedef enum {
+            DATA_MODE_XY        = 4, //!< X,Y format for 2D detectors
+        } DataMode1;
+
+        /**
          * Number of elements in each cache array.
          */
         static const uint32_t CACHE_SIZE;
@@ -191,8 +198,7 @@ class BnlRocPvaPlugin : public BasePvaPlugin {
         void reserve();
 
     private:
-        #define FIRST_BNLROCPVAPLUGIN_PARAM NormalDataFormat
-        int NormalDataFormat;
+        #define FIRST_BNLROCPVAPLUGIN_PARAM XyFractWidth
         int XyFractWidth;
         #define LAST_BNLROCPVAPLUGIN_PARAM XyFractWidth
 };
