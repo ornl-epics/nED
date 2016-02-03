@@ -247,7 +247,7 @@ void DspPlugin::createParams_v63() {
     createConfigParam("LvdsTsyncCtrl",  'E', 0x2,  2,  6, 0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
     createConfigParam("LvdsSysrstCtrl", 'E', 0x2,  2,  8, 0); // LVDS T&C SYSRST# buffer ctrl (0=sysrst,1=sysrst,2=always 0,3=always 1)
     createConfigParam("LvdsTxenCtrl",   'E', 0x2,  2, 10, 0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
-    createConfigParam("LvdsOutClck",    'E', 0x2,  2, 16, 0); // LVDS output clock mode
+    createConfigParam("LvdsOutClck",    'E', 0x2,  2, 16, 0); // LVDS output clock mode       (0=35.3 Mhz, 1=30.2 Mhz, 2=26.5 Mhz, 3=23.6 Mhz)
     createConfigParam("LvdsNRetry",     'E', 0x2,  2, 18, 3); // LVDS downstream retrys
     createConfigParam("Lvds1:WordLen",  'E', 0x2,  1, 20, 0); // LVDS chan1 data word length  (0=RX FIFO data,1=set to 4)
     createConfigParam("Lvds2:WordLen",  'E', 0x2,  1, 21, 0); // LVDS chan2 data word length  (0=RX FIFO data,1=set to 4)
@@ -284,7 +284,7 @@ void DspPlugin::createParams_v63() {
     createConfigParam("OptTxDelay",     'E', 0x8,  7, 24, 3); // Optical packet send delay    (0=0ns, 1=313ns, 3=1us, 100=31.3us)
     createConfigParam("OptTxDelayC",    'E', 0x8,  1, 31, 1); // Optical packet send delay ct (0=use OPT_TX_DELAY,1=prev word count)
 
-    createConfigParam("OptMaxSize",     'E', 0x9, 16,  0, 16111); // Optical packet max dwords
+    createConfigParam("OptMaxSize",     'E', 0x9, 16,  0, 3600); // Optical packet max dwords
     createConfigParam("OptNeutronEop",  'E', 0x9,  1, 16, 1); // Optical Neutron send EOP     (0=disabled,1=enabled)
     createConfigParam("OptMetaEop",     'E', 0x9,  1, 17, 0); // Optical Metadata send EOP    (0=disabled,1=enabled)
     createConfigParam("OptTofCtrl",     'E', 0x9,  1, 18, 1); // TOF control                  (0=fixed TOF,1=full time offset)

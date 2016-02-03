@@ -216,11 +216,13 @@ def main():
         print "No plugins found in '{0}'".format(st_cmd)
 
     archived = dict()
+    macros = {
+        'NED': ned_dir,
+        'TOP': os.path.dirname( os.path.dirname( os.path.dirname(st_cmd) ) )
+    }
     for plugin in plugins:
-
-        inpath = os.path.realpath(do_substitutions(plugin['file'], { 'NED': ned_dir } ))
-        macros = { 'P': plugin['pv_prefix'] }
-
+        macros['P'] = plugin['pv_prefix']
+        inpath = os.path.realpath(do_substitutions(plugin['file'], macros ))
         archived.update(parse_archive_records(inpath, macros, options.verbose))
 
     print_xml(iocname, archived)
