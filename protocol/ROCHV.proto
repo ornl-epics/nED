@@ -13,9 +13,9 @@
 ##################################################
 
 Terminator = CR;
-ReplyTimeout = 150;
-locktimeout = 500;
-readtimeout  = 150;
+ReplyTimeout = 900;
+locktimeout = 1500;
+readtimeout  = 900;
 extrainput   = Ignore;
 
 #
