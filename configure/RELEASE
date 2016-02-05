@@ -19,18 +19,16 @@
 # Build settings that are NOT module paths should appear in a
 # CONFIG_SITE file.
 
-SUPPORT=/home/controls/epics
+ASYN=           /home/controls/prod/epics/asyn/rel4-26_20150804
+AUTOSAVE=       /home/controls/prod/epics/autosave/rel5-5_20150218
+STREAMDEVICE=   /home/controls/prod/epics/StreamDevice/rel2.6_20151007
+OCCLIB=         /home/controls/prod/occ/rel1.4_20150812/lib
+SNCSEQ=		/home/controls/prod/epics/seq/rel2-0-14_20150218
+PVMEDIATOR=	/home/controls/prod/epics/pvMediator/rel1.4_20151005
+CALC=		/home/controls/prod/epics/calc/rel3-4_20150218
+BUSY=		/home/controls/prod/epics/busy/rel1-6_20150804
 
-ASYN=           $(SUPPORT)/asyn/master
-AUTOSAVE=       $(SUPPORT)/autosave/master
-STREAMDEVICE=   $(SUPPORT)/StreamDevice/master
-OCCLIB=         /home/controls/occ/master/lib
-SNCSEQ=		$(SUPPORT)/seq/master
-PVMEDIATOR=	$(SUPPORT)/pvMediator/master
-CALC=		$(SUPPORT)/calc/master
-BUSY=		$(SUPPORT)/busy/master
-
-EPICS_BASE=/home/controls/epics/base/master
-BASEV4=/home/controls/epics/basev4/master
+EPICS_BASE=     /home/controls/prod/epics/base/rel3.14.12.4_20140619
+BASEV4=         /home/controls/prod/epics/basev4/relhead_20150218
 
 include $(BASEV4)/RELEASE.local
