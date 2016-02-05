@@ -152,7 +152,7 @@ class BasePvaPlugin : public BasePlugin {
 
     protected:
         PvaNeutronData::shared_pointer m_pvNeutrons;
-        PvaNeutronData::shared_pointer m_pvMetadata;
+        PvaMetaData::shared_pointer m_pvMetadata;
 
     private:
         uint32_t m_nReceived;       //!< Number of packets received
