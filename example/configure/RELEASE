@@ -19,5 +19,5 @@
 # Build settings that are NOT module paths should appear in a
 # CONFIG_SITE file.
 
-include $(TOP)/../configure/RELEASE
 NED=            $(TOP)/..
+include $(NED)/configure/RELEASE

@@ -42,58 +42,40 @@ record(mbbo, "$(P)CmdReq")
     field(TEST, "Reset")
     field(ELVL, "39")
     field(ELST, "Reset LVDS")
-    field(FLNK, "$(P)CmdRspEnable")
+    field(FLNK, "$(P)CmdReqDis")
 }
-# This CmdRsp* database logic is used to split set of CmdReq/CmdRsp asyn hooks into
-# multiple PVs. Not all modules provide all commands but they would all like to use
-# the same interface (for C code simplicity). We use a trick in CmdReq to only enable
-# CmdRsp PV when actually expecting something. Different set of PVs can be used
-# for specialized commands, although there might race condition if more than one PV
-# connected to asyn(CmdReq) is used at the same time. Though the worst case is that
-# CmdRsp gets false response.
-record(longout, "$(P)CmdRspEnable")
+# Force single outstanding operation at any time.
+# put to CmdReq will fail until the response is received.
+# CmdRsp will re-enable once received some response or timeout.
+record(longout, "$(P)CmdReqDis")
 {
-    field(DOL,  "1")
-    field(OUT,  "$(P)CmdRspEn PP")
-}
-record(calcout, "$(P)CmdRspDisable")
-{
-    field(INPA, "$(P)CmdRspRaw PP")
-    field(CALC, "A=0||A=2")
-    field(OOPT, "When Zero")
-    field(OUT,  "$(P)CmdRspEn PP")
-}
-record(bi, "$(P)CmdRspEn")
-{
-    field(ZNAM, "CmdRsp disabled")
-    field(ONAM, "CmdRsp enabled")
-    field(VAL,  "0")
-    field(PINI, "YES")
+    field(VAL,  "1")
+    field(OUT,  "$(P)CmdReq.DISP")
 }
 record(longin, "$(P)CmdRspRaw")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))CmdRsp")
     field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)CmdRspFilter")
+    field(FLNK, "$(P)CmdRspCalc")
 }
-record(calcout, "$(P)CmdRspFilter")
+# Only process CmdRsp while CmdReq is disabled. This prevents
+# to react on other asynInt32::CmdReq requests. For some reason
+# the excersize with DISV & SDIS in CmdRsp caches previous response
+# and doesn't work as expected.
+record(calcout, "$(P)CmdRspCalc")
 {
-    field(INPA, "$(P)CmdRspEn NPP")
+    field(INPA, "$(P)CmdReq.DISP")
+    field(INPB, "$(P)CmdRspRaw NPP")
     field(CALC, "A=1")
     field(OOPT, "When Non-zero")
-    field(OUT,  "$(P)CmdRspFanout PP")
-}
-record(fanout, "$(P)CmdRspFanout")
-{
-    field(LNK1, "$(P)CmdRspDisable PP")
-    field(LNK2, "$(P)CmdRsp PP")
+    field(OCAL, "B")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)CmdRsp PP")
 }
 record(mbbi, "$(P)CmdRsp")
 {
     field(DESC, "Last command response")
-    field(INP,  "$(P)CmdRspRaw NPP")
-    field(FLNK, "$(P)RspCheck")
     field(ZRVL, "0")
     field(ZRST, "None issued")
     field(ONVL, "1")
@@ -106,6 +88,16 @@ record(mbbi, "$(P)CmdRsp")
     field(FRST, "Error")
     field(FVVL, "5")
     field(FVST, "Skipped")
+    field(FLNK, "$(P)CmdReqEn")
+}
+# Re-enable CmdReq as soon as leaving Waiting state
+record(calcout, "$(P)CmdReqEn")
+{
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A=2")
+    field(OUT,  "$(P)CmdReq.DISP")
+    field(OOPT, "When Zero")
+    field(FLNK, "$(P)RspCheck")
 }
 record(fanout, "$(P)RspCheck")
 {

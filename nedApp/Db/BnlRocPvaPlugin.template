@@ -1,18 +1,15 @@
 include "BasePlugin.include"
 include "BasePvaPlugin.include"
 
-record(bo, "$(P)NormalDataFormat")
+# Upgrade the DataMode PV
+record(mbbo, "$(P)DataMode")
 {
-    info(archive, "Monitor, 00:00:05, VAL")
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Switch normal data mode")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))NormalDataFormat")
-    field(ZNAM, "common")
-    field(ONAM, "native")
-    field(VAL,  "0")
-    field(PINI, "YES")
+    field(ZRST, "pixel")
+    field(ONST, "raw")
+    field(TWST, "extended")
+    field(THST, "verbose")
+    field(FRVL, "4")
+    field(FRST, "xy")
 }
 record(longout, "$(P)XyFractWidth")
 {

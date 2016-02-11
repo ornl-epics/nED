@@ -30,7 +30,6 @@ BnlRocPvaPlugin::BnlRocPvaPlugin(const char *portName, const char *dispatcherPor
     setCallbacks(&BnlRocPvaPlugin::processTofPixelData, &BnlRocPvaPlugin::postTofPixelData);
 
     // Create PV parameters
-    createParam("NormalDataFormat", asynParamInt32, &NormalDataFormat, 0); // WRITE - Normal data format switch
     createParam("XyFractWidth",     asynParamInt32, &XyFractWidth, 11);    // WRITE - Number of fraction bits in X,Y data
     callParamCallbacks();
 }
@@ -38,15 +37,11 @@ BnlRocPvaPlugin::BnlRocPvaPlugin(const char *portName, const char *dispatcherPor
 asynStatus BnlRocPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == DataModeP) {
-        int normalDataFormat = 0;
         switch (value) {
         case DATA_MODE_NORMAL:
-            getIntegerParam(NormalDataFormat, &normalDataFormat);
-            if (normalDataFormat == 1) {
-                setCallbacks(&BnlRocPvaPlugin::processNormalData, &BnlRocPvaPlugin::postNormalData);
-            } else {
-                setCallbacks(&BnlRocPvaPlugin::processTofPixelData, &BnlRocPvaPlugin::postTofPixelData);
-            }
+            // Normal mode for this plugin is the tof,pixel format
+            // even though the normal mode for BNL ROC is X,Y format
+            setCallbacks(&BnlRocPvaPlugin::processTofPixelData, &BnlRocPvaPlugin::postTofPixelData);
             break;
         case DATA_MODE_RAW:
             setCallbacks(&BnlRocPvaPlugin::processRawData, &BnlRocPvaPlugin::postRawData);
@@ -54,22 +49,15 @@ asynStatus BnlRocPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         case DATA_MODE_EXTENDED:
             setCallbacks(&BnlRocPvaPlugin::processExtendedData, &BnlRocPvaPlugin::postExtendedData);
             break;
+        case DATA_MODE_XY:
+            setCallbacks(&BnlRocPvaPlugin::processNormalData, &BnlRocPvaPlugin::postNormalData);
+            break;
         default:
             LOG_ERROR("Ignoring invalid output mode %d", value);
             return asynError;
         }
-    } else if (pasynUser->reason == NormalDataFormat) {
-        int dataMode = DATA_MODE_NORMAL;
-        getIntegerParam(DataModeP, &dataMode);
-
-        if (dataMode == DATA_MODE_NORMAL) {
-            if (value == 1) {
-                setCallbacks(&BnlRocPvaPlugin::processNormalData, &BnlRocPvaPlugin::postNormalData);
-            } else {
-                setCallbacks(&BnlRocPvaPlugin::processTofPixelData, &BnlRocPvaPlugin::postTofPixelData);
-            }
-        }
         flushData();
+        return asynSuccess;
     } else if (pasynUser->reason == XyFractWidth) {
         if (value < 0 || value > 15)
             return asynError;

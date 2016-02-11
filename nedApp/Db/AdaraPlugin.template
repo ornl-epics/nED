@@ -34,7 +34,7 @@ record(stringin, "$(P)ClientIp")
 
 record(scalcout, "$(P)StatusCalc")
 {
-    field(DESC, "Determine global OCC status")
+    field(DESC, "Determine global plugin status")
     field(INAA, "$(P)ClientIp NPP")
     field(INPA, "$(P)Enable.SEVR NPP")
     field(CALC, "A=0&&LEN(AA)>0")
