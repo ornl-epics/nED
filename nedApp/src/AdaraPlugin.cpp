@@ -86,9 +86,6 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
     uint32_t outpacket[10];
     int neutronsEn = 0, metadataEn = 0;
 
-    if (getDataMode() != DATA_MODE_NORMAL)
-        return;
-
     getIntegerParam(NeutronsEn, &neutronsEn);
     getIntegerParam(MetadataEn, &metadataEn);
 
