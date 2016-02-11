@@ -30,11 +30,13 @@
 import sys
 import re
 import os
-from optparse import OptionParser
+import argparse
+
 
 __version__ = "0.2.0"
 
 PVTABLE_DIR_TMPL = "/home/controls/<beamline>/pvtable/<iocname>/"
+BL = os.environ['BL']
 
 def parse_st_cmd_env(st_cmd_filepath):
     """ Parse st.cmd file and extract environment variables """
@@ -137,63 +139,48 @@ def write_pvs_file(outpath, pv_prefix, vars):
         outfile.write("</pvtable>\n")
 
 def main():
-    usage = ("%prog [options] /path/to/st.cmd\n"
-             "\n"
-             "Create .pvs files for all detector devices configured in st.cmd.")
+    desc = "Create .pvs files for all detector devices configured in st.cmd."
 
-    parse = OptionParser(usage=usage, version='%prog '+str(__version__))
-    parse.add_option("-b", dest="bl_prefix", default=None, help="Override beamline PREFIX, example BL99:Det:")
-    parse.add_option("-n", dest="ned_dir", default=None, help="Path to nED root directory")
-    parse.add_option("-o", dest="outdir", default=None, help="Override output directory")
-    parse.add_option("-v", dest="verbose", default=False, action="store_true", help="Verbose mode")
-    (options, args) = parse.parse_args()
+    parser = argparse.ArgumentParser(description=desc)
+    parser.add_argument("st_cmd", help="Path to nED IOC st.cmd file")
+    parser.add_argument("-b", "--bl-prefix", default=BL+":Det", help="Override beamline PREFIX, defaults to " + BL + ":Det")
+    parser.add_argument("-f", "--force", default=False, help="Overwrite existing files", action="store_true")
+    parser.add_argument("-n", "--ned-dir", default=None, help="Path to nED root directory")
+    parser.add_argument("-o", "--outdir", default=None, help="Override output directory")
+    parser.add_argument("-v", "--verbose", default=False, action="store_true", help="Verbose mode")
+    args = parser.parse_args()
 
     # Verify IOC startup file
-    if not args[0:]:
-        parse.print_usage()
-        sys.exit(1)
-    st_cmd = args[0]
-    if not os.path.isfile(st_cmd):
-        print "ERROR: Invalid IOC startup file path '{0}'".format(st_cmd)
+    if not os.path.isfile(args.st_cmd):
+        print "ERROR: Invalid IOC startup file path '{0}'".format(args.st_cmd)
         sys.exit(1)
 
     # Try to read EPICS macros from startup file
-    env = parse_st_cmd_env(st_cmd)
-    if options.verbose:
+    env = parse_st_cmd_env(args.st_cmd)
+    if args.verbose:
         print "Found {0} EPICS macros in IOC startup file".format(len(env))
         for k,v in env.items():
             print " {0} = {1}".format(k, v)
 
     # Verify beamline prefix, command line overrides one from st.cmd
-    bl_prefix = None
-    if 'PREFIX' in env:
-        bl_prefix = env['PREFIX']
-        if options.verbose:
-            print "Found beamline prefix '{0}' in {1}".format(bl_prefix, st_cmd)
-    if options.bl_prefix:
-        if bl_prefix and options.verbose:
-            print "Overriding beamline prefix '{0}' -> '{1}'".format(bl_prefix, options.bl_prefix)
-        bl_prefix = options.bl_prefix
-    if not bl_prefix:
-        print "ERROR: Can't find beamline prefix, use -b parameter to specify it"
-        parse.print_help()
-        sys.exit(1)
-    if bl_prefix[-1] != ":":
-        if options.verbose:
-            print "Adjusting beamline prefix '{0}' -> '{0}:'".format(bl_prefix)
-        bl_prefix += ":"
+    re_bl = re.compile("^BL[0-9]{1,2}.?:\w+$")
+    if not re_bl.search(args.bl_prefix):
+        raise UserWarning("Invalid BL prefix")
+
+    if args.bl_prefix[-1] != ":":
+        args.bl_prefix += ":"
 
     # Verify output directory
-    if options.outdir:
-        outdir = options.outdir
+    if args.outdir:
+        outdir = args.outdir
     elif 'IOCNAME' in env:
-        if options.verbose:
+        if args.verbose:
             print "Found IOC name '{0}' in {1}".format(env['IOCNAME'], st_cmd)
-        beamline = bl_prefix.split(":")[0].lower()
+        beamline = args.bl_prefix.split(":")[0].lower()
         outdir = os.path.normpath(PVTABLE_DIR_TMPL)
         outdir = outdir.replace("<beamline>", beamline)
         outdir = outdir.replace("<iocname>", env['IOCNAME'])
-        if options.verbose:
+        if args.verbose:
             print "Set output directory to '{0}'".format(outdir)
     else:
         print "ERROR: Can't detect output directory from IOC startup file, use -o parameter to specify it"
@@ -205,10 +192,10 @@ def main():
         os.makedirs(outdir)
 
     # Verify nED directory
-    if options.ned_dir:
-        ned_dir = os.path.join(options.ned_dir, "nedApp", "src")
+    if args.ned_dir:
+        ned_dir = os.path.join(args.ned_dir, "nedApp", "src")
         if not os.path.isdir(ned_dir):
-            print "ERROR: {0} is not valid nED top level directory".format(options.ned_dir)
+            print "ERROR: {0} is not valid nED top level directory".format(args.ned_dir)
             sys.exit(1)
     else:
         ned_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "nedApp", "src")
@@ -218,16 +205,16 @@ def main():
     ned_dir = os.path.normpath(ned_dir)
     print ned_dir
 
-    plugins = parse_st_cmd_plugins(st_cmd, bl_prefix, options.verbose)
+    plugins = parse_st_cmd_plugins(args.st_cmd, args.bl_prefix, args.verbose)
     if not plugins:
         print "No device plugins found in '{0}'".format(st_cmd)
-    elif options.verbose:
+    elif args.verbose:
         print "Found {0} device plugins".format(len(plugins))
 
     all_config = []
     for plugin in plugins:
 
-        if options.verbose:
+        if args.verbose:
             print "Found {0} plugin configuration named {1}".format(plugin["name"], plugin["device"])
         inpath = os.path.join(ned_dir, plugin["name"] + ".cpp")
 
@@ -241,9 +228,9 @@ def main():
 
             if vars:
                 outpath = os.path.join(outdir, plugin["device"] + "_" + mode + ".pvs")
-                write_pvs_file(outpath, plugin['pv_prefix'], vars)
-
-                print "Created {0} from {1}".format(outpath, inpath)
+                if not os.path.isfile(outpath) or args.force:
+                    write_pvs_file(outpath, plugin['pv_prefix'], vars)
+                    print "Created {0} from {1}".format(outpath, inpath)
 
                 if mode == "config":
                     for var in vars:
@@ -254,8 +241,9 @@ def main():
 
     if all_config:
         outpath = os.path.join(outdir, "all_config.pvs")
-        write_pvs_file(outpath, "", all_config)
-        print "Created {0}".format(outpath)
+        if not os.path.isfile(outpath) or args.force:
+            write_pvs_file(outpath, "", all_config)
+            print "Created {0}".format(outpath)
 
 if __name__ == "__main__":
     main()
