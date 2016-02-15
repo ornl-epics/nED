@@ -7,20 +7,19 @@
  * @author Greg Guyotte
  */
 
+#include "Common.h"
 #include "BnlRocPlugin.h"
 #include "Log.h"
 
 #include <cstring>
 
-#define HEX_BYTE_TO_DEC(a)      ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
-
-EPICS_REGISTER_PLUGIN(BnlRocPlugin, 5, "Port name", string, 
-        "Dispatcher port name", string, "Hardware ID", string, 
+EPICS_REGISTER_PLUGIN(BnlRocPlugin, 5, "Port name", string,
+        "Dispatcher port name", string, "Hardware ID", string,
         "Hw & SW version", string, "Blocking", int);
 
-/* Since supporting multiple versions with different number of PVs, this is 
+/* Since supporting multiple versions with different number of PVs, this is
  * just a maximum value. */
-const unsigned BnlRocPlugin::NUM_BNLROCPLUGIN_DYNPARAMS       = 650;  
+const unsigned BnlRocPlugin::NUM_BNLROCPLUGIN_DYNPARAMS       = 650;
 
 /**
  * BNL ROC version response format
@@ -42,8 +41,8 @@ struct RspReadVersion {
 BnlRocPlugin::BnlRocPlugin(const char *portName, const char *dispatcherPortName,
         const char *hardwareId, const char *version, int blocking)
     : BaseModulePlugin(portName, dispatcherPortName, hardwareId,
-            DasPacket::MOD_TYPE_BNLROC, true, blocking, 
-            NUM_BNLROCPLUGIN_DYNPARAMS, defaultInterfaceMask, 
+            DasPacket::MOD_TYPE_BNLROC, true, blocking,
+            NUM_BNLROCPLUGIN_DYNPARAMS, defaultInterfaceMask,
             defaultInterruptMask)
     , m_version(version)
 {
@@ -74,7 +73,7 @@ bool BnlRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
     if (version.hw_version == 1) {
         char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, 
+        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version,
                 version.fw_revision);
         if (m_version == ver)
             return true;
@@ -83,7 +82,7 @@ bool BnlRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
     return false;
 }
 
-bool BnlRocPlugin::parseVersionRsp(const DasPacket *packet, 
+bool BnlRocPlugin::parseVersionRsp(const DasPacket *packet,
         BaseModulePlugin::Version &version)
 {
     const RspReadVersion *response;
@@ -107,7 +106,7 @@ bool BnlRocPlugin::parseVersionRsp(const DasPacket *packet,
     return true;
 }
 
-// createStatusParams_v* and createConfigParams_v* functions are implemented in 
+// createStatusParams_v* and createConfigParams_v* functions are implemented in
 // custom files for two reasons:
 // * easy parsing through scripts in tools/ directory
 // * easily compare PVs between ROC versions
