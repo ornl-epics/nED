@@ -84,6 +84,9 @@
 		<Unit filename="BnlRocPlugin_v20.cpp" />
 		<Unit filename="BnlRocPvaPlugin.cpp" />
 		<Unit filename="BnlRocPvaPlugin.h" />
+		<Unit filename="CRocPlugin.cpp" />
+		<Unit filename="CRocPlugin.h" />
+		<Unit filename="CRocPlugin_v93.cpp" />
 		<Unit filename="CircularBuffer.cpp" />
 		<Unit filename="CircularBuffer.h" />
 		<Unit filename="CmdDispatcher.cpp" />
