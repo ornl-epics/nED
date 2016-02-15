@@ -7,11 +7,12 @@
  * @author Klemen Vodopivec
  */
 
-#include "AcpcFemPlugin.h"
 #include "AcpcPlugin.h"
+#include "AcpcFemPlugin.h"
 #include "AdcRocPlugin.h"
-#include "BnlRocPlugin.h"
 #include "ArocPlugin.h"
+#include "BnlRocPlugin.h"
+#include "CRocPlugin.h"
 #include "DiscoverPlugin.h"
 #include "DspPlugin.h"
 #include "FemPlugin.h"
@@ -55,12 +56,8 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
 {
     int nReceived = 0;
     int nProcessed = 0;
-    int nDiscovered = 0;
-    int nVerified = 0;
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
-    getIntegerParam(Discovered, &nDiscovered);
-    getIntegerParam(Verified,   &nVerified);
 
     nReceived += packetList->size();
 
@@ -72,39 +69,57 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
             continue;
 
         if (packet->cmdinfo.command == DasPacket::CMD_DISCOVER) {
+            m_discovered[packet->getSourceAddress()].type = packet->cmdinfo.module_type;
+
             if (packet->cmdinfo.module_type == DasPacket::MOD_TYPE_DSP) {
-                // DSP responds with a list of modules it knows about in the payload.
+                // Pre 6.5 DSP responds with a list of modules it knows about in the payload.
                 // It appears that only DSPs will respond to a broadcast address and from
-                // their responses all their submodules can be observed. Since we're
+                // their responses all their submodules can be detected. Since we're
                 // also interested in module types, we'll do a p2p discover to every module.
-                m_discovered[packet->source].type = DasPacket::MOD_TYPE_DSP;
+                //
+                // Starting with v6.5, DSP-T no longer generates the table internally
+                // and doesn't send all modules in his discover response. Instead it
+                // behaves exactly the same as everybody else and also doesn't block
+                // global command.
                 reqVersion(packet->getSourceAddress());
 
-                nDiscovered++;
 
                 // The global LVDS discover packet should address all modules connected
-                // through LVDS. For some unidentified reason, ROC boards connected directly
-                // to DSP don't respond, whereas ROCs behind FEM do.
-                // So we do P2P to each module.
+                // through LVDS. DSP-T prior to v6.5 also blocks global discover command
+                // and instead does his own discovery. To support all DSP-T versions,
+                // we parse DSP-T response if any and do P2P to each module.
                 for (uint32_t i=0; i<packet->payload_length/sizeof(uint32_t); i++) {
-                    nDiscovered++;
                     m_discovered[packet->payload[i]].parent = packet->getRouterAddress();
                     reqLvdsDiscover(packet->payload[i]);
                     reqLvdsVersion(packet->payload[i]);
                 }
-            } else if (packet->cmdinfo.is_passthru) {
-                // Source hardware id belongs to the DSP, the actual module id is in payload
-                m_discovered[packet->getSourceAddress()].type = packet->cmdinfo.module_type;
             } else {
-                m_discovered[packet->getSourceAddress()].type = packet->cmdinfo.module_type;
+                reqLvdsVersion(packet->getSourceAddress());
             }
             nProcessed++;
         } else if (packet->cmdinfo.command == DasPacket::CMD_READ_VERSION) {
             uint32_t source = packet->getSourceAddress();
             if (m_discovered.find(source) != m_discovered.end()) {
+                m_discovered[source].verified = true;
+
                 switch (m_discovered[source].type) {
+                case DasPacket::MOD_TYPE_ACPC:
+                    AcpcPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
                 case DasPacket::MOD_TYPE_ACPCFEM:
                     AcpcFemPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_ADCROC:
+                    AdcRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_AROC:
+                    ArocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_BNLROC:
+                    BnlRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_CROC:
+                    CRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
                 case DasPacket::MOD_TYPE_DSP:
                     DspPlugin::parseVersionRsp(packet, m_discovered[source].version);
@@ -115,30 +130,24 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                 case DasPacket::MOD_TYPE_ROC:
                     RocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
-                case DasPacket::MOD_TYPE_ADCROC:
-                    AdcRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
-                    break;
-                case DasPacket::MOD_TYPE_BNLROC:
-                    BnlRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
-                    break;
-                case DasPacket::MOD_TYPE_ACPC:
-                    AcpcPlugin::parseVersionRsp(packet, m_discovered[source].version);
-                    break;
-                case DasPacket::MOD_TYPE_AROC:
-                    ArocPlugin::parseVersionRsp(packet, m_discovered[source].version);
-                    break;
                 default:
+                    m_discovered[source].verified = false;
                     break;
                 }
             }
-            nVerified++;
             nProcessed++;
         }
     }
 
+    int nVerified = 0;
+    for (auto it=m_discovered.begin(); it!=m_discovered.end(); it++) {
+        if (it->second.verified)
+            nVerified++;
+    }
+
     setIntegerParam(RxCount,    nReceived);
     setIntegerParam(ProcCount,  nProcessed);
-    setIntegerParam(Discovered, nDiscovered);
+    setIntegerParam(Discovered, m_discovered.size());
     setIntegerParam(Verified,   nVerified);
     callParamCallbacks();
 }
@@ -219,15 +228,15 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_ACPCFEM:   plugin = "AcpcFemPlugin";   type = "afem";    break;
             case DasPacket::MOD_TYPE_ACPC:      plugin = "AcpcPlugin";      type = "acpc";    break;
             case DasPacket::MOD_TYPE_ADCROC:    plugin = "AdcRocPlugin";    type = "adcroc";  break;
-            case DasPacket::MOD_TYPE_BNLROC:    plugin = "BnlRocPlugin";    type = "broc";    break;
             case DasPacket::MOD_TYPE_AROC:      plugin = "ArocPlugin";      type = "aroc";    break;
+            case DasPacket::MOD_TYPE_BNLROC:    plugin = "BnlRocPlugin";    type = "broc";    break;
+            case DasPacket::MOD_TYPE_CROC:      plugin = "CRocPlugin";      type = "croc";    break;
             case DasPacket::MOD_TYPE_DSP:       plugin = "DspPlugin";       type = "dsp";     break;
             case DasPacket::MOD_TYPE_FEM:       plugin = "FemPlugin";       type = "fem";     break;
             case DasPacket::MOD_TYPE_ROC:       plugin = "RocPlugin";       type = "roc";     break;
 /*
  * These are not yet supported
             case DasPacket::MOD_TYPE_BIDIMROC:  plugin = "BidimRocPlugin";  type = "Broc";    break;
-            case DasPacket::MOD_TYPE_CROC:      plugin = "CrocPlugin";      type = "croc";    break;
             case DasPacket::MOD_TYPE_FFC:       plugin = "FfcPlugin";       type = "ffc";     break;
             case DasPacket::MOD_TYPE_HROC:      plugin = "HrocPlugin";      type = "hroc";    break;
             case DasPacket::MOD_TYPE_IROC:      plugin = "IrocPlugin";      type = "iroc";    break;
