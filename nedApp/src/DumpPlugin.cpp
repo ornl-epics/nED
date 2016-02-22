@@ -30,6 +30,7 @@ DumpPlugin::DumpPlugin(const char *portName, const char *dispatcherPortName, int
     , m_unknwnEn(true)
 {
     createParam("FilePath",         asynParamOctet, &FilePath);          // WRITE - Path to file where to save all received data
+    createParam("BadPktsEn",        asynParamInt32, &BadPktsEn, 1);      // WRITE - Switch for bad packets
     createParam("RtdlPktsEn",       asynParamInt32, &RtdlPktsEn, 1);     // WRITE - Switch for RTDL packets
     createParam("NeutronPktsEn",    asynParamInt32, &NeutronPktsEn, 1);  // WRITE - Switch for neutron packets
     createParam("MetadataPktsEn",   asynParamInt32, &MetadataPktsEn, 1); // WRITE - Switch for metadata packets
@@ -66,42 +67,49 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
             const DasPacket *packet = *it;
 
             // Skip filtered-out packets
-            if ( (m_rtdlEn     && packet->isRtdl()        ) ||
-                 (m_neutronEn  && packet->isNeutronData() ) ||
-                 (m_metadataEn && packet->isMetaData()    ) ||
-                 (m_cmdEn      && packet->isCommand() && !packet->isRtdl() && packet->cmdinfo.command != DasPacket::CMD_TSYNC) ||
-                 (m_unknwnEn) ) {
+            if (packet->isBad()) {
+                if (m_badEn == false) continue;
+            } else if (packet->isRtdl()) {
+                if (m_rtdlEn == false) continue;
+            } else if (packet->isCommand()) {
+                if (m_cmdEn == false) continue;
+            } else if (packet->isNeutronData()) {
+                if (m_neutronEn == false) continue;
+            } else if (packet->isMetaData()) {
+                if (m_metadataEn == false) continue;
+            } else {
+                if (m_unknwnEn == false) continue;
+            }
 
-                nProcessed++;
+            nProcessed++;
 
-                // m_fd is non-blocking, might fail when system buffers are full
-                ssize_t ret = write(m_fd, packet, packet->length());
-                if (ret == static_cast<ssize_t>(packet->length())) {
-                    nSaved++;
-                } else {
-                    nNotSaved++;
-                    if (ret == -1) {
-                        LOG_WARN("Failed to save packet to file: %s", strerror(errno));
-                    } else if (m_fdIsPipe) {
-                        // Nothing we can do about it
-                        char path[1024];
-                        getStringParam(FilePath, sizeof(path), path);
-                        LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->length(), path);
-                        if (corruptOffset == 0) {
-                            corruptOffset = lseek(m_fd, 0, SEEK_CUR) - ret;
-                        }
-                    } else if (lseek(m_fd, -1 * ret, SEEK_CUR) != 0) {
-                        // Too bad but lseek() failed - very unlikely
-                        off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
-                        char path[1024];
-                        getStringParam(FilePath, sizeof(path), path);
-                        LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->length(), path, offset);
-                        if (corruptOffset == 0) {
-                            corruptOffset = offset;
-                        }
-                    } else {
-                        LOG_WARN("Failed to save packet to file");
+            // m_fd is non-blocking, might fail when system buffers are full
+            ssize_t ret = write(m_fd, packet, packet->length());
+            if (ret == static_cast<ssize_t>(packet->length())) {
+                nSaved++;
+            } else {
+                nNotSaved++;
+                if (ret == -1) {
+                    LOG_WARN("Failed to save packet to file: %s", strerror(errno));
+                } else if (m_fdIsPipe) {
+                    // Nothing we can do about it
+                    char path[1024];
+                    getStringParam(FilePath, sizeof(path), path);
+                    LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->length(), path);
+                    if (corruptOffset == 0) {
+                        corruptOffset = lseek(m_fd, 0, SEEK_CUR) - ret;
                     }
+                } else if (lseek(m_fd, -1 * ret, SEEK_CUR) != 0) {
+                    // Too bad but lseek() failed - very unlikely
+                    off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
+                    char path[1024];
+                    getStringParam(FilePath, sizeof(path), path);
+                    LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->length(), path, offset);
+                    if (corruptOffset == 0) {
+                        corruptOffset = offset;
+                    }
+                } else {
+                    LOG_WARN("Failed to save packet to file");
                 }
             }
         }
@@ -143,6 +151,8 @@ asynStatus DumpPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             }
         }
         return asynSuccess;
+    } else if (pasynUser->reason == BadPktsEn) {
+        m_badEn = (value > 0);
     } else if (pasynUser->reason == RtdlPktsEn) {
         m_rtdlEn = (value > 0);
     } else if (pasynUser->reason == NeutronPktsEn) {
