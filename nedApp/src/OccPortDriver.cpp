@@ -15,6 +15,7 @@
 #include "BasePlugin.h"
 #include "Log.h"
 
+#include <algorithm> // std::min
 #include <cstring> // strerror
 #include <cstddef>
 #include <errno.h>
@@ -426,6 +427,34 @@ void OccPortDriver::handleRecvError(int ret)
     this->unlock();
 }
 
+void OccPortDriver::dump(const char *data, uint32_t len)
+{
+    char buffer[64] = { 0 };
+    char *ptr = buffer;
+    const uint32_t maxlen = 4096;
+
+    LOG_DEBUG("Dump %u bytes of raw data at offset %p", len, data);
+
+    // OCC library is always 4-byte aligned, so the buffer should
+    // be good for 4-byte reads even if the packet is not 4-byte
+    // aligned.
+    for (uint32_t i = 0; i < std::min(len, maxlen)/4; i++) {
+        if ((i % 4) == 0 && i > 0) {
+            LOG_DEBUG("%s", buffer);
+            buffer[0] = 0;
+            ptr = buffer;
+        }
+        snprintf(ptr, buffer + sizeof(buffer) - ptr, "0x%08X ", *(uint32_t *)(data + i*4));
+        ptr += 11;
+    }
+    if (ptr > 0) {
+        LOG_DEBUG("%s", buffer);
+    }
+    if (len > maxlen) {
+        LOG_DEBUG("... truncated to %u bytes", maxlen);
+    }
+}
+
 void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 {
     void *data;
@@ -478,6 +507,7 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             } else {
                 LOG_ERROR("Partial data from OCC, aborting process thread");
             }
+            dump((char *)data + consumed, length - consumed);
             handleRecvError(-ERANGE);
             break;
         }
