@@ -84,7 +84,7 @@ void StatPlugin::processData(const DasPacketList * const packetList)
         } else if (packet->cmdinfo.is_command && packet->cmdinfo.command == DasPacket::CMD_TSYNC) {
             m_tsyncCount++;
             m_tsyncBytes += packet->length();
-        } else if (packet->isBadPacket()) {
+        } else if (packet->isBad()) {
             m_badCount++;
             m_badBytes += packet->length();
         }
