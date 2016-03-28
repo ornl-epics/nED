@@ -35,6 +35,7 @@ DB += BnlFlatFieldPlugin.db
 DB += BnlPosCalcPlugin.db
 
 DB += DspPlugin_v51.db
+DB += DspPlugin_v52.db
 DB += DspPlugin_v63.db
 DB += DspPlugin_v64.db
 DB += DspPlugin_v65.db
@@ -70,6 +71,7 @@ include $(TOP)/configure/RULES
 #
 
 DspPlugin_v51.template: DspPlugin_v51.generated
+DspPlugin_v52.template: DspPlugin_v52.generated
 DspPlugin_v63.template: DspPlugin_v63.generated
 DspPlugin_v64.template: DspPlugin_v64.generated
 DspPlugin_v65.template: DspPlugin_v65.generated
