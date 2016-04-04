@@ -2,3 +2,5 @@ html/
 latex/
 *.dox
 ned.layout
+tags
+*.json
