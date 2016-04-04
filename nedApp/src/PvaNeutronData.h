@@ -29,17 +29,17 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr sample_a1;        //!< LPSD ONLY: ADC samples
         epics::pvData::PVUIntArrayPtr sample_a2;        //!< CROC ONLY: TimeRange samples
         epics::pvData::PVUIntArrayPtr sample_a8;        //!< AROC/ACPC ONLY: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x1;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x2;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x3;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x4;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x5;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x6;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x7;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x8;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x9;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x10;     //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_x11;     //!< BNLROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x1;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x2;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x3;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x4;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x5;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x6;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x7;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x8;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x9;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x10;     //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_x11;     //!< BNLROC & CROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_x12;     //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_x13;     //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_x14;     //!< BNLROC: ADC samples
@@ -49,13 +49,13 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUShortArrayPtr sample_x18;     //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_x19;     //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_x20;     //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_y1;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_y2;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_y3;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_y4;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_y5;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_y6;      //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_y7;      //!< BNLROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_y1;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_y2;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_y3;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_y4;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_y5;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_y6;      //!< BNLROC & CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_y7;      //!< BNLROC & CROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_y8;      //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_y9;      //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_y10;     //!< BNLROC: ADC samples
@@ -66,6 +66,26 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUShortArrayPtr sample_y15;     //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_y16;     //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_y17;     //!< BNLROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g1;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g2;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g3;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g4;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g5;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g6;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g7;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g8;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g9;      //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g10;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g11;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g12;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g13;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g14;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g15;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g16;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g17;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g18;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g19;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g20;     //!< CROC: ADC samples
         epics::pvData::PVUIntArrayPtr sample_a48;       //!< ACPC ONLY: ADC samples
         epics::pvData::PVUIntArrayPtr sample_b1;        //!< LPSD ONLY: ADC samples
         epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC/ACPC ONLY: ADC samples
