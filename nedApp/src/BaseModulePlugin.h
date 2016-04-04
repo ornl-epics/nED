@@ -727,6 +727,15 @@ class BaseModulePlugin : public BasePlugin {
         }
 
         /**
+         * Create meta-parameter
+         *
+         * Meta parameter is a module parameter that doesn't have corresponding
+         * register. It's value is cached in software only and possibly sent to
+         * connected PVs.
+         */
+        void createConfigParam(const char *name, uint32_t nBits, int value, BaseModulePlugin::ValueConverter conv=CONV_UNSIGN);
+
+        /**
          * Create and register single integer temperature parameter.
          *
          * Temperature values are returned in READ_TEMPERATURE response payload.
