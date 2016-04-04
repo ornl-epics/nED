@@ -12,7 +12,7 @@ include $(TOP)/configure/CONFIG
 # to pick-up functionlity from library.
 
 # The C/C++ bitfield ordering in structs is platform AND compiler dependant
-# 
+#
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
 #USR_CXXFLAGS += -DMAX_PACKET_LEN=36000 # Uncomment when dealing with legacy DSP
 USR_CXXFLAGS += -std=c++0x
@@ -135,6 +135,8 @@ $(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
 $(PROD_NAME)_SRCS  += TimingPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlFlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
+$(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
+$(PROD_NAME)_SRCS  += CRocPvaPlugin.cpp
 
 #===========================
 
