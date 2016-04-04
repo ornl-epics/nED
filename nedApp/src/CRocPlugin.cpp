@@ -13,14 +13,15 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(CRocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
+EPICS_REGISTER_PLUGIN(CRocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "PosCalc port name", string);
 
 const unsigned CRocPlugin::NUM_CROCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
 
-CRocPlugin::CRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_CROC, true, blocking,
+CRocPlugin::CRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, const char *posCalcPortName)
+    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_CROC, true, 0,
                        NUM_CROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
     , m_version(version)
+    , m_posCalcPort(posCalcPortName)
 {
     if (0) {
     } else if (m_version == "v93") {
@@ -84,6 +85,13 @@ bool CRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
     }
 
     return false;
+}
+
+asynStatus CRocPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (!m_posCalcPort.empty())
+        BasePlugin::sendParam(m_posCalcPort, getParamName(pasynUser->reason), value);
+    return BaseModulePlugin::writeInt32(pasynUser, value);
 }
 
 // createParams_v* function is implemented in custom files for two

@@ -106,12 +106,12 @@ void CRocPlugin::createParams_v93()
     createConfigParam("Tp17Select",       'E',  0xA,  8, 0, 0);     // TP17 select
     createConfigParam("Tp18Select",       'E',  0xA,  8, 8, 0);     // TP18 select
     createConfigParam("DeadTime",         'E',  0xB, 16, 0, 0);     // Dead time
-    createConfigParam("TimeRangeCntMin",  'E',  0xC, 13, 0, 0);     // Time range count min nmin[0]
-    createConfigParam("TimeRangeMin",     'E',  0xC,  2,13, 0);     // Time range minimum
-    createConfigParam("YMin",             'E',  0xD,  8, 0, 0);     // Y minimum nmin[2]
-    createConfigParam("XMin",             'E',  0xD,  8, 8, 0);     // X minimum nmin[1]
-    createConfigParam("Tcnt",             'E',  0xE,  8, 0, 0);     // G minimum nmin[3]
-    createConfigParam("XThreshold",       'E',  0xE,  4, 8, 0);     // X above nmin[2] - nmin[4]
+    createConfigParam("TimeRangeMin",     'E',  0xC, 13, 0, 0);     // Time range count min nmin[0]
+    createConfigParam("TimeRangeMinCnt",  'E',  0xC,  2,13, 0);     // Minimum number of valid time
+    createConfigParam("YMin",             'E',  0xD,  8, 0, 0);     // Y minimum nmin[1]
+    createConfigParam("XMin",             'E',  0xD,  8, 8, 0);     // X minimum nmin[2]
+    createConfigParam("Gcnt",             'E',  0xE,  8, 0, 0);     // G minimum nmin[3]
+    createConfigParam("XCntMin",          'E',  0xE,  4, 8, 0);     // X above nmin[2] - nmin[4]
     createConfigParam("GMin",             'E',  0xE,  4,12, 0);     // nongap_maxcnt_dratio
     createConfigParam("PrsInfo0",         'E',  0xF, 16, 0, 0);     // prs_info[47:32]
     createConfigParam("PrsInfo1",         'E', 0x10, 16, 0, 0);     // prs_info[63:48]
@@ -125,4 +125,8 @@ void CRocPlugin::createParams_v93()
     createConfigParam("EdgeMode",         'F',  0x0,  1, 8, 0);     // Edge mode                     (0=low,1=falling edge)
     createConfigParam("CoincidenceMode",  'F',  0x0,  2, 9, 0);     // Coincidence mode              (0=multiple hit,1=sections,2=both)
     createConfigParam("LvdsRate",         'F',  0x0,  1,15, 0);     // LVDS output rate              (0=40Mhz,1=20Mhz)
+
+    // Meta-parameters needed for calculation but not available in firmware
+    createConfigParam("YCntMax",                      8,    0);     // Num of Y above threshold
+    createConfigParam("MapMode",                      8,    0);     // Type of mapping algorithm
 }

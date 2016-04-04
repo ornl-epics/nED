@@ -26,6 +26,7 @@ class CRocPlugin : public BaseModulePlugin {
 
     private: // variables
         std::string m_version;                              //!< Version string as passed to constructor
+        std::string m_posCalcPort;                          //!< Name of the CRocPosCalcPlugin port for sending this CROC parameters
 
     public: // functions
 
@@ -39,9 +40,9 @@ class CRocPlugin : public BaseModulePlugin {
          * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version ROC HW&SW version, ie. V5_50
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
+         * @param[in] posCalcPortName Name of the CROC position calculation plugin
          */
-        CRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
+        CRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, const char *posCalcPortName=0);
 
         /**
          * Try to parse the ROC version response packet an populate the structure.
@@ -75,6 +76,11 @@ class CRocPlugin : public BaseModulePlugin {
          * @return true when they match, false otherwise.
          */
         bool checkVersion(const BaseModulePlugin::Version &version);
+
+        /**
+         * Handle passing parameters from other plugins.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
     private: // functions
 
