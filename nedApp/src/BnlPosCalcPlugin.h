@@ -220,7 +220,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         calc_return_t calculatePosition(const BnlDataPacket::RawEvent *event, double *x, double *y);
 
     protected:
-        #define FIRST_DATACONVERTPLUGIN_PARAM ErrMem
+        #define FIRST_BNLPOSCALCPLUGIN_PARAM ErrMem
         int ErrMem;         //!< Error allocating buffer
         int XyFractWidth;   //!< Number of fraction bits in X,Y Qm.n format
         int LowChargeVetoEn;//!< Switch for toggle low charge rejection
@@ -241,7 +241,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
         int XCentroidScale; //!< Centroid X scale factor
         int YCentroidScale; //!< Centroid Y scale factor
         int PvaName;        //!< Name of PVA channel for position calculation data
-        #define LAST_DATACONVERTPLUGIN_PARAM PvaName
+        #define LAST_BNLPOSCALCPLUGIN_PARAM PvaName
         int XScales[20];
         int YScales[17];
         int XOffsets[20];
