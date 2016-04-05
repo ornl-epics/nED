@@ -175,7 +175,7 @@ def main():
         outdir = args.outdir
     elif 'IOCNAME' in env:
         if args.verbose:
-            print "Found IOC name '{0}' in {1}".format(env['IOCNAME'], st_cmd)
+            print "Found IOC name '{0}' in {1}".format(env['IOCNAME'], args.st_cmd)
         beamline = args.bl_prefix.split(":")[0].lower()
         outdir = os.path.normpath(PVTABLE_DIR_TMPL)
         outdir = outdir.replace("<beamline>", beamline)
@@ -207,7 +207,7 @@ def main():
 
     plugins = parse_st_cmd_plugins(args.st_cmd, args.bl_prefix, args.verbose)
     if not plugins:
-        print "No device plugins found in '{0}'".format(st_cmd)
+        print "No device plugins found in '{0}'".format(args.st_cmd)
     elif args.verbose:
         print "Found {0} device plugins".format(len(plugins))
 
@@ -244,6 +244,8 @@ def main():
         if not os.path.isfile(outpath) or args.force:
             write_pvs_file(outpath, "", all_config)
             print "Created {0}".format(outpath)
+        else:
+            print "File exists, skipping {0}".format(outpath)
 
 if __name__ == "__main__":
     main()

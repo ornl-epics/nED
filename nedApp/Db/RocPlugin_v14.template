@@ -1,0 +1,27 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "RocPlugin_v4x.include"
+include "RocPlugin_v14.generated"
+include "RocPlugin.include"
+include "GlobalConD.include"
+
+record(longin, "$(P)HwVer")
+{
+    field(HIGH, "3")
+    field(LOW,  "1")
+}
+record(longin, "$(P)HwRev")
+{
+    field(HIGH, "66")
+    field(LOW,  "64")
+}
+record(longin, "$(P)FwVer")
+{
+    field(HIGH, "2")
+    field(LOW,  "0")
+}
+record(longin, "$(P)FwRev")
+{
+    field(HIGH, "5")
+    field(LOW,  "3")
+}
