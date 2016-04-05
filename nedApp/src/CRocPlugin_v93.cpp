@@ -93,7 +93,7 @@ void CRocPlugin::createParams_v93()
 
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-    createConfigParam("PositionIdx",      '1',  0x0, 32, 0, 0);     // Position index
+    createConfigParam("PositionId",       '1',  0x0, 32, 0, 0);     // Position index
     createConfigParam("TsyncDelay",       'D',  0x0, 32, 0, 0);     // TSYNC delay
     createConfigParam("TimeVetoLow",      'E',  0x0, 32, 0, 0);     // Timestamp veto low
     createConfigParam("TimeVetoHigh",     'E',  0x2, 32, 0, 333333);// Timestamp veto high
