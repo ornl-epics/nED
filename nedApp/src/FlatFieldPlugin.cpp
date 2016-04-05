@@ -260,8 +260,6 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     getBooleanParam(PsEn,           &psEn);
     getBooleanParam(ConvEn,         &convEn);
     getBooleanParam(CorrEn,         &corrEn);
-    if (getDataMode() != BasePlugin::DATA_MODE_NORMAL)
-        passthru = true;
 
     // This is a trick to avoid locking access to member variables. Since
     // plugin design ensures a single instance of processDataUnlocked()

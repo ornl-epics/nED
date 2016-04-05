@@ -275,7 +275,7 @@ struct DasPacket
         /**
          * Is this a bad packet as identified by OCC board?
          */
-        bool isBadPacket() const;
+        bool isBad() const;
 
         /**
          * Is this pure Neutron Event data packet?

@@ -168,7 +168,7 @@ bool DasPacket::isData() const
     return (!cmdinfo.is_command);
 }
 
-bool DasPacket::isBadPacket() const
+bool DasPacket::isBad() const
 {
     return (cmdinfo.command == BAD_PACKET);
 }

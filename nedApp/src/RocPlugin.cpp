@@ -41,12 +41,35 @@ struct RspReadVersion_v54 : public RspReadVersion {
     uint32_t vendor_id;
 };
 
+/**
+ * GE ROC V2 version response format
+ *
+ * The upper byte is always 0x20=32. This doesn't play well
+ * with the rest of the code so we redefine the version meaning
+ * and only use half of the hw version an leave the rest 12 bits
+ * for revision, which ends up much bigger than any SNS revisions.
+ */
+struct RspReadVersionGE {
+#ifdef BITFIELD_LSB_FIRST
+    unsigned hw_revision:12;    // Board revision number
+    unsigned hw_version:4;      // Board version number
+    unsigned fw_revision:8;     // Firmware revision number
+    unsigned fw_version:8;      // Firmware version number
+#else
+#error Missing RspReadVersionV5 declaration
+#endif // BITFIELD_LSB_FIRST
+};
+
 RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
     : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ROC, true, blocking,
                        NUM_ROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
     , m_version(version)
 {
     if (0) {
+    } else if (m_version == "v14" || m_version == "v14") {
+        setNumChannels(8);
+        setIntegerParam(Supported, 1);
+        createParams_v14();
     } else if (m_version == "v45" || m_version == "v44") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
@@ -167,26 +190,36 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
 
 bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
-    const RspReadVersion *response;
-    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion_v54)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
-    } else {
-        return false;
-    }
-    version.hw_version  = response->hw_version;
-    version.hw_revision = response->hw_revision;
-    version.hw_year     = 0;
-    version.hw_month    = 0;
-    version.hw_day      = 0;
-    version.fw_version  = response->fw_version;
-    version.fw_revision = response->fw_revision;
-    version.fw_year     = HEX_BYTE_TO_DEC(response->year >> 8) * 100 + HEX_BYTE_TO_DEC(response->year);
-    version.fw_month    = HEX_BYTE_TO_DEC(response->month);
-    version.fw_day      = HEX_BYTE_TO_DEC(response->day);
+    memset(&version, 0, sizeof(BaseModulePlugin::Version));
 
-    return true;
+    if (packet->getPayloadLength() == sizeof(RspReadVersionGE)) {
+        const RspReadVersionGE *response = reinterpret_cast<const RspReadVersionGE*>(packet->getPayload());
+
+        version.hw_version  = response->hw_version;
+        version.hw_revision = response->hw_revision;
+        version.fw_version  = response->fw_version;
+        version.fw_revision = response->fw_revision;
+
+        return true;
+
+    } else if (packet->getPayloadLength() == sizeof(RspReadVersion) ||
+               packet->getPayloadLength() == sizeof(RspReadVersion_v54)) {
+
+        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+
+        version.hw_version  = response->hw_version;
+        version.hw_revision = response->hw_revision;
+        version.fw_version  = response->fw_version;
+        version.fw_revision = response->fw_revision;
+        version.fw_year     = HEX_BYTE_TO_DEC(response->year >> 8) * 100 + HEX_BYTE_TO_DEC(response->year);
+        version.fw_month    = HEX_BYTE_TO_DEC(response->month);
+        version.fw_day      = HEX_BYTE_TO_DEC(response->day);
+        // Skip vendor id from V5.4
+
+        return true;
+    }
+
+    return false;
 }
 
 bool RocPlugin::checkVersion(const BaseModulePlugin::Version &version)
@@ -250,6 +283,8 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
         buffer[i/2] |= data[i] << (16*(i%2));
     }
     sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
+
+epicsTimeGetCurrent(&m_sendHvTime);
 }
 
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
@@ -258,6 +293,12 @@ bool RocPlugin::rspHvCmd(const DasPacket *packet)
 
     // Single character per OCC packet
     char byte = payload[0] & 0xFF;
+
+if (byte == '?') {
+epicsTimeStamp now;
+epicsTimeGetCurrent(&now);
+LOG_ERROR("HV delay: %.9f", epicsTimeDiffInSeconds(&now, &m_sendHvTime));
+}
 
     m_hvBuffer.enqueue(&byte, 1);
 

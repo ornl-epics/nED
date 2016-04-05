@@ -77,6 +77,7 @@ class DumpPlugin : public BasePlugin {
         void processData(const DasPacketList * const packetList);
 
     private: // variables
+        bool m_badEn;
         bool m_rtdlEn;
         bool m_neutronEn;
         bool m_metadataEn;
@@ -106,6 +107,7 @@ class DumpPlugin : public BasePlugin {
     private: // asyn parameters
         #define FIRST_DUMPPLUGIN_PARAM FilePath
         int FilePath;       //!< Path to file where to save all received data
+        int BadPktsEn;      //!< Switch for bad packets
         int RtdlPktsEn;     //!< Switch for RTDL packets
         int NeutronPktsEn;  //!< Switch for neutron packets
         int MetadataPktsEn; //!< Switch for metadata packets

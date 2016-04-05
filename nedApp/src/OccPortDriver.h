@@ -161,6 +161,14 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          */
         void refreshOccStatus(bool basic_status);
 
+        /**
+         * Dump raw data to log in hex format
+         *
+         * @param[in] data to be dumped
+         * @param[in] length of data in bytes
+         */
+        void dump(const char *data, uint32_t length);
+
     private:
         #define FIRST_OCCPORTDRIVER_PARAM Status
         int Status;
