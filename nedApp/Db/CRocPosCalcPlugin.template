@@ -1,1 +1,55 @@
 include "BasePlugin.include"
+
+record(bo, "$(P)CalcEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Toggle position calculation")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CalcEn")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(longin, "$(P)CntSplit")
+{
+    field(DESC, "Number of splits occurred")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntSplit")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bo, "$(P)ResetCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset counters")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetCnt")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(calcout, "$(P)AutoResetCnt")
+{
+    info(autosaveFields, "VAL INPA")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Auto reset counters")
+    field(INPA, "10000000")
+    field(INPB, "$(P)CntTotalEvents NPP")
+    field(CALC, "B>A?1:0")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)ResetCnt PP")
+}
+record(bo, "$(P)PassVetoes")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Allow vetoes in output stream")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PassVetoes")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}

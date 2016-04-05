@@ -33,6 +33,7 @@ DB += PulsedMagnet.db
 DB += TimingPlugin.db
 DB += BnlFlatFieldPlugin.db
 DB += BnlPosCalcPlugin.db
+DB += CRocPosCalcPlugin.db
 
 DB += DspPlugin_v51.db
 DB += DspPlugin_v63.db
