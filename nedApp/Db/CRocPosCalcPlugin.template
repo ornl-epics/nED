@@ -1,5 +1,10 @@
 include "BasePlugin.include"
 
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI,  "YES")
+}
 record(bo, "$(P)CalcEn")
 {
     info(autosaveFields, "VAL")
