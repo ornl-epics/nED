@@ -733,7 +733,7 @@ class BaseModulePlugin : public BasePlugin {
          * register. It's value is cached in software only and possibly sent to
          * connected PVs.
          */
-        void createConfigParam(const char *name, uint32_t nBits, int value, BaseModulePlugin::ValueConverter conv=CONV_UNSIGN);
+        void createMetaConfigParam(const char *name, uint32_t nBits, int value, BaseModulePlugin::ValueConverter conv=CONV_UNSIGN);
 
         /**
          * Create and register single integer temperature parameter.

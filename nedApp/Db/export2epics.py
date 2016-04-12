@@ -98,7 +98,7 @@ def parse_src_file(path, verbose=False):
     regexes = {
         'status':     re.compile("createStatusParam\s*\((.*)\);(.*)$"),
         'counter':    re.compile("createCounterParam\s*\((.*)\);(.*)$"),
-        'config_meta':re.compile("createConfigParam\s*\((\s*\"[^\"]*\"\s*,[^\,]*,[^\,]*)\);(.*)$"),
+        'config_meta':re.compile("createMetaConfigParam\s*\((\s*\"[^\"]*\"\s*,[^\,]*,[^\,]*)\);(.*)$"),
         'config':     re.compile("createConfigParam\s*\((.*)\);(.*)$"),
         'config_ch':  re.compile("createChanConfigParam\s*\((.*)\);(.*)$"),
         'temp':       re.compile("createTempParam\s*\((.*)\);(.*)$"),

@@ -127,6 +127,6 @@ void CRocPlugin::createParams_v93()
     createConfigParam("LvdsRate",         'F',  0x0,  1,15, 0);     // LVDS output rate              (0=40Mhz,1=20Mhz)
 
     // Meta-parameters needed for calculation but not available in firmware
-    createConfigParam("YCntMax",                      8,    0);     // Num of Y above threshold
-    createConfigParam("MapMode",                      8,    0);     // Type of mapping algorithm
+    createMetaConfigParam("YCntMax",                  8,    0);     // Num of Y above threshold
+    createMetaConfigParam("MapMode",                  8,    0);     // Type of mapping algorithm
 }
