@@ -36,7 +36,8 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
 
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);                // Reset counters
     createParam("CalcEn",       asynParamInt32, &CalcEn, 0);               // Toggle position calculation
-    createParam("CntSplit",     asynParamInt32, &CntSplit,  0);            // Number of packet train splits
+    createParam("CntSplit",     asynParamInt32, &CntSplit, 0);             // Number of packet train splits
+    createParam("PassVetoes",   asynParamInt32, &PassVetoes, 0);           // Allow vetoes in output stream
 
     callParamCallbacks();
 }
@@ -69,6 +70,11 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         m_stats.reset();
         m_paramsMutex.unlock();
         return asynSuccess;
+    } else if (pasynUser->reason == PassVetoes) {
+        m_paramsMutex.lock();
+        m_calcParams.passVetoes = (value != 0);
+        m_paramsMutex.unlock();
+        return asynSuccess;
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
 }
@@ -76,6 +82,8 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std::string &param, epicsInt32 value)
 {
     CRocParams *params;
+
+    LOG_DEBUG("Remote plugin %s set new param: %s=%d", detector.c_str(), param.c_str(), value);
 
     m_paramsMutex.lock();
     // First find existing CRocParam structure or create new one
@@ -88,12 +96,13 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
     }
 
     // Now translate parameter described by string into the structure
-    if (param == "Position") {
+    if (param == "PositionId") {
         // Make an entry in lookup-by-position table
         m_detParamsByPosition.erase(params->position);
         m_detParamsByPosition[value] = params;
 
         params->position = value;
+        LOG_INFO("Registered detector %s, position %d", detector.c_str(), value);
     } else if (param == "TimeRange1") {
         params->timeRange1 = value;
     } else if (param == "TimeRange2") {
@@ -145,6 +154,7 @@ void CRocPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLi
     getIntegerParam(RxCount,        &nReceived);
     getIntegerParam(ProcCount,      &nProcessed);
     getIntegerParam(CntSplit,       &nSplits);
+    getBooleanParam(CalcEn,         &calcEn);
     inDataMode = getDataMode();
     this->unlock();
 

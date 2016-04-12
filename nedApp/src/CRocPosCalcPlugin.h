@@ -229,7 +229,8 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int CalcEn;         //!< Toggle position calculation
-        #define LAST_CROCPOSCALCPLUGIN_PARAM CalcEn
+        int PassVetoes;     //!< Allow vetoes in output stream
+        #define LAST_CROCPOSCALCPLUGIN_PARAM PassVetoes
 };
 
 #endif // CROC_POS_CALC_PLUGIN_H
