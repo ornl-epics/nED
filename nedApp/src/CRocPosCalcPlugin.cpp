@@ -38,6 +38,8 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("CalcEn",       asynParamInt32, &CalcEn, 0);               // Toggle position calculation
     createParam("CntSplit",     asynParamInt32, &CntSplit, 0);             // Number of packet train splits
     createParam("PassVetoes",   asynParamInt32, &PassVetoes, 0);           // Allow vetoes in output stream
+    createParam("GNongapMaxRatio", asynParamInt32, &GNongapMaxRatio, 0);   // TODO
+    createParam("EfficiencyBoost", asynParamInt32, &EfficiencyBoost, 0);   // TODO
 
     callParamCallbacks();
 }
@@ -75,6 +77,14 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         m_calcParams.passVetoes = (value != 0);
         m_paramsMutex.unlock();
         return asynSuccess;
+    } else if (pasynUser->reason == EfficiencyBoost) {
+        m_paramsMutex.lock();
+        m_calcParams.efficiencyBoost = (value != 0);
+        m_paramsMutex.unlock();
+    } else if (pasynUser->reason == GNongapMaxRatio) {
+        m_paramsMutex.lock();
+        m_calcParams.gNongapMaxRatio = value / 100.0;
+        m_paramsMutex.unlock();
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
 }
@@ -305,21 +315,23 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     }
 
     ret = calculateXPosition(event, detParams, x);
-    if (ret != CRocDataPacket::VETO_NO)
+    if (ret != CRocDataPacket::VETO_NO) {
+        pixel = ret;
         return ret;
+    }
     if (x < 0 || x >= 14*11) {
         pixel = CRocDataPacket::VETO_OUT_OF_RANGE;
         return CRocDataPacket::VETO_OUT_OF_RANGE;
     }
 
-    pixel = 7*(uint8_t)x + (uint8_t)y;
+    pixel = detParams->position + 7*(uint8_t)x + (uint8_t)y;
     return CRocDataPacket::VETO_NO;
 }
 
-void CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3)
+uint8_t CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3)
 {
     max1 = max2 = max3 = 0;
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 1; i < size; i++) {
         if (values[i] > values[max1]) {
             max3 = max2;
             max2 = max1;
@@ -331,6 +343,10 @@ void CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, uint8
             max3 = i;
         }
     }
+    if (max3 != 0 && values[0] != 0) return 3;
+    if (max2 != 0 && values[0] != 0) return 2;
+    if (max1 != 0 && values[0] != 0) return 1;
+    return 0;
 }
 
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, double &y)
@@ -340,6 +356,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPac
     uint8_t ySecondMaxIndex = 0;
     uint8_t yThirdMaxIndex = 0;
     uint8_t yIndex = 0;
+    uint8_t nYmaxes;
 
     for (int i=0; i<7; i++) {
         if (event->photon_count_y[i] >= detParams->yMin)
@@ -348,23 +365,26 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPac
     if (yCnt >= detParams->yCntMax)
         return CRocDataPacket::VETO_Y_HIGH_SIGNAL;
 
-    findMaxIndexes(event->photon_count_y, 7, yMaxIndex, ySecondMaxIndex, yThirdMaxIndex);
+    nYmaxes = findMaxIndexes(event->photon_count_y, 7, yMaxIndex, ySecondMaxIndex, yThirdMaxIndex);
 
     // Try efficiency boost
     if (yCnt == 0) {
         if (!m_calcParams.efficiencyBoost)
             return CRocDataPacket::VETO_Y_LOW_SIGNAL;
-        if ((event->photon_count_y[yMaxIndex] + event->photon_count_y[ySecondMaxIndex]) < detParams->yMin)
-            return CRocDataPacket::VETO_Y_LOW_SIGNAL;
-        int distance = abs(yMaxIndex - ySecondMaxIndex);
-        if (distance > 1)
-            return CRocDataPacket::VETO_Y_LOW_SIGNAL;
-        // Distance is 1 and there's enough photons combined, continue
+        if (nYmaxes > 1) {
+            if ((event->photon_count_y[yMaxIndex] + event->photon_count_y[ySecondMaxIndex]) < detParams->yMin)
+                return CRocDataPacket::VETO_Y_LOW_SIGNAL;
+            int distance = abs(yMaxIndex - ySecondMaxIndex);
+            if (distance > 1)
+                return CRocDataPacket::VETO_Y_LOW_SIGNAL;
+            // Distance is 1 and there's enough photons combined, continue
+        }
     }
 
     // Implementation only for YMaxOut==7, TODO for YMaxOut==13
     yIndex = yMaxIndex;
-    if (event->photon_count_y[ySecondMaxIndex] > (0.75*event->photon_count_y[yMaxIndex]) &&
+    if (nYmaxes > 1 &&
+        event->photon_count_y[ySecondMaxIndex] > (0.75*event->photon_count_y[yMaxIndex]) &&
         event->photon_count_y[ySecondMaxIndex] > detParams->yMin) {
 
         int distance = abs(yMaxIndex - ySecondMaxIndex);
@@ -401,6 +421,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
     uint8_t xMaxIndex = 0;
     uint8_t xSecondMaxIndex = 0;
     uint8_t xThirdMaxIndex = 0;
+    uint8_t nXmaxes;
 
     // Check veto conditions for X
     for (int i=0; i<11; i++) {
@@ -410,23 +431,25 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
     if (xCnt >= detParams->xCntMax)
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
 
-    findMaxIndexes(event->photon_count_x, 11, xMaxIndex, xSecondMaxIndex, xThirdMaxIndex);
+    nXmaxes = findMaxIndexes(event->photon_count_x, 11, xMaxIndex, xSecondMaxIndex, xThirdMaxIndex);
     if (xCnt == 0) {
         if (!m_calcParams.efficiencyBoost)
             return CRocDataPacket::VETO_X_LOW_SIGNAL;
-        if ((event->photon_count_x[xMaxIndex] + event->photon_count_x[xSecondMaxIndex]) < detParams->xMin)
-            return CRocDataPacket::VETO_X_LOW_SIGNAL;
-        int distance = abs(xMaxIndex - xSecondMaxIndex);
-        if (distance > 1 && distance < 9)
-            return CRocDataPacket::VETO_X_LOW_SIGNAL;
-        // Distance is 1 and there's enough photons combined, continue
+        if (nXmaxes > 1) {
+            if ((event->photon_count_x[xMaxIndex] + event->photon_count_x[xSecondMaxIndex]) < detParams->xMin)
+                return CRocDataPacket::VETO_X_LOW_SIGNAL;
+            int distance = abs(xMaxIndex - xSecondMaxIndex);
+            if (distance > 1 && distance < 9)
+                return CRocDataPacket::VETO_X_LOW_SIGNAL;
+            // Distance is 1 and there's enough photons combined, continue
+        }
     }
 
 //    assert(detParams->pixelCheckMode == CRocParams::CROC_PIXELCHECK_USEMAX); // Need to support other modes?
 
-    // Two max values found, posibly adjust X index
     uint8_t xIndex = xMaxIndex;
-    if (event->photon_count_x[xMaxIndex] == event->photon_count_x[xSecondMaxIndex]) {
+    if (nXmaxes > 1 && event->photon_count_x[xMaxIndex] == event->photon_count_x[xSecondMaxIndex]) {
+        // Two max values found, posibly adjust X index
         uint8_t v1 = event->photon_count_x[xMaxIndex] - event->photon_count_x[xThirdMaxIndex];
         uint8_t v2 = event->photon_count_x[xSecondMaxIndex] - event->photon_count_x[xThirdMaxIndex];
         if (v2 < v1)
@@ -458,8 +481,9 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionMultiGapReq(const 
     uint8_t gMaxIndex;
     uint8_t gSecondMaxIndex;
     uint8_t gThirdMaxIndex;
+    uint8_t nGmaxes;
 
-    findMaxIndexes(event->photon_count_g, 14, gMaxIndex, gSecondMaxIndex, gThirdMaxIndex);
+    nGmaxes = findMaxIndexes(event->photon_count_g, 14, gMaxIndex, gSecondMaxIndex, gThirdMaxIndex);
 
     // Start with the obvious index, encoding might shift it by 1 in either direction
     gIndex = gMaxIndex;
@@ -467,21 +491,23 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionMultiGapReq(const 
     if ((xIndex == 0 || xIndex == 10) && gMaxIndex > 0 && gMaxIndex < 13) {
         if (event->photon_count_g[gMaxIndex] < detParams->gGapMin1)
             return CRocDataPacket::VETO_G_LOW_SIGNAL;
-        if (event->photon_count_g[gSecondMaxIndex] < detParams->gGapMin2)
-            return CRocDataPacket::VETO_G_LOW_SIGNAL;
-        int distance = abs(gMaxIndex - gSecondMaxIndex);
-        if (distance > 1)
-            return CRocDataPacket::VETO_G_LOW_SIGNAL;
-        if ((xIndex == 0  && gMaxIndex < gSecondMaxIndex) ||
-            (xIndex == 10 && gMaxIndex > gSecondMaxIndex)) {
+        if (nGmaxes > 1) {
+            if (event->photon_count_g[gSecondMaxIndex] < detParams->gGapMin2)
+                return CRocDataPacket::VETO_G_LOW_SIGNAL;
+            int distance = abs(gMaxIndex - gSecondMaxIndex);
+            if (distance > 1)
+                return CRocDataPacket::VETO_G_LOW_SIGNAL;
+            if ((xIndex == 0  && gMaxIndex < gSecondMaxIndex) ||
+                (xIndex == 10 && gMaxIndex > gSecondMaxIndex)) {
 
-                gIndex = gSecondMaxIndex;
+                    gIndex = gSecondMaxIndex;
+            }
         }
     } else {
         if (event->photon_count_g[gMaxIndex] < detParams->gMin)
             return CRocDataPacket::VETO_G_LOW_SIGNAL;;
         uint8_t cnt = m_calcParams.gNongapMaxRatio * event->photon_count_g[gMaxIndex];
-        if (event->photon_count_g[gSecondMaxIndex] > cnt)
+        if (nGmaxes > 1 && event->photon_count_g[gSecondMaxIndex] > cnt)
             return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     }
 
@@ -495,15 +521,19 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionNencode(const CRoc
     uint8_t xMaxIndex;
     uint8_t xSecondMaxIndex;
     uint8_t tmp;
+    uint8_t nGmaxes;
 
-    findMaxIndexes(event->photon_count_g, 14, gMaxIndex, gSecondMaxIndex, tmp);
+    nGmaxes = findMaxIndexes(event->photon_count_g, 14, gMaxIndex, gSecondMaxIndex, tmp);
     findMaxIndexes(event->photon_count_x, 11, xMaxIndex, xSecondMaxIndex, tmp);
+
+    if (nGmaxes == 0)
+        return CRocDataPacket::VETO_G_LOW_SIGNAL;
 
     if (xIndex > 0 && xIndex < 10) {
         if (event->photon_count_g[gMaxIndex] < detParams->gMin)
             return CRocDataPacket::VETO_G_LOW_SIGNAL;
         uint8_t cnt = m_calcParams.gNongapMaxRatio * event->photon_count_g[gMaxIndex];
-        if (event->photon_count_g[gSecondMaxIndex] > cnt)
+        if (nGmaxes > 1 && event->photon_count_g[gSecondMaxIndex] > cnt)
             return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     } else if (xSecondMaxIndex == 1 || xSecondMaxIndex == 9) {
         uint8_t cnt = std::max(detParams->xMin, (uint32_t)(0.65 * event->photon_count_x[xIndex]));
@@ -530,13 +560,13 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionNencode(const CRoc
 
     if (xIndex == 0 && xIndex == 10) {
         if (abs(gMaxIndex - gSecondMaxIndex) == 1) {
-            if (event->photon_count_g[gMaxIndex] + event->photon_count_g[gSecondMaxIndex] < detParams->gMin)
+            if (nGmaxes > 1 && event->photon_count_g[gMaxIndex] + event->photon_count_g[gSecondMaxIndex] < detParams->gMin)
                 return CRocDataPacket::VETO_G_LOW_SIGNAL;
         } else {
             if (event->photon_count_g[gMaxIndex] < detParams->gMin)
                 return CRocDataPacket::VETO_G_LOW_SIGNAL;
 
-            if (event->photon_count_g[gSecondMaxIndex] > detParams->gGapMin2)
+            if (nGmaxes > 1 && event->photon_count_g[gSecondMaxIndex] > detParams->gGapMin2)
                 return CRocDataPacket::VETO_G_LOW_SIGNAL;
         }
     }

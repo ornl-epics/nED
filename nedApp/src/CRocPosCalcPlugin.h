@@ -78,7 +78,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
                 int32_t nTotal;         //!< Total number of events in packet
                 int32_t counters[20];   //!< Array of different veto counters
 
-                #define VETO2INT(a) (((a) & ~0x80000000) >> 16)
+                #define VETO2INT(a) (((a) & ~0x80000000) >> 26)
 
                 Stats()
                 {
@@ -205,8 +205,9 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          * @param[out] max1 index of maximum value
          * @param[out] max2 index of second max value
          * @param[out] max3 index of third max value
+         * @return number of values found, valid values are 0, 1, 2, 3
          */
-        static void findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3);
+        static uint8_t findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3);
 
         /**
          * Save a single detector parameter into cache
@@ -230,7 +231,9 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int ResetCnt;       //!< Reset counters
         int CalcEn;         //!< Toggle position calculation
         int PassVetoes;     //!< Allow vetoes in output stream
-        #define LAST_CROCPOSCALCPLUGIN_PARAM PassVetoes
+        int GNongapMaxRatio;//!< Second max G ratio
+        int EfficiencyBoost;//!< Switch to enable efficiency boost
+        #define LAST_CROCPOSCALCPLUGIN_PARAM EfficiencyBoost
 };
 
 #endif // CROC_POS_CALC_PLUGIN_H
