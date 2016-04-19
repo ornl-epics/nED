@@ -62,6 +62,8 @@ void CRocPvaPlugin::processRawData(const uint32_t *data, uint32_t count)
             m_cache.photon_count_x[i].push_back(events->photon_count_x[i]);
         for (int i=0; i<7; i++)
             m_cache.photon_count_y[i].push_back(events->photon_count_y[i]);
+        for (int i=0; i<4; i++)
+            m_cache.time_range[i].push_back(events->time_range[i]);
         events++;
     }
 }
@@ -83,6 +85,9 @@ void CRocPvaPlugin::processExtendedData(const uint32_t *data, uint32_t count)
         }
         for (int i=0; i<7; i++) {
             m_cache.photon_count_y[i].push_back(events->photon_count_y[i]);
+        }
+        for (int i=0; i<4; i++) {
+            m_cache.time_range[i].push_back(events->time_range[i]);
         }
         events++;
     }
@@ -130,6 +135,10 @@ void CRocPvaPlugin::postRawData(const PvaNeutronData::shared_pointer& pvRecord)
     m_pvNeutrons->sample_y5->replace(freeze(m_cache.photon_count_y[4]));
     m_pvNeutrons->sample_y6->replace(freeze(m_cache.photon_count_y[5]));
     m_pvNeutrons->sample_y7->replace(freeze(m_cache.photon_count_y[6]));
+    m_pvNeutrons->time_range1->replace(freeze(m_cache.time_range[0]));
+    m_pvNeutrons->time_range2->replace(freeze(m_cache.time_range[1]));
+    m_pvNeutrons->time_range3->replace(freeze(m_cache.time_range[2]));
+    m_pvNeutrons->time_range4->replace(freeze(m_cache.time_range[3]));
 
     // Reduce gradual memory reallocation by pre-allocating instead of clear()
     reserve();
@@ -178,6 +187,10 @@ void CRocPvaPlugin::postExtendedData(const PvaNeutronData::shared_pointer& pvRec
     m_pvNeutrons->sample_y5->replace(freeze(m_cache.photon_count_y[4]));
     m_pvNeutrons->sample_y6->replace(freeze(m_cache.photon_count_y[5]));
     m_pvNeutrons->sample_y7->replace(freeze(m_cache.photon_count_y[6]));
+    m_pvNeutrons->time_range1->replace(freeze(m_cache.time_range[0]));
+    m_pvNeutrons->time_range2->replace(freeze(m_cache.time_range[1]));
+    m_pvNeutrons->time_range3->replace(freeze(m_cache.time_range[2]));
+    m_pvNeutrons->time_range4->replace(freeze(m_cache.time_range[3]));
 
     // Reduce gradual memory reallocation by pre-allocating instead of clear()
     reserve();
@@ -194,6 +207,8 @@ void CRocPvaPlugin::flushData()
         m_cache.photon_count_x[i].clear();
     for (int i=0; i<7; i++)
         m_cache.photon_count_y[i].clear();
+    for (int i=0; i<4; i++)
+        m_cache.time_range[i].clear();
 
     reserve();
 
@@ -211,4 +226,6 @@ void CRocPvaPlugin::reserve()
         m_cache.photon_count_x[i].reserve(CACHE_SIZE);
     for (int i=0; i<7; i++)
         m_cache.photon_count_y[i].reserve(CACHE_SIZE);
+    for (int i=0; i<4; i++)
+        m_cache.time_range[i].reserve(CACHE_SIZE);
 }

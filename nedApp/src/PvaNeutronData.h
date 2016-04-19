@@ -66,26 +66,26 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUShortArrayPtr sample_y15;     //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_y16;     //!< BNLROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_y17;     //!< BNLROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g1;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g2;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g3;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g4;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g5;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g6;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g7;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g8;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g9;      //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g10;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g11;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g12;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g13;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g14;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g15;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g16;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g17;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g18;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g19;     //!< CROC: ADC samples
-        epics::pvData::PVUShortArrayPtr sample_g20;     //!< CROC: ADC samples
+        epics::pvData::PVUShortArrayPtr sample_g1;      //!< CROC: photon count in g1
+        epics::pvData::PVUShortArrayPtr sample_g2;      //!< CROC: photon count in g2
+        epics::pvData::PVUShortArrayPtr sample_g3;      //!< CROC: photon count in g3
+        epics::pvData::PVUShortArrayPtr sample_g4;      //!< CROC: photon count in g4
+        epics::pvData::PVUShortArrayPtr sample_g5;      //!< CROC: photon count in g5
+        epics::pvData::PVUShortArrayPtr sample_g6;      //!< CROC: photon count in g6
+        epics::pvData::PVUShortArrayPtr sample_g7;      //!< CROC: photon count in g7
+        epics::pvData::PVUShortArrayPtr sample_g8;      //!< CROC: photon count in g8
+        epics::pvData::PVUShortArrayPtr sample_g9;      //!< CROC: photon count in g9
+        epics::pvData::PVUShortArrayPtr sample_g10;     //!< CROC: photon count in g10
+        epics::pvData::PVUShortArrayPtr sample_g11;     //!< CROC: photon count in g11
+        epics::pvData::PVUShortArrayPtr sample_g12;     //!< CROC: photon count in g12
+        epics::pvData::PVUShortArrayPtr sample_g13;     //!< CROC: photon count in g13
+        epics::pvData::PVUShortArrayPtr sample_g14;     //!< CROC: photon count in g14
+        epics::pvData::PVUShortArrayPtr sample_g15;     //!< CROC: photon count in g15
+        epics::pvData::PVUShortArrayPtr sample_g16;     //!< CROC: photon count in g16
+        epics::pvData::PVUShortArrayPtr sample_g17;     //!< CROC: photon count in g17
+        epics::pvData::PVUShortArrayPtr sample_g18;     //!< CROC: photon count in g18
+        epics::pvData::PVUShortArrayPtr sample_g19;     //!< CROC: photon count in g19
+        epics::pvData::PVUShortArrayPtr sample_g20;     //!< CROC: photon count in g20
         epics::pvData::PVUIntArrayPtr sample_a48;       //!< ACPC ONLY: ADC samples
         epics::pvData::PVUIntArrayPtr sample_b1;        //!< LPSD ONLY: ADC samples
         epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC/ACPC ONLY: ADC samples
@@ -95,6 +95,10 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVFloatArrayPtr position_y;      //!< Position Y
         epics::pvData::PVFloatArrayPtr photo_sum_x;     //!< Photo sum X
         epics::pvData::PVFloatArrayPtr photo_sum_y;     //!< Photo sum Y
+        epics::pvData::PVUShortArrayPtr time_range1;    //!< CROC ONLY: photon counts in time bin 1
+        epics::pvData::PVUShortArrayPtr time_range2;    //!< CROC ONLY: photon counts in time bin 2
+        epics::pvData::PVUShortArrayPtr time_range3;    //!< CROC ONLY: photon counts in time bin 3
+        epics::pvData::PVUShortArrayPtr time_range4;    //!< CROC ONLY: photon counts in time bin 4
 
     public:
         POINTER_DEFINITIONS(PvaNeutronData);
