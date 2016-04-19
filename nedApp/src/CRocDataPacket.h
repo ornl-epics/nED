@@ -62,20 +62,20 @@ class CRocDataPacket {
 
         typedef enum {
             VETO_NO                 = 0,
-            VETO_OUT_OF_RANGE       = (1  << 16) | 0x80000000,
-            VETO_TIMERANGE_OVERFLOW = (2  << 16) | 0x80000000,//!< Error code, sum of time ranges over threshold
-            VETO_TIMERANGE_COUNT    = (3  << 16) | 0x80000000,   //!< Error code, time range count
-            VETO_Y_LOW_SIGNAL       = (4  << 16) | 0x80000000,      //!< Error code, low signal on Y
-            VETO_Y_HIGH_SIGNAL      = (5  << 16) | 0x80000000,     //!< Error code, high signal on Y
-            VETO_Y_NON_ADJACENT     = (6  << 16) | 0x80000000,
-            VETO_X_LOW_SIGNAL       = (7  << 16) | 0x80000000,      //!< Error code, low signal on X
-            VETO_X_HIGH_SIGNAL      = (8  << 16) | 0x80000000,     //!< Error code, high signal on X
-            VETO_G_NON_ADJACENT     = (9  << 16) | 0x80000000,
-            VETO_G_HIGH_SIGNAL      = (10 << 16) | 0x80000000,           //!< More than one signal in single event
-            VETO_G_GHOST            = (11 << 16) | 0x80000000,
-            VETO_G_LOW_SIGNAL       = (12 << 16) | 0x80000000,
-            VETO_INVALID_POSITION   = (13 << 16) | 0x80000000, //!< Unknown position
-            VETO_INVALID_CALC       = (14 << 16) | 0x80000000, //!< Unknown calculation mode
+            VETO_OUT_OF_RANGE       = (1  << 22) | 0x80000000,
+            VETO_TIMERANGE_OVERFLOW = (2  << 22) | 0x80000000,//!< Error code, sum of time ranges over threshold
+            VETO_TIMERANGE_COUNT    = (3  << 22) | 0x80000000,   //!< Error code, time range count
+            VETO_Y_LOW_SIGNAL       = (4  << 22) | 0x80000000,      //!< Error code, low signal on Y
+            VETO_Y_HIGH_SIGNAL      = (5  << 22) | 0x80000000,     //!< Error code, high signal on Y
+            VETO_Y_NON_ADJACENT     = (6  << 22) | 0x80000000,
+            VETO_X_LOW_SIGNAL       = (7  << 22) | 0x80000000,      //!< Error code, low signal on X
+            VETO_X_HIGH_SIGNAL      = (8  << 22) | 0x80000000,     //!< Error code, high signal on X
+            VETO_G_NON_ADJACENT     = (9  << 22) | 0x80000000,
+            VETO_G_HIGH_SIGNAL      = (10 << 22) | 0x80000000,           //!< More than one signal in single event
+            VETO_G_GHOST            = (11 << 22) | 0x80000000,
+            VETO_G_LOW_SIGNAL       = (12 << 22) | 0x80000000,
+            VETO_INVALID_POSITION   = (13 << 22) | 0x80000000, //!< Unknown position
+            VETO_INVALID_CALC       = (14 << 22) | 0x80000000, //!< Unknown calculation mode
         } VetoType;
 };
 
