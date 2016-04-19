@@ -127,6 +127,10 @@ void CRocPlugin::createParams_v93()
     createConfigParam("LvdsRate",         'F',  0x0,  1,15, 0);     // LVDS output rate              (0=40Mhz,1=20Mhz)
 
     // Meta-parameters needed for calculation but not available in firmware
+    createMetaConfigParam("XCntMax",                  8,    0);     // Num of X above threshold
     createMetaConfigParam("YCntMax",                  8,    0);     // Num of Y above threshold
     createMetaConfigParam("MapMode",                  8,    0);     // Type of mapping algorithm
+    createMetaConfigParam("GGapMin1",                 8,    0);     // Num of X above threshold
+    createMetaConfigParam("GGapMin2",                 8,    0);     // Num of X above threshold
+    createMetaConfigParam("GMin2",                    8,    0);     // Num of X above threshold
 }

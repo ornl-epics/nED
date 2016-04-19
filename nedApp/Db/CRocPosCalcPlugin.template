@@ -58,3 +58,24 @@ record(bo, "$(P)PassVetoes")
     field(ZNAM, "disable")
     field(ONAM, "enable")
 }
+record(bo, "$(P)EfficiencyBoost")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Toggle efficiency boost")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))EfficiencyBoost")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(longout, "$(P)GNongapMaxRatio")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Second max G ratio")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))GNongapMaxRatio")
+    field(PINI, "YES")
+    field(EGU,  "%")
+}
