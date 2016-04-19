@@ -117,7 +117,7 @@ def parse_src_file(path, mode):
                         val = 0
                         if type == "config":
                             val = match.group(2)
-s                        vars_cache[path][type].append({ 'name': match.group(1), 'val': val })
+                        vars_cache[path][type].append({ 'name': match.group(1), 'val': val })
                         break
 
     return vars_cache[path][mode]
