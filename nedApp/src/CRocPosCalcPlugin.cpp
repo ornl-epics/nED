@@ -38,8 +38,12 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("CalcEn",       asynParamInt32, &CalcEn, 0);               // Toggle position calculation
     createParam("CntSplit",     asynParamInt32, &CntSplit, 0);             // Number of packet train splits
     createParam("PassVetoes",   asynParamInt32, &PassVetoes, 0);           // Allow vetoes in output stream
-    createParam("GNongapMaxRatio", asynParamInt32, &GNongapMaxRatio, 0);   // TODO
-    createParam("EfficiencyBoost", asynParamInt32, &EfficiencyBoost, 0);   // TODO
+    createParam("GNongapMaxRatio",  asynParamInt32, &GNongapMaxRatio, 0);  // TODO
+    createParam("EfficiencyBoost",  asynParamInt32, &EfficiencyBoost, 0);  // TODO
+    createParam("TimeRange1Min",    asynParamInt32, &TimeRange1Min, 6);    // Min counts in first time range bin
+    createParam("TimeRange2Min",    asynParamInt32, &TimeRange2Min, 5);    // Min counts in second time range bin
+    createParam("TimeRangeDelayMin",asynParamInt32, &TimeRangeDelayMin, 15);   // Delayed event threshold
+    createParam("TofResolution",    asynParamInt32, &TofResolution, 250);   // Time between two events in 100ns
 
     callParamCallbacks();
 }
@@ -84,6 +88,22 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == GNongapMaxRatio) {
         m_paramsMutex.lock();
         m_calcParams.gNongapMaxRatio = value / 100.0;
+        m_paramsMutex.unlock();
+    } else if (pasynUser->reason == TimeRange1Min) {
+        m_paramsMutex.lock();
+        m_calcParams.timeRange1Min = value;
+        m_paramsMutex.unlock();
+    } else if (pasynUser->reason == TimeRange2Min) {
+        m_paramsMutex.lock();
+        m_calcParams.timeRange2Min = value;
+        m_paramsMutex.unlock();
+    } else if (pasynUser->reason == TimeRangeDelayMin) {
+        m_paramsMutex.lock();
+        m_calcParams.timeRangeDelayMin = value;
+        m_paramsMutex.unlock();
+    } else if (pasynUser->reason == TofResolution) {
+        m_paramsMutex.lock();
+        m_calcParams.tofResolution = value;
         m_paramsMutex.unlock();
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
@@ -303,28 +323,48 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
 {
     CRocDataPacket::VetoType ret;
     double x,y;
+    pixel = detParams->position;
+    uint32_t delaySum = (event->time_range[1] + event->time_range[2] + event->time_range[3]);
+
+    // Check for echo event
+    if (event->tof < (detParams->tofLast + m_calcParams.tofResolution)) {
+        pixel |= CRocDataPacket::VETO_ECHO;
+        return CRocDataPacket::VETO_ECHO;
+    }
+
+    // Check time ranges first
+    if (event->time_range[0] < m_calcParams.timeRange1Min || event->time_range[1] < m_calcParams.timeRange2Min) {
+        if (event->time_range[0] < m_calcParams.timeRange1Min && 
+            delaySum >= m_calcParams.timeRangeDelayMin) {
+            pixel |= CRocDataPacket::VETO_TIMERANGE_DELAYED;
+            return CRocDataPacket::VETO_TIMERANGE_DELAYED;
+        } else {
+            pixel |= CRocDataPacket::VETO_TIMERANGE_ODD;
+            return CRocDataPacket::VETO_TIMERANGE_ODD;
+        }
+    }
 
     ret = calculateYPosition(event, detParams, y);
     if (ret != CRocDataPacket::VETO_NO) {
-        pixel = ret;
+        pixel |= ret;
         return ret;
     }
     if (y < 0 || y >= 7) {
-        pixel = CRocDataPacket::VETO_OUT_OF_RANGE;
+        pixel |= CRocDataPacket::VETO_OUT_OF_RANGE;
         return CRocDataPacket::VETO_OUT_OF_RANGE;
     }
 
     ret = calculateXPosition(event, detParams, x);
     if (ret != CRocDataPacket::VETO_NO) {
-        pixel = ret;
+        pixel |= ret;
         return ret;
     }
     if (x < 0 || x >= 14*11) {
-        pixel = CRocDataPacket::VETO_OUT_OF_RANGE;
+        pixel |= CRocDataPacket::VETO_OUT_OF_RANGE;
         return CRocDataPacket::VETO_OUT_OF_RANGE;
     }
 
-    pixel = detParams->position + 7*(uint8_t)x + (uint8_t)y;
+    pixel += 7*(uint8_t)x + (uint8_t)y;
     return CRocDataPacket::VETO_NO;
 }
 
@@ -478,6 +518,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
 
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionMultiGapReq(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t xIndex, uint8_t &gIndex)
 {
+    // Reimplemented from dcomserver CROC_CALC_LNEWMGR
     uint8_t gMaxIndex;
     uint8_t gSecondMaxIndex;
     uint8_t gThirdMaxIndex;
@@ -516,6 +557,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionMultiGapReq(const 
 
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionNencode(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &xIndex, uint8_t &gIndex)
 {
+    // Reimplemented from dcomserver CROC_CALCP_NENCODE_BALANCE
     uint8_t gMaxIndex;
     uint8_t gSecondMaxIndex;
     uint8_t xMaxIndex;

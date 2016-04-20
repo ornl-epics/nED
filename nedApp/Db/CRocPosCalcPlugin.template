@@ -79,3 +79,40 @@ record(longout, "$(P)GNongapMaxRatio")
     field(PINI, "YES")
     field(EGU,  "%")
 }
+record(longout, "$(P)TimeRange1Min")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Min counts in first time range")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRange1Min")
+    field(VAL,  "6")
+    field(PINI, "YES")
+}
+record(longout, "$(P)TimeRange2Min")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Min counts in second time range")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRange2Min")
+    field(VAL,  "5")
+    field(PINI, "YES")
+}
+record(longout, "$(P)TimeRangeDelayMin")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Delayed event count threshold")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRangeDelayMin")
+    field(VAL,  "15")
+    field(PINI, "YES")
+}
+record(longout, "$(P)TofResolution")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Min time between two events")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TofResolution")
+    field(PINI, "YES")
+    field(VAL,  "250")
+    field(EGU,  "x100ns")
+}

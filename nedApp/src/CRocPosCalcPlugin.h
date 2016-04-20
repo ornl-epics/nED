@@ -33,6 +33,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          * CRocPlugin sends its parameters.
          */
         struct CRocParams {
+            // Cached parameters values
             uint32_t position;
             uint16_t timeRange1;
             uint16_t timeRange2;
@@ -53,6 +54,9 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
                 ENCODE_MULTI_GAP_REQ,
                 ENCODE_V3,
             } mapMode;
+
+            // Run-time variables follow
+            uint32_t tofLast;       // Last processed time of flight for this detector
         };
 
         /**
@@ -65,7 +69,12 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
 
             bool checkAdjTube;          //!< Switch to toggle checking for adjacent tubes
             float gNongapMaxRatio;
-            bool efficiencyBoost;   //!< Switch for efficiency boost calculation
+            bool efficiencyBoost;       //!< Switch for efficiency boost calculation
+
+            uint8_t timeRange1Min;      //!< Threshold for first time range bin
+            uint8_t timeRange2Min;      //!< Threshold for second time range bin
+            uint32_t timeRangeDelayMin; //!< Delayed event threshold
+            uint32_t tofResolution;     //!< Min time between two events in 100ns
         };
 
         /**
@@ -233,7 +242,11 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int PassVetoes;     //!< Allow vetoes in output stream
         int GNongapMaxRatio;//!< Second max G ratio
         int EfficiencyBoost;//!< Switch to enable efficiency boost
-        #define LAST_CROCPOSCALCPLUGIN_PARAM EfficiencyBoost
+        int TimeRange1Min;  //!< Min counts in first time range bin
+        int TimeRange2Min;  //!< Min counts in second time range bin
+        int TimeRangeDelayMin; //!< Delayed event threshold
+        int TofResolution;  //!< Time between two events in 100ns
+        #define LAST_CROCPOSCALCPLUGIN_PARAM TofResolution
 };
 
 #endif // CROC_POS_CALC_PLUGIN_H

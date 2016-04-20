@@ -76,6 +76,9 @@ class CRocDataPacket {
             VETO_G_LOW_SIGNAL       = (12 << 22) | 0x80000000,
             VETO_INVALID_POSITION   = (13 << 22) | 0x80000000, //!< Unknown position
             VETO_INVALID_CALC       = (14 << 22) | 0x80000000, //!< Unknown calculation mode
+            VETO_ECHO               = (15 << 22) | 0x80000000, //!< Echo event detected
+            VETO_TIMERANGE_ODD      = (16 << 22) | 0x80000000, //!< Time range is odd
+            VETO_TIMERANGE_DELAYED  = (17 << 22) | 0x80000000, //!< Delayed event based on time range
         } VetoType;
 };
 
