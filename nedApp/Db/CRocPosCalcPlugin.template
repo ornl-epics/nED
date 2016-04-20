@@ -116,3 +116,13 @@ record(longout, "$(P)TofResolution")
     field(VAL,  "250")
     field(EGU,  "x100ns")
 }
+record(bo, "$(P)OutExtMode")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Select the output event format")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))OutExtMode")
+    field(PINI, "YES")
+    field(ZNAM, "normal")
+    field(ONAM, "extended")
+}

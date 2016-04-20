@@ -36,6 +36,7 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
 
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);                // Reset counters
     createParam("CalcEn",       asynParamInt32, &CalcEn, 0);               // Toggle position calculation
+    createParam("OutExtMode",   asynParamInt32, &OutExtMode, 0);           // Switch to toggle between normal and extended output format
     createParam("CntSplit",     asynParamInt32, &CntSplit, 0);             // Number of packet train splits
     createParam("PassVetoes",   asynParamInt32, &PassVetoes, 0);           // Allow vetoes in output stream
     createParam("GNongapMaxRatio",  asynParamInt32, &GNongapMaxRatio, 0);  // TODO
@@ -104,6 +105,10 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == TofResolution) {
         m_paramsMutex.lock();
         m_calcParams.tofResolution = value;
+        m_paramsMutex.unlock();
+    } else if (pasynUser->reason == OutExtMode) {
+        m_paramsMutex.lock();
+        m_calcParams.outExtMode = (value != 0);
         m_paramsMutex.unlock();
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
@@ -188,6 +193,9 @@ void CRocPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLi
     inDataMode = getDataMode();
     this->unlock();
 
+    if (inDataMode != BasePlugin::DATA_MODE_RAW && inDataMode != BasePlugin::DATA_MODE_EXTENDED)
+        calcEn = false;
+
     nReceived += packetList->size();
 
     // Optimize pass thru mode
@@ -201,7 +209,6 @@ void CRocPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLi
         m_paramsMutex.lock();
 
         m_calcParams.inExtMode = (inDataMode == BasePlugin::DATA_MODE_EXTENDED);
-        m_calcParams.outExtMode = true;
 
         // Break single loop into two parts to have single point of sending data
         for (auto it = packetList->cbegin(); it != packetList->cend(); ) {

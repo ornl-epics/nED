@@ -239,6 +239,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int CalcEn;         //!< Toggle position calculation
+        int OutExtMode;     //!< Switch to toggle between normal and extended output format
         int PassVetoes;     //!< Allow vetoes in output stream
         int GNongapMaxRatio;//!< Second max G ratio
         int EfficiencyBoost;//!< Switch to enable efficiency boost
