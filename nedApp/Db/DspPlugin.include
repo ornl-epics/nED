@@ -14,6 +14,7 @@ record(sel, "$(P)DataSizeSel")
     field(INPA, "$(P)RocDS.VAL PP")
     field(INPB, "$(P)AcpcDS.VAL PP")
     field(INPC, "$(P)BnlDS.VAL PP")
+    field(INPD, "$(P)CrocDS.VAL PP")
     field(NVL,  "$(P)DetTypeSel.VAL PP")
 }
 record(mbbo, "$(P)DetTypeSel")
@@ -31,6 +32,8 @@ record(mbbo, "$(P)DetTypeSel")
     field(ONST, "ACPC")
     field(TWVL, "2")
     field(TWST, "BNL")
+    field(THVL, "3")
+    field(THST, "CROC")
 }
 record(sel, "$(P)RocDS")
 {
@@ -56,6 +59,15 @@ record(sel, "$(P)BnlDS")
     field(INPB, "42") # Raw mode
     field(INPC, "46") # Extended mode
     field(INPD, "46") # Verbose mode
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+record(sel, "$(P)CrocDS")
+{
+    field(INPA, "4") # Normal mode
+    field(INPB, "24") # Raw mode
+    field(INPC, "26") # Extended mode
+    field(INPD, "26") # Verbose mode
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")
 }
