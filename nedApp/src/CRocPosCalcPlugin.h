@@ -83,46 +83,70 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          * by reference.
          */
         class Stats {
-            public:
-                int32_t nTotal;         //!< Total number of events in packet
+            private:
                 int32_t counters[20];   //!< Array of different veto counters
 
-                #define VETO2INT(a) (((a) & ~0x80000000) >> 26)
+            public:
+                #define VETO2INT(a) (((a) & ~0x80000000) >> 22)
 
                 Stats()
                 {
                     reset();
                 }
 
+                /**
+                 * Reset counters
+                 */
                 void reset()
                 {
-                    nTotal = 0;
                     for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
                         counters[i] = 0;
                     }
                 }
 
+                /**
+                 * Sum counters from two objects
+                 */
                 Stats &operator+=(const Stats &rhs)
                 {
-                    nTotal += rhs.nTotal;
-                    for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
-                        counters[i] += rhs.counters[i];
-                    }
-                    if (nTotal > std::numeric_limits<int32_t>::max()) {
+                    int64_t count = getTotal() + rhs.getTotal();
+                    if (count > std::numeric_limits<int32_t>::max()) {
+                        // This is not good, un-controlled resetting
                         reset();
+                    } else {
+                        for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
+                            counters[i] += rhs.counters[i];
+                        }
                     }
                     return *this;
                 }
 
+                /**
+                 * Increase number of particular veto counts by 1
+                 */
                 void increment(CRocDataPacket::VetoType type)
                 {
-                    nTotal++;
                     counters[VETO2INT(type)]++;
                 }
 
-                int32_t get(CRocDataPacket::VetoType type)
+                /**
+                 * Get number of selected vetoed events.
+                 */
+                int32_t get(CRocDataPacket::VetoType type) const
                 {
                     return counters[VETO2INT(type)];
+                }
+
+                /**
+                 * Get number of all events combined.
+                 */
+                int32_t getTotal() const
+                {
+                    int32_t count = 0;
+                    for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
+                        count += counters[i];
+                    }
+                    return count;
                 }
         };
 
@@ -198,9 +222,9 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          */
         CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint32_t &pixel);
 
-        CRocDataPacket::VetoType calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, double &y);
+        CRocDataPacket::VetoType calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
 
-        CRocDataPacket::VetoType calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, double &x);
+        CRocDataPacket::VetoType calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &x);
 
         CRocDataPacket::VetoType calculateGPositionMultiGapReq(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t xIndex, uint8_t &gIndex);
 
@@ -247,7 +271,23 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int TimeRange2Min;  //!< Min counts in second time range bin
         int TimeRangeDelayMin; //!< Delayed event threshold
         int TofResolution;  //!< Time between two events in 100ns
-        #define LAST_CROCPOSCALCPLUGIN_PARAM TofResolution
+
+        int CntTotalEvents;    //!< Number of all events
+        int CntGoodEvents;     //!< Number of good events
+        int CntVetoYLow;       //!< Y signal low
+        int CntVetoYNoise;     //!< Y signal noisy
+        int CntVetoXLow;       //!< X signal low
+        int CntVetoXNoise;     //!< X signal noisy
+        int CntVetoGLow;       //!< G signal low
+        int CntVetoGNoise;     //!< G signal noisy
+        int CntVetoGGhost;     //!< TODO
+        int CntVetoGNonAdj;    //!< TODO
+        int CntVetoBadPos;     //!< Invalid detector configuration, no such position configured
+        int CntVetoBadCalc;    //!< Bad configuration, no such mapping mode
+        int CntVetoEcho;       //!< Event to close to previous
+        int CntVetoTimeRange;  //!< Time range bins rejected
+        int CntVetoDelayed;    //!< Event delayed based on time range bins
+        #define LAST_CROCPOSCALCPLUGIN_PARAM CntVetoDelayed
 };
 
 #endif // CROC_POS_CALC_PLUGIN_H

@@ -46,6 +46,22 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("TimeRangeDelayMin",asynParamInt32, &TimeRangeDelayMin, 15);   // Delayed event threshold
     createParam("TofResolution",    asynParamInt32, &TofResolution, 250);   // Time between two events in 100ns
 
+    createParam("CntTotalEvents",   asynParamInt32, &CntTotalEvents, 0);
+    createParam("CntGoodEvents",    asynParamInt32, &CntGoodEvents, 0);
+    createParam("CntVetoYLow",      asynParamInt32, &CntVetoYLow, 0);
+    createParam("CntVetoYNoise",    asynParamInt32, &CntVetoYNoise, 0);
+    createParam("CntVetoXLow",      asynParamInt32, &CntVetoXLow, 0);
+    createParam("CntVetoXNoise",    asynParamInt32, &CntVetoXNoise, 0);
+    createParam("CntVetoGLow",      asynParamInt32, &CntVetoGLow, 0);
+    createParam("CntVetoGNoise",    asynParamInt32, &CntVetoGNoise, 0);
+    createParam("CntVetoGGhost",    asynParamInt32, &CntVetoGGhost, 0);
+    createParam("CntVetoGNonAdj",   asynParamInt32, &CntVetoGNonAdj, 0);
+    createParam("CntVetoBadPos",    asynParamInt32, &CntVetoBadPos, 0);
+    createParam("CntVetoBadCalc",   asynParamInt32, &CntVetoBadCalc, 0);
+    createParam("CntVetoEcho",      asynParamInt32, &CntVetoEcho, 0);
+    createParam("CntVetoTimeRange", asynParamInt32, &CntVetoTimeRange, 0);
+    createParam("CntVetoDelayed",   asynParamInt32, &CntVetoDelayed, 0);
+
     callParamCallbacks();
 }
 
@@ -264,7 +280,21 @@ void CRocPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLi
     setIntegerParam(RxCount,    nReceived   % std::numeric_limits<int32_t>::max());
     setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
-    // TODO: Rest of the statistics
+    setIntegerParam(CntTotalEvents,     m_stats.getTotal());
+    setIntegerParam(CntGoodEvents,      m_stats.get(CRocDataPacket::VETO_NO));
+    setIntegerParam(CntVetoYLow,        m_stats.get(CRocDataPacket::VETO_Y_LOW_SIGNAL));
+    setIntegerParam(CntVetoYNoise,      m_stats.get(CRocDataPacket::VETO_Y_HIGH_SIGNAL));
+    setIntegerParam(CntVetoXLow,        m_stats.get(CRocDataPacket::VETO_X_LOW_SIGNAL));
+    setIntegerParam(CntVetoXNoise,      m_stats.get(CRocDataPacket::VETO_X_HIGH_SIGNAL));
+    setIntegerParam(CntVetoGLow,        m_stats.get(CRocDataPacket::VETO_G_LOW_SIGNAL));
+    setIntegerParam(CntVetoGNoise,      m_stats.get(CRocDataPacket::VETO_G_HIGH_SIGNAL));
+    setIntegerParam(CntVetoGGhost,      m_stats.get(CRocDataPacket::VETO_G_GHOST));
+    setIntegerParam(CntVetoGNonAdj,     m_stats.get(CRocDataPacket::VETO_G_NON_ADJACENT));
+    setIntegerParam(CntVetoBadPos,      m_stats.get(CRocDataPacket::VETO_INVALID_POSITION));
+    setIntegerParam(CntVetoBadCalc,     m_stats.get(CRocDataPacket::VETO_INVALID_CALC));
+    setIntegerParam(CntVetoEcho,        m_stats.get(CRocDataPacket::VETO_ECHO));
+    setIntegerParam(CntVetoTimeRange,   m_stats.get(CRocDataPacket::VETO_TIMERANGE_BAD));
+    setIntegerParam(CntVetoDelayed,     m_stats.get(CRocDataPacket::VETO_TIMERANGE_DELAYED));
     callParamCallbacks();
     this->unlock();
 }
@@ -326,53 +356,67 @@ CRocPosCalcPlugin::Stats CRocPosCalcPlugin::processPacket(const DasPacket *inPac
     return stats;
 }
 
+/**
+ * Calculates X and Y dimension from the raw counts and encodes it into pixel id
+ * format. The encoded pixel id includes pixel position withing the detector and
+ * the detector offset information. It may also include the veto type in case
+ * event was rejected. In case multiple rejection conditions were met, only the
+ * first one gets encoded into pixel id. A single detector defines 154x7=1078
+ * pixels. The final encoding is as follows:
+ * pixel id = (0x8FC00000) | (<detector offset> + <xy>)
+ */
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint32_t &pixel)
 {
-    CRocDataPacket::VetoType ret;
-    double x,y;
-    pixel = detParams->position;
+    CRocDataPacket::VetoType veto = CRocDataPacket::VETO_NO;
+    CRocDataPacket::VetoType tmpVeto = CRocDataPacket::VETO_NO;
+    uint8_t x,y;
     uint32_t delaySum = (event->time_range[1] + event->time_range[2] + event->time_range[3]);
 
     // Check for echo event
     if (event->tof < (detParams->tofLast + m_calcParams.tofResolution)) {
-        pixel |= CRocDataPacket::VETO_ECHO;
-        return CRocDataPacket::VETO_ECHO;
+        if (m_calcParams.passVetoes == false) return CRocDataPacket::VETO_ECHO;
+        if (veto == CRocDataPacket::VETO_NO) veto = CRocDataPacket::VETO_ECHO;
     }
 
     // Check time ranges first
     if (event->time_range[0] < m_calcParams.timeRange1Min || event->time_range[1] < m_calcParams.timeRange2Min) {
         if (event->time_range[0] < m_calcParams.timeRange1Min && 
             delaySum >= m_calcParams.timeRangeDelayMin) {
-            pixel |= CRocDataPacket::VETO_TIMERANGE_DELAYED;
-            return CRocDataPacket::VETO_TIMERANGE_DELAYED;
+            if (m_calcParams.passVetoes == false) return CRocDataPacket::VETO_TIMERANGE_DELAYED;
+            if (veto == CRocDataPacket::VETO_NO) veto = CRocDataPacket::VETO_TIMERANGE_DELAYED;
         } else {
-            pixel |= CRocDataPacket::VETO_TIMERANGE_ODD;
-            return CRocDataPacket::VETO_TIMERANGE_ODD;
+            if (m_calcParams.passVetoes == false) return CRocDataPacket::VETO_TIMERANGE_BAD;
+            if (veto == CRocDataPacket::VETO_NO) veto = CRocDataPacket::VETO_TIMERANGE_BAD;
         }
     }
 
-    ret = calculateYPosition(event, detParams, y);
-    if (ret != CRocDataPacket::VETO_NO) {
-        pixel |= ret;
-        return ret;
+    tmpVeto = calculateYPosition(event, detParams, y);
+    if (tmpVeto != CRocDataPacket::VETO_NO) {
+        if (m_calcParams.passVetoes == false) return tmpVeto;
+        if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
     }
-    if (y < 0 || y >= 7) {
-        pixel |= CRocDataPacket::VETO_OUT_OF_RANGE;
-        return CRocDataPacket::VETO_OUT_OF_RANGE;
-    }
-
-    ret = calculateXPosition(event, detParams, x);
-    if (ret != CRocDataPacket::VETO_NO) {
-        pixel |= ret;
-        return ret;
-    }
-    if (x < 0 || x >= 14*11) {
-        pixel |= CRocDataPacket::VETO_OUT_OF_RANGE;
-        return CRocDataPacket::VETO_OUT_OF_RANGE;
+    if (y >= 7) {
+        if (m_calcParams.passVetoes == false) return CRocDataPacket::VETO_OUT_OF_RANGE;
+        if (veto == CRocDataPacket::VETO_NO) veto = CRocDataPacket::VETO_OUT_OF_RANGE;
+        y = 6;
     }
 
-    pixel += 7*(uint8_t)x + (uint8_t)y;
-    return CRocDataPacket::VETO_NO;
+    tmpVeto = calculateXPosition(event, detParams, x);
+    if (tmpVeto != CRocDataPacket::VETO_NO) {
+        if (m_calcParams.passVetoes == false) return tmpVeto;
+        if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
+    }
+    if (x >= 14*11) {
+        if (m_calcParams.passVetoes == false) return CRocDataPacket::VETO_OUT_OF_RANGE;
+        if (veto == CRocDataPacket::VETO_NO) veto = CRocDataPacket::VETO_OUT_OF_RANGE;
+        x = 14*11 - 1;
+    }
+
+    pixel = detParams->position + 7*x + y;
+    if (veto != CRocDataPacket::VETO_NO)
+        pixel |= veto;
+
+    return veto;
 }
 
 uint8_t CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3)
@@ -396,7 +440,7 @@ uint8_t CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, ui
     return 0;
 }
 
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, double &y)
+CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &y)
 {
     uint8_t yCnt = 0;
     uint8_t yMaxIndex = 0;
@@ -462,7 +506,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPac
     return CRocDataPacket::VETO_NO;
 }
 
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, double &x)
+CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &x)
 {
     uint8_t xCnt = 0;
     uint8_t xMaxIndex = 0;
