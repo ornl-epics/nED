@@ -129,7 +129,7 @@ void CRocPlugin::createParams_v93()
     // Meta-parameters needed for calculation but not available in firmware
     createMetaConfigParam("XCntMax",                  8,    0);     // Num of X above threshold
     createMetaConfigParam("YCntMax",                  8,    0);     // Num of Y above threshold
-    createMetaConfigParam("MapMode",                  8,    0);     // Type of mapping algorithm     (0=multi gap req,1=encode v3)
+    createMetaConfigParam("FiberCoding",              8,    0);     // Type of mapping algorithm     (0=v2,1=v3)
     createMetaConfigParam("GGapMin1",                 8,    0);     // Num of X above threshold
     createMetaConfigParam("GGapMin2",                 8,    0);     // Num of X above threshold
     createMetaConfigParam("GMin2",                    8,    0);     // Num of X above threshold

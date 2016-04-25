@@ -523,3 +523,15 @@ record(calc, "$(P)RateVetoDelayed")
     field(PREC, "2")
     field(EGU,  "%")
 }
+record(bo, "$(P)VerifyMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Event verification algorithm")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))VerifyMode")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "legacy")
+    field(ONAM, "new")
+}

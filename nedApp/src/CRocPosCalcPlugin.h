@@ -20,8 +20,11 @@
 #include <unordered_map>
 
 /**
- * CRocPosCalcPlugin canverts detector raw data into detector normal data
+ * Analyze raw CROC data and convert it to tof,pixel format.
  *
+ * When CROC is in raw data format, it performs no data validation on its own.
+ * Software is responsible for validation and bad event rejection. This plugin
+ * will rake raw CROC data, evaluate it and convert it to tof,pixel format.
  */
 class CRocPosCalcPlugin : public BaseDispatcherPlugin {
     private: // definitions
@@ -50,10 +53,11 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             uint32_t gGapMin1;
             uint32_t gGapMin2;
 
-            enum {
-                ENCODE_MULTI_GAP_REQ,
-                ENCODE_V3,
-            } mapMode;
+            typedef enum {
+                FIBER_CODING_V2,
+                FIBER_CODING_V3,
+            } FiberCoding;
+            FiberCoding fiberCoding;
 
             // Run-time variables follow
             uint32_t tofLast;       // Last processed time of flight for this detector
@@ -66,6 +70,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             bool passVetoes;
             bool inExtMode;
             bool outExtMode;
+            bool verifyModeNew;
 
             bool checkAdjTube;          //!< Switch to toggle checking for adjacent tubes
             float gNongapMaxRatio;
@@ -161,7 +166,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
 
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
         uint32_t m_bufferSize;      //!< Size of buffer
-        DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins
+        DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins, TODO: get rid of this one
         Stats m_stats;              //!< Event counters
 
     public: // structures and defines
@@ -222,13 +227,32 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          */
         CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint32_t &pixel);
 
+        CRocDataPacket::VetoType checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
+
+        /**
+         * Verify the time spectrum range of the event.
+         *
+         * The 4 time range bins are used to validate the time shape of the neutron
+         * event and catch non-neutron events like gamma.
+         */
+        CRocDataPacket::VetoType checkTimeRangeNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
+
         CRocDataPacket::VetoType calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
+        CRocDataPacket::VetoType calculateYPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
 
         CRocDataPacket::VetoType calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &x);
+        CRocDataPacket::VetoType calculateXPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &x);
 
         CRocDataPacket::VetoType calculateGPositionMultiGapReq(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t xIndex, uint8_t &gIndex);
 
         CRocDataPacket::VetoType calculateGPositionNencode(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &xIndex, uint8_t &gIndex);
+
+    private:
+        uint8_t findMaxIndex(const uint8_t *values, size_t size, uint8_t &max);
+        int8_t findDirection(const uint8_t *values, size_t size, uint8_t maxIndex);
+        double calculateGNoise(const uint8_t *values, uint8_t maxIndex);
+        double calculateXNoise(const uint8_t *values, uint8_t maxIndex);
+        double calculateYNoise(const uint8_t *values, uint8_t maxIndex);
 
         /**
          * Find the maximum three indexes in the array.
@@ -250,6 +274,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          * structure.
          * When setting position parameter, function will also connect the found
          * CRocParameter to the lookup-by-position table.
+         * Must be thread protected from the outside.
          *
          * @param[in] detector to which parameter belongs to
          * @param[in] param name of the parameter
@@ -271,6 +296,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int TimeRange2Min;  //!< Min counts in second time range bin
         int TimeRangeDelayMin; //!< Delayed event threshold
         int TofResolution;  //!< Time between two events in 100ns
+        int VerifyMode;     //!< Select event verification algorithm
 
         int CntTotalEvents;    //!< Number of all events
         int CntGoodEvents;     //!< Number of good events
