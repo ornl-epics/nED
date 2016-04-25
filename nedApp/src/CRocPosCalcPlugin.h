@@ -92,67 +92,35 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
                 int32_t counters[20];   //!< Array of different veto counters
 
             public:
-                #define VETO2INT(a) (((a) & ~0x80000000) >> 22)
-
-                Stats()
-                {
-                    reset();
-                }
+                /**
+                 * Constructor initializes all internal counters.
+                 */
+                Stats();
 
                 /**
                  * Reset counters
                  */
-                void reset()
-                {
-                    for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
-                        counters[i] = 0;
-                    }
-                }
+                void reset();
 
                 /**
                  * Sum counters from two objects
                  */
-                Stats &operator+=(const Stats &rhs)
-                {
-                    int64_t count = getTotal() + rhs.getTotal();
-                    if (count > std::numeric_limits<int32_t>::max()) {
-                        // This is not good, un-controlled resetting
-                        reset();
-                    } else {
-                        for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
-                            counters[i] += rhs.counters[i];
-                        }
-                    }
-                    return *this;
-                }
+                Stats &operator+=(const Stats &rhs);
 
                 /**
                  * Increase number of particular veto counts by 1
                  */
-                void increment(CRocDataPacket::VetoType type)
-                {
-                    counters[VETO2INT(type)]++;
-                }
+                void increment(CRocDataPacket::VetoType type);
 
                 /**
                  * Get number of selected vetoed events.
                  */
-                int32_t get(CRocDataPacket::VetoType type) const
-                {
-                    return counters[VETO2INT(type)];
-                }
+                int32_t get(CRocDataPacket::VetoType type) const;
 
                 /**
                  * Get number of all events combined.
                  */
-                int32_t getTotal() const
-                {
-                    int32_t count = 0;
-                    for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
-                        count += counters[i];
-                    }
-                    return count;
-                }
+                int32_t getTotal() const;
         };
 
     private: // variables

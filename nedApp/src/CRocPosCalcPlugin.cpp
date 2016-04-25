@@ -858,3 +858,51 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionNencode(const CRoc
 
     return CRocDataPacket::VETO_NO;
 }
+
+// ============= CRocPosCalcPlugin::Stats class implementation ============= //
+
+#define VETO2INT(a) (((a) & ~0x80000000) >> 22)
+CRocPosCalcPlugin::Stats::Stats()
+{
+    reset();
+}
+
+void CRocPosCalcPlugin::Stats::reset()
+{
+    for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
+        counters[i] = 0;
+    }
+}
+
+CRocPosCalcPlugin::Stats &CRocPosCalcPlugin::Stats::operator+=(const Stats &rhs)
+{
+    int64_t count = getTotal() + rhs.getTotal();
+    if (count > std::numeric_limits<int32_t>::max()) {
+        // This is not good, un-controlled resetting
+        reset();
+    } else {
+        for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
+            counters[i] += rhs.counters[i];
+        }
+    }
+    return *this;
+}
+
+void CRocPosCalcPlugin::Stats::increment(CRocDataPacket::VetoType type)
+{
+    counters[VETO2INT(type)]++;
+}
+
+int32_t CRocPosCalcPlugin::Stats::get(CRocDataPacket::VetoType type) const
+{
+    return counters[VETO2INT(type)];
+}
+
+int32_t CRocPosCalcPlugin::Stats::getTotal() const
+{
+    int32_t count = 0;
+    for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
+        count += counters[i];
+    }
+    return count;
+}
