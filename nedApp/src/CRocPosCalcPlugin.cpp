@@ -185,6 +185,12 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
         params->gGapMin1 = value;
     } else if (param == "GGapMin2") {
         params->gGapMin2 = value;
+    } else if (param == "GNoiseThreshold") {
+        params->gNoiseThreshold = value;
+    } else if (param == "XNoiseThreshold") {
+        params->xNoiseThreshold = value;
+    } else if (param == "YNoiseThreshold") {
+        params->yNoiseThreshold = value;
     }
 }
 
@@ -608,7 +614,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
 inline double CRocPosCalcPlugin::calculateGNoise(const uint8_t *values, uint8_t maxIndex)
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
+    uint32_t weights[] = { 1, 2, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
     for (uint8_t i=0; i<14; i++) {
         noise += values[i] * weights[abs(i-maxIndex)];
     }
@@ -618,7 +624,7 @@ inline double CRocPosCalcPlugin::calculateGNoise(const uint8_t *values, uint8_t 
 inline double CRocPosCalcPlugin::calculateXNoise(const uint8_t *values, uint8_t maxIndex)
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 1 };
+    uint32_t weights[] = { 1, 2, 3, 4, 10, 10, 10, 10, 4, 3, 2 };
     for (uint8_t i=0; i<11; i++) {
         noise += values[i] * weights[abs(i-maxIndex)];
     }
@@ -628,21 +634,21 @@ inline double CRocPosCalcPlugin::calculateXNoise(const uint8_t *values, uint8_t 
 inline double CRocPosCalcPlugin::calculateYNoise(const uint8_t *values, uint8_t maxIndex)
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 1, 3, 3, 3, 3, 1 };
+    uint32_t weights[] = { 1, 5, 10, 10, 10, 10, 10 };
     for (uint8_t i=0; i<7; i++) {
         noise += values[i] * weights[abs(i-maxIndex)];
     }
     return 1.0*noise/values[maxIndex];
 }
 
-inline uint8_t CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t size, uint8_t &max)
+inline bool CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t size, uint8_t &max)
 {
     max = 0;
-    uint8_t found = 0;
-    for (size_t i = 0; i < size; i++) {
+    bool found = (values[0] > 0);
+    for (size_t i = 1; i < size; i++) {
         if (values[i] > values[max]) {
             max = i;
-            found = 1;
+            found = true;
         }
     }
     return found;
@@ -655,10 +661,10 @@ inline uint8_t CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t siz
  *         maxIndex, negative value when more counts on the left side and
  *         0 left and right side are equal.
  */
-inline int8_t CRocPosCalcPlugin::findDirection(const uint8_t *values, size_t size, uint8_t maxIndex)
+inline int32_t CRocPosCalcPlugin::findDirection(const uint8_t *values, size_t size, uint8_t maxIndex)
 {
-    uint8_t left = 0;
-    uint8_t right = 0;
+    int32_t left = 0;
+    int32_t right = 0;
     if (maxIndex > 0) {
         left = values[maxIndex-1];
     }
@@ -672,7 +678,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
 {
     uint8_t yMaxIndex;
 
-    if (findMaxIndex(event->photon_count_y, 7, yMaxIndex) == 0) {
+    if (findMaxIndex(event->photon_count_y, 7, yMaxIndex) == false) {
         return CRocDataPacket::VETO_Y_LOW_SIGNAL;
     }
 
@@ -680,9 +686,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
         return CRocDataPacket::VETO_Y_LOW_SIGNAL;
     }
 
-    // TODO: add noise parameter to detParams
-    double noiseMax = 2.0;
-    if (calculateYNoise(event->photon_count_y, yMaxIndex) > noiseMax) {
+    if (calculateYNoise(event->photon_count_y, yMaxIndex) > detParams->yNoiseThreshold) {
         return CRocDataPacket::VETO_Y_HIGH_SIGNAL;
     }
 
@@ -695,7 +699,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     uint8_t gMaxIndex;
     uint8_t xMaxIndex;
 
-    if (findMaxIndex(event->photon_count_g, 14, gMaxIndex) == 0) {
+    if (findMaxIndex(event->photon_count_g, 14, gMaxIndex) == false) {
         return CRocDataPacket::VETO_G_LOW_SIGNAL;
     }
 
@@ -703,13 +707,11 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
         return CRocDataPacket::VETO_G_LOW_SIGNAL;
     }
 
-    // TODO: add noise parameter to detParams
-    double noiseMax = 2.0;
-    if (calculateGNoise(event->photon_count_g, gMaxIndex) > noiseMax) {
+    if (calculateGNoise(event->photon_count_g, gMaxIndex) > detParams->gNoiseThreshold) {
         return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     }
 
-    if (findMaxIndex(event->photon_count_x, 11, xMaxIndex) == 0) {
+    if (findMaxIndex(event->photon_count_x, 11, xMaxIndex) == false) {
         return CRocDataPacket::VETO_X_LOW_SIGNAL;
     }
 
@@ -717,12 +719,12 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
         return CRocDataPacket::VETO_X_LOW_SIGNAL;
     }
 
-    if (calculateXNoise(event->photon_count_x, xMaxIndex) > noiseMax) {
+    if (calculateXNoise(event->photon_count_x, xMaxIndex) > detParams->xNoiseThreshold) {
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
     }
 
     if (xMaxIndex == 0 || xMaxIndex == 10) {
-        int8_t gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
+        int32_t gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
         if (detParams->fiberCoding == CRocParams::FIBER_CODING_V2) {
             if (gDirection > 0) {
                 assert(gMaxIndex < 13);

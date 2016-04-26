@@ -133,4 +133,8 @@ void CRocPlugin::createParams_v93()
     createMetaConfigParam("GGapMin1",                 8,    0);     // Num of X above threshold
     createMetaConfigParam("GGapMin2",                 8,    0);     // Num of X above threshold
     createMetaConfigParam("GMin2",                    8,    0);     // Num of X above threshold
+
+    createMetaConfigParam("GNoiseThreshold",         32,    8);     // G noise threshold
+    createMetaConfigParam("XNoiseThreshold",         32,    8);     // X noise threshold
+    createMetaConfigParam("YNoiseThreshold",         32,    8);     // Y noise threshold
 }

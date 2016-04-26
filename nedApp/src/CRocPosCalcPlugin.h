@@ -59,6 +59,10 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             } FiberCoding;
             FiberCoding fiberCoding;
 
+            uint32_t gNoiseThreshold;  //!< G noise threshold
+            uint32_t xNoiseThreshold;  //!< X noise threshold
+            uint32_t yNoiseThreshold;  //!< Y noise threshold
+
             // Run-time variables follow
             uint32_t tofLast;       // Last processed time of flight for this detector
         };
@@ -216,8 +220,8 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         CRocDataPacket::VetoType calculateGPositionNencode(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &xIndex, uint8_t &gIndex);
 
     private:
-        uint8_t findMaxIndex(const uint8_t *values, size_t size, uint8_t &max);
-        int8_t findDirection(const uint8_t *values, size_t size, uint8_t maxIndex);
+        bool findMaxIndex(const uint8_t *values, size_t size, uint8_t &max);
+        int32_t findDirection(const uint8_t *values, size_t size, uint8_t maxIndex);
         double calculateGNoise(const uint8_t *values, uint8_t maxIndex);
         double calculateXNoise(const uint8_t *values, uint8_t maxIndex);
         double calculateYNoise(const uint8_t *values, uint8_t maxIndex);

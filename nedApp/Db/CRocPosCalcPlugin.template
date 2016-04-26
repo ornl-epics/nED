@@ -45,6 +45,7 @@ record(calcout, "$(P)AutoResetCnt")
     field(CALC, "B>A?1:0")
     field(OOPT, "When Non-zero")
     field(OUT,  "$(P)ResetCnt PP")
+    field(PINI, "YES")
 }
 record(bo, "$(P)PassVetoes")
 {
