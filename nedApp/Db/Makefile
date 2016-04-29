@@ -55,6 +55,7 @@ DB += RocPlugin_v57.db
 DB += RocPlugin_v58.db
 DB += AdcRocPlugin_v02.db
 DB += AdcRocPlugin_v03.db
+DB += AdcRocPlugin_v05.db
 DB += BnlRocPlugin_v00.db
 DB += BnlRocPlugin_v20.db
 DB += AcpcPlugin_v144.db
@@ -90,6 +91,7 @@ RocPlugin_v57.template: RocPlugin_v57.generated
 RocPlugin_v58.template: RocPlugin_v58.generated
 AdcRocPlugin_v02.template: AdcRocPlugin_v02.generated
 AdcRocPlugin_v03.template: AdcRocPlugin_v03.generated
+AdcRocPlugin_v05.template: AdcRocPlugin_v05.generated
 BnlRocPlugin_v00.template: BnlRocPlugin_v00.generated
 BnlRocPlugin_v20.template: BnlRocPlugin_v20.generated
 AcpcPlugin_v144.template: AcpcPlugin_v144.generated
