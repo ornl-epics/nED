@@ -23,7 +23,7 @@ class CRocPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVUIntArray::svector time_of_flight;
             epics::pvData::PVUIntArray::svector position_index;
             epics::pvData::PVUIntArray::svector pixel;
-            epics::pvData::PVUShortArray::svector photon_count_g[20];
+            epics::pvData::PVUShortArray::svector photon_count_g[14];
             epics::pvData::PVUShortArray::svector photon_count_x[11];
             epics::pvData::PVUShortArray::svector photon_count_y[7];
             epics::pvData::PVUShortArray::svector time_range[4];

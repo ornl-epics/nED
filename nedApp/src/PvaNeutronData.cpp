@@ -41,12 +41,6 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("sample_g12",     standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_g13",     standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_g14",     standardField->scalarArray(epics::pvData::pvUShort, ""))
-        ->add("sample_g15",     standardField->scalarArray(epics::pvData::pvUShort, ""))
-        ->add("sample_g16",     standardField->scalarArray(epics::pvData::pvUShort, ""))
-        ->add("sample_g17",     standardField->scalarArray(epics::pvData::pvUShort, ""))
-        ->add("sample_g18",     standardField->scalarArray(epics::pvData::pvUShort, ""))
-        ->add("sample_g19",     standardField->scalarArray(epics::pvData::pvUShort, ""))
-        ->add("sample_g20",     standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_x1",      standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_x2",      standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_x3",      standardField->scalarArray(epics::pvData::pvUShort, ""))
@@ -196,30 +190,6 @@ bool PvaNeutronData::init()
 
     sample_g14 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g14.value");
     if (sample_g14.get() == NULL)
-        return false;
-
-    sample_g15 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g15.value");
-    if (sample_g15.get() == NULL)
-        return false;
-
-    sample_g16 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g16.value");
-    if (sample_g16.get() == NULL)
-        return false;
-
-    sample_g17 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g17.value");
-    if (sample_g17.get() == NULL)
-        return false;
-
-    sample_g18 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g18.value");
-    if (sample_g18.get() == NULL)
-        return false;
-
-    sample_g19 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g19.value");
-    if (sample_g19.get() == NULL)
-        return false;
-
-    sample_g20 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g20.value");
-    if (sample_g20.get() == NULL)
         return false;
 
     sample_x1 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x1.value");

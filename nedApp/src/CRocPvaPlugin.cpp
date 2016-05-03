@@ -56,7 +56,7 @@ void CRocPvaPlugin::processRawData(const uint32_t *data, uint32_t count)
     while (nEvents-- > 0) {
         m_cache.time_of_flight.push_back(events->tof & 0x000FFFFF);
         m_cache.position_index.push_back(events->position);
-        for (int i=0; i<20; i++)
+        for (int i=0; i<14; i++)
             m_cache.photon_count_g[i].push_back(events->photon_count_g[i]);
         for (int i=0; i<11; i++)
             m_cache.photon_count_x[i].push_back(events->photon_count_x[i]);
@@ -77,7 +77,7 @@ void CRocPvaPlugin::processExtendedData(const uint32_t *data, uint32_t count)
         m_cache.time_of_flight.push_back(events->tof & 0x000FFFFF);
         m_cache.position_index.push_back(events->position);
         m_cache.pixel.push_back(events->pixelid);
-        for (int i=0; i<20; i++) {
+        for (int i=0; i<14; i++) {
             m_cache.photon_count_g[i].push_back(events->photon_count_g[i]);
         }
         for (int i=0; i<11; i++) {
@@ -111,12 +111,6 @@ void CRocPvaPlugin::postRawData(const PvaNeutronData::shared_pointer& pvRecord)
     m_pvNeutrons->sample_g12->replace(freeze(m_cache.photon_count_g[11]));
     m_pvNeutrons->sample_g13->replace(freeze(m_cache.photon_count_g[12]));
     m_pvNeutrons->sample_g14->replace(freeze(m_cache.photon_count_g[13]));
-    m_pvNeutrons->sample_g15->replace(freeze(m_cache.photon_count_g[14]));
-    m_pvNeutrons->sample_g16->replace(freeze(m_cache.photon_count_g[15]));
-    m_pvNeutrons->sample_g17->replace(freeze(m_cache.photon_count_g[16]));
-    m_pvNeutrons->sample_g18->replace(freeze(m_cache.photon_count_g[17]));
-    m_pvNeutrons->sample_g19->replace(freeze(m_cache.photon_count_g[18]));
-    m_pvNeutrons->sample_g20->replace(freeze(m_cache.photon_count_g[19]));
     m_pvNeutrons->sample_x1->replace(freeze(m_cache.photon_count_x[0]));
     m_pvNeutrons->sample_x2->replace(freeze(m_cache.photon_count_x[1]));
     m_pvNeutrons->sample_x3->replace(freeze(m_cache.photon_count_x[2]));
@@ -163,12 +157,6 @@ void CRocPvaPlugin::postExtendedData(const PvaNeutronData::shared_pointer& pvRec
     m_pvNeutrons->sample_g12->replace(freeze(m_cache.photon_count_g[11]));
     m_pvNeutrons->sample_g13->replace(freeze(m_cache.photon_count_g[12]));
     m_pvNeutrons->sample_g14->replace(freeze(m_cache.photon_count_g[13]));
-    m_pvNeutrons->sample_g15->replace(freeze(m_cache.photon_count_g[14]));
-    m_pvNeutrons->sample_g16->replace(freeze(m_cache.photon_count_g[15]));
-    m_pvNeutrons->sample_g17->replace(freeze(m_cache.photon_count_g[16]));
-    m_pvNeutrons->sample_g18->replace(freeze(m_cache.photon_count_g[17]));
-    m_pvNeutrons->sample_g19->replace(freeze(m_cache.photon_count_g[18]));
-    m_pvNeutrons->sample_g20->replace(freeze(m_cache.photon_count_g[19]));
     m_pvNeutrons->sample_x1->replace(freeze(m_cache.photon_count_x[0]));
     m_pvNeutrons->sample_x2->replace(freeze(m_cache.photon_count_x[1]));
     m_pvNeutrons->sample_x3->replace(freeze(m_cache.photon_count_x[2]));
@@ -201,7 +189,7 @@ void CRocPvaPlugin::flushData()
     m_cache.time_of_flight.clear();
     m_cache.position_index.clear();
     m_cache.pixel.clear();
-    for (int i=0; i<20; i++)
+    for (int i=0; i<14; i++)
         m_cache.photon_count_g[i].clear();
     for (int i=0; i<11; i++)
         m_cache.photon_count_x[i].clear();
@@ -220,7 +208,7 @@ void CRocPvaPlugin::reserve()
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
     m_cache.pixel.reserve(CACHE_SIZE);
-    for (int i=0; i<20; i++)
+    for (int i=0; i<14; i++)
         m_cache.photon_count_g[i].reserve(CACHE_SIZE);
     for (int i=0; i<11; i++)
         m_cache.photon_count_x[i].reserve(CACHE_SIZE);

@@ -80,12 +80,6 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUShortArrayPtr sample_g12;     //!< CROC: photon count in g12
         epics::pvData::PVUShortArrayPtr sample_g13;     //!< CROC: photon count in g13
         epics::pvData::PVUShortArrayPtr sample_g14;     //!< CROC: photon count in g14
-        epics::pvData::PVUShortArrayPtr sample_g15;     //!< CROC: photon count in g15
-        epics::pvData::PVUShortArrayPtr sample_g16;     //!< CROC: photon count in g16
-        epics::pvData::PVUShortArrayPtr sample_g17;     //!< CROC: photon count in g17
-        epics::pvData::PVUShortArrayPtr sample_g18;     //!< CROC: photon count in g18
-        epics::pvData::PVUShortArrayPtr sample_g19;     //!< CROC: photon count in g19
-        epics::pvData::PVUShortArrayPtr sample_g20;     //!< CROC: photon count in g20
         epics::pvData::PVUIntArrayPtr sample_a48;       //!< ACPC ONLY: ADC samples
         epics::pvData::PVUIntArrayPtr sample_b1;        //!< LPSD ONLY: ADC samples
         epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC/ACPC ONLY: ADC samples
