@@ -786,27 +786,51 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
     }
 
+    // Inspect edges and consider modifying G or X index
     if (xMaxIndex == 0 || xMaxIndex == 10) {
         int32_t gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
         if (detParams->fiberCoding == CRocParams::FIBER_CODING_V2) {
+            // 1-to-1 mapping, but an event might get G group wrong
             if (gDirection > 0) {
                 assert(gMaxIndex < 13);
-                if (event->photon_count_x[0] > event->photon_count_x[10]) {
+                if (event->photon_count_x[0] > event->photon_count_x[10] &&
+                    event->photon_count_x[10] >= detParams->xMin) {
+                    // example:
+                    //            v
+                    // G: 0 . . 0 9 7 0 . . 0
+                    // X: 7 0 . . . . 0 4 5
+                    //    ^
                     gMaxIndex++;
                 }
             } else if (gDirection < 0) {
                 assert(gMaxIndex > 0);
-                if (event->photon_count_x[10] > event->photon_count_x[0]) {
+                if (event->photon_count_x[10] > event->photon_count_x[0] &&
+                    event->photon_count_x[0] >= detParams->xMin) {
+                    // example:
+                    //              v
+                    // G: 0 . . 0 7 9 0 . . 0
+                    // X: 5 4 0 . . . . 0 7
+                    //                    ^
                     gMaxIndex--;
                 }
             }
         } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
             // every second G group has X0 and X11 swapped
             if (gDirection < 0 && xMaxIndex == 10) {
+                // example:
+                //              v
+                // G: 0 . . 0 3 5 0 . . 0
+                // X: 3 0 . . . . . 0 5
+                //                    ^
                 xMaxIndex = 0;
             } else if (gDirection > 0 && xMaxIndex == 0) {
+                // example:
+                //            v
+                // G: 0 . . 0 5 3 0 . . 0
+                // X: 5 0 . . . . . 0 3
+                //    ^
                 xMaxIndex = 10;
-            } else if (gDirection == 0 &&(gMaxIndex % 2) == 1) {
+            } else if (gDirection == 0 && (gMaxIndex % 2) == 1) {
                 if (xMaxIndex == 0) {
                     xMaxIndex = 10;
                 } else /* (xMaxIndex == 10) */ {
