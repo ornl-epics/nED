@@ -45,7 +45,7 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("TimeRange2Min",    asynParamInt32, &TimeRange2Min, 5);     // WRITE - Min counts in second time range bin
     createParam("TimeRangeDelayMin",asynParamInt32, &TimeRangeDelayMin, 15);// WRITE - Delayed event threshold
     createParam("TofResolution",    asynParamInt32, &TofResolution, 250);   // WRITE - Time between two events in 100ns
-    createParam("VerifyMode",       asynParamInt32, &VerifyMode, 0);        // WRITE - Select event verification algorithm (0=legacy,1=new)
+    createParam("ProcessMode",      asynParamInt32, &ProcessMode, 0);       // WRITE - Select event verification algorithm (0=legacy,1=new)
 
     createParam("CntTotalEvents",   asynParamInt32, &CntTotalEvents, 0);    // READ - Number of all events
     createParam("CntGoodEvents",    asynParamInt32, &CntGoodEvents, 0);     // READ - Number of good events
@@ -67,6 +67,9 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("GWeights",     asynParamInt8Array, &GWeights);             // WRITE - G noise calculation weights
     createParam("XWeights",     asynParamInt8Array, &XWeights);             // WRITE - X noise calculation weights
     createParam("YWeights",     asynParamInt8Array, &YWeights);             // WRITE - Y noise calculation weights
+
+    createParam("TimeRangeExp",     asynParamInt32, &TimeRangeExp);         // WRITE - Time range experimental rejection
+    createParam("TimeRangeJason",   asynParamInt32, &TimeRangeJason);       // WRITE - Jason's time range rejection
 
     callParamCallbacks();
 }
@@ -122,8 +125,14 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == OutExtMode) {
         m_calcParams.outExtMode = (value != 0);
         handled = true;
-    } else if (pasynUser->reason == VerifyMode) {
-        m_calcParams.verifyModeNew = (value != 0);
+    } else if (pasynUser->reason == ProcessMode) {
+        m_calcParams.processModeNew = (value != 0);
+        handled = true;
+    } else if (pasynUser->reason == TimeRangeExp) {
+        m_calcParams.timeRangeExperimental = (value != 0);
+        handled = true;
+    } else if (pasynUser->reason == TimeRangeJason) {
+        m_calcParams.timeRangeJason = (value != 0);
         handled = true;
     }
     m_paramsMutex.unlock();
@@ -251,6 +260,10 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
         params->xNoiseThreshold = value;
     } else if (param == "YNoiseThreshold") {
         params->yNoiseThreshold = value;
+    } else if (param == "TimeRangeMin") {
+        params->timeRangeMin = value;
+    } else if (param == "TimeRangeMinCnt") {
+        params->timeRangeMinCnt = value;
     }
 }
 
@@ -431,8 +444,8 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     CRocDataPacket::VetoType tmpVeto = CRocDataPacket::VETO_NO;
     uint8_t x,y;
 
-    if (m_calcParams.verifyModeNew)
-        tmpVeto = checkTimeRangeNew(event, detParams);
+    if (m_calcParams.timeRangeJason)
+        tmpVeto = checkTimeRangeJason(event, detParams);
     else
         tmpVeto = checkTimeRange(event, detParams);
     if (tmpVeto != CRocDataPacket::VETO_NO) {
@@ -440,7 +453,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
         if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
     }
 
-    if (m_calcParams.verifyModeNew)
+    if (m_calcParams.processModeNew)
         tmpVeto = calculateYPositionNew(event, detParams, y);
     else
         tmpVeto = calculateYPosition(event, detParams, y);
@@ -454,7 +467,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
         y = 6;
     }
 
-    if (m_calcParams.verifyModeNew)
+    if (m_calcParams.processModeNew)
         tmpVeto = calculateXPositionNew(event, detParams, x);
     else
         tmpVeto = calculateXPosition(event, detParams, x);
@@ -475,7 +488,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     return veto;
 }
 
-CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
+CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRangeJason(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
 {
     uint32_t delaySum = (event->time_range[1] + event->time_range[2] + event->time_range[3]);
 
@@ -497,26 +510,20 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket:
     return CRocDataPacket::VETO_NO;
 }
 
-/**
- * At least 3 bins need to be populated, of which both middle bins, or event is
- * rejected. This will reject events with sparse bins, events with short
- * life time like gamma, and strongly delayed events.
- * Function does not check for weak events with overall low counts or burst
- * events. Those are expected to be checked in X and Y verify functions more
- * accurately.
- */
-CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRangeNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
+CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
 {
-    uint8_t nEmpty = 0;
+    uint8_t cnt = 0;
     for (int i=0; i<4; i++) {
-        if (event->time_range[i] == 0) {
-            nEmpty++;
+        if (event->time_range[i] >= detParams->timeRangeMin) {
+            cnt++;
         }
     }
 
-    if (nEmpty > 1) {
+    if (cnt < detParams->timeRangeMinCnt) {
         return CRocDataPacket::VETO_TIMERANGE_BAD;
-    } else if (event->time_range[1] == 0 || event->time_range[2] == 0) {
+    }
+    if (m_calcParams.timeRangeExperimental &&
+        (event->time_range[1] < detParams->timeRangeMin || event->time_range[2] < detParams->timeRangeMin)) {
         return CRocDataPacket::VETO_TIMERANGE_BAD;
     }
     return CRocDataPacket::VETO_NO;

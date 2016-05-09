@@ -524,17 +524,41 @@ record(calc, "$(P)RateVetoDelayed")
     field(PREC, "2")
     field(EGU,  "%")
 }
-record(bo, "$(P)VerifyMode")
+record(bo, "$(P)ProcessMode")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Event verification algorithm")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))VerifyMode")
+    field(OUT,  "@asyn($(PORT))ProcessMode")
     field(VAL,  "0")
     field(PINI, "YES")
     field(ZNAM, "legacy")
     field(ONAM, "new")
+}
+record(bo, "$(P)TimeRangeExp")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Experimental time range reject")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRangeExp")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(bo, "$(P)TimeRangeJason")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Jason's time range reject")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRangeJason")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
 }
 record(waveform, "$(P)GWeights")
 {

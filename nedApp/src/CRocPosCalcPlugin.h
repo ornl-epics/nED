@@ -48,6 +48,9 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             uint32_t yMin;          //!< Min number of counts on each y sample
             uint32_t yCntMax;       //!< Max number of valid y samples
 
+            uint16_t timeRangeMin;  //!< Min threshold for time range bins
+            uint8_t timeRangeMinCnt;//!< Min number of valid time range bins
+
             uint32_t gMin;
             uint32_t gMin2;
             uint32_t gGapMin1;
@@ -74,7 +77,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             bool passVetoes;
             bool inExtMode;
             bool outExtMode;
-            bool verifyModeNew;
+            bool processModeNew;
 
             bool checkAdjTube;          //!< Switch to toggle checking for adjacent tubes
             float gNongapMaxRatio;
@@ -84,6 +87,9 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             uint8_t timeRange2Min;      //!< Threshold for second time range bin
             uint32_t timeRangeDelayMin; //!< Delayed event threshold
             uint32_t tofResolution;     //!< Min time between two events in 100ns
+
+            bool timeRangeExperimental; //!< Turn on/off experimental time range rejection
+            bool timeRangeJason;        //!< Jason Hodges method of time range rejection
         };
 
         /**
@@ -207,15 +213,15 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          */
         CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint32_t &pixel);
 
-        CRocDataPacket::VetoType checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
-
         /**
          * Verify the time spectrum range of the event.
          *
          * The 4 time range bins are used to validate the time shape of the neutron
          * event and catch non-neutron events like gamma.
          */
-        CRocDataPacket::VetoType checkTimeRangeNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
+        CRocDataPacket::VetoType checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
+
+        CRocDataPacket::VetoType checkTimeRangeJason(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
 
         CRocDataPacket::VetoType calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
         CRocDataPacket::VetoType calculateYPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
@@ -276,7 +282,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int TimeRange2Min;  //!< Min counts in second time range bin
         int TimeRangeDelayMin; //!< Delayed event threshold
         int TofResolution;  //!< Time between two events in 100ns
-        int VerifyMode;     //!< Select event verification algorithm
+        int ProcessMode;    //!< Select event verification algorithm
 
         int CntTotalEvents;    //!< Number of all events
         int CntGoodEvents;     //!< Number of good events
@@ -297,7 +303,10 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int GWeights;
         int XWeights;
         int YWeights;
-        #define LAST_CROCPOSCALCPLUGIN_PARAM CntVetoDelayed
+
+        int TimeRangeExp;       //!< Switch for experimental time range rejection
+        int TimeRangeJason;     //!< Use Jason's time range rejection
+        #define LAST_CROCPOSCALCPLUGIN_PARAM TimeRangeJason
 };
 
 #endif // CROC_POS_CALC_PLUGIN_H
