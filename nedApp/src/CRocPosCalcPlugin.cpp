@@ -63,6 +63,11 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("CntVetoTimeRange", asynParamInt32, &CntVetoTimeRange, 0);  // READ - Number of events rejected due to time range policy
     createParam("CntVetoDelayed",   asynParamInt32, &CntVetoDelayed, 0);    // READ - Number of events delayed based on time range bins
 
+    // These might be more suitable in CROC configuration
+    createParam("GWeights",     asynParamInt8Array, &GWeights);             // WRITE - G noise calculation weights
+    createParam("XWeights",     asynParamInt8Array, &XWeights);             // WRITE - X noise calculation weights
+    createParam("YWeights",     asynParamInt8Array, &YWeights);             // WRITE - Y noise calculation weights
+
     callParamCallbacks();
 }
 
@@ -126,6 +131,61 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         return asynSuccess;
 
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
+}
+
+asynStatus CRocPosCalcPlugin::writeInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements)
+{
+    if (pasynUser->reason == GWeights) {
+        // asyn will try to initialize the record with 0 elements
+        if (nElements != 14) {
+            if (nElements > 0) {
+                LOG_ERROR("14 elements expected for G weights");
+                return asynError;
+            } else {
+                return asynSuccess;
+            }
+        }
+        m_paramsMutex.lock();
+        for (size_t i = 0; i < 14; i++) {
+            m_gWeights[i] = values[i];
+        }
+        m_paramsMutex.unlock();
+        return asynSuccess;
+    } else if (pasynUser->reason == XWeights) {
+        // asyn will try to initialize the record with 0 elements
+        if (nElements != 11) {
+            if (nElements > 0) {
+                LOG_ERROR("11 elements expected for G weights");
+                return asynError;
+            } else {
+                return asynSuccess;
+            }
+        }
+        m_paramsMutex.lock();
+        for (size_t i = 0; i < 11; i++) {
+            m_xWeights[i] = values[i];
+        }
+        m_paramsMutex.unlock();
+        return asynSuccess;
+    } else if (pasynUser->reason == YWeights) {
+        // asyn will try to initialize the record with 0 elements
+        if (nElements != 7) {
+            if (nElements > 0) {
+                LOG_ERROR("7 elements expected for G weights");
+                return asynError;
+            } else {
+                return asynSuccess;
+            }
+        }
+        m_paramsMutex.lock();
+        for (size_t i = 0; i < 7; i++) {
+            m_gWeights[i] = values[i];
+        }
+        m_paramsMutex.unlock();
+        return asynSuccess;
+    }
+
+    return BaseDispatcherPlugin::writeInt8Array(pasynUser, values, nElements);
 }
 
 void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std::string &param, epicsInt32 value)
@@ -274,7 +334,6 @@ void CRocPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLi
         }
 
         m_paramsMutex.unlock();
-
     }
 
     this->lock();
@@ -478,9 +537,9 @@ uint8_t CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, ui
             max3 = i;
         }
     }
-    if (max3 != 0 && values[0] != 0) return 3;
-    if (max2 != 0 && values[0] != 0) return 2;
-    if (max1 != 0 && values[0] != 0) return 1;
+    if (max3 != 0 || values[0] != 0) return 3;
+    if (max2 != 0 || values[0] != 0) return 2;
+    if (max1 != 0 || values[0] != 0) return 1;
     return 0;
 }
 
@@ -614,9 +673,8 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
 inline double CRocPosCalcPlugin::calculateGNoise(const uint8_t *values, uint8_t maxIndex)
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 2, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
     for (uint8_t i=0; i<14; i++) {
-        noise += values[i] * weights[abs(i-maxIndex)];
+        noise += values[i] * m_gWeights[abs(i-maxIndex)];
     }
     return 1.0*noise/values[maxIndex];
 }
@@ -624,9 +682,8 @@ inline double CRocPosCalcPlugin::calculateGNoise(const uint8_t *values, uint8_t 
 inline double CRocPosCalcPlugin::calculateXNoise(const uint8_t *values, uint8_t maxIndex)
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 2, 3, 4, 10, 10, 10, 10, 4, 3, 2 };
     for (uint8_t i=0; i<11; i++) {
-        noise += values[i] * weights[abs(i-maxIndex)];
+        noise += values[i] * m_xWeights[abs(i-maxIndex)];
     }
     return 1.0*noise/values[maxIndex];
 }
@@ -634,9 +691,8 @@ inline double CRocPosCalcPlugin::calculateXNoise(const uint8_t *values, uint8_t 
 inline double CRocPosCalcPlugin::calculateYNoise(const uint8_t *values, uint8_t maxIndex)
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 5, 10, 10, 10, 10, 10 };
     for (uint8_t i=0; i<7; i++) {
-        noise += values[i] * weights[abs(i-maxIndex)];
+        noise += values[i] * m_yWeights[abs(i-maxIndex)];
     }
     return 1.0*noise/values[maxIndex];
 }
