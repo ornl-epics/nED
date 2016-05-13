@@ -339,7 +339,7 @@ CRocPosCalcPlugin::Stats CRocPosCalcPlugin::processPacket(const DasPacket *inPac
                 memcpy(outEvent, inEvent, inEventSize);
                 outEvent->pixelid = pixel;
             } else {
-                CRocDataPacket::NormalEvent *outEvent = reinterpret_cast<CRocDataPacket::NormalEvent *>(outPacket->getData(&nOutEvents));
+                CRocDataPacket::NormalEvent *outEvent = reinterpret_cast<CRocDataPacket::NormalEvent *>(outData);
                 outEvent->tof = inEvent->tof;
                 outEvent->pixelid = pixel;
             }
