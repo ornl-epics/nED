@@ -6,6 +6,7 @@ record(bo, "$(P)Enable")
 }
 record(stringin, "$(P)HwId")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "Hardware ID address")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))HwId")
@@ -197,6 +198,7 @@ record(bi, "$(P)Status")
 }
 record(stringin, "$(P)HwDate")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))HwDate")
     field(VAL,  "Unknown")
@@ -231,6 +233,7 @@ record(scalcout, "$(P)HwVerStr")
 }
 record(stringin, "$(P)FwDate")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))FwDate")
     field(VAL,  "Unknown")
@@ -258,6 +261,7 @@ record(longin, "$(P)FwVer")
 }
 record(scalcout, "$(P)FwVerStr")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "FW version concatenated")
     field(INPA, "$(P)FwVer NPP MS")
     field(INPB, "$(P)FwRev NPP MS")
