@@ -137,4 +137,37 @@ void CRocPlugin::createParams_v93()
     createMetaConfigParam("GNoiseThreshold",         32,    8);     // G noise threshold
     createMetaConfigParam("XNoiseThreshold",         32,    8);     // X noise threshold
     createMetaConfigParam("YNoiseThreshold",         32,    8);     // Y noise threshold
+
+    createMetaConfigParam("G_0:Weight",               8,    1);     // Weight for max G found
+    createMetaConfigParam("G_1:Weight",               8,    3);     // Weight for G +-1 away
+    createMetaConfigParam("G_2:Weight",               8,    5);     // Weight for G +-2 away
+    createMetaConfigParam("G_3:Weight",               8,    5);     // Weight for G +-3 away
+    createMetaConfigParam("G_4:Weight",               8,    5);     // Weight for G +-4 away
+    createMetaConfigParam("G_5:Weight",               8,    5);     // Weight for G +-5 away
+    createMetaConfigParam("G_6:Weight",               8,    5);     // Weight for G +-6 away
+    createMetaConfigParam("G_7:Weight",               8,    5);     // Weight for G +-7 away
+    createMetaConfigParam("G_8:Weight",               8,    5);     // Weight for G +-8 away
+    createMetaConfigParam("G_9:Weight",               8,    5);     // Weight for G +-9 away
+    createMetaConfigParam("G_10:Weight",              8,    5);     // Weight for G +-10 away
+    createMetaConfigParam("G_11:Weight",              8,    5);     // Weight for G +-11 away
+    createMetaConfigParam("G_12:Weight",              8,    5);     // Weight for G +-12 away
+    createMetaConfigParam("G_12:Weight",              8,    5);     // Weight for G +-13 away
+    createMetaConfigParam("X_0:Weight",               8,    1);     // Weight for max X found
+    createMetaConfigParam("X_1:Weight",               8,    3);     // Weight for X +-1 away
+    createMetaConfigParam("X_2:Weight",               8,    5);     // Weight for X +-2 away
+    createMetaConfigParam("X_3:Weight",               8,    5);     // Weight for X +-3 away
+    createMetaConfigParam("X_4:Weight",               8,    5);     // Weight for X +-4 away
+    createMetaConfigParam("X_5:Weight",               8,    5);     // Weight for X +-5 away
+    createMetaConfigParam("X_6:Weight",               8,    5);     // Weight for X +-6 away
+    createMetaConfigParam("X_7:Weight",               8,    5);     // Weight for X +-7 away
+    createMetaConfigParam("X_8:Weight",               8,    5);     // Weight for X +-8 away
+    createMetaConfigParam("X_9:Weight",               8,    5);     // Weight for X +-9 away
+    createMetaConfigParam("X_10:Weight",              8,    5);     // Weight for X +-10 away
+    createMetaConfigParam("Y_0:Weight",               8,    1);     // Weight for max Y found
+    createMetaConfigParam("Y_1:Weight",               8,    3);     // Weight for Y +-1 away
+    createMetaConfigParam("Y_2:Weight",               8,    5);     // Weight for Y +-2 away
+    createMetaConfigParam("Y_3:Weight",               8,    5);     // Weight for Y +-3 away
+    createMetaConfigParam("Y_4:Weight",               8,    5);     // Weight for Y +-4 away
+    createMetaConfigParam("Y_5:Weight",               8,    5);     // Weight for Y +-5 away
+    createMetaConfigParam("Y_6:Weight",               8,    5);     // Weight for Y +-6 away
 }

@@ -45,7 +45,7 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("TimeRange2Min",    asynParamInt32, &TimeRange2Min, 5);     // WRITE - Min counts in second time range bin
     createParam("TimeRangeDelayMin",asynParamInt32, &TimeRangeDelayMin, 15);// WRITE - Delayed event threshold
     createParam("TofResolution",    asynParamInt32, &TofResolution, 250);   // WRITE - Time between two events in 100ns
-    createParam("VerifyMode",       asynParamInt32, &VerifyMode, 0);        // WRITE - Select event verification algorithm (0=legacy,1=new)
+    createParam("ProcessMode",      asynParamInt32, &ProcessMode, 0);       // WRITE - Select event verification algorithm (0=legacy,1=new)
 
     createParam("CntTotalEvents",   asynParamInt32, &CntTotalEvents, 0);    // READ - Number of all events
     createParam("CntGoodEvents",    asynParamInt32, &CntGoodEvents, 0);     // READ - Number of good events
@@ -62,6 +62,14 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("CntVetoEcho",      asynParamInt32, &CntVetoEcho, 0);       // READ - Number of events too close to previous
     createParam("CntVetoTimeRange", asynParamInt32, &CntVetoTimeRange, 0);  // READ - Number of events rejected due to time range policy
     createParam("CntVetoDelayed",   asynParamInt32, &CntVetoDelayed, 0);    // READ - Number of events delayed based on time range bins
+
+    // These might be more suitable in CROC configuration
+    createParam("GWeights",     asynParamInt8Array, &GWeights);             // WRITE - G noise calculation weights
+    createParam("XWeights",     asynParamInt8Array, &XWeights);             // WRITE - X noise calculation weights
+    createParam("YWeights",     asynParamInt8Array, &YWeights);             // WRITE - Y noise calculation weights
+
+    createParam("TimeRangeExp",     asynParamInt32, &TimeRangeExp);         // WRITE - Time range experimental rejection
+    createParam("TimeRangeJason",   asynParamInt32, &TimeRangeJason);       // WRITE - Jason's time range rejection
 
     callParamCallbacks();
 }
@@ -117,8 +125,14 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == OutExtMode) {
         m_calcParams.outExtMode = (value != 0);
         handled = true;
-    } else if (pasynUser->reason == VerifyMode) {
-        m_calcParams.verifyModeNew = (value != 0);
+    } else if (pasynUser->reason == ProcessMode) {
+        m_calcParams.processModeNew = (value != 0);
+        handled = true;
+    } else if (pasynUser->reason == TimeRangeExp) {
+        m_calcParams.timeRangeExperimental = (value != 0);
+        handled = true;
+    } else if (pasynUser->reason == TimeRangeJason) {
+        m_calcParams.timeRangeJason = (value != 0);
         handled = true;
     }
     m_paramsMutex.unlock();
@@ -126,6 +140,61 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         return asynSuccess;
 
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
+}
+
+asynStatus CRocPosCalcPlugin::writeInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements)
+{
+    if (pasynUser->reason == GWeights) {
+        // asyn will try to initialize the record with 0 elements
+        if (nElements != 14) {
+            if (nElements > 0) {
+                LOG_ERROR("14 elements expected for G weights");
+                return asynError;
+            } else {
+                return asynSuccess;
+            }
+        }
+        m_paramsMutex.lock();
+        for (size_t i = 0; i < 14; i++) {
+            m_gWeights[i] = values[i];
+        }
+        m_paramsMutex.unlock();
+        return asynSuccess;
+    } else if (pasynUser->reason == XWeights) {
+        // asyn will try to initialize the record with 0 elements
+        if (nElements != 11) {
+            if (nElements > 0) {
+                LOG_ERROR("11 elements expected for G weights");
+                return asynError;
+            } else {
+                return asynSuccess;
+            }
+        }
+        m_paramsMutex.lock();
+        for (size_t i = 0; i < 11; i++) {
+            m_xWeights[i] = values[i];
+        }
+        m_paramsMutex.unlock();
+        return asynSuccess;
+    } else if (pasynUser->reason == YWeights) {
+        // asyn will try to initialize the record with 0 elements
+        if (nElements != 7) {
+            if (nElements > 0) {
+                LOG_ERROR("7 elements expected for G weights");
+                return asynError;
+            } else {
+                return asynSuccess;
+            }
+        }
+        m_paramsMutex.lock();
+        for (size_t i = 0; i < 7; i++) {
+            m_gWeights[i] = values[i];
+        }
+        m_paramsMutex.unlock();
+        return asynSuccess;
+    }
+
+    return BaseDispatcherPlugin::writeInt8Array(pasynUser, values, nElements);
 }
 
 void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std::string &param, epicsInt32 value)
@@ -191,6 +260,31 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
         params->xNoiseThreshold = value;
     } else if (param == "YNoiseThreshold") {
         params->yNoiseThreshold = value;
+    } else if (param == "TimeRangeMin") {
+        params->timeRangeMin = value;
+    } else if (param == "TimeRangeMinCnt") {
+        params->timeRangeMinCnt = value;
+    }
+    for (int i=0; i<14; i++) {
+        char name[32];
+        snprintf(name, sizeof(name), "G_%d:Weight", i);
+        if (strcpy(name, param.c_str()) == 0) {
+            params->gWeights[i] = value;
+        }
+    }
+    for (int i=0; i<11; i++) {
+        char name[32];
+        snprintf(name, sizeof(name), "X_%d:Weight", i);
+        if (strcpy(name, param.c_str()) == 0) {
+            params->xWeights[i] = value;
+        }
+    }
+    for (int i=0; i<7; i++) {
+        char name[32];
+        snprintf(name, sizeof(name), "Y_%d:Weight", i);
+        if (strcpy(name, param.c_str()) == 0) {
+            params->yWeights[i] = value;
+        }
     }
 }
 
@@ -274,7 +368,6 @@ void CRocPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLi
         }
 
         m_paramsMutex.unlock();
-
     }
 
     this->lock();
@@ -372,8 +465,8 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     CRocDataPacket::VetoType tmpVeto = CRocDataPacket::VETO_NO;
     uint8_t x,y;
 
-    if (m_calcParams.verifyModeNew)
-        tmpVeto = checkTimeRangeNew(event, detParams);
+    if (m_calcParams.timeRangeJason)
+        tmpVeto = checkTimeRangeJason(event, detParams);
     else
         tmpVeto = checkTimeRange(event, detParams);
     if (tmpVeto != CRocDataPacket::VETO_NO) {
@@ -381,7 +474,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
         if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
     }
 
-    if (m_calcParams.verifyModeNew)
+    if (m_calcParams.processModeNew)
         tmpVeto = calculateYPositionNew(event, detParams, y);
     else
         tmpVeto = calculateYPosition(event, detParams, y);
@@ -395,7 +488,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
         y = 6;
     }
 
-    if (m_calcParams.verifyModeNew)
+    if (m_calcParams.processModeNew)
         tmpVeto = calculateXPositionNew(event, detParams, x);
     else
         tmpVeto = calculateXPosition(event, detParams, x);
@@ -416,7 +509,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     return veto;
 }
 
-CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
+CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRangeJason(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
 {
     uint32_t delaySum = (event->time_range[1] + event->time_range[2] + event->time_range[3]);
 
@@ -438,26 +531,20 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket:
     return CRocDataPacket::VETO_NO;
 }
 
-/**
- * At least 3 bins need to be populated, of which both middle bins, or event is
- * rejected. This will reject events with sparse bins, events with short
- * life time like gamma, and strongly delayed events.
- * Function does not check for weak events with overall low counts or burst
- * events. Those are expected to be checked in X and Y verify functions more
- * accurately.
- */
-CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRangeNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
+CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
 {
-    uint8_t nEmpty = 0;
+    uint8_t cnt = 0;
     for (int i=0; i<4; i++) {
-        if (event->time_range[i] == 0) {
-            nEmpty++;
+        if (event->time_range[i] >= detParams->timeRangeMin) {
+            cnt++;
         }
     }
 
-    if (nEmpty > 1) {
+    if (cnt < detParams->timeRangeMinCnt) {
         return CRocDataPacket::VETO_TIMERANGE_BAD;
-    } else if (event->time_range[1] == 0 || event->time_range[2] == 0) {
+    }
+    if (m_calcParams.timeRangeExperimental &&
+        (event->time_range[1] < detParams->timeRangeMin || event->time_range[2] < detParams->timeRangeMin)) {
         return CRocDataPacket::VETO_TIMERANGE_BAD;
     }
     return CRocDataPacket::VETO_NO;
@@ -478,9 +565,9 @@ uint8_t CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, ui
             max3 = i;
         }
     }
-    if (max3 != 0 && values[0] != 0) return 3;
-    if (max2 != 0 && values[0] != 0) return 2;
-    if (max1 != 0 && values[0] != 0) return 1;
+    if (max3 != 0 || values[0] != 0) return 3;
+    if (max2 != 0 || values[0] != 0) return 2;
+    if (max1 != 0 || values[0] != 0) return 1;
     return 0;
 }
 
@@ -611,30 +698,27 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
     return CRocDataPacket::VETO_NO;
 }
 
-inline double CRocPosCalcPlugin::calculateGNoise(const uint8_t *values, uint8_t maxIndex)
+inline double CRocPosCalcPlugin::calculateGNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[14])
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 2, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };
     for (uint8_t i=0; i<14; i++) {
         noise += values[i] * weights[abs(i-maxIndex)];
     }
     return 1.0*noise/values[maxIndex];
 }
 
-inline double CRocPosCalcPlugin::calculateXNoise(const uint8_t *values, uint8_t maxIndex)
+inline double CRocPosCalcPlugin::calculateXNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[11])
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 2, 3, 4, 10, 10, 10, 10, 4, 3, 2 };
     for (uint8_t i=0; i<11; i++) {
         noise += values[i] * weights[abs(i-maxIndex)];
     }
     return 1.0*noise/values[maxIndex];
 }
 
-inline double CRocPosCalcPlugin::calculateYNoise(const uint8_t *values, uint8_t maxIndex)
+inline double CRocPosCalcPlugin::calculateYNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[7])
 {
     uint32_t noise = 0;
-    uint32_t weights[] = { 1, 5, 10, 10, 10, 10, 10 };
     for (uint8_t i=0; i<7; i++) {
         noise += values[i] * weights[abs(i-maxIndex)];
     }
@@ -682,12 +766,15 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
         return CRocDataPacket::VETO_Y_LOW_SIGNAL;
     }
 
-    if (event->photon_count_y[yMaxIndex] < detParams->yMin) {
-        return CRocDataPacket::VETO_Y_LOW_SIGNAL;
+    double noise = calculateYNoise(event->photon_count_y, yMaxIndex, detParams->yWeights);
+    if (noise > detParams->yNoiseThreshold) {
+        return CRocDataPacket::VETO_Y_HIGH_SIGNAL;
     }
 
-    if (calculateYNoise(event->photon_count_y, yMaxIndex) > detParams->yNoiseThreshold) {
-        return CRocDataPacket::VETO_Y_HIGH_SIGNAL;
+    if (event->photon_count_y[yMaxIndex] < detParams->yMin) {
+        if (!m_calcParams.efficiencyBoost || noise > 1.0) {
+            return CRocDataPacket::VETO_Y_LOW_SIGNAL;
+        }
     }
 
     y = yMaxIndex;
@@ -703,47 +790,77 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
         return CRocDataPacket::VETO_G_LOW_SIGNAL;
     }
 
-    if (event->photon_count_g[gMaxIndex] < detParams->gMin) {
-        return CRocDataPacket::VETO_G_LOW_SIGNAL;
+    double gNoise = calculateGNoise(event->photon_count_g, gMaxIndex, detParams->gWeights);
+    if (gNoise > detParams->gNoiseThreshold) {
+        return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     }
 
-    if (calculateGNoise(event->photon_count_g, gMaxIndex) > detParams->gNoiseThreshold) {
-        return CRocDataPacket::VETO_G_HIGH_SIGNAL;
+    if (event->photon_count_g[gMaxIndex] < detParams->gMin) {
+        if (!m_calcParams.efficiencyBoost || gNoise > 1.0) {
+            return CRocDataPacket::VETO_G_LOW_SIGNAL;
+        }
     }
 
     if (findMaxIndex(event->photon_count_x, 11, xMaxIndex) == false) {
         return CRocDataPacket::VETO_X_LOW_SIGNAL;
     }
 
-    if (event->photon_count_x[xMaxIndex] < detParams->xMin) {
-        return CRocDataPacket::VETO_X_LOW_SIGNAL;
-    }
-
-    if (calculateXNoise(event->photon_count_x, xMaxIndex) > detParams->xNoiseThreshold) {
+    double xNoise = calculateXNoise(event->photon_count_x, xMaxIndex, detParams->xWeights);
+    if (xNoise > detParams->xNoiseThreshold) {
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
     }
 
+    if (event->photon_count_x[xMaxIndex] < detParams->xMin) {
+        if (!m_calcParams.efficiencyBoost || xNoise > 1.0) {
+            return CRocDataPacket::VETO_X_LOW_SIGNAL;
+        }
+    }
+
+    // Inspect edges and consider modifying G or X index
     if (xMaxIndex == 0 || xMaxIndex == 10) {
         int32_t gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
         if (detParams->fiberCoding == CRocParams::FIBER_CODING_V2) {
+            // 1-to-1 mapping, but an event might get G group wrong
             if (gDirection > 0) {
                 assert(gMaxIndex < 13);
-                if (event->photon_count_x[0] > event->photon_count_x[10]) {
+                if (event->photon_count_x[0] > event->photon_count_x[10] &&
+                    event->photon_count_x[10] >= detParams->xMin) {
+                    // example:
+                    //            v
+                    // G: 0 . . 0 9 7 0 . . 0
+                    // X: 7 0 . . . . 0 4 5
+                    //    ^
                     gMaxIndex++;
                 }
             } else if (gDirection < 0) {
                 assert(gMaxIndex > 0);
-                if (event->photon_count_x[10] > event->photon_count_x[0]) {
+                if (event->photon_count_x[10] > event->photon_count_x[0] &&
+                    event->photon_count_x[0] >= detParams->xMin) {
+                    // example:
+                    //              v
+                    // G: 0 . . 0 7 9 0 . . 0
+                    // X: 5 4 0 . . . . 0 7
+                    //                    ^
                     gMaxIndex--;
                 }
             }
         } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
             // every second G group has X0 and X11 swapped
             if (gDirection < 0 && xMaxIndex == 10) {
+                // example:
+                //              v
+                // G: 0 . . 0 3 5 0 . . 0
+                // X: 3 0 . . . . . 0 5
+                //                    ^
                 xMaxIndex = 0;
             } else if (gDirection > 0 && xMaxIndex == 0) {
+                // example:
+                //            v
+                // G: 0 . . 0 5 3 0 . . 0
+                // X: 5 0 . . . . . 0 3
+                //    ^
                 xMaxIndex = 10;
-            } else if (gDirection == 0 &&(gMaxIndex % 2) == 1) {
+            } else if (gDirection == 0 && (gMaxIndex % 2) == 1) {
                 if (xMaxIndex == 0) {
                     xMaxIndex = 10;
                 } else /* (xMaxIndex == 10) */ {
