@@ -62,9 +62,12 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             } FiberCoding;
             FiberCoding fiberCoding;
 
-            uint32_t gNoiseThreshold;  //!< G noise threshold
-            uint32_t xNoiseThreshold;  //!< X noise threshold
-            uint32_t yNoiseThreshold;  //!< Y noise threshold
+            uint8_t gWeights[14];       //!< G weights for noise calculation
+            uint8_t xWeights[11];       //!< X weights for noise calculation
+            uint8_t yWeights[7];        //!< Y weights for noise calculation
+            uint32_t gNoiseThreshold;   //!< G noise threshold
+            uint32_t xNoiseThreshold;   //!< X noise threshold
+            uint32_t yNoiseThreshold;   //!< Y noise threshold
 
             // Run-time variables follow
             uint32_t tofLast;       // Last processed time of flight for this detector
@@ -81,7 +84,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
 
             bool checkAdjTube;          //!< Switch to toggle checking for adjacent tubes
             float gNongapMaxRatio;
-            bool efficiencyBoost;       //!< Switch for efficiency boost calculation
+            bool efficiencyBoost;       //!< Ignore min threshold if single channel response
 
             uint8_t timeRange1Min;      //!< Threshold for first time range bin
             uint8_t timeRange2Min;      //!< Threshold for second time range bin
@@ -236,9 +239,9 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
     private:
         bool findMaxIndex(const uint8_t *values, size_t size, uint8_t &max);
         int32_t findDirection(const uint8_t *values, size_t size, uint8_t maxIndex);
-        double calculateGNoise(const uint8_t *values, uint8_t maxIndex);
-        double calculateXNoise(const uint8_t *values, uint8_t maxIndex);
-        double calculateYNoise(const uint8_t *values, uint8_t maxIndex);
+        double calculateGNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[14]);
+        double calculateXNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[11]);
+        double calculateYNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[7]);
 
         /**
          * Find the maximum three indexes in the array.
