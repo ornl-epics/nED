@@ -149,9 +149,6 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         uint32_t m_bufferSize;      //!< Size of buffer
         DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins, TODO: get rid of this one
         Stats m_stats;              //!< Event counters
-        uint8_t m_gWeights[14] = { 1, 2, 5, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 };     //!< Weights for G counts
-        uint8_t m_xWeights[11] = { 1, 2, 3, 4, 10, 10, 10, 10, 4, 3, 2 };                     //!< Weights for X counts
-        uint8_t m_yWeights[7]  = { 1, 5, 10, 10, 10, 10, 10 };                                //!< Weights for Y counts
 
     public: // structures and defines
 
@@ -179,11 +176,6 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          * Handle writing integer values, including parameters sent from CRocPlugin.
          */
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
-
-        /**
-         * Handle weight parameters.
-         */
-        asynStatus writeInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements);
 
         /**
          * Overloaded function to process incoming OCC packets.

@@ -142,61 +142,6 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
 }
 
-asynStatus CRocPosCalcPlugin::writeInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements)
-{
-    if (pasynUser->reason == GWeights) {
-        // asyn will try to initialize the record with 0 elements
-        if (nElements != 14) {
-            if (nElements > 0) {
-                LOG_ERROR("14 elements expected for G weights");
-                return asynError;
-            } else {
-                return asynSuccess;
-            }
-        }
-        m_paramsMutex.lock();
-        for (size_t i = 0; i < 14; i++) {
-            m_gWeights[i] = values[i];
-        }
-        m_paramsMutex.unlock();
-        return asynSuccess;
-    } else if (pasynUser->reason == XWeights) {
-        // asyn will try to initialize the record with 0 elements
-        if (nElements != 11) {
-            if (nElements > 0) {
-                LOG_ERROR("11 elements expected for G weights");
-                return asynError;
-            } else {
-                return asynSuccess;
-            }
-        }
-        m_paramsMutex.lock();
-        for (size_t i = 0; i < 11; i++) {
-            m_xWeights[i] = values[i];
-        }
-        m_paramsMutex.unlock();
-        return asynSuccess;
-    } else if (pasynUser->reason == YWeights) {
-        // asyn will try to initialize the record with 0 elements
-        if (nElements != 7) {
-            if (nElements > 0) {
-                LOG_ERROR("7 elements expected for G weights");
-                return asynError;
-            } else {
-                return asynSuccess;
-            }
-        }
-        m_paramsMutex.lock();
-        for (size_t i = 0; i < 7; i++) {
-            m_gWeights[i] = values[i];
-        }
-        m_paramsMutex.unlock();
-        return asynSuccess;
-    }
-
-    return BaseDispatcherPlugin::writeInt8Array(pasynUser, values, nElements);
-}
-
 void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std::string &param, epicsInt32 value)
 {
     CRocParams *params;
@@ -264,26 +209,33 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
         params->timeRangeMin = value;
     } else if (param == "TimeRangeMinCnt") {
         params->timeRangeMinCnt = value;
-    }
-    for (int i=0; i<14; i++) {
-        char name[32];
-        snprintf(name, sizeof(name), "G_%d:Weight", i);
-        if (strcpy(name, param.c_str()) == 0) {
-            params->gWeights[i] = value;
+    } else if (param.compare(0, 7, "GWeight") == 0) {
+        for (int i=0; i<14; i++) {
+            char name[32];
+            snprintf(name, sizeof(name), "GWeight%d", i);
+            if (param == name) {
+                params->gWeights[i] = value;
+                break;
+            }
         }
-    }
-    for (int i=0; i<11; i++) {
-        char name[32];
-        snprintf(name, sizeof(name), "X_%d:Weight", i);
-        if (strcpy(name, param.c_str()) == 0) {
-            params->xWeights[i] = value;
+    } else if (param.compare(0, 7, "XWeight") == 0) {
+        for (int i=0; i<11; i++) {
+            char name[32];
+            snprintf(name, sizeof(name), "XWeight%d", i);
+            if (param == name) {
+//LOG_ERROR("xWeights[%d] = %d", i, value);
+                params->xWeights[i] = value;
+                break;
+            }
         }
-    }
-    for (int i=0; i<7; i++) {
-        char name[32];
-        snprintf(name, sizeof(name), "Y_%d:Weight", i);
-        if (strcpy(name, param.c_str()) == 0) {
-            params->yWeights[i] = value;
+    } else if (param.compare(0, 7, "YWeight") == 0) {
+        for (int i=0; i<7; i++) {
+            char name[32];
+            snprintf(name, sizeof(name), "YWeight%d", i);
+            if (param == name) {
+                params->yWeights[i] = value;
+                break;
+            }
         }
     }
 }
@@ -711,6 +663,7 @@ inline double CRocPosCalcPlugin::calculateXNoise(const uint8_t *values, uint8_t 
 {
     uint32_t noise = 0;
     for (uint8_t i=0; i<11; i++) {
+//LOG_ERROR("values[%d]=%d weights[%d]=%d", i, values[i], abs(i-maxIndex), weights[abs(i-maxIndex)]);
         noise += values[i] * weights[abs(i-maxIndex)];
     }
     return 1.0*noise/values[maxIndex];
@@ -791,6 +744,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     }
 
     double gNoise = calculateGNoise(event->photon_count_g, gMaxIndex, detParams->gWeights);
+//LOG_ERROR("gNoise=%.1f threshold=%d", gNoise, detParams->gNoiseThreshold);
     if (gNoise > detParams->gNoiseThreshold) {
         return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     }
@@ -806,6 +760,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     }
 
     double xNoise = calculateXNoise(event->photon_count_x, xMaxIndex, detParams->xWeights);
+//LOG_ERROR("xNoise=%.1f threshold=%d", xNoise, detParams->xNoiseThreshold);
     if (xNoise > detParams->xNoiseThreshold) {
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
     }

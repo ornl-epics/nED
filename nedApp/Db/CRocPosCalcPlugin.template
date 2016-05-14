@@ -560,33 +560,3 @@ record(bo, "$(P)TimeRangeJason")
     field(ZNAM, "disabled")
     field(ONAM, "enabled")
 }
-record(waveform, "$(P)GWeights")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "G noise calculation weights")
-    field(DTYP, "asynInt8ArrayOut")
-    field(INP,  "@asyn($(PORT))GWeights")
-    field(PINI, "YES")
-    field(FTVL, "CHAR")
-    field(NELM, "14")
-}
-record(waveform, "$(P)XWeights")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "X noise calculation weights")
-    field(DTYP, "asynInt8ArrayOut")
-    field(INP,  "@asyn($(PORT))XWeights")
-    field(PINI, "YES")
-    field(FTVL, "CHAR")
-    field(NELM, "11")
-}
-record(waveform, "$(P)YWeights")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "Y noise calculation weights")
-    field(DTYP, "asynInt8ArrayOut")
-    field(INP,  "@asyn($(PORT))YWeights")
-    field(PINI, "YES")
-    field(FTVL, "CHAR")
-    field(NELM, "7")
-}
