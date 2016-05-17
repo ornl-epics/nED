@@ -40,9 +40,12 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
                        blocking, NUM_ACPCFEMPLUGIN_PARAMS + NUM_ACPCFEMPLUGIN_DYNPARAMS)
     , m_version(version)
 {
-    createStatusParams_v22();
-
-    setIntegerParam(Supported, 1);
+    if (m_version == "v14" || m_version == "v22") {
+        createStatusParams_v22();
+        setIntegerParam(Supported, 1);
+    } else {
+        setIntegerParam(Supported, 0);
+    }
 
     callParamCallbacks();
     initParams();
@@ -50,6 +53,9 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
 
 bool AcpcFemPlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
+    if (version.hw_version == 2 && version.hw_revision == 4 && version.fw_version == 1 && version.fw_revision == 4)
+        return true;
+
     if (version.hw_version == 2 && version.hw_revision == 5 && version.fw_version == 2 && version.fw_revision == 2)
         return true;
 
