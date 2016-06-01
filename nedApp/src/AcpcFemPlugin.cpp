@@ -40,7 +40,10 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
                        blocking, NUM_ACPCFEMPLUGIN_PARAMS + NUM_ACPCFEMPLUGIN_DYNPARAMS)
     , m_version(version)
 {
-    if (m_version == "v14" || m_version == "v22") {
+    if (m_version == "v14") {
+        createStatusParams_v14();
+        setIntegerParam(Supported, 1);
+    } else if (m_version == "v22") {
         createStatusParams_v22();
         setIntegerParam(Supported, 1);
     } else {
