@@ -46,6 +46,7 @@ asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
         m_discovered.clear();
         reqDiscover(DasPacket::HWID_BROADCAST);
+        reqLvdsDiscover(DasPacket::HWID_BROADCAST);	// DSP-T v6.5+ no longer forwards broadcast packets
         return asynSuccess;
     }
     return BasePlugin::writeInt32(pasynUser, value);
@@ -73,7 +74,7 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
 
         if (packet->cmdinfo.command == DasPacket::CMD_DISCOVER) {
             if (packet->cmdinfo.module_type == DasPacket::MOD_TYPE_DSP) {
-                // DSP responds with a list of modules it knows about in the payload.
+                // DSP before v6.5 responds with a list of modules it knows about in the payload.
                 // It appears that only DSPs will respond to a broadcast address and from
                 // their responses all their submodules can be observed. Since we're
                 // also interested in module types, we'll do a p2p discover to every module.
@@ -85,7 +86,7 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                 // The global LVDS discover packet should address all modules connected
                 // through LVDS. For some unidentified reason, ROC boards connected directly
                 // to DSP don't respond, whereas ROCs behind FEM do.
-                // So we do P2P to each module.
+                // So we do P2P to each module.  This will be 0 length for v6.5+
                 for (uint32_t i=0; i<packet->payload_length/sizeof(uint32_t); i++) {
                     nDiscovered++;
                     m_discovered[packet->payload[i]].parent = packet->getRouterAddress();
@@ -95,8 +96,12 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
             } else if (packet->cmdinfo.is_passthru) {
                 // Source hardware id belongs to the DSP, the actual module id is in payload
                 m_discovered[packet->getSourceAddress()].type = packet->cmdinfo.module_type;
+                // DSP v6.5+ does not broadcast version, so we need to do it explicitly
+                reqLvdsVersion(packet->getSourceAddress());
             } else {
+                // a non-DSP on an optical link?
                 m_discovered[packet->getSourceAddress()].type = packet->cmdinfo.module_type;
+                reqVersion(packet->getSourceAddress());
             }
             nProcessed++;
         } else if (packet->cmdinfo.command == DasPacket::CMD_READ_VERSION) {
