@@ -94,9 +94,9 @@ void CRocPlugin::createParams_v93()
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionId",       '1',  0x0, 32, 0, 0);     // Position index
-    createConfigParam("TsyncDelay",       'D',  0x0, 32, 0, 0);     // TSYNC delay
-    createConfigParam("TimeVetoLow",      'E',  0x0, 32, 0, 0);     // Timestamp veto low
-    createConfigParam("TimeVetoHigh",     'E',  0x2, 32, 0, 333333);// Timestamp veto high
+    createConfigParam("TsyncDelay",       'D',  0x0, 32, 0, 0);     // TSYNC delay                   (scale:100,unit:ns)
+    createConfigParam("TimeVetoLow",      'E',  0x0, 32, 0, 0);     // Timestamp veto low            (scale:100,unit:ns)
+    createConfigParam("TimeVetoHigh",     'E',  0x2, 32, 0, 333333);// Timestamp veto high           (scale:100,unit:ns)
     createConfigParam("FakeTrigDelay",    'E',  0x4, 16, 0, 20000); // Fake trigger delay
     createConfigParam("PulseToPulseTime", 'E',  0x5, 16, 0, 0);     // Pulse-to-pulse time
     createConfigParam("TimeRange1",       'E',  0x6, 16, 0, 0);     // Time range width #1
