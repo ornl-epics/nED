@@ -23,15 +23,17 @@ BaseDispatcherPlugin::~BaseDispatcherPlugin()
 asynStatus BaseDispatcherPlugin::writeGenericPointer(asynUser *pasynUser, void *pointer)
 {
     if (pasynUser->reason == REASON_OCCDATA) {
-        asynInterface *interface = pasynManager->findInterface(m_pasynuser, asynGenericPointerType, 1);
-        if (!interface) {
-            LOG_ERROR("ERROR: Cannot find writeGenericPointer interface on array port %s", m_dispatcherPortName.c_str());
-            return asynError;
-        }
+        for (auto it=m_remotePorts.begin(); it!=m_remotePorts.end(); it++) {
+            asynInterface *interface = pasynManager->findInterface(it->second.pasynuser, asynGenericPointerType, 1);
+            if (!interface) {
+                LOG_ERROR("ERROR: Cannot find writeGenericPointer interface on array port %s", it->first.c_str());
+                return asynError;
+            }
 
-        asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-        void *ptr = reinterpret_cast<void *>(reinterpret_cast<DasPacketList *>(pointer));
-        asynGenericPointerInterface->write(interface->drvPvt, m_pasynuser, ptr);
+            asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
+            void *ptr = reinterpret_cast<void *>(reinterpret_cast<DasPacketList *>(pointer));
+            asynGenericPointerInterface->write(interface->drvPvt, it->second.pasynuser, ptr);
+        }
     }
     return asynSuccess;
 }
@@ -40,4 +42,11 @@ void BaseDispatcherPlugin::sendToPlugins(const DasPacketList *packetList)
 {
     void *ptr = const_cast<void *>(reinterpret_cast<const void *>(packetList));
     doCallbacksGenericPointer(ptr, REASON_OCCDATA, 0);
+}
+
+void BaseDispatcherPlugin::processDataUnlocked(const DasPacketList * const packetList)
+{
+    // Don't reserve or wait for plugins in default configuration, assume
+    // the source plugin is doing it.
+    sendToPlugins(packetList);
 }
