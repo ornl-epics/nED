@@ -74,12 +74,7 @@ asynStatus BasePvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == PvMetadataEn) {
         m_metadataEn = (value > 0);
     } else if (pasynUser->reason == DataModeP) {
-        // Dirty patch: take out the flushing as it causes issues on
-        // PVA channel, like double userTags, missing timestamps etc.
-        // It's 2 days before production and no time left to debug it
-        // properly. It's a new feature after 1.5 version so should
-        // not cause much troubles.
-        //flushData();
+        flushData();
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }
@@ -306,6 +301,7 @@ void BasePvaPlugin::flushData()
         time.setUserTag(m_metadataPostSeq++);
 
         try {
+            m_pvMetadata->beginGroupPut();
             m_pvMetadata->timeStamp.set(time);
             m_pvMetadata->proton_charge->put(0);
             m_pvMetadata->time_of_flight->replace(freeze(emptyIntArray));

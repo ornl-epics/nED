@@ -130,6 +130,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
             const RtdlHeader *rtdl = packet->getRtdlHeader();
             if (rtdl != 0) {
                 uint32_t eventsCount;
+                uint8_t dataFlags = 0;
                 const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(packet->getData(&eventsCount));
                 eventsCount /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
                 epicsTimeStamp currentTs = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
@@ -139,8 +140,10 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 // Skip if disabled
                 if (packet->isNeutronData()) {
                     if (neutronsEn == 0) continue;
+                    dataFlags = 0x1;
                 } else {
                     if (metadataEn == 0) continue;
+                    dataFlags = 0x2;
                 }
 
                 prevTs.secPastEpoch = seq->rtdl.timestamp_sec;
@@ -174,7 +177,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 outpacket[3] = rtdl->timestamp_nsec;
                 outpacket[4] = seq->sourceId;
                 outpacket[5] = ((seq->pulseSeq++ & 0x7FF) << 16) + (seq->totalSeq++ & 0xFFFF);
-                outpacket[6] = rtdl->charge;
+                outpacket[6] = (dataFlags << 27) | rtdl->charge;
                 outpacket[7] = rtdl->general_info;
                 outpacket[8] = rtdl->tsync_width;
                 outpacket[9] = rtdl->tsync_delay;

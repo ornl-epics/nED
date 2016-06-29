@@ -36,7 +36,7 @@ void RocPlugin::createParams_v14()
 
 
     createStatusParam("Ch1:Configured",       1, 0x0,  1,  0); // Chan1 configured             (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Ch1:Enabled",          1, 0x0,  1,  1); // Chan1 enabled                (0=enabled,1=disabled [alarm], archive:monitor)
+    createStatusParam("Ch1:Enabled",          1, 0x0,  1,  1); // Chan1 enabled                (0=disabled [alarm],1=enabled, archive:monitor)
     createStatusParam("Ch1:Acquiring",        1, 0x0,  1,  2); // Chan1 Acquiring data         (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Ch1:FpgaHasData",      1, 0x0,  1,  3); // Chan1 FIFO has data          (0=no,1=yes)
     createStatusParam("Ch1:AdcFifoAlmostFull",1, 0x0,  1,  4); // Chan1 FIFO almost full       (0=no,1=yes)
@@ -53,7 +53,7 @@ void RocPlugin::createParams_v14()
     createStatusParam("Ch1:AdcFifoFull",      1, 0x0,  1, 15); // Chan1 FIFO full detectec     (0=no,1=yes)
 
     createStatusParam("Ch2:Configured",       2, 0x0,  1,  0); // Chan2 configured             (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Ch2:Enabled",          2, 0x0,  1,  1); // Chan2 enabled                (0=enabled,1=disabled [alarm], archive:monitor)
+    createStatusParam("Ch2:Enabled",          2, 0x0,  1,  1); // Chan2 enabled                (0=disabled [alarm],1=enabled, archive:monitor)
     createStatusParam("Ch2:Acquiring",        2, 0x0,  1,  2); // Chan2 Acquiring data         (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Ch2:FpgaHasData",      2, 0x0,  1,  3); // Chan2 FIFO has data          (0=no,1=yes)
     createStatusParam("Ch2:AdcFifoAlmostFull",2, 0x0,  1,  4); // Chan2 FIFO almost full       (0=no,1=yes)
@@ -70,7 +70,7 @@ void RocPlugin::createParams_v14()
     createStatusParam("Ch2:AdcFifoFull",      2, 0x0,  1, 15); // Chan2 FIFO full detectec     (0=no,1=yes)
 
     createStatusParam("Ch3:Configured",       3, 0x0,  1,  0); // Chan3 configured             (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Ch3:Enabled",          3, 0x0,  1,  1); // Chan3 enabled                (0=enabled,1=disabled [alarm], archive:monitor)
+    createStatusParam("Ch3:Enabled",          3, 0x0,  1,  1); // Chan3 enabled                (0=disabled [alarm],1=enabled, archive:monitor)
     createStatusParam("Ch3:Acquiring",        3, 0x0,  1,  2); // Chan3 Acquiring data         (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Ch3:FpgaHasData",      3, 0x0,  1,  3); // Chan3 FIFO has data          (0=no,1=yes)
     createStatusParam("Ch3:AdcFifoAlmostFull",3, 0x0,  1,  4); // Chan3 FIFO almost full       (0=no,1=yes)
@@ -87,7 +87,7 @@ void RocPlugin::createParams_v14()
     createStatusParam("Ch3:AdcFifoFull",      3, 0x0,  1, 15); // Chan3 FIFO full detectec     (0=no,1=yes)
 
     createStatusParam("Ch4:Configured",       4, 0x0,  1,  0); // Chan4 configured             (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Ch4:Enabled",          4, 0x0,  1,  1); // Chan4 enabled                (0=enabled,1=disabled [alarm], archive:monitor)
+    createStatusParam("Ch4:Enabled",          4, 0x0,  1,  1); // Chan4 enabled                (0=disabled [alarm],1=enabled, archive:monitor)
     createStatusParam("Ch4:Acquiring",        4, 0x0,  1,  2); // Chan4 Acquiring data         (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Ch4:FpgaHasData",      4, 0x0,  1,  3); // Chan4 FIFO has data          (0=no,1=yes)
     createStatusParam("Ch4:AdcFifoAlmostFull",4, 0x0,  1,  4); // Chan4 FIFO almost full       (0=no,1=yes)
@@ -104,7 +104,7 @@ void RocPlugin::createParams_v14()
     createStatusParam("Ch4:AdcFifoFull",      4, 0x0,  1, 15); // Chan4 FIFO full detectec     (0=no,1=yes)
 
     createStatusParam("Ch5:Configured",       5, 0x0,  1,  0); // Chan5 configured             (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Ch5:Enabled",          5, 0x0,  1,  1); // Chan5 enabled                (0=enabled,1=disabled [alarm], archive:monitor)
+    createStatusParam("Ch5:Enabled",          5, 0x0,  1,  1); // Chan5 enabled                (0=disabled [alarm],1=enabled, archive:monitor)
     createStatusParam("Ch5:Acquiring",        5, 0x0,  1,  2); // Chan5 Acquiring data         (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Ch5:FpgaHasData",      5, 0x0,  1,  3); // Chan5 FIFO has data          (0=no,1=yes)
     createStatusParam("Ch5:AdcFifoAlmostFull",5, 0x0,  1,  4); // Chan5 FIFO almost full       (0=no,1=yes)
@@ -121,7 +121,7 @@ void RocPlugin::createParams_v14()
     createStatusParam("Ch5:AdcFifoFull",      5, 0x0,  1, 15); // Chan5 FIFO full detectec     (0=no,1=yes)
 
     createStatusParam("Ch6:Configured",       6, 0x0,  1,  0); // Chan6 configured             (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Ch6:Enabled",          6, 0x0,  1,  1); // Chan6 enabled                (0=enabled,1=disabled [alarm], archive:monitor)
+    createStatusParam("Ch6:Enabled",          6, 0x0,  1,  1); // Chan6 enabled                (0=disabled [alarm],1=enabled, archive:monitor)
     createStatusParam("Ch6:Acquiring",        6, 0x0,  1,  2); // Chan6 Acquiring data         (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Ch6:FpgaHasData",      6, 0x0,  1,  3); // Chan6 FIFO has data          (0=no,1=yes)
     createStatusParam("Ch6:AdcFifoAlmostFull",6, 0x0,  1,  4); // Chan6 FIFO almost full       (0=no,1=yes)
@@ -138,7 +138,7 @@ void RocPlugin::createParams_v14()
     createStatusParam("Ch6:AdcFifoFull",      6, 0x0,  1, 15); // Chan6 FIFO full detectec     (0=no,1=yes)
 
     createStatusParam("Ch7:Configured",       7, 0x0,  1,  0); // Chan7 configured             (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Ch7:Enabled",          7, 0x0,  1,  1); // Chan7 enabled                (0=enabled,1=disabled [alarm], archive:monitor)
+    createStatusParam("Ch7:Enabled",          7, 0x0,  1,  1); // Chan7 enabled                (0=disabled [alarm],1=enabled, archive:monitor)
     createStatusParam("Ch7:Acquiring",        7, 0x0,  1,  2); // Chan7 Acquiring data         (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Ch7:FpgaHasData",      7, 0x0,  1,  3); // Chan7 FIFO has data          (0=no,1=yes)
     createStatusParam("Ch7:AdcFifoAlmostFull",7, 0x0,  1,  4); // Chan7 FIFO almost full       (0=no,1=yes)
@@ -155,7 +155,7 @@ void RocPlugin::createParams_v14()
     createStatusParam("Ch7:AdcFifoFull",      7, 0x0,  1, 15); // Chan7 FIFO full detectec     (0=no,1=yes)
 
     createStatusParam("Ch8:Configured",       8, 0x0,  1,  0); // Chan8 configured             (0=not configured [alarm],1=configured, archive:monitor)
-    createStatusParam("Ch8:Enabled",          8, 0x0,  1,  1); // Chan8 enabled                (0=enabled,1=disabled [alarm], archive:monitor)
+    createStatusParam("Ch8:Enabled",          8, 0x0,  1,  1); // Chan8 enabled                (0=disabled [alarm],1=enabled, archive:monitor)
     createStatusParam("Ch8:Acquiring",        8, 0x0,  1,  2); // Chan8 Acquiring data         (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Ch8:FpgaHasData",      8, 0x0,  1,  3); // Chan8 FIFO has data          (0=no,1=yes)
     createStatusParam("Ch8:AdcFifoAlmostFull",8, 0x0,  1,  4); // Chan8 FIFO almost full       (0=no,1=yes)
@@ -227,6 +227,7 @@ void RocPlugin::createParams_v14()
     createConfigParam("TimeVetoLow",      'E',  0x1,  32, 0, 5000); // Timestamp veto low
     createConfigParam("TimeVetoHigh",     'E',  0x3,  32, 0, 4031616); // Timestamp veto high
     createConfigParam("FakeTrigDelay",    'E',  0x5,  16, 0, 65535);// Fake trigger delay
+    createConfigParam("ScaleFactor",      'E',  0x6,  16, 0, 2048);    // Scale factor
 
     createConfigParam("LvdsRate",         'F',  0x0,  1, 15, 0);    // LVDS output rate              (0=20Mhz,1=10Mhz)
     createConfigParam("HighResMode",      'F',  0x0,  1, 9,  0);    // High resolution mode          (0=low res 0-127,1=high res 0-255)
@@ -237,8 +238,6 @@ void RocPlugin::createParams_v14()
     createConfigParam("TcTclkMode",       'F',  0x0,  1, 3,  0);    // T&C TCLK mode                 (0=external,1=internal 10MHz)
     createConfigParam("TcResetMode",      'F',  0x0,  1, 2,  0);    // T&C Reset mode                (0=internal,1=external)
     createConfigParam("AcquireMode",      'F',  0x0,  2, 0,  0);    // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
-
-    createConfigParam("Unused",           'F',  0x1, 16, 0,  0);    // GE ROC needs this one
 
     // Now channel parameters - note the extra channel parameter
     createChanConfigParam("Ch1:PositionIdx",  1, '1',  0x0, 32, 0, 6144);   // Chan1 position index
@@ -264,8 +263,8 @@ void RocPlugin::createParams_v14()
     createChanConfigParam("Ch1:Sample2",      1, '8',  0x7,  9, 0, 15);     // Chan1 Sample 2 point [0:10]
 
     createChanConfigParam("Ch2:PositionIdx",  2, '1',  0x0, 32, 0, 6272);   // Chan2 position index
-    createChanConfigParam("Ch2:A:InOffset",   2, '1',  0x2,  9, 0, 261, CONV_SIGN_MAGN); // Chan2 A input offset
-    createChanConfigParam("Ch2:B:InOffset",   2, '1',  0x3,  9, 0, 271, CONV_SIGN_MAGN); // Chan2 B input offset
+    createChanConfigParam("Ch2:A:InOffset",   2, '1',  0x2,  9, 0, 6, CONV_SIGN_MAGN); // Chan2 A input offset
+    createChanConfigParam("Ch2:B:InOffset",   2, '1',  0x3,  9, 0, 5, CONV_SIGN_MAGN); // Chan2 B input offset
     createChanConfigParam("Ch2:A:FullScale",  2, '1',  0x4,  8, 0, 0);      // Chan2 A full scale
     createChanConfigParam("Ch2:Sum:FullScale",2, '1',  0x5,  8, 0, 0);      // Chan2 SUM full scale
     createChanConfigParam("Ch2:B:FullScale",  2, '1',  0x6,  8, 0, 0);      // Chan2 B full scale
@@ -286,8 +285,8 @@ void RocPlugin::createParams_v14()
     createChanConfigParam("Ch2:Sample2",      2, '8',  0x7,  9, 0, 15);     // Chan2 Sample 2 point [0:10]
 
     createChanConfigParam("Ch3:PositionIdx",  3, '1',  0x0, 32, 0, 6400);   // Chan3 position index
-    createChanConfigParam("Ch3:A:InOffset",   3, '1',  0x2,  9, 0, 262, CONV_SIGN_MAGN); // Chan3 A input offset
-    createChanConfigParam("Ch3:B:InOffset",   3, '1',  0x3,  9, 0, 4, CONV_SIGN_MAGN); // Chan3 B input offset
+    createChanConfigParam("Ch3:A:InOffset",   3, '1',  0x2,  9, 0, 6, CONV_SIGN_MAGN); // Chan3 A input offset
+    createChanConfigParam("Ch3:B:InOffset",   3, '1',  0x3,  9, 0, 5, CONV_SIGN_MAGN); // Chan3 B input offset
     createChanConfigParam("Ch3:A:FullScale",  3, '1',  0x4,  8, 0, 0);      // Chan3 A full scale
     createChanConfigParam("Ch3:Sum:FullScale",3, '1',  0x5,  8, 0, 0);      // Chan3 SUM full scale
     createChanConfigParam("Ch3:B:FullScale",  3, '1',  0x6,  8, 0, 0);      // Chan3 B full scale
@@ -308,8 +307,8 @@ void RocPlugin::createParams_v14()
     createChanConfigParam("Ch3:Sample2",      3, '8',  0x7,  9, 0, 15);     // Chan3 Sample 2 point [0:10]
 
     createChanConfigParam("Ch4:PositionIdx",  4, '1',  0x0, 32, 0, 6528);   // Chan4 position index
-    createChanConfigParam("Ch4:A:InOffset",   4, '1',  0x2,  9, 0, 297, CONV_SIGN_MAGN); // Chan4 A input offset
-    createChanConfigParam("Ch4:B:InOffset",   4, '1',  0x3,  9, 0, 12, CONV_SIGN_MAGN); // Chan4 B input offset
+    createChanConfigParam("Ch4:A:InOffset",   4, '1',  0x2,  9, 0, 6, CONV_SIGN_MAGN); // Chan4 A input offset
+    createChanConfigParam("Ch4:B:InOffset",   4, '1',  0x3,  9, 0, 5, CONV_SIGN_MAGN); // Chan4 B input offset
     createChanConfigParam("Ch4:A:FullScale",  4, '1',  0x4,  8, 0, 0);      // Chan4 A full scale
     createChanConfigParam("Ch4:Sum:FullScale",4, '1',  0x5,  8, 0, 0);      // Chan4 SUM full scale
     createChanConfigParam("Ch4:B:FullScale",  4, '1',  0x6,  8, 0, 0);      // Chan4 B full scale
@@ -330,8 +329,8 @@ void RocPlugin::createParams_v14()
     createChanConfigParam("Ch4:Sample2",      4, '8',  0x7,  9, 0, 15);     // Chan4 Sample 2 point [0:10]
 
     createChanConfigParam("Ch5:PositionIdx",  5, '1',  0x0, 32, 0, 6656);   // Chan5 position index
-    createChanConfigParam("Ch5:A:InOffset",   5, '1',  0x2,  9, 0, 263, CONV_SIGN_MAGN); // Chan5 A input offset
-    createChanConfigParam("Ch5:B:InOffset",   5, '1',  0x3,  9, 0, 268, CONV_SIGN_MAGN); // Chan5 B input offset
+    createChanConfigParam("Ch5:A:InOffset",   5, '1',  0x2,  9, 0, 6, CONV_SIGN_MAGN); // Chan5 A input offset
+    createChanConfigParam("Ch5:B:InOffset",   5, '1',  0x3,  9, 0, 5, CONV_SIGN_MAGN); // Chan5 B input offset
     createChanConfigParam("Ch5:A:FullScale",  5, '1',  0x4,  8, 0, 0);      // Chan5 A full scale
     createChanConfigParam("Ch5:Sum:FullScale",5, '1',  0x5,  8, 0, 0);      // Chan5 SUM full scale
     createChanConfigParam("Ch5:B:FullScale",  5, '1',  0x6,  8, 0, 0);      // Chan5 B full scale
@@ -374,8 +373,8 @@ void RocPlugin::createParams_v14()
     createChanConfigParam("Ch6:Sample2",      6, '8',  0x7,  9, 0, 15);     // Chan6 Sample 2 point [0:10]
 
     createChanConfigParam("Ch7:PositionIdx",  7, '1',  0x0, 32, 0, 6912);   // Chan7 position index
-    createChanConfigParam("Ch7:A:InOffset",   7, '1',  0x2,  9, 0, 258, CONV_SIGN_MAGN); // Chan7 A input offset
-    createChanConfigParam("Ch7:B:InOffset",   7, '1',  0x3,  9, 0, 9, CONV_SIGN_MAGN); // Chan7 B input offset
+    createChanConfigParam("Ch7:A:InOffset",   7, '1',  0x2,  9, 0, 6, CONV_SIGN_MAGN); // Chan7 A input offset
+    createChanConfigParam("Ch7:B:InOffset",   7, '1',  0x3,  9, 0, 5, CONV_SIGN_MAGN); // Chan7 B input offset
     createChanConfigParam("Ch7:A:FullScale",  7, '1',  0x4,  8, 0, 0);      // Chan7 A full scale
     createChanConfigParam("Ch7:Sum:FullScale",7, '1',  0x5,  8, 0, 0);      // Chan7 SUM full scale
     createChanConfigParam("Ch7:B:FullScale",  7, '1',  0x6,  8, 0, 0);      // Chan7 B full scale
