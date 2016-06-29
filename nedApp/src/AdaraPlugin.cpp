@@ -55,9 +55,6 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
 {
     m_lastSentTimestamp = { 0, 0 };
 
-    m_neutronSeq.sourceId = g_sourceList.get();
-    m_metadataSeq.sourceId = g_sourceList.get();
-
     createParam("PixelsMapped", asynParamInt32, &PixelsMapped, 0); // WRITE - Tells whether data packets are flagged as raw or mapped pixel data
     createParam("NeutronsEn",   asynParamInt32, &NeutronsEn, 0); // WRITE - Enable forwarding neutron events
     createParam("MetadataEn",   asynParamInt32, &MetadataEn, 0); // WRITE - Enable forwarding metadata events
@@ -74,16 +71,95 @@ asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == PixelsMapped) {
         m_dataPktType = (value == 0 ? ADARA_PKT_TYPE_RAW_EVENT : ADARA_PKT_TYPE_MAPPED_EVENT);
     } else if (pasynUser->reason == Reset) {
-        m_metadataSeq.reset();
-        m_neutronSeq.reset();
+        for (auto it=m_sources.begin(); it!=m_sources.end(); it++) {
+            // Reset the sequence, not the source id
+            it->second.reset();
+        }
         return asynSuccess;
     }
     return BaseSocketPlugin::writeInt32(pasynUser, value);
 }
 
-void AdaraPlugin::processData(const DasPacketList * const packetList)
+
+bool AdaraPlugin::sendHeartbeat(const epicsTimeStamp &t)
+{
+        uint32_t outpacket[4];
+
+        outpacket[0] = 0;
+        outpacket[1] = ADARA_PKT_TYPE_HEARTBEAT;
+        outpacket[2] = t.secPastEpoch;
+        outpacket[3] = t.nsec;
+
+        // If sending fails, send() will automatically close the socket
+        return send(outpacket, 4*sizeof(uint32_t));
+}
+
+bool AdaraPlugin::sendRtdl(const uint32_t data[32])
+{
+    uint32_t outpacket[2];
+    bool ret;
+
+    outpacket[0] = 30*sizeof(uint32_t);
+    outpacket[1] = ADARA_PKT_TYPE_RTDL;
+
+    // The RTDL packet contents is just what ADARA expects.
+    // Prefix that with the length and type of packet.
+    m_heartbeatActive = false;
+    ret = send(outpacket, 2*sizeof(uint32_t));
+    if (ret) {
+        ret = send(data, 32*sizeof(uint32_t));
+    }
+    m_heartbeatActive = true;
+    return ret;
+}
+
+bool AdaraPlugin::sendEvents(SourceSequence *seq, const DasPacket::Event *events, uint32_t eventsCount, bool neutrons, bool endOfPulse)
 {
     uint32_t outpacket[10];
+    bool ret;
+    uint32_t dataFlags = (neutrons ? 0x1 : 0x2);
+
+    outpacket[0] = 24 + sizeof(DasPacket::Event)*eventsCount;
+    outpacket[1] = m_dataPktType;
+    outpacket[2] = seq->rtdl.timestamp_sec;
+    outpacket[3] = seq->rtdl.timestamp_nsec;
+    outpacket[4] = seq->sourceId;
+    outpacket[5] = ((int)endOfPulse << 31) | ((seq->pulseSeq & 0x7FF) << 16) | ((seq->totalSeq++) & 0xFFFF);
+    outpacket[6] = (dataFlags << 27) | seq->rtdl.charge;
+    outpacket[6] = seq->rtdl.charge;
+    outpacket[7] = seq->rtdl.general_info;
+    outpacket[8] = seq->rtdl.tsync_width;
+    outpacket[9] = seq->rtdl.tsync_delay;
+
+    m_heartbeatActive = false;
+    ret = send(outpacket, 10*sizeof(uint32_t));
+    if (eventsCount > 0 && ret) {
+        ret = send(reinterpret_cast<const uint32_t*>(events), eventsCount*sizeof(DasPacket::Event));
+    }
+    m_heartbeatActive = true;
+
+    return ret;
+}
+
+AdaraPlugin::SourceSequence *AdaraPlugin::findSource(bool neutron, uint32_t id)
+{
+    uint64_t mapId = ((uint64_t)neutron << 32) | (uint64_t)id;
+    SourceSequence *seq = 0;
+
+    std::map<uint64_t, SourceSequence>::iterator it = m_sources.find(mapId);
+    if (it == m_sources.end()) {
+        m_sources[mapId].sourceId = g_sourceList.get();
+        it = m_sources.find(mapId);
+    }
+    if (it != m_sources.end()) {
+        seq = &it->second;
+    }
+
+    return seq;
+}
+
+void AdaraPlugin::processData(const DasPacketList * const packetList)
+{
     int neutronsEn = 0, metadataEn = 0;
 
     getIntegerParam(NeutronsEn, &neutronsEn);
@@ -107,88 +183,57 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
             // Pass a single RTDL packet for a given timestamp. DSP in most cases
             // sends two almost identical RTDL packets which differ only in source id
             // and packet/data flag.
-            if (epicsTimeEqual(&timestamp, &m_lastRtdlTimestamp) == 0) { // time not equal
-                outpacket[0] = 30*sizeof(uint32_t);
-                outpacket[1] = ADARA_PKT_TYPE_RTDL;
-
+            // RTDL packets must be the same across multiple DSPs since they
+            // originate from single source - accelerator.
+            if (epicsTimeGreaterThan(&timestamp, &m_lastRtdlTimestamp)) {
                 // The RTDL packet contents is just what ADARA expects.
                 // Prefix that with the length and type of packet.
-                m_heartbeatActive = false;
-                if (send(outpacket, sizeof(uint32_t)*2) &&
-                    send(packet->payload, sizeof(uint32_t)*std::min(packet->getPayloadLength(), 32U))) {
+                if (packet->getPayloadLength() == 128) {
+                    sendRtdl(packet->payload);
                     m_nTransmitted++;
+                    m_lastRtdlTimestamp = timestamp;
+
                     // Disabling this allows the plugin to send heartbeat every time there's
                     // no data which seems to help SMS do the book-keeping.
                     //epicsTimeGetCurrent(&m_lastSentTimestamp);
-                    m_lastRtdlTimestamp = timestamp;
                 }
-                m_heartbeatActive = true;
             }
             m_nProcessed++;
 
         } else if (packet->isData()) {
             const RtdlHeader *rtdl = packet->getRtdlHeader();
             if (rtdl != 0) {
-                uint32_t eventsCount;
-                uint8_t dataFlags = 0;
-                const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(packet->getData(&eventsCount));
-                eventsCount /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
-                epicsTimeStamp currentTs = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
-                epicsTimeStamp prevTs;
-                SourceSequence *seq = (packet->isNeutronData() ? &m_neutronSeq : &m_metadataSeq);
 
                 // Skip if disabled
                 if (packet->isNeutronData()) {
                     if (neutronsEn == 0) continue;
-                    dataFlags = 0x1;
                 } else {
                     if (metadataEn == 0) continue;
-                    dataFlags = 0x2;
                 }
 
+                SourceSequence *seq = findSource(packet->isNeutronData(), packet->getSourceAddress());
+                if (seq == 0) {
+                    continue;
+                }
+
+                epicsTimeStamp currentTs = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
+                epicsTimeStamp prevTs;
                 prevTs.secPastEpoch = seq->rtdl.timestamp_sec;
                 prevTs.nsec         = seq->rtdl.timestamp_nsec;
 
                 // When transition to new pulse is detected, inject EOP packet for previous pulse
                 if (epicsTimeEqual(&currentTs, &prevTs) == 0) {
                     if (prevTs.secPastEpoch > 0 && prevTs.nsec > 0) {
-                        outpacket[0] = 24;
-                        outpacket[1] = m_dataPktType;
-                        outpacket[2] = seq->rtdl.timestamp_sec;
-                        outpacket[3] = seq->rtdl.timestamp_nsec;
-                        outpacket[4] = seq->sourceId;
-                        outpacket[5] = (1 << 31) | ((seq->pulseSeq & 0x7FF) << 16) | ((seq->totalSeq++) & 0xFFFF);
-                        outpacket[6] = seq->rtdl.charge;
-                        outpacket[7] = seq->rtdl.general_info;
-                        outpacket[8] = seq->rtdl.tsync_width;
-                        outpacket[9] = seq->rtdl.tsync_delay;
-
-                        m_heartbeatActive = false;
-                        (void)send(outpacket, sizeof(uint32_t)*10);
-                        m_heartbeatActive = true;
+                        sendEvents(seq, 0, 0, packet->isNeutronData(), true);
                     }
                     seq->pulseSeq = 0;
                     seq->rtdl = *rtdl; // Cache current packet RTDL for the next injected packet
                 }
 
-                outpacket[0] = 24 + sizeof(DasPacket::Event)*eventsCount;
-                outpacket[1] = m_dataPktType;
-                outpacket[2] = rtdl->timestamp_sec;
-                outpacket[3] = rtdl->timestamp_nsec;
-                outpacket[4] = seq->sourceId;
-                outpacket[5] = ((seq->pulseSeq++ & 0x7FF) << 16) + (seq->totalSeq++ & 0xFFFF);
-                outpacket[6] = (dataFlags << 27) | rtdl->charge;
-                outpacket[7] = rtdl->general_info;
-                outpacket[8] = rtdl->tsync_width;
-                outpacket[9] = rtdl->tsync_delay;
-
-                m_heartbeatActive = false;
-                if (send(outpacket, sizeof(uint32_t)*10) &&
-                    send(reinterpret_cast<const uint32_t*>(events), sizeof(DasPacket::Event)*eventsCount)) {
-                    m_nTransmitted++;
-                    epicsTimeGetCurrent(&m_lastSentTimestamp);
-                }
-                m_heartbeatActive = true;
+                uint32_t eventsCount;
+                const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(packet->getData(&eventsCount));
+                eventsCount /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
+                sendEvents(seq, events, packet->isNeutronData(), eventsCount);
                 m_nProcessed++;
             }
         }
@@ -211,15 +256,7 @@ float AdaraPlugin::checkClient()
     double inactive = epicsTimeDiffInSeconds(&now, &m_lastSentTimestamp);
 
     if (m_heartbeatActive && isClientConnected() && inactive > heartbeatInt) {
-        uint32_t outpacket[4];
-
-        outpacket[0] = 0;
-        outpacket[1] = ADARA_PKT_TYPE_HEARTBEAT;
-        outpacket[2] = now.secPastEpoch;
-        outpacket[3] = now.nsec;
-
-        // If sending fails, send() will automatically close the socket
-        (void)send(outpacket, sizeof(outpacket));
+        sendHeartbeat(now);
     }
     return BaseSocketPlugin::checkClient();
 }
