@@ -502,6 +502,7 @@ record(longin, "$(P)RecvRateBs")
 }
 record(calc, "$(P)RecvRateKBs")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "OCC receive rate kB/s")
     field(INPA, "$(P)RecvRateBs NPP")
     field(FLNK, "$(P)RecvRateMBs")
@@ -560,6 +561,7 @@ record(longin, "$(P)ProcRateBs")
 }
 record(calc, "$(P)ProcRateKBs")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "Data processing rate kB/s")
     field(INPA, "$(P)ProcRateBs NPP")
     field(FLNK, "$(P)ProcRateMBs")
@@ -626,7 +628,8 @@ record(calc, "$(P)StatusCalc")
     field(INPB, "$(P)ConStatus.SEVR")
     field(INPC, "$(P)RxEnRb.SEVR")
     field(INPD, "$(P)FpgaTemp.SEVR")
-    field(CALC, "(A+B+C+D)=0")
+    field(INPE, "$(P)RxEn")
+    field(CALC, "(A+B+C+D)=0||D=0")
     field(FLNK, "$(P)Status")
 }
 record(bi, "$(P)Status")

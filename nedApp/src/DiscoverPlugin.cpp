@@ -47,6 +47,7 @@ asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
         m_discovered.clear();
         reqDiscover(DasPacket::HWID_BROADCAST);
+        reqLvdsDiscover(DasPacket::HWID_BROADCAST);    // DSP-T v6.5+ no longer forwards broadcast packets
         return asynSuccess;
     }
     return BasePlugin::writeInt32(pasynUser, value);
@@ -56,6 +57,8 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
 {
     int nReceived = 0;
     int nProcessed = 0;
+    int nDiscovered;
+    int nVerified;
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
 
@@ -69,39 +72,33 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
             continue;
 
         if (packet->cmdinfo.command == DasPacket::CMD_DISCOVER) {
-            m_discovered[packet->getSourceAddress()].type = packet->cmdinfo.module_type;
-
             if (packet->cmdinfo.module_type == DasPacket::MOD_TYPE_DSP) {
-                // Pre 6.5 DSP responds with a list of modules it knows about in the payload.
-                // It appears that only DSPs will respond to a broadcast address and from
-                // their responses all their submodules can be detected. Since we're
-                // also interested in module types, we'll do a p2p discover to every module.
-                //
-                // Starting with v6.5, DSP-T no longer generates the table internally
-                // and doesn't send all modules in his discover response. Instead it
-                // behaves exactly the same as everybody else and also doesn't block
-                // global command.
+                m_discovered[packet->source].type = DasPacket::MOD_TYPE_DSP;
                 reqVersion(packet->getSourceAddress());
 
-
-                // The global LVDS discover packet should address all modules connected
-                // through LVDS. DSP-T prior to v6.5 also blocks global discover command
-                // and instead does his own discovery. To support all DSP-T versions,
-                // we parse DSP-T response if any and do P2P to each module.
+                // DSP before v6.5 responds with a list of modules it knows about in the payload.
+                // It discoveres them by sending single word discover commands 3 times and collecting
+                // responses in a table that is returned in this packet payload.
+                // DSP-T v6.5 and after don't return such a table, but it will properly
+                // propagate LVDS broadcast packet.
                 for (uint32_t i=0; i<packet->payload_length/sizeof(uint32_t); i++) {
                     m_discovered[packet->payload[i]].parent = packet->getRouterAddress();
                     reqLvdsDiscover(packet->payload[i]);
-                    reqLvdsVersion(packet->payload[i]);
                 }
-            } else {
+            } else if (packet->cmdinfo.is_passthru) {
+                m_discovered[packet->getSourceAddress()].type = packet->cmdinfo.module_type;
                 reqLvdsVersion(packet->getSourceAddress());
+            } else {
+                // a non-DSP on an optical link?
+                m_discovered[packet->getSourceAddress()].type = packet->cmdinfo.module_type;
+                reqVersion(packet->getSourceAddress());
             }
             nProcessed++;
         } else if (packet->cmdinfo.command == DasPacket::CMD_READ_VERSION) {
+            // We need to know module type as version response format differs between modules.
+            // This is the main reason why reading version is not done in parallel with discovery.
             uint32_t source = packet->getSourceAddress();
             if (m_discovered.find(source) != m_discovered.end()) {
-                m_discovered[source].verified = true;
-
                 switch (m_discovered[source].type) {
                 case DasPacket::MOD_TYPE_ACPC:
                     AcpcPlugin::parseVersionRsp(packet, m_discovered[source].version);
@@ -131,7 +128,6 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                     RocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
                 default:
-                    m_discovered[source].verified = false;
                     break;
                 }
             }
@@ -139,15 +135,20 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
         }
     }
 
-    int nVerified = 0;
+    // Do some statistics how many modules we have seen. Do it separately from
+    // packet parsing to avoid double accounting in case more than one same packet is received.
+    nDiscovered = 0;
+    nVerified = 0;
     for (auto it=m_discovered.begin(); it!=m_discovered.end(); it++) {
-        if (it->second.verified)
+        if (it->second.type != 0)
+            nDiscovered++;
+        if (it->second.version.fw_version != 0 && it->second.version.fw_revision !=0)
             nVerified++;
     }
 
     setIntegerParam(RxCount,    nReceived);
     setIntegerParam(ProcCount,  nProcessed);
-    setIntegerParam(Discovered, m_discovered.size());
+    setIntegerParam(Discovered, nDiscovered);
     setIntegerParam(Verified,   nVerified);
     callParamCallbacks();
 }

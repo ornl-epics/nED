@@ -83,9 +83,7 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
 
     occ_interface_type occtype = OCC_INTERFACE_OPTICAL;
-    if (strchr(devfile, ',') != 0)
-        occtype = OCC_INTERFACE_PIPE;
-    else if (strchr(devfile, ':') != 0)
+    if (strchr(devfile, ':') != 0)
         occtype = OCC_INTERFACE_SOCKET;
 
     // Initialize OCC library

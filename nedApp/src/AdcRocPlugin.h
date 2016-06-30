@@ -180,6 +180,22 @@ class AdcRocPlugin : public BaseModulePlugin {
          * Create and register all status counter ADCROC v0.3 parameters to be exposed to EPICS.
          */
         void createCounterParams_v03();
+        
+        /**
+         * Create and register all status ADCROC v0.5 parameters to be exposed to EPICS.
+         */
+        void createStatusParams_v05();
+
+        /**
+         * Create and register all config ADCROC v0.5 parameters to be exposed to EPICS.
+         */
+        void createConfigParams_v05();
+
+        /**
+         * Create and register all status counter ADCROC v0.5 parameters to be exposed to EPICS.
+         */
+        void createCounterParams_v05();
+
 };
 
 #endif // ADC_ROC_PLUGIN_H

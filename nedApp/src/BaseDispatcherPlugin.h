@@ -81,9 +81,12 @@ class BaseDispatcherPlugin : public BasePlugin {
          * Only unlocked method is provided to prevent dead-lock when calling
          * sendToPlugins. Developer is responsible for locking the plugin.
          *
+         * Default implementation simply forwards the received packet list to
+         * all subscribed plugins.
+         *
          * @param[in] packets List of packets received in this batch.
          */
-        virtual void processDataUnlocked(const DasPacketList * const packets) {}
+        virtual void processDataUnlocked(const DasPacketList * const packets);
 
     private:
         // Prevent overloading locked version

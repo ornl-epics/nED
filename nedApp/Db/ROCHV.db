@@ -4,13 +4,19 @@
 #
 
 
+record(calc, "$(P)hv:VoltDiff") {
+   field(CALC, "(abs(A-B)>50.0")
+   field(INPA, "$(P)hv:Volt CP NMS")
+   field(INPB, "$(P)hv:VoltCmd CP NMS")
+   field(HIHI, "0.5")
+   field(HHSV, "MAJOR")
+}
 #
 # Summary alarm status
 #
 record(calc, "$(P)hv:AlarmSum") {
-   field(CALC, "((abs(A-B)>50.0)||C||D)&&E&&F")
-   field(INPA, "$(P)hv:Volt CP NMS")
-   field(INPB, "$(P)hv:VoltCmd CP NMS")
+   field(CALC, "(A||C||D)&&E&&F")
+   field(INPA, "$(P)hv:VoltDiff CP NMS")
    field(INPC, "$(P)hv:CommAlarm.SEVR CP NMS")
    field(INPD, "$(P)hv:Volt.SEVR CP NMS")
    field(INPE, "$(P)Enable CP NMS")

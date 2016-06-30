@@ -420,14 +420,15 @@ void DspPlugin::createParams_v65() {
     createCounterParam("Lvds7:Rate",      0x2D, 24,  0); // LVDS Ch7 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
     createCounterParam("OptA:Rate",       0x2E, 24,  0); // Optic A rate             (calc:2*A*10^(3-B), calclink:RateMeterInt, unit:byte/s, prec:2)
     createCounterParam("OptB:Rate",       0x2F, 24,  0); // Optic B rate             (calc:2*A*10^(3-B), calclink:RateMeterInt, unit:byte/s, prec:2)
-    createCounterParam("SCounters96",     0x30, 32,  0); // TBD
-    createCounterParam("SCounters98",     0x31, 32,  0); // TBD
-    createCounterParam("SCounters100",    0x32, 16,  0); // TBD
-    createCounterParam("SCounters101",    0x32, 16, 16); // TBD
-    createCounterParam("SCounters102",    0x33, 16,  0); // TBD
-    createCounterParam("SCounters103",    0x33, 16, 16); // TBD
-    createCounterParam("SCounters104",    0x34, 16,  0); // TBD
-    createCounterParam("SCounters105",    0x34, 16, 16); // TBD
+    createCounterParam("OptA:Payload",    0x30, 24,  0); // Optic A payload rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("RateDoutPls",     0x31, 24,  0); // TBD                      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("SCounters100",    0x32, 24,  0); // TBD                      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("SCounters102",    0x33, 24,  0); // TBD                      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("SCounters104",    0x34, 24,  0); // TBD
+    createCounterParam("SCounters106",    0x35, 16,  0); // TBD
+    createCounterParam("SCounters107",    0x35, 16, 16); // TBD
+    createCounterParam("SCounters108",    0x36, 16,  0); // TBD
+    createCounterParam("SCounters109",    0x36, 16, 16); // TBD
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured, archive:monitor)
@@ -557,4 +558,10 @@ void DspPlugin::createParams_v65() {
 
     createStatusParam("CntBadRtdl",   0x16, 16,  0); // RTDL frame CRC errors count
     createStatusParam("CntBadData",   0x16, 16, 16); // Ev Link frame CRC errors cnt
+
+    // TODO: define the names and descriptions when ready
+    createStatusParam("Unused23LB",   0x17, 16,  0); // TODO
+    createStatusParam("Unused23HB",   0x17, 16, 16); // TODO
+    createStatusParam("Unused24LB",   0x18, 16,  0); // TODO
+    createStatusParam("Unused24HB",   0x18, 16, 16); // TODO
 }
