@@ -189,8 +189,9 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 // The RTDL packet contents is just what ADARA expects.
                 // Prefix that with the length and type of packet.
                 if (packet->getPayloadLength() == 128) {
-                    sendRtdl(packet->payload);
-                    m_nTransmitted++;
+                    if (sendRtdl(packet->payload)) {
+                        m_nTransmitted++;
+                    }
                     m_lastRtdlTimestamp = timestamp;
 
                     // Disabling this allows the plugin to send heartbeat every time there's
@@ -223,8 +224,9 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
 
                 // When transition to new pulse is detected, inject EOP packet for previous pulse
                 if (epicsTimeEqual(&currentTs, &prevTs) == 0) {
-                    if (prevTs.secPastEpoch > 0 && prevTs.nsec > 0) {
-                        sendEvents(seq, 0, 0, packet->isNeutronData(), true);
+                    if (prevTs.secPastEpoch > 0 && prevTs.nsec > 0 && sendEvents(seq, 0, 0, packet->isNeutronData(), true)) {
+                        epicsTimeGetCurrent(&m_lastSentTimestamp);
+                        m_nTransmitted++;
                     }
                     seq->pulseSeq = 0;
                     seq->rtdl = *rtdl; // Cache current packet RTDL for the next injected packet
@@ -233,7 +235,10 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 uint32_t eventsCount;
                 const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(packet->getData(&eventsCount));
                 eventsCount /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
-                sendEvents(seq, events, packet->isNeutronData(), eventsCount);
+                if (sendEvents(seq, events, packet->isNeutronData(), eventsCount)) {
+                    epicsTimeGetCurrent(&m_lastSentTimestamp);
+                    m_nTransmitted++;
+                }
                 m_nProcessed++;
             }
         }
