@@ -12,8 +12,6 @@
 
 #include "BaseSocketPlugin.h"
 
-#define ADARA_MAX_NUM_DSPS  10  //!< Maximum number of DSPs supported by a single AdaraPlugin instance
-
 /**
  * Plugin that forwards Neutron Event data to ADARA SMS over TCP/IP.
  *
@@ -45,7 +43,7 @@ class AdaraPlugin : public BaseSocketPlugin {
         /**
          * Structure describing output packets sequence for a given source.
          *
-         * A source is any unique data channel with a specific event type. 
+         * A source is any unique data channel with a specific event type.
          * Each DSP provides up to 2 sources, a neutron and metadata source.
          */
         struct SourceSequence {
@@ -145,6 +143,20 @@ class AdaraPlugin : public BaseSocketPlugin {
          * @param[in] id A unique number to identifiy the data source, usually DSP hardware id
          */
         SourceSequence *findSource(bool neutron, uint32_t id);
+
+        /**
+         * Overloaded function resets internal state when new client connects.
+         */
+        void clientConnected();
+
+        /**
+         * Reset all internal logic.
+         *
+         * When reset, the following internal logic is reset:
+         * - ADARA protocol sources' sequence numbers are reset to 0
+         * - RTDL book-keeping logic is reset to beggining
+         */
+        void reset();
 
     protected:
         #define FIRST_ADARAPLUGIN_PARAM PixelsMapped

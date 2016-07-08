@@ -71,15 +71,26 @@ asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == PixelsMapped) {
         m_dataPktType = (value == 0 ? ADARA_PKT_TYPE_RAW_EVENT : ADARA_PKT_TYPE_MAPPED_EVENT);
     } else if (pasynUser->reason == Reset) {
-        for (auto it=m_sources.begin(); it!=m_sources.end(); it++) {
-            // Reset the sequence, not the source id
-            it->second.reset();
-        }
+        reset();
         return asynSuccess;
     }
     return BaseSocketPlugin::writeInt32(pasynUser, value);
 }
 
+void AdaraPlugin::clientConnected()
+{
+    reset();
+}
+
+void AdaraPlugin::reset()
+{
+    for (auto it=m_sources.begin(); it!=m_sources.end(); it++) {
+        // Reset the sequence, not the source id
+        it->second.reset();
+    }
+    m_lastRtdlTimestamp.secPastEpoch = 0;
+    m_lastRtdlTimestamp.nsec = 0;
+}
 
 bool AdaraPlugin::sendHeartbeat(const epicsTimeStamp &t)
 {
@@ -235,7 +246,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 uint32_t eventsCount;
                 const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(packet->getData(&eventsCount));
                 eventsCount /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
-                if (sendEvents(seq, events, packet->isNeutronData(), eventsCount)) {
+                if (sendEvents(seq, events, eventsCount, packet->isNeutronData())) {
                     epicsTimeGetCurrent(&m_lastSentTimestamp);
                     m_nTransmitted++;
                 }
