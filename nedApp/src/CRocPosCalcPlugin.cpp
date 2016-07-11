@@ -740,6 +740,41 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
     return CRocDataPacket::VETO_NO;
 }
 
+/**
+ * Fiber mapping v3 correction:
+ * Every even G index (first one being 1) has x1 fiber swapped with x11. This is
+ * to help more accurtely determine the position on the edge between two Gs.
+ * Knowing that, post-processing correction is necessary for even G indexes.
+ * Consider these 2 cases:
+ * \verbatim
+   Event 1:              v
+    # | | | | | | | | | | # | | | | | | | | | | # | | ...
+              G=1                      G=2
+
+   Possible readouts:
+   X: 0 1 0 0 0 0 0 0 1 3 8
+   G: 7 4 0 0 0 0 0 0 0 0 0 0 0 0
+   or
+   G: 4 7 0 0 0 0 0 0 0 0 0 0 0 0
+
+   Event 2:                v
+    # | | | | | | | | | | # | | | | | | | | | | # | | ...
+             G=1                      G=2
+
+   Possible readout:
+   X: 0 3 1 0 0 0 0 0 0 1 8
+   G: 7 4 0 0 0 0 0 0 0 0 0 0 0 0
+   or
+   G: 4 7 0 0 0 0 0 0 0 0 0 0 0 0
+   \endverbatim
+ *
+ * The 2 readouts are almost the same except for the possible difference in X
+ * readout. Common correction for both cases is to correct swap X position
+ * 0<=>10 when G is even number and closest G neighbour is on the opposite side
+ * of X.
+ *
+ * Similar exercise can be made for G=2 and G=3.
+ */
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &x)
 {
     uint8_t gMaxIndex;
@@ -809,25 +844,15 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
             }
         } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
             // every second G group has X0 and X10 swapped
-            if (gDirection < 0 && xMaxIndex == 10) {
-                // example:
-                //              v
-                // G: 0 . . 0 3 5 0 . . 0
-                // X: 3 0 . . . . . 0 5
-                //                    ^
-                xMaxIndex = 0;
-            } else if (gDirection > 0 && xMaxIndex == 0) {
-                // example:
-                //            v
-                // G: 0 . . 0 5 3 0 . . 0
-                // X: 5 0 . . . . . 0 3
-                //    ^
-                xMaxIndex = 10;
-            } else if (gDirection == 0 && (gMaxIndex % 2) == 1) {
-                if (xMaxIndex == 0) {
-                    xMaxIndex = 10;
-                } else /* (xMaxIndex == 10) */ {
-                    xMaxIndex = 0;
+            if ((gMaxIndex % 2) == 1) {
+                if (xMaxIndex == 10) {
+                    if (gDirection <= 0) {
+                        xMaxIndex = 0;
+                    }
+                } else { /* (xMaxIndex == 0) */
+                    if (gDirection >= 0) {
+                        xMaxIndex = 10;
+                    }
                 }
             }
         }
