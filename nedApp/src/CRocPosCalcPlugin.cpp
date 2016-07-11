@@ -678,13 +678,9 @@ inline double CRocPosCalcPlugin::calculateYNoise(const uint8_t *values, uint8_t 
     return 1.0*noise/values[maxIndex];
 }
 
-inline uint8_t CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t size, uint8_t &max)
+inline bool CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t size, uint8_t &max)
 {
-    uint8_t found = 0;
     max = 0;
-    if (values[0] > 0) {
-        found = 1;
-    }
     bool found = (values[0] > 0);
     for (size_t i = 1; i < size; i++) {
         if (values[i] > values[max]) {
@@ -843,7 +839,9 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
                 }
             }
         } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
-            // every second G group has X0 and X10 swapped
+            // Every second G group has X0 and X10 swapped, see function comment
+            // for details. The code here could be rolled out for readability,
+            // this is the most effiecient version.
             if ((gMaxIndex % 2) == 1) {
                 if (xMaxIndex == 10) {
                     if (gDirection <= 0) {
