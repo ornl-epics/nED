@@ -678,9 +678,13 @@ inline double CRocPosCalcPlugin::calculateYNoise(const uint8_t *values, uint8_t 
     return 1.0*noise/values[maxIndex];
 }
 
-inline bool CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t size, uint8_t &max)
+inline uint8_t CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t size, uint8_t &max)
 {
+    uint8_t found = 0;
     max = 0;
+    if (values[0] > 0) {
+        found = 1;
+    }
     bool found = (values[0] > 0);
     for (size_t i = 1; i < size; i++) {
         if (values[i] > values[max]) {
@@ -725,7 +729,9 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
     }
 
     if (event->photon_count_y[yMaxIndex] < detParams->yMin) {
-        if (!m_calcParams.efficiencyBoost || noise > 1.0) {
+        // Allow low signal events when efficiency boost is enabled or
+        // a single channel fired (noise==1.0)
+        if (!m_calcParams.efficiencyBoost && noise > 1.0) {
             return CRocDataPacket::VETO_Y_LOW_SIGNAL;
         }
     }
@@ -744,13 +750,14 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     }
 
     double gNoise = calculateGNoise(event->photon_count_g, gMaxIndex, detParams->gWeights);
-//LOG_ERROR("gNoise=%.1f threshold=%d", gNoise, detParams->gNoiseThreshold);
     if (gNoise > detParams->gNoiseThreshold) {
         return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     }
 
     if (event->photon_count_g[gMaxIndex] < detParams->gMin) {
-        if (!m_calcParams.efficiencyBoost || gNoise > 1.0) {
+        // Allow low signal events when efficiency boost is enabled or
+        // a single channel fired (noise==1.0)
+        if (!m_calcParams.efficiencyBoost && gNoise > 1.0) {
             return CRocDataPacket::VETO_G_LOW_SIGNAL;
         }
     }
@@ -760,13 +767,14 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     }
 
     double xNoise = calculateXNoise(event->photon_count_x, xMaxIndex, detParams->xWeights);
-//LOG_ERROR("xNoise=%.1f threshold=%d", xNoise, detParams->xNoiseThreshold);
     if (xNoise > detParams->xNoiseThreshold) {
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
     }
 
     if (event->photon_count_x[xMaxIndex] < detParams->xMin) {
-        if (!m_calcParams.efficiencyBoost || xNoise > 1.0) {
+        // Allow low signal events when efficiency boost is enabled or
+        // a single channel fired (noise==1.0)
+        if (!m_calcParams.efficiencyBoost && xNoise > 1.0) {
             return CRocDataPacket::VETO_X_LOW_SIGNAL;
         }
     }
@@ -800,7 +808,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
                 }
             }
         } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
-            // every second G group has X0 and X11 swapped
+            // every second G group has X0 and X10 swapped
             if (gDirection < 0 && xMaxIndex == 10) {
                 // example:
                 //              v
