@@ -31,6 +31,7 @@ DB += GlobalConG.db
 DB += ApplyConfig.db
 DB += PulsedMagnet.db
 DB += TimingPlugin.db
+DB += TofCorrectPlugin.db
 DB += BnlFlatFieldPlugin.db
 DB += BnlPosCalcPlugin.db
 DB += CRocPosCalcPlugin.db

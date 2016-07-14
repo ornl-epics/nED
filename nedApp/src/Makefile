@@ -137,6 +137,7 @@ $(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
 $(PROD_NAME)_SRCS  += TimingPlugin.cpp
+$(PROD_NAME)_SRCS  += TofCorrectPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlFlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp

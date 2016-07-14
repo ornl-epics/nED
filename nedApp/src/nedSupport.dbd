@@ -33,6 +33,7 @@ registrar("RocPvaPluginRegister")
 registrar("RtdlPluginRegister")
 registrar("StatPluginRegister")
 registrar("TimingPluginRegister")
+registrar("TofCorrectPluginRegister")
 
 # Detector support plugins (alphabetically)
 registrar("AcpcFemPluginRegister")
