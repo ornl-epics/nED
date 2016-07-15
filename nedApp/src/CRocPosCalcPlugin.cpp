@@ -705,7 +705,7 @@ inline int32_t CRocPosCalcPlugin::findDirection(const uint8_t *values, size_t si
     if (maxIndex > 0) {
         left = values[maxIndex-1];
     }
-    if (maxIndex < 13) {
+    if (maxIndex < (size-1)) {
         right = values[maxIndex+1];
     }
     return right - left;
@@ -817,8 +817,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
             // 1-to-1 mapping, but an event might get G group wrong
             if (gDirection > 0) {
                 assert(gMaxIndex < 13);
-                if (event->photon_count_x[0] > event->photon_count_x[10] &&
-                    event->photon_count_x[10] >= detParams->xMin) {
+                if (event->photon_count_x[0] >= event->photon_count_x[10]) {
                     // example:
                     //            v
                     // G: 0 . . 0 9 7 0 . . 0
@@ -828,8 +827,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
                 }
             } else if (gDirection < 0) {
                 assert(gMaxIndex > 0);
-                if (event->photon_count_x[10] > event->photon_count_x[0] &&
-                    event->photon_count_x[0] >= detParams->xMin) {
+                if (event->photon_count_x[10] >= event->photon_count_x[0]) {
                     // example:
                     //              v
                     // G: 0 . . 0 7 9 0 . . 0
