@@ -402,6 +402,15 @@ CRocPosCalcPlugin::Stats CRocPosCalcPlugin::processPacket(const DasPacket *inPac
     return stats;
 }
 
+static inline uint32_t diff_unsigned(uint32_t a, uint32_t b)
+{
+    if (a > b) {
+        return (a-b);
+    } else {
+        return (b-a);
+    }
+}
+
 /**
  * Calculates X and Y dimension from the raw counts and encodes it into pixel id
  * format. The encoded pixel id includes pixel position withing the detector and
@@ -411,7 +420,7 @@ CRocPosCalcPlugin::Stats CRocPosCalcPlugin::processPacket(const DasPacket *inPac
  * pixels. The final encoding is as follows:
  * > pixel id = (0x8FC00000) | ([detector offset] + [xy])
  */
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint32_t &pixel)
+CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *detParams, uint32_t &pixel)
 {
     CRocDataPacket::VetoType veto = CRocDataPacket::VETO_NO;
     CRocDataPacket::VetoType tmpVeto = CRocDataPacket::VETO_NO;
@@ -455,8 +464,21 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     }
 
     pixel = detParams->position + 7*x + y;
-    if (veto != CRocDataPacket::VETO_NO)
+    if (veto == CRocDataPacket::VETO_NO) {
+        // Reduce the echo events - strong neutrons with light response spanning
+        // over multiple acq frames
+//LOG_ERROR("TOF: now=%u, prev=%u, diff=%u tofResolution=%u", event->tof, detParams->lastTof, diff_unsigned(event->tof, detParams->lastTof), m_calcParams.tofResolution);
+//LOG_ERROR("PIX: now=%u, prev=%u, diff=%u", pixel, detParams->lastPixelId, diff_unsigned(pixel, detParams->lastPixelId));
+        if (diff_unsigned(event->tof, detParams->lastTof) < m_calcParams.tofResolution && diff_unsigned(pixel, detParams->lastPixelId) < 84) {
+            veto = CRocDataPacket::VETO_ECHO;
+        } else {
+            detParams->lastTof = event->tof;
+            detParams->lastPixelId = pixel;
+        }
+    }
+    if (veto != CRocDataPacket::VETO_NO) {
         pixel |= veto;
+    }
 
     return veto;
 }
@@ -466,14 +488,13 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRangeJason(const CRocDataPa
     uint32_t delaySum = (event->time_range[1] + event->time_range[2] + event->time_range[3]);
 
     // Check for echo event
-    if (event->tof < (detParams->tofLast + m_calcParams.tofResolution)) {
+    if (event->tof < (detParams->lastTof + m_calcParams.tofResolution)) {
         return CRocDataPacket::VETO_ECHO;
     }
 
     // Check time ranges first
     if (event->time_range[0] < m_calcParams.timeRange1Min || event->time_range[1] < m_calcParams.timeRange2Min) {
-        if (event->time_range[0] < m_calcParams.timeRange1Min &&
-            delaySum >= m_calcParams.timeRangeDelayMin) {
+        if (event->time_range[0] < m_calcParams.timeRange1Min && delaySum >= m_calcParams.timeRangeDelayMin) {
             return CRocDataPacket::VETO_TIMERANGE_DELAYED;
         } else {
             return CRocDataPacket::VETO_TIMERANGE_BAD;
@@ -698,17 +719,18 @@ inline bool CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t size, 
  *         maxIndex, negative value when more counts on the left side and
  *         0 left and right side are equal.
  */
-inline int32_t CRocPosCalcPlugin::findDirection(const uint8_t *values, size_t size, uint8_t maxIndex)
+inline float CRocPosCalcPlugin::findDirection(const uint8_t *values, size_t size, uint8_t maxIndex)
 {
     int32_t left = 0;
     int32_t right = 0;
+    float center = values[maxIndex];
     if (maxIndex > 0) {
         left = values[maxIndex-1];
     }
     if (maxIndex < (size-1)) {
         right = values[maxIndex+1];
     }
-    return right - left;
+    return (right - left)/center;
 }
 
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &y)
@@ -812,7 +834,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
 
     // Inspect edges and consider modifying G or X index
     if (xMaxIndex == 0 || xMaxIndex == 10) {
-        int32_t gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
+        float gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
         if (detParams->fiberCoding == CRocParams::FIBER_CODING_V2) {
             // 1-to-1 mapping, but an event might get G group wrong
             if (gDirection > 0) {

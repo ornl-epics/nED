@@ -70,7 +70,8 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             uint32_t yNoiseThreshold;   //!< Y noise threshold
 
             // Run-time variables follow
-            uint32_t tofLast;       // Last processed time of flight for this detector
+            uint32_t lastTof;           //!< Last processed time of flight for this detector
+            uint32_t lastPixelId;       //!< Last calculated pixel id
         };
 
         /**
@@ -206,7 +207,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         /**
          * Calculates pixel id from raw event data.
          */
-        CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint32_t &pixel);
+        CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *params, uint32_t &pixel);
 
         /**
          * Verify the time spectrum range of the event.
@@ -230,7 +231,24 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
 
     private:
         bool findMaxIndex(const uint8_t *values, size_t size, uint8_t &max);
-        int32_t findDirection(const uint8_t *values, size_t size, uint8_t maxIndex);
+
+        /**
+         * Find out whether the event is more to the right or left around the max.
+         *
+         * Based on the 1st neighbours of the maximum index, calculate a normalized
+         * number that represents left or right side of the maximum where the
+         * event might be. Number is between -1.0 and 1.0. 0 means there is no
+         * information on which side to look. Closer to -1.0 means more probably
+         * the event is on the left edge of max G and closer to 1.0 means right
+         * edge.
+         *
+         * @param[in] values Array of values to consider
+         * @param[in] size of the array
+         * @param[in] maxIndex Index of the maximum value within array
+         * @return Normalized floating point number in range [-1.0, 1.0]
+         */
+        float findDirection(const uint8_t *values, size_t size, uint8_t maxIndex);
+
         double calculateGNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[14]);
         double calculateXNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[11]);
         double calculateYNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[7]);
