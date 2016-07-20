@@ -68,9 +68,6 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("XWeights",     asynParamInt8Array, &XWeights);             // WRITE - X noise calculation weights
     createParam("YWeights",     asynParamInt8Array, &YWeights);             // WRITE - Y noise calculation weights
 
-    createParam("TimeRangeExp",     asynParamInt32, &TimeRangeExp);         // WRITE - Time range experimental rejection
-    createParam("TimeRangeJason",   asynParamInt32, &TimeRangeJason);       // WRITE - Jason's time range rejection
-
     callParamCallbacks();
 }
 
@@ -127,12 +124,6 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         handled = true;
     } else if (pasynUser->reason == ProcessMode) {
         m_calcParams.processModeNew = (value != 0);
-        handled = true;
-    } else if (pasynUser->reason == TimeRangeExp) {
-        m_calcParams.timeRangeExperimental = (value != 0);
-        handled = true;
-    } else if (pasynUser->reason == TimeRangeJason) {
-        m_calcParams.timeRangeJason = (value != 0);
         handled = true;
     }
     m_paramsMutex.unlock();
@@ -433,10 +424,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     CRocDataPacket::VetoType tmpVeto = CRocDataPacket::VETO_NO;
     uint8_t x,y;
 
-    if (m_calcParams.timeRangeJason)
-        tmpVeto = checkTimeRangeJason(event, detParams);
-    else
-        tmpVeto = checkTimeRange(event, detParams);
+    tmpVeto = checkTimeRange(event, detParams);
     if (tmpVeto != CRocDataPacket::VETO_NO) {
         if (m_calcParams.passVetoes == false) return tmpVeto;
         if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
@@ -491,27 +479,6 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     return veto;
 }
 
-CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRangeJason(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
-{
-    uint32_t delaySum = (event->time_range[1] + event->time_range[2] + event->time_range[3]);
-
-    // Check for echo event
-    if (event->tof < (detParams->lastTof + m_calcParams.tofResolution)) {
-        return CRocDataPacket::VETO_ECHO;
-    }
-
-    // Check time ranges first
-    if (event->time_range[0] < m_calcParams.timeRange1Min || event->time_range[1] < m_calcParams.timeRange2Min) {
-        if (event->time_range[0] < m_calcParams.timeRange1Min && delaySum >= m_calcParams.timeRangeDelayMin) {
-            return CRocDataPacket::VETO_TIMERANGE_DELAYED;
-        } else {
-            return CRocDataPacket::VETO_TIMERANGE_BAD;
-        }
-    }
-
-    return CRocDataPacket::VETO_NO;
-}
-
 CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
 {
     uint8_t cnt = 0;
@@ -521,11 +488,16 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket:
         }
     }
 
-    if (cnt < detParams->timeRangeMinCnt) {
-        return CRocDataPacket::VETO_TIMERANGE_BAD;
+    if (event->time_range[0] < m_calcParams.timeRange1Min && event->time_range[1] < m_calcParams.timeRange2Min) {
+        uint32_t delaySum = (event->time_range[1] + event->time_range[2] + event->time_range[3]);
+        if (delaySum >= m_calcParams.timeRangeDelayMin) {
+            return CRocDataPacket::VETO_TIMERANGE_DELAYED;
+        } else {
+            return CRocDataPacket::VETO_TIMERANGE_BAD;
+        }
     }
-    if (m_calcParams.timeRangeExperimental &&
-        (event->time_range[1] < detParams->timeRangeMin || event->time_range[2] < detParams->timeRangeMin)) {
+
+    if (cnt < detParams->timeRangeMinCnt) {
         return CRocDataPacket::VETO_TIMERANGE_BAD;
     }
     return CRocDataPacket::VETO_NO;
@@ -815,6 +787,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     }
 
     // X rejection
+    uint8_t xMaxIndex;
     if (findMaxIndex(event->photon_count_x, 11, xMaxIndex) == false) {
         return CRocDataPacket::VETO_X_LOW_SIGNAL;
     }

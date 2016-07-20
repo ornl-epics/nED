@@ -92,9 +92,6 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             uint8_t timeRange2Min;      //!< Threshold for second time range bin
             uint32_t timeRangeDelayMin; //!< Delayed event threshold
             uint32_t tofResolution;     //!< Min time between two events in 100ns
-
-            bool timeRangeExperimental; //!< Turn on/off experimental time range rejection
-            bool timeRangeJason;        //!< Jason Hodges method of time range rejection
         };
 
         /**
@@ -218,8 +215,6 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          */
         CRocDataPacket::VetoType checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
 
-        CRocDataPacket::VetoType checkTimeRangeJason(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
-
         CRocDataPacket::VetoType calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
         CRocDataPacket::VetoType calculateYPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
 
@@ -317,10 +312,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int GWeights;
         int XWeights;
         int YWeights;
-
-        int TimeRangeExp;       //!< Switch for experimental time range rejection
-        int TimeRangeJason;     //!< Use Jason's time range rejection
-        #define LAST_CROCPOSCALCPLUGIN_PARAM TimeRangeJason
+        #define LAST_CROCPOSCALCPLUGIN_PARAM YWeights
 };
 
 #endif // CROC_POS_CALC_PLUGIN_H
