@@ -72,6 +72,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             // Run-time variables follow
             uint32_t lastTof;           //!< Last processed time of flight for this detector
             uint32_t lastPixelId;       //!< Last calculated pixel id
+            uint64_t pulseId;           //!< Last good event pulse id
         };
 
         /**
@@ -207,7 +208,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         /**
          * Calculates pixel id from raw event data.
          */
-        CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *params, uint32_t &pixel);
+        CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *params, uint32_t &pixel, uint64_t pulseId);
 
         /**
          * Verify the time spectrum range of the event.
@@ -261,7 +262,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          * @param[out] max1 index of maximum value
          * @param[out] max2 index of second max value
          * @param[out] max3 index of third max value
-         * @return number of values found, valid values are 0, 1, 2, 3
+         * @return number of non-zero values in array.
          */
         static uint8_t findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3);
 

@@ -352,6 +352,13 @@ CRocPosCalcPlugin::Stats CRocPosCalcPlugin::processPacket(const DasPacket *inPac
     uint32_t outEventSize = (m_calcParams.outExtMode ? sizeof(CRocDataPacket::ExtendedEvent) : sizeof(CRocDataPacket::NormalEvent));
     uint32_t tmp;
     uint32_t nInEvents, nOutEvents;
+    uint64_t pulseId = 0;
+
+    // Determine pulseId based on RTDL time
+    const RtdlHeader *rtdl = inPacket->getRtdlHeader();
+    if (rtdl) {
+        pulseId = ((uint64_t)rtdl->timestamp_sec << 32) | rtdl->timestamp_nsec;
+    }
 
     // outPacket is guaranteed to be at least the size of srcPacket
     (void)inPacket->copyHeader(outPacket, inPacket->length());
@@ -375,7 +382,7 @@ CRocPosCalcPlugin::Stats CRocPosCalcPlugin::processPacket(const DasPacket *inPac
             ret = CRocDataPacket::VETO_INVALID_POSITION;
             pixel = CRocDataPacket::VETO_INVALID_POSITION;
         } else {
-            ret = calculatePixel(inEvent, it->second, pixel);
+            ret = calculatePixel(inEvent, it->second, pixel, pulseId);
         }
 
         if (ret == CRocDataPacket::VETO_NO || m_calcParams.passVetoes) {
@@ -420,7 +427,7 @@ static inline uint32_t diff_unsigned(uint32_t a, uint32_t b)
  * pixels. The final encoding is as follows:
  * > pixel id = (0x8FC00000) | ([detector offset] + [xy])
  */
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *detParams, uint32_t &pixel)
+CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *detParams, uint32_t &pixel, uint64_t pulseId)
 {
     CRocDataPacket::VetoType veto = CRocDataPacket::VETO_NO;
     CRocDataPacket::VetoType tmpVeto = CRocDataPacket::VETO_NO;
@@ -469,11 +476,12 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
         // over multiple acq frames
 //LOG_ERROR("TOF: now=%u, prev=%u, diff=%u tofResolution=%u", event->tof, detParams->lastTof, diff_unsigned(event->tof, detParams->lastTof), m_calcParams.tofResolution);
 //LOG_ERROR("PIX: now=%u, prev=%u, diff=%u", pixel, detParams->lastPixelId, diff_unsigned(pixel, detParams->lastPixelId));
-        if (diff_unsigned(event->tof, detParams->lastTof) < m_calcParams.tofResolution && diff_unsigned(pixel, detParams->lastPixelId) < 84) {
+        if (pulseId == detParams->pulseId && (event->tof - detParams->lastTof) < m_calcParams.tofResolution && diff_unsigned(pixel, detParams->lastPixelId) < 84) {
             veto = CRocDataPacket::VETO_ECHO;
         } else {
             detParams->lastTof = event->tof;
             detParams->lastPixelId = pixel;
+            detParams->pulseId = pulseId;
         }
     }
     if (veto != CRocDataPacket::VETO_NO) {
@@ -525,23 +533,25 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket:
 
 uint8_t CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3)
 {
-    max1 = max2 = max3 = 0;
-    for (size_t i = 1; i < size; i++) {
-        if (values[i] > values[max1]) {
+    uint8_t nNonZero = 0;
+
+    max1 = max2 = max3 = 255;
+    for (size_t i = 0; i < size; i++) {
+        if (values[i] > 0) {
+            nNonZero++;
+        }
+        if (max1 == 255 || values[i] > values[max1]) {
             max3 = max2;
             max2 = max1;
             max1 = i;
-        } else if (values[i] > values[max2]) {
+        } else if (max2 == 255 || values[i] > values[max2]) {
             max3 = max2;
             max2 = i;
-        } else if (values[i] > values[max3] ) {
+        } else if (max3 == 255 || values[i] > values[max3] ) {
             max3 = i;
         }
     }
-    if (max3 != 0 || values[0] != 0) return 3;
-    if (max2 != 0 || values[0] != 0) return 2;
-    if (max1 != 0 || values[0] != 0) return 1;
-    return 0;
+    return nNonZero;
 }
 
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &y)
@@ -712,13 +722,6 @@ inline bool CRocPosCalcPlugin::findMaxIndex(const uint8_t *values, size_t size, 
     return found;
 }
 
-/**
- * Find the direction in which the neighbour with higher counts is.
- *
- * @return positive number when more counts were detected on the right side from
- *         maxIndex, negative value when more counts on the left side and
- *         0 left and right side are equal.
- */
 inline float CRocPosCalcPlugin::findDirection(const uint8_t *values, size_t size, uint8_t maxIndex)
 {
     int32_t left = 0;
@@ -749,11 +752,10 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
     if (event->photon_count_y[yMaxIndex] < detParams->yMin) {
         // Allow low signal events when efficiency boost is enabled or
         // a single channel fired (noise==1.0)
-        if (!m_calcParams.efficiencyBoost && noise > 1.0) {
+        if (!m_calcParams.efficiencyBoost /*&& noise > 1.0*/) {
             return CRocDataPacket::VETO_Y_LOW_SIGNAL;
         }
     }
-
     y = yMaxIndex;
     return CRocDataPacket::VETO_NO;
 }
@@ -795,39 +797,35 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
  */
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &x)
 {
+    // G rejection
     uint8_t gMaxIndex;
-    uint8_t xMaxIndex;
-
     if (findMaxIndex(event->photon_count_g, 14, gMaxIndex) == false) {
         return CRocDataPacket::VETO_G_LOW_SIGNAL;
     }
-
     double gNoise = calculateGNoise(event->photon_count_g, gMaxIndex, detParams->gWeights);
     if (gNoise > detParams->gNoiseThreshold) {
         return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     }
-
     if (event->photon_count_g[gMaxIndex] < detParams->gMin) {
         // Allow low signal events when efficiency boost is enabled or
         // a single channel fired (noise==1.0)
-        if (!m_calcParams.efficiencyBoost && gNoise > 1.0) {
+        if (!m_calcParams.efficiencyBoost /*&& gNoise > 1.0*/) {
             return CRocDataPacket::VETO_G_LOW_SIGNAL;
         }
     }
 
+    // X rejection
     if (findMaxIndex(event->photon_count_x, 11, xMaxIndex) == false) {
         return CRocDataPacket::VETO_X_LOW_SIGNAL;
     }
-
     double xNoise = calculateXNoise(event->photon_count_x, xMaxIndex, detParams->xWeights);
     if (xNoise > detParams->xNoiseThreshold) {
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
     }
-
     if (event->photon_count_x[xMaxIndex] < detParams->xMin) {
         // Allow low signal events when efficiency boost is enabled or
         // a single channel fired (noise==1.0)
-        if (!m_calcParams.efficiencyBoost && xNoise > 1.0) {
+        if (!m_calcParams.efficiencyBoost /*&& xNoise > 1.0*/) {
             return CRocDataPacket::VETO_X_LOW_SIGNAL;
         }
     }
