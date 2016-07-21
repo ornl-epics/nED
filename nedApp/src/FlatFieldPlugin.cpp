@@ -421,7 +421,7 @@ bool FlatFieldPlugin::correctPosition(double &x, double &y, uint32_t position)
     unsigned yp = y;
 
     // All tables of the same size, safe to compare against just one
-    if (x < 0.0 || xp >= xtable->sizeX || y < 0.0 || yp >= xtable->sizeY)
+    if (x < 0.0 || xp >= (xtable->sizeX-1) || y < 0.0 || yp >= (xtable->sizeY-1))
         return false;
 
     // All checks passed - do the correction
@@ -448,7 +448,7 @@ bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x,
     unsigned yp = y;
 
     // All tables of the same size, safe to compare against just one
-    if (x < 0.0 || xp >= upperLimits->sizeX || y < 0.0 || yp >= upperLimits->sizeY)
+    if (x < 0.0 || xp >= (upperLimits->sizeX-1) || y < 0.0 || yp >= (upperLimits->sizeY-1))
         return 0;
 
     double upperLimit = upperLimits->data[xp][yp];
