@@ -114,17 +114,6 @@ record(longout, "$(P)TimeRangeDelayMin")
     field(PINI, "YES")
     field(EGU,  "counts")
 }
-record(longout, "$(P)TofResolutionRaw")
-{
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Min time between two events")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))TofResolution")
-    field(PINI, "YES")
-    field(VAL,  "250")
-    field(EGU,  "x100ns")
-}
 record(ao, "$(P)TofResolution")
 {
     field(ASG,  "BEAMLINE")

@@ -722,9 +722,8 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
     }
 
     if (event->photon_count_y[yMaxIndex] < detParams->yMin) {
-        // Allow low signal events when efficiency boost is enabled or
-        // a single channel fired (noise==1.0)
-        if (!m_calcParams.efficiencyBoost /*&& noise > 1.0*/) {
+        // Allow low signal single channel events when efficiency boost is enabled
+        if (!m_calcParams.efficiencyBoost || noise > 1.0) {
             return CRocDataPacket::VETO_Y_LOW_SIGNAL;
         }
     }
@@ -779,9 +778,8 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
         return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     }
     if (event->photon_count_g[gMaxIndex] < detParams->gMin) {
-        // Allow low signal events when efficiency boost is enabled or
-        // a single channel fired (noise==1.0)
-        if (!m_calcParams.efficiencyBoost /*&& gNoise > 1.0*/) {
+        // Allow low signal single channel events when efficiency boost is enabled
+        if (!m_calcParams.efficiencyBoost || gNoise > 1.0) {
             return CRocDataPacket::VETO_G_LOW_SIGNAL;
         }
     }
@@ -796,9 +794,8 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
     }
     if (event->photon_count_x[xMaxIndex] < detParams->xMin) {
-        // Allow low signal events when efficiency boost is enabled or
-        // a single channel fired (noise==1.0)
-        if (!m_calcParams.efficiencyBoost /*&& xNoise > 1.0*/) {
+        // Allow low signal single channel events when efficiency boost is enabled
+        if (!m_calcParams.efficiencyBoost || xNoise > 1.0) {
             return CRocDataPacket::VETO_X_LOW_SIGNAL;
         }
     }
@@ -810,38 +807,67 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
             // 1-to-1 mapping, but an event might get G group wrong
             if (gDirection > 0) {
                 assert(gMaxIndex < 13);
-                if (event->photon_count_x[0] >= event->photon_count_x[10]) {
-                    // example:
-                    //            v
-                    // G: 0 . . 0 9 7 0 . . 0
-                    // X: 7 0 . . . . 0 4 5
-                    //    ^
+                if (event->photon_count_g[gMaxIndex+1] < 0.3*event->photon_count_g[gMaxIndex]) {
+                    return CRocDataPacket::VETO_G_GHOST; 
+                }
+                if (event->photon_count_x[0] > event->photon_count_x[10]) {
                     gMaxIndex++;
+                } else if (event->photon_count_x[0] == event->photon_count_x[10]) {
+                    if (event->photon_count_x[1] >= event->photon_count_x[9]) {
+                        gMaxIndex++;
+                    } else {
+                        xMaxIndex = 10;
+                    }
                 }
             } else if (gDirection < 0) {
                 assert(gMaxIndex > 0);
-                if (event->photon_count_x[10] >= event->photon_count_x[0]) {
-                    // example:
-                    //              v
-                    // G: 0 . . 0 7 9 0 . . 0
-                    // X: 5 4 0 . . . . 0 7
-                    //                    ^
+                if (event->photon_count_g[gMaxIndex-1] < 0.3*event->photon_count_g[gMaxIndex]) {
+                    return CRocDataPacket::VETO_G_GHOST;
+                }
+                if (event->photon_count_x[10] > event->photon_count_x[0]) {
                     gMaxIndex--;
+                } else if (event->photon_count_x[10] == event->photon_count_x[0]) {
+                    if (event->photon_count_x[9] >= event->photon_count_x[1]) {
+                        gMaxIndex--;
+                    } else {
+                        xMaxIndex = 0;
+                    }
+                }
+            } else {
+                // Left and right neighbours are the same, are they both 0?
+                uint8_t leftG  = (gMaxIndex > 0  ? event->photon_count_g[gMaxIndex-1] : 0);
+                uint8_t rightG = (gMaxIndex < 13 ? event->photon_count_g[gMaxIndex+1] : 0);
+                if (leftG > 0 && rightG > 0) {
+                    // Imposible to deduce the location, must reject
+                    return CRocDataPacket::VETO_G_GHOST;
+                } else if (leftG == 0 && rightG == 0) {
+                    if (event->photon_count_x[0] > detParams->xMin && event->photon_count_x[10] > detParams->xMin) {
+                        // Response on both edges of X, but a single G?
+                        return CRocDataPacket::VETO_G_GHOST;
+                    }
                 }
             }
         } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
             // Every second G group has X0 and X10 swapped, see function comment
-            // for details. The code here could be rolled out for readability,
-            // this is the most effiecient version.
+            // for details.
             if ((gMaxIndex % 2) == 1) {
-                if (xMaxIndex == 10) {
-                    if (gDirection <= 0) {
-                        xMaxIndex = 0;
+                if (gDirection == 0) {
+                    // gDirection == 0 when right neighbour matches left one or
+                    // they're both zero
+                    assert(gMaxIndex > 0);
+                    if (event->photon_count_g[gMaxIndex-1] > 0) {
+                        // As left neighbour is non zero, right one is non-zero too.
+                        // We can't deduce the proper location and must reject.
+                        return CRocDataPacket::VETO_G_GHOST;
+                    } else {
+                        // Left and right neighbours are both zero, yet the
+                        // PMTs are swapped. Swap again to make it right.
+                        xMaxIndex = (xMaxIndex == 0 ? 10 : 0);
                     }
-                } else { /* (xMaxIndex == 0) */
-                    if (gDirection >= 0) {
-                        xMaxIndex = 10;
-                    }
+                } else if (gDirection < 0 && xMaxIndex == 10) {
+                    xMaxIndex = 0;
+                } else if (gDirection > 0 && xMaxIndex == 0) {
+                    xMaxIndex = 10;
                 }
             }
         }
