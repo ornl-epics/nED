@@ -24,9 +24,10 @@ record(longin, "$(P)FwRev")
     field(HIGH, "8")
     field(LOW,  "6")
 }
-# ROC doesn't update any valueable fields, like Discovered or Configured
 record(calc, "$(P)HwStatus")
 {
-    field(INPA, "1")
-    field(CALC, "1")
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(CALC, "A=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
 }

@@ -18,6 +18,7 @@
 #include <string>
 #include <functional>
 #include <list>
+#include <map>
 #include <memory>
 #include <asynPortDriver.h>
 #include <epicsMessageQueue.h>
@@ -114,7 +115,7 @@ class BasePlugin : public asynPortDriver {
          * BasePlugin object has been fully constructed or through Enable asyn parameter.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] dispatcherPortName Comma separated list of remote ports to connect to.
          * @param[in] reason Type of the messages to receive callbacks for.
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          * @param[in] numParams The number of parameters that the derived class supports.
@@ -126,7 +127,7 @@ class BasePlugin : public asynPortDriver {
          * @param[in] priority The thread priority for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          * @param[in] stackSize The stack size for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          */
-        BasePlugin(const char *portName, const char *dispatcherPortName, int reason, int blocking=0,
+        BasePlugin(const char *portName, const char *dispatcherPortNames, int reason, int blocking=0,
                    int numParams=0, int maxAddr=1, int interfaceMask=BasePlugin::defaultInterfaceMask,
                    int interruptMask=BasePlugin::defaultInterruptMask, int asynFlags=0, int autoConnect=1,
                    int priority=0, int stackSize=0);
@@ -266,12 +267,25 @@ class BasePlugin : public asynPortDriver {
         inline DataMode getDataMode() { return m_dataMode; };
 
     protected:
-        asynUser *m_pasynuser;                      //!< asynUser handler for asyn management
         std::string m_portName;                     //!< Port name
-        std::string m_dispatcherPortName;           //!< Dispatcher port name
+
+        /**
+         * Structure to describe asyn interface.
+         */
+        struct RemotePort {
+            asynUser *pasynuser;    //!< asynUser handler for asyn management
+            void *asynGenericPointerInterrupt;  //!< Generic pointer interrupt handler
+        };
+
+        /**
+         * Map of all registered remote ports.
+         *
+         * Key is remote port name. Value holds the remote port connection
+         * information and handle.
+         */
+        std::map<std::string, RemotePort> m_remotePorts;
 
     private:
-        void *m_asynGenericPointerInterrupt;        //!< Generic pointer interrupt handler
         epicsMessageQueue m_messageQueue;           //!< Message queue for non-blocking mode
         Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup

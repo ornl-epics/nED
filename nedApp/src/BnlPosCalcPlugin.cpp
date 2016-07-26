@@ -14,7 +14,7 @@
 #include <limits>
 #include <cmath>
 
-//#define CALC_ALTERNATIVE
+#define CALC_ALTERNATIVE
 
 EPICS_REGISTER_PLUGIN(BnlPosCalcPlugin, 3, "Port name", string, "Dispatcher port name", string, "Buffer size in bytes", int);
 

@@ -142,7 +142,7 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
         }
     }
 
-    // Can not use asynPortDriver::lock()
+    // Serialize sending to plugins - can not use asynPortDriver::lock()
     m_mutex.lock();
 
     // Packet order is not preserved here, but nearly all packets are expected
@@ -151,6 +151,8 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
     if (!modifiedPktsList.empty()) {
         modifiedPktsList.reserve();
         BaseDispatcherPlugin::sendToPlugins(&modifiedPktsList);
+        modifiedPktsList.release();
+        modifiedPktsList.waitAllReleased();
         // All plugins done with list of packets, put them back to pool
         for (auto it = modifiedPktsList.cbegin(); it != modifiedPktsList.cend(); it++) {
             freePacket(const_cast<DasPacket *>(*it));
@@ -159,6 +161,8 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
     if (!originalPktsList.empty()) {
         originalPktsList.reserve();
         BaseDispatcherPlugin::sendToPlugins(&originalPktsList);
+        originalPktsList.release();
+        originalPktsList.waitAllReleased();
     }
 
     m_mutex.unlock();
@@ -248,7 +252,7 @@ double TimingPlugin::updateRtdl()
         getIntegerParam(Mode, &mode);
     
         this->lock();
-        // Must not block
+        // This is the only place where m_rtdlPacket is changed
         if (mode == 0)
             sendRtdlPacket = createFakeRtdl(m_rtdlPacket);
         else if (mode == 1)
@@ -261,8 +265,10 @@ double TimingPlugin::updateRtdl()
         if (sendRtdlPacket) {
             m_mutex.lock();
             DasPacketList packetList;
-            packetList.reset(m_rtdlPacket);
+            packetList.reset(m_rtdlPacket); // reset automatically reserves
             BaseDispatcherPlugin::sendToPlugins(&packetList);
+            packetList.release();
+            packetList.waitAllReleased();
             m_mutex.unlock();
         }
     }

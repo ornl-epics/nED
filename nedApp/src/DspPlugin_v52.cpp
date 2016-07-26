@@ -1,4 +1,4 @@
-/* DspPlugin_v51.cpp
+/* DspPlugin_v52.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -9,7 +9,7 @@
 
 #include "DspPlugin.h"
 
-void DspPlugin::createParams_v51() {
+void DspPlugin::createParams_v52() {
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
     createConfigParam("PixId0",         'B', 0x0,  32,  0, 0); // State 0 Position Index Off
     createConfigParam("PixId1",         'B', 0x1,  32,  0, 0); // State 1 Position Index Off
@@ -75,8 +75,11 @@ void DspPlugin::createParams_v51() {
     createConfigParam("DipSwEn",        'E', 0x1,  1, 30, 0); // Enable on-board DIP switches (0=disable, 1=enable)
     createConfigParam("EndOfChainEn",   'E', 0x1,  1, 31, 0); // Enable end of chain vetos    (0=disable, 1=enable)
 
-    createConfigParam("SerialARate",    'F', 0x0, 16,  0, 0x104); // Serial A baud rate
-    createConfigParam("SerialBRate",    'F', 0x0, 16, 16, 0x104); // Serial B baud rate
+    createConfigParam("HystMinLow",     'F', 0x0,  4,  0, 4); // Chop HYST minimum low
+    createConfigParam("HystMinHi",      'F', 0x0,  4,  4, 4); // Chop HYST minimum high
+    createConfigParam("OperMode",       'F', 0x0,  3,  8, 0); // Operation mode               (0=normal,1=fake data,2=fake trigger,3=idle)
+    createConfigParam("BadTlkEn",       'F', 0x0,  1, 11, 0); // Send bad TLK packet switch   (0=no,1=yes)
+
     createConfigParam("SysRstMode",     'F', 0x1,  2,  0, 0); // Reset mode => SYSRST_O#      (0=not used,1=not used,2=from LVDS T&C,3=from optical T&C)
     createConfigParam("LvdsTclkMode",   'E', 0x1,  2,  2, 0); // LVDS TX control TCLK mode    (0=TCLK from int,1=TCLK from int,2=TCLK from LVDS,3=TCLK from optical)
     createConfigParam("LvdsTsyncMode",  'E', 0x1,  2,  4, 1); // LVDS TSYNC_O mode            (0=local TSYNC,1=TSYNC from TREF,2=TSYNC from LVDS,3=TSYNC from opt)

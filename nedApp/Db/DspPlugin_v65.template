@@ -28,6 +28,6 @@ record(mbbo, "$(P)CmdReq")
 {
     field(TVVL, "129")
     field(TVST, "Down reset")
-    field(THVL, "39")
-    field(THST, "Down reset LVDS")
+    field(TTVL, "39")
+    field(TTST, "Down reset LVDS")
 }
