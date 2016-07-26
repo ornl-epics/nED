@@ -122,6 +122,8 @@ record(bi, "$(P)AcquiringSet")
 {
     field(ZNAM, "not acquiring")
     field(ONAM, "acquiring")
+    field(VAL,  "0")
+    field(PINI, "YES")
     field(FLNK, "$(P)AcquiringCheck")
 }
 record(calc, "$(P)AcquiringCheck")
