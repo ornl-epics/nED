@@ -289,7 +289,9 @@ epicsTimeStamp m_sendHvTime;
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring
         int Acquiring;
-        #define LAST_ROCPLUGIN_PARAM Acquiring
+        int HvDelay;
+        int HvB2bDelay;
+        #define LAST_ROCPLUGIN_PARAM HvB2bDelay
 };
 
 #endif // DSP_PLUGIN_H

@@ -5,7 +5,7 @@
 
 
 record(calc, "$(P)hv:VoltDiff") {
-   field(CALC, "(abs(A-B)>50.0")
+   field(CALC, "(abs(A-B))>50.0")
    field(INPA, "$(P)hv:Volt CP NMS")
    field(INPB, "$(P)hv:VoltCmd CP NMS")
    field(HIHI, "0.5")
@@ -485,3 +485,22 @@ record(ai, "$(P)hv:VConvZ") {
    field(FLNK, "$(P)hv:ReadADC") 
 }
 
+# Measures the time between HV request and first character of the response
+record(ai, "$(P)hv:RspDelay") {
+   field(DESC, "Response delay")
+   field(INP,  "@asyn($(PORT))HvDelay")
+   field(PREC, "3")
+   field(HOPR, "0.5")
+   field(EGU,  "seconds")
+   field(SCAN, "I/O Intr")
+} 
+
+# Measures the time between HV request and last character of the response
+record(ai, "$(P)hv:RspTime") {
+   field(DESC, "Response time")
+   field(INP,  "@asyn($(PORT))HvB2bDelay")
+   field(PREC, "3")
+   field(HOPR, "0.9")
+   field(EGU,  "seconds")
+   field(SCAN, "I/O Intr")
+} 
