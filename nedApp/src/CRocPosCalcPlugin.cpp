@@ -11,6 +11,7 @@
 #include "CRocPosCalcPlugin.h"
 #include "Log.h"
 
+#include <algorithm>
 #include <cstring>
 #include <likely.h>
 #include <limits>
@@ -439,8 +440,8 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
         if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
     }
     if (y >= 7) {
-        if (m_calcParams.passVetoes == false) return CRocDataPacket::VETO_OUT_OF_RANGE;
         if (veto == CRocDataPacket::VETO_NO) veto = CRocDataPacket::VETO_OUT_OF_RANGE;
+        if (m_calcParams.passVetoes == false) return veto;
         y = 6;
     }
 
@@ -462,8 +463,6 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     if (veto == CRocDataPacket::VETO_NO) {
         // Reduce the echo events - strong neutrons with light response spanning
         // over multiple acq frames
-//LOG_ERROR("TOF: now=%u, prev=%u, diff=%u tofResolution=%u", event->tof, detParams->lastTof, diff_unsigned(event->tof, detParams->lastTof), m_calcParams.tofResolution);
-//LOG_ERROR("PIX: now=%u, prev=%u, diff=%u", pixel, detParams->lastPixelId, diff_unsigned(pixel, detParams->lastPixelId));
         if (pulseId == detParams->pulseId && (event->tof - detParams->lastTof) < m_calcParams.tofResolution && diff_unsigned(pixel, detParams->lastPixelId) < 84) {
             veto = CRocDataPacket::VETO_ECHO;
         } else {
@@ -482,10 +481,18 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
 CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams)
 {
     uint8_t cnt = 0;
+    uint32_t sum = 0;
     for (int i=0; i<4; i++) {
+        sum += event->time_range[i];
         if (event->time_range[i] >= detParams->timeRangeMin) {
             cnt++;
         }
+    }
+    if (sum > 600) {
+        return CRocDataPacket::VETO_TIMERANGE_BAD;
+    }
+    if (cnt < detParams->timeRangeMinCnt) {
+        return CRocDataPacket::VETO_TIMERANGE_BAD;
     }
 
     if (event->time_range[0] < m_calcParams.timeRange1Min && event->time_range[1] < m_calcParams.timeRange2Min) {
@@ -497,9 +504,6 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket:
         }
     }
 
-    if (cnt < detParams->timeRangeMinCnt) {
-        return CRocDataPacket::VETO_TIMERANGE_BAD;
-    }
     return CRocDataPacket::VETO_NO;
 }
 
@@ -526,128 +530,173 @@ uint8_t CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, ui
     return nNonZero;
 }
 
+static inline std::vector<uint8_t> sortIndexesDesc(const uint8_t *values, size_t size) {
+    std::vector<uint8_t> sorted(size);
+
+    for (size_t i=0; i<size; i++) {
+        sorted[i]=i;
+    }
+
+	for (size_t i=0; i<size; i++) {
+		for(size_t j=i+1; j<size; j++) {
+            if (values[sorted[i]] < values[sorted[j]]) {
+                uint8_t tmp = sorted[j];
+				sorted[j] = sorted[i];
+				sorted[i] = tmp;
+			}
+		}
+	}
+    return sorted;
+}
+
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &y)
 {
-    uint8_t yCnt = 0;
-    uint8_t yMaxIndex = 0;
-    uint8_t ySecondMaxIndex = 0;
-    uint8_t yThirdMaxIndex = 0;
-    uint8_t yIndex = 0;
-    uint8_t nYmaxes;
-
-    for (int i=0; i<7; i++) {
-        if (event->photon_count_y[i] >= detParams->yMin)
-            yCnt++;
+    uint8_t totalCnt = 0;
+    for (uint8_t i=0; i<7; i++) {
+        if (event->photon_count_y[i] > detParams->yMin) {
+            totalCnt++;
+        }
     }
-    if (yCnt >= detParams->yCntMax)
+    if (totalCnt > detParams->yCntMax)
         return CRocDataPacket::VETO_Y_HIGH_SIGNAL;
 
-    nYmaxes = findMaxIndexes(event->photon_count_y, 7, yMaxIndex, ySecondMaxIndex, yThirdMaxIndex);
+    std::vector<uint8_t> ySorted = sortIndexesDesc(event->photon_count_y, 7);
 
-    // Try efficiency boost
-    if (yCnt == 0) {
+    y = ySorted[0];
+    if (event->photon_count_y[ySorted[0]] < detParams->yMin) {
         if (!m_calcParams.efficiencyBoost)
             return CRocDataPacket::VETO_Y_LOW_SIGNAL;
-        if (nYmaxes > 1) {
-            if ((event->photon_count_y[yMaxIndex] + event->photon_count_y[ySecondMaxIndex]) < detParams->yMin)
-                return CRocDataPacket::VETO_Y_LOW_SIGNAL;
-            int distance = abs(yMaxIndex - ySecondMaxIndex);
-            if (distance > 1)
-                return CRocDataPacket::VETO_Y_LOW_SIGNAL;
-            // Distance is 1 and there's enough photons combined, continue
+        if ((event->photon_count_y[ySorted[0]] + event->photon_count_y[ySorted[1]]) <= detParams->yMin || diff_unsigned(ySorted[0], ySorted[1]) > 1) {
+            return CRocDataPacket::VETO_Y_LOW_SIGNAL;
         }
     }
 
-    // Implementation only for YMaxOut==7, TODO for YMaxOut==13
-    yIndex = yMaxIndex;
-    if (nYmaxes > 1 &&
-        event->photon_count_y[ySecondMaxIndex] > (0.75*event->photon_count_y[yMaxIndex]) &&
-        event->photon_count_y[ySecondMaxIndex] > detParams->yMin) {
-
-        int distance = abs(yMaxIndex - ySecondMaxIndex);
-        if (m_calcParams.checkAdjTube && distance > 1)
-            return CRocDataPacket::VETO_Y_NON_ADJACENT;
-
-        if (event->photon_count_y[ySecondMaxIndex] == event->photon_count_y[yMaxIndex]) {
-            int v1 = abs(event->photon_count_y[yThirdMaxIndex] - event->photon_count_y[ySecondMaxIndex]);
-            int v2 = abs(event->photon_count_y[yThirdMaxIndex] - event->photon_count_y[yMaxIndex]);
-            if (v1 < v2)
-                yIndex = ySecondMaxIndex;
+    // When equal, pick the Y index with stronger neighbours response
+    if (event->photon_count_y[ySorted[0]] == event->photon_count_y[ySorted[1]]) {
+        if ( (ySorted[1] - ySorted[2]) < (ySorted[0] - ySorted[2]) ) {
+            y = ySorted[1];
         }
     }
-
-    // TODO: missing directions from dcom
-
-    y = yIndex;
-
-#ifdef DO_CENTROID
-    // Now the centroid position calculation
-    if (yIndex > 0 && yIndex < 6) {
-        int nsum = event->photon_count_y[yIndex+1] - event->photon_count_y[yIndex-1];
-        int dsum = event->photon_count_y[yIndex-1] + event->photon_count_y[yIndex] + event->photon_count_y[yIndex+1];
-        y += 1.0 * nsum / dsum;
-    }
-#endif
 
     return CRocDataPacket::VETO_NO;
 }
 
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &x)
 {
-    uint8_t xCnt = 0;
-    uint8_t xMaxIndex = 0;
-    uint8_t xSecondMaxIndex = 0;
-    uint8_t xThirdMaxIndex = 0;
-    uint8_t nXmaxes;
-
-    // Check veto conditions for X
-    for (int i=0; i<11; i++) {
-        if (event->photon_count_x[i] >= detParams->xMin)
-            xCnt++;
+    uint8_t totalCnt = 0;
+    for (uint8_t i=0; i<11; i++) {
+        if (event->photon_count_x[i] >= detParams->xMin) {
+            totalCnt++;
+        }
     }
-    if (xCnt >= detParams->xCntMax)
+    if (totalCnt > detParams->xCntMax)
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
 
-    nXmaxes = findMaxIndexes(event->photon_count_x, 11, xMaxIndex, xSecondMaxIndex, xThirdMaxIndex);
-    if (xCnt == 0) {
+    std::vector<uint8_t> xSorted = sortIndexesDesc(event->photon_count_x, 11);
+    std::vector<uint8_t> gSorted = sortIndexesDesc(event->photon_count_g, 14);
+
+    // Start with the obvious index, encoding might shift it by 1 in either direction
+    uint8_t gIndex = gSorted[0];
+    uint8_t xIndex = xSorted[0];
+
+    // Try the efficiency boost
+    if (event->photon_count_x[xIndex] < detParams->xMin) {
         if (!m_calcParams.efficiencyBoost)
             return CRocDataPacket::VETO_X_LOW_SIGNAL;
-        if (nXmaxes > 1) {
-            if ((event->photon_count_x[xMaxIndex] + event->photon_count_x[xSecondMaxIndex]) < detParams->xMin)
+        if ((event->photon_count_x[xSorted[0]] + event->photon_count_x[xSorted[1]]) > detParams->xMin) {
+            uint8_t distance = diff_unsigned(xSorted[0], xSorted[1]);
+            // X must be adjacent. 0,10 are adjacent to both 1 and 9
+            if (distance > 1 && distance < 9) {
                 return CRocDataPacket::VETO_X_LOW_SIGNAL;
-            int distance = abs(xMaxIndex - xSecondMaxIndex);
-            if (distance > 1 && distance < 9)
-                return CRocDataPacket::VETO_X_LOW_SIGNAL;
-            // Distance is 1 and there's enough photons combined, continue
+            }
+        } else {
+            return CRocDataPacket::VETO_X_LOW_SIGNAL;
         }
     }
 
-//    assert(detParams->pixelCheckMode == CRocParams::CROC_PIXELCHECK_USEMAX); // Need to support other modes?
-
-    uint8_t xIndex = xMaxIndex;
-    if (nXmaxes > 1 && event->photon_count_x[xMaxIndex] == event->photon_count_x[xSecondMaxIndex]) {
-        // Two max values found, posibly adjust X index
-        uint8_t v1 = event->photon_count_x[xMaxIndex] - event->photon_count_x[xThirdMaxIndex];
-        uint8_t v2 = event->photon_count_x[xSecondMaxIndex] - event->photon_count_x[xThirdMaxIndex];
-        if (v2 < v1)
-            xIndex = xSecondMaxIndex;
+    // When equal, pick the X index with stronger neighbours response
+    if (event->photon_count_x[xSorted[0]] == event->photon_count_x[xSorted[1]]) {
+        if ( (xSorted[1] - xSorted[2]) < (xSorted[0] - xSorted[2]) ) {
+            xIndex = xSorted[1];
+        }
     }
 
-    CRocDataPacket::VetoType ret;
-    uint8_t gIndex;
     switch (detParams->fiberCoding) {
     case CRocParams::FIBER_CODING_V2:
-        ret = calculateGPositionMultiGapReq(event, detParams, xIndex, gIndex);
+        // Reimplemented from dcomserver CROC_CALC_LNEWMGR
+        if ((xIndex == 0 || xIndex == 10) && gIndex > 0 && gIndex < 13) {
+            if (event->photon_count_g[gSorted[0]] < detParams->gGapMin1) {
+                return CRocDataPacket::VETO_G_LOW_SIGNAL;
+            }
+            if (event->photon_count_g[gSorted[1]] < detParams->gGapMin2) {
+                return CRocDataPacket::VETO_G_LOW_SIGNAL;
+            }
+            if (diff_unsigned(gSorted[0], gSorted[1]) > 1) {
+                return CRocDataPacket::VETO_G_NON_ADJACENT;
+            }
+            if ((xIndex == 0  && gSorted[0] < gSorted[1]) || (xIndex == 10 && gSorted[0] > gSorted[1])) {
+                gIndex = gSorted[1];
+            }
+        } else {
+            if (event->photon_count_g[gSorted[0]] < detParams->gMin) {
+                return CRocDataPacket::VETO_G_LOW_SIGNAL;
+            }
+            uint8_t gThreshold = m_calcParams.gNongapMaxRatio * event->photon_count_g[gSorted[0]];
+            if (event->photon_count_g[gSorted[1]] > gThreshold) {
+                return CRocDataPacket::VETO_G_HIGH_SIGNAL;
+            }
+        }
         break;
     case CRocParams::FIBER_CODING_V3:
-        ret = calculateGPositionNencode(event, detParams, xIndex, gIndex);
+        // Reimplemented from dcomserver CROC_CALCP_NENCODE_BALANCE
+        if (xIndex > 0 && xIndex < 10) {
+            if (event->photon_count_g[gIndex] < detParams->gMin)
+                return CRocDataPacket::VETO_G_LOW_SIGNAL;
+            uint8_t gThreshold = m_calcParams.gNongapMaxRatio * event->photon_count_g[gIndex];
+            if (event->photon_count_g[gSorted[1]] > gThreshold)
+                return CRocDataPacket::VETO_G_HIGH_SIGNAL;
+        } else if (xIndex == 1 || xIndex == 9) {
+            uint8_t xThreshold = 0.65 * event->photon_count_x[xIndex];
+            if (detParams->xMin >= xThreshold) {
+                xThreshold = detParams->xMin + 1;
+            }
+            if (event->photon_count_x[xSorted[1]] >= xThreshold) {
+                if ((gIndex % 2) == 1) {
+                    if ((xSorted[1] == 1 && xSorted[0] == 10) || (xSorted[1] == 9 && xSorted[0] == 0)) {
+                        xIndex = xSorted[1];
+                    } else {
+                        return CRocDataPacket::VETO_G_GHOST;
+                    }
+                } else {
+                    if ((xSorted[1] == 1 && xSorted[0] == 0)  || (xSorted[1] == 9 && xSorted[10] == 0)) {
+                        xIndex = xSorted[1];
+                    } else {
+                        return CRocDataPacket::VETO_G_GHOST;
+                    }
+                }
+            }
+        }
+
+        // Second round - xIndex might be already be altered
+        if (xIndex == 0 || xIndex == 10) {
+            if (event->photon_count_g[gSorted[0]] < detParams->gMin)
+                return CRocDataPacket::VETO_G_LOW_SIGNAL;
+
+            if ((gIndex % 2) == 1) {
+                xIndex = (xIndex == 10 ? 0 : 10);
+            }
+            if (diff_unsigned(gSorted[0], gSorted[1]) > 1) {
+                if (event->photon_count_g[gSorted[1]] > detParams->gGapMin1)
+                    return CRocDataPacket::VETO_G_GHOST;
+            } else {
+                if ((event->photon_count_g[gSorted[0]] + event->photon_count_g[gSorted[1]]) < detParams->gMin)
+                    return CRocDataPacket::VETO_G_LOW_SIGNAL;
+            }
+        }
         break;
     default:
-        ret = CRocDataPacket::VETO_INVALID_CALC;
-        break;
+        return CRocDataPacket::VETO_INVALID_CALC;
     }
-    if (ret != CRocDataPacket::VETO_NO)
-        return ret;
 
     x = 11*gIndex + xIndex;
     return CRocDataPacket::VETO_NO;
@@ -801,14 +850,18 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     }
 
     // Inspect edges and consider modifying G or X index
-    if (xMaxIndex == 0 || xMaxIndex == 10) {
+    if (detParams->fiberCoding == CRocParams::FIBER_CODING_V2) {
         float gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
-        if (detParams->fiberCoding == CRocParams::FIBER_CODING_V2) {
+        if ((xMaxIndex == 0 || xMaxIndex == 10) && gMaxIndex > 0 && gMaxIndex < 13) {
             // 1-to-1 mapping, but an event might get G group wrong
             if (gDirection > 0) {
                 assert(gMaxIndex < 13);
-                if (event->photon_count_g[gMaxIndex+1] < 0.3*event->photon_count_g[gMaxIndex]) {
-                    return CRocDataPacket::VETO_G_GHOST; 
+                // Reject ghosts with indipendent discrimination
+                if (event->photon_count_g[gMaxIndex] < detParams->gGapMin1) {
+                    return CRocDataPacket::VETO_G_GHOST;
+                }
+                if (event->photon_count_g[gMaxIndex+1] < detParams->gGapMin2) {
+                    return CRocDataPacket::VETO_G_GHOST;
                 }
                 if (event->photon_count_x[0] > event->photon_count_x[10]) {
                     gMaxIndex++;
@@ -821,7 +874,11 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
                 }
             } else if (gDirection < 0) {
                 assert(gMaxIndex > 0);
-                if (event->photon_count_g[gMaxIndex-1] < 0.3*event->photon_count_g[gMaxIndex]) {
+                // Reject ghosts with indipendent discrimination
+                if (event->photon_count_g[gMaxIndex] < detParams->gGapMin1) {
+                    return CRocDataPacket::VETO_G_GHOST;
+                }
+                if (event->photon_count_g[gMaxIndex-1] < detParams->gGapMin2) {
                     return CRocDataPacket::VETO_G_GHOST;
                 }
                 if (event->photon_count_x[10] > event->photon_count_x[0]) {
@@ -847,7 +904,16 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
                     }
                 }
             }
-        } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
+        } else {
+            uint8_t gThreshold = m_calcParams.gNongapMaxRatio * event->photon_count_g[gMaxIndex];
+            if (gDirection > 0 && event->photon_count_g[gMaxIndex+1] > gThreshold)
+                return CRocDataPacket::VETO_G_HIGH_SIGNAL;
+            else if (gDirection < 0 && event->photon_count_g[gMaxIndex-1] > gThreshold)
+                return CRocDataPacket::VETO_G_HIGH_SIGNAL;
+        }
+    } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
+        if (xMaxIndex == 0 || xMaxIndex == 10) {
+            float gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
             // Every second G group has X0 and X10 swapped, see function comment
             // for details.
             if ((gMaxIndex % 2) == 1) {
@@ -879,104 +945,12 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
 
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionMultiGapReq(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t xIndex, uint8_t &gIndex)
 {
-    // Reimplemented from dcomserver CROC_CALC_LNEWMGR
-    uint8_t gMaxIndex;
-    uint8_t gSecondMaxIndex;
-    uint8_t gThirdMaxIndex;
-    uint8_t nGmaxes;
-
-    nGmaxes = findMaxIndexes(event->photon_count_g, 14, gMaxIndex, gSecondMaxIndex, gThirdMaxIndex);
-
-    // Start with the obvious index, encoding might shift it by 1 in either direction
-    gIndex = gMaxIndex;
-
-    if ((xIndex == 0 || xIndex == 10) && gMaxIndex > 0 && gMaxIndex < 13) {
-        if (event->photon_count_g[gMaxIndex] < detParams->gGapMin1)
-            return CRocDataPacket::VETO_G_LOW_SIGNAL;
-        if (nGmaxes > 1) {
-            if (event->photon_count_g[gSecondMaxIndex] < detParams->gGapMin2)
-                return CRocDataPacket::VETO_G_LOW_SIGNAL;
-            int distance = abs(gMaxIndex - gSecondMaxIndex);
-            if (distance > 1)
-                return CRocDataPacket::VETO_G_LOW_SIGNAL;
-            if ((xIndex == 0  && gMaxIndex < gSecondMaxIndex) ||
-                (xIndex == 10 && gMaxIndex > gSecondMaxIndex)) {
-
-                    gIndex = gSecondMaxIndex;
-            }
-        }
-    } else {
-        if (event->photon_count_g[gMaxIndex] < detParams->gMin)
-            return CRocDataPacket::VETO_G_LOW_SIGNAL;;
-        uint8_t cnt = m_calcParams.gNongapMaxRatio * event->photon_count_g[gMaxIndex];
-        if (nGmaxes > 1 && event->photon_count_g[gSecondMaxIndex] > cnt)
-            return CRocDataPacket::VETO_G_HIGH_SIGNAL;
-    }
 
     return CRocDataPacket::VETO_NO;
 }
 
 CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionNencode(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &xIndex, uint8_t &gIndex)
 {
-    // Reimplemented from dcomserver CROC_CALCP_NENCODE_BALANCE
-    uint8_t gMaxIndex;
-    uint8_t gSecondMaxIndex;
-    uint8_t xMaxIndex;
-    uint8_t xSecondMaxIndex;
-    uint8_t tmp;
-    uint8_t nGmaxes;
-
-    nGmaxes = findMaxIndexes(event->photon_count_g, 14, gMaxIndex, gSecondMaxIndex, tmp);
-    findMaxIndexes(event->photon_count_x, 11, xMaxIndex, xSecondMaxIndex, tmp);
-
-    if (nGmaxes == 0)
-        return CRocDataPacket::VETO_G_LOW_SIGNAL;
-
-    if (xIndex > 0 && xIndex < 10) {
-        if (event->photon_count_g[gMaxIndex] < detParams->gMin)
-            return CRocDataPacket::VETO_G_LOW_SIGNAL;
-        uint8_t cnt = m_calcParams.gNongapMaxRatio * event->photon_count_g[gMaxIndex];
-        if (nGmaxes > 1 && event->photon_count_g[gSecondMaxIndex] > cnt)
-            return CRocDataPacket::VETO_G_HIGH_SIGNAL;
-    } else if (xSecondMaxIndex == 1 || xSecondMaxIndex == 9) {
-        uint8_t cnt = std::max(detParams->xMin, (uint32_t)(0.65 * event->photon_count_x[xIndex]));
-        if (event->photon_count_x[xSecondMaxIndex] >= cnt) {
-
-            if (gMaxIndex & 0x1) { // group is odd 1,3,etc
-                if ((xSecondMaxIndex == 1 && xIndex == 10) ||
-                    (xSecondMaxIndex == 9 && xIndex == 0)) {
-
-                    xIndex = xSecondMaxIndex;
-                } else {
-                    return CRocDataPacket::VETO_G_GHOST;
-                }
-            } else { // group is even 2,4,etc
-                if ((xSecondMaxIndex == 1 && xIndex == 0) ||
-                    (xSecondMaxIndex == 9 && xIndex == 10)) {
-                    xIndex = xSecondMaxIndex;
-                } else {
-                    return CRocDataPacket::VETO_G_GHOST;
-                }
-            }
-        }
-    }
-
-    if (xIndex == 0 && xIndex == 10) {
-        if (abs(gMaxIndex - gSecondMaxIndex) == 1) {
-            if (nGmaxes > 1 && event->photon_count_g[gMaxIndex] + event->photon_count_g[gSecondMaxIndex] < detParams->gMin)
-                return CRocDataPacket::VETO_G_LOW_SIGNAL;
-        } else {
-            if (event->photon_count_g[gMaxIndex] < detParams->gMin)
-                return CRocDataPacket::VETO_G_LOW_SIGNAL;
-
-            if (nGmaxes > 1 && event->photon_count_g[gSecondMaxIndex] > detParams->gGapMin2)
-                return CRocDataPacket::VETO_G_LOW_SIGNAL;
-        }
-    }
-
-    // TODO: explain this!!!
-    if ((gIndex == 4 && xIndex == 11) || (gIndex == 6 && gIndex == 2))
-        xIndex = 1;
 
     return CRocDataPacket::VETO_NO;
 }
