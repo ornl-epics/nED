@@ -27,6 +27,9 @@ CRocPlugin::CRocPlugin(const char *portName, const char *dispatcherPortName, con
     } else if (m_version == "v93") {
         setIntegerParam(Supported, 1);
         createParams_v93();
+    } else if (m_version == "v94") {
+        setIntegerParam(Supported, 1);
+        createParams_v94();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported CROC version '%s'", version);

@@ -1,0 +1,34 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "CRocPlugin_v94.generated"
+include "CRocPlugin.include"
+include "GlobalConD.include"
+
+record(longin, "$(P)HwVer")
+{
+    field(HIGH, "2")
+    field(LOW,  "0")
+}
+record(longin, "$(P)HwRev")
+{
+    field(HIGH, "3")
+    field(LOW,  "1")
+}
+record(longin, "$(P)FwVer")
+{
+    field(HIGH, "10")
+    field(LOW,  "8")
+}
+record(longin, "$(P)FwRev")
+{
+    field(HIGH, "5")
+    field(LOW,  "3")
+}
+record(calc, "$(P)HwStatus")
+{
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
+    field(CALC, "(A+B)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+}

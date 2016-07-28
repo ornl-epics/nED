@@ -85,9 +85,14 @@ class CRocPlugin : public BaseModulePlugin {
     private: // functions
 
         /**
-         * Create and register all ROC v4.4/v4.5 parameters to be exposed to EPICS.
+         * Create and register all CROC v9.3 parameters to be exposed to EPICS.
          */
         void createParams_v93();
+
+        /**
+         * Create and register all CROC v9.4 parameters to be exposed to EPICS.
+         */
+        void createParams_v94();
 };
 
 #endif // CROC_PLUGIN_H
