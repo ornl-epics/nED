@@ -45,7 +45,9 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("TimeRange1Min",    asynParamInt32, &TimeRange1Min, 6);     // WRITE - Min counts in first time range bin
     createParam("TimeRange2Min",    asynParamInt32, &TimeRange2Min, 5);     // WRITE - Min counts in second time range bin
     createParam("TimeRangeDelayMin",asynParamInt32, &TimeRangeDelayMin, 15);// WRITE - Delayed event threshold
-    createParam("TofResolution",    asynParamInt32, &TofResolution, 250);   // WRITE - Time between two events in 100ns
+    createParam("TimeRangeSumMax",  asynParamInt32, &TimeRangeSumMax, 600); // WRITE - High threshold for integrated time ranges
+    createParam("EchoDeadTime",     asynParamInt32, &EchoDeadTime, 250);    // WRITE - Time between two local events in 100ns
+    createParam("EchoDeadArea",     asynParamInt32, &EchoDeadArea, 160);    // WRITE - Number of pixels defining the echo-detection area
     createParam("ProcessMode",      asynParamInt32, &ProcessMode, 0);       // WRITE - Select event verification algorithm (0=legacy,1=new)
 
     createParam("CntTotalEvents",   asynParamInt32, &CntTotalEvents, 0);    // READ - Number of all events
@@ -63,11 +65,6 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("CntVetoEcho",      asynParamInt32, &CntVetoEcho, 0);       // READ - Number of events too close to previous
     createParam("CntVetoTimeRange", asynParamInt32, &CntVetoTimeRange, 0);  // READ - Number of events rejected due to time range policy
     createParam("CntVetoDelayed",   asynParamInt32, &CntVetoDelayed, 0);    // READ - Number of events delayed based on time range bins
-
-    // These might be more suitable in CROC configuration
-    createParam("GWeights",     asynParamInt8Array, &GWeights);             // WRITE - G noise calculation weights
-    createParam("XWeights",     asynParamInt8Array, &XWeights);             // WRITE - X noise calculation weights
-    createParam("YWeights",     asynParamInt8Array, &YWeights);             // WRITE - Y noise calculation weights
 
     callParamCallbacks();
 }
@@ -117,8 +114,14 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == TimeRangeDelayMin) {
         m_calcParams.timeRangeDelayMin = value;
         handled = true;
-    } else if (pasynUser->reason == TofResolution) {
-        m_calcParams.tofResolution = value;
+    } else if (pasynUser->reason == TimeRangeSumMax) {
+        m_calcParams.timeRangeSumMax = value;
+        handled = true;
+    } else if (pasynUser->reason == EchoDeadTime) {
+        m_calcParams.echoDeadTime = value;
+        handled = true;
+    } else if (pasynUser->reason == EchoDeadArea) {
+        m_calcParams.echoDeadArea = value / 2;
         handled = true;
     } else if (pasynUser->reason == OutExtMode) {
         m_calcParams.outExtMode = (value != 0);
@@ -215,7 +218,6 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
             char name[32];
             snprintf(name, sizeof(name), "XWeight%d", i);
             if (param == name) {
-//LOG_ERROR("xWeights[%d] = %d", i, value);
                 params->xWeights[i] = value;
                 break;
             }
@@ -374,7 +376,7 @@ CRocPosCalcPlugin::Stats CRocPosCalcPlugin::processPacket(const DasPacket *inPac
             ret = CRocDataPacket::VETO_INVALID_POSITION;
             pixel = CRocDataPacket::VETO_INVALID_POSITION;
         } else {
-            ret = calculatePixel(inEvent, it->second, pixel, pulseId);
+            ret = calculatePixel(inEvent, it->second, pulseId, pixel);
         }
 
         if (ret == CRocDataPacket::VETO_NO || m_calcParams.passVetoes) {
@@ -419,7 +421,7 @@ static inline uint32_t diff_unsigned(uint32_t a, uint32_t b)
  * pixels. The final encoding is as follows:
  * > pixel id = (0x8FC00000) | ([detector offset] + [xy])
  */
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *detParams, uint32_t &pixel, uint64_t pulseId)
+CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *detParams, uint64_t pulseId, uint32_t &pixel)
 {
     CRocDataPacket::VetoType veto = CRocDataPacket::VETO_NO;
     CRocDataPacket::VetoType tmpVeto = CRocDataPacket::VETO_NO;
@@ -463,7 +465,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
     if (veto == CRocDataPacket::VETO_NO) {
         // Reduce the echo events - strong neutrons with light response spanning
         // over multiple acq frames
-        if (pulseId == detParams->pulseId && (event->tof - detParams->lastTof) < m_calcParams.tofResolution && diff_unsigned(pixel, detParams->lastPixelId) < 84) {
+        if (pulseId == detParams->pulseId && (event->tof - detParams->lastTof) < m_calcParams.echoDeadTime && diff_unsigned(pixel, detParams->lastPixelId) < m_calcParams.echoDeadArea) {
             veto = CRocDataPacket::VETO_ECHO;
         } else {
             detParams->lastTof = event->tof;
@@ -488,7 +490,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket:
             cnt++;
         }
     }
-    if (sum > 600) {
+    if (sum > m_calcParams.timeRangeSumMax) {
         return CRocDataPacket::VETO_TIMERANGE_BAD;
     }
     if (cnt < detParams->timeRangeMinCnt) {
@@ -507,30 +509,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::checkTimeRange(const CRocDataPacket:
     return CRocDataPacket::VETO_NO;
 }
 
-uint8_t CRocPosCalcPlugin::findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3)
-{
-    uint8_t nNonZero = 0;
-
-    max1 = max2 = max3 = 255;
-    for (size_t i = 0; i < size; i++) {
-        if (values[i] > 0) {
-            nNonZero++;
-        }
-        if (max1 == 255 || values[i] > values[max1]) {
-            max3 = max2;
-            max2 = max1;
-            max1 = i;
-        } else if (max2 == 255 || values[i] > values[max2]) {
-            max3 = max2;
-            max2 = i;
-        } else if (max3 == 255 || values[i] > values[max3] ) {
-            max3 = i;
-        }
-    }
-    return nNonZero;
-}
-
-static inline std::vector<uint8_t> sortIndexesDesc(const uint8_t *values, size_t size) {
+inline std::vector<uint8_t> CRocPosCalcPlugin::sortIndexesDesc(const uint8_t *values, size_t size) {
     std::vector<uint8_t> sorted(size);
 
     for (size_t i=0; i<size; i++) {
@@ -621,6 +600,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
         }
     }
 
+    // Find the right G,X due to encoding loss of information
     switch (detParams->fiberCoding) {
     case CRocParams::FIBER_CODING_V2:
         // Reimplemented from dcomserver CROC_CALC_LNEWMGR
@@ -702,29 +682,10 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
     return CRocDataPacket::VETO_NO;
 }
 
-inline double CRocPosCalcPlugin::calculateGNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[14])
+inline double CRocPosCalcPlugin::calculateNoise(const uint8_t *values, size_t size, uint8_t maxIndex, const uint8_t *weights)
 {
     uint32_t noise = 0;
-    for (uint8_t i=0; i<14; i++) {
-        noise += values[i] * weights[abs(i-maxIndex)];
-    }
-    return 1.0*noise/values[maxIndex];
-}
-
-inline double CRocPosCalcPlugin::calculateXNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[11])
-{
-    uint32_t noise = 0;
-    for (uint8_t i=0; i<11; i++) {
-//LOG_ERROR("values[%d]=%d weights[%d]=%d", i, values[i], abs(i-maxIndex), weights[abs(i-maxIndex)]);
-        noise += values[i] * weights[abs(i-maxIndex)];
-    }
-    return 1.0*noise/values[maxIndex];
-}
-
-inline double CRocPosCalcPlugin::calculateYNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[7])
-{
-    uint32_t noise = 0;
-    for (uint8_t i=0; i<7; i++) {
+    for (uint8_t i=0; i<size; i++) {
         noise += values[i] * weights[abs(i-maxIndex)];
     }
     return 1.0*noise/values[maxIndex];
@@ -765,7 +726,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
         return CRocDataPacket::VETO_Y_LOW_SIGNAL;
     }
 
-    double noise = calculateYNoise(event->photon_count_y, yMaxIndex, detParams->yWeights);
+    double noise = calculateNoise(event->photon_count_y, 7, yMaxIndex, detParams->yWeights);
     if (noise > detParams->yNoiseThreshold) {
         return CRocDataPacket::VETO_Y_HIGH_SIGNAL;
     }
@@ -782,7 +743,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocData
 
 /**
  * Fiber mapping v3 correction:
- * Every even G index (first one being 1) has x1 fiber swapped with x11. This is
+ * Every even G index (index starts at 0) has x1 fiber swapped with x11. This is
  * to help more accurtely determine the position on the edge between two Gs.
  * Knowing that, post-processing correction is necessary for even G indexes.
  * Consider these 2 cases:
@@ -822,7 +783,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     if (findMaxIndex(event->photon_count_g, 14, gMaxIndex) == false) {
         return CRocDataPacket::VETO_G_LOW_SIGNAL;
     }
-    double gNoise = calculateGNoise(event->photon_count_g, gMaxIndex, detParams->gWeights);
+    double gNoise = calculateNoise(event->photon_count_g, 14, gMaxIndex, detParams->gWeights);
     if (gNoise > detParams->gNoiseThreshold) {
         return CRocDataPacket::VETO_G_HIGH_SIGNAL;
     }
@@ -838,7 +799,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     if (findMaxIndex(event->photon_count_x, 11, xMaxIndex) == false) {
         return CRocDataPacket::VETO_X_LOW_SIGNAL;
     }
-    double xNoise = calculateXNoise(event->photon_count_x, xMaxIndex, detParams->xWeights);
+    double xNoise = calculateNoise(event->photon_count_x, 11, xMaxIndex, detParams->xWeights);
     if (xNoise > detParams->xNoiseThreshold) {
         return CRocDataPacket::VETO_X_HIGH_SIGNAL;
     }
@@ -940,18 +901,6 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocData
     }
 
     x = 11*gMaxIndex + xMaxIndex;
-    return CRocDataPacket::VETO_NO;
-}
-
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionMultiGapReq(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t xIndex, uint8_t &gIndex)
-{
-
-    return CRocDataPacket::VETO_NO;
-}
-
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculateGPositionNencode(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &xIndex, uint8_t &gIndex)
-{
-
     return CRocDataPacket::VETO_NO;
 }
 

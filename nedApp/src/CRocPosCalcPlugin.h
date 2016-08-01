@@ -84,14 +84,16 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             bool outExtMode;
             bool processModeNew;
 
-            bool checkAdjTube;          //!< Switch to toggle checking for adjacent tubes
-            float gNongapMaxRatio;
+            float gNongapMaxRatio;  //!< Percentage of the second max G comparing to max in order to qualify
             bool efficiencyBoost;       //!< Ignore min threshold if single channel response
 
+            // For testing purposes for now, consider moving to detectors otherwise
             uint8_t timeRange1Min;      //!< Threshold for first time range bin
             uint8_t timeRange2Min;      //!< Threshold for second time range bin
             uint32_t timeRangeDelayMin; //!< Delayed event threshold
-            uint32_t tofResolution;     //!< Min time between two events in 100ns
+            uint32_t timeRangeSumMax;   //!< Max value for sumed time ranges
+            uint32_t echoDeadTime;      //!< Min time between two space-close events in 100ns
+            uint32_t echoDeadArea;      //!< Area in pixels for echo rejection
         };
 
         /**
@@ -204,28 +206,134 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
 
         /**
          * Calculates pixel id from raw event data.
+         *
+         * This is the top level function to convert a raw event into common
+         * neutron format. Based on run time parameters, it decides which
+         * discrimination and event calculations algorithms to use. Rejected
+         * events are flagged with veto masks. Dirty work is done by other
+         * functions in this order:
+         *  * checkTimeRange()
+         *  * calculateYPosition()
+         *  * calculateXPosition()
+         *
+         * @param[in] event input in raw format
+         * @param[in] params of the detector
+         * @param[in] pulseId is unique id of the pulse this event belongs to
+         * @param[out] pixel calculated, upper bits describe veto flags
+         * @return When event is rejected, the return veto type describes the
+         *         reason for rejection. The same type is put in upper bits of
+         *         pixel.
          */
-        CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *params, uint32_t &pixel, uint64_t pulseId);
+        CRocDataPacket::VetoType calculatePixel(const CRocDataPacket::RawEvent *event, CRocParams *params, uint64_t pulseId, uint32_t &pixel);
 
         /**
-         * Verify the time spectrum range of the event.
+         * Verify the 4 time ranges of the raw event.
          *
-         * The 4 time range bins are used to validate the time shape of the neutron
-         * event and catch non-neutron events like gamma.
+         * Raw event provides counts in 4 time range bins. Width of the bins
+         * is configured in detector settings. The information from time ranges
+         * is used to detect a real neutron event and eliminate potential gamma
+         * events. Function here does only elimination, no correction.
+         *
+         * The discrimination involves several steps:
+         *   * minimum number of bins with high enough counts
+         *   * integrated number of counts must be below the max threshold
+         *   * first two bins must be above the min limit
+         *
+         * @param[in] event input in raw format
+         * @param[in] detParams settings of detector
+         * @return Positive number when rejected, 0 otherwise.
          */
         CRocDataPacket::VetoType checkTimeRange(const CRocDataPacket::RawEvent *event, const CRocParams *detParams);
 
+        /**
+         * Calculate the Y position of the event
+         *
+         * Detector provides 7 Y positions.
+         *
+         * Function first does low signal and noisy signal discrimination.
+         * Number of channels with counts over the minimum must not exceed
+         * configurable threshold. If no channel reaches the minimum count value,
+         * a second chance is given if efficiency boost is enabled. Only if two
+         * adjacent events sumed together reach the minimum the event is allowed.
+         *
+         * The calculated Y position is simply the index of the channel with
+         * highest counts value. Except when two channels have the same highest
+         * value. In such case the third adjacent channel determines the final
+         * Y index.
+         *
+         * @param[in] event input in raw format
+         * @param[in] detParams settings of detector
+         * @param[out] y calculated position
+         * @return Positive number when rejected, 0 otherwise.
+         */
         CRocDataPacket::VetoType calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
+
+        /**
+         * Calculate the Y position of the event
+         *
+         * @todo Work in progress, not used right now due to ghosting.
+         */
         CRocDataPacket::VetoType calculateYPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
 
+        /**
+         * Calculate the X position of the event
+         *
+         * Due to limited number of PMTs, X information is organized into 14
+         * groups called G channels and 11 X channels for finer position within
+         * the group. Each channels provides number of photon counts in that
+         * channel in given acquisition time. To calculate the overall X position,
+         * the process is easy in theory with a lot of corner cases to handle.
+         * Find the G channel with most counts and multiply its index with 11.
+         * Then find the X channel and add its index to previosuly multipled
+         * value. The outcome is the absolute X position of the event.
+         *
+         * When X is close to 0 or 10 edge, its response could leak to the other
+         * side of channels and 2 G channels will share the counts. The
+         * algorithm tries to use G and X channel information to determine the
+         * correct position of the event. Error to do so will move the pixel id
+         * 11 or even 22 pixels to the either direction. Such an error is often
+         * called ghosting in SNS. PMT physical mapping can improve the situation
+         * greatly and ghosting is almost removed with mapping v3.
+         *
+         * Function first does low signal and noisy signal discrimination.
+         * Number of channels with counts over the minimum must not exceed
+         * configurable threshold. If no channel reaches the minimum count value,
+         * a second chance is given if efficiency boost is enabled. Only if two
+         * adjacent events sumed together reach the minimum the event is allowed.
+         *
+         * The rest of the function deals with properly determining the correct
+         * location of the event based on selected detector mapping. It will
+         * change G and/or X index when certain. When uncertain, it will reject
+         * the event as ghost.
+         *
+         * Finally the X position is calculated as X = Gindex*11 + Xindex.
+         *
+         * @param[in] event input in raw format
+         * @param[in] detParams settings of detector
+         * @param[out] x calculated position
+         * @return Positive number when rejected, 0 otherwise.
+         */
         CRocDataPacket::VetoType calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &x);
+
+        /**
+         * Calculate the X position of the event
+         *
+         * @todo Work in progress, not used right now due to ghosting.
+         */
         CRocDataPacket::VetoType calculateXPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &x);
 
-        CRocDataPacket::VetoType calculateGPositionMultiGapReq(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t xIndex, uint8_t &gIndex);
-
-        CRocDataPacket::VetoType calculateGPositionNencode(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &xIndex, uint8_t &gIndex);
-
     private:
+        /**
+         * Return an with of the maximum value or the first one found.
+         *
+         * When two or more values are the same, index of the first one is
+         * returned.
+         *
+         * @param[in] values input table
+         * @param[in] size of the input table
+         * @param[out] max found index
+         * @return true when found, false when all values are 0.
+         */
         bool findMaxIndex(const uint8_t *values, size_t size, uint8_t &max);
 
         /**
@@ -245,21 +353,31 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          */
         float findDirection(const uint8_t *values, size_t size, uint8_t maxIndex);
 
-        double calculateGNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[14]);
-        double calculateXNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[11]);
-        double calculateYNoise(const uint8_t *values, uint8_t maxIndex, const uint8_t weights[7]);
+        /**
+         * Return a ratio of noise comparing to the max value.
+         *
+         * For each value from the input table determine the index distance from
+         * the maxIndex. Use found distance as the index into the weights table
+         * and multiply weight with the input value. Sum all together and divide
+         * by value at maxIndex. Returned ratio equal to 1.0 when maxIndex is
+         * the only non-zero value or >1.0 otherwise.
+         *
+         * @param[in] values input table
+         * @param[in] size of the input table and weights table
+         * @param[in] maxIndex index of the maximum value in input table
+         * @param[in] weights is a table with weights
+         * @return noise ratio
+         */
+        double calculateNoise(const uint8_t *values, size_t size, uint8_t maxIndex, const uint8_t *weights);
 
         /**
-         * Find the maximum three indexes in the array.
+         * Values from the input table are sorted in descending order and the list of indeces is returned.
          *
-         * @param[in] values array
-         * @param[in] size of array
-         * @param[out] max1 index of maximum value
-         * @param[out] max2 index of second max value
-         * @param[out] max3 index of third max value
-         * @return number of non-zero values in array.
+         * @param[in] values input table
+         * @param[in] size of the input table
+         * @return a list indeces of the same size as input table
          */
-        static uint8_t findMaxIndexes(const uint8_t *values, size_t size, uint8_t &max1, uint8_t &max2, uint8_t &max3);
+        static inline std::vector<uint8_t> sortIndexesDesc(const uint8_t *values, size_t size);
 
         /**
          * Save a single detector parameter into cache
@@ -279,19 +397,21 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
 
     protected:
         #define FIRST_CROCPOSCALCPLUGIN_PARAM ErrMem
-        int ErrMem;         //!< Error allocating buffer
-        int CntSplit;       //!< Total number of splited incoming packet lists
-        int ResetCnt;       //!< Reset counters
-        int CalcEn;         //!< Toggle position calculation
-        int OutExtMode;     //!< Switch to toggle between normal and extended output format
-        int PassVetoes;     //!< Allow vetoes in output stream
-        int GNongapMaxRatio;//!< Second max G ratio
-        int EfficiencyBoost;//!< Switch to enable efficiency boost
-        int TimeRange1Min;  //!< Min counts in first time range bin
-        int TimeRange2Min;  //!< Min counts in second time range bin
-        int TimeRangeDelayMin; //!< Delayed event threshold
-        int TofResolution;  //!< Time between two events in 100ns
-        int ProcessMode;    //!< Select event verification algorithm
+        int ErrMem;             //!< Error allocating buffer
+        int CntSplit;           //!< Total number of splited incoming packet lists
+        int ResetCnt;           //!< Reset counters
+        int CalcEn;             //!< Toggle position calculation
+        int OutExtMode;         //!< Switch to toggle between normal and extended output format
+        int PassVetoes;         //!< Allow vetoes in output stream
+        int GNongapMaxRatio;    //!< Second max G ratio
+        int EfficiencyBoost;    //!< Switch to enable efficiency boost
+        int TimeRange1Min;      //!< Min counts in first time range bin
+        int TimeRange2Min;      //!< Min counts in second time range bin
+        int TimeRangeDelayMin;  //!< Delayed event threshold
+        int TimeRangeSumMax;    //!< High threshold for integrated time ranges
+        int EchoDeadTime;       //!< Time between two events in 100ns
+        int EchoDeadArea;       //!< High threshold for integrated time ranges
+        int ProcessMode;        //!< Select event verification algorithm
 
         int CntTotalEvents;    //!< Number of all events
         int CntGoodEvents;     //!< Number of good events
@@ -301,18 +421,14 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int CntVetoXNoise;     //!< X signal noisy
         int CntVetoGLow;       //!< G signal low
         int CntVetoGNoise;     //!< G signal noisy
-        int CntVetoGGhost;     //!< TODO
-        int CntVetoGNonAdj;    //!< TODO
+        int CntVetoGGhost;     //!< Rejected due to ghosting
+        int CntVetoGNonAdj;    //!< Non adjacent channels
         int CntVetoBadPos;     //!< Invalid detector configuration, no such position configured
         int CntVetoBadCalc;    //!< Bad configuration, no such mapping mode
         int CntVetoEcho;       //!< Event to close to previous
         int CntVetoTimeRange;  //!< Time range bins rejected
         int CntVetoDelayed;    //!< Event delayed based on time range bins
-
-        int GWeights;
-        int XWeights;
-        int YWeights;
-        #define LAST_CROCPOSCALCPLUGIN_PARAM YWeights
+        #define LAST_CROCPOSCALCPLUGIN_PARAM CntVetoDelayed
 };
 
 #endif // CROC_POS_CALC_PLUGIN_H
