@@ -1,0 +1,116 @@
+record(calc, "$(P)PmtsCheck1")
+{
+    field(INPA, "$(P)Y1:Pmt:Alarm NPP")
+    field(INPB, "$(P)Y2:Pmt:Alarm NPP")
+    field(INPC, "$(P)Y3:Pmt:Alarm NPP")
+    field(INPD, "$(P)Y4:Pmt:Alarm NPP")
+    field(INPE, "$(P)Y5:Pmt:Alarm NPP")
+    field(INPF, "$(P)Y6:Pmt:Alarm NPP")
+    field(INPG, "$(P)Y7:Pmt:Alarm NPP")
+    field(INPH, "$(P)X1:Pmt:Alarm NPP")
+    field(INPI, "$(P)X2:Pmt:Alarm NPP")
+    field(INPJ, "$(P)X3:Pmt:Alarm NPP")
+    field(INPK, "$(P)X4:Pmt:Alarm NPP")
+    field(INPL, "$(P)X5:Pmt:Alarm NPP")
+    field(CALC, "A+B+C+D+E+F+G+H+I+J+K+L")
+}
+record(calc, "$(P)PmtsCheck2")
+{
+    field(INPA, "$(P)X6:Pmt:Alarm NPP")
+    field(INPB, "$(P)X7:Pmt:Alarm NPP")
+    field(INPC, "$(P)X8:Pmt:Alarm NPP")
+    field(INPD, "$(P)X9:Pmt:Alarm NPP")
+    field(INPE, "$(P)X10:Pmt:Alarm NPP")
+    field(INPF, "$(P)X11:Pmt:Alarm NPP")
+    field(INPG, "$(P)G1:Pmt:Alarm NPP")
+    field(INPH, "$(P)G2:Pmt:Alarm NPP")
+    field(INPI, "$(P)G3:Pmt:Alarm NPP")
+    field(INPJ, "$(P)G4:Pmt:Alarm NPP")
+    field(INPK, "$(P)G5:Pmt:Alarm NPP")
+    field(INPL, "$(P)G6:Pmt:Alarm NPP")
+    field(CALC, "A+B+C+D+E+F+G+H+I+J+K+L")
+}
+record(calc, "$(P)PmtsCheck3")
+{
+    field(INPA, "$(P)G7:Pmt:Alarm NPP")
+    field(INPB, "$(P)G8:Pmt:Alarm NPP")
+    field(INPC, "$(P)G9:Pmt:Alarm NPP")
+    field(INPD, "$(P)G10:Pmt:Alarm NPP")
+    field(INPE, "$(P)G11:Pmt:Alarm NPP")
+    field(INPF, "$(P)G12:Pmt:Alarm NPP")
+    field(INPG, "$(P)G13:Pmt:Alarm NPP")
+    field(INPH, "$(P)G14:Pmt:Alarm NPP")
+    field(CALC, "A+B+C+D+E+F+G+H+I+J+K+L")
+}
+# Number of PMTs in alarm state
+record(calc, "$(P)NumFailedPmts")
+{
+    field(INPA, "$(P)PmtsCheck1 PP")
+    field(INPB, "$(P)PmtsCheck2 PP")
+    field(INPC, "$(P)PmtsCheck3 PP")
+    field(CALC, "A+B+C")
+}
+
+record(dfanout, "$(P)PmtsCheckEn1")
+{
+    field(OUTA, "$(P)Y1:Pmt:AlarmCalc.A PP")
+    field(OUTB, "$(P)Y2:Pmt:AlarmCalc.A PP")
+    field(OUTC, "$(P)Y3:Pmt:AlarmCalc.A PP")
+    field(OUTD, "$(P)Y4:Pmt:AlarmCalc.A PP")
+    field(OUTE, "$(P)Y5:Pmt:AlarmCalc.A PP")
+    field(OUTF, "$(P)Y6:Pmt:AlarmCalc.A PP")
+    field(OUTG, "$(P)Y7:Pmt:AlarmCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)PmtsCheckEn2")
+{
+    field(OUTA, "$(P)X1:Pmt:AlarmCalc.A PP")
+    field(OUTB, "$(P)X2:Pmt:AlarmCalc.A PP")
+    field(OUTC, "$(P)X3:Pmt:AlarmCalc.A PP")
+    field(OUTD, "$(P)X4:Pmt:AlarmCalc.A PP")
+    field(OUTE, "$(P)X5:Pmt:AlarmCalc.A PP")
+    field(OUTF, "$(P)X6:Pmt:AlarmCalc.A PP")
+    field(OUTG, "$(P)X7:Pmt:AlarmCalc.A PP")
+    field(OUTH, "$(P)X8:Pmt:AlarmCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)PmtsCheckEn3")
+{
+    field(OUTA, "$(P)X9:Pmt:AlarmCalc.A PP")
+    field(OUTB, "$(P)X10:Pmt:AlarmCalc.A PP")
+    field(OUTC, "$(P)X11:Pmt:AlarmCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)PmtsCheckEn4")
+{
+    field(OUTA, "$(P)G1:Pmt:AlarmCalc.A PP")
+    field(OUTB, "$(P)G2:Pmt:AlarmCalc.A PP")
+    field(OUTC, "$(P)G3:Pmt:AlarmCalc.A PP")
+    field(OUTD, "$(P)G4:Pmt:AlarmCalc.A PP")
+    field(OUTE, "$(P)G5:Pmt:AlarmCalc.A PP")
+    field(OUTF, "$(P)G6:Pmt:AlarmCalc.A PP")
+    field(OUTG, "$(P)G7:Pmt:AlarmCalc.A PP")
+    field(OUTH, "$(P)G8:Pmt:AlarmCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)PmtsCheckEn5")
+{
+    field(OUTA, "$(P)G9:Pmt:AlarmCalc.A PP")
+    field(OUTB, "$(P)G10:Pmt:AlarmCalc.A PP")
+    field(OUTC, "$(P)G11:Pmt:AlarmCalc.A PP")
+    field(OUTD, "$(P)G12:Pmt:AlarmCalc.A PP")
+    field(OUTE, "$(P)G13:Pmt:AlarmCalc.A PP")
+    field(OUTF, "$(P)G14:Pmt:AlarmCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)PmtsCheckEn")
+{
+    field(OUTA, "$(P)PmtsCheckEn1 PP")
+    field(OUTB, "$(P)PmtsCheckEn2 PP")
+    field(OUTC, "$(P)PmtsCheckEn3 PP")
+    field(OUTD, "$(P)PmtsCheckEn4 PP")
+    field(OUTE, "$(P)PmtsCheckEn5 PP")
+    field(OMSL, "supervisory")
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
