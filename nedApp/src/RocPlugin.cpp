@@ -7,12 +7,11 @@
  * @author Klemen Vodopivec
  */
 
+#include "Common.h"
 #include "RocPlugin.h"
 #include "Log.h"
 
 #include <cstring>
-
-#define HEX_BYTE_TO_DEC(a)      ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
 
 EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 

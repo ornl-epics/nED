@@ -7,6 +7,7 @@
  * @author Klemen Vodopivec
  */
 
+#include "Common.h"
 #include "DspPlugin.h"
 #include "Log.h"
 
@@ -18,7 +19,6 @@
 #include <string>
 
 #define NUM_DSPPLUGIN_PARAMS    0 // ((int)(&LAST_DSPPLUGIN_PARAM - &FIRST_DSPPLUGIN_PARAM + 1))
-#define HEX_BYTE_TO_DEC(a)      ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
 
 EPICS_REGISTER_PLUGIN(DspPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Version", string, "Blocking", int);
 

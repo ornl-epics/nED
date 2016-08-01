@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <errno.h>
 #include <occlib.h>
+#include <math.h>
 
 #include "DspPlugin.h"
 
@@ -492,9 +493,9 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
         } else {
             packetsList.release();
 
-            if (retryCounter < 5) {
-                // Increasingly sleep by 10us, first pass doesn't sleep
-                epicsThreadSleep(1e-5 * retryCounter++);
+            if (retryCounter < 7) {
+                // Exponentially sleep up to ~1.1s, first pass doesn't sleep
+                epicsThreadSleep(1e-5 * pow(10, retryCounter++));
                 continue;
             }
 

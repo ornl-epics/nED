@@ -12,7 +12,7 @@ include $(TOP)/configure/CONFIG
 # to pick-up functionlity from library.
 
 # The C/C++ bitfield ordering in structs is platform AND compiler dependant
-# 
+#
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
 #USR_CXXFLAGS += -DMAX_PACKET_LEN=36000 # Uncomment when dealing with legacy DSP
 USR_CXXFLAGS += -std=c++0x
@@ -89,7 +89,6 @@ $(PROD_NAME)_SRCS  += DspPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v64.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v65.cpp
-$(PROD_NAME)_SRCS  += RocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
@@ -97,6 +96,10 @@ $(PROD_NAME)_SRCS  += AdcRocPlugin_v05.cpp
 $(PROD_NAME)_SRCS  += BnlRocPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlRocPlugin_v00.cpp
 $(PROD_NAME)_SRCS  += BnlRocPlugin_v20.cpp
+$(PROD_NAME)_SRCS  += CRocPlugin.cpp
+$(PROD_NAME)_SRCS  += CRocPlugin_v93.cpp
+$(PROD_NAME)_SRCS  += CRocPlugin_v94.cpp
+$(PROD_NAME)_SRCS  += RocPlugin.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v14.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v47.cpp
@@ -136,8 +139,11 @@ $(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
 $(PROD_NAME)_SRCS  += TimingPlugin.cpp
+$(PROD_NAME)_SRCS  += TofCorrectPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlFlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
+$(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
+$(PROD_NAME)_SRCS  += CRocPvaPlugin.cpp
 
 #===========================
 

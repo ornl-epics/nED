@@ -296,3 +296,36 @@ float BasePlugin::timerExpire(std::shared_ptr<Timer> &timer, std::function<float
     this->unlock();
     return delay;
 }
+
+bool BasePlugin::sendParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value)
+{
+    ParamsExch p = {m_portName, paramName};
+
+    asynUser *asynuser = pasynManager->createAsynUser(0, 0);
+    asynuser->userPvt = this;
+    asynuser->reason = REASON_PARAMS_EXCH;
+    asynuser->userData = reinterpret_cast<void *>(&p);
+
+    asynStatus status = pasynManager->connectDevice(asynuser, remotePort.c_str(), 0);
+    if (status != asynSuccess) {
+        LOG_ERROR("Failed to connect to remote port %s (status=%d, error=%s)",
+                  remotePort.c_str(), status, asynuser->errorMessage);
+        return false;
+    }
+
+    bool ret;
+    asynInterface *iface = pasynManager->findInterface(asynuser, asynInt32Type, 1);
+    if (!iface) {
+        LOG_ERROR("Can't find %s interface on array port %s", asynInt32Type, remotePort.c_str());
+        ret = false;
+    } else {
+        asynInt32 *ifaceInt32 = reinterpret_cast<asynInt32 *>(iface->pinterface);
+        ifaceInt32->write(iface->drvPvt, asynuser, value);
+        ret = true;
+    }
+
+    pasynManager->disconnect(asynuser);
+    pasynManager->freeAsynUser(asynuser);
+
+    return ret;
+}

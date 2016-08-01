@@ -99,6 +99,7 @@ def parse_src_file(path, mode):
       'counter': re.compile("createCounterParam\s*\(\s*\"([\w:]+)\"\s*,"),
       'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
       'config_ch': re.compile("createChanConfigParam\s*\(\s*\"([\w:]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
+      'config_meta': re.compile("createMetaConfigParam\s*\(\s*\"([\w:]+)\",[^,]*,\s*(\S+)\s*[,\)].*"),
       'temp':    re.compile("createTempParam\s*\(\s*\"([\w:]+)\"\s*,"),
     }
 
@@ -109,7 +110,7 @@ def parse_src_file(path, mode):
 
             for line in infile:
                 for type,regex in types.items():
-                    if type == "config_ch":
+                    if type in [ "config_ch", "config_meta" ]:
                         type = "config"
                     match = regex.search(line)
                     if match:
@@ -117,6 +118,7 @@ def parse_src_file(path, mode):
                         if type == "config":
                             val = match.group(2)
                         vars_cache[path][type].append({ 'name': match.group(1), 'val': val })
+                        break
 
     return vars_cache[path][mode]
 

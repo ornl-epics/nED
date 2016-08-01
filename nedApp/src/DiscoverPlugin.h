@@ -31,10 +31,12 @@ class DiscoverPlugin : public BasePlugin {
             DasPacket::ModuleType type;
             uint32_t parent;
             BaseModulePlugin::Version version;
+            bool verified;
 
             ModuleDesc()
                 : type(static_cast<DasPacket::ModuleType>(0))
                 , parent(0)
+                , verified(false)
             {}
         };
 
@@ -97,7 +99,7 @@ class DiscoverPlugin : public BasePlugin {
          * Print discovered modules in human format
          */
         uint32_t formatOutput(char *buffer, uint32_t size);
-        
+
         /**
          * Print discovered modules in substitution format
          */

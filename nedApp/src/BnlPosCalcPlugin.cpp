@@ -18,12 +18,12 @@
 
 EPICS_REGISTER_PLUGIN(BnlPosCalcPlugin, 3, "Port name", string, "Dispatcher port name", string, "Buffer size in bytes", int);
 
-#define NUM_DATACONVERTPLUGIN_PARAMS      ((int)(&LAST_DATACONVERTPLUGIN_PARAM - &FIRST_DATACONVERTPLUGIN_PARAM + 1)) + (20 + 17)*3
+#define NUM_BNLPOSCALCPLUGIN_PARAMS      ((int)(&LAST_BNLPOSCALCPLUGIN_PARAM - &FIRST_BNLPOSCALCPLUGIN_PARAM + 1)) + (20 + 17)*3
 
 #define POS_SPECIAL     (1 << 30)
 
 BnlPosCalcPlugin::BnlPosCalcPlugin(const char *portName, const char *dispatcherPortName, int bufSize)
-    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_DATACONVERTPLUGIN_PARAMS, asynOctetMask, asynOctetMask)
+    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_BNLPOSCALCPLUGIN_PARAMS, asynOctetMask, asynOctetMask)
     , m_correctionScale(1.0)
 {
     if (bufSize > 0) {
@@ -252,6 +252,7 @@ BnlPosCalcPlugin::Stats BnlPosCalcPlugin::processPacket(const DasPacket *srcPack
     BnlDataPacket::NormalEvent *destEvent = reinterpret_cast<BnlDataPacket::NormalEvent *>(destPacket->getData(&nDestEvents));
     nEvents /= (eventSize / sizeof(uint32_t));
 
+    nDestEvents = 0;
     while (nEvents-- > 0) {
         const BnlDataPacket::RawEvent *srcEvent= reinterpret_cast<const BnlDataPacket::RawEvent *>(data);
 
@@ -410,14 +411,14 @@ BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const BnlDat
 
     // Interpolate X position
     denom = xSamples[xPeakIndex+1] + xSamples[xPeakIndex] + xSamples[xPeakIndex-1];
-    num   = xSamples[xPeakIndex+1]                       - xSamples[xPeakIndex-1];
+    num   = xSamples[xPeakIndex+1]                        - xSamples[xPeakIndex-1];
     if (denom < m_centroidMin)
         return CALC_LOW_CHARGE;
     *x = xPeakIndex + (m_xCentroidScale * num / denom);
 
     // Interpolate Y position
     denom = ySamples[yPeakIndex+1] + ySamples[yPeakIndex] + ySamples[yPeakIndex-1];
-    num   = ySamples[yPeakIndex+1]                       - ySamples[yPeakIndex-1];
+    num   = ySamples[yPeakIndex+1]                        - ySamples[yPeakIndex-1];
     if (denom < m_centroidMin)
         return CALC_LOW_CHARGE;
     *y = yPeakIndex + (m_yCentroidScale * num / denom);

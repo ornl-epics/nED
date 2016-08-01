@@ -24,6 +24,7 @@ def parse_one(type, params_str, desc_str, extra_str):
         'counter':    [ "name", "offset", "width", "bit_offset" ],
         'config':     [ "name", "section", "section_offset", "width", "bit_offset", "default", "convert" ],
         'config_ch':  [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default", "convert" ],
+        'config_meta': [ "name", "width", "default", "convert" ],
         'temp':       [ "name", "offset", "width", "bit_offset" ],
         'preampcfg':  [ "name", "offset", "width", "bit_offset", "default" ],
         'preamptrig': [ "name", "offset", "width", "bit_offset", "default" ],
@@ -83,7 +84,7 @@ def parse_one(type, params_str, desc_str, extra_str):
                         d['alarm'] = True
                     param['options'].append(d)
 
-    if type in [ "config", "config_ch", "preampcfg", "preamptrig" ]:
+    if type in [ "config", "config_ch", "config_meta", "preampcfg", "preamptrig" ]:
         param['direction'] = "inout"
     else:
         param['direction'] = "in"
@@ -97,6 +98,7 @@ def parse_src_file(path, verbose=False):
     regexes = {
         'status':     re.compile("createStatusParam\s*\((.*)\);(.*)$"),
         'counter':    re.compile("createCounterParam\s*\((.*)\);(.*)$"),
+        'config_meta':re.compile("createMetaConfigParam\s*\((\s*\"[^\"]*\"\s*,[^\,]*,[^\,]*)\);(.*)$"),
         'config':     re.compile("createConfigParam\s*\((.*)\);(.*)$"),
         'config_ch':  re.compile("createChanConfigParam\s*\((.*)\);(.*)$"),
         'temp':       re.compile("createTempParam\s*\((.*)\);(.*)$"),
@@ -122,6 +124,8 @@ def parse_src_file(path, verbose=False):
                         extra = match_d.group(2)
 
                     params.append( parse_one(type, match.group(1), desc, extra) )
+
+                    break
 
     return params
 

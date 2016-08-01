@@ -7,11 +7,12 @@
  * @author Klemen Vodopivec
  */
 
-#include "AcpcFemPlugin.h"
 #include "AcpcPlugin.h"
+#include "AcpcFemPlugin.h"
 #include "AdcRocPlugin.h"
-#include "BnlRocPlugin.h"
 #include "ArocPlugin.h"
+#include "BnlRocPlugin.h"
+#include "CRocPlugin.h"
 #include "DiscoverPlugin.h"
 #include "DspPlugin.h"
 #include "FemPlugin.h"
@@ -99,8 +100,23 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
             uint32_t source = packet->getSourceAddress();
             if (m_discovered.find(source) != m_discovered.end()) {
                 switch (m_discovered[source].type) {
+                case DasPacket::MOD_TYPE_ACPC:
+                    AcpcPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
                 case DasPacket::MOD_TYPE_ACPCFEM:
                     AcpcFemPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_ADCROC:
+                    AdcRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_AROC:
+                    ArocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_BNLROC:
+                    BnlRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
+                case DasPacket::MOD_TYPE_CROC:
+                    CRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
                 case DasPacket::MOD_TYPE_DSP:
                     DspPlugin::parseVersionRsp(packet, m_discovered[source].version);
@@ -110,18 +126,6 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                     break;
                 case DasPacket::MOD_TYPE_ROC:
                     RocPlugin::parseVersionRsp(packet, m_discovered[source].version);
-                    break;
-                case DasPacket::MOD_TYPE_ADCROC:
-                    AdcRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
-                    break;
-                case DasPacket::MOD_TYPE_BNLROC:
-                    BnlRocPlugin::parseVersionRsp(packet, m_discovered[source].version);
-                    break;
-                case DasPacket::MOD_TYPE_ACPC:
-                    AcpcPlugin::parseVersionRsp(packet, m_discovered[source].version);
-                    break;
-                case DasPacket::MOD_TYPE_AROC:
-                    ArocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
                 default:
                     break;
@@ -225,15 +229,15 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_ACPCFEM:   plugin = "AcpcFemPlugin";   type = "afem";    break;
             case DasPacket::MOD_TYPE_ACPC:      plugin = "AcpcPlugin";      type = "acpc";    break;
             case DasPacket::MOD_TYPE_ADCROC:    plugin = "AdcRocPlugin";    type = "adcroc";  break;
-            case DasPacket::MOD_TYPE_BNLROC:    plugin = "BnlRocPlugin";    type = "broc";    break;
             case DasPacket::MOD_TYPE_AROC:      plugin = "ArocPlugin";      type = "aroc";    break;
+            case DasPacket::MOD_TYPE_BNLROC:    plugin = "BnlRocPlugin";    type = "broc";    break;
+            case DasPacket::MOD_TYPE_CROC:      plugin = "CRocPlugin";      type = "croc";    break;
             case DasPacket::MOD_TYPE_DSP:       plugin = "DspPlugin";       type = "dsp";     break;
             case DasPacket::MOD_TYPE_FEM:       plugin = "FemPlugin";       type = "fem";     break;
             case DasPacket::MOD_TYPE_ROC:       plugin = "RocPlugin";       type = "roc";     break;
 /*
  * These are not yet supported
             case DasPacket::MOD_TYPE_BIDIMROC:  plugin = "BidimRocPlugin";  type = "Broc";    break;
-            case DasPacket::MOD_TYPE_CROC:      plugin = "CrocPlugin";      type = "croc";    break;
             case DasPacket::MOD_TYPE_FFC:       plugin = "FfcPlugin";       type = "ffc";     break;
             case DasPacket::MOD_TYPE_HROC:      plugin = "HrocPlugin";      type = "hroc";    break;
             case DasPacket::MOD_TYPE_IROC:      plugin = "IrocPlugin";      type = "iroc";    break;

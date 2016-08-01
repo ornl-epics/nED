@@ -408,6 +408,10 @@ struct DasPacket
 
         /**
          * Copy header and RTDL header of this container to another one.
+         * @param[out] dest Previously allocated packet where to copy header
+         * @param[in] destSize Size of allocated destination packet - must be
+         *                     greater than this packet size or function fails.
+         * @return true on success, fail on failure
          */
         bool copyHeader(DasPacket *dest, uint32_t destSize) const;
 

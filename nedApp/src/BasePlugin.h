@@ -32,7 +32,12 @@ enum {
     // share the same space. asynPortDriver start with 0 and increments the index for
     // each parameter. Pick reasonably high unique numbers here.
     REASON_OCCDATA          = 10000,
-    REASON_OCCDATADIAG      = 10001,
+    REASON_PARAMS_EXCH      = 10001,
+};
+
+struct ParamsExch {
+    std::string portName;
+    std::string paramName;
 };
 
 class Timer;
@@ -311,6 +316,16 @@ class BasePlugin : public asynPortDriver {
          * Thread will automatically stop when PluginBlockingCallbacks is set to 0.
          */
         void processDataThread(epicsEvent *shutdown);
+
+        /**
+         * Send int32 parameter to another plugin.
+         *
+         * @param[in] remotePort name of the remote plugin.
+         * @param[in] paramName name of the parameter
+         * @param[in] value of the parameter
+         * @return true on success
+         */
+        bool sendParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value);
 
     protected:
         #define FIRST_BASEPLUGIN_PARAM Enable

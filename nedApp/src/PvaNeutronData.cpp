@@ -27,6 +27,20 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("sample_a1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_a2",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_a8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_g1",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g2",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g3",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g4",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g5",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g6",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g7",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g8",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g9",      standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g10",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g11",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g12",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g13",     standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("sample_g14",     standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_x1",      standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_x2",      standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_x3",      standardField->scalarArray(epics::pvData::pvUShort, ""))
@@ -73,6 +87,10 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("position_y",     standardField->scalarArray(epics::pvData::pvFloat, ""))
         ->add("photo_sum_x",    standardField->scalarArray(epics::pvData::pvFloat, ""))
         ->add("photo_sum_y",    standardField->scalarArray(epics::pvData::pvFloat, ""))
+        ->add("time_range1",    standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("time_range2",    standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("time_range3",    standardField->scalarArray(epics::pvData::pvUShort, ""))
+        ->add("time_range4",    standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->createStructure()
     );
 
@@ -116,6 +134,62 @@ bool PvaNeutronData::init()
 
     sample_a8 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a8.value");
     if (sample_a8.get() == NULL)
+        return false;
+
+    sample_g1 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g1.value");
+    if (sample_g1.get() == NULL)
+        return false;
+
+    sample_g2 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g2.value");
+    if (sample_g2.get() == NULL)
+        return false;
+
+    sample_g3 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g3.value");
+    if (sample_g3.get() == NULL)
+        return false;
+
+    sample_g4 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g4.value");
+    if (sample_g4.get() == NULL)
+        return false;
+
+    sample_g5 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g5.value");
+    if (sample_g5.get() == NULL)
+        return false;
+
+    sample_g6 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g6.value");
+    if (sample_g6.get() == NULL)
+        return false;
+
+    sample_g7 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g7.value");
+    if (sample_g7.get() == NULL)
+        return false;
+
+    sample_g8 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g8.value");
+    if (sample_g8.get() == NULL)
+        return false;
+
+    sample_g9 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g9.value");
+    if (sample_g9.get() == NULL)
+        return false;
+
+    sample_g10 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g10.value");
+    if (sample_g10.get() == NULL)
+        return false;
+
+    sample_g11 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g11.value");
+    if (sample_g11.get() == NULL)
+        return false;
+
+    sample_g12 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g12.value");
+    if (sample_g12.get() == NULL)
+        return false;
+
+    sample_g13 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g13.value");
+    if (sample_g13.get() == NULL)
+        return false;
+
+    sample_g14 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_g14.value");
+    if (sample_g14.get() == NULL)
         return false;
 
     sample_x1 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_x1.value");
@@ -300,6 +374,22 @@ bool PvaNeutronData::init()
 
     photo_sum_y = getPVStructure()->getSubField<epics::pvData::PVFloatArray>("photo_sum_y.value");
     if (photo_sum_y.get() == NULL)
+        return false;
+
+    time_range1 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("time_range1.value");
+    if (time_range1.get() == NULL)
+        return false;
+
+    time_range2 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("time_range2.value");
+    if (time_range2.get() == NULL)
+        return false;
+
+    time_range3 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("time_range3.value");
+    if (time_range3.get() == NULL)
+        return false;
+
+    time_range4 = getPVStructure()->getSubField<epics::pvData::PVUShortArray>("time_range4.value");
+    if (time_range4.get() == NULL)
         return false;
 
     return true;
