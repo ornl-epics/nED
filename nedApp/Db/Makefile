@@ -66,10 +66,10 @@ DB += BnlRocPlugin_v00.db
 DB += BnlRocPlugin_v20.db
 DB += AcpcPlugin_v144.db
 DB += ArocPlugin_v23.db
+DB += CRocPmt.db
 DB += CRocPlugin_v93.db
 DB += CRocPlugin_v94.db
 
-DB += CRocPmt.db
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
