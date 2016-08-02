@@ -104,6 +104,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         class Stats {
             private:
                 int32_t counters[20];   //!< Array of different veto counters
+                uint64_t total;         //!< All counters combined
 
             public:
                 /**

@@ -917,24 +917,29 @@ void CRocPosCalcPlugin::Stats::reset()
     for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
         counters[i] = 0;
     }
+    total = 0;
 }
 
 CRocPosCalcPlugin::Stats &CRocPosCalcPlugin::Stats::operator+=(const Stats &rhs)
 {
-    int64_t count = getTotal() + rhs.getTotal();
-    if (count > std::numeric_limits<int32_t>::max()) {
+    if ((total + rhs.total) > std::numeric_limits<int32_t>::max()) {
         // This is not good, un-controlled resetting
         reset();
-    } else {
-        for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
-            counters[i] += rhs.counters[i];
-        }
     }
+
+    for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
+        counters[i] += rhs.counters[i];
+    }
+    total += rhs.total;
     return *this;
 }
 
 void CRocPosCalcPlugin::Stats::increment(CRocDataPacket::VetoType type)
 {
+    if (total >= std::numeric_limits<int32_t>::max()) {
+        reset();
+    }
+    total++;
     counters[VETO2INT(type)]++;
 }
 
@@ -945,9 +950,5 @@ int32_t CRocPosCalcPlugin::Stats::get(CRocDataPacket::VetoType type) const
 
 int32_t CRocPosCalcPlugin::Stats::getTotal() const
 {
-    int32_t count = 0;
-    for (size_t i=0; i<sizeof(counters)/sizeof(int32_t); i++) {
-        count += counters[i];
-    }
-    return count;
+    return (int32_t)total;
 }
