@@ -3,7 +3,7 @@ include "BaseModulePlugin.include"
 include "CRocPlugin_v93.generated"
 include "CRocPlugin.include"
 include "GlobalConD.include"
-include "CRocPmt.include"
+include "CRocPmt.db"
 include "CRocPmts.include"
 
 record(longin, "$(P)HwVer")

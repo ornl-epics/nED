@@ -34,7 +34,7 @@ pattern { S, INPUT, OUTPUT, TIME }
         { $(P)G14:Pmt, $(P)G14:Pmt:AlarmCalc, $(P)G14:Pmt:Alarm, 300 }
 }
 
-file CRocPmt.template {
+file CRocPmtCheck.template {
 pattern { S }
         { $(P)Y1 }
         { $(P)Y2 }

@@ -66,8 +66,10 @@ DB += BnlRocPlugin_v00.db
 DB += BnlRocPlugin_v20.db
 DB += AcpcPlugin_v144.db
 DB += ArocPlugin_v23.db
+DB += CRocPmt.db
 DB += CRocPlugin_v93.db
 DB += CRocPlugin_v94.db
+
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
@@ -107,11 +109,8 @@ BnlRocPlugin_v00.template: BnlRocPlugin_v00.generated
 BnlRocPlugin_v20.template: BnlRocPlugin_v20.generated
 AcpcPlugin_v144.template: AcpcPlugin_v144.generated
 ArocPlugin_v23.template: ArocPlugin_v23.generated
-CRocPlugin_v93.template: CRocPlugin_v93.generated CRocPmt.include
+CRocPlugin_v93.template: CRocPlugin_v93.generated
 CRocPlugin_v94.template: CRocPlugin_v94.generated
 
 %.generated: ../src/%.cpp
 	../export2epics.py -i $^ -o $@
-
-CRocPmt.include: CRocPmt.template CRocPmt.substitutions
-	msi   -I. -I.. -I../O.Common -I../../../db -I/home/controls/epics/asyn/master/db -I/home/controls/epics/autosave/master/db -I/home/controls/epics/pvMediator/master/db -I/home/controls/epics/genericIO/master/db -I/home/controls/epics/base/master/db -S../CRocPmt.substitutions > $@
