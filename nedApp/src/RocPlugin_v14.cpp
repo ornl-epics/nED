@@ -227,6 +227,7 @@ void RocPlugin::createParams_v14()
     createConfigParam("TimeVetoLow",      'E',  0x1,  32, 0, 5000); // Timestamp veto low
     createConfigParam("TimeVetoHigh",     'E',  0x3,  32, 0, 4031616); // Timestamp veto high
     createConfigParam("FakeTrigDelay",    'E',  0x5,  16, 0, 65535);// Fake trigger delay
+    createConfigParam("ScaleFactor",      'E',  0x6,  16, 0, 2048);    // Scale factor
 
     createConfigParam("LvdsRate",         'F',  0x0,  1, 15, 0);    // LVDS output rate              (0=20Mhz,1=10Mhz)
     createConfigParam("HighResMode",      'F',  0x0,  1, 9,  0);    // High resolution mode          (0=low res 0-127,1=high res 0-255)
@@ -237,8 +238,6 @@ void RocPlugin::createParams_v14()
     createConfigParam("TcTclkMode",       'F',  0x0,  1, 3,  0);    // T&C TCLK mode                 (0=external,1=internal 10MHz)
     createConfigParam("TcResetMode",      'F',  0x0,  1, 2,  0);    // T&C Reset mode                (0=internal,1=external)
     createConfigParam("AcquireMode",      'F',  0x0,  2, 0,  0);    // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
-
-    createConfigParam("Unused",           'F',  0x1, 16, 0,  0);    // GE ROC needs this one
 
     // Now channel parameters - note the extra channel parameter
     createChanConfigParam("Ch1:PositionIdx",  1, '1',  0x0, 32, 0, 6144);   // Chan1 position index
