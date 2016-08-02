@@ -3,6 +3,8 @@ include "BaseModulePlugin.include"
 include "CRocPlugin_v94.generated"
 include "CRocPlugin.include"
 include "GlobalConD.include"
+include "CRocPmt.db"
+include "CRocPmts.include"
 
 record(longin, "$(P)HwVer")
 {
@@ -31,4 +33,10 @@ record(calc, "$(P)HwStatus")
     field(CALC, "(A+B)=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
+}
+
+# Upgrade RspCheck record and drive it to PMT checks
+record(fanout, "$(P)RspCheck")
+{
+    field(LNK4, "$(P)NumFailedPmts PP")
 }

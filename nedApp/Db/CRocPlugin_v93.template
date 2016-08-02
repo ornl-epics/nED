@@ -34,3 +34,9 @@ record(calc, "$(P)HwStatus")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 }
+
+# Upgrade RspCheck record and drive it to PMT checks
+record(fanout, "$(P)RspCheck")
+{
+    field(LNK4, "$(P)NumFailedPmts PP")
+}
