@@ -38,5 +38,5 @@ record(calc, "$(P)HwStatus")
 # Upgrade RspCheck record and drive it to PMT checks
 record(fanout, "$(P)RspCheck")
 {
-    field(LNK4, "$(P)NumFailedPmts PP")
+    field(LNK4, "$(P)Pmt:Status PP")
 }
