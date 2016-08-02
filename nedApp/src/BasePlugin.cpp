@@ -7,6 +7,7 @@
  * @author Klemen Vodopivec
  */
 
+#include "Common.h"
 #include "BasePlugin.h"
 #include "DasPacketList.h"
 #include "Log.h"
@@ -29,24 +30,18 @@ extern "C" {
     }
 }
 
-BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortName, int reason, int blocking,
+BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortNames, int reason, int blocking,
                        int numParams, int maxAddr, int interfaceMask,
                        int interruptMask, int asynFlags, int autoConnect,
                        int priority, int stackSize)
     : asynPortDriver(portName, maxAddr, NUM_BASEPLUGIN_PARAMS + numParams, interfaceMask | defaultInterfaceMask,
                      interruptMask | defaultInterruptMask, asynFlags, autoConnect, priority, stackSize)
     , m_portName(portName)
-    , m_dispatcherPortName(dispatcherPortName)
-    , m_asynGenericPointerInterrupt(0)
     , m_messageQueue(MESSAGE_QUEUE_SIZE, sizeof(void*))
     , m_thread(0)
     , m_shutdown(false)
 {
     int status;
-
-    m_pasynuser = pasynManager->createAsynUser(0, 0);
-    m_pasynuser->userPvt = this;
-    m_pasynuser->reason = reason;
 
     createParam("Enable",       asynParamInt32,     &Enable);       // WRITE - Enable or disable plugin
     createParam("ProcCount",    asynParamInt32,     &ProcCount, 0); // READ - Number processed packets
@@ -54,12 +49,33 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortName, int
     createParam("TxCount",      asynParamInt32,     &TxCount,   0); // READ - Number packets sent to OCC
     createParam("DataMode",     asynParamInt32,     &DataModeP, DATA_MODE_NORMAL); // WRITE - Data format mode (see BasePlugin::DataMode)
 
-    // Connect to dispatcher port permanently. Don't allow connecting to different port at runtime.
-    // Callbacks need to be enabled separately in order to actually get triggered from dispatcher.
-    status = pasynManager->connectDevice(m_pasynuser, dispatcherPortName, 0);
-    if (status != asynSuccess) {
-        LOG_ERROR("Failed calling pasynManager->connectDevice to port %s (status=%d, error=%s)",
-                  portName, status, m_pasynuser->errorMessage);
+    std::vector<std::string> portNames = split(dispatcherPortNames, ',');
+    for (auto it=portNames.begin(); it!=portNames.end(); it++) {
+        asynUser *pasynuser = pasynManager->createAsynUser(0, 0);
+        if (pasynuser == 0) {
+            LOG_ERROR("Failed to create asyn user interface for %s", it->c_str());
+            continue;
+        }
+        pasynuser->userPvt = this;
+        pasynuser->reason = reason;
+
+        // Connect to dispatcher port permanently. Don't allow connecting to different port at runtime.
+        // Callbacks need to be enabled separately in order to actually get triggered from dispatcher.
+        status = pasynManager->connectDevice(pasynuser, it->c_str(), 0);
+        if (status != asynSuccess) {
+            LOG_ERROR("Failed calling pasynManager->connectDevice to port %s (status=%d, error=%s)",
+                      it->c_str(), status, m_remotePorts[*it].pasynuser->errorMessage);
+            pasynManager->freeAsynUser(pasynuser);
+            continue;
+        }
+
+        m_remotePorts[*it].pasynuser = pasynuser;
+        m_remotePorts[*it].asynGenericPointerInterrupt = NULL;
+    }
+
+    if (m_remotePorts.size() > 1) {
+        // Enforce blocking mode to avoid serialization of calling threads
+        blocking = 1;
     }
 
     if (blocking) {
@@ -88,6 +104,12 @@ BasePlugin::~BasePlugin()
 
     // Make sure to disconnect from asyn ports
     (void)enableCallbacks(false);
+
+    for (auto it=m_remotePorts.begin(); it!=m_remotePorts.end(); it++) {
+        pasynManager->disconnect(it->second.pasynuser);
+        pasynManager->freeAsynUser(it->second.pasynuser);
+        it->second.pasynuser = NULL;
+    }
 }
 
 void BasePlugin::processDataUnlocked(const DasPacketList * const packetList)
@@ -179,18 +201,20 @@ void BasePlugin::dispatcherCallback(asynUser *pasynUser, void *genericPointer)
 
 void BasePlugin::sendToDispatcher(const DasPacket *packet)
 {
-    asynInterface *interface = pasynManager->findInterface(m_pasynuser, asynGenericPointerType, 1);
-    if (!interface) {
-        LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, m_dispatcherPortName.c_str());
-        return;
-    }
+    for (auto it=m_remotePorts.begin(); it!=m_remotePorts.end(); it++) {
+        asynInterface *interface = pasynManager->findInterface(it->second.pasynuser, asynGenericPointerType, 1);
+        if (!interface) {
+            LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, it->first.c_str());
+            continue;
+        }
 
-    DasPacketList packetsList;
-    packetsList.reset(packet);
-    asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-    void *ptr = reinterpret_cast<void *>(const_cast<DasPacketList *>(&packetsList));
-    asynGenericPointerInterface->write(interface->drvPvt, m_pasynuser, ptr);
-    packetsList.release();
+        DasPacketList packetsList;
+        packetsList.reset(packet);
+        asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
+        void *ptr = reinterpret_cast<void *>(const_cast<DasPacketList *>(&packetsList));
+        asynGenericPointerInterface->write(interface->drvPvt, it->second.pasynuser, ptr);
+        packetsList.release();
+    }
 }
 
 std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &callback, double delay)
@@ -230,30 +254,32 @@ bool BasePlugin::enableCallbacks(bool enable)
 {
     asynStatus status = asynSuccess;
 
-    asynInterface *interface = pasynManager->findInterface(m_pasynuser, asynGenericPointerType, 1);
-    if (!interface) {
-        LOG_ERROR("Can't find asynGenericPointer interface on array port %s", m_dispatcherPortName.c_str());
-        return false;
-    }
-
-    if (enable && !m_asynGenericPointerInterrupt) {
-        asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-        status = asynGenericPointerInterface->registerInterruptUser(
-                    interface->drvPvt, m_pasynuser,
-                    ::dispatcherCallback, this, &m_asynGenericPointerInterrupt);
-        if (status != asynSuccess) {
-            LOG_ERROR("Can't enable interrupt callbacks on dispatcher port: %s", m_pasynuser->errorMessage);
+    for (auto it=m_remotePorts.begin(); it!=m_remotePorts.end(); it++) {
+        asynInterface *interface = pasynManager->findInterface(it->second.pasynuser, asynGenericPointerType, 1);
+        if (!interface) {
+            LOG_ERROR("Can't find asynGenericPointer interface on array port %s", it->first.c_str());
+            return false;
         }
-    }
-    if (!enable && m_asynGenericPointerInterrupt) {
-        asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-        status = asynGenericPointerInterface->cancelInterruptUser(
-            interface->drvPvt,
-            m_pasynuser,
-            m_asynGenericPointerInterrupt);
-        m_asynGenericPointerInterrupt = NULL;
-        if (status != asynSuccess) {
-            LOG_ERROR("Can't disable interrupt callbacks on dispatcher port: %s", m_pasynuser->errorMessage);
+
+        if (enable && !it->second.asynGenericPointerInterrupt) {
+            asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
+            status = asynGenericPointerInterface->registerInterruptUser(
+                        interface->drvPvt, it->second.pasynuser,
+                        ::dispatcherCallback, this, &it->second.asynGenericPointerInterrupt);
+            if (status != asynSuccess) {
+                LOG_ERROR("Can't enable interrupt callbacks on dispatcher port: %s", it->second.pasynuser->errorMessage);
+            }
+        }
+        if (!enable && it->second.asynGenericPointerInterrupt) {
+            asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
+            status = asynGenericPointerInterface->cancelInterruptUser(
+                interface->drvPvt,
+                it->second.pasynuser,
+                it->second.asynGenericPointerInterrupt);
+            it->second.asynGenericPointerInterrupt = NULL;
+            if (status != asynSuccess) {
+                LOG_ERROR("Can't disable interrupt callbacks on dispatcher port: %s", it->second.pasynuser->errorMessage);
+            }
         }
     }
 
@@ -269,4 +295,37 @@ float BasePlugin::timerExpire(std::shared_ptr<Timer> &timer, std::function<float
     }
     this->unlock();
     return delay;
+}
+
+bool BasePlugin::sendParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value)
+{
+    ParamsExch p = {m_portName, paramName};
+
+    asynUser *asynuser = pasynManager->createAsynUser(0, 0);
+    asynuser->userPvt = this;
+    asynuser->reason = REASON_PARAMS_EXCH;
+    asynuser->userData = reinterpret_cast<void *>(&p);
+
+    asynStatus status = pasynManager->connectDevice(asynuser, remotePort.c_str(), 0);
+    if (status != asynSuccess) {
+        LOG_ERROR("Failed to connect to remote port %s (status=%d, error=%s)",
+                  remotePort.c_str(), status, asynuser->errorMessage);
+        return false;
+    }
+
+    bool ret;
+    asynInterface *iface = pasynManager->findInterface(asynuser, asynInt32Type, 1);
+    if (!iface) {
+        LOG_ERROR("Can't find %s interface on array port %s", asynInt32Type, remotePort.c_str());
+        ret = false;
+    } else {
+        asynInt32 *ifaceInt32 = reinterpret_cast<asynInt32 *>(iface->pinterface);
+        ifaceInt32->write(iface->drvPvt, asynuser, value);
+        ret = true;
+    }
+
+    pasynManager->disconnect(asynuser);
+    pasynManager->freeAsynUser(asynuser);
+
+    return ret;
 }

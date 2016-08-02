@@ -12,8 +12,6 @@
 
 #include "BaseSocketPlugin.h"
 
-#define ADARA_MAX_NUM_DSPS  10  //!< Maximum number of DSPs supported by a single AdaraPlugin instance
-
 /**
  * Plugin that forwards Neutron Event data to ADARA SMS over TCP/IP.
  *
@@ -44,6 +42,9 @@ class AdaraPlugin : public BaseSocketPlugin {
 
         /**
          * Structure describing output packets sequence for a given source.
+         *
+         * A source is any unique data channel with a specific event type.
+         * Each DSP provides up to 2 sources, a neutron and metadata source.
          */
         struct SourceSequence {
             uint32_t sourceId;          //!< Source id for output packets
@@ -62,8 +63,8 @@ class AdaraPlugin : public BaseSocketPlugin {
                 rtdl.timestamp_nsec = 0;
             }
         };
-        SourceSequence m_neutronSeq;    //!< Neutrons data sequence
-        SourceSequence m_metadataSeq;   //!< Metadata data sequence
+
+        std::map<uint64_t, SourceSequence> m_sources;   //!< Registered sources
 
     public:
         /**
@@ -102,6 +103,60 @@ class AdaraPlugin : public BaseSocketPlugin {
          * @return Number returned from BaseSocketPlugin::checkClient()
          */
         float checkClient();
+
+    private:
+        /**
+         * When socket is connected, send heartbeat to ADARA.
+         *
+         * @param[in] time to put in packet.
+         * @retval true When data has been sent.
+         * @retval false Socket not connected or other socket error.
+         */
+        bool sendHeartbeat(const epicsTimeStamp &t);
+
+        /**
+         * When socket is connected, send RTDL to ADARA.
+         *
+         * @param[in] data
+         * @retval true When data has been sent.
+         * @retval false Socket not connected or other socket error.
+         */
+        bool sendRtdl(const uint32_t data[8]);
+
+        /**
+         * When socket is connected, send events to ADARA.
+         *
+         * @param[in] seq Channel/sequence information
+         * @param[in] events to be sent.
+         * @param[in] eventsCount number of events to send.
+         * @param[in] neutrons flags whether the events to send are neutrons
+         * @param[in] endOfPulse set to true if these are last events for given pulse.
+         * @retval true When data has been sent.
+         * @retval false Socket not connected or other socket error.
+         */
+        bool sendEvents(SourceSequence *seq, const DasPacket::Event *events, uint32_t eventCount, bool neutrons, bool endOfPulse=false);
+
+        /**
+         * Return a source structure for given data type and hardware id pair.
+         *
+         * @param[in] neutron Flags the source data type.
+         * @param[in] id A unique number to identifiy the data source, usually DSP hardware id
+         */
+        SourceSequence *findSource(bool neutron, uint32_t id);
+
+        /**
+         * Overloaded function resets internal state when new client connects.
+         */
+        void clientConnected();
+
+        /**
+         * Reset all internal logic.
+         *
+         * When reset, the following internal logic is reset:
+         * - ADARA protocol sources' sequence numbers are reset to 0
+         * - RTDL book-keeping logic is reset to beggining
+         */
+        void reset();
 
     protected:
         #define FIRST_ADARAPLUGIN_PARAM PixelsMapped

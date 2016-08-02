@@ -7,11 +7,11 @@
  * @author Klemen Vodopivec
  */
 
+#include "Common.h"
 #include "FemPlugin.h"
 #include "Log.h"
 
 #define NUM_FEMPLUGIN_PARAMS    0 //((int)(&LAST_FEMPLUGIN_PARAM - &FIRST_FEMPLUGIN_PARAM + 1))
-#define HEX_BYTE_TO_DEC(a)      ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
 
 EPICS_REGISTER_PLUGIN(FemPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
@@ -53,8 +53,11 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         createParams_v37();
     } else if (m_version == "v38") {
         setIntegerParam(Supported, 1);
-        setIntegerParam(UpgradeStatus, UPGRADE_NOT_STARTED); // supported but not started
         createParams_v38();
+    } else if (m_version == "v320") {
+        setIntegerParam(Supported, 1);
+        setIntegerParam(UpgradeStatus, UPGRADE_NOT_STARTED); // supported but not started
+        createParams_v320();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);

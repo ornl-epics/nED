@@ -1,0 +1,11 @@
+include "BasePlugin.include"
+include "BasePvaPlugin.include"
+
+# Upgrade the DataMode PV
+record(mbbo, "$(P)DataMode")
+{
+    field(ZRST, "pixel")
+    field(ONST, "raw")
+    field(TWST, "extended")
+    field(THST, "verbose")
+}

@@ -346,6 +346,7 @@ record(sel, "$(P)DataSizeSel")
     field(INPA, "$(P)RocDS.VAL PP")
     field(INPB, "$(P)AcpcDS.VAL PP")
     field(INPC, "$(P)BnlDS.VAL PP")
+    field(INPD, "$(P)CRocDS.VAL PP")
     field(NVL,  "$(P)DetTypeSel.VAL PP")
 }
 record(mbbo, "$(P)DetTypeSel")
@@ -363,6 +364,8 @@ record(mbbo, "$(P)DetTypeSel")
     field(ONST, "ACPC")
     field(TWVL, "2")
     field(TWST, "BNL")
+    field(THVL, "3")
+    field(THST, "CROC")
 }
 record(sel, "$(P)RocDS")
 {
@@ -391,4 +394,13 @@ record(sel, "$(P)BnlDS")
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")
 }
+record(sel, "$(P)CRocDS")
+{
+    field(INPA, "8") # Normal mode
+    field(INPB, "48") # Raw mode
+    field(INPC, "52") # Extended mode
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+
 

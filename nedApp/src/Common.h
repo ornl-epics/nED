@@ -11,6 +11,7 @@
 #define NED_COMMON_HPP
 
 #include <string>
+#include <vector>
 
 #define ALIGN_UP(number, boundary)      (((number) + (boundary) - 1) & ~((boundary) - 1))
 #define HEX_BYTE_TO_DEC(a)              ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
@@ -24,5 +25,25 @@
  * @retval false on failure, possibly file doesn't exist.
  */
 bool fileSize(const std::string &path, uint32_t &size);
+
+/**
+ * Split a string and return a vector of tokens.
+ *
+ * String is split by delim character. Empty tokens are included in the output.
+ * @param[in] string to be split
+ * @param[in] delim character to be used
+ * @return the new elements vector
+ */
+std::vector<std::string> split(const std::string &s, char delim);
+
+/**
+ * Split string and modify vector in place.
+ *
+ * @param[in] string to be split
+ * @param[in] delim character to be used
+ * @param[out] elements vector
+ * @return the elements vector for ease of use
+ */
+std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
 
 #endif // NED_COMMON_HPP

@@ -1,24 +1,22 @@
-/* FemPlugin_v32.cpp
+/* FemPlugin_v36.cpp
  *
- * Copyright (c) 2015 Oak Ridge National Laboratory.
+ * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
  * See file LICENSE that is included with this distribution.
  *
  * @author Klemen Vodopivec
  */
 
-#include "FemPlugin.h"
-
 /**
  * @file FemPlugin_v38.cpp
  *
  * FEM 3.8 parameters
  *
- * The FEM 3.8 firmware is identical to FEM 3.6 except that it adds support for
- * remote upgrade. There's a new configuration register to control the remote
- * upgrade. There's also a new remote upgrade status register which is the same
- * as the one returned from upgrade command.
+ * The FEM 3.8 firmware is identical to FEM 3.7 except that it adds new Counter
+ * registers.
  */
+
+#include "FemPlugin.h"
 
 void FemPlugin::createParams_v38()
 {
@@ -215,7 +213,7 @@ void FemPlugin::createParams_v38()
     createConfigParam("TcResetMode",       'F', 0x0,  1,  0, 1);  // Reset mode                   (0=internal,1=external)
     createConfigParam("TcTclkMode",        'F', 0x0,  1,  1, 0);  // TCLK mode                    (0=external,1=internal)
     createConfigParam("TcTsyncMode",       'F', 0x0,  1,  2, 0);  // TSYNC mode                   (0=external,1=internal)
-    createConfigParam("TcTxEnMode",        'F', 0x0,  1,  3, 0);  // TXEN mode                    (0=external,1=internal)
+    createConfigParam("TcTxEnMode",        'F', 0x0,  1,  3, 0);  // TXEN mode                    (0=internal,1=frontside)
     createConfigParam("Lvds1:En",          'F', 0x0,  1,  4, 0);  // Chan1 disable                (0=enable,1=disable)
     createConfigParam("Lvds2:En",          'F', 0x0,  1,  5, 0);  // Chan2 disable                (0=enable,1=disable)
     createConfigParam("Lvds3:En",          'F', 0x0,  1,  6, 0);  // Chan3 disable                (0=enable,1=disable)
@@ -233,23 +231,17 @@ void FemPlugin::createParams_v38()
     createConfigParam("TestPatternId",     'F', 0x1, 12,  0, 0);  // Test pattern id
     createConfigParam("TestPatternRate",   'F', 0x2, 16,  0, 0);  // Test pattern rate            (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
 
-    createConfigParam("UpgEn",           'F', 0x3,  1,  0, 0);  // Enable remote upgrade SM     (0=disable,1=enable)
-    createConfigParam("UpgModeCheckId",  'F', 0x3,  1,  1, 0);  // Check ID only mode           (0=disable,1=enable)
-    createConfigParam("UpgModeVerify",   'F', 0x3,  1,  2, 0);  // Verify only mode             (0=disable,1=enable)
-    createConfigParam("UpgBar2FifoRst",  'F', 0x3,  1,  3, 0);  // BAR2 FIFO reset              (0=disable,1=enable)
-    // TODO: if 32 bit wide register, need filler
-
     // *************** Counter parameters ***************
 
-//     BLXXX:Det:RocXXX:| sig nam                 |                 | EPICS record description |
-    createCounterParam("Lvds1:UpRxRate",           0x0, 32,  0); // Ch1 upstream RX rate
-    createCounterParam("Lvds2:UpRxRate",           0x2, 32,  0); // Ch2 upstream RX rate
-    createCounterParam("Lvds3:UpRxRate",           0x4, 32,  0); // Ch3 upstream RX rate
-    createCounterParam("Lvds4:UpRxRate",           0x6, 32,  0); // Ch4 upstream RX rate
-    createCounterParam("Lvds5:UpRxRate",           0x8, 32,  0); // Ch5 upstream RX rate
-    createCounterParam("Lvds6:UpRxRate",           0xA, 32,  0); // Ch6 upstream RX rate
-    createCounterParam("Lvds7:UpRxRate",           0xC, 32,  0); // Ch7 upstream RX rate
-    createCounterParam("Lvds8:UpRxRate",           0xE, 32,  0); // Ch8 upstream RX rate
+//     BLXXX:Det:RocXXX:| sig nam                 |                | EPICS record description |
+    createCounterParam("Lvds1:UpRxRate",          0x0, 32,  0); // Ch1 upstream RX rate
+    createCounterParam("Lvds2:UpRxRate",          0x2, 32,  0); // Ch2 upstream RX rate
+    createCounterParam("Lvds3:UpRxRate",          0x4, 32,  0); // Ch3 upstream RX rate
+    createCounterParam("Lvds4:UpRxRate",          0x6, 32,  0); // Ch4 upstream RX rate
+    createCounterParam("Lvds5:UpRxRate",          0x8, 32,  0); // Ch5 upstream RX rate
+    createCounterParam("Lvds6:UpRxRate",          0xA, 32,  0); // Ch6 upstream RX rate
+    createCounterParam("Lvds7:UpRxRate",          0xC, 32,  0); // Ch7 upstream RX rate
+    createCounterParam("Lvds8:UpRxRate",          0xE, 32,  0); // Ch8 upstream RX rate
     createCounterParam("Lvds9:UpRxRate",          0x10, 32,  0); // Ch9 upstream RX rate
     createCounterParam("DownRxRate",              0x12, 32,  0); // Downstream RX rate
     createCounterParam("UpTxRate",                0x14, 32,  0); // Upstream TX rate
@@ -325,51 +317,13 @@ void FemPlugin::createParams_v38()
     createCounterParam("DownRxFrameErrCnt",       0x41, 16,  0); // Downstream RX Frame Error cn
     createCounterParam("DownRxLenErrCnt",         0x42, 16,  0); // Downstream RX Length Error c
 
-    createCounterParam("UpgDone",                 0x43,  1,  0); // Upgrade done
-    createCounterParam("UpgErr",                  0x43,  1,  1); // Upgrade error detected
-    createCounterParam("UpgErrIdCode",            0x43,  1,  2); // Upgrade id error detected
-    createCounterParam("UpgErrErase",             0x43,  1,  3); // Upgrade error erasing
-    createCounterParam("UpgErrProgram",           0x43,  1,  4); // Upgrade error programming
-    createCounterParam("UpgErrCrc",               0x43,  1,  5); // Upgrade error CRC
-    createCounterParam("UpgErrBlockLck",          0x43,  1,  6); // Upgrade error block locked
-    createCounterParam("UpgErrVPP",               0x43,  1,  7); // Upgrade error VPP
-    createCounterParam("UpgErrCmdSeq",            0x43,  1,  8); // Upgrade error CMD sequence
-    createCounterParam("UpgErrTimeout",           0x43,  1,  9); // Upgrade error timeout
-    createCounterParam("UpgStarted",              0x43,  1, 10); // Upgrade started
-    createCounterParam("UpgInitialized",          0x43,  1, 11); // Upgrade initialized
-    createCounterParam("UpgIdChecked",            0x43,  1, 12); // Upgrade id checked
-    createCounterParam("UpgEraseSwitch",          0x43,  1, 13); // Upgrade erase switch OK
-    createCounterParam("UpgErased",               0x43,  1, 14); // Upgrade erased
-    createCounterParam("UpgProgrammed",           0x43,  1, 15); // Upgrade programmed
-    createCounterParam("UpgVerified",             0x43,  1, 16); // Upgrade verified
-    createCounterParam("UpgProgSwitch",           0x43,  1, 17); // Upgrade program switch OK
-    createCounterParam("UpgFifoEmpty",            0x43,  1, 28); // Upgrade FIFO empty
-    createCounterParam("UpgFifoAlmstFull",        0x43,  1, 29); // Upgrade FIFO almost full
-    createCounterParam("UpgFifoFull",             0x43,  1, 30); // Upgrade FIFO full
-    createCounterParam("UpgBusy",                 0x43,  1, 31); // Upgrade state machine busy
-
-    // *************** Counter parameters ***************
-
-    linkUpgradeParam("UpgDone",                    0x1,  1,  0); // Upgrade done
-    linkUpgradeParam("UpgErr",                     0x1,  1,  1); // Upgrade error detected
-    linkUpgradeParam("UpgErrIdCode",               0x1,  1,  2); // Upgrade id error detected
-    linkUpgradeParam("UpgErrErase",                0x1,  1,  3); // Upgrade error erasing
-    linkUpgradeParam("UpgErrProgram",              0x1,  1,  4); // Upgrade error programming
-    linkUpgradeParam("UpgErrCrc",                  0x1,  1,  5); // Upgrade error CRC
-    linkUpgradeParam("UpgErrBlockLck",             0x1,  1,  6); // Upgrade error block locked
-    linkUpgradeParam("UpgErrVPP",                  0x1,  1,  7); // Upgrade error VPP
-    linkUpgradeParam("UpgErrCmdSeq",               0x1,  1,  8); // Upgrade error CMD sequence
-    linkUpgradeParam("UpgErrTimeout",              0x1,  1,  9); // Upgrade error timeout
-    linkUpgradeParam("UpgStarted",                 0x1,  1, 10); // Upgrade started
-    linkUpgradeParam("UpgInitialized",             0x1,  1, 11); // Upgrade initialized
-    linkUpgradeParam("UpgIdChecked",               0x1,  1, 12); // Upgrade id checked
-    linkUpgradeParam("UpgEraseSwitch",             0x1,  1, 13); // Upgrade erase switch OK
-    linkUpgradeParam("UpgErased",                  0x1,  1, 14); // Upgrade erased
-    linkUpgradeParam("UpgProgrammed",              0x1,  1, 15); // Upgrade programmed
-    linkUpgradeParam("UpgVerified",                0x1,  1, 16); // Upgrade verified
-    linkUpgradeParam("UpgProgSwitch",              0x1,  1, 17); // Upgrade program switch OK
-    linkUpgradeParam("UpgFifoEmpty",               0x1,  1, 28); // Upgrade FIFO empty
-    linkUpgradeParam("UpgFifoAlmstFull",           0x1,  1, 29); // Upgrade FIFO almost full
-    linkUpgradeParam("UpgFifoFull",                0x1,  1, 30); // Upgrade FIFO full
-    linkUpgradeParam("UpgBusy",                    0x1,  1, 31); // Upgrade state machine busy
+    createCounterParam("Lvds1:DropEvCnt",         0x43, 16,  0); // Ch1 dropped data events
+    createCounterParam("Lvds2:DropEvCnt",         0x44, 16,  0); // Ch2 dropped data events
+    createCounterParam("Lvds3:DropEvCnt",         0x45, 16,  0); // Ch3 dropped data events
+    createCounterParam("Lvds4:DropEvCnt",         0x46, 16,  0); // Ch4 dropped data events
+    createCounterParam("Lvds5:DropEvCnt",         0x47, 16,  0); // Ch5 dropped data events
+    createCounterParam("Lvds6:DropEvCnt",         0x48, 16,  0); // Ch6 dropped data events
+    createCounterParam("Lvds7:DropEvCnt",         0x49, 16,  0); // Ch7 dropped data events
+    createCounterParam("Lvds8:DropEvCnt",         0x4A, 16,  0); // Ch8 dropped data events
+    createCounterParam("Lvds9:DropEvCnt",         0x4B, 16,  0); // Ch9 dropped data events
 }

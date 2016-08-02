@@ -7,12 +7,11 @@
  * @author Klemen Vodopivec
  */
 
+#include "Common.h"
 #include "RocPlugin.h"
 #include "Log.h"
 
 #include <cstring>
-
-#define HEX_BYTE_TO_DEC(a)      ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
 
 EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
@@ -102,6 +101,9 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);
     }
+
+    createParam("HvDelay",      asynParamFloat64, &HvDelay,     0.0); // READ - Time from HV request to first response character
+    createParam("HvB2bDelay",   asynParamFloat64, &HvB2bDelay,  0.0); // READ - Time from HV request to last response character
 
     callParamCallbacks();
     initParams();
@@ -285,21 +287,34 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
     }
     sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
 
-epicsTimeGetCurrent(&m_sendHvTime);
+    epicsTimeGetCurrent(&m_sendHvTime);
 }
 
 bool RocPlugin::rspHvCmd(const DasPacket *packet)
 {
     const uint32_t *payload = packet->getPayload();
+    epicsTimeStamp now;
+    double diff;
 
     // Single character per OCC packet
     char byte = payload[0] & 0xFF;
 
-if (byte == '?') {
-epicsTimeStamp now;
-epicsTimeGetCurrent(&now);
-LOG_ERROR("HV delay: %.9f", epicsTimeDiffInSeconds(&now, &m_sendHvTime));
-}
+    switch (byte) {
+    case '?':
+        epicsTimeGetCurrent(&now);
+        diff = epicsTimeDiffInSeconds(&now, &m_sendHvTime);
+        setIntegerParam(HvDelay, diff);
+        callParamCallbacks();
+        break;
+    case '\r':
+        epicsTimeGetCurrent(&now);
+        diff = epicsTimeDiffInSeconds(&now, &m_sendHvTime);
+        setIntegerParam(HvB2bDelay, diff);
+        callParamCallbacks();
+        break;
+    default:
+        break;
+    }
 
     m_hvBuffer.enqueue(&byte, 1);
 

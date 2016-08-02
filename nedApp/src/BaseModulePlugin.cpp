@@ -833,6 +833,11 @@ void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, 
     createRegParam("CONFIG", name, false, channel, section, offset, nBits, shift, value, conv);
 }
 
+void BaseModulePlugin::createMetaConfigParam(const char *name, uint32_t nBits, int value, BaseModulePlugin::ValueConverter conv)
+{
+    createRegParam("META", name, false, 0, 0, 0, nBits, 0, value, conv);
+}
+
 void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, BaseModulePlugin::ValueConverter conv)
 {
     createRegParam("TEMPERATURE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);

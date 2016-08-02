@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <errno.h>
 #include <occlib.h>
+#include <math.h>
 
 #include "DspPlugin.h"
 
@@ -82,9 +83,7 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
 
     occ_interface_type occtype = OCC_INTERFACE_OPTICAL;
-    if (strchr(devfile, ',') != 0)
-        occtype = OCC_INTERFACE_PIPE;
-    else if (strchr(devfile, ':') != 0)
+    if (strchr(devfile, ':') != 0)
         occtype = OCC_INTERFACE_SOCKET;
 
     // Initialize OCC library
@@ -494,9 +493,9 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
         } else {
             packetsList.release();
 
-            if (retryCounter < 5) {
-                // Increasingly sleep by 10us, first pass doesn't sleep
-                epicsThreadSleep(1e-5 * retryCounter++);
+            if (retryCounter < 7) {
+                // Exponentially sleep up to ~1.1s, first pass doesn't sleep
+                epicsThreadSleep(1e-5 * pow(10, retryCounter++));
                 continue;
             }
 

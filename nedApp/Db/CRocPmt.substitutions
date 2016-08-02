@@ -1,0 +1,71 @@
+file debounce.template {
+pattern { S, INPUT, OUTPUT, TIME }
+        { $(P)Y1:Pmt,  $(P)Y1:Pmt:AlarmCalc,  $(P)Y1:Pmt:Alarm,  300 }
+        { $(P)Y2:Pmt,  $(P)Y2:Pmt:AlarmCalc,  $(P)Y2:Pmt:Alarm,  300 }
+        { $(P)Y3:Pmt,  $(P)Y3:Pmt:AlarmCalc,  $(P)Y3:Pmt:Alarm,  300 }
+        { $(P)Y4:Pmt,  $(P)Y4:Pmt:AlarmCalc,  $(P)Y4:Pmt:Alarm,  300 }
+        { $(P)Y5:Pmt,  $(P)Y5:Pmt:AlarmCalc,  $(P)Y5:Pmt:Alarm,  300 }
+        { $(P)Y6:Pmt,  $(P)Y6:Pmt:AlarmCalc,  $(P)Y6:Pmt:Alarm,  300 }
+        { $(P)Y7:Pmt,  $(P)Y7:Pmt:AlarmCalc,  $(P)Y7:Pmt:Alarm,  300 }
+        { $(P)X1:Pmt,  $(P)X1:Pmt:AlarmCalc,  $(P)X1:Pmt:Alarm,  300 }
+        { $(P)X2:Pmt,  $(P)X2:Pmt:AlarmCalc,  $(P)X2:Pmt:Alarm,  300 }
+        { $(P)X3:Pmt,  $(P)X3:Pmt:AlarmCalc,  $(P)X3:Pmt:Alarm,  300 }
+        { $(P)X4:Pmt,  $(P)X4:Pmt:AlarmCalc,  $(P)X4:Pmt:Alarm,  300 }
+        { $(P)X5:Pmt,  $(P)X5:Pmt:AlarmCalc,  $(P)X5:Pmt:Alarm,  300 }
+        { $(P)X6:Pmt,  $(P)X6:Pmt:AlarmCalc,  $(P)X6:Pmt:Alarm,  300 }
+        { $(P)X7:Pmt,  $(P)X7:Pmt:AlarmCalc,  $(P)X7:Pmt:Alarm,  300 }
+        { $(P)X8:Pmt,  $(P)X8:Pmt:AlarmCalc,  $(P)X8:Pmt:Alarm,  300 }
+        { $(P)X9:Pmt,  $(P)X9:Pmt:AlarmCalc,  $(P)X9:Pmt:Alarm,  300 }
+        { $(P)X10:Pmt, $(P)X10:Pmt:AlarmCalc, $(P)X10:Pmt:Alarm, 300 }
+        { $(P)X11:Pmt, $(P)X11:Pmt:AlarmCalc, $(P)X11:Pmt:Alarm, 300 }
+        { $(P)G1:Pmt,  $(P)G1:Pmt:AlarmCalc,  $(P)G1:Pmt:Alarm,  300 }
+        { $(P)G2:Pmt,  $(P)G2:Pmt:AlarmCalc,  $(P)G2:Pmt:Alarm,  300 }
+        { $(P)G3:Pmt,  $(P)G3:Pmt:AlarmCalc,  $(P)G3:Pmt:Alarm,  300 }
+        { $(P)G4:Pmt,  $(P)G4:Pmt:AlarmCalc,  $(P)G4:Pmt:Alarm,  300 }
+        { $(P)G5:Pmt,  $(P)G5:Pmt:AlarmCalc,  $(P)G5:Pmt:Alarm,  300 }
+        { $(P)G6:Pmt,  $(P)G6:Pmt:AlarmCalc,  $(P)G6:Pmt:Alarm,  300 }
+        { $(P)G7:Pmt,  $(P)G7:Pmt:AlarmCalc,  $(P)G7:Pmt:Alarm,  300 }
+        { $(P)G8:Pmt,  $(P)G8:Pmt:AlarmCalc,  $(P)G8:Pmt:Alarm,  300 }
+        { $(P)G9:Pmt,  $(P)G9:Pmt:AlarmCalc,  $(P)G9:Pmt:Alarm,  300 }
+        { $(P)G10:Pmt, $(P)G10:Pmt:AlarmCalc, $(P)G10:Pmt:Alarm, 300 }
+        { $(P)G11:Pmt, $(P)G11:Pmt:AlarmCalc, $(P)G11:Pmt:Alarm, 300 }
+        { $(P)G12:Pmt, $(P)G12:Pmt:AlarmCalc, $(P)G12:Pmt:Alarm, 300 }
+        { $(P)G13:Pmt, $(P)G13:Pmt:AlarmCalc, $(P)G13:Pmt:Alarm, 300 }
+        { $(P)G14:Pmt, $(P)G14:Pmt:AlarmCalc, $(P)G14:Pmt:Alarm, 300 }
+}
+
+file CRocPmtCheck.template {
+pattern { S }
+        { $(P)Y1 }
+        { $(P)Y2 }
+        { $(P)Y3 }
+        { $(P)Y4 }
+        { $(P)Y5 }
+        { $(P)Y6 }
+        { $(P)Y7 }
+        { $(P)X1 }
+        { $(P)X2 }
+        { $(P)X3 }
+        { $(P)X4 }
+        { $(P)X5 }
+        { $(P)X6 }
+        { $(P)X7 }
+        { $(P)X8 }
+        { $(P)X9 }
+        { $(P)X10 }
+        { $(P)X11 }
+        { $(P)G1 }
+        { $(P)G2 }
+        { $(P)G3 }
+        { $(P)G4 }
+        { $(P)G5 }
+        { $(P)G6 }
+        { $(P)G7 }
+        { $(P)G8 }
+        { $(P)G9 }
+        { $(P)G10 }
+        { $(P)G11 }
+        { $(P)G12 }
+        { $(P)G13 }
+        { $(P)G14 }
+}

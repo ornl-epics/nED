@@ -7,11 +7,11 @@
  * @author Klemen Vodopivec
  */
 
+#include "Common.h"
 #include "AcpcFemPlugin.h"
 #include "Log.h"
 
 #define NUM_ACPCFEMPLUGIN_PARAMS    0 //((int)(&LAST_ACPCFEMPLUGIN_PARAM - &FIRST_ACPCFEMPLUGIN_PARAM + 1))
-#define HEX_BYTE_TO_DEC(a)      ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
 
 EPICS_REGISTER_PLUGIN(AcpcFemPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
@@ -40,7 +40,10 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortNam
                        blocking, NUM_ACPCFEMPLUGIN_PARAMS + NUM_ACPCFEMPLUGIN_DYNPARAMS)
     , m_version(version)
 {
-    if (m_version == "v14" || m_version == "v22") {
+    if (m_version == "v14") {
+        createStatusParams_v14();
+        setIntegerParam(Supported, 1);
+    } else if (m_version == "v22") {
         createStatusParams_v22();
         setIntegerParam(Supported, 1);
     } else {

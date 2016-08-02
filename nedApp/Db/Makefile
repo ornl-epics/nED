@@ -31,8 +31,11 @@ DB += GlobalConG.db
 DB += ApplyConfig.db
 DB += PulsedMagnet.db
 DB += TimingPlugin.db
+DB += TofCorrectPlugin.db
 DB += BnlFlatFieldPlugin.db
 DB += BnlPosCalcPlugin.db
+DB += CRocPosCalcPlugin.db
+DB += CRocPvaPlugin.db
 
 DB += DspPlugin_v51.db
 DB += DspPlugin_v52.db
@@ -63,6 +66,10 @@ DB += BnlRocPlugin_v00.db
 DB += BnlRocPlugin_v20.db
 DB += AcpcPlugin_v144.db
 DB += ArocPlugin_v23.db
+DB += CRocPmt.db
+DB += CRocPlugin_v93.db
+DB += CRocPlugin_v94.db
+
 
 #----------------------------------------------------
 # If <anyname>.db template is not named <anyname>*.template add
@@ -83,6 +90,7 @@ FemPlugin_v35.template: FemPlugin_v35.generated
 FemPlugin_v36.template: FemPlugin_v36.generated
 FemPlugin_v37.template: FemPlugin_v37.generated
 FemPlugin_v38.template: FemPlugin_v38.generated
+AcpcFemPlugin_v14.template: AcpcFemPlugin_v14.generated
 AcpcFemPlugin_v22.template: AcpcFemPlugin_v22.generated
 RocPlugin_v14.template: RocPlugin_v14.generated
 RocPlugin_v44.template: RocPlugin_v45.generated
@@ -101,6 +109,8 @@ BnlRocPlugin_v00.template: BnlRocPlugin_v00.generated
 BnlRocPlugin_v20.template: BnlRocPlugin_v20.generated
 AcpcPlugin_v144.template: AcpcPlugin_v144.generated
 ArocPlugin_v23.template: ArocPlugin_v23.generated
+CRocPlugin_v93.template: CRocPlugin_v93.generated
+CRocPlugin_v94.template: CRocPlugin_v94.generated
 
 %.generated: ../src/%.cpp
 	../export2epics.py -i $^ -o $@
