@@ -46,6 +46,7 @@ record(calcout, "$(P)AutoResetCnt")
     field(OOPT, "When Non-zero")
     field(OUT,  "$(P)ResetCnt PP")
     field(PINI, "YES")
+    field(SCAN, "1 second")
 }
 record(bo, "$(P)PassVetoes")
 {
@@ -114,10 +115,21 @@ record(longout, "$(P)TimeRangeDelayMin")
     field(PINI, "YES")
     field(EGU,  "counts")
 }
-record(ao, "$(P)TofResolution")
+record(longout, "$(P)TimeRangeSumMax")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "High threshold for sum time ranges")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRangeSumMax")
+    field(VAL,  "600")
+    field(PINI, "YES")
+    field(EGU,  "counts")
+}
+record(ao, "$(P)EchoDeadTime")
 {
     field(ASG,  "BEAMLINE")
-    field(DESC, "Min time between two events")
+    field(DESC, "Back to back time for echo detection")
     field(DTYP, "asynInt32")
     field(VAL,  "0")
     field(EGU,  "ns")
@@ -125,8 +137,19 @@ record(ao, "$(P)TofResolution")
     field(LINR, "SLOPE")
     info(autosaveFields, "VAL")
     field(PINI, "YES")
-    field(OUT,  "@asyn($(PORT))TofResolution")
+    field(OUT,  "@asyn($(PORT))EchoDeadTime")
     field(ASG,  "BEAMLINE")
+}
+record(longout, "$(P)EchoDeadArea")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Pixel area for echo detection")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))EchoDeadArea")
+    field(VAL,  "168")
+    field(PINI, "YES")
+    field(EGU,  "pixels")
 }
 record(bo, "$(P)OutExtMode")
 {

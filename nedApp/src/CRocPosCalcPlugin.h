@@ -411,7 +411,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int TimeRangeDelayMin;  //!< Delayed event threshold
         int TimeRangeSumMax;    //!< High threshold for integrated time ranges
         int EchoDeadTime;       //!< Time between two events in 100ns
-        int EchoDeadArea;       //!< High threshold for integrated time ranges
+        int EchoDeadArea;       //!< Pixel area for echo detection
         int ProcessMode;        //!< Select event verification algorithm
 
         int CntTotalEvents;    //!< Number of all events
