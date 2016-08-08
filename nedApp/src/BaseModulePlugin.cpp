@@ -73,6 +73,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     setIntegerParam(CmdRsp, LAST_CMD_NONE);
     callParamCallbacks();
 
+    epicsTimeGetCurrent(&m_lastCmdTime);
+
     m_remoteUpgrade.inProgress = false;
     m_remoteUpgrade.buffer = 0;
     m_remoteUpgrade.bufferSize = 0;
@@ -114,6 +116,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
                 if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
                    LOG_WARN("Failed to schedule CmdRsp timeout callback");
                 setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+                epicsTimeGetCurrent(&m_lastCmdTime);
 
                 // Increase this for all packets, although only used in rspWriteConfig()
                 m_cfgSectionCnt++;
@@ -876,6 +879,10 @@ std::string BaseModulePlugin::addr2ip(uint32_t addr)
 float BaseModulePlugin::noResponseCleanup(DasPacket::CommandType command)
 {
     if (m_waitingResponse == command) {
+        epicsTimeStamp now;
+        epicsTimeGetCurrent(&now);
+        double t = epicsTimeDiffInSeconds(&now, &m_lastCmdTime);
+        LOG_INFO("Timeout waiting for %s response in %.3f seconds", cmd2str(command), t);
         m_waitingResponse = static_cast<DasPacket::CommandType>(0);
         setIntegerParam(CmdRsp, LAST_CMD_TIMEOUT);
 
