@@ -1,39 +1,3 @@
-file debounce.template {
-pattern { S, INPUT, OUTPUT, TIME }
-        { $(P)Y1:Pmt,  $(P)Y1:Pmt:Status,  $(P)Y1:Pmt:Alarm,  300 }
-        { $(P)Y2:Pmt,  $(P)Y2:Pmt:Status,  $(P)Y2:Pmt:Alarm,  300 }
-        { $(P)Y3:Pmt,  $(P)Y3:Pmt:Status,  $(P)Y3:Pmt:Alarm,  300 }
-        { $(P)Y4:Pmt,  $(P)Y4:Pmt:Status,  $(P)Y4:Pmt:Alarm,  300 }
-        { $(P)Y5:Pmt,  $(P)Y5:Pmt:Status,  $(P)Y5:Pmt:Alarm,  300 }
-        { $(P)Y6:Pmt,  $(P)Y6:Pmt:Status,  $(P)Y6:Pmt:Alarm,  300 }
-        { $(P)Y7:Pmt,  $(P)Y7:Pmt:Status,  $(P)Y7:Pmt:Alarm,  300 }
-        { $(P)X1:Pmt,  $(P)X1:Pmt:Status,  $(P)X1:Pmt:Alarm,  300 }
-        { $(P)X2:Pmt,  $(P)X2:Pmt:Status,  $(P)X2:Pmt:Alarm,  300 }
-        { $(P)X3:Pmt,  $(P)X3:Pmt:Status,  $(P)X3:Pmt:Alarm,  300 }
-        { $(P)X4:Pmt,  $(P)X4:Pmt:Status,  $(P)X4:Pmt:Alarm,  300 }
-        { $(P)X5:Pmt,  $(P)X5:Pmt:Status,  $(P)X5:Pmt:Alarm,  300 }
-        { $(P)X6:Pmt,  $(P)X6:Pmt:Status,  $(P)X6:Pmt:Alarm,  300 }
-        { $(P)X7:Pmt,  $(P)X7:Pmt:Status,  $(P)X7:Pmt:Alarm,  300 }
-        { $(P)X8:Pmt,  $(P)X8:Pmt:Status,  $(P)X8:Pmt:Alarm,  300 }
-        { $(P)X9:Pmt,  $(P)X9:Pmt:Status,  $(P)X9:Pmt:Alarm,  300 }
-        { $(P)X10:Pmt, $(P)X10:Pmt:Status, $(P)X10:Pmt:Alarm, 300 }
-        { $(P)X11:Pmt, $(P)X11:Pmt:Status, $(P)X11:Pmt:Alarm, 300 }
-        { $(P)G1:Pmt,  $(P)G1:Pmt:Status,  $(P)G1:Pmt:Alarm,  300 }
-        { $(P)G2:Pmt,  $(P)G2:Pmt:Status,  $(P)G2:Pmt:Alarm,  300 }
-        { $(P)G3:Pmt,  $(P)G3:Pmt:Status,  $(P)G3:Pmt:Alarm,  300 }
-        { $(P)G4:Pmt,  $(P)G4:Pmt:Status,  $(P)G4:Pmt:Alarm,  300 }
-        { $(P)G5:Pmt,  $(P)G5:Pmt:Status,  $(P)G5:Pmt:Alarm,  300 }
-        { $(P)G6:Pmt,  $(P)G6:Pmt:Status,  $(P)G6:Pmt:Alarm,  300 }
-        { $(P)G7:Pmt,  $(P)G7:Pmt:Status,  $(P)G7:Pmt:Alarm,  300 }
-        { $(P)G8:Pmt,  $(P)G8:Pmt:Status,  $(P)G8:Pmt:Alarm,  300 }
-        { $(P)G9:Pmt,  $(P)G9:Pmt:Status,  $(P)G9:Pmt:Alarm,  300 }
-        { $(P)G10:Pmt, $(P)G10:Pmt:Status, $(P)G10:Pmt:Alarm, 300 }
-        { $(P)G11:Pmt, $(P)G11:Pmt:Status, $(P)G11:Pmt:Alarm, 300 }
-        { $(P)G12:Pmt, $(P)G12:Pmt:Status, $(P)G12:Pmt:Alarm, 300 }
-        { $(P)G13:Pmt, $(P)G13:Pmt:Status, $(P)G13:Pmt:Alarm, 300 }
-        { $(P)G14:Pmt, $(P)G14:Pmt:Status, $(P)G14:Pmt:Alarm, 300 }
-}
-
 file CRocPmtCheck.template {
 pattern { S }
         { $(P)Y1 }
