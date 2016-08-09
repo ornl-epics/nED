@@ -103,9 +103,11 @@ record(calcout, "$(P)CmdReqEn")
 record(fanout, "$(P)RspCheck")
 {
     field(DESC, "Response check fanout")
-    field(LNK1, "$(P)MissCount PP")
+    field(LNK1, "$(P)RspMissCount PP")
     field(LNK2, "$(P)HwStatus PP")
     field(LNK3, "$(P)AcquiringCalc PP")
+    field(LNK4, "$(P)AcquiringCheckCalc PP")
+    # LNK5,LNK6 reserved for custom use by modules
 }
 # Monitor CmdReq for start/stop commands and set AcquireSet to yes/no
 record(calcout, "$(P)AcquiringCalc")
@@ -124,22 +126,39 @@ record(bi, "$(P)AcquiringSet")
     field(ONAM, "acquiring")
     field(VAL,  "0")
     field(PINI, "YES")
-    field(FLNK, "$(P)AcquiringCheck")
+    field(FLNK, "$(P)StatusCalc")
 }
-record(calc, "$(P)AcquiringCheck")
+# Verifies that acquiring state matches the request
+# 0 .. mismatch (MAJOR alarm)
+# 1 .. not acquiring
+# 2 .. acquiring
+# When module is disabled, we follow the request
+record(calc, "$(P)AcquiringCheckCalc")
 {
     field(INPA, "$(P)Acquiring NPP")
     field(INPB, "$(P)AcquiringSet NPP")
-    field(INPC, "$(P)AcquiringSet.SEVR NPP")
-    field(INPD, "$(P)Enable NPP")
-    field(CALC, "(A=B&&C=0)||D=0")
+    field(INPC, "$(P)Enable NPP")
+    field(CALC, "(C=1&&A#B)?0:A+1")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
+    field(FLNK, "$(P)AcquiringCheck")
+}
+record(mbbo, "$(P)AcquiringCheck")
+{
+    field(DOL,  "$(P)AcquiringCheckCalc PP")
+    field(OMSL, "closed_loop")
+    field(ZRVL, "0")
+    field(ZRST, "mismatch")
+    field(ZRSV, "MAJOR")
+    field(ONVL, "1")
+    field(ONST, "not acquiring")
+    field(TWVL, "2")
+    field(TWST, "acquiring")
     field(FLNK, "$(P)StatusCalc")
 }
 record(bi, "$(P)Acquiring")
 {
-    field(FLNK, "$(P)AcquiringCheck")
+    field(FLNK, "$(P)AcquiringCalc")
 }
 # Placeholder record, may be extended by module.
 # MAJOR alarm is captured in overall status.
@@ -152,17 +171,16 @@ record(calc, "$(P)HwStatus")
 # Detector is considered missing if it doesn't respond to at 2 or more
 # subsequent commands. Record recoveres (goes out of alarm) if it responds
 # afterwards.
-record(calc, "$(P)MissCount")
+record(calc, "$(P)RspMissCount")
 {
     info(archive, "Monitor, 00:00:10, VAL")
+    info(autosaveFields, "HIHI")
     field(DESC, "Count missing responses")
     field(INPA, "$(P)CmdRsp NPP")
-    field(INPB, "$(P)MissCount NPP")
+    field(INPB, "$(P)RspMissCount NPP")
     field(INPC, "$(P)Enable NPP")
     field(CALC, "C=0?0:(A=3)?B+1:(A=2)?B:0")
-    field(HIGH, "3")
-    field(HSV,  "MINOR")
-    field(HIHI, "5")
+    field(HIHI, "3")
     field(HHSV, "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
@@ -171,7 +189,7 @@ record(calc, "$(P)MissCount")
 record(calc, "$(P)HealthStatusCalc")
 {
     field(DESC, "Aggregate alarms")
-    field(INPA, "$(P)MissCount.SEVR")
+    field(INPA, "$(P)RspMissCount.SEVR")
     field(INPB, "$(P)Supported.SEVR")
     field(INPC, "$(P)Verified.SEVR")
     field(INPD, "$(P)HwStatus.SEVR")
@@ -186,7 +204,7 @@ record(calc, "$(P)StatusCalc")
 {
     field(INPA, "$(P)Enable NPP")
     field(INPB, "$(P)HealthStatusCalc.SEVR PP")
-   field(INPC, "$(P)AcquiringCheck.SEVR NPP")
+    field(INPC, "$(P)AcquiringCheck.SEVR NPP")
     field(CALC, "A=0||(B+C)=0")
     field(PINI, "YES") # For Supported link
     field(FLNK, "$(P)Status")
