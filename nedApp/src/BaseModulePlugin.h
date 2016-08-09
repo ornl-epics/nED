@@ -189,7 +189,6 @@ class BaseModulePlugin : public BasePlugin {
         DasPacket::ModuleType m_hardwareType;           //!< Hardware type
         std::map<std::string, ParamTable> m_params;     //!< Maps of exported parameters
         DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
-        epicsTimeStamp m_lastCmdTime;                   //!< Time of last command sent out
         uint8_t m_expectedChannel;                      //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
         uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
         uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
