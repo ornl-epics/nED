@@ -922,7 +922,7 @@ void CRocPosCalcPlugin::Stats::reset()
 
 CRocPosCalcPlugin::Stats &CRocPosCalcPlugin::Stats::operator+=(const Stats &rhs)
 {
-    if ((total + rhs.total) > std::numeric_limits<int32_t>::max()) {
+    if ((total + rhs.total) > (unsigned)std::numeric_limits<int32_t>::max()) {
         // This is not good, un-controlled resetting
         reset();
     }
@@ -936,7 +936,7 @@ CRocPosCalcPlugin::Stats &CRocPosCalcPlugin::Stats::operator+=(const Stats &rhs)
 
 void CRocPosCalcPlugin::Stats::increment(CRocDataPacket::VetoType type)
 {
-    if (total >= std::numeric_limits<int32_t>::max()) {
+    if (total >= (unsigned)std::numeric_limits<int32_t>::max()) {
         reset();
     }
     total++;
