@@ -280,8 +280,9 @@ asynStatus DiscoverPlugin::readOctet(asynUser *pasynUser, char *value, size_t nC
 
 void DiscoverPlugin::report(FILE *fp, int details)
 {
-    char buffer[16*1024]; // Should be sufficient for about 230 modules
-    uint32_t length = formatOutput(buffer, sizeof(buffer));
+    size_t size = 100000; // Should be enough for about 1000 modules
+    char *buffer = (char *)malloc(size);
+    uint32_t length = formatOutput(buffer, size);
     fwrite(buffer, 1, length, fp);
     return BasePlugin::report(fp, details);
 }
