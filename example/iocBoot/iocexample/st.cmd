@@ -45,6 +45,13 @@ dbLoadRecords("$(NED)/db/OccPortDriver.db","P=$(PREFIX)occ1:,PORT=occ")
 CmdDispatcherConfigure("cmd", "occ")
 dbLoadRecords("$(NED)/db/CmdDispatcherPlugin.db","P=$(PREFIX)cmd1:,PORT=cmd")
 
+# For legacy DSP without timing setups
+#TimingPluginConfigure("time", "occ")
+#dbLoadRecords("$(NED)/db/TimingPluginConfigure.db","P=$(PREFIX)time:,PORT=time")
+
+# Beammonitor tof correction plugin
+#TofCorrectPluginConfigure("tof", "occ", 0)
+#dbLoadRecords("$(NED)/db/TofCorrectPlugin.db","P=$(PREFIX)tof:,PORT=tof")
 
 ### Global RX Plug-ins
 
