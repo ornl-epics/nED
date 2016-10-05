@@ -282,8 +282,11 @@ void DiscoverPlugin::report(FILE *fp, int details)
 {
     size_t size = 100000; // Should be enough for about 1000 modules
     char *buffer = (char *)malloc(size);
-    uint32_t length = formatOutput(buffer, size);
-    fwrite(buffer, 1, length, fp);
+    if (buffer) {
+        uint32_t length = formatOutput(buffer, size);
+        fwrite(buffer, 1, length, fp);
+        free(buffer);
+    }
     return BasePlugin::report(fp, details);
 }
 
