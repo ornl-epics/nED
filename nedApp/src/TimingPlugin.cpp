@@ -45,6 +45,9 @@ TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     createParam("PoolSize",     asynParamInt32, &PoolSize,    0); // READ - Number of allocated packets
     createParam("Mode",         asynParamInt32, &Mode,        0); // WRITE - Source where to ger RTDL data from
     createParam("RecvPort",     asynParamInt32, &RecvPort, 8055); // WRITE - Remote port
+    createParam("Connected",    asynParamInt32, &Connected,   0); // READ - Flag whether ETC connection is established
+    createParam("FakeRtdlCnt",  asynParamInt32, &FakeRtdlCnt, 0); // READ - Number of fake RTDL packets generated
+    createParam("EtcRtdlCnt",   asynParamInt32, &EtcRtdlCnt,  0); // READ - Number of packets received from ETC computer
 
     createFakeRtdl(m_rtdlPacket);
     // Use static values for RTDL frames
@@ -81,25 +84,40 @@ TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
 asynStatus TimingPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Mode) {
+        bool connected = false;
+        asynStatus status = asynError;
         switch (value) {
         case 0:
             disconnectEtc();
+            status = asynSuccess;
             break;
         case 1:
             int port;
             if (getIntegerParam(RecvPort, &port) != asynSuccess || port == 0) {
                 LOG_ERROR("Can not connect to timing server: RecvPort not configured");
-                return asynError;
+                break;
             }
             disconnectEtc();
             if (connectEtc(port) == false) {
                 LOG_ERROR("Can not connect to timing server: connection refused");
-                return asynError;
+                break;
+            } else {
+                connected = true;
+                status = asynSuccess;
             }
             break;
         default:
-            return asynError;
+            int oldmode;
+            getIntegerParam(Mode, &oldmode);
+            LOG_ERROR("Invalid operation mode '%d', reverting to %d", value, oldmode);
+            value = oldmode;
+            break;
         }
+
+        setIntegerParam(Connected, connected);
+        setIntegerParam(Mode, value);
+        callParamCallbacks();
+        return status;
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }
@@ -244,24 +262,34 @@ double TimingPlugin::updateRtdl()
 
     epicsTimeGetCurrent(&t1);
 
+    this->lock();
     getIntegerParam(Enable, &enabled);
+    this->unlock();
 
     if (enabled == 1) {
         bool sendRtdlPacket = false;
         int mode;
         getIntegerParam(Mode, &mode);
-    
+
         this->lock();
         // This is the only place where m_rtdlPacket is changed
         if (mode == 0)
             sendRtdlPacket = createFakeRtdl(m_rtdlPacket);
         else if (mode == 1)
             sendRtdlPacket = recvRtdlFromEtc(m_rtdlPacket);
+
+        if (sendRtdlPacket) {
+            int counter;
+            getIntegerParam(mode == 0 ? FakeRtdlCnt : EtcRtdlCnt, &counter);
+            counter = (++counter > 0 ? counter : 0);
+            setIntegerParam(mode == 0 ? FakeRtdlCnt : EtcRtdlCnt, counter);
+            callParamCallbacks();
+        }
         this->unlock();
-    
+
         // NOTE: No guarantee that there's a new RTDL data in 16ms.
         //       Data for two pulses can be merged together in that case.
-    
+
         if (sendRtdlPacket) {
             m_mutex.lock();
             DasPacketList packetList;

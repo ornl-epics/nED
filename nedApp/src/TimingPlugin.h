@@ -195,7 +195,10 @@ class TimingPlugin : public BaseDispatcherPlugin {
         int PoolSize;           //!< Number of allocated packets
         int Mode;               //!< Select RTDL data source, fake or network
         int RecvPort;           //!< Remote port
-        #define LAST_TIMINGPLUGIN_PARAM RecvPort
+        int Connected;          //!< Flag whether connected to ETC computer
+        int FakeRtdlCnt;        //!< Number of fake RTDL pulses generated
+        int EtcRtdlCnt;         //!< Number of RTDL pulses received from ETC
+        #define LAST_TIMINGPLUGIN_PARAM EtcRtdlCnt
 
 };
 #endif // TIMING_PLUGIN_H

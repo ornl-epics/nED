@@ -33,3 +33,54 @@ record(longout, "$(P)RecvPort")
     field(OUT,  "@asyn($(PORT))RecvPort")
     field(PINI, "YES")
 }
+
+record(bi, "$(P)Connected")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Flags whether connected to ETC")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Connected")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "disconnected")
+    field(ONAM, "connected")
+}
+
+record(longin, "$(P)FakeRtdlCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of fake RTDLs generated")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))FakeRtdlCnt")
+    field(SCAN, "Passive")
+}
+
+record(calc, "$(P)FakeRtdlRate")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)FakeRtdlCnt NPP")
+    field(INPB, "$(P)FakeRtdlCnt PP")
+    field(CALC, "B-A")
+    field(EGU,  "Hz")
+    field(SCAN, "1 second")
+}
+
+record(longin, "$(P)EtcRtdlCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Rate of generated RTDLs")
+    field(DESC, "Number of RTDLs received from ETC")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))EtcRtdlCnt")
+    field(SCAN, "Passive")
+}
+
+record(calc, "$(P)EtcRtdlRate")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Rate of RTDLs received from ETC")
+    field(INPA, "$(P)EtcRtdlCnt NPP")
+    field(INPB, "$(P)EtcRtdlCnt PP")
+    field(CALC, "B-A")
+    field(EGU,  "Hz")
+    field(SCAN, "1 second")
+}
