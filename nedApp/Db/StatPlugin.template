@@ -25,6 +25,7 @@ record(longin, "$(P)CmdCnt")
 }
 record(calc, "$(P)CmdCntRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
    field(INPA,  "$(P)CmdCnt NPP")
    field(INPB,  "$(P)CmdCnt PP")
    field(CALC,  "B-A")
@@ -41,6 +42,8 @@ record(longin, "$(P)DataCnt")
 }
 record(calc, "$(P)DataCntRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
+   field(ADEL,  "5")
    field(INPA,  "$(P)DataCnt NPP")
    field(INPB,  "$(P)DataCnt PP")
    field(CALC,  "B-A")
@@ -57,6 +60,8 @@ record(longin, "$(P)MetaCnt")
 }
 record(calc, "$(P)MetaCntRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
+   field(ADEL,  "5")
    field(INPA,  "$(P)MetaCnt NPP")
    field(INPB,  "$(P)MetaCnt PP")
    field(CALC,  "B-A")
@@ -73,6 +78,7 @@ record(longin, "$(P)RtdlCnt")
 }
 record(calc, "$(P)RtdlCntRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
    field(INPA,  "$(P)RtdlCnt NPP")
    field(INPB,  "$(P)RtdlCnt PP")
    field(CALC,  "B-A")
@@ -89,6 +95,7 @@ record(longin, "$(P)TsyncCnt")
 }
 record(calc, "$(P)TsyncCntRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
    field(INPA,  "$(P)TsyncCnt NPP")
    field(INPB,  "$(P)TsyncCnt PP")
    field(CALC,  "B-A")
@@ -105,6 +112,7 @@ record(longin, "$(P)BadCnt")
 }
 record(calc, "$(P)BadCntRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
    field(INPA,  "$(P)BadCnt NPP")
    field(INPB,  "$(P)BadCnt PP")
    field(CALC,  "B-A")
@@ -121,6 +129,8 @@ record(longin, "$(P)TotCnt")
 }
 record(calc, "$(P)TotCntRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
+   field(ADEL,  "5")
    field(INPA,  "$(P)TotCnt NPP")
    field(INPB,  "$(P)TotCnt PP")
    field(CALC,  "B-A")
@@ -137,6 +147,7 @@ record(longin, "$(P)CmdByte")
 }
 record(calc, "$(P)CmdByteRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
    field(INPA,  "$(P)CmdByte NPP")
    field(INPB,  "$(P)CmdByte PP")
    field(CALC,  "B-A")
@@ -153,6 +164,8 @@ record(longin, "$(P)DataByte")
 }
 record(calc, "$(P)DataByteRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
+   field(ADEL,  "10000")
    field(INPA,  "$(P)DataByte NPP")
    field(INPB,  "$(P)DataByte PP")
    field(CALC,  "B-A")
@@ -180,6 +193,8 @@ record(longin, "$(P)MetaByte")
 }
 record(calc, "$(P)MetaByteRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
+   field(ADEL,  "10000")
    field(INPA,  "$(P)MetaByte NPP")
    field(INPB,  "$(P)MetaByte PP")
    field(CALC,  "B-A")
@@ -207,6 +222,7 @@ record(longin, "$(P)RtdlByte")
 }
 record(calc, "$(P)RtdlByteRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
    field(INPA,  "$(P)RtdlByte NPP")
    field(INPB,  "$(P)RtdlByte PP")
    field(CALC,  "B-A")
@@ -223,6 +239,7 @@ record(longin, "$(P)TsyncByte")
 }
 record(calc, "$(P)TsyncByteRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
    field(INPA,  "$(P)TsyncByte NPP")
    field(INPB,  "$(P)TsyncByte PP")
    field(CALC,  "B-A")
@@ -239,6 +256,7 @@ record(longin, "$(P)BadByte")
 }
 record(calc, "$(P)BadByteRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
    field(INPA,  "$(P)BadByte NPP")
    field(INPB,  "$(P)BadByte PP")
    field(CALC,  "B-A")
@@ -255,6 +273,8 @@ record(longin, "$(P)TotByte")
 }
 record(calc, "$(P)TotByteRate")
 {
+   info(archive, "Monitor, 00:00:01, VAL")
+   field(ADEL,  "10000")
    field(INPA,  "$(P)TotByte NPP")
    field(INPB,  "$(P)TotByte PP")
    field(CALC,  "B-A")
@@ -402,5 +422,3 @@ record(sel, "$(P)CRocDS")
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")
 }
-
-
