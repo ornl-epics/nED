@@ -12,8 +12,7 @@ record(longout, "$(P)DataModeL")
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")
-    field(INPB, "$(P)Discovered.SEVR NPP")
-    field(CALC, "(A+B)=0")
+    field(CALC, "A=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 }
