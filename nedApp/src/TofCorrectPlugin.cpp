@@ -24,29 +24,48 @@ TofCorrectPlugin::TofCorrectPlugin(const char *portName, const char *connectPort
     , m_nReceived(0)
     , m_nProcessed(0)
 {
-    createParam("TofOffset",    asynParamInt32, &TofOffset,   0); // WRITE - Full TOF offset to be applied in nsec
-    createParam("PixelId",      asynParamInt32, &PixelId,     0); // WRITE - Select pixel id
-    createParam("FrameLen",     asynParamInt32, &FrameLen,    0); // WRITE - Frame length in nsec
+    createParam("PoolSize",     asynParamInt32, &PoolSize,    0); // READ - Number of allocated packets
+    createParam("TofOffset1",   asynParamInt32, &TofOffset1,  0); // WRITE - Full TOF offset to be applied in nsec
+    createParam("PixelId1",     asynParamInt32, &PixelId1,    0); // WRITE - Select pixel id
+    createParam("FrameLen1",    asynParamInt32, &FrameLen1,   0); // WRITE - Frame length in nsec
+    createParam("NCorrected1",  asynParamInt32, &NCorrected1, 0); // READ - Number of corrected events
+    createParam("TofOffset2",   asynParamInt32, &TofOffset2,  0); // WRITE - Full TOF offset to be applied in nsec
+    createParam("PixelId2",     asynParamInt32, &PixelId2,    0); // WRITE - Select pixel id
+    createParam("FrameLen2",    asynParamInt32, &FrameLen2,   0); // WRITE - Frame length in nsec
+    createParam("NCorrected2",  asynParamInt32, &NCorrected2, 0); // READ - Number of corrected events
+    createParam("TofOffset3",   asynParamInt32, &TofOffset3,  0); // WRITE - Full TOF offset to be applied in nsec
+    createParam("PixelId3",     asynParamInt32, &PixelId3,    0); // WRITE - Select pixel id
+    createParam("FrameLen3",    asynParamInt32, &FrameLen3,   0); // WRITE - Frame length in nsec
+    createParam("NCorrected3",  asynParamInt32, &NCorrected3, 0); // READ - Number of corrected events
 }
 
 void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetList)
 {
     std::list<DasPacket *> allocPktsList;
     DasPacketList modifiedPktsList;
-    int tofOffset;
-    int pixelId;
-    int frameLen;
-    uint32_t coarseOffset;
-    uint32_t fineOffset;
-    uint32_t frameNum;
+    int tofOffset[3];
+    int pixelId[3];
+    int frameLen[3];
+    uint32_t coarseOffset[3];
+    uint32_t fineOffset[3];
+    uint32_t frameNum[3];
+    int32_t nEvents[3];
 
     this->lock();
-    getIntegerParam(TofOffset, &tofOffset);
-    getIntegerParam(FrameLen, &frameLen);
-    getIntegerParam(PixelId, &pixelId);
+    getIntegerParam(TofOffset1,  &tofOffset[0]);
+    getIntegerParam(FrameLen1,   &frameLen[0]);
+    getIntegerParam(PixelId1,    &pixelId[0]);
+    getIntegerParam(NCorrected1, &nEvents[0]);
+    getIntegerParam(TofOffset2,  &tofOffset[1]);
+    getIntegerParam(FrameLen2,   &frameLen[1]);
+    getIntegerParam(PixelId2,    &pixelId[1]);
+    getIntegerParam(NCorrected2, &nEvents[1]);
+    getIntegerParam(TofOffset3,  &tofOffset[2]);
+    getIntegerParam(FrameLen3,   &frameLen[2]);
+    getIntegerParam(PixelId3,    &pixelId[2]);
+    getIntegerParam(NCorrected3, &nEvents[2]);
     this->unlock();
 
-//LOG_ERROR("tofOffset=%d, frameLen=%d, pixelId=0x%08X", tofOffset, frameLen, pixelId);
     if (frameLen == 0 || tofOffset == 0) {
         modifiedPktsList.reset(packetList); // reset() automatically reserves
         sendToPlugins(&modifiedPktsList);
@@ -54,22 +73,27 @@ void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetLis
         modifiedPktsList.waitAllReleased();
         modifiedPktsList.clear();
     } else {
-        tofOffset /= 100;
-        frameLen /= 100;
-        fineOffset = tofOffset % frameLen;
-        frameNum = tofOffset / frameLen;
-        coarseOffset = frameNum * frameLen;
-        
+        for (int i=0; i<3; i++) {
+            if (pixelId[i] != 0) {
+                if (frameLen[i] == 0)
+                    frameLen[i] = 1;
+                tofOffset[i] /= 100;
+                frameLen[i] /= 100;
+                fineOffset[i] = tofOffset[i] % frameLen[i];
+                frameNum[i] = tofOffset[i] / frameLen[i];
+                coarseOffset[i] = frameNum[i] * frameLen[i];
+            }
+        }
+
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
-    
+
             if (packet->isMetaData()) {
-//LOG_ERROR("tofOffset=%d frameLen=%d, fineOffset=%d, frameNum=%d, coarseOffset=%d", tofOffset, frameLen, fineOffset, frameNum, coarseOffset);
                 DasPacket *modifiedPacket = allocPacket(packet->length());
                 if (!modifiedPacket)
                     continue;
                 allocPktsList.push_back(modifiedPacket);
-    
+
                 if (packet->copyHeader(modifiedPacket, packet->length())) {
                     uint32_t nDwords;
                     uint32_t *dstData = modifiedPacket->getData(&nDwords);
@@ -80,19 +104,29 @@ void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetLis
                     modifiedPacket->payload_length += nDwords * 4;
 
                     for (uint32_t i=0; (i+1)<nDwords; i+=2) {
-                        // Only match selected pixelId
-                        if (dstData[i+1] == (uint32_t)pixelId) {
-                            uint32_t tof = dstData[i] & 0x000FFFFF;
-                            // Do the frame correction
-                            if (tof < fineOffset) {
-                                // Account for misaligned trigger
-                                tof += coarseOffset + frameLen;
-                            } else {
-                                tof += coarseOffset;
+                        // Find 0-2 index into correction params table,
+                        // or skip event if pixel not to be corrected
+                        int index = -1;
+                        for (int j=0; j<3; j++) {
+                            if (dstData[i+1] == (uint32_t)pixelId[j]) {
+                                index = j;
+                                break;
                             }
-                            dstData[i] = (dstData[i] & 0xFFF00000) | tof;
-//LOG_ERROR("adjusting pixel 0x%08X: %d => %d", pixelId, srcData[i], dstData[i]);
                         }
+                        if (index == -1)
+                            continue;
+
+                        uint32_t tof = dstData[i] & 0x000FFFFF;
+                        // Do the frame correction
+                        if (tof < fineOffset[index]) {
+                            // Account for misaligned trigger
+                            tof += coarseOffset[index] + frameLen[index];
+                        } else {
+                            tof += coarseOffset[index];
+                        }
+                        dstData[i] = (dstData[i] & 0xFFF00000) | tof;
+
+                        nEvents[index]++;
                     }
                     modifiedPktsList.push_back(modifiedPacket);
                 }
@@ -124,6 +158,9 @@ void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetLis
     setIntegerParam(ProcCount,  m_nProcessed);
     setIntegerParam(RxCount,    m_nReceived);
     setIntegerParam(PoolSize,   m_pool.size());
+    setIntegerParam(NCorrected1,nEvents[0] > 0 ? nEvents[0] : 0);
+    setIntegerParam(NCorrected2,nEvents[1] > 0 ? nEvents[1] : 0);
+    setIntegerParam(NCorrected3,nEvents[2] > 0 ? nEvents[2] : 0);
     callParamCallbacks();
     this->unlock();
 }

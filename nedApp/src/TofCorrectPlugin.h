@@ -14,6 +14,11 @@
 #include "BaseDispatcherPlugin.h"
 
 /**
+ * Define a number of pixels to be corrected
+ */
+#define TOF_MAX_PIXELS 3
+
+/**
  * Plugin to adjust TOF in events.
  *
  * For now the plugin only adjusts selected meta-data events. It's a temporary
@@ -77,10 +82,19 @@ class TofCorrectPlugin : public BaseDispatcherPlugin {
     protected:
         #define FIRST_TOFCORRECTPLUGIN_PARAM PoolSize
         int PoolSize;           //!< Number of allocated packets
-        int PixelId;            //!< Select pixel id to correct
-        int TofOffset;          //!< Apply this offset to every matched event
-        int FrameLen;           //!< Length of a frame in nsec
-        #define LAST_TOFCORRECTPLUGIN_PARAM FrameLen
+        int PixelId1;           //!< Select pixel id to correct
+        int TofOffset1;         //!< Apply this offset to every matched event
+        int FrameLen1;          //!< Length of a frame in nsec
+        int NCorrected1;        //!< Number of events corrected
+        int PixelId2;           //!< Select pixel id to correct
+        int TofOffset2;         //!< Apply this offset to every matched event
+        int FrameLen2;          //!< Length of a frame in nsec
+        int NCorrected2;        //!< Number of events corrected
+        int PixelId3;           //!< Select pixel id to correct
+        int TofOffset3;         //!< Apply this offset to every matched event
+        int FrameLen3;          //!< Length of a frame in nsec
+        int NCorrected3;        //!< Number of events corrected
+        #define LAST_TOFCORRECTPLUGIN_PARAM NCorrected3
 
 };
 #endif // TOF_CORRECT_PLUGIN_H

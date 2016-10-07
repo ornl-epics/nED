@@ -13,32 +13,114 @@ record(longin, "$(P)PoolSize")
     field(SCAN,  "I/O Intr")
     field(PINI,  "YES")
 }
-record(longout, "$(P)PixelId")
+record(longout, "$(P)PixelId1")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Select meta pixel id to adjust")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))PixelId")
+    field(OUT,  "@asyn($(PORT))PixelId1")
     field(PINI, "YES")
 }
-record(longout, "$(P)TofOffset")
+record(longout, "$(P)TofOffset1")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "TOF offset to be applied")
     field(DTYP, "asynInt32")
     field(EGU,  "nsec")
-    field(OUT,  "@asyn($(PORT))TofOffset")
+    field(OUT,  "@asyn($(PORT))TofOffset1")
     field(PINI, "YES")
 }
-record(longout, "$(P)FrameLen")
+record(longout, "$(P)FrameLen1")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Frame length")
     field(EGU,  "nsec")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))FrameLen")
+    field(OUT,  "@asyn($(PORT))FrameLen1")
     field(PINI, "YES")
+}
+record(longout, "$(P)NCorrected1")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of corrected events")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))NCorrected1")
+    field(SCAN, "I/O Intr")
+}
+record(longout, "$(P)PixelId2")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select meta pixel id to adjust")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PixelId2")
+    field(PINI, "YES")
+}
+record(longout, "$(P)TofOffset2")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TOF offset to be applied")
+    field(DTYP, "asynInt32")
+    field(EGU,  "nsec")
+    field(OUT,  "@asyn($(PORT))TofOffset2")
+    field(PINI, "YES")
+}
+record(longout, "$(P)FrameLen2")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Frame length")
+    field(EGU,  "nsec")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))FrameLen2")
+    field(PINI, "YES")
+}
+record(longout, "$(P)NCorrected2")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of corrected events")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))NCorrected2")
+    field(SCAN, "I/O Intr")
+}
+record(longout, "$(P)PixelId3")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select meta pixel id to adjust")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PixelId3")
+    field(PINI, "YES")
+}
+record(longout, "$(P)TofOffset3")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TOF offset to be applied")
+    field(DTYP, "asynInt32")
+    field(EGU,  "nsec")
+    field(OUT,  "@asyn($(PORT))TofOffset3")
+    field(PINI, "YES")
+}
+record(longout, "$(P)FrameLen3")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Frame length")
+    field(EGU,  "nsec")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))FrameLen3")
+    field(PINI, "YES")
+}
+record(longout, "$(P)NCorrected3")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of corrected events")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))NCorrected3")
+    field(SCAN, "I/O Intr")
 }
