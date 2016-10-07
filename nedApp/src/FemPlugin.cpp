@@ -54,6 +54,9 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
     } else if (m_version == "v38") {
         setIntegerParam(Supported, 1);
         createParams_v38();
+    } else if (m_version == "v39") {
+        setIntegerParam(Supported, 1);
+        createParams_v39();
     } else if (m_version == "v320") {
         setIntegerParam(Supported, 1);
         setIntegerParam(UpgradeStatus, UPGRADE_NOT_STARTED); // supported but not started

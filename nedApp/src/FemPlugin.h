@@ -91,6 +91,11 @@ class FemPlugin : public BaseModulePlugin {
         void createParams_v38();
 
         /**
+         * Create and register all FEM9 v39 parameters to be exposed to EPICS.
+         */
+        void createParams_v39();
+
+        /**
          * Create and register all FEM9 v38 parameters to be exposed to EPICS.
          */
         void createParams_v320();
