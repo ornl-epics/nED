@@ -15,7 +15,7 @@
 
 EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 670;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
 
 /**
  * ROC V5 version response format
@@ -303,13 +303,13 @@ bool RocPlugin::rspHvCmd(const DasPacket *packet)
     case '?':
         epicsTimeGetCurrent(&now);
         diff = epicsTimeDiffInSeconds(&now, &m_sendHvTime);
-        setIntegerParam(HvDelay, diff);
+        setDoubleParam(HvDelay, diff);
         callParamCallbacks();
         break;
     case '\r':
         epicsTimeGetCurrent(&now);
         diff = epicsTimeDiffInSeconds(&now, &m_sendHvTime);
-        setIntegerParam(HvB2bDelay, diff);
+        setDoubleParam(HvB2bDelay, diff);
         callParamCallbacks();
         break;
     default:

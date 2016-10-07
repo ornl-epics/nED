@@ -488,6 +488,7 @@ record(ai, "$(P)hv:VConvZ") {
 # Measures the time between HV request and first character of the response
 record(ai, "$(P)hv:RspDelay") {
    field(DESC, "Response delay")
+   field(DTYP, "asynFloat64")
    field(INP,  "@asyn($(PORT))HvDelay")
    field(PREC, "3")
    field(HOPR, "0.5")
@@ -498,6 +499,7 @@ record(ai, "$(P)hv:RspDelay") {
 # Measures the time between HV request and last character of the response
 record(ai, "$(P)hv:RspTime") {
    field(DESC, "Response time")
+   field(DTYP, "asynFloat64")
    field(INP,  "@asyn($(PORT))HvB2bDelay")
    field(PREC, "3")
    field(HOPR, "0.9")
