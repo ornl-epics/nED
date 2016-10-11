@@ -332,6 +332,8 @@ void FemPlugin::createParams_v39()
     createCounterParam("Lvds8:DropEvCnt",         0x4A, 16,  0); // Ch8 dropped data events
     createCounterParam("Lvds9:DropEvCnt",         0x4B, 16,  0); // Ch9 dropped data events
 
+/*
+ * These parameters need to be moved to RemoteUpdate response command.
     createCounterParam("Upg:OutDone",             0x4C,  1,  0); // Upgrade SPI_OutDone
     createCounterParam("Upg:OutError",            0x4C,  1,  1); // Upgrade SPI_OutError
     createCounterParam("Upg:OutErrorIdCode",      0x4C,  1,  2); // Upgrade SPI_OutErrorIdCode
@@ -355,4 +357,5 @@ void FemPlugin::createParams_v39()
     createCounterParam("Upg:FifoProgFull",        0x4E,  1, 13); // Upgrade SPI_fifo_progful
     createCounterParam("Upg:FifoFull",            0x4E,  1, 14); // Upgrade SPI_fifo_full
     createCounterParam("Upg:Busy",                0x4E,  1, 15); // Upgrade SPI_busy
+*/
 }
