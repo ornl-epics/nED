@@ -66,25 +66,27 @@ void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetLis
     getIntegerParam(NCorrected3, &nEvents[2]);
     this->unlock();
 
-    if (frameLen == 0 || tofOffset == 0) {
+    bool enabled = false;
+    for (int i=0; i<3; i++) {
+        if (pixelId[i] != 0) {
+            enabled = true;
+            if (frameLen[i] == 0)
+                frameLen[i] = 1;
+            tofOffset[i] /= 100;
+            frameLen[i] /= 100;
+            fineOffset[i] = tofOffset[i] % frameLen[i];
+            frameNum[i] = tofOffset[i] / frameLen[i];
+            coarseOffset[i] = frameNum[i] * frameLen[i];
+        }
+    }
+
+    if (enabled == false) {
         modifiedPktsList.reset(packetList); // reset() automatically reserves
         sendToPlugins(&modifiedPktsList);
         modifiedPktsList.release();
         modifiedPktsList.waitAllReleased();
         modifiedPktsList.clear();
     } else {
-        for (int i=0; i<3; i++) {
-            if (pixelId[i] != 0) {
-                if (frameLen[i] == 0)
-                    frameLen[i] = 1;
-                tofOffset[i] /= 100;
-                frameLen[i] /= 100;
-                fineOffset[i] = tofOffset[i] % frameLen[i];
-                frameNum[i] = tofOffset[i] / frameLen[i];
-                coarseOffset[i] = frameNum[i] * frameLen[i];
-            }
-        }
-
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
 
