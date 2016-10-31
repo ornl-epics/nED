@@ -27,7 +27,6 @@ AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortNam
     m_cache.photo_sum_x.reserve(CACHE_SIZE);
     m_cache.photo_sum_y.reserve(CACHE_SIZE);
 
-    createParam("FlatFieldEn",   asynParamInt32, &FlatFieldEn, 0); // WRITE - Normal data has been flat-field corrected
     // UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
     createParam("XyFractWidth",  asynParamInt32, &XyFractWidth, 24); // WRITE - Number of fraction bits in X,Y data
     createParam("PsFractWidth",  asynParamInt32, &PsFractWidth, 15); // WRITE - Number of fraction bits in PhotoSum data
@@ -37,16 +36,9 @@ AcpcPvaPlugin::AcpcPvaPlugin(const char *portName, const char *dispatcherPortNam
 asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == DataModeP) {
-        int flatfieldEn = 0;
-        getIntegerParam(FlatFieldEn, &flatfieldEn);
-
         switch (value) {
         case DATA_MODE_NORMAL:
-            if (flatfieldEn == 1) {
-                setCallbacks(&AcpcPvaPlugin::processTofPixelData, &AcpcPvaPlugin::postTofPixelData);
-            } else {
-                setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
-            }
+            setCallbacks(&AcpcPvaPlugin::processTofPixelData, &AcpcPvaPlugin::postTofPixelData);
             break;
         case DATA_MODE_RAW:
             setCallbacks(&AcpcPvaPlugin::processRawData, &AcpcPvaPlugin::postRawData);
@@ -54,21 +46,12 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         case DATA_MODE_VERBOSE:
             // TODO
             break;
+        case DATA_MODE_XY:
+            setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
+            break;
         default:
             LOG_ERROR("Ignoring invalid output mode %d", value);
             return asynError;
-        }
-        flushData();
-    } else if (pasynUser->reason == FlatFieldEn) {
-        int dataMode = DATA_MODE_NORMAL;
-        getIntegerParam(DataModeP, &dataMode);
-
-        if (dataMode == DATA_MODE_NORMAL) {
-            if (value == 1) {
-                setCallbacks(&AcpcPvaPlugin::processTofPixelData, &AcpcPvaPlugin::postTofPixelData);
-            } else {
-                setCallbacks(&AcpcPvaPlugin::processNormalData, &AcpcPvaPlugin::postNormalData);
-            }
         }
         flushData();
     } else if (pasynUser->reason == XyFractWidth) {
