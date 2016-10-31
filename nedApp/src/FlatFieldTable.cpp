@@ -135,30 +135,27 @@ bool FlatFieldTable::parseHeaders(
                 return false;
             }
             nHeaders++;
-        }
-        if (key == "Size") {
+        } else if (key == "Size") {
             if (sscanf(value.c_str(), "%ux%u", &size_x, &size_y) != 2) {
                 importError = "Failed to read table size";
                 return false;
             }
             nHeaders++;
-        }
-        if (key == "Type") {
+        } else if (key == "Type") {
             char dim;
-            if (sscanf(value.c_str(), "Photo Sum %c lower", &dim) == 1) {
+            char direction[8];
+            if (sscanf(value.c_str(), "Photo Sum %c %5s", &dim, direction) == 2) {
                 if (dim == 'x' || dim == 'X') {
-                    type = TYPE_X_PS_LOW;
+                    if (std::string(direction) == "upper") {
+                        type = TYPE_X_PS_UP;
+                    } else if (std::string(direction) == "lower") {
+                        type = TYPE_X_PS_LOW;
+                    } else {
+                        importError = "Invalid photo sum table type";
+                        return false;
+                    }
                 } else if (dim == 'y' || dim == 'Y') {
-                    importError = "Y photo sum table not implemented";
-                } else {
-                    importError = "Unknown photo sum dimension";
-                    return false;
-                }
-            } else if (sscanf(value.c_str(), "Photo Sum %c upper", &dim) == 1) {
-                if (dim == 'x' || dim == 'X') {
-                    type = TYPE_X_PS_UP;
-                } else if (dim == 'y' || dim == 'Y') {
-                    importError = "Y photo sum table not implemented";
+                    //LOG_WARN("Y photo sum table not implemented");
                 } else {
                     importError = "Unknown photo sum dimension";
                     return false;
@@ -177,8 +174,7 @@ bool FlatFieldTable::parseHeaders(
                 return false;
             }
             nHeaders++;
-        }
-        if (key == "Position") {
+        } else if (key == "Position") {
             if (sscanf(value.c_str(), "%u", &position_id) != 1) {
                 importError = "Failed to read position id";
                 return false;

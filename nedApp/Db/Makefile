@@ -22,6 +22,7 @@ DB += AdaraPlugin.db
 DB += CmdDispatcherPlugin.db
 DB += DebugPlugin.db
 DB += FlatFieldPlugin.db
+DB += FlatFieldPosition.db
 DB += ProxyPlugin.db
 DB += PixelMapPlugin.db
 DB += RocPvaPlugin.db

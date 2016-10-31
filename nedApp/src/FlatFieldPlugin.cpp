@@ -20,7 +20,8 @@
 #include <limits>
 #include <string>
 
-#define NUM_FLATFIELDPLUGIN_PARAMS ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1))
+#define MAX_POSITIONS 100
+#define NUM_FLATFIELDPLUGIN_PARAMS ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1)) + (MAX_POSITIONS * 6)
 
 #if defined(WIN32) || defined(_WIN32)
 #   define PATH_SEPARATOR "\\"
@@ -31,8 +32,7 @@
 EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Dispatcher port name", string, "Correction tables file", string, "Buffer size", int);
 
 FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importDir, int bufSize)
-    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_FLATFIELDPLUGIN_PARAMS, asynOctetMask | asynInt8ArrayMask | asynFloat64Mask, asynOctetMask | asynInt8ArrayMask | asynFloat64Mask)
-    , m_tablesErr(1)
+    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_FLATFIELDPLUGIN_PARAMS, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
     , m_tableSizeX(0)
     , m_tableSizeY(0)
 {
@@ -52,9 +52,6 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
     createParam("ImportDir",    asynParamOctet, &ImportDir, importDir); // Path to correction tables directory
     createParam("BufferSize",   asynParamInt32, &BufferSize, (int)m_bufferSize); // Allocated buffer size
-    createParam("Positions",    asynParamInt8Array, &Positions);        // Array of configured positions
-    createParam("PositionsReport", asynParamOctet, &PositionsReport);   // Array of configured positions
-    createParam("TablesErr",    asynParamInt32, &TablesErr, m_tablesErr); // Default is 1 until expected positions are configured and checked
     createParam("PsEn",         asynParamInt32, &PsEn, 0);              // Switch to toggle photosum elimination
     createParam("CorrEn",       asynParamInt32, &CorrEn, 0);            // Switch to toggle applying flat field correction
     createParam("ConvEn",       asynParamInt32, &ConvEn, 0);            // Switch to toggle converting data to pixel id format
@@ -71,6 +68,51 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("YMaxOut",      asynParamInt32, &YMaxOut, 511);         // WRITE - Converted max Y value
     createParam("TablesSizeX",  asynParamInt32, &TablesSizeX, (int)m_tableSizeX); // READ - All tables X size
     createParam("TablesSizeY",  asynParamInt32, &TablesSizeY, (int)m_tableSizeY); // READ - All tables Y size
+
+    int nParams = ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1));
+    PosEnable.resize(m_tables.size());
+    PosId.resize(m_tables.size());
+    PosCorrX.resize(m_tables.size());
+    PosCorrY.resize(m_tables.size());
+    PosPsUpX.resize(m_tables.size());
+    PosPsLowX.resize(m_tables.size());
+    for (size_t i=0; i<m_tables.size(); i++) {
+        PosEnable[i] = -1;
+        if (m_tables[i].nTables > 0) {
+            int param;
+            char name[16];
+
+            if ((nParams + 4) > NUM_FLATFIELDPLUGIN_PARAMS) {
+                LOG_ERROR("Parameter table size not big enough, skipping some positions");
+                break;
+            }
+
+            snprintf(name, sizeof(name), "Pos%zu:Enable", i);
+            createParam(name, asynParamInt32, &param, 0);
+            PosEnable[i] = param;
+
+            snprintf(name, sizeof(name), "Pos%zu:Id", i);
+            createParam(name, asynParamInt32, &param, 0);
+            PosId[i] = param;
+
+            snprintf(name, sizeof(name), "Pos%zu:CorrX", i);
+            createParam(name, asynParamInt32, &param, 0);
+            PosCorrX[i] = param;
+
+            snprintf(name, sizeof(name), "Pos%zu:CorrY", i);
+            createParam(name, asynParamInt32, &param, 0);
+            PosCorrY[i] = param;
+
+            snprintf(name, sizeof(name), "Pos%zu:PsUpX", i);
+            createParam(name, asynParamInt32, &param, 0);
+            PosPsUpX[i] = param;
+
+            snprintf(name, sizeof(name), "Pos%zu:PsLowX", i);
+            createParam(name, asynParamInt32, &param, 0);
+            PosPsLowX[i] = param;
+        }
+    }
+
     callParamCallbacks();
 }
 
@@ -78,6 +120,32 @@ FlatFieldPlugin::~FlatFieldPlugin()
 {
     if (m_buffer != 0)
         free(m_buffer);
+}
+
+asynStatus FlatFieldPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
+{
+    for (size_t i=0; i<m_tables.size(); i++) {
+        if (pasynUser->reason == PosEnable[i]) {
+            *value = m_tables[i].enabled;
+            return asynSuccess;
+        } else if (pasynUser->reason == PosId[i]) {
+            *value = (int)i;
+            return asynSuccess;
+        } else if (pasynUser->reason == PosCorrX[i]) {
+            *value = (m_tables[i].corrX != 0);
+            return asynSuccess;
+        } else if (pasynUser->reason == PosCorrY[i]) {
+            *value = (m_tables[i].corrY != 0);
+            return asynSuccess;
+        } else if (pasynUser->reason == PosPsUpX[i]) {
+            *value = (m_tables[i].psLowX != 0);
+            return asynSuccess;
+        } else if (pasynUser->reason == PosPsLowX[i]) {
+            *value = (m_tables[i].psUpX != 0);
+            return asynSuccess;
+        }
+    }
+    return BaseDispatcherPlugin::readInt32(pasynUser, value);
 }
 
 asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -101,6 +169,55 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == XMaxOut || pasynUser->reason == YMaxOut) {
         if (value < 1 || value >= 1024)
             return asynError;
+    } else if (pasynUser->reason == CorrEn) {
+        if (value != 0) {
+            for (size_t i=0; i<m_tables.size(); i++) {
+                if (m_tables[i].nTables == 0 || m_tables[i].enabled == false) continue;
+                if (m_tables[i].corrX == 0 || m_tables[i].corrY == 0) {
+                    LOG_ERROR("Disabling position %zu due to lack of flat field correction tables", i);
+                    setIntegerParam(PosEnable[i], 0);
+                }
+            }
+            callParamCallbacks();
+        }
+    } else if (pasynUser->reason == PsEn) {
+        if (value != 0) {
+            for (size_t i=0; i<m_tables.size(); i++) {
+                if (m_tables[i].nTables == 0 || m_tables[i].enabled == false) continue;
+                if (m_tables[i].psLowX == 0 || m_tables[i].psUpX == 0) {
+                    LOG_ERROR("Disabling position %zu due to lack of photo sum tables", i);
+                    setIntegerParam(PosEnable[i], 0);
+                }
+            }
+            callParamCallbacks();
+        }
+    } else {
+        for (size_t i=0; i<PosEnable.size(); i++) {
+            if (pasynUser->reason == PosEnable[i]) {
+                asynStatus ret = asynSuccess;
+                int psEn, corrEn;
+                getIntegerParam(PsEn, &psEn);
+                getIntegerParam(CorrEn, &corrEn);
+                if (i >= m_tables.size()) {
+                    LOG_ERROR("Failed to %s position, invalid position %zu", (value == 0 ? "disable" : "enable"), i);
+                    value = 0;
+                    ret = asynError;
+                } else if (value == 1 && psEn == 1 && (m_tables[i].psLowX == 0 || m_tables[i].psUpX == 0)) {
+                    LOG_ERROR("Failed to enable position %zu, missing photo sum tables", i);
+                    value = 0;
+                    ret = asynError;
+                } else if (value == 1 && corrEn == 1 && (m_tables[i].corrX == 0 || m_tables[i].corrY == 0)) {
+                    LOG_ERROR("Failed to enable position %zu, missing correction tables", i);
+                    value = 0;
+                    ret = asynError;
+                } else {
+                    m_tables[i].enabled = (value != 0);
+                }
+                setIntegerParam(PosEnable[i], value);
+                callParamCallbacks();
+                return asynSuccess;
+            }
+        }
     }
     return BaseDispatcherPlugin::writeInt32(pasynUser, value);
 }
@@ -114,107 +231,10 @@ asynStatus FlatFieldPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 value
     return BaseDispatcherPlugin::writeFloat64(pasynUser, value);
 }
 
-asynStatus FlatFieldPlugin::writeInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements)
-{
-    if (pasynUser->reason == Positions) {
-        // asyn will try to initialize the record with 0 elements
-        if (nElements > 0) {
-            // Disable all tables first
-            for (size_t i = 0; i < m_tables.size(); i++) {
-                m_tables[i].enabled = false;
-                if (m_tables[i].psLowX.get() == 0 && m_tables[i].psUpX.get() == 0 &&
-                    m_tables[i].corrX.get()  == 0 && m_tables[i].corrY.get() == 0) {
-                    m_tables[i].init = false;
-                }
-            }
-
-            // Copy list of enabled list to m_tables
-            m_tablesErr = 0;
-            bool psEn, corrEn;
-            getBooleanParam(PsEn,   &psEn);
-            getBooleanParam(CorrEn, &corrEn);
-            for (size_t i = 0; i < nElements; i++) {
-                uint32_t position = values[i];
-                if (position >= m_tables.size()) {
-                    m_tablesErr = 1;
-                    LOG_ERROR("Position %d not loaded", position);
-                    m_tables.resize(position+1);
-                }
-                m_tables[position].enabled = true;
-                m_tables[position].init = true;
-
-                if (psEn == 1 && (m_tables[position].psLowX.get() == 0 || m_tables[position].psUpX.get() == 0)) {
-                    m_tablesErr = 1;
-                    LOG_ERROR("Photosum tables for position %d not laded", position);
-                    continue;
-                }
-                if (corrEn == 1 && (m_tables[position].corrX.get() == 0 || m_tables[position].corrY.get() == 0)) {
-                    m_tablesErr = 1;
-                    LOG_ERROR("X and Y correction tables for position %d not laded", position);
-                    continue;
-                }
-            }
-
-            // If there's a request to enable a table but there was a problen meeting
-            // the requirements, flag an error - user can use asynReport to diagnoze
-            // what tables are loaded
-            setIntegerParam(TablesErr, m_tablesErr);
-            callParamCallbacks();
-        }
-        return asynSuccess;
-    }
-    return BaseDispatcherPlugin::writeInt8Array(pasynUser, values, nElements);
-}
-
-asynStatus FlatFieldPlugin::readInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements, size_t *nIn)
-{
-    if (pasynUser->reason == Positions) {
-        bool psEn, corrEn;
-        getBooleanParam(PsEn, &psEn);
-        getBooleanParam(CorrEn, &corrEn);
-        *nIn = 0;
-        for (size_t i = 0; i < m_tables.size(); i++) {
-            bool loaded = false;
-            if (corrEn && psEn) {
-                // all 4 tables must be loaded
-                if (m_tables[i].corrX.get()  != 0 && m_tables[i].corrY.get()  != 0 &&
-                    m_tables[i].psLowX.get() != 0 && m_tables[i].psUpX.get() != 0) {
-                    loaded = true;
-                }
-            } else if (corrEn) {
-                // X and Y correction tables must be loaded
-                if (m_tables[i].corrX.get()  != 0 && m_tables[i].corrY.get()  != 0) {
-                    loaded = true;
-                }
-            } else if (psEn) {
-                // X and Y correction tables must be loaded
-                if (m_tables[i].psLowX.get() != 0 && m_tables[i].psUpX.get() != 0) {
-                    loaded = true;
-                }
-            }
-
-            if (loaded == true && *nIn < nElements) {
-                *values = (uint8_t)i;
-                values++;
-                *nIn += 1;
-            }
-        }
-        return asynSuccess;
-    }
-    return BaseDispatcherPlugin::writeInt8Array(pasynUser, values, nElements);
-}
-
 asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
 {
     if (pasynUser->reason == ImportReport) {
         *nActual = snprintf(value, nChars, "%s", m_importReport.c_str());
-        return asynSuccess;
-    } else if (pasynUser->reason == PositionsReport) {
-        bool psEn, corrEn;
-        getBooleanParam(PsEn, &psEn);
-        getBooleanParam(CorrEn, &corrEn);
-        std::string report = generatePositionsReport(psEn, corrEn);
-        *nActual = snprintf(value, nChars, "%s", report.c_str());
         return asynSuccess;
     }
     return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
@@ -240,8 +260,8 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     int xyFractWidth = 0;
     int psFractWidth = 0;
 
-    if (m_buffer == 0 || m_tablesErr == 1) {
-        LOG_ERROR("Flat field correction disabled due to import error");
+    if (m_buffer == 0) {
+        LOG_ERROR("Flat field correction disabled, no memory");
         return;
     }
 
@@ -382,7 +402,7 @@ void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destP
             DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(newPayload);
 
             destEvent->tof = srcEvent->tof & 0xFFFFFFF;
-            destEvent->pixelid = (srcEvent->position & 0xFF) << 20; // incompatible with dcomserver, he shifts for 16 or 18 bits depending on HighRes
+            destEvent->pixelid = (position & 0xFF) << 20; // incompatible with dcomserver, he shifts for 16 or 18 bits depending on HighRes
             destEvent->pixelid |= ((uint32_t)round(x * m_xScaleOut) & m_xMaskOut);
             destEvent->pixelid |= ((uint32_t)round(y * m_yScaleOut) & m_yMaskOut);
 
@@ -503,13 +523,13 @@ void FlatFieldPlugin::importFiles(const std::string &path)
             // Make sure there's enough place in the m_corrTables
             if (m_tables.size() <= table->position) {
                 m_tables.resize(table->position + 1);
-                m_tables[table->position].init = true;
             }
 
             // Push table to tables vector
             if (table->type == FlatFieldTable::TYPE_X_CORR) {
                 if (m_tables[table->position].corrX.get() == 0) {
                     m_tables[table->position].corrX = table;
+                    m_tables[table->position].nTables++;
                     foundCorrTables = true;
                 } else {
                     LOG_ERROR("Correction X table already loaded for position %u", table->position);
@@ -519,6 +539,7 @@ void FlatFieldPlugin::importFiles(const std::string &path)
             } else if (table->type == FlatFieldTable::TYPE_Y_CORR) {
                 if (m_tables[table->position].corrY.get() == 0) {
                     m_tables[table->position].corrY = table;
+                    m_tables[table->position].nTables++;
                     foundCorrTables = true;
                 } else {
                     LOG_ERROR("Correction Y table already loaded for position %u", table->position);
@@ -528,6 +549,7 @@ void FlatFieldPlugin::importFiles(const std::string &path)
             } else if (table->type == FlatFieldTable::TYPE_X_PS_LOW) {
                 if (m_tables[table->position].psLowX.get() == 0) {
                     m_tables[table->position].psLowX = table;
+                    m_tables[table->position].nTables++;
                     foundPsTables = true;
                 } else {
                     LOG_ERROR("Photosum low X table already loaded for position %u", table->position);
@@ -537,6 +559,7 @@ void FlatFieldPlugin::importFiles(const std::string &path)
             } else if (table->type == FlatFieldTable::TYPE_X_PS_UP) {
                 if (m_tables[table->position].psUpX.get() == 0) {
                     m_tables[table->position].psUpX = table;
+                    m_tables[table->position].nTables++;
                     foundPsTables = true;
                 } else {
                     LOG_ERROR("Photosum upper X table already loaded for position %u", table->position);
@@ -589,7 +612,7 @@ std::string FlatFieldPlugin::generatePositionsReport(bool psEn, bool corrEn)
     std::ostringstream report;
     for (size_t i = 0; i < m_tables.size(); i++) {
         // Skip sparse vector entries
-        if (m_tables[i].init == false)
+        if (m_tables[i].nTables == 0)
             continue;
 
         report << "Position " << i << (m_tables[i].enabled == false ? " NOT " : " ") << "enabled:" << std::endl;
