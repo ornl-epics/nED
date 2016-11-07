@@ -85,7 +85,7 @@ struct RtdlHeader {
         };
 #endif
     };
-    uint32_t tsync_width;
+    uint32_t tsync_period;
     union {
         uint32_t tsync_delay;
 #ifdef BITFIELD_LSB_FIRST

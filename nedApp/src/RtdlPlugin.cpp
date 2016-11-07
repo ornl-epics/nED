@@ -63,7 +63,7 @@ void RtdlPlugin::processData(const DasPacketList * const packetList)
             setIntegerParam(Tstat,              rtdl->tstat);
             setIntegerParam(PrevCycleVeto,      rtdl->last_cycle_veto);
             setIntegerParam(Cycle,              rtdl->cycle);
-            setIntegerParam(IntraPulseTime,     rtdl->tsync_width * 100);
+            setIntegerParam(IntraPulseTime,     rtdl->tsync_period * 100);
             setIntegerParam(TofFullOffset,      rtdl->tof_full_offset);
             setIntegerParam(FrameOffset,        rtdl->frame_offset);
             setIntegerParam(TofFixOffset,       rtdl->tof_fixed_offset);

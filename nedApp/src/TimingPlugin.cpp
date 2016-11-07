@@ -328,7 +328,7 @@ bool TimingPlugin::createFakeRtdl(DasPacket *packet)
     rtdl->cycle = (rtdl->cycle + 1) % 600;
     rtdl->last_cycle_veto = 0;
     rtdl->pulse.charge = 100000 + 5 * rand();
-    rtdl->tsync_width = (rtdl->cycle == 0x1 ? 166662 : 166661);
+    rtdl->tsync_period = (rtdl->cycle == 0x1 ? 166662 : 166661);
     rtdl->tstat = 30;
     rtdl->pulse.flavor = (rtdl->cycle > 0 ? RtdlHeader::RTDL_FLAVOR_TARGET_1 : RtdlHeader::RTDL_FLAVOR_NO_BEAM);
     rtdl->tof_full_offset = 1;
@@ -409,7 +409,7 @@ bool TimingPlugin::recvRtdlFromEtc(DasPacket *packet)
             rtdl->pulse.bad = (message.pulse_type >> 6) & 0x1;
             rtdl->pulse.charge = message.pulse_charge & 0xFFFFFF;
             rtdl->cycle = (rtdl->cycle + 1) % 600;
-            rtdl->tsync_width = (rtdl->cycle == 0x1 ? 166662 : 166661);
+            rtdl->tsync_period = (rtdl->cycle == 0x1 ? 166662 : 166661);
             rtdl->tsync_delay = 0x80000000;
 
             // Ring revolution period frame id is 4

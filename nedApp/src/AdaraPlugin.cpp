@@ -139,7 +139,7 @@ bool AdaraPlugin::sendEvents(SourceSequence *seq, const DasPacket::Event *events
     outpacket[6] = (dataFlags << 27) | seq->rtdl.charge;
     outpacket[6] = seq->rtdl.charge;
     outpacket[7] = seq->rtdl.general_info;
-    outpacket[8] = seq->rtdl.tsync_width;
+    outpacket[8] = seq->rtdl.tsync_period;
     outpacket[9] = seq->rtdl.tsync_delay;
 
     m_heartbeatActive = false;
