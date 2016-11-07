@@ -135,6 +135,24 @@ class BaseSocketPlugin : public BasePlugin {
         bool send(const uint32_t *data, uint32_t length);
 
         /**
+         * Receive as much data as available from the socket in specified time.
+         *
+         * Function waits for at most `timeout' number of seconds if there's no
+         * data immediately available. Once any data is available, it will read
+         * as much as available or max `length' bytes, whicheve is smaller.
+         *
+         * Caller of this function must ensure plugin is locked. Function will
+         * unlock while waiting for data and allow other threads to run.
+         *
+         * @param[in] data Buffer where data is put.
+         * @param[in] length Buffer size
+         * @param[in] timeout in seconds to wait for data if not avaialbe immediately.
+         * @param[out] actual Number of bytes read.
+         * @return true if any data has been received, false on error
+         */
+        bool recv(uint32_t *data, uint32_t length, double timeout, uint32_t *actual);
+
+        /**
          * Periodically called to check client connection status or new client
          *
          * Check for new incoming client, connect it and update ClientIp PV.

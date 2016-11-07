@@ -44,6 +44,44 @@ BaseSocketPlugin::~BaseSocketPlugin()
 {
 }
 
+bool BaseSocketPlugin::recv(uint32_t *data, uint32_t length, double timeout, uint32_t *actual)
+{
+    struct pollfd fds;
+    int timeout_ms = (timeout > 0 ? timeout * 1000 : 0);
+    int ret;
+
+    fds.fd = m_clientSock;
+    fds.events = POLLIN;
+    fds.revents = 0;
+
+    this->unlock();
+    ret = poll(&fds, 1, timeout_ms);
+    this->lock();
+
+    if (ret != 1 || fds.revents != POLLIN) {
+        if (ret == -1) {
+            LOG_ERROR("Closed socket due to poll() failure - %s", strerror(errno));
+            disconnectClient();
+        }
+        *actual = 0;
+        return false;
+    }
+
+    // poll() returned successfully, read() will either read data or return -1
+    // immediately, non-blocking.
+    ret = read(fds.fd, reinterpret_cast<void *>(data), length);
+    if (ret == -1) {
+        LOG_ERROR("Closed socket due to write error - %s", strerror(errno));
+        disconnectClient();
+        *actual = 0;
+        return false;
+    }
+
+    *actual = ret;
+
+    return (ret > 0);
+}
+
 bool BaseSocketPlugin::send(const uint32_t *data, uint32_t length)
 {
     const char *rest = reinterpret_cast<const char *>(data);
@@ -52,6 +90,7 @@ bool BaseSocketPlugin::send(const uint32_t *data, uint32_t length)
     bool firstRun = true;
     ssize_t sent = 0;
     int myErrno = 0;
+    int retries = 5; // 1 second for each retry defined when client connects
 
     // Optimize most likely path, mainly avoid time consuming unlocking/locking
     sent = write(m_clientSock, rest, length);
@@ -92,6 +131,11 @@ bool BaseSocketPlugin::send(const uint32_t *data, uint32_t length)
                 inactive = epicsTimeDiffInSeconds(&t2, &t1);
                 setDoubleParam(ClientInactive, inactive);
                 callParamCallbacks();
+
+                if (retries-- == 0) {
+                    LOG_ERROR("Failed to send data in 5 seconds, giving up");
+                    break;
+                }
 
             } else if (m_clientSock != -1) {
                 LOG_ERROR("Closed socket due to an write error - %s", strerror(myErrno));

@@ -11,6 +11,7 @@
 #define PROXY_PLUGIN_H
 
 #include "BaseSocketPlugin.h"
+#include "Thread.h"
 
 /**
  * Plugin that forwards Neutron Event data to PROXY SMS over TCP/IP.
@@ -40,6 +41,7 @@ class ProxyPlugin : public BaseSocketPlugin {
         uint64_t m_nTransmitted;    //!< Number of packets sent to BASESOCKET
         uint64_t m_nProcessed;      //!< Number of processed packets
         uint64_t m_nReceived;       //!< Number of packets received from dispatcher
+        Thread m_recvThread;        // Thread for receiving data from socket
 
     public:
         /**
@@ -62,6 +64,15 @@ class ProxyPlugin : public BaseSocketPlugin {
          * @param[in] packetList List of packets to be processed
          */
         virtual void processData(const DasPacketList * const packetList);
+
+    private: // functions
+        /**
+         * Main function for the receive thread.
+         *
+         * Runs in a loop with a max turn-around time of 1 second. Before each
+         * iteration it checks for shutdown event.
+         */
+        void sockReceive(epicsEvent *shutdown);
 };
 
 #endif // PROXY_PLUGIN_H
