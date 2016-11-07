@@ -187,7 +187,7 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
 void OccPortDriver::refreshOccStatus(bool basic_status)
 {
     // This one can take long time to execute, don't lock the driver while it's executing
-    int ret = occ_status(m_occ, &m_occStatusCache, basic_status);
+    int ret = occ_status(m_occ, &m_occStatusCache, basic_status ? OCC_STATUS_FAST : OCC_STATUS_FULL);
 
     this->lock();
 
