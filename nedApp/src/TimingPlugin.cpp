@@ -130,7 +130,7 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
     for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
         const DasPacket *packet = *it;
 
-        if (packet->isData() && packet->getRtdlHeader() == 0) {
+        if (packet->isData() && packet->getDataTypeLegacy() != DATA_TYPE_NEUTRON_RTDL) {
             RtdlHeader *rtdl = 0;
 
             if (packet->datainfo.subpacket_start) {
