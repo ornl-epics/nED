@@ -111,9 +111,10 @@ class TimingPlugin : public BaseDispatcherPlugin {
          *
          * @param[in] src Source data packet
          * @param[in] rtdl RTDL data to be used.
+         * @param[in] onlyNeutrons True when packet type is neutrons, false for metadata.
          * @return Modified packet or 0 on error.
          */
-        const DasPacket *timestampPacket(const DasPacket *src, const RtdlHeader *rtdl);
+        const DasPacket *timestampPacket(const DasPacket *src, const RtdlHeader *rtdl, bool onlyNeutrons);
 
         /**
          * Allocate packet of at least the size requested

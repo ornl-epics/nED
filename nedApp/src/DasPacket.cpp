@@ -324,3 +324,21 @@ bool DasPacket::copyHeader(DasPacket *dest, uint32_t destSize) const
     dest->payload_length = payload_length;
     return true;
 }
+
+DasPacket::DataTypeLegacy DasPacket::getDataTypeLegacy() const
+{
+    // Can't make C union smaller than 1 byte, the intent was:
+    // struct DataInfo {
+    //   unsigned subpacket_start:1;     //!< The first packet in the train of subpackets
+    //   unsigned subpacket_end:1;       //!< Last packet in the train
+    //   union {
+    //     struct {
+    //       unsigned only_neutron_data:1;   //!< Only neutron data, if 0 some metadata is included
+    //       unsigned rtdl_present:1;        //!< Is RTDL 6-words data included right after the header? Should be always 1 for newer DSPs
+    //     };
+    //     DataTypeLegacy data_type_legacy;
+    //   };
+    //   unsigned unused4:1;             //!< Always zero?
+    int type = (datainfo.rtdl_present << 1 | datainfo.only_neutron_data);
+    return static_cast<DataTypeLegacy>(type);
+}

@@ -175,13 +175,8 @@ struct DasPacket
 #ifdef BITFIELD_LSB_FIRST
             unsigned subpacket_start:1;     //!< The first packet in the train of subpackets
             unsigned subpacket_end:1;       //!< Last packet in the train
-            union __attribute__ ((__packed__)) {
-                enum DataTypeLegacy data_type_legacy:2;  // For non-DSPT environment, this one has different meaning
-                struct __attribute__ ((__packed__)) {
-                    unsigned only_neutron_data:1;   //!< Only neutron data, if 0 some metadata is included
-                    unsigned rtdl_present:1;        //!< Is RTDL 6-words data included right after the header? Should be always 1 for newer DSPs
-                };
-            };
+            unsigned only_neutron_data:1;   //!< Only neutron data, if 0 some metadata is included
+            unsigned rtdl_present:1;        //!< Is RTDL 6-words data included right after the header? Should be always 1 for newer DSPs
             unsigned unused4:1;             //!< Always zero?
             unsigned format_code:3;         //!< Format code, 000 for neutron data, 111 for RTDL data packet
             unsigned subpacket_count:16;    //!< Subpacket counter
@@ -434,9 +429,7 @@ struct DasPacket
          * Return type of data as returned by legacy DSP. For DSP-T environment
          * RTDL header should be always present and different flags apply.
          */
-        DataTypeLegacy getDataTypeLegacy() const {
-            return datainfo.data_type_legacy;
-        };
+        DataTypeLegacy getDataTypeLegacy() const;
 
     private:
 

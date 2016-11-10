@@ -130,7 +130,8 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
     for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
         const DasPacket *packet = *it;
 
-        if (packet->isData() && packet->getDataTypeLegacy() != DATA_TYPE_NEUTRON_RTDL) {
+        DasPacket::DataTypeLegacy type = packet->getDataTypeLegacy();
+        if (packet->isData() && type != DasPacket::DATA_TYPE_NEUTRON_RTDL) {
             RtdlHeader *rtdl = 0;
 
             if (packet->datainfo.subpacket_start) {
@@ -150,7 +151,7 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
             else
                 rtdl = &m_metaRtdl;
 
-            const DasPacket *timedPacket = timestampPacket(packet, rtdl);
+            const DasPacket *timedPacket = timestampPacket(packet, rtdl, type != DasPacket::DATA_TYPE_METADATA);
             if (timedPacket) {
                 modifiedPktsList.push_back(timedPacket);
                 m_nProcessed++;
@@ -195,7 +196,7 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
     this->unlock();
 }
 
-const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlHeader *rtdl) {
+const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlHeader *rtdl, bool onlyNeutrons) {
     DasPacket *packet;
     uint32_t nDwords;
 
@@ -217,6 +218,7 @@ const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlH
     memcpy(rtdlHdr, rtdl, sizeof(RtdlHeader));
     packet->payload_length = sizeof(RtdlHeader);
     packet->datainfo.rtdl_present = 1;
+    packet->datainfo.only_neutron_data = onlyNeutrons;
 
     // And finally copy the payload
     uint32_t *destPayload = packet->getData(&nDwords);
