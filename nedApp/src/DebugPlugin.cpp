@@ -186,7 +186,7 @@ void DebugPlugin::generatePacket()
     memset(m_rawPacket, 0, sizeof(m_rawPacket));
     if (packet) {
         memcpy(m_rawPacket, packet, std::min((size_t)packet->length(), sizeof(m_rawPacket)));
-        free(packet);
+        delete packet;
     }
 
     setIntegerParam(RawPkt0,  m_rawPacket[0]);

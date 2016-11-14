@@ -383,6 +383,9 @@ void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destP
         double photosum_x = srcEvent->photosum_x * m_psScale;
         uint32_t position = srcEvent->position;
 
+        // MANDI workaround while running behind dcomserver
+        position = (srcEvent->position >> 16) & 0xFF;
+
         // Check photo sum first
         if (photosum == true && checkPhotoSumLimits(x, y, photosum_x, position) == false) {
             nVeto++;
@@ -412,7 +415,7 @@ void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destP
             Event *destEvent = reinterpret_cast<Event *>(newPayload);
 
             destEvent->tof = srcEvent->tof & 0xFFFFFFF;
-            destEvent->position = srcEvent->position;
+            destEvent->position = position & 0xFF;
             destEvent->x = x / m_xScaleIn;
             destEvent->y = y / m_yScaleIn;
             destEvent->photosum_x = srcEvent->photosum_x;
@@ -464,12 +467,12 @@ bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x,
     if (m_tables[position].enabled == false || upperLimits.get() == 0 || lowerLimits.get() == 0)
         return false;
 
-    unsigned xp = x;
-    unsigned yp = y;
+    unsigned xp = nearbyint(x);
+    unsigned yp = nearbyint(y);
 
     // All tables of the same size, safe to compare against just one
     if (x < 0.0 || xp >= (upperLimits->sizeX-1) || y < 0.0 || yp >= (upperLimits->sizeY-1))
-        return 0;
+        return false;
 
     double upperLimit = upperLimits->data[xp][yp];
     double lowerLimit = lowerLimits->data[xp][yp];

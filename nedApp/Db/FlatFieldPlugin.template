@@ -97,21 +97,39 @@ record(bo, "$(P)ConvEn")
 
 record(longin, "$(P)CntGoodEvents")
 {
-    field(DESC, "Number of processed events")
+    field(DESC, "Number of good events")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))CntGoodEvents")
-    field(SCAN, "I/O Intr")
+    field(SCAN, "Passive")
     field(VAL,  "0")
     field(PINI, "YES")
+}
+record(calc, "$(P)RateGoodEvents")
+{
+    field(DESC, "Good events rate")
+    field(INPA, "$(P)CntGoodEvents NPP")
+    field(INPB, "$(P)CntGoodEvents PP")
+    field(CALC, "B-A")
+    field(EGU,  "ev/s")
+    field(SCAN, "1 second")
 }
 record(longin, "$(P)CntVetoEvents")
 {
     field(DESC, "Number of vetoed events")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))CntVetoEvents")
-    field(SCAN, "I/O Intr")
+    field(SCAN, "Passive")
     field(VAL,  "0")
     field(PINI, "YES")
+}
+record(calc, "$(P)RateVetoEvents")
+{
+    field(DESC, "Good events rate")
+    field(INPA, "$(P)CntVetoEvents NPP")
+    field(INPB, "$(P)CntVetoEvents PP")
+    field(CALC, "B-A")
+    field(EGU,  "ev/s")
+    field(SCAN, "1 second")
 }
 record(longin, "$(P)CntSplit")
 {
