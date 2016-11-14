@@ -20,11 +20,16 @@
  * automatically open single listening socket. There's no thread running to
  * check when the client actually connects, instead derived class should
  * periodically call connectClient() function.
+ *
+ * All functions in this class assume the plugin is locked while they're called,
+ * except for send() and recv() which must be called while unlocked since they
+ * can block.
  */
 class BaseSocketPlugin : public BasePlugin {
     private:
         int m_listenSock;           //!< Socket for incoming connections, -1 when not listening
         int m_clientSock;           //!< Client socket to send/receive data to/from, -1 when no client
+        epicsTimeStamp m_lastClientActivity;    //!< When did client last send or receive something, useful for connection upkeeping
 
     public:
         static const int defaultInterfaceMask = asynOctetMask | asynFloat64Mask | BasePlugin::defaultInterfaceMask;
@@ -122,7 +127,8 @@ class BaseSocketPlugin : public BasePlugin {
          * waiting, allowing CloseClient parameter to be used to kill the
          * connection from outside.
          *
-         * Caller of this function must ensure locked access.
+         * Caller must ensure the plugin is not locked when this function gets
+         * called. Function may block for some time.
          *
          * Function can not be extended with a timeout parameter as the
          * implementation could not guarantee data integrity on the socket -
@@ -141,8 +147,8 @@ class BaseSocketPlugin : public BasePlugin {
          * data immediately available. Once any data is available, it will read
          * as much as available or max `length' bytes, whicheve is smaller.
          *
-         * Caller of this function must ensure plugin is locked. Function will
-         * unlock while waiting for data and allow other threads to run.
+         * Caller must ensure the plugin is not locked when this function gets
+         * called. Function may block for some time.
          *
          * @param[in] data Buffer where data is put.
          * @param[in] length Buffer size
@@ -156,6 +162,8 @@ class BaseSocketPlugin : public BasePlugin {
          * Periodically called to check client connection status or new client
          *
          * Check for new incoming client, connect it and update ClientIp PV.
+         * If client is already connected but no data was exchanged for a period
+         * of time defined by CheckInt parameter, function calls sendHeartbeat().
          *
          * Function is run by the epicsTimer in a background thread shared by
          * timers from all plugins. The timer is initialized in constructor for
@@ -188,6 +196,18 @@ class BaseSocketPlugin : public BasePlugin {
          * is based on the error returned by writing to socket.
          */
         virtual void clientDisconnected() {};
+
+        /**
+         * Function called periodically during inactivity to send a heartbeat message over socket.
+         *
+         * Client disconnect can only be detected by writing something to the
+         * socket. If client is gonne, write() will fail. read() does not
+         * necessarily fail when client closes the socket.
+         * This function should be implemented and send some data to the client,
+         * otherwise client disconnect detection relies on other data being
+         * sent.
+         */
+        virtual void sendHeartbeat() {};
 
     protected:
         #define FIRST_BASESOCKETPLUGIN_PARAM ListenIP

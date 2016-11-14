@@ -278,6 +278,11 @@ struct DasPacket
         bool isResponse() const;
 
         /**
+         * Sets this packet to be a response to a command.
+         */
+        void setResponse();
+
+        /**
          * Is this a data packet?
          */
         bool isData() const;

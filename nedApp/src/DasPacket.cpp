@@ -163,6 +163,12 @@ bool DasPacket::isResponse() const
     return (cmdinfo.is_command && cmdinfo.is_response);
 }
 
+void DasPacket::setResponse()
+{
+    cmdinfo.is_command = 1;
+    cmdinfo.is_response = 1;
+}
+
 bool DasPacket::isData() const
 {
     return (!cmdinfo.is_command);

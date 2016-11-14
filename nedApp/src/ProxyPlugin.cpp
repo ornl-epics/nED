@@ -61,6 +61,7 @@ void ProxyPlugin::processData(const DasPacketList * const packetList)
     callParamCallbacks();
 }
 
+/* Receive thread worker function. */
 void ProxyPlugin::sockReceive(epicsEvent *shutdown)
 {
     DasPacketList packetsList;
@@ -75,27 +76,29 @@ void ProxyPlugin::sockReceive(epicsEvent *shutdown)
     size_t bufferSize = 16 * 1024;
     char *buffer = (char *)mallocMustSucceed(bufferSize, "Failed to allocate socket send buffer");
 
-    this->lock();
     while (shutdown->tryWait() == false) {
         uint32_t received;
 
-        if (!isClientConnected()) {
-            this->unlock();
+        this->lock();
+        bool connected = isClientConnected();
+        this->unlock();
+
+        if (!connected) {
             epicsThreadSleep(loopTime);
-            this->lock();
             // There's a periodic timer checking for client, wait until it connects
             continue;
         }
 
-        // recv() unlocks the plugin when waiting
         if (recv((uint32_t *)buffer, bufferSize, loopTime, &received) == true) {
             uint32_t consumed = packetsList.reset(reinterpret_cast<uint8_t*>(buffer), received);
             uint32_t nPackets = 0;
 
+            this->lock();
             for (auto it = packetsList.cbegin(); it != packetsList.cend(); it++) {
                 sendToDispatcher(*it);
                 nPackets++;
             }
+            this->unlock();
 
             packetsList.release();
 
@@ -103,5 +106,19 @@ void ProxyPlugin::sockReceive(epicsEvent *shutdown)
                 LOG_WARN("Some data received from socket can't be parsed, received %u b, processed %u b (%u packets)", received, consumed, nPackets);
         }
     }
-    this->unlock();
+}
+
+void ProxyPlugin::clientConnected()
+{
+    LOG_INFO("Client connected to OCC proxy");
+}
+
+void ProxyPlugin::sendHeartbeat()
+{
+    DasPacket *packet = DasPacket::createOcc(DasPacket::HWID_SELF, DasPacket::HWID_BROADCAST, DasPacket::CMD_READ_STATUS, 0, 0);
+    if (packet) {
+        packet->setResponse();
+        send(reinterpret_cast<uint32_t*>(packet), packet->length());
+        free(packet);
+    }
 }

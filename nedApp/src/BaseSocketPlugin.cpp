@@ -35,6 +35,8 @@ BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherP
     createParam("CloseClient",  asynParamInt32,     &CloseClient, 0);   // WRITE - Force client disconnect
     callParamCallbacks();
 
+    m_lastClientActivity = { 0, 0 };
+
     // Schedule a period task to check for incoming client
     std::function<float(void)> watchdogCb = std::bind(&BaseSocketPlugin::checkClient, this);
     scheduleCallback(watchdogCb, 2.0);
@@ -50,13 +52,13 @@ bool BaseSocketPlugin::recv(uint32_t *data, uint32_t length, double timeout, uin
     int timeout_ms = (timeout > 0 ? timeout * 1000 : 0);
     int ret;
 
+    this->lock();
     fds.fd = m_clientSock;
+    this->unlock();
     fds.events = POLLIN;
     fds.revents = 0;
 
-    this->unlock();
     ret = poll(&fds, 1, timeout_ms);
-    this->lock();
 
     if (ret != 1 || fds.revents != POLLIN) {
         if (ret == -1) {
@@ -75,6 +77,10 @@ bool BaseSocketPlugin::recv(uint32_t *data, uint32_t length, double timeout, uin
         disconnectClient();
         *actual = 0;
         return false;
+    } else if (ret > 0) {
+        this->lock();
+        epicsTimeGetCurrent(&m_lastClientActivity);
+        this->unlock();
     }
 
     *actual = ret;
@@ -85,42 +91,38 @@ bool BaseSocketPlugin::recv(uint32_t *data, uint32_t length, double timeout, uin
 bool BaseSocketPlugin::send(const uint32_t *data, uint32_t length)
 {
     const char *rest = reinterpret_cast<const char *>(data);
-    double inactive = 0.0;
     epicsTimeStamp t1;
-    bool firstRun = true;
-    ssize_t sent = 0;
     int myErrno = 0;
-    int retries = 5; // 1 second for each retry defined when client connects
+    int retries = 3; // 1 second for each retry defined when client connects
+    int socket;
+    epicsTimeStamp lastClientActivity = { 0, 0 };
 
-    // Optimize most likely path, mainly avoid time consuming unlocking/locking
-    sent = write(m_clientSock, rest, length);
-    if (likely(sent == length)) {
-        return true;
-    }
+    // Cache the same socket for the duration of this function. If client
+    // disconnects and a new client is connected,
+    // we don't want to send partial data to new client but rather fail this function.
+    this->lock();
+    socket = m_clientSock;
+    this->unlock();
 
-    // perform error checking inside the loop
-    myErrno = errno;
+    if (socket == -1)
+        return false;
+
     epicsTimeGetCurrent(&t1);
-
-    while (m_clientSock != -1 && length > 0) {
-        if (firstRun == false) {
-            int sock = m_clientSock; // got local reference to be able to release lock
-            this->unlock();
-            // With unlocked write, ClientDiscon can be used to force client disconnect
-            // OS will recognize invalid sock and return EINVAL error, which the code
-            // below should catch and cleanup the rest
-            sent = write(sock, rest, length);
-            myErrno = errno;
-            this->lock();
-        }
-        firstRun = false;
-
-        // Not everything went as planned
-        if (sent >= 0) {
-            epicsTimeGetCurrent(&t1);
-            rest += sent;
+    while (length > 0 && retries-- > 0) {
+        ssize_t sent = write(socket, rest, length);
+        if (likely(sent == length)) {
+            // Optimize most likely path, mainly avoid time consuming unlocking/locking
+            epicsTimeGetCurrent(&lastClientActivity);
+            length = 0;
+            break;
+        } else if (sent > 0) {
+            epicsTimeGetCurrent(&lastClientActivity);
             length -= sent;
-        } else { //sent == -1
+            rest += sent;
+            myErrno = 0;
+            continue;
+        } else if (sent == -1) {
+            myErrno = errno;
             // SO_SNDTIMEO will interrupt every 1.0s
             if (myErrno == EAGAIN || myErrno == EWOULDBLOCK) {
                 // Export client inactivity time through parameter.
@@ -128,28 +130,29 @@ bool BaseSocketPlugin::send(const uint32_t *data, uint32_t length)
                 // at certain threshold.
                 epicsTimeStamp t2;
                 epicsTimeGetCurrent(&t2);
-                inactive = epicsTimeDiffInSeconds(&t2, &t1);
+                double inactive = epicsTimeDiffInSeconds(&t2, &t1);
+                this->lock();
                 setDoubleParam(ClientInactive, inactive);
                 callParamCallbacks();
-
-                if (retries-- == 0) {
-                    LOG_ERROR("Failed to send data in 5 seconds, giving up");
-                    break;
-                }
-
-            } else if (m_clientSock != -1) {
-                LOG_ERROR("Closed socket due to an write error - %s", strerror(myErrno));
-                disconnectClient();
-                // No need to break, while loop will check
+                this->unlock();
             }
+        } else { // sent == 0
+            myErrno = ENOSPC;
         }
     }
 
-    if (inactive != 0.0) {
-        // while loop got interrupted due to client disconnect
-        setDoubleParam(ClientInactive, 0.0);
-        callParamCallbacks();
+    this->lock();
+    if (length > 0) {
+        disconnectClient();
+        if (retries == 0) {
+            LOG_ERROR("Closed socket, too many retries");
+        } else {
+            LOG_ERROR("Closed socket due to a write error - %s", strerror(myErrno));
+        }
+    } else {
+        m_lastClientActivity = lastClientActivity;
     }
+    this->unlock();
 
     return (length == 0);
 }
@@ -358,11 +361,22 @@ void BaseSocketPlugin::disconnectClient()
 
 float BaseSocketPlugin::checkClient()
 {
+    int checkInt;
+    epicsTimeStamp now;
+
+    getIntegerParam(CheckInt, &checkInt);
+    epicsTimeGetCurrent(&now);
+
+    double inactive = epicsTimeDiffInSeconds(&now, &m_lastClientActivity);
+
+    if (isClientConnected() && inactive >= checkInt) {
+        sendHeartbeat();
+    }
+
+    // Now check again in case heartbeat failed and closed the socket
     if (!isClientConnected()) {
         connectClient();
     }
 
-    int delay;
-    getIntegerParam(CheckInt, &delay);
-    return delay;
+    return checkInt;
 }

@@ -73,6 +73,18 @@ class ProxyPlugin : public BaseSocketPlugin {
          * iteration it checks for shutdown event.
          */
         void sockReceive(epicsEvent *shutdown);
+
+        /**
+         * Overloaded function.
+         */
+        void clientConnected();
+
+        /**
+         * Overloaded heartbeat functionality.
+         *
+         * Puts a dummy READ_STATUS response from OCC into a socket.
+         */
+        void sendHeartbeat();
 };
 
 #endif // PROXY_PLUGIN_H
