@@ -63,8 +63,8 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortNames, in
         // Callbacks need to be enabled separately in order to actually get triggered from dispatcher.
         status = pasynManager->connectDevice(pasynuser, it->c_str(), 0);
         if (status != asynSuccess) {
-            LOG_ERROR("Failed calling pasynManager->connectDevice to port %s (status=%d, error=%s)",
-                      it->c_str(), status, m_remotePorts[*it].pasynuser->errorMessage);
+            LOG_ERROR("Failed calling pasynManager->connectDevice to port %s (status=%d)",
+                      it->c_str(), status);
             pasynManager->freeAsynUser(pasynuser);
             continue;
         }
