@@ -84,8 +84,8 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
             nProcessed++;
 
             // m_fd is non-blocking, might fail when system buffers are full
-            ssize_t ret = write(m_fd, packet, packet->length());
-            if (ret == static_cast<ssize_t>(packet->length())) {
+            ssize_t ret = write(m_fd, packet, packet->getLength());
+            if (ret == static_cast<ssize_t>(packet->getLength())) {
                 nSaved++;
             } else {
                 nNotSaved++;
@@ -95,7 +95,7 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
                     // Nothing we can do about it
                     char path[1024];
                     getStringParam(FilePath, sizeof(path), path);
-                    LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->length(), path);
+                    LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->getLength(), path);
                     if (corruptOffset == 0) {
                         corruptOffset = lseek(m_fd, 0, SEEK_CUR) - ret;
                     }
@@ -104,7 +104,7 @@ void DumpPlugin::processData(const DasPacketList * const packetList)
                     off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
                     char path[1024];
                     getStringParam(FilePath, sizeof(path), path);
-                    LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->length(), path, offset);
+                    LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->getLength(), path, offset);
                     if (corruptOffset == 0) {
                         corruptOffset = offset;
                     }

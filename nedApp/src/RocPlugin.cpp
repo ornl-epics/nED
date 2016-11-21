@@ -242,13 +242,13 @@ bool RocPlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
     if (m_version == "v54") {
         uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
 
-        if (packet->length() > sizeof(buffer)) {
+        if (packet->getLength() > sizeof(buffer)) {
             LOG_ERROR("Received v5.4 READ_CONFIG response bigger than expected");
             return asynError;
         }
 
         // Packet in shared queue must not be modified. So we make a copy.
-        memcpy(buffer, packet, packet->length());
+        memcpy(buffer, packet, packet->getLength());
         packet = reinterpret_cast<const DasPacket *>(buffer);
         const_cast<DasPacket *>(packet)->payload_length -= 4; // This is the only reason we're doing all the buffering
     }

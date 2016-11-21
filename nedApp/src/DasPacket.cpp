@@ -51,7 +51,7 @@ DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandTy
         cmdinfo.is_channel = 1;
     }
 
-    void *addr = malloc(sizeof(DasPacket) + payload_length);
+    void *addr = malloc(sizeof(DasPacket) + ALIGN_UP(payload_length, 4));
     if (addr)
         packet = new (addr) DasPacket(source, destination, cmdinfo, payload_length, payload);
     return packet;
@@ -138,10 +138,10 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
 
 bool DasPacket::isValid() const
 {
-    return (length() > MinLength);
+    return (getLength() > MinLength);
 }
 
-uint32_t DasPacket::length() const
+uint32_t DasPacket::getLength() const
 {
     // All incoming packets are 4-byte aligned by DSP
     // Outgoing commands for LVDS modules might be 2-byte aligned

@@ -283,7 +283,7 @@ void CRocPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLi
                 }
 
                 // Calculate space needed for this packet
-                uint32_t pktSize = packet->length();
+                uint32_t pktSize = packet->getLength();
                 if (!m_calcParams.inExtMode) {
                     // Convert to extended mode, add space for pixel field
                     uint32_t nEvents = (packet->getDataLength() / sizeof(CRocDataPacket::RawEvent));
@@ -355,7 +355,7 @@ CRocPosCalcPlugin::Stats CRocPosCalcPlugin::processPacket(const DasPacket *inPac
     }
 
     // outPacket is guaranteed to be at least the size of srcPacket
-    (void)inPacket->copyHeader(outPacket, inPacket->length());
+    (void)inPacket->copyHeader(outPacket, inPacket->getLength());
 
     char *outData = const_cast<char *>(reinterpret_cast<const char *>(outPacket->getData(&tmp)));
     const char *inData = reinterpret_cast<const char *>(inPacket->getData(&nInEvents));

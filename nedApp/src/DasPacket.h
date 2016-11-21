@@ -265,7 +265,7 @@ struct DasPacket
         /**
          * Total length of the packet in bytes.
          */
-        uint32_t length() const;
+        uint32_t getLength() const;
 
         /**
          * Is this a command packet?

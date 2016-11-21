@@ -133,7 +133,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
 
                     // If running out of space, send this batch
                     uint32_t remain = m_bufferSize - bufferOffset;
-                    if (remain < packet->length()) {
+                    if (remain < packet->getLength()) {
                         nSplits++;
                         break;
                     }
@@ -149,7 +149,7 @@ void PixelMapPlugin::processDataUnlocked(const DasPacketList * const packetList)
                     // Reserve part of buffer for this packet, it may shrink from original but never grow
                     DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
                     m_packetList.push_back(newPacket);
-                    bufferOffset += packet->length();
+                    bufferOffset += packet->getLength();
 
                     // Do the pixel id mapping - this can be parallelized
                     #pragma omp task firstprivate(packet, newPacket) shared(errors)
@@ -181,7 +181,7 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPac
     PixelMapErrors errors;
 
     // destPacket is guaranteed to be at least the size of srcPacket
-    (void)srcPacket->copyHeader(destPacket, srcPacket->length());
+    (void)srcPacket->copyHeader(destPacket, srcPacket->getLength());
 
     uint32_t nEvents, nDestEvents;
     const DasPacket::Event *srcEvent= reinterpret_cast<const DasPacket::Event *>(srcPacket->getData(&nEvents));

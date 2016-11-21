@@ -215,7 +215,7 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
                 }
                 setIntegerParam(PosEnable[i], value);
                 callParamCallbacks();
-                return asynSuccess;
+                return ret;
             }
         }
     }
@@ -312,7 +312,7 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
 
                 // If running out of space, send this batch
                 uint32_t remain = m_bufferSize - bufferOffset;
-                if (remain < packet->length()) {
+                if (remain < packet->getLength()) {
                     nSplits++;
                     break;
                 }
@@ -328,7 +328,7 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
                 // Reserve part of buffer for this packet, it may shrink from original but never grow
                 DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
                 newPacketList.push_back(newPacket);
-                bufferOffset += packet->length();
+                bufferOffset += packet->getLength();
 
                 // Process the packet
                 processPacket(packet, newPacket, corrEn, psEn, convEn, nGood, nVeto);
@@ -367,7 +367,7 @@ void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destP
     };
 
     // destPacket is guaranteed to be at least the size of srcPacket
-    (void)srcPacket->copyHeader(destPacket, srcPacket->length());
+    (void)srcPacket->copyHeader(destPacket, srcPacket->getLength());
 
     uint32_t nEvents;
     const Event *srcEvent= reinterpret_cast<const Event *>(srcPacket->getData(&nEvents));

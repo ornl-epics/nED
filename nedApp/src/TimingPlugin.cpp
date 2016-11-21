@@ -200,13 +200,13 @@ const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlH
     DasPacket *packet;
     uint32_t nDwords;
 
-    if (src->length() + sizeof(RtdlHeader) > PACKET_SIZE) {
-        LOG_WARN("Packet size %u exceeds upper limit %lu, not timestamping data packet", src->length(), PACKET_SIZE - sizeof(RtdlHeader));
+    if (src->getLength() + sizeof(RtdlHeader) > PACKET_SIZE) {
+        LOG_WARN("Packet size %u exceeds upper limit %lu, not timestamping data packet", src->getLength(), PACKET_SIZE - sizeof(RtdlHeader));
         return reinterpret_cast<DasPacket *>(0);
     }
 
     // Get new packet buffer
-    packet = allocPacket(src->length() + sizeof(RtdlHeader));
+    packet = allocPacket(src->getLength() + sizeof(RtdlHeader));
     if (!packet)
         return packet;
 

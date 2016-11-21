@@ -48,7 +48,7 @@ void ProxyPlugin::processData(const DasPacketList * const packetList)
         if (!clientConnected)
             continue;
 
-       if (send(reinterpret_cast<const uint32_t *>(packet), packet->length()))
+       if (send(reinterpret_cast<const uint32_t *>(packet), packet->getLength()))
             m_nTransmitted++;
 
         m_nProcessed++;
@@ -118,7 +118,7 @@ void ProxyPlugin::sendHeartbeat()
     DasPacket *packet = DasPacket::createOcc(DasPacket::HWID_SELF, DasPacket::HWID_BROADCAST, DasPacket::CMD_READ_STATUS, 0, 0);
     if (packet) {
         packet->setResponse();
-        send(reinterpret_cast<uint32_t*>(packet), packet->length());
-        free(packet);
+        send(reinterpret_cast<uint32_t*>(packet), packet->getLength());
+        delete packet;
     }
 }

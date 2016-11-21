@@ -66,27 +66,27 @@ void StatPlugin::processData(const DasPacketList * const packetList)
     for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
         const DasPacket *packet = *it;
 
-        m_receivedBytes += packet->length();
+        m_receivedBytes += packet->getLength();
         if (packet->isResponse()) {
             m_cmdCount++;
-            m_cmdBytes += packet->length();
+            m_cmdBytes += packet->getLength();
         } else if (packet->isNeutronData()) {
             accumulatePCharge(m_neutronPulseTime, packet->getRtdlHeader(), m_neutronPCharge);
             m_dataCount++;
-            m_dataBytes += packet->length();
+            m_dataBytes += packet->getLength();
         } else if (packet->isMetaData()) {
             m_metaCount++;
-            m_metaBytes += packet->length();
+            m_metaBytes += packet->getLength();
         } else if (packet->isRtdl()) {
             accumulatePCharge(m_rtdlPulseTime, packet->getRtdlHeader(), m_rtdlPCharge);
             m_rtdlCount++;
-            m_rtdlBytes += packet->length();
+            m_rtdlBytes += packet->getLength();
         } else if (packet->cmdinfo.is_command && packet->cmdinfo.command == DasPacket::CMD_TSYNC) {
             m_tsyncCount++;
-            m_tsyncBytes += packet->length();
+            m_tsyncBytes += packet->getLength();
         } else if (packet->isBad()) {
             m_badCount++;
-            m_badBytes += packet->length();
+            m_badBytes += packet->getLength();
         }
     }
 

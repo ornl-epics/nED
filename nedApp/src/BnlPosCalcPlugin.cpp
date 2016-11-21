@@ -193,7 +193,7 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
 
                 // If running out of space, send this batch
                 uint32_t remain = m_bufferSize - bufferOffset;
-                if (remain < packet->length()) {
+                if (remain < packet->getLength()) {
                     nSplits++;
                     break;
                 }
@@ -209,7 +209,7 @@ void BnlPosCalcPlugin::processDataUnlocked(const DasPacketList * const packetLis
                 // Reserve part of buffer for this packet, it may shrink from original but never grow
                 DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
                 m_packetList.push_back(newPacket);
-                bufferOffset += packet->length();
+                bufferOffset += packet->getLength();
 
                 // Process the packet - only raw mode supported for now
                 m_stats += processPacket(packet, newPacket, extendedMode);
@@ -245,7 +245,7 @@ BnlPosCalcPlugin::Stats BnlPosCalcPlugin::processPacket(const DasPacket *srcPack
     uint32_t eventSize = (extendedMode ? sizeof(BnlDataPacket::ExtendedEvent) : sizeof(BnlDataPacket::RawEvent));
 
     // destPacket is guaranteed to be at least the size of srcPacket
-    (void)srcPacket->copyHeader(destPacket, srcPacket->length());
+    (void)srcPacket->copyHeader(destPacket, srcPacket->getLength());
 
     uint32_t nEvents, nDestEvents;
     const char *data = reinterpret_cast<const char *>(srcPacket->getData(&nEvents));

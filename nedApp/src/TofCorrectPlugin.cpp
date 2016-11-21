@@ -91,12 +91,12 @@ void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetLis
             const DasPacket *packet = *it;
 
             if (packet->isMetaData()) {
-                DasPacket *modifiedPacket = allocPacket(packet->length());
+                DasPacket *modifiedPacket = allocPacket(packet->getLength());
                 if (!modifiedPacket)
                     continue;
                 allocPktsList.push_back(modifiedPacket);
 
-                if (packet->copyHeader(modifiedPacket, packet->length())) {
+                if (packet->copyHeader(modifiedPacket, packet->getLength())) {
                     uint32_t nDwords;
                     uint32_t *dstData = modifiedPacket->getData(&nDwords);
                     const uint32_t *srcData = packet->getData(&nDwords);

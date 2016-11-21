@@ -329,7 +329,7 @@ asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer
 
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
-            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->length(), 4));
+            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->getLength(), 4));
             if (ret != 0) {
                 setIntegerParam(LastErr, -ret);
                 setIntegerParam(Status, STAT_OCC_ERROR);
@@ -494,6 +494,10 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             packetsList.release();
 
             if (retryCounter < 7) {
+                uint32_t packetLen = 0;
+                if (length >= DasPacket::MinLength)
+                    packetLen = reinterpret_cast<DasPacket *>(data)->getLength();
+                LOG_DEBUG("Consumed %u of %u (expecting %u), retry %u/6", consumed, length, packetLen, retryCounter);
                 // Exponentially sleep up to ~1.1s, first pass doesn't sleep
                 epicsThreadSleep(1e-5 * pow(10, retryCounter++));
                 continue;
@@ -501,10 +505,14 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 
             // OCC still doesn't have enough data, check what's going on
             DasPacket *packet = reinterpret_cast<DasPacket *>(data);
-            if (packet->length() > DasPacket::MaxLength) {
-                LOG_ERROR("Possibly corrupted data in queue based on packet length, aborting process thread");
+            if (length < DasPacket::MinLength) {
+                LOG_ERROR("Aborting processing thread, not enough input data to describe packet");
+            } else if (packet->getLength() > DasPacket::MaxLength) {
+                LOG_ERROR("Aborting processing thread, packet size %u bigger than supported %u", packet->getLength(), DasPacket::MaxLength);
+            } else if (packet->getLength() > length) {
+                LOG_ERROR("Aborting processing thread, expecting %u bytes but only have %u", packet->getLength(), length);
             } else {
-                LOG_ERROR("Partial data from OCC, aborting process thread");
+                LOG_ERROR("Aborting processing thread, undetermined error");
             }
             dump((char *)data + consumed, length - consumed);
             handleRecvError(-ERANGE);
