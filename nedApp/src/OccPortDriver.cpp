@@ -81,6 +81,7 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("RxEnRb",           asynParamInt32,     &RxEnRb);                   // READ - Incoming data enabled         (0=disabled,1=enabled)
     createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
+    createParam("MaxPktSize",       asynParamInt32,     &MaxPktSize, 4000);         // WRITE - Maximum size of DAS packet payload
 
     occ_interface_type occtype = OCC_INTERFACE_OPTICAL;
     if (strchr(devfile, ':') != 0)
@@ -289,6 +290,9 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
         // There's a thread to refresh OCC status, including error packets enabled
         m_statusEvent.signal();
+    } else if (pasynUser->reason == MaxPktSize) {
+        DasPacket::setMaxLength(value);
+        return asynSuccess;
     }
     return asynPortDriver::writeInt32(pasynUser, value);
 }
@@ -495,7 +499,7 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 
             if (retryCounter < 7) {
                 uint32_t packetLen = 0;
-                if (length >= DasPacket::MinLength)
+                if (length >= DasPacket::getMinLength())
                     packetLen = reinterpret_cast<DasPacket *>(data)->getLength();
                 LOG_DEBUG("Consumed %u of %u (expecting %u), retry %u/6", consumed, length, packetLen, retryCounter);
                 // Exponentially sleep up to ~1.1s, first pass doesn't sleep
@@ -505,10 +509,10 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 
             // OCC still doesn't have enough data, check what's going on
             DasPacket *packet = reinterpret_cast<DasPacket *>(data);
-            if (length < DasPacket::MinLength) {
+            if (length < DasPacket::getMinLength()) {
                 LOG_ERROR("Aborting processing thread, not enough input data to describe packet");
-            } else if (packet->getLength() > DasPacket::MaxLength) {
-                LOG_ERROR("Aborting processing thread, packet size %u bigger than supported %u", packet->getLength(), DasPacket::MaxLength);
+            } else if (packet->getLength() > packet->getMaxLength()) {
+                LOG_ERROR("Aborting processing thread, packet size %u bigger than supported %u", packet->getLength(), packet->getMaxLength());
             } else if (packet->getLength() > length) {
                 LOG_ERROR("Aborting processing thread, expecting %u bytes but only have %u", packet->getLength(), length);
             } else {

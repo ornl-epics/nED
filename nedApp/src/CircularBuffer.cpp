@@ -25,7 +25,7 @@ using namespace std;
 CircularBuffer::CircularBuffer(uint32_t size)
     : m_unit(UNIT_SIZE)
     , m_size(_align(size, m_unit))
-    , m_rolloverSize(min(m_size - m_unit, 2 * DasPacket::MaxLength))
+    , m_rolloverSize(4096) // start small, will dynamically increase if needed
     , m_error(0)
     , m_prevError(0)
     , m_consumer(0)
@@ -140,6 +140,16 @@ int CircularBuffer::wait(void **data, uint32_t *len, double timeout)
         *len = m_producer - m_consumer;
     else {
         *len = m_size - m_consumer;
+        if (*len > m_rolloverSize) {
+            // Extend roll-over buffer size slowly, see if client is happy
+            // with it and increase it further otherwise in the next call.
+            void *rollover = malloc(2*m_rolloverSize);
+            if (rollover) {
+                free(m_rollover);
+                m_rollover = rollover;
+                m_rolloverSize *= 2;
+            }
+        }
         if (*len < m_rolloverSize) {
             uint32_t head = *len;
             uint32_t tail = min(m_rolloverSize - *len, m_producer);
@@ -230,4 +240,3 @@ uint32_t CircularBuffer::size()
 {
     return m_size;
 }
-

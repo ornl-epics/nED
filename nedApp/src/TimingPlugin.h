@@ -59,14 +59,28 @@ class TimingPlugin : public BaseDispatcherPlugin {
          */
         TimingPlugin(const char *portName, const char *connectPortName);
 
+        /**
+         * Destructor.
+         */
+        ~TimingPlugin();
+
     private:
+
+        /**
+         * Describe a single allocated memory block.
+         */
+        typedef struct {
+            DasPacket *packet;          //!< Allocated memory address
+            size_t size;                //!< Allocated memory size
+            bool inUse;                 //!< Currently used by someone
+        } PoolEntry;
+
         uint32_t m_nReceived;           //!< Number of received packets
         uint32_t m_nProcessed;          //!< Number of modified packets
         DasPacket *m_rtdlPacket;        //!< Last RTDL packet sent out
         RtdlHeader m_neutronsRtdl;      //!< RTDL data for neutron packets, if sub-packets train goes after new RTDL data
         RtdlHeader m_metaRtdl;          //!< RTDL data for metadata packets, if sub-packets train goes after new RTDL data
-        std::list<DasPacket *> m_pool;  //!< Pool of DasPacket allocated objects, all of the same size
-        static const uint32_t PACKET_SIZE;  //!< Size of every packet allocated
+        std::list<PoolEntry> m_pool;    //!< Pool of DasPacket allocated objects
         epicsMutex m_mutex;             //!< Mutex used solely to serialize sending data to plugins
         Timer m_timer;                  //!< Used to trigger periodic RTDL updates
         int m_socket;                   //!< Socket to remote timing server

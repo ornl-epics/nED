@@ -20,16 +20,14 @@ DasPacketList::DasPacketList()
 const DasPacket *DasPacketList::verifyPacket(const uint8_t *data, uint32_t dataLen) const
 {
     const DasPacket *packet = reinterpret_cast<const DasPacket *>(data);
-    uint32_t packetLen;
 
-    if (dataLen < DasPacket::MinLength)
+    if (dataLen < DasPacket::getMinLength())
         return 0;
 
-    packetLen = packet->getLength();
-    if (packetLen < DasPacket::MinLength || packetLen > DasPacket::MaxLength)
+    if (packet->isValid() == false)
         return 0;
 
-    if (packetLen > dataLen)
+    if (packet->getLength() > dataLen)
         return 0;
 
     return packet;

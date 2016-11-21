@@ -20,8 +20,6 @@
 
 EPICS_REGISTER_PLUGIN(TimingPlugin, 2, "Port name", string, "Remote port name", string);
 
-const uint32_t TimingPlugin::PACKET_SIZE =  sizeof(DasPacket) + DasPacket::MaxLength;
-
 TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     : BaseDispatcherPlugin(portName, connectPortName, /*blocking=*/0, NUM_TIMINGPLUGIN_PARAMS)
     , m_nReceived(0)
@@ -79,6 +77,13 @@ TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     m_rtdlPacket->payload[31] = 0x02fa1e2d;
     std::function<float(void)> timerCb = std::bind(&TimingPlugin::updateRtdl, this);
     m_timer.schedule(timerCb, 0.01);
+}
+
+TimingPlugin::~TimingPlugin()
+{
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        delete it->packet;
+    }
 }
 
 asynStatus TimingPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -199,9 +204,10 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
 const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlHeader *rtdl, bool onlyNeutrons) {
     DasPacket *packet;
     uint32_t nDwords;
+    uint32_t maxSize = DasPacket::getMaxLength() - sizeof(RtdlHeader);
 
-    if (src->getLength() + sizeof(RtdlHeader) > PACKET_SIZE) {
-        LOG_WARN("Packet size %u exceeds upper limit %lu, not timestamping data packet", src->getLength(), PACKET_SIZE - sizeof(RtdlHeader));
+    if (src->getLength() > maxSize) {
+        LOG_WARN("Packet size %u exceeds upper limit %u, not timestamping data packet", src->getLength(), maxSize);
         return reinterpret_cast<DasPacket *>(0);
     }
 
@@ -231,21 +237,27 @@ const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlH
 
 DasPacket *TimingPlugin::allocPacket(uint32_t size)
 {
-    DasPacket *packet;
+    DasPacket *packet = reinterpret_cast<DasPacket *>(0);
 
-    if (size > PACKET_SIZE) {
-        LOG_ERROR("New packet size must not exceed %u", PACKET_SIZE);
-        return reinterpret_cast<DasPacket *>(0);
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        if (it->size >= size && it->inUse == false) {
+            it->inUse = true;
+            packet = it->packet;
+            break;
+        }
     }
 
-    if (m_pool.size() > 0) {
-        packet = m_pool.front();
-        m_pool.pop_front();
-    } else {
-        packet = reinterpret_cast<DasPacket *>(calloc(1, PACKET_SIZE));
+    if (!packet) {
+        packet = DasPacket::alloc(size);
         if (!packet) {
             LOG_ERROR("Failed to allocate packet buffer");
-            return reinterpret_cast<DasPacket *>(0);
+        } else {
+            PoolEntry entry;
+            entry.inUse = true;
+            entry.size = size;
+            entry.packet = packet;
+            m_pool.push_back(entry);
+            LOG_DEBUG("Increased packet pool to %zu", m_pool.size());
         }
     }
 
@@ -254,7 +266,17 @@ DasPacket *TimingPlugin::allocPacket(uint32_t size)
 
 void TimingPlugin::freePacket(DasPacket *packet)
 {
-    m_pool.push_back(packet);
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        if (it->packet == packet) {
+            if (it->inUse == false) {
+                LOG_WARN("Corrupted pool, packet returned twice?");
+            }
+            it->inUse = false;
+            return;
+        }
+    }
+    LOG_WARN("Packet not found in pool, discarding");
+    delete packet;
 }
 
 double TimingPlugin::updateRtdl()

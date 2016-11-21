@@ -105,7 +105,7 @@ class CircularBuffer : public BaseCircularBuffer {
         void *m_buffer;             //!< Circular buffer
         const uint32_t m_size;      //!< Size of the circular buffer in bytes
         void *m_rollover;           //!< Rollover buffer for the last packet in circular buffer that is cut in two parts
-        const uint32_t m_rolloverSize; //!< Size of the rollover buffer in bytes
+        uint32_t m_rolloverSize;    //!< Size of the rollover buffer in bytes
         int m_error;                //!< Non-zero error value
         int m_prevError;            //!< A cached error used only in wait() function to detect the error first time
 

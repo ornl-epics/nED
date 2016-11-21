@@ -628,3 +628,13 @@ record(bi, "$(P)Status")
     field(OSV,  "NO_ALARM")
     field(INP,  "$(P)StatusCalc")
 }
+record(longout, "$(P)MaxPktSize")
+{
+    # The same value is shared across all OCC ports
+    info(autosaveFields, "VAL")
+    field(DESC, "Maximum packet size")
+    field(PINI, "YES")
+    field(VAL,  "4000")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MaxPktSize")
+}

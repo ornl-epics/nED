@@ -14,12 +14,8 @@
 #include <string.h>
 
 // Static members initilization
-const uint32_t DasPacket::MinLength = sizeof(DasPacket);
-
-#ifndef MAX_PACKET_LEN
-#define MAX_PACKET_LEN 4000 // DSP-T limit is 3600, can be changed from Makefile
-#endif // MAX_PACKET_LEN
-const uint32_t DasPacket::MaxLength = MAX_PACKET_LEN + MinLength;
+uint32_t DasPacket::MinLength = sizeof(DasPacket);
+uint32_t DasPacket::MaxLength = sizeof(DasPacket) + 4000; // DSP-T is hardcoded to 3600 total but can leak and do slightly more, 4024 should be safe for DSP-T
 
 DasPacket::DasPacket(uint32_t source_, uint32_t destination_, CommandInfo cmdinfo_, uint32_t payload_length_, uint32_t *payload_)
     : destination(destination_)
@@ -34,6 +30,17 @@ DasPacket::DasPacket(uint32_t source_, uint32_t destination_, CommandInfo cmdinf
     } else {
         memset(payload, 0, payload_length);
     }
+}
+
+DasPacket *DasPacket::alloc(uint32_t size)
+{
+    DasPacket *packet = 0;
+    CommandInfo info;
+    memset(&info, 0, sizeof(CommandInfo));
+    void *addr = malloc(sizeof(DasPacket) + ALIGN_UP(size, 4));
+    if (addr)
+        packet = new (addr) DasPacket(0x0, 0x0, info, size - sizeof(DasPacket), NULL);
+    return packet;
 }
 
 DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload)
@@ -138,7 +145,8 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
 
 bool DasPacket::isValid() const
 {
-    return (getLength() > MinLength);
+    uint32_t length = getLength();
+    return (length >= MinLength && length <= MaxLength);
 }
 
 uint32_t DasPacket::getLength() const
@@ -151,6 +159,22 @@ uint32_t DasPacket::getLength() const
     else if (cmdinfo.is_command && cmdinfo.is_passthru && !cmdinfo.is_response && packet_length != ALIGN_UP(packet_length, 2))
         packet_length = 0;
     return packet_length;
+}
+
+uint32_t DasPacket::getMinLength()
+{
+    return DasPacket::MinLength;
+}
+
+uint32_t DasPacket::getMaxLength()
+{
+    return DasPacket::MaxLength;
+}
+
+uint32_t DasPacket::setMaxLength(uint32_t size)
+{
+    DasPacket::MaxLength = ALIGN_UP(size, 4);
+    return DasPacket::MaxLength;
 }
 
 bool DasPacket::isCommand() const
