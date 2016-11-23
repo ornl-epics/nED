@@ -65,6 +65,7 @@ LIB_SRCS  += GlobalCon.st
 LIB_SRCS  += HVScan.st
 LIB_SRCS  += ApplyConfig.st
 $(PROD_NAME)_SRCS  += Common.cpp
+$(PROD_NAME)_SRCS  += McsFile.cpp
 $(PROD_NAME)_SRCS  += ValueConvert.cpp
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp

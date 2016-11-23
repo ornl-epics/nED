@@ -329,3 +329,12 @@ bool BasePlugin::sendParam(const std::string &remotePort, const std::string &par
 
     return ret;
 }
+
+asynStatus BasePlugin::getIntegerParam(const char *name, int *value)
+{
+    int param;
+    asynStatus ret = asynPortDriver::findParam(name, &param);
+    if (ret == asynSuccess)
+        ret = getIntegerParam(param, value);
+    return ret;
+}

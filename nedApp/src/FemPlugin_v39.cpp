@@ -332,30 +332,27 @@ void FemPlugin::createParams_v39()
     createCounterParam("Lvds8:DropEvCnt",         0x4A, 16,  0); // Ch8 dropped data events
     createCounterParam("Lvds9:DropEvCnt",         0x4B, 16,  0); // Ch9 dropped data events
 
-/*
- * These parameters need to be moved to RemoteUpdate response command.
-    createCounterParam("Upg:OutDone",             0x4C,  1,  0); // Upgrade SPI_OutDone
-    createCounterParam("Upg:OutError",            0x4C,  1,  1); // Upgrade SPI_OutError
-    createCounterParam("Upg:OutErrorIdCode",      0x4C,  1,  2); // Upgrade SPI_OutErrorIdCode
-    createCounterParam("Upg:OutErrorErase",       0x4C,  1,  3); // Upgrade SPI_OutErrorErase
-    createCounterParam("Upg:OutErrorProgram",     0x4C,  1,  4); // Upgrade SPI_OutErrorProgram
-    createCounterParam("Upg:OutErrorCrc",         0x4C,  1,  5); // Upgrade SPI_OutErrorCrc
-    createCounterParam("Upg:OutErrorBlockLocked", 0x4C,  1,  6); // Upgrade SPI_OutErrorBlockLoc
-    createCounterParam("Upg:OutErrorVPP",         0x4C,  1,  7); // Upgrade SPI_OutErrorVPP
-    createCounterParam("Upg:OutErrorCmdSeq",      0x4C,  1,  8); // Upgrade SPI_OutErrorCmdSeque
-    createCounterParam("Upg:OutErrorTimeOut",     0x4C,  1,  9); // Upgrade SPI_OutErrorTimeOut
-    createCounterParam("Upg:OutStarted",          0x4C,  1, 10); // Upgrade SPI_OutStarted
-    createCounterParam("Upg:OutInit",             0x4C,  1, 11); // Upgrade SPI_OutInitOK
-    createCounterParam("Upg:OutCheckId",          0x4C,  1, 12); // Upgrade SPI_OutCheckIdOK
-    createCounterParam("Upg:OutEraseSwitchWord",  0x4C,  1, 13); // Upgrade SPI_OutEraseSwitchWo
-    createCounterParam("Upg:OutErase",            0x4C,  1, 14); // Upgrade SPI_OutEraseOK
-    createCounterParam("Upg:OutProgram",          0x4C,  1, 15); // Upgrade SPI_OutProgramOK
+    createUpgradeParam("Upg:OutDone",             0x4C,  1,  0); // Upgrade SPI_OutDone
+    createUpgradeParam("Upg:OutError",            0x4C,  1,  1); // Upgrade SPI_OutError
+    createUpgradeParam("Upg:OutErrorIdCode",      0x4C,  1,  2); // Upgrade SPI_OutErrorIdCode
+    createUpgradeParam("Upg:OutErrorErase",       0x4C,  1,  3); // Upgrade SPI_OutErrorErase
+    createUpgradeParam("Upg:OutErrorProgram",     0x4C,  1,  4); // Upgrade SPI_OutErrorProgram
+    createUpgradeParam("Upg:OutErrorCrc",         0x4C,  1,  5); // Upgrade SPI_OutErrorCrc
+    createUpgradeParam("Upg:OutErrorBlockLocked", 0x4C,  1,  6); // Upgrade SPI_OutErrorBlockLoc
+    createUpgradeParam("Upg:OutErrorVPP",         0x4C,  1,  7); // Upgrade SPI_OutErrorVPP
+    createUpgradeParam("Upg:OutErrorCmdSeq",      0x4C,  1,  8); // Upgrade SPI_OutErrorCmdSeque
+    createUpgradeParam("Upg:OutErrorTimeOut",     0x4C,  1,  9); // Upgrade SPI_OutErrorTimeOut
+    createUpgradeParam("Upg:OutStarted",          0x4C,  1, 10); // Upgrade SPI_OutStarted
+    createUpgradeParam("Upg:OutInit",             0x4C,  1, 11); // Upgrade SPI_OutInitOK
+    createUpgradeParam("Upg:OutCheckId",          0x4C,  1, 12); // Upgrade SPI_OutCheckIdOK
+    createUpgradeParam("Upg:OutEraseSwitchWord",  0x4C,  1, 13); // Upgrade SPI_OutEraseSwitchWo
+    createUpgradeParam("Upg:OutErase",            0x4C,  1, 14); // Upgrade SPI_OutEraseOK
+    createUpgradeParam("Upg:OutProgram",          0x4C,  1, 15); // Upgrade SPI_OutProgramOK
 
-    createCounterParam("Upg:OutVerifyOK",         0x4D,  1,  0); // Upgrade SPI_outVerifyOK
-    createCounterParam("Upg:OutPrgSwitchWordOK",  0x4D,  1,  1); // Upgrade SPI_outProgramSwitch
-    createCounterParam("Upg:FifoEmpty",           0x4E,  1, 12); // Upgrade SPI_fifo_empty
-    createCounterParam("Upg:FifoProgFull",        0x4E,  1, 13); // Upgrade SPI_fifo_progful
-    createCounterParam("Upg:FifoFull",            0x4E,  1, 14); // Upgrade SPI_fifo_full
-    createCounterParam("Upg:Busy",                0x4E,  1, 15); // Upgrade SPI_busy
-*/
+    createUpgradeParam("Upg:OutVerifyOK",         0x4D,  1,  0); // Upgrade SPI_outVerifyOK
+    createUpgradeParam("Upg:OutPrgSwitchWordOK",  0x4D,  1,  1); // Upgrade SPI_outProgramSwitch
+    createUpgradeParam("Upg:FifoEmpty",           0x4E,  1, 12); // Upgrade SPI_fifo_empty
+    createUpgradeParam("Upg:FifoProgFull",        0x4E,  1, 13); // Upgrade SPI_fifo_progful
+    createUpgradeParam("Upg:FifoFull",            0x4E,  1, 14); // Upgrade SPI_fifo_full
+    createUpgradeParam("Upg:Busy",                0x4E,  1, 15); // Upgrade SPI_busy
 }
