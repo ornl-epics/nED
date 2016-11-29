@@ -337,7 +337,18 @@ class BasePlugin : public asynPortDriver {
          */
         asynStatus getIntegerParam(const char *name, int *value);
         using asynPortDriver::getIntegerParam;
-        
+
+        /**
+         * Sets new value of an integer in the parameter library.
+         *
+         * Convenience function to look by parameter name that only works for
+         * for first asynPort address plugins.
+         *
+         * @see asynPortDriver::setIntegerParam(int, int)
+         */
+        asynStatus setIntegerParam(const char *name, int value);
+        using asynPortDriver::setIntegerParam;
+
     protected:
         #define FIRST_BASEPLUGIN_PARAM Enable
         int Enable;

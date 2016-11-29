@@ -31,12 +31,14 @@ class FemPlugin : public BaseModulePlugin {
             enum Status {
                 NOT_SUPPORTED       = 0, //!< Remote update not supported by this modules
                 NOT_READY           = 1, //!< Supported but failed to initialize internal structures
-                LOADED              = 3, //!< Firmware file loaded and ready to start
+                LOADED              = 2, //!< Firmware file loaded and ready to start
+                ERASING             = 3, //!< Flash is erasing, must wait
                 IN_PROGRESS         = 4, //!< Some packets already sent, some left to be sent
                 WAITING             = 5, //!< Waiting for module to become ready
-                DONE                = 6, //!< Upgrade successful
-                ERROR               = 7, //!< Upgrade failed
-                ABORTED             = 8, //!< User aborted update
+                FINALIZING          = 6, //!< Final check of status, disable remote upgrade
+                DONE                = 7, //!< Upgrade successful
+                ERROR               = 8, //!< Upgrade failed
+                ABORTED             = 9, //!< User aborted update
             } status;
 
             /**
@@ -51,6 +53,15 @@ class FemPlugin : public BaseModulePlugin {
                 TIMEOUT,
             } Action;
 
+            /**
+             * Type of check to perform in remoteUpgradeCheck function.
+             */
+            typedef enum {
+                WAIT_ERASED,
+                WAIT_READY,
+                WAIT_PROGRAMMED,
+            } CheckType;
+
             McsFile file;           //!< Firmware image file path, stays opened while in progress
             std::shared_ptr<char> buffer;
             uint32_t bufferSize;
@@ -58,7 +69,11 @@ class FemPlugin : public BaseModulePlugin {
             uint32_t offset;        //!< Current data position, used as progress
             uint32_t lastCount;     //!< Number of bytes sent in previous chunk
             std::shared_ptr<Timer> timer; //!< Currently running timer for response timeout handling
+            std::shared_ptr<Timer> statusTimer; //!< Currently running timer for status refresh
+            epicsTimeStamp eraseStartTime; //!< Timestamp of erase command sent out
             epicsTimeStamp lastReadyTime; //!< Timestamp of last 'ready' response
+            epicsTimeStamp disableTime; //!< Timestamp when upgrade was disabled
+            uint8_t expectedWrCfg;  //!< Counter how many write config responses to silently ignore
         } m_remoteUpgrade;          //!< Remote upgrade context
 
     public: // functions
@@ -179,12 +194,29 @@ class FemPlugin : public BaseModulePlugin {
          * Packet was already unpacked and all PVs populated before invoking
          * this function.
          */
-        FemPlugin::RemoteUpgrade::Status remoteUpgradeCheck();
+        FemPlugin::RemoteUpgrade::Status remoteUpgradeCheck(RemoteUpgrade::CheckType type);
 
         /**
          * Remote upgrade timeout handler.
          */
         float remoteUpgradeTimeout();
+
+        /**
+         * Periodic timer to check upgrade status.
+         */
+        float remoteUpgradeStatusRefresh();
+
+        /**
+         * Check whether the timer expired
+         *
+         * Retrieve asyn parameter value as timeout and check whether more than
+         * that time has elapsed since the timer was reset.
+         *
+         * @param[in] timer previously reset, starting point
+         * @param[in] timeoutParam asyn float64 param to retrieve timeout value
+         * @return true if more than timeout time has elapsedsince timer was set/reset, false otherwise
+         */
+        bool timerExpired(epicsTimeStamp *timer, int timeoutParam);
 
     protected:
         #define FIRST_FEMPLUGIN_PARAM UpgradeFile
@@ -194,6 +226,9 @@ class FemPlugin : public BaseModulePlugin {
         int UpgradeSize;     //!< Total firmware size in bytes
         int UpgradePosition; //!< Bytes already sent to remote party
         int UpgradeCmd;      //!< Command to send to update process (start, abort)
+        int UpgradeEraseTimeout;    //!< Max time to wait for erased flag
+        int UpgradeBusyTimeout;     //!< Max time to wait for ready flag
+        int UpgradeProgramTimeout;  //!< Max time to wait for programmed flag
         #define LAST_FEMPLUGIN_PARAM UpgradeCmd
 };
 

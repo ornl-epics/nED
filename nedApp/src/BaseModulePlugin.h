@@ -576,7 +576,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] channel to be selected, 0 selects main/control part.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqWriteConfig(uint8_t section, uint8_t channel);
+        virtual DasPacket::CommandType reqWriteConfig(uint8_t section=0, uint8_t channel=0);
 
         /**
          * Default handler for READ_CONFIG response.

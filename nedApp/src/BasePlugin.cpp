@@ -338,3 +338,12 @@ asynStatus BasePlugin::getIntegerParam(const char *name, int *value)
         ret = getIntegerParam(param, value);
     return ret;
 }
+
+asynStatus BasePlugin::setIntegerParam(const char *name, int value)
+{
+    int param;
+    asynStatus ret = asynPortDriver::findParam(name, &param);
+    if (ret == asynSuccess)
+        ret = setIntegerParam(param, value);
+    return ret;
+}
