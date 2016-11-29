@@ -305,6 +305,22 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool processResponse(const DasPacket *packet);
 
         /**
+         * Send a request to the module.
+         *
+         * For every down-stream request the module is expected to reply back.
+         * A state around waiting for the response is handled by this function,
+         * including setting up timeout counter, setting the expected response
+         * and updating related status PV to let user know about the progress.
+         * A single outstanding request/response is allowed at any given time.
+         * If correlating response is not received in given time, the request
+         * is canceled.
+         *
+         * @param[in] command to be sent
+         * @return true if request has been handled, false otherwise
+         */
+        virtual bool processRequest(DasPacket::CommandType command);
+
+        /**
          * Handle common command requests.
          *
          * Command request is triggered from EPICS records and is handled by
@@ -614,12 +630,15 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Send firmware upgrade packet.
          *
-         * Default implementation doesn't send any actual data, which FEMs will
-         * respond with current status.
+         * Data is sent as is to the remote side. Caller is responsible for
+         * formatting, endianess etc.
+         * When size is zero, modules are expected to return the current status.
          *
+         * @param[in] data to be sent
+         * @param[in] size of data in bytes
          * @return DasPacket::CMD_UPGRADE or 0 when no packet was sent for some reason.
          */
-        virtual DasPacket::CommandType reqUpgrade();
+        virtual DasPacket::CommandType reqUpgrade(const char *data=0, uint32_t size=0);
 
         /**
          * Default handler for CMD_UPGRADE response.

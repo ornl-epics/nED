@@ -15,7 +15,7 @@
 
 EPICS_REGISTER_PLUGIN(FemPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 290; // MAX(`for file in FemPlugin_v3*; do grep create $file | grep Param | wc -l; done`)
+const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 320; // MAX(`for file in FemPlugin_v3*; do grep create $file | grep Param | wc -l; done`)
 
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
@@ -34,17 +34,20 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
+// GCC specific - but very efficient 1 CPU cycle
+#define BYTE_SWAP(a) __builtin_bswap32(a)
+
 FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
     : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_FEM, true,
                        blocking, NUM_FEMPLUGIN_PARAMS + NUM_FEMPLUGIN_DYNPARAMS)
     , m_version(version)
 {
-    createParam("UpgradeFile",      asynParamOctet, &UpgradeFile);               // WRITE - Path to the firmware file to be programmed
-    createParam("UpdataChunkSize",  asynParamInt32,&UpgradeChunkSize, 256);    // WRITE - Maximum payload size for split program file transfer
-    createParam("UpgradeStatus",    asynParamInt32, &UpgradeStatus);             // READ Firmware update status
-    createParam("UpgradeSize",      asynParamInt32, &UpgradeSize, 0);            // READ - Total firmware size in bytes
-    createParam("UpgradePosition",  asynParamInt32, &UpgradePosition, 0);      // READ - Bytes already sent to remote porty
-    createParam("UpgradeAbort",     asynParamInt32, &UpgradeCmd, 0);             // WRITE - Upgrade command
+    createParam("Upg:File",     asynParamOctet, &UpgradeFile);             // WRITE - Path to the firmware file to be programmed
+    createParam("Upg:ChunkSize",asynParamInt32, &UpgradeChunkSize, 256);   // WRITE - Maximum payload size for split program file transfer
+    createParam("Upg:Status",   asynParamInt32, &UpgradeStatus);           // READ Firmware update status
+    createParam("Upg:Size",     asynParamInt32, &UpgradeSize, 0);          // READ - Total firmware size in bytes
+    createParam("Upg:Position", asynParamInt32, &UpgradePosition, 0);      // READ - Bytes already sent to remote porty
+    createParam("Upg:Cmd",      asynParamInt32, &UpgradeCmd, 0);           // WRITE - Upgrade command
 
     m_remoteUpgrade.status = RemoteUpgrade::NOT_SUPPORTED;
 
@@ -66,7 +69,7 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
     } else if (m_version == "v39") {
         setIntegerParam(Supported, 1);
         createParams_v39();
-        remoteUpgradeInit();
+        remoteUpgradeSM(RemoteUpgrade::INIT);
     } else if (m_version == "v320") {
         setIntegerParam(Supported, 1);
         createParams_v320();
@@ -81,50 +84,27 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
 
 asynStatus FemPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    if (pasynUser->reason == UpgradeChunkSize) {
-        // Enforce 4 bytes aligned transfers
-        uint32_t newSize = ALIGN_UP(value, 4);
-
-        if (m_remoteUpgrade.bufferSize >= newSize) {
-            m_remoteUpgrade.bufferSize = newSize;
-        } else {
-            char *buffer = (char *)malloc(newSize);
-            if (buffer == 0)
-                return asynError;
-            m_remoteUpgrade.buffer.reset(buffer);
-            m_remoteUpgrade.bufferSize = newSize;
-        }
-
-        setIntegerParam(UpgradeChunkSize, newSize);
-        callParamCallbacks();
-        return asynSuccess;
-    }
     if (pasynUser->reason == UpgradeCmd) {
-        if (m_remoteUpgrade.status == RemoteUpgrade::NOT_SUPPORTED) {
-            LOG_WARN("Remote upgrade not supported by module");
-            return asynError;
-        }
         if (value == 0) {
-            remoteUpgradeAbort(true);
+            return remoteUpgradeSM(RemoteUpgrade::ABORT) ? asynSuccess : asynError;
+        } else if (value == 1) {
+            return remoteUpgradeSM(RemoteUpgrade::START) ? asynSuccess : asynError;
         } else {
-            m_remoteUpgrade.status = RemoteUpgrade::IN_PROGRESS;
-            remoteUpgradeRsp(0);
+            return processRequest(DasPacket::CMD_UPGRADE) ? asynSuccess : asynError;
         }
-        return asynSuccess;
     }
     return BaseModulePlugin::writeInt32(pasynUser, value);
 }
 
 asynStatus FemPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
 {
+    asynStatus ret = BaseModulePlugin::writeOctet(pasynUser, value, nChars, nActual);
     if (pasynUser->reason == UpgradeFile) {
-        remoteUpgradeLoad(std::string(value, nChars));
-        *nActual = nChars;
-        return asynSuccess;
+        if (!remoteUpgradeSM(RemoteUpgrade::LOAD_FILE))
+            ret = asynError;
     }
-    return BaseModulePlugin::writeOctet(pasynUser, value, nChars, nActual);
+    return ret;
 }
-
 
 bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
@@ -160,124 +140,232 @@ bool FemPlugin::checkVersion(const BaseModulePlugin::Version &version)
     return false;
 }
 
-void FemPlugin::remoteUpgradeInit()
-{
-    int chunkSize;
-    getIntegerParam(UpgradeChunkSize, &chunkSize);
-    chunkSize = ALIGN_UP(chunkSize, 4);
-
-    m_remoteUpgrade.offset = 0;
-    m_remoteUpgrade.lastCount = 0;
-    m_remoteUpgrade.buffer.reset( (char *)malloc(chunkSize) );
-
-    if (!m_remoteUpgrade.buffer) {
-        LOG_ERROR("Not enabling remote update - failed to allocate packet");
-        m_remoteUpgrade.status = RemoteUpgrade::NOT_READY;
-        m_remoteUpgrade.bufferSize = 0;
-    } else {
-        m_remoteUpgrade.status = RemoteUpgrade::READY;
-        m_remoteUpgrade.bufferSize = chunkSize;
-    }
-
-    setIntegerParam(UpgradeStatus, m_remoteUpgrade.status);
-    setIntegerParam(UpgradePosition, 0);
-    setIntegerParam(UpgradeSize, 0);
-    callParamCallbacks();
-
-    std::function<bool(const DasPacket *)> handler = std::bind(&FemPlugin::remoteUpgradeRsp, this, std::placeholders::_1);
-    registerResponseHandler(handler);
-}
-
-void FemPlugin::remoteUpgradeLoad(const std::string &path)
-{
-    switch (m_remoteUpgrade.status) {
-    case RemoteUpgrade::READY:
-    case RemoteUpgrade::LOADED:
-    case RemoteUpgrade::DONE:
-    case RemoteUpgrade::ERROR:
-    case RemoteUpgrade::ABORTED:
-        if (m_remoteUpgrade.file.import(path) == true) {
-            m_remoteUpgrade.status = RemoteUpgrade::LOADED;
-        } else {
-            m_remoteUpgrade.status = RemoteUpgrade::ERROR;
-        }
-        setIntegerParam(UpgradeStatus, m_remoteUpgrade.status);
-        setIntegerParam(UpgradePosition, 0);
-        setIntegerParam(UpgradeSize, m_remoteUpgrade.file.getSize());
-        callParamCallbacks();
-        break;
-    default:
-        break;
-    }
-}
-
 bool FemPlugin::remoteUpgradeRsp(const DasPacket *packet)
 {
-    if (packet && packet->getResponseType() != DasPacket::CMD_UPGRADE)
-        return false;
-    if (!packet && m_remoteUpgrade.status == RemoteUpgrade::LOADED)
-        m_remoteUpgrade.status = RemoteUpgrade::IN_PROGRESS;
-    if (m_remoteUpgrade.status != RemoteUpgrade::IN_PROGRESS)
-        return false;
+    return remoteUpgradeSM(RemoteUpgrade::PROCESS_RESPONSE, packet);
+}
 
-    // Will set up new timer if necessary
-    if (m_remoteUpgrade.timer) {
-        m_remoteUpgrade.timer->cancel();
-        m_remoteUpgrade.timer.reset();
-    }
+// Big fat state machine
+bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *packet)
+{
+    int chunkSize;
+    bool ret = true;
+    char path[128];
 
-    // do..while() trick used as exit point
-    do {
-        if (packet) {
-            // Unpack registers
-            if (rspUpgrade(packet) == false) {
+    switch (action) {
+    case RemoteUpgrade::INIT:
+        if (m_remoteUpgrade.status == RemoteUpgrade::NOT_SUPPORTED) {
+            std::function<bool(const DasPacket *)> handler = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
+            registerResponseHandler(handler);
+
+            m_remoteUpgrade.status = RemoteUpgrade::NOT_READY;
+            setIntegerParam(UpgradePosition, 0);
+            setIntegerParam(UpgradeSize, 0);
+        } else {
+            LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
+            ret = false;
+        }
+        break;
+    case RemoteUpgrade::LOAD_FILE:
+        if (m_remoteUpgrade.status == RemoteUpgrade::NOT_READY ||
+            m_remoteUpgrade.status == RemoteUpgrade::LOADED ||
+            m_remoteUpgrade.status == RemoteUpgrade::DONE ||
+            m_remoteUpgrade.status == RemoteUpgrade::ABORTED ||
+            m_remoteUpgrade.status == RemoteUpgrade::ERROR) {
+
+            if (getStringParam(UpgradeFile, sizeof(path), path) != asynSuccess) {
+                LOG_ERROR("Upgrade failed - no file specified");
+                ret = false;
+            } else if (m_remoteUpgrade.file.import(path) == true) {
+                m_remoteUpgrade.status = RemoteUpgrade::LOADED;
+            } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                ret = false;
+            }
+            setIntegerParam(UpgradePosition, 0);
+            setIntegerParam(UpgradeSize, m_remoteUpgrade.file.getSize());
+        } else {
+            LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
+            ret = false;
+        }
+        break;
+    case RemoteUpgrade::START:
+        if (m_remoteUpgrade.status == RemoteUpgrade::LOADED ||
+            m_remoteUpgrade.status == RemoteUpgrade::DONE ||
+            m_remoteUpgrade.status == RemoteUpgrade::ABORTED ||
+            m_remoteUpgrade.status == RemoteUpgrade::ERROR) {
+
+            if (m_remoteUpgrade.file.getSize() == 0) {
+                LOG_WARN("Upgrade can't start - file not loaded");
+                ret = false;
                 break;
+            }
+
+            setIntegerParam(UpgradePosition, 0);
+            m_remoteUpgrade.offset = 0;
+            m_remoteUpgrade.lastCount = 0;
+
+            getIntegerParam(UpgradeChunkSize, &chunkSize);
+            chunkSize = (chunkSize < 0) ? 256 : ALIGN_UP(chunkSize, 4);
+            if ((uint32_t)chunkSize > m_remoteUpgrade.bufferSize) {
+                m_remoteUpgrade.buffer.reset( (char *)malloc(chunkSize) );
+                if (!m_remoteUpgrade.buffer) {
+                    LOG_ERROR("Upgrade can't start - failed to allocate buffer");
+                    m_remoteUpgrade.bufferSize = 0;
+                    m_remoteUpgrade.status = RemoteUpgrade::LOADED;
+                    ret = false;
+                    break;
+                }
+                m_remoteUpgrade.bufferSize = chunkSize;
+            }
+
+            m_remoteUpgrade.status = RemoteUpgrade::IN_PROGRESS;
+
+            reqUpgrade();
+            epicsTimeGetCurrent(&m_remoteUpgrade.lastReadyTime);
+            LOG_INFO("Upgrade started");
+        } else {
+            LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
+            ret = false;
+        }
+        break;
+    case RemoteUpgrade::PROCESS_RESPONSE:
+        if (m_remoteUpgrade.status == RemoteUpgrade::IN_PROGRESS ||
+            m_remoteUpgrade.status == RemoteUpgrade::WAITING) {
+
+            if (packet == 0) {
+                LOG_ERROR("Upgrade assert - packet==0");
+                ret = false;
+                break;
+            } else if (packet->getResponseType() != DasPacket::CMD_UPGRADE) {
+                // Silently skip other packets, too much chatter otherwise
+                ret = false;
+                break;
+            } else if (rspUpgrade(packet) == false) {
+                m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                ret = false;
+                break;
+            }
+
+            // Will set up new timer if necessary
+            if (m_remoteUpgrade.timer) {
+                m_remoteUpgrade.timer->cancel();
+                m_remoteUpgrade.timer.reset();
             }
 
             // Do all flags check out?
             int status = remoteUpgradeCheck();
             if (status == RemoteUpgrade::DONE) {
+
+                // Switch from potential waiting state
+                m_remoteUpgrade.status = RemoteUpgrade::IN_PROGRESS;
+
+                epicsTimeGetCurrent(&m_remoteUpgrade.lastReadyTime);
+
                 m_remoteUpgrade.offset += m_remoteUpgrade.lastCount;
-                m_remoteUpgrade.busyRetries = 0;
+
+                getIntegerParam(UpgradeChunkSize, &chunkSize);
+                chunkSize = ALIGN_UP(chunkSize, 4);
+                m_remoteUpgrade.lastCount = m_remoteUpgrade.file.read(m_remoteUpgrade.offset,
+                                                                      m_remoteUpgrade.buffer.get(),
+                                                                      chunkSize);
+                if (m_remoteUpgrade.lastCount == 0) {
+                    m_remoteUpgrade.status = RemoteUpgrade::DONE;
+                    break;
+                }
+
+                // MCS is in big endian, convert to little endian
+                uint32_t *data = (uint32_t *)m_remoteUpgrade.buffer.get();
+                for (uint32_t i=0; i<m_remoteUpgrade.lastCount/4; i++) {
+                    data[i] = BYTE_SWAP(data[i]);
+                }
+
+                LOG_DEBUG("Upgrade progress, sending firmware chunk size %u at offset %u", m_remoteUpgrade.lastCount, m_remoteUpgrade.offset);
+                reqUpgrade(m_remoteUpgrade.buffer.get(), m_remoteUpgrade.lastCount);
+
+                // A packet was sent out, setup a timeout timer
+                double timeout;
+                getDoubleParam(NoRspTimeout, &timeout);
+                std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
+                m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
+
             } else if (status == RemoteUpgrade::IN_PROGRESS) {
-                // TODO: need to stop at some point
-                m_remoteUpgrade.busyRetries++;
-                // Send an empty packet to retrieve the status again
-                // TODO: delay?
-                sendToDispatcher(DasPacket::CMD_UPGRADE);
-                break;
+                // Prevent waiting for 'ready' flag too long
+                epicsTimeStamp now;
+                epicsTimeGetCurrent(&now);
+                if (epicsTimeDiffInSeconds(&now, &m_remoteUpgrade.lastReadyTime) > 1.0) {
+                    m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                    LOG_ERROR("Upgrade error - giving up waiting on module 'ready' flag");
+                    // Response handled, return true
+                    break;
+                }
+
+                m_remoteUpgrade.status = RemoteUpgrade::WAITING;
+
+                // Send a silent request to retrieve the status again
+                LOG_DEBUG("Upgrade busy, sending upgrade status refresh request");
+                reqUpgrade();
+
+                // A packet was sent out, setup a timeout timer
+                double timeout;
+                getDoubleParam(NoRspTimeout, &timeout);
+                std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
+                m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
+
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
                 LOG_ERROR("Upgrade error - response check failed");
-                break;
+                ret = false;
             }
-        }
-
-        m_remoteUpgrade.lastCount = m_remoteUpgrade.file.read(m_remoteUpgrade.offset,
-                                                              m_remoteUpgrade.buffer.get(),
-                                                              m_remoteUpgrade.bufferSize);
-        if (m_remoteUpgrade.lastCount > 0) {
-            sendToDispatcher(DasPacket::CMD_UPGRADE, 0, (uint32_t*)m_remoteUpgrade.buffer.get(), m_remoteUpgrade.lastCount);
-            double timeout;
-            getDoubleParam(NoRspTimeout, &timeout);
-            std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
-            m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
         } else {
-            m_remoteUpgrade.status = RemoteUpgrade::DONE;
+            LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
+            ret = false;
         }
-    } while (0);
+        break;
+    case RemoteUpgrade::ABORT:
+        if (m_remoteUpgrade.status == RemoteUpgrade::IN_PROGRESS ||
+            m_remoteUpgrade.status == RemoteUpgrade::WAITING) {
 
-    setIntegerParam(UpgradeStatus, m_remoteUpgrade.status);
+            if (m_remoteUpgrade.timer) {
+                m_remoteUpgrade.timer->cancel();
+                m_remoteUpgrade.timer.reset();
+            }
+            m_remoteUpgrade.status = RemoteUpgrade::ABORTED;
+
+        } else {
+            LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
+            ret = false;
+        }
+        break;
+    case RemoteUpgrade::TIMEOUT:
+        if (m_remoteUpgrade.status == RemoteUpgrade::IN_PROGRESS ||
+            m_remoteUpgrade.status == RemoteUpgrade::WAITING) {
+
+            if (m_remoteUpgrade.timer) {
+                m_remoteUpgrade.timer->cancel();
+                m_remoteUpgrade.timer.reset();
+            }
+
+            m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+            LOG_ERROR("Upgrade failed - didn't receive response in time");
+
+        } else {
+            LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
+            ret = false;
+        }
+        break;
+    }
     setIntegerParam(UpgradePosition, m_remoteUpgrade.offset);
+    setIntegerParam(UpgradeStatus, m_remoteUpgrade.status);
     callParamCallbacks();
-
-    return true;
+    return ret;
 }
+
 FemPlugin::RemoteUpgrade::Status FemPlugin::remoteUpgradeCheck()
 {
     int param;
 
+    // This is all very FEM 3.9 specific
     getIntegerParam("Upg:OutError",            &param); if (param == 1) return RemoteUpgrade::ERROR;
     getIntegerParam("Upg:OutError",            &param); if (param == 1) return RemoteUpgrade::ERROR;
     getIntegerParam("Upg:OutErrorIdCode",      &param); if (param == 1) return RemoteUpgrade::ERROR;
@@ -288,29 +376,15 @@ FemPlugin::RemoteUpgrade::Status FemPlugin::remoteUpgradeCheck()
     getIntegerParam("Upg:OutErrorVPP",         &param); if (param == 1) return RemoteUpgrade::ERROR;
     getIntegerParam("Upg:OutErrorCmdSeq",      &param); if (param == 1) return RemoteUpgrade::ERROR;
     getIntegerParam("Upg:OutErrorTimeOut",     &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:Busy",                &param); if (param == 1) return RemoteUpgrade::IN_PROGRESS;
+    getIntegerParam("Upg:FifoFull",            &param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:Ready",               &param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
+    getIntegerParam("Upg:FifoProgFull",        &param); if (param == 1) return RemoteUpgrade::IN_PROGRESS;
 
     return RemoteUpgrade::DONE;
 }
 
-void FemPlugin::remoteUpgradeAbort(bool userAbort)
-{
-    if (m_remoteUpgrade.status == RemoteUpgrade::IN_PROGRESS) {
-        if (userAbort)
-            m_remoteUpgrade.status = RemoteUpgrade::ABORTED;
-        else
-            m_remoteUpgrade.status = RemoteUpgrade::ERROR;
-
-        setIntegerParam(UpgradeStatus, m_remoteUpgrade.status);
-        callParamCallbacks();
-    }
-}
-
 float FemPlugin::remoteUpgradeTimeout()
 {
-    m_remoteUpgrade.status = RemoteUpgrade::ERROR;
-    setIntegerParam(UpgradeStatus, m_remoteUpgrade.status);
-    callParamCallbacks();
-    LOG_ERROR("Remote upgrade failed - didn't receive response in time");
+    remoteUpgradeSM(RemoteUpgrade::TIMEOUT);
     return 0.0;
 }

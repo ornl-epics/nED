@@ -81,44 +81,8 @@ void BaseModulePlugin::setNumChannels(uint32_t n)
 asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == CmdReq) {
-        double timeout;
-        getDoubleParam(NoRspTimeout, &timeout);
-
-        if (m_waitingResponse != 0) {
-            LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
+        if (!processRequest(static_cast<DasPacket::CommandType>(value)))
             return asynError;
-        }
-
-        m_expectedChannel = 0;
-        m_cfgSectionCnt = 0; // used to correctly report CmdRsp when 0 channel succeeds but other channels don't have registers in particular section
-
-        setIntegerParam(CfgChannel, m_expectedChannel);
-        setIntegerParam(CmdRsp, LAST_CMD_WAIT);
-        callParamCallbacks();
-
-        do {
-            m_waitingResponse = handleRequest(static_cast<DasPacket::CommandType>(value), timeout);
-
-            if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
-                if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
-                   LOG_WARN("Failed to schedule CmdRsp timeout callback");
-                setIntegerParam(CmdRsp, LAST_CMD_WAIT);
-
-                // Increase this for all packets, although only used in rspWriteConfig()
-                m_cfgSectionCnt++;
-            } else {
-                // No such section for non-channel command, are the more channels to try?
-                m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
-                if (m_expectedChannel > 0) {
-                    continue;
-                }
-                setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
-            }
-            break; // Needs `break; } while(1)' because of continue
-        } while (1);
-
-        callParamCallbacks();
-
         return asynSuccess;
     }
     if (pasynUser->reason == CfgSection) {
@@ -151,6 +115,49 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
     // Just issue default handler to see if it can handle it
     return BasePlugin::writeInt32(pasynUser, value);
+}
+
+bool BaseModulePlugin::processRequest(DasPacket::CommandType command)
+{
+    double timeout;
+    getDoubleParam(NoRspTimeout, &timeout);
+
+    if (m_waitingResponse != 0) {
+        LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", command, m_waitingResponse);
+        return false;
+    }
+
+    m_expectedChannel = 0;
+    m_cfgSectionCnt = 0; // used to correctly report CmdRsp when 0 channel succeeds but other channels don't have registers in particular section
+
+    setIntegerParam(CfgChannel, m_expectedChannel);
+    setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+    callParamCallbacks();
+
+    do {
+        m_waitingResponse = handleRequest(command, timeout);
+
+        if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
+            if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
+               LOG_WARN("Failed to schedule CmdRsp timeout callback");
+            setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+
+            // Increase this for all packets, although only used in rspWriteConfig()
+            m_cfgSectionCnt++;
+        } else {
+            // No such section for non-channel command, are the more channels to try?
+            m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
+            if (m_expectedChannel > 0) {
+                continue;
+            }
+            setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
+        }
+        break; // Needs `break; } while(1)' because of continue
+    } while (1);
+
+    callParamCallbacks();
+
+    return true;
 }
 
 DasPacket::CommandType BaseModulePlugin::handleRequest(DasPacket::CommandType command, double &timeout)
@@ -713,11 +720,14 @@ bool BaseModulePlugin::rspStop(const DasPacket *packet)
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
-DasPacket::CommandType BaseModulePlugin::reqUpgrade()
+DasPacket::CommandType BaseModulePlugin::reqUpgrade(const char *data, uint32_t size)
 {
-    // Send empty packet, in that case FEM returns an upgrade status only
-    sendToDispatcher(DasPacket::CMD_UPGRADE);
-    return DasPacket::CMD_STOP;
+    if (data == 0 || size == 0) {
+        data = 0;
+        size = 0;
+    }
+    sendToDispatcher(DasPacket::CMD_UPGRADE, 0, (uint32_t*)data, size);
+    return DasPacket::CMD_UPGRADE;
 }
 
 bool BaseModulePlugin::rspUpgrade(const DasPacket *packet)
@@ -725,7 +735,7 @@ bool BaseModulePlugin::rspUpgrade(const DasPacket *packet)
     uint32_t wordsize = (m_behindDsp ? 2 : 4);
     uint32_t length = ALIGN_UP(m_params["UPGRADE"].sizes[0]*wordsize, 4);
     if (packet->getPayloadLength() != ALIGN_UP(length, 4)) {
-        LOG_ERROR("Received wrong READ_TEMP response based on length; "
+        LOG_ERROR("Received wrong READ_UPGRADE response based on length; "
                   "received %u, expected %u",
                   packet->getPayloadLength(), length);
         return false;

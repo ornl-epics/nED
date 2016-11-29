@@ -38,7 +38,7 @@ uint32_t McsFile::read(uint32_t offset, char *data, uint32_t nCount) {
         nActual = std::min(m_length - offset, nCount);
         memcpy(data, &m_buffer[offset], nActual);
     }
-    return true;
+    return nActual;
 }
 
 uint32_t McsFile::getSize() {

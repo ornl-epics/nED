@@ -31,22 +31,34 @@ class FemPlugin : public BaseModulePlugin {
             enum Status {
                 NOT_SUPPORTED       = 0, //!< Remote update not supported by this modules
                 NOT_READY           = 1, //!< Supported but failed to initialize internal structures
-                READY               = 2, //!< Supported and ready
                 LOADED              = 3, //!< Firmware file loaded and ready to start
                 IN_PROGRESS         = 4, //!< Some packets already sent, some left to be sent
-                DONE                = 5, //!< Upgrade successful
-                ERROR               = 6, //!< Upgrade failed
-                ABORTED             = 7, //!< User aborted update
+                WAITING             = 5, //!< Waiting for module to become ready
+                DONE                = 6, //!< Upgrade successful
+                ERROR               = 7, //!< Upgrade failed
+                ABORTED             = 8, //!< User aborted update
             } status;
+
+            /**
+             * Valid state machine actions/state transitions.
+             */
+            typedef enum {
+                INIT,
+                LOAD_FILE,
+                START,
+                PROCESS_RESPONSE,
+                ABORT,
+                TIMEOUT,
+            } Action;
 
             McsFile file;           //!< Firmware image file path, stays opened while in progress
             std::shared_ptr<char> buffer;
             uint32_t bufferSize;
             uint32_t pktPayloadSize;//!< Size of allocated space in packet payload
             uint32_t offset;        //!< Current data position, used as progress
-            uint8_t busyRetries;    //!< Number of busy retries
             uint32_t lastCount;     //!< Number of bytes sent in previous chunk
             std::shared_ptr<Timer> timer; //!< Currently running timer for response timeout handling
+            epicsTimeStamp lastReadyTime; //!< Timestamp of last 'ready' response
         } m_remoteUpgrade;          //!< Remote upgrade context
 
     public: // functions
@@ -146,46 +158,16 @@ class FemPlugin : public BaseModulePlugin {
         void createParams_v320();
 
         /**
-         * Initialize remote upgrade sequence.
+         * Response handler to be registers into BaseModulePlugin
          *
-         * Pre-allocates DasPacket used to send each chunk of upgrade data. It
-         * then sets the remote upgrade status to ready. Finally it registers
-         * remote upgrade handler as internal state machine to be invoked
-         * whenever a CMD_UPGRADE response is received.
-         */
-        void remoteUpgradeInit();
-
-        /**
-         * Load firmware file
-         *
-         * Opens the file and determines its length. UpgradeSize and UpgradeLen
-         * PVs are updated. Next buffer for each packet is allocated based on
-         * user provided value, rounded to nearest power of 2. Finally the
-         * upgrade in progress flag is set, which prevents starting second
-         * upgrade sequence.
-         */
-        void remoteUpgradeLoad(const std::string &path);
-
-        /**
-         * Abort remote upgrade currently in progress.
-         *
-         * @param[in] userAbort Determines the remote upgrade status, ABORTED vs. ERROR
-         */
-        void remoteUpgradeAbort(bool userAbort);
-
-        /**
-         * Handle remote upgrade response packet.
-         *
-         * This function is almost the complete state machine for upgrade process.
-         * Each time it's called it checks the status returned by module to
-         * determine whether to proceed with more data, wait for busy flag or
-         * abort due to error. It sends one chunk of data at a time and quits,
-         * expecting the response to invoke this function again when received.
-         *
-         * @param[in] packet response from module
          * @return true when packet has been handled
          */
         bool remoteUpgradeRsp(const DasPacket *packet);
+
+        /**
+         * Remote upgrade state machine function.
+         */
+        bool remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *packet=0);
 
         /**
          * Module specific function to check for remote upgrade status response.
