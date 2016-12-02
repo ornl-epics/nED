@@ -26,7 +26,8 @@ struct FlatFieldTable {
 
         uint32_t sizeX;
         uint32_t sizeY;
-        uint32_t position;
+        uint32_t position_id;
+        uint32_t pixel_offset;
         Type_t type;
 
         std::vector< std::vector<double> > data;
@@ -104,13 +105,14 @@ struct FlatFieldTable {
          * @param[out] size_x X dimension size
          * @param[out] size_y Y dimension size
          * @param[out] position_id Camera position id
+         * @param[out] pixel_offset Pixel id offset
          * @param[out] type Type of imported table
          * @param[in] path File path name used for error reporting
          * @retval MAP_ERR_BAD_FORMAT Unrecognized file format
          * @retval MAP_ERR_PARSE File seems to be expected format but parse error.
          * @retval MAP_ERR_NONE Header parsed.
          */
-        bool parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id, Type_t &type, const std::string &path);
+        bool parseHeaders(std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id_, uint32_t &pixel_offset_, Type_t &type, const std::string &path);
 };
 
 #endif // FLAT_FIELD_TABLE_H

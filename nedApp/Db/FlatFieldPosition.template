@@ -26,20 +26,21 @@ record(bi, "$(P)pos$(POS):EnableRBVraw")
     field(PINI, "YES")
     field(ZNAM, "no")
     field(ONAM, "yes")
+    field(FLNK, "$(P)pos$(POS):EnableCheck")
 }
 record(calc, "$(P)pos$(POS):EnableAlarm")
 {
     field(INPA, "$(P)pos$(POS):Enable NPP")
-    field(INPB, "$(P)pos$(POS):EnableRBVraw PP")
+    field(INPB, "$(P)pos$(POS):EnableRBVraw NPP")
     field(CALC, "A#B")
     field(PINI, "YES")
     field(HIGH, "1")
     field(HSV,  "MAJOR")
 }
-record(calc, "$(P)pos$(POS):EnableCheck")
+record(calcout, "$(P)pos$(POS):EnableCheck")
 {
     field(INPA, "$(P)pos$(POS):EnableAlarm PP MS")
-    field(INPB, "$(P)pos$(POS):EnableRBVraw PP")
+    field(INPB, "$(P)pos$(POS):EnableRBVraw NPP")
     field(CALC, "B")
     field(FLNK, "$(P)pos$(POS):EnableRBV")
 }

@@ -55,8 +55,11 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("PsEn",         asynParamInt32, &PsEn, 0);              // Switch to toggle photosum elimination
     createParam("CorrEn",       asynParamInt32, &CorrEn, 0);            // Switch to toggle applying flat field correction
     createParam("ConvEn",       asynParamInt32, &ConvEn, 0);            // Switch to toggle converting data to pixel id format
-    createParam("CntVetoEvents",asynParamInt32, &CntVetoEvents, 0);     // Number of vetoed events
     createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);     // Number of calculated events
+    createParam("CntPosVetos",  asynParamInt32, &CntPosVetos, 0);       // Number of bad position vetos
+    createParam("CntRangeVetos",asynParamInt32, &CntRangeVetos, 0);     // Number of bad X,Y range vetos
+    createParam("CntPosCfgVetos",asynParamInt32, &CntPosCfgVetos, 0);   // Number of position configuration vetos
+    createParam("CntPsVetos",   asynParamInt32, &CntPsVetos, 0);        // Number of photosum discriminated events
     createParam("CntSplit",     asynParamInt32, &CntSplit,  0);         // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);             // Reset counters
     // Next two params are in UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
@@ -70,15 +73,10 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("TablesSizeY",  asynParamInt32, &TablesSizeY, (int)m_tableSizeY); // READ - All tables Y size
 
     int nParams = ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1));
-    PosEnable.resize(m_tables.size());
-    PosId.resize(m_tables.size());
-    PosCorrX.resize(m_tables.size());
-    PosCorrY.resize(m_tables.size());
-    PosPsUpX.resize(m_tables.size());
-    PosPsLowX.resize(m_tables.size());
-    for (size_t i=0; i<m_tables.size(); i++) {
-        PosEnable[i] = -1;
-        if (m_tables[i].nTables > 0) {
+
+    for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
+        PosEnable[it->second.position_id] = -1;
+        if (it->second.nTables > 0) {
             int param;
             char name[16];
 
@@ -87,29 +85,29 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
                 break;
             }
 
-            snprintf(name, sizeof(name), "Pos%zu:Enable", i);
+            snprintf(name, sizeof(name), "Pos%u:Enable", it->second.position_id);
             createParam(name, asynParamInt32, &param, 0);
-            PosEnable[i] = param;
+            PosEnable[it->second.position_id] = param;
 
-            snprintf(name, sizeof(name), "Pos%zu:Id", i);
+            snprintf(name, sizeof(name), "Pos%u:Id", it->second.position_id);
             createParam(name, asynParamInt32, &param, 0);
-            PosId[i] = param;
+            PosId[it->second.position_id] = param;
 
-            snprintf(name, sizeof(name), "Pos%zu:CorrX", i);
+            snprintf(name, sizeof(name), "Pos%u:CorrX", it->second.position_id);
             createParam(name, asynParamInt32, &param, 0);
-            PosCorrX[i] = param;
+            PosCorrX[it->second.position_id] = param;
 
-            snprintf(name, sizeof(name), "Pos%zu:CorrY", i);
+            snprintf(name, sizeof(name), "Pos%u:CorrY", it->second.position_id);
             createParam(name, asynParamInt32, &param, 0);
-            PosCorrY[i] = param;
+            PosCorrY[it->second.position_id] = param;
 
-            snprintf(name, sizeof(name), "Pos%zu:PsUpX", i);
+            snprintf(name, sizeof(name), "Pos%u:PsUpX", it->second.position_id);
             createParam(name, asynParamInt32, &param, 0);
-            PosPsUpX[i] = param;
+            PosPsUpX[it->second.position_id] = param;
 
-            snprintf(name, sizeof(name), "Pos%zu:PsLowX", i);
+            snprintf(name, sizeof(name), "Pos%u:PsLowX", it->second.position_id);
             createParam(name, asynParamInt32, &param, 0);
-            PosPsLowX[i] = param;
+            PosPsLowX[it->second.position_id] = param;
         }
     }
 
@@ -124,24 +122,24 @@ FlatFieldPlugin::~FlatFieldPlugin()
 
 asynStatus FlatFieldPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
 {
-    for (size_t i=0; i<m_tables.size(); i++) {
-        if (pasynUser->reason == PosEnable[i]) {
-            *value = m_tables[i].enabled;
+    for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
+        if (pasynUser->reason == PosEnable[it->second.position_id]) {
+            *value = it->second.enabled;
             return asynSuccess;
-        } else if (pasynUser->reason == PosId[i]) {
-            *value = (int)i;
+        } else if (pasynUser->reason == PosId[it->second.position_id]) {
+            *value = (int)it->second.position_id;
             return asynSuccess;
-        } else if (pasynUser->reason == PosCorrX[i]) {
-            *value = (m_tables[i].corrX != 0);
+        } else if (pasynUser->reason == PosCorrX[it->second.position_id]) {
+            *value = (it->second.corrX != 0);
             return asynSuccess;
-        } else if (pasynUser->reason == PosCorrY[i]) {
-            *value = (m_tables[i].corrY != 0);
+        } else if (pasynUser->reason == PosCorrY[it->second.position_id]) {
+            *value = (it->second.corrY != 0);
             return asynSuccess;
-        } else if (pasynUser->reason == PosPsUpX[i]) {
-            *value = (m_tables[i].psLowX != 0);
+        } else if (pasynUser->reason == PosPsUpX[it->second.position_id]) {
+            *value = (it->second.psLowX != 0);
             return asynSuccess;
-        } else if (pasynUser->reason == PosPsLowX[i]) {
-            *value = (m_tables[i].psUpX != 0);
+        } else if (pasynUser->reason == PosPsLowX[it->second.position_id]) {
+            *value = (it->second.psUpX != 0);
             return asynSuccess;
         }
     }
@@ -155,9 +153,13 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             setIntegerParam(RxCount, 0);
             setIntegerParam(ProcCount, 0);
             setIntegerParam(CntGoodEvents, 0);
-            setIntegerParam(CntVetoEvents, 0);
+            setIntegerParam(CntPosVetos, 0);
+            setIntegerParam(CntRangeVetos, 0);
+            setIntegerParam(CntPosCfgVetos, 0);
+            setIntegerParam(CntPsVetos, 0);
             setIntegerParam(CntSplit, 0);
             callParamCallbacks();
+            m_evCounters.reset();
         }
         return asynSuccess;
     } else if (pasynUser->reason == XyFractWidth) {
@@ -166,54 +168,51 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == PsFractWidth) {
         if (value < 1 || value > 30)
             return asynError;
-    } else if (pasynUser->reason == XMaxOut || pasynUser->reason == YMaxOut) {
+    } else if (pasynUser->reason ==  || pasynUser->reason == YMaxOut) {
         if (value < 1 || value >= 1024)
             return asynError;
     } else if (pasynUser->reason == CorrEn) {
+        // Check that we have both flat-field correction tables for all positions
         if (value != 0) {
-            for (size_t i=0; i<m_tables.size(); i++) {
-                if (m_tables[i].nTables == 0 || m_tables[i].enabled == false) continue;
-                if (m_tables[i].corrX == 0 || m_tables[i].corrY == 0) {
-                    LOG_ERROR("Disabling position %zu due to lack of flat field correction tables", i);
-                    setIntegerParam(PosEnable[i], 0);
+            for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
+                if (it->second.nTables == 0 || it->second.enabled == false) continue;
+                if (it->second.corrX == 0 || it->second.corrY == 0) {
+                    LOG_ERROR("Disabling position %u due to lack of flat field correction tables", it->second.position_id);
+                    setIntegerParam(PosEnable[it->second.position_id], 0);
                 }
             }
             callParamCallbacks();
         }
     } else if (pasynUser->reason == PsEn) {
         if (value != 0) {
-            for (size_t i=0; i<m_tables.size(); i++) {
-                if (m_tables[i].nTables == 0 || m_tables[i].enabled == false) continue;
-                if (m_tables[i].psLowX == 0 || m_tables[i].psUpX == 0) {
-                    LOG_ERROR("Disabling position %zu due to lack of photo sum tables", i);
-                    setIntegerParam(PosEnable[i], 0);
+            for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
+                if (it->second.nTables == 0 || it->second.enabled == false) continue;
+                if (it->second.psLowX == 0 || it->second.psUpX == 0) {
+                    LOG_ERROR("Disabling position %u due to lack of photo sum tables", it->second.position_id);
+                    setIntegerParam(PosEnable[it->second.position_id], 0);
                 }
             }
             callParamCallbacks();
         }
     } else {
-        for (size_t i=0; i<PosEnable.size(); i++) {
-            if (pasynUser->reason == PosEnable[i]) {
+        for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
+            if (pasynUser->reason == PosEnable[it->second.position_id]) {
                 asynStatus ret = asynSuccess;
                 int psEn, corrEn;
                 getIntegerParam(PsEn, &psEn);
                 getIntegerParam(CorrEn, &corrEn);
-                if (i >= m_tables.size()) {
-                    LOG_ERROR("Failed to %s position, invalid position %zu", (value == 0 ? "disable" : "enable"), i);
+                if (value == 1 && psEn == 1 && (it->second.psLowX == 0 || it->second.psUpX == 0)) {
+                    LOG_ERROR("Failed to enable position %u, missing photo sum tables", it->second.position_id);
                     value = 0;
                     ret = asynError;
-                } else if (value == 1 && psEn == 1 && (m_tables[i].psLowX == 0 || m_tables[i].psUpX == 0)) {
-                    LOG_ERROR("Failed to enable position %zu, missing photo sum tables", i);
-                    value = 0;
-                    ret = asynError;
-                } else if (value == 1 && corrEn == 1 && (m_tables[i].corrX == 0 || m_tables[i].corrY == 0)) {
-                    LOG_ERROR("Failed to enable position %zu, missing correction tables", i);
+                } else if (value == 1 && corrEn == 1 && (it->second.corrX == 0 || it->second.corrY == 0)) {
+                    LOG_ERROR("Failed to enable position %u, missing correction tables", it->second.position_id);
                     value = 0;
                     ret = asynError;
                 } else {
-                    m_tables[i].enabled = (value != 0);
+                    it->second.enabled = (value != 0);
                 }
-                setIntegerParam(PosEnable[i], value);
+                setIntegerParam(PosEnable[it->second.position_id], value);
                 callParamCallbacks();
                 return ret;
             }
@@ -244,9 +243,6 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
 {
     int nReceived = 0;
     int nProcessed = 0;
-    TransformErrors errors;
-    int nVeto = 0;
-    int nGood = 0;
     int nSplits = 0;
     DasPacketList newPacketList;
     bool psEn = false;
@@ -268,15 +264,13 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     this->lock();
     getIntegerParam(RxCount,        &nReceived);
     getIntegerParam(ProcCount,      &nProcessed);
-    getIntegerParam(CntVetoEvents,  &nVeto);
-    getIntegerParam(CntGoodEvents,  &nGood);
     getIntegerParam(CntSplit,       &nSplits);
     getIntegerParam(XyFractWidth,   &xyFractWidth);
     getIntegerParam(PsFractWidth,   &psFractWidth);
     getDoubleParam(XMaxIn,          &xMaxIn);
     getDoubleParam(YMaxIn,          &yMaxIn);
-    getIntegerParam(XMaxOut,        &xMaxOut); // Guaranteed to be in 10-bit range
-    getIntegerParam(YMaxOut,        &yMaxOut); // Guaranteed to be in 10-bit range
+    getIntegerParam(XMaxOut,        &xMaxOut);
+    getIntegerParam(YMaxOut,        &yMaxOut);
     getBooleanParam(PsEn,           &psEn);
     getBooleanParam(ConvEn,         &convEn);
     getBooleanParam(CorrEn,         &corrEn);
@@ -331,7 +325,9 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
                 bufferOffset += packet->getLength();
 
                 // Process the packet
-                processPacket(packet, newPacket, corrEn, psEn, convEn, nGood, nVeto);
+                EventCounters counters;
+                processPacket(packet, newPacket, corrEn, psEn, convEn, counters);
+                m_evCounters += counters;
             }
 
             sendToPlugins(&newPacketList);
@@ -346,14 +342,18 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     setIntegerParam(RxCount,    nReceived   % std::numeric_limits<int32_t>::max());
     setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntVetoEvents, nVeto);
-    setIntegerParam(CntGoodEvents, nGood);
+    setIntegerParam(CntGoodEvents,  m_evCounters.nGood);
+    setIntegerParam(CntPosVetos,    m_evCounters.nPosition);
+    setIntegerParam(CntRangeVetos,  m_evCounters.nRange);
+    setIntegerParam(CntPosCfgVetos, m_evCounters.nPosCfg);
+    setIntegerParam(CntPsVetos,     m_evCounters.nPhotosum);
     callParamCallbacks();
     this->unlock();
 }
 
-void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool correct, bool photosum, bool convert, int &nGood, int &nVeto)
+void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool correct, bool photosum, bool convert, EventCounters &counters)
 {
+    uint32_t nVetoes[5] = {}; // Array of vetoes - needs to match number of VetoType entries
 
     // This structure represents an event from 2D detectors. It
     // matches AcpcDataPacket::NormalEvent and BnlDataPacket::NormalEvent.
@@ -383,29 +383,40 @@ void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destP
         double photosum_x = srcEvent->photosum_x * m_psScale;
         uint32_t position = srcEvent->position;
 
-        // MANDI workaround while running behind dcomserver
-        position = (srcEvent->position >> 16) & 0xFF;
-
         // Check photo sum first
-        if (photosum == true && checkPhotoSumLimits(x, y, photosum_x, position) == false) {
-            nVeto++;
-            srcEvent++;
-            continue;
+        if (photosum == true) {
+            VetoType veto = checkPhotoSumLimits(x, y, photosum_x, position);
+            if (veto != VETO_NO) {
+                nVetoes[veto]++;
+                srcEvent++;
+                continue;
+            }
         }
 
         // Apply flat field correction
-        if (correct == true && correctPosition(x, y, position) == false) {
-            nVeto++;
-            srcEvent++;
-            continue;
+        if (correct == true) {
+            VetoType veto = correctPosition(x, y, position);
+            if (veto != VETO_NO) {
+                nVetoes[veto]++;
+                srcEvent++;
+                continue;
+            }
         }
 
         // Not a veto, check what output format should we do
         if (convert == true) {
+            // Detect an overlap between configured position index and local pixel id
+            uint32_t pixelMask = m_xMaskOut | m_yMaskOut;
+            if (position & pixelMask) {
+                nVetoes[VETO_POSITION_CFG]++;
+                srcEvent++;
+                continue;
+            }
+
             DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(newPayload);
 
             destEvent->tof = srcEvent->tof & 0xFFFFFFF;
-            destEvent->pixelid = (position & 0xFF) << 20; // incompatible with dcomserver, he shifts for 16 or 18 bits depending on HighRes
+            destEvent->pixelid = position;
             destEvent->pixelid |= ((uint32_t)round(x * m_xScaleOut) & m_xMaskOut);
             destEvent->pixelid |= ((uint32_t)round(y * m_yScaleOut) & m_yMaskOut);
 
@@ -425,27 +436,35 @@ void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destP
             destPacket->payload_length += sizeof(Event);
         }
 
-        nGood++;
+        nVetoes[VETO_NO]++;
         srcEvent++;
+    }
+
+    counters.nGood     = nVetoes[VETO_NO];
+    counters.nPosition = nVetoes[VETO_POSITION];
+    counters.nRange    = nVetoes[VETO_RANGE];
+    counters.nPosCfg   = nVetoes[VETO_POSITION_CFG];
+    counters.nPhotosum = nVetoes[VETO_PHOTOSUM];
+
+    counters.nTotal = counters.nGood;
+    for (size_t i=0; i<sizeof(nVetoes)/sizeof(uint32_t); i++) {
+        counters.nTotal += nVetoes[i];
     }
 }
 
-bool FlatFieldPlugin::correctPosition(double &x, double &y, uint32_t position)
+FlatFieldPlugin::VetoType FlatFieldPlugin::correctPosition(double &x, double &y, uint32_t position)
 {
-    if (position >= m_tables.size())
-        return false;
-
     std::shared_ptr<FlatFieldTable> xtable = m_tables[position].corrX;
     std::shared_ptr<FlatFieldTable> ytable = m_tables[position].corrY;
-    if (m_tables[position].enabled == false || xtable.get() == 0 || ytable.get() == 0)
-        return false;
+    if (!xtable || !ytable || m_tables[position].enabled == false)
+        return VETO_POSITION;
 
     unsigned xp = x;
     unsigned yp = y;
 
     // All tables of the same size, safe to compare against just one
     if (x < 0.0 || xp >= (xtable->sizeX-1) || y < 0.0 || yp >= (xtable->sizeY-1))
-        return false;
+        return VETO_RANGE;
 
     // All checks passed - do the correction
     double dx = (xp == 0 || xp == (xtable->sizeX - 1)) ? 0 : x - xp;
@@ -454,30 +473,30 @@ bool FlatFieldPlugin::correctPosition(double &x, double &y, uint32_t position)
     x -= (dx * xtable->data[xp+1][yp]) + ((1 - dx) * xtable->data[xp][yp]);
     y -= (dy * ytable->data[xp][yp+1]) + ((1 - dy) * ytable->data[xp][yp]);
 
-    return true;
+    return VETO_NO;
 }
 
-bool FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position)
+FlatFieldPlugin::VetoType FlatFieldPlugin::checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position)
 {
-    if (position >= m_tables.size())
-        return false;
-
     std::shared_ptr<FlatFieldTable> upperLimits = m_tables[position].psUpX;
     std::shared_ptr<FlatFieldTable> lowerLimits = m_tables[position].psLowX;
-    if (m_tables[position].enabled == false || upperLimits.get() == 0 || lowerLimits.get() == 0)
-        return false;
+    if (!upperLimits || !lowerLimits || m_tables[position].enabled == false)
+        return VETO_POSITION;
 
     unsigned xp = nearbyint(x);
     unsigned yp = nearbyint(y);
 
     // All tables of the same size, safe to compare against just one
     if (x < 0.0 || xp >= (upperLimits->sizeX-1) || y < 0.0 || yp >= (upperLimits->sizeY-1))
-        return false;
+        return VETO_RANGE;
 
     double upperLimit = upperLimits->data[xp][yp];
     double lowerLimit = lowerLimits->data[xp][yp];
 
-    return (lowerLimit <= photosum_x && photosum_x <= upperLimit);
+    if (lowerLimit <= photosum_x && photosum_x <= upperLimit)
+        return VETO_NO;
+    else
+        return VETO_PHOTOSUM;
 }
 void FlatFieldPlugin::importFiles(const std::string &path)
 {
@@ -523,49 +542,48 @@ void FlatFieldPlugin::importFiles(const std::string &path)
                 continue;
             }
 
-            // Make sure there's enough place in the m_corrTables
-            if (m_tables.size() <= table->position) {
-                m_tables.resize(table->position + 1);
-            }
-
-            // Push table to tables vector
+            // Push table to tables container
             if (table->type == FlatFieldTable::TYPE_X_CORR) {
-                if (m_tables[table->position].corrX.get() == 0) {
-                    m_tables[table->position].corrX = table;
-                    m_tables[table->position].nTables++;
+                if (m_tables[table->pixel_offset].corrX.get() == 0) {
+                    m_tables[table->pixel_offset].corrX = table;
+                    m_tables[table->pixel_offset].position_id = table->position_id;
+                    m_tables[table->pixel_offset].nTables++;
                     foundCorrTables = true;
                 } else {
-                    LOG_ERROR("Correction X table already loaded for position %u", table->position);
+                    LOG_ERROR("Correction X table already loaded for position %u (pixel offset=%u)", table->position_id, table->pixel_offset);
                     importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_Y_CORR) {
-                if (m_tables[table->position].corrY.get() == 0) {
-                    m_tables[table->position].corrY = table;
-                    m_tables[table->position].nTables++;
+                if (m_tables[table->pixel_offset].corrY.get() == 0) {
+                    m_tables[table->pixel_offset].corrY = table;
+                    m_tables[table->pixel_offset].position_id = table->position_id;
+                    m_tables[table->pixel_offset].nTables++;
                     foundCorrTables = true;
                 } else {
-                    LOG_ERROR("Correction Y table already loaded for position %u", table->position);
+                    LOG_ERROR("Correction Y table already loaded for position %u (pixel offset=%u)", table->position_id, table->pixel_offset);
                     importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_X_PS_LOW) {
-                if (m_tables[table->position].psLowX.get() == 0) {
-                    m_tables[table->position].psLowX = table;
-                    m_tables[table->position].nTables++;
+                if (m_tables[table->pixel_offset].psLowX.get() == 0) {
+                    m_tables[table->pixel_offset].psLowX = table;
+                    m_tables[table->pixel_offset].position_id = table->position_id;
+                    m_tables[table->pixel_offset].nTables++;
                     foundPsTables = true;
                 } else {
-                    LOG_ERROR("Photosum low X table already loaded for position %u", table->position);
+                    LOG_ERROR("Photosum low X table already loaded for position %u (pixel offset=%u)", table->position_id, table->pixel_offset);
                     importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_X_PS_UP) {
-                if (m_tables[table->position].psUpX.get() == 0) {
-                    m_tables[table->position].psUpX = table;
-                    m_tables[table->position].nTables++;
+                if (m_tables[table->pixel_offset].psUpX.get() == 0) {
+                    m_tables[table->pixel_offset].psUpX = table;
+                    m_tables[table->pixel_offset].position_id = table->position_id;
+                    m_tables[table->pixel_offset].nTables++;
                     foundPsTables = true;
                 } else {
-                    LOG_ERROR("Photosum upper X table already loaded for position %u", table->position);
+                    LOG_ERROR("Photosum upper X table already loaded for position %u (pixel offset=%u)", table->position_id, table->pixel_offset);
                     importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
                     continue;
                 }
@@ -583,28 +601,28 @@ void FlatFieldPlugin::importFiles(const std::string &path)
     // * X and Y correction tables loaded if using correction (foundCorrTables==true)
     // * Lower and upper X photosum tables loaded if using photosum (foundPsTable==true)
     bool nPositions = 0;
-    for (uint32_t i = 0; i < m_tables.size(); i++) {
+    for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
 
-        if (m_tables[i].corrX.get() == 0 && m_tables[i].corrY.get() == 0 && m_tables[i].psLowX.get() == 0 && m_tables[i].psUpX.get() == 0)
+        if (it->second.corrX.get() == 0 && it->second.corrY.get() == 0 && it->second.psLowX.get() == 0 && it->second.psUpX.get() == 0)
             continue;
 
         nPositions++;
 
         if (foundCorrTables == true) {
-            if (m_tables[i].corrX.get() == 0) {
-                LOG_ERROR("Missing X correction table for position %u", i);
+            if (it->second.corrX.get() == 0) {
+                LOG_ERROR("Missing X correction table for position %u", it->second.position_id);
             }
-            if (m_tables[i].corrY.get() == 0) {
-                LOG_ERROR("Missing Y correction table for position %u", i);
+            if (it->second.corrY.get() == 0) {
+                LOG_ERROR("Missing Y correction table for position %u", it->second.position_id);
             }
         }
 
         if (foundPsTables == true) {
-            if (m_tables[i].psLowX.get() == 0) {
-                LOG_ERROR("Missing lower X photosum correction table for position %u", i);
+            if (it->second.psLowX.get() == 0) {
+                LOG_ERROR("Missing lower X photosum correction table for position %u", it->second.position_id);
             }
-            if (m_tables[i].psUpX.get() == 0) {
-                LOG_ERROR("Missing upper X photosum correction table for position %u", i);
+            if (it->second.psUpX.get() == 0) {
+                LOG_ERROR("Missing upper X photosum correction table for position %u", it->second.position_id);
             }
         }
     }
@@ -613,19 +631,19 @@ void FlatFieldPlugin::importFiles(const std::string &path)
 std::string FlatFieldPlugin::generatePositionsReport(bool psEn, bool corrEn)
 {
     std::ostringstream report;
-    for (size_t i = 0; i < m_tables.size(); i++) {
+    for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
         // Skip sparse vector entries
-        if (m_tables[i].nTables == 0)
+        if (it->second.nTables == 0)
             continue;
 
-        report << "Position " << i << (m_tables[i].enabled == false ? " NOT " : " ") << "enabled:" << std::endl;
+        report << "Position " << it->second.position_id << (it->second.enabled == false ? " NOT " : " ") << "enabled:" << std::endl;
         if (psEn) {
-            report << " * upper X photosum table " << (m_tables[i].psUpX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
-            report << " * lower X photosum table " << (m_tables[i].psLowX.get() != 0 ? "loaded" : "MISSING") << std::endl;
+            report << " * upper X photosum table " << (it->second.psUpX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
+            report << " * lower X photosum table " << (it->second.psLowX.get() != 0 ? "loaded" : "MISSING") << std::endl;
         }
         if (corrEn) {
-            report << " * X correction table " << (m_tables[i].corrX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
-            report << " * Y correction table " << (m_tables[i].corrY.get()  != 0 ? "loaded" : "MISSING") << std::endl;
+            report << " * X correction table " << (it->second.corrX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
+            report << " * Y correction table " << (it->second.corrY.get()  != 0 ? "loaded" : "MISSING") << std::endl;
         }
     }
     return report.str();

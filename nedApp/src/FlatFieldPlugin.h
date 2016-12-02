@@ -14,6 +14,7 @@
 #include "FlatFieldTable.h"
 
 #include <limits>
+#include <map>
 #include <sstream>
 
 /**
@@ -71,46 +72,11 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         struct PositionTables {
             unsigned nTables;                       //!< Number of loaded tables, when zero position is sparse and should be skipped
             bool enabled;                           //!< User has enabled this position - may not have other field
+            uint32_t position_id;                   //!< Position human friendly id
             std::shared_ptr<FlatFieldTable> corrX;  //!< Pointer to X correction table
             std::shared_ptr<FlatFieldTable> corrY;  //!< Pointer to Y correction table
             std::shared_ptr<FlatFieldTable> psLowX; //!< Pointer to lower X photosum table
             std::shared_ptr<FlatFieldTable> psUpX;  //!< Pointer to upper X photosum table
-        };
-
-        /**
-         * Structure used for returning error counters from transform function.
-         * It's easier to parallelize and more effiecient than passing arguments
-         * by reference.
-         */
-        class TransformErrors {
-            public:
-                int32_t nErrors;    //!< Pixel id has error bit already set
-                int32_t nUnmapped;  //!< No correction table was found for given module
-                int32_t nPhotoSum;  //!< Number of photo sum rejected pixels
-
-                TransformErrors()
-                    : nErrors(0)
-                    , nUnmapped(0)
-                    , nPhotoSum(0)
-                {}
-
-                TransformErrors &operator+=(const TransformErrors &rhs)
-                {
-                    // Prevent overflow, stop counting at INT32_MAX instead
-                    if (rhs.nErrors > std::numeric_limits<int32_t>::max() - nErrors)
-                        nErrors = std::numeric_limits<int32_t>::max();
-                    else
-                        nErrors += rhs.nErrors;
-                    if (rhs.nUnmapped > std::numeric_limits<int32_t>::max() - nUnmapped)
-                        nUnmapped = std::numeric_limits<int32_t>::max();
-                    else
-                        nUnmapped += rhs.nUnmapped;
-                    if (rhs.nPhotoSum > std::numeric_limits<int32_t>::max() - nPhotoSum)
-                        nPhotoSum = std::numeric_limits<int32_t>::max();
-                    else
-                        nPhotoSum += rhs.nPhotoSum;
-                    return *this;
-                }
         };
 
         /**
@@ -136,6 +102,56 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
             FF_CONVERT_ONLY     = 2, //!< Convert X,Y event into TOF,pixel id only,
                                      //!< no flat-field correction or photo sum elimination is applied
         } FfMode_t;
+
+        /**
+         * Event veto qualifier.
+         */
+        typedef enum {
+            VETO_NO,                 //!< No veto
+            VETO_POSITION,           //!< Invalid/unconfigured position
+            VETO_RANGE,              //!< X,Y out of range
+            VETO_POSITION_CFG,       //!< Position configuration error - overlaps pixel id
+            VETO_PHOTOSUM,           //!< Photosum range
+        } VetoType;
+
+        /**
+         * Structure used for returning event counters from processPacket() function.
+         * It's easier to parallelize and more effiecient than passing arguments
+         * by reference.
+         */
+        class EventCounters {
+            public:
+                int32_t nTotal;         //!< Total number of events in packet
+                int32_t nGood;          //!< Number of good events in packet
+                int32_t nPosition;      //!< Number of bad position - vetoed
+                int32_t nRange;         //!< Number of bad X,Y range - vetoed
+                int32_t nPosCfg;        //!< Number of position overlap - vetoed
+                int32_t nPhotosum;      //!< Number of photosum discriminated - vetoed
+
+                EventCounters()
+                {
+                    reset();
+                }
+
+                EventCounters &operator+=(const EventCounters &rhs)
+                {
+                    nTotal += rhs.nTotal;
+                    nGood += rhs.nGood;
+                    nPosition += rhs.nPosition;
+                    nRange += rhs.nRange;
+                    nPosCfg += rhs.nPosCfg;
+                    nPhotosum += rhs.nPhotosum;
+                    if (nTotal > std::numeric_limits<int32_t>::max()) {
+                        nTotal = nGood = nPosition = nRange = nPosCfg = nPhotosum = 0;
+                    }
+                    return *this;
+                }
+
+                void reset()
+                {
+                    nTotal = nGood = nPosition = nRange = nPosCfg = nPhotosum = 0;
+                }
+        };
 
     public: // structures and defines
         /**
@@ -214,10 +230,9 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[in] correct Toggle applying flat field correction
          * @param[in] photosum Toggle checking photosum
          * @param[in] convert Convert from native normal to common normal event
-         * @param[out] nCorr number of corrected events
-         * @param[out] nVetoed number of vetoed events
+         * @param[out] counters tell how many events were good or rejected and why
          */
-        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool correct, bool photosum, bool convert, int &nGood, int &nVeto);
+        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool correct, bool photosum, bool convert, EventCounters &counters);
 
         /**
          * Apply flat field correction on X,Y event
@@ -227,9 +242,9 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[in] x value to be corrected, in range [0.0 .. m_tableSizeX)
          * @param[in] y value to be corrected, in range [0.0 .. m_tableSizeY)
          * @param[in] position Detector position id to find corresponding correction tables.
-         * @return true when X,Y position was corrected, false if out of range
+         * @return VetoType
          */
-        bool correctPosition(double &x, double &y, uint32_t position);
+        VetoType correctPosition(double &x, double &y, uint32_t position);
 
         /**
          * Determine whether the X,Y position is within photo sum limits.
@@ -241,9 +256,9 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[in] y Calculate position Y, in range [0.0 .. X table size)
          * @param[in] photosum_x Photo sum X value
          * @param[in] position Detector position id to find corresponding correction tables.
-         * @return true when X,Y position is within photosum checks, false otherwise
+         * @return VetoType
          */
-        bool checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position);
+        VetoType checkPhotoSumLimits(double x, double y, double photosum_x, uint32_t position);
 
         /**
          * Try to import all files in given directory.
@@ -288,7 +303,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         uint32_t m_bufferSize;      //!< Size of buffer
         uint32_t m_tableSizeX;      //!< X dimension size of all tables
         uint32_t m_tableSizeY;      //!< Y dimension size of all tables
-        std::vector<PositionTables> m_tables;    //!< Array of lookup tables, detector position is index
+        std::map<uint32_t, PositionTables> m_tables; //!< Map of lookup tables/number of detectors is usually small so hashing should be somewhat equally fast as vector, index is pixel_offset
         std::string m_importReport; //!< Text to be printed when asynReport() is called
 
         // Following member variables must be carefully set since they're used un-locked
@@ -299,6 +314,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         uint32_t m_xMaskOut;        //!< Mask to be applied to X when converting to pixel id format
         uint32_t m_yMaskOut;        //!< Mask to be applied to Y when converting to pixel id format
         double m_psScale;           //!< Scaling factor to convert unsigned UQm.n 32 bit value into double
+        EventCounters m_evCounters; //!< Global event counters
 
     protected:
         #define FIRST_FLATFIELDPLUGIN_PARAM ImportReport
@@ -309,7 +325,10 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int CorrEn;         //!< Switch to toggle applying flat field correction
         int ConvEn;         //!< Switch to toggle converting data to pixel id format
         int CntGoodEvents;  //!< Number of calculated events
-        int CntVetoEvents;  //!< Number of vetoed events
+        int CntPosVetos;    //!< Number of bad position vetos
+        int CntRangeVetos;  //!< Number of bad X,Y range vetos
+        int CntPosCfgVetos; //!< Number of position config vetos
+        int CntPsVetos;     //!< Number of photosum discriminated events
         int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int PsFractWidth;   //!< Photo sum is in UQm.n format, n is fraction width
@@ -322,12 +341,12 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int TablesSizeY;    //!< All tables size Y
         #define LAST_FLATFIELDPLUGIN_PARAM TablesSizeY
 
-        std::vector<int> PosEnable;
-        std::vector<int> PosId;
-        std::vector<int> PosCorrX;
-        std::vector<int> PosCorrY;
-        std::vector<int> PosPsUpX;
-        std::vector<int> PosPsLowX;
+        std::map<uint32_t, int> PosEnable;
+        std::map<uint32_t, int> PosId;
+        std::map<uint32_t, int> PosCorrX;
+        std::map<uint32_t, int> PosCorrY;
+        std::map<uint32_t, int> PosPsUpX;
+        std::map<uint32_t, int> PosPsLowX;
 };
 
 #endif // FLAT_FIELD_PLUGIN_H

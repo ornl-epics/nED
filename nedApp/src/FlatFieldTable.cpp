@@ -14,7 +14,8 @@
 FlatFieldTable::FlatFieldTable()
 : sizeX(0)
 , sizeY(0)
-, position(0)
+, position_id(0)
+, pixel_offset(0)
 , type(TYPE_INVALID)
 {}
 
@@ -33,7 +34,7 @@ bool FlatFieldTable::import(const std::string &path)
         return false;
     }
 
-    if (parseHeaders(infile, sizeX, sizeY, position, type, path) == false) {
+    if (parseHeaders(infile, sizeX, sizeY, position_id, pixel_offset, type, path) == false) {
         // error already reported
         return false;
     }
@@ -116,12 +117,13 @@ bool FlatFieldTable::parseHeader(std::ifstream &infile, std::string &key, std::s
 }
 
 bool FlatFieldTable::parseHeaders(
-    std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id,
-    FlatFieldTable::Type_t &type, const std::string &path)
+    std::ifstream &infile, uint32_t &size_x, uint32_t &size_y, uint32_t &position_id_,
+    uint32_t &pixel_offset_, FlatFieldTable::Type_t &type, const std::string &path)
 {
     size_x = 0;
     size_y = 0;
-    position_id = 0xFFFFFFFF;
+    position_id_ = 0xFFFFFFFF;
+    pixel_offset_ = 0xFFFFFFFF;
     type = TYPE_INVALID;
     int version = 0;
     uint32_t nHeaders = 0;
@@ -175,11 +177,20 @@ bool FlatFieldTable::parseHeaders(
             }
             nHeaders++;
         } else if (key == "Position") {
-            if (sscanf(value.c_str(), "%u", &position_id) != 1) {
+            if (sscanf(value.c_str(), "%u", &position_id_) != 1) {
                 importError = "Failed to read position id";
                 return false;
-            } else if (position_id & ~0x7FFFFFFF) {
+            } else if (position_id_ & ~0x7FFFFFFF) {
                 importError = "Invalid position id %u";
+                return false;
+            }
+            nHeaders++;
+        } else if (key == "Pixel offset") {
+            if (sscanf(value.c_str(), "%u", &pixel_offset_) != 1) {
+                importError = "Failed to read pixel offset";
+                return false;
+            } else if (pixel_offset_ & ~0x7FFFFFFF) {
+                importError = "Invalid pixel offset %u";
                 return false;
             }
             nHeaders++;
