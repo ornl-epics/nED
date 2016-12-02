@@ -1,0 +1,88 @@
+record(longin, "$(P)pos$(POS):Id")
+{
+    field(DESC, "Position id")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):Id")
+    field(PINI, "YES")
+}
+record(bo, "$(P)pos$(POS):Enable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Position enable switch")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Pos$(POS):Enable")
+    field(PINI, "YES")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+    field(FLNK, "$(P)pos$(POS):EnableCheck")
+}
+record(bi, "$(P)pos$(POS):EnableRBVraw")
+{
+    field(DESC, "Position enable readback")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):Enable")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(calc, "$(P)pos$(POS):EnableAlarm")
+{
+    field(INPA, "$(P)pos$(POS):Enable NPP")
+    field(INPB, "$(P)pos$(POS):EnableRBVraw PP")
+    field(CALC, "A#B")
+    field(PINI, "YES")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
+}
+record(calc, "$(P)pos$(POS):EnableCheck")
+{
+    field(INPA, "$(P)pos$(POS):EnableAlarm PP MS")
+    field(INPB, "$(P)pos$(POS):EnableRBVraw PP")
+    field(CALC, "B")
+    field(FLNK, "$(P)pos$(POS):EnableRBV")
+}
+record(bi, "$(P)pos$(POS):EnableRBV")
+{
+    field(DESC, "Position enable readback")
+    field(INP,  "$(P)pos$(POS):EnableCheck NPP MS")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)pos$(POS):CorrX")
+{
+    field(DESC, "Correction X table loaded flag")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):CorrX")
+    field(PINI, "YES")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)pos$(POS):CorrY")
+{
+    field(DESC, "Correction Y table loaded flag")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):CorrY")
+    field(PINI, "YES")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)pos$(POS):PsLowX")
+{
+    field(DESC, "Photo Sum X lower table loaded flag")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):PsLowX")
+    field(PINI, "YES")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)pos$(POS):PsUpX")
+{
+    field(DESC, "Photo Sum X upper table loaded flag")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):PsUpX")
+    field(PINI, "YES")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}

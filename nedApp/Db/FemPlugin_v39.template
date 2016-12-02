@@ -3,6 +3,7 @@ include "BaseModulePlugin.include"
 include "FemPlugin.include"
 include "FemPlugin_v39.generated"
 include "GlobalConD.include"
+include "RemoteUpgrade.include"
 
 record(longin, "$(P)HwVer")
 {

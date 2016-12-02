@@ -50,10 +50,9 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dispatcherPortName, i
     , m_nTransmitted(0)
     , m_nProcessed(0)
     , m_nReceived(0)
-    , m_heartbeatActive(true)
     , m_dataPktType(ADARA_PKT_TYPE_RAW_EVENT)
 {
-    m_lastSentTimestamp = { 0, 0 };
+    m_lastDataTimestamp = { 0, 0 };
 
     createParam("PixelsMapped", asynParamInt32, &PixelsMapped, 0); // WRITE - Tells whether data packets are flagged as raw or mapped pixel data
     createParam("NeutronsEn",   asynParamInt32, &NeutronsEn, 0); // WRITE - Enable forwarding neutron events
@@ -79,6 +78,7 @@ asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 void AdaraPlugin::clientConnected()
 {
+    LOG_INFO("ADARA client connected");
     reset();
 }
 
@@ -92,17 +92,21 @@ void AdaraPlugin::reset()
     m_lastRtdlTimestamp.nsec = 0;
 }
 
-bool AdaraPlugin::sendHeartbeat(const epicsTimeStamp &t)
+void AdaraPlugin::sendHeartbeat()
 {
-        uint32_t outpacket[4];
+    uint32_t outpacket[4];
+    epicsTimeStamp now;
+    epicsTimeGetCurrent(&now);
 
-        outpacket[0] = 0;
-        outpacket[1] = ADARA_PKT_TYPE_HEARTBEAT;
-        outpacket[2] = t.secPastEpoch;
-        outpacket[3] = t.nsec;
+    outpacket[0] = 0;
+    outpacket[1] = ADARA_PKT_TYPE_HEARTBEAT;
+    outpacket[2] = now.secPastEpoch;
+    outpacket[3] = now.nsec;
 
-        // If sending fails, send() will automatically close the socket
-        return send(outpacket, 4*sizeof(uint32_t));
+    // If sending fails, send() will automatically close the socket
+    this->unlock();
+    send(outpacket, 4*sizeof(uint32_t));
+    this->lock();
 }
 
 bool AdaraPlugin::sendRtdl(const uint32_t data[32])
@@ -115,12 +119,12 @@ bool AdaraPlugin::sendRtdl(const uint32_t data[32])
 
     // The RTDL packet contents is just what ADARA expects.
     // Prefix that with the length and type of packet.
-    m_heartbeatActive = false;
+    this->unlock();
     ret = send(outpacket, 2*sizeof(uint32_t));
     if (ret) {
         ret = send(data, 32*sizeof(uint32_t));
     }
-    m_heartbeatActive = true;
+    this->lock();
     return ret;
 }
 
@@ -139,15 +143,15 @@ bool AdaraPlugin::sendEvents(SourceSequence *seq, const DasPacket::Event *events
     outpacket[6] = (dataFlags << 27) | seq->rtdl.charge;
     outpacket[6] = seq->rtdl.charge;
     outpacket[7] = seq->rtdl.general_info;
-    outpacket[8] = seq->rtdl.tsync_width;
+    outpacket[8] = seq->rtdl.tsync_period;
     outpacket[9] = seq->rtdl.tsync_delay;
 
-    m_heartbeatActive = false;
+    this->unlock();
     ret = send(outpacket, 10*sizeof(uint32_t));
     if (eventsCount > 0 && ret) {
         ret = send(reinterpret_cast<const uint32_t*>(events), eventsCount*sizeof(DasPacket::Event));
     }
-    m_heartbeatActive = true;
+    this->lock();
 
     return ret;
 }
@@ -236,7 +240,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 // When transition to new pulse is detected, inject EOP packet for previous pulse
                 if (epicsTimeEqual(&currentTs, &prevTs) == 0) {
                     if (prevTs.secPastEpoch > 0 && prevTs.nsec > 0 && sendEvents(seq, 0, 0, packet->isNeutronData(), true)) {
-                        epicsTimeGetCurrent(&m_lastSentTimestamp);
+                        epicsTimeGetCurrent(&m_lastDataTimestamp);
                         m_nTransmitted++;
                     }
                     seq->pulseSeq = 0;
@@ -247,7 +251,7 @@ void AdaraPlugin::processData(const DasPacketList * const packetList)
                 const DasPacket::Event *events = reinterpret_cast<const DasPacket::Event *>(packet->getData(&eventsCount));
                 eventsCount /= (sizeof(DasPacket::Event) / sizeof(uint32_t));
                 if (sendEvents(seq, events, eventsCount, packet->isNeutronData())) {
-                    epicsTimeGetCurrent(&m_lastSentTimestamp);
+                    epicsTimeGetCurrent(&m_lastDataTimestamp);
                     m_nTransmitted++;
                 }
                 m_nProcessed++;
@@ -269,10 +273,10 @@ float AdaraPlugin::checkClient()
 
     getIntegerParam(CheckInt, &heartbeatInt);
     epicsTimeGetCurrent(&now);
-    double inactive = epicsTimeDiffInSeconds(&now, &m_lastSentTimestamp);
+    double inactive = epicsTimeDiffInSeconds(&now, &m_lastDataTimestamp);
 
-    if (m_heartbeatActive && isClientConnected() && inactive > heartbeatInt) {
-        sendHeartbeat(now);
+    if (isClientConnected() && inactive > heartbeatInt) {
+        sendHeartbeat();
     }
     return BaseSocketPlugin::checkClient();
 }

@@ -8,16 +8,17 @@ record(bo, "$(P)Enable")
     field(PINI, "YES")
 }
 
-record(bo, "$(P)FlatFieldEn")
+# Upgrade the DataMode PV
+record(mbbo, "$(P)DataMode")
 {
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Flag whether flat-field transformed")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))FlatFieldEn")
-    field(ZNAM, "raw data")
-    field(ONAM, "transformed")
+    field(ZRST, "pixel")
+    field(ONST, "raw")
+    field(TWST, "extended")
+    field(THST, "verbose")
+    field(FRVL, "4")
+    field(FRST, "xy")
 }
+
 record(longout, "$(P)XyFractWidth")
 {
     info(autosaveFields, "VAL")

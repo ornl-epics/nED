@@ -14,7 +14,6 @@ include $(TOP)/configure/CONFIG
 # The C/C++ bitfield ordering in structs is platform AND compiler dependant
 #
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
-#USR_CXXFLAGS += -DMAX_PACKET_LEN=36000 # Uncomment when dealing with legacy DSP
 USR_CXXFLAGS += -std=c++0x
 
 #USR_CXXFLAGS += -fopenmp
@@ -66,6 +65,7 @@ LIB_SRCS  += GlobalCon.st
 LIB_SRCS  += HVScan.st
 LIB_SRCS  += ApplyConfig.st
 $(PROD_NAME)_SRCS  += Common.cpp
+$(PROD_NAME)_SRCS  += McsFile.cpp
 $(PROD_NAME)_SRCS  += ValueConvert.cpp
 $(PROD_NAME)_SRCS  += Timer.cpp
 $(PROD_NAME)_SRCS  += Thread.cpp

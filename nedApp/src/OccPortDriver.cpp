@@ -81,6 +81,7 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("RxEnRb",           asynParamInt32,     &RxEnRb);                   // READ - Incoming data enabled         (0=disabled,1=enabled)
     createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
+    createParam("MaxPktSize",       asynParamInt32,     &MaxPktSize, 4000);         // WRITE - Maximum size of DAS packet payload
 
     occ_interface_type occtype = OCC_INTERFACE_OPTICAL;
     if (strchr(devfile, ':') != 0)
@@ -187,7 +188,7 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
 void OccPortDriver::refreshOccStatus(bool basic_status)
 {
     // This one can take long time to execute, don't lock the driver while it's executing
-    int ret = occ_status(m_occ, &m_occStatusCache, basic_status);
+    int ret = occ_status(m_occ, &m_occStatusCache, basic_status ? OCC_STATUS_FAST : OCC_STATUS_FULL);
 
     this->lock();
 
@@ -289,6 +290,9 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
         // There's a thread to refresh OCC status, including error packets enabled
         m_statusEvent.signal();
+    } else if (pasynUser->reason == MaxPktSize) {
+        DasPacket::setMaxLength(value);
+        return asynSuccess;
     }
     return asynPortDriver::writeInt32(pasynUser, value);
 }
@@ -329,7 +333,7 @@ asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer
 
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
-            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->length(), 4));
+            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->getLength(), 4));
             if (ret != 0) {
                 setIntegerParam(LastErr, -ret);
                 setIntegerParam(Status, STAT_OCC_ERROR);
@@ -494,6 +498,10 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             packetsList.release();
 
             if (retryCounter < 7) {
+                uint32_t packetLen = 0;
+                if (length >= DasPacket::getMinLength())
+                    packetLen = reinterpret_cast<DasPacket *>(data)->getLength();
+                LOG_DEBUG("Consumed %u of %u (expecting %u), retry %u/6", consumed, length, packetLen, retryCounter);
                 // Exponentially sleep up to ~1.1s, first pass doesn't sleep
                 epicsThreadSleep(1e-5 * pow(10, retryCounter++));
                 continue;
@@ -501,10 +509,14 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 
             // OCC still doesn't have enough data, check what's going on
             DasPacket *packet = reinterpret_cast<DasPacket *>(data);
-            if (packet->length() > DasPacket::MaxLength) {
-                LOG_ERROR("Possibly corrupted data in queue based on packet length, aborting process thread");
+            if (length < DasPacket::getMinLength()) {
+                LOG_ERROR("Aborting processing thread, not enough input data to describe packet");
+            } else if (packet->getLength() > packet->getMaxLength()) {
+                LOG_ERROR("Aborting processing thread, packet size %u bigger than supported %u", packet->getLength(), packet->getMaxLength());
+            } else if (packet->getLength() > length) {
+                LOG_ERROR("Aborting processing thread, expecting %u bytes but only have %u", packet->getLength(), length);
             } else {
-                LOG_ERROR("Partial data from OCC, aborting process thread");
+                LOG_ERROR("Aborting processing thread, undetermined error");
             }
             dump((char *)data + consumed, length - consumed);
             handleRecvError(-ERANGE);

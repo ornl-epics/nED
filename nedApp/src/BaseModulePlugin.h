@@ -106,19 +106,6 @@ class BaseModulePlugin : public BasePlugin {
         };
 
         /**
-         * Valid remote upgrade status values.
-         */
-        enum RemoteUpgradeStatus {
-            UPGRADE_NOT_SUPPORTED   = 0, //!< Remote upgrade not yet started
-            UPGRADE_NOT_STARTED     = 1, //!< Remote upgrade not yet started
-            UPGRADE_IN_PROGRESS     = 2, //!< Remote upgrade currently in progress
-            UPGRADE_DONE            = 3, //!< All data sent and acknowledged by remote party
-            UPGRADE_CANCELED        = 4, //!< Canceled due to packet timeout or nack
-            UPGRADE_INIT_FAILED     = 5, //!< Failed to initialize
-            UPGRADE_USER_ABORT      = 6, //!< Aborted by user
-        };
-
-        /**
          * Valid register raw value converters
          */
         enum ValueConverter {
@@ -198,13 +185,7 @@ class BaseModulePlugin : public BasePlugin {
         std::map<int, uint32_t> m_configSectionSizes;   //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
         std::map<int, uint32_t> m_configSectionOffsets; //!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
         std::shared_ptr<Timer> m_timeoutTimer;          //!< Currently running timer for response timeout handling
-        struct {
-            bool inProgress;        //!< Remote upgrade currently in progress
-            std::ifstream file;     //!< Firmware image file path, stays opened while in progress
-            uint32_t *buffer;       //!< Buffer to read data into
-            int bufferSize;         //!< Buffer size in bytes, (re)allocated when inProgress transitions to true
-            int position;           //!< Current file position, used as progress
-        } m_remoteUpgrade;          //!< Remote upgrade context
+        std::list<std::function<bool(const DasPacket *)> > m_stateMachines; //!< Active internal state machines
 
     public: // functions
 
@@ -263,11 +244,6 @@ class BaseModulePlugin : public BasePlugin {
         virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
-         * Handle writing strings.
-         */
-        virtual asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
-
-        /**
          * Create a packet and send it through dispatcher to the OCC board
          *
          * Either optical or LVDS packet is created based on the connection type this
@@ -304,6 +280,11 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Check response packets before handling their content.
          *
+         * First it checks if there's any internal state machine expecting this
+         * response. Each state machine must register its entry function with
+         * m_stateMachines and must return true if it handled the response, in
+         * which case all further processing of the response is stopped.
+         *
          * Enforces several checks on response packets. When a command is sent
          * out, expected response must be received or timeout occurred before
          * another command can be issued. This function checks both conditions
@@ -322,6 +303,22 @@ class BaseModulePlugin : public BasePlugin {
          * @return true if packet has been processed, false otherwise
          */
         virtual bool processResponse(const DasPacket *packet);
+
+        /**
+         * Send a request to the module.
+         *
+         * For every down-stream request the module is expected to reply back.
+         * A state around waiting for the response is handled by this function,
+         * including setting up timeout counter, setting the expected response
+         * and updating related status PV to let user know about the progress.
+         * A single outstanding request/response is allowed at any given time.
+         * If correlating response is not received in given time, the request
+         * is canceled.
+         *
+         * @param[in] command to be sent
+         * @return true if request has been handled, false otherwise
+         */
+        virtual bool processRequest(DasPacket::CommandType command);
 
         /**
          * Handle common command requests.
@@ -631,28 +628,25 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspStop(const DasPacket *packet);
 
         /**
-         * Send part of the new firmware image as one packet.
+         * Send firmware upgrade packet.
          *
-         * The firmware image is split into packets based on UpgradePktSize
-         * parameter. On first packet, the remote upgrade sequence is
-         * initialized.
-         * Updates the UpgradeStatus parameter for every relevant change.
+         * Data is sent as is to the remote side. Caller is responsible for
+         * formatting, endianess etc.
+         * When size is zero, modules are expected to return the current status.
          *
-         * @image html Remote_Upgrade_SM.png
-         * @image latex Remote_Upgrade_SM.png width=6in
+         * @param[in] data to be sent
+         * @param[in] size of data in bytes
          * @return DasPacket::CMD_UPGRADE or 0 when no packet was sent for some reason.
          */
-        virtual DasPacket::CommandType reqUpgrade();
+        virtual DasPacket::CommandType reqUpgrade(const char *data=0, uint32_t size=0);
 
         /**
          * Default handler for CMD_UPGRADE response.
          *
-         * Verifies that the remote module accepted partial firmware packet.
-         * On last packet it the remote upgrade sequence is stopped.
-         * Updates the UpgradeStatus parameter for every relevant change.
+         * Unpacks upgrade registers.
          *
-         * @retval true Remote module acknowledged reception.
-         * @retval false Timeout has occurred or remote module refused packet.
+         * @retval true Response was succesfully unpacked.
+         * @retval false Could not process response.
          */
         virtual bool rspUpgrade(const DasPacket *packet);
 
@@ -743,6 +737,13 @@ class BaseModulePlugin : public BasePlugin {
         void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, ValueConverter conv=CONV_UNSIGN);
 
         /**
+         * Create and register single integer upgrade parameter.
+         *
+         * Upgrade values are returned in CMD_UPGRATE response payload.
+         */
+        void createUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, ValueConverter conv=CONV_UNSIGN);
+
+        /**
          * Link existing parameter to upgrade parameters table.
          *
          * Useful when two hardware registers in two different response types
@@ -812,50 +813,6 @@ class BaseModulePlugin : public BasePlugin {
          * @retval false if callback was already invoked and it hasn't been canceled
          */
         bool cancelTimeoutCallback();
-
-        /**
-         * Initialize remote upgrade sequence.
-         *
-         * Opens the file and determines its length. UpgradeSize and UpgradeLen
-         * PVs are updated. Next buffer for each packet is allocated based on
-         * user provided value, rounded to nearest power of 2. Finally the
-         * upgrade in progress flag is set, which prevents starting second
-         * upgrade sequence.
-         *
-         * @return true when initialized, false on any error.
-         */
-        bool remoteUpgradeStart();
-
-        /**
-         * Read some data from file and send it to remote party.
-         *
-         * Read data into previously allocated buffer and ship it.
-         *
-         * @return false when no more data to send.
-         */
-        bool remoteUpgradeSend();
-
-        /**
-         * Test for more data to send.
-         *
-         * @return true when some data available, false otherwise.
-         */
-        bool remoteUpgradeDone();
-
-        /**
-         * Stop current remote upgrade sequence.
-         *
-         * Must be called before initiating new sequence.
-         */
-        void remoteUpgradeStop();
-
-        /**
-         * Check whether remote upgrade sequence is active.
-         *
-         * @retval true active
-         * @retval false not active
-         */
-        bool remoteUpgradeInProgress();
 
         /**
          * Try to parse READ_VERSION packet payload into a Version structure.
@@ -971,6 +928,28 @@ class BaseModulePlugin : public BasePlugin {
          */
         const char *cmd2str(DasPacket::CommandType command);
 
+        /**
+         * Register callback function for the handling responses internally.
+         *
+         * Internal response handling allows arbitrary function to get invoked
+         * before handling the response the regular way. All communication to
+         * the connected module is transparent to the rest of the BaseModulePlugin
+         * functionality and is complete responsibility of the registered
+         * handler. However, this allows custom state machines to be implemented
+         * in nED infrastructure. That can be more efficient that external
+         * state machine using sequencer for example, and more importantly it
+         * can be easily parallelized with asynchronoucity of nED.
+         *
+         * The state machine needs to register a single entry function that is
+         * invoked whenever a response from the module is received. Function
+         * needs to return true if it handled the response and further processing
+         * of response stops. In other words, if response was expected by the
+         * state machine noone else should process it. Response handler functions
+         * are called in the order they're registered. There's no mechanism to
+         * prevent overlap in case - it's strictly first come first served.
+         */
+        void registerResponseHandler(std::function<bool(const DasPacket *)> &callback);
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.
@@ -993,12 +972,6 @@ class BaseModulePlugin : public BasePlugin {
         int Verified;       //!< Hardware id, version and type all verified
         int CfgSection;     //!< Selected configuration section to be written
         int CfgChannel;     //!< Selected channel to be configured
-        int UpgradeFile;    //!< New firmware file to be programed
-        int UpgradePktSize; //!< Max payload size for split transfer
-        int UpgradeStatus;  //!< Remote upgrade status
-        int UpgradeSize;    //!< Total firmware size in bytes
-        int UpgradePos;     //!< Bytes already sent to remote party
-        int UpgradeAbort;   //!< Abort current upgrade sequence
         int NoRspTimeout;   //!< Time to wait for response
         #define LAST_BASEMODULEPLUGIN_PARAM NoRspTimeout
 };

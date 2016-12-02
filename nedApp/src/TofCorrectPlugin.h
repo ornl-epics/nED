@@ -31,11 +31,25 @@ class TofCorrectPlugin : public BaseDispatcherPlugin {
          */
         TofCorrectPlugin(const char *portName, const char *connectPortName);
 
+        /**
+         * Destructor
+         */
+        ~TofCorrectPlugin();
+
     private:
+
+        /**
+         * Describe a single allocated memory block.
+         */
+        typedef struct {
+            DasPacket *packet;          //!< Allocated memory address
+            size_t size;                //!< Allocated memory size
+            bool inUse;                 //!< Currently used by someone
+        } PoolEntry;
+
         uint32_t m_nReceived;           //!< Number of received packets
         uint32_t m_nProcessed;          //!< Number of modified packets
-        std::list<DasPacket *> m_pool;  //!< Pool of DasPacket allocated objects, all of the same size
-        static const uint32_t PACKET_SIZE;  //!< Size of every packet allocated
+        std::list<PoolEntry> m_pool;    //!< Pool of DasPacket allocated objects, all of the same size
         epicsMutex m_mutex;             //!< Mutex used solely to serialize sending data to plugins
 
         /**

@@ -147,6 +147,13 @@ class AcpcPvaPlugin : public BasePvaPlugin {
         } m_cache;
 
         /**
+         * Extended detector data mode.
+         */
+        typedef enum {
+            DATA_MODE_XY        = 4, //!< X,Y format for 2D detectors
+        } DataMode1;
+
+        /**
          * Number of elements in each cache array.
          */
         static const uint32_t CACHE_SIZE;
@@ -155,8 +162,7 @@ class AcpcPvaPlugin : public BasePvaPlugin {
         uint32_t m_photosumDivider; // Photo Sum is in UQm.n format, divider is (1 << n)
 
     protected:
-        #define FIRST_ACPCPVAPLUGIN_PARAM FlatFieldEn
-        int FlatFieldEn;
+        #define FIRST_ACPCPVAPLUGIN_PARAM XyFractWidth
         int XyFractWidth;
         int PsFractWidth;
         #define LAST_ACPCPVAPLUGIN_PARAM PsFractWidth

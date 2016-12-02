@@ -184,8 +184,10 @@ void DebugPlugin::generatePacket()
         packet = DasPacket::createLvds(DasPacket::HWID_SELF, dest, command, 0, 0);
 
     memset(m_rawPacket, 0, sizeof(m_rawPacket));
-    if (packet)
-        memcpy(m_rawPacket, packet, std::min((size_t)packet->length(), sizeof(m_rawPacket)));
+    if (packet) {
+        memcpy(m_rawPacket, packet, std::min((size_t)packet->getLength(), sizeof(m_rawPacket)));
+        delete packet;
+    }
 
     setIntegerParam(RawPkt0,  m_rawPacket[0]);
     setIntegerParam(RawPkt1,  m_rawPacket[1]);

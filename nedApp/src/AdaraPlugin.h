@@ -35,9 +35,8 @@ class AdaraPlugin : public BaseSocketPlugin {
         uint64_t m_nTransmitted;    //!< Number of packets sent to BASESOCKET
         uint64_t m_nProcessed;      //!< Number of processed packets
         uint64_t m_nReceived;       //!< Number of packets received from dispatcher
-        epicsTimeStamp m_lastSentTimestamp; //!< Timestamp of last packet sent to Adara
+        epicsTimeStamp m_lastDataTimestamp; //!< Timestamp of last event data sent to Adara for SMS book-keeping
         epicsTimeStamp m_lastRtdlTimestamp; //!< Timestamp of last RTDL packet sent to Adara
-        bool m_heartbeatActive;     //!< Allow to temporarily disable heartbeat to prevent interleaved writes on socket
         uint32_t m_dataPktType;     //!< Type of data packets, raw or mapped pixel data
 
         /**
@@ -106,13 +105,12 @@ class AdaraPlugin : public BaseSocketPlugin {
 
     private:
         /**
-         * When socket is connected, send heartbeat to ADARA.
+         * Sends ADARA heartbeat packet during event data inactivity.
          *
-         * @param[in] time to put in packet.
          * @retval true When data has been sent.
          * @retval false Socket not connected or other socket error.
          */
-        bool sendHeartbeat(const epicsTimeStamp &t);
+        void sendHeartbeat();
 
         /**
          * When socket is connected, send RTDL to ADARA.

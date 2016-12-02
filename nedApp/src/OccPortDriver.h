@@ -208,7 +208,8 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         int RxEnRb;
         int ErrPktEn;
         int ErrPktEnRb;
-        #define LAST_OCCPORTDRIVER_PARAM ErrPktEnRb
+        int MaxPktSize;
+        #define LAST_OCCPORTDRIVER_PARAM MaxPktSize
 };
 
 #endif // OCCPORTDRIVER_H

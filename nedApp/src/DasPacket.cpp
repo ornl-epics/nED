@@ -14,12 +14,8 @@
 #include <string.h>
 
 // Static members initilization
-const uint32_t DasPacket::MinLength = sizeof(DasPacket);
-
-#ifndef MAX_PACKET_LEN
-#define MAX_PACKET_LEN 4000 // DSP-T limit is 3600, can be changed from Makefile
-#endif // MAX_PACKET_LEN
-const uint32_t DasPacket::MaxLength = MAX_PACKET_LEN + MinLength;
+uint32_t DasPacket::MinLength = sizeof(DasPacket);
+uint32_t DasPacket::MaxLength = sizeof(DasPacket) + 4000; // DSP-T is hardcoded to 3600 total but can leak and do slightly more, 4024 should be safe for DSP-T
 
 DasPacket::DasPacket(uint32_t source_, uint32_t destination_, CommandInfo cmdinfo_, uint32_t payload_length_, uint32_t *payload_)
     : destination(destination_)
@@ -34,6 +30,17 @@ DasPacket::DasPacket(uint32_t source_, uint32_t destination_, CommandInfo cmdinf
     } else {
         memset(payload, 0, payload_length);
     }
+}
+
+DasPacket *DasPacket::alloc(uint32_t size)
+{
+    DasPacket *packet = 0;
+    CommandInfo info;
+    memset(&info, 0, sizeof(CommandInfo));
+    void *addr = malloc(sizeof(DasPacket) + ALIGN_UP(size, 4));
+    if (addr)
+        packet = new (addr) DasPacket(0x0, 0x0, info, size - sizeof(DasPacket), NULL);
+    return packet;
 }
 
 DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload)
@@ -51,7 +58,7 @@ DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandTy
         cmdinfo.is_channel = 1;
     }
 
-    void *addr = malloc(sizeof(DasPacket) + payload_length);
+    void *addr = malloc(sizeof(DasPacket) + ALIGN_UP(payload_length, 4));
     if (addr)
         packet = new (addr) DasPacket(source, destination, cmdinfo, payload_length, payload);
     return packet;
@@ -138,10 +145,11 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
 
 bool DasPacket::isValid() const
 {
-    return (length() > MinLength);
+    uint32_t length = getLength();
+    return (length >= MinLength && length <= MaxLength);
 }
 
-uint32_t DasPacket::length() const
+uint32_t DasPacket::getLength() const
 {
     // All incoming packets are 4-byte aligned by DSP
     // Outgoing commands for LVDS modules might be 2-byte aligned
@@ -153,6 +161,22 @@ uint32_t DasPacket::length() const
     return packet_length;
 }
 
+uint32_t DasPacket::getMinLength()
+{
+    return DasPacket::MinLength;
+}
+
+uint32_t DasPacket::getMaxLength()
+{
+    return DasPacket::MaxLength;
+}
+
+uint32_t DasPacket::setMaxLength(uint32_t size)
+{
+    DasPacket::MaxLength = ALIGN_UP(size, 4);
+    return DasPacket::MaxLength;
+}
+
 bool DasPacket::isCommand() const
 {
     return (cmdinfo.is_command);
@@ -161,6 +185,12 @@ bool DasPacket::isCommand() const
 bool DasPacket::isResponse() const
 {
     return (cmdinfo.is_command && cmdinfo.is_response);
+}
+
+void DasPacket::setResponse()
+{
+    cmdinfo.is_command = 1;
+    cmdinfo.is_response = 1;
 }
 
 bool DasPacket::isData() const
@@ -323,4 +353,22 @@ bool DasPacket::copyHeader(DasPacket *dest, uint32_t destSize) const
     memcpy(dest, this, copySize);
     dest->payload_length = payload_length;
     return true;
+}
+
+DasPacket::DataTypeLegacy DasPacket::getDataTypeLegacy() const
+{
+    // Can't make C union smaller than 1 byte, the intent was:
+    // struct DataInfo {
+    //   unsigned subpacket_start:1;     //!< The first packet in the train of subpackets
+    //   unsigned subpacket_end:1;       //!< Last packet in the train
+    //   union {
+    //     struct {
+    //       unsigned only_neutron_data:1;   //!< Only neutron data, if 0 some metadata is included
+    //       unsigned rtdl_present:1;        //!< Is RTDL 6-words data included right after the header? Should be always 1 for newer DSPs
+    //     };
+    //     DataTypeLegacy data_type_legacy;
+    //   };
+    //   unsigned unused4:1;             //!< Always zero?
+    int type = (datainfo.rtdl_present << 1 | datainfo.only_neutron_data);
+    return static_cast<DataTypeLegacy>(type);
 }

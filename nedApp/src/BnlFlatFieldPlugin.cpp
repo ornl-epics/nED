@@ -127,7 +127,7 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
 
                 // If running out of space, send this batch
                 uint32_t remain = m_bufferSize - bufferOffset;
-                if (remain < packet->length()) {
+                if (remain < packet->getLength()) {
                     nSplits++;
                     break;
                 }
@@ -143,7 +143,7 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
                 // Reserve part of buffer for this packet, it may shrink from original but never grow
                 DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
                 m_packetList.push_back(newPacket);
-                bufferOffset += packet->length();
+                bufferOffset += packet->getLength();
 
                 // Process the packet - only raw mode supported for now
                 processPacket(packet, newPacket, xyDivider, corrEn, convEn, nGood, nVeto);
@@ -168,7 +168,7 @@ void BnlFlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetL
 void BnlFlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, float xyDivider, bool correct, bool convert, int &nGood, int &nVeto)
 {
     // destPacket is guaranteed to be at least the size of srcPacket
-    (void)srcPacket->copyHeader(destPacket, srcPacket->length());
+    (void)srcPacket->copyHeader(destPacket, srcPacket->getLength());
 
     uint32_t nEvents;
     const BnlDataPacket::NormalEvent *srcEvent= reinterpret_cast<const BnlDataPacket::NormalEvent *>(srcPacket->getData(&nEvents));

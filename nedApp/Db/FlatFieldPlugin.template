@@ -23,9 +23,8 @@ record(bo, "$(P)Enable")
 record(calc, "$(P)StatusCalc")
 {
     field(INPA, "$(P)Enable.SEVR")
-    field(INPB, "$(P)TablesErr.SEVR")
-    field(INPC, "$(P)BufferSize.SEVR")
-    field(CALC, "(A+B+C)=0")
+    field(INPB, "$(P)BufferSize.SEVR")
+    field(CALC, "(A+B)=0")
     field(FLNK, "$(P)Status")
 }
 record(bi, "$(P)Status")
@@ -54,18 +53,6 @@ record(waveform, "$(P)ImportDir")
     field(NELM, "1024")
     field(PINI, "YES")
 }
-record(bi, "$(P)TablesErr")
-{
-    field(DESC, "One or more tables not imported")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))TablesErr")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-    field(ZNAM, "no error")
-    field(ONAM, "error")
-    field(OSV,  "MAJOR")
-    field(FLNK, "$(P)StatusCalc")
-}
 record(longin, "$(P)BufferSize")
 {
     field(DESC, "Size of the transformation buffer")
@@ -86,7 +73,6 @@ record(bo, "$(P)PsEn")
     field(PINI, "YES")
     field(ZNAM, "disabled")
     field(ONAM, "enabled")
-    field(FLNK, "$(P)Positions_RB")
 }
 record(bo, "$(P)CorrEn")
 {
@@ -97,7 +83,6 @@ record(bo, "$(P)CorrEn")
     field(PINI, "YES")
     field(ZNAM, "disabled")
     field(ONAM, "enabled")
-    field(FLNK, "$(P)Positions_RB")
 }
 record(bo, "$(P)ConvEn")
 {
@@ -109,54 +94,42 @@ record(bo, "$(P)ConvEn")
     field(ZNAM, "disabled")
     field(ONAM, "enabled")
 }
-record(waveform, "$(P)Positions")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "Configured positions")
-    field(DTYP, "asynInt8ArrayOut")
-    field(INP,  "@asyn($(PORT))Positions")
-    field(PINI, "YES")
-    field(FTVL, "CHAR")
-    field(NELM, "100")
-    field(FLNK, "$(P)PositionsReport")
-}
-record(waveform, "$(P)Positions_RB")
-{
-    field(DESC, "Loaded positions")
-    field(DTYP, "asynInt8ArrayIn")
-    field(INP,  "@asyn($(PORT))Positions")
-    field(PINI, "YES")
-    field(FTVL, "CHAR")
-    field(NELM, "100")
-    field(FLNK, "$(P)Positions")
-}
-record(waveform, "$(P)PositionsReport")
-{
-    field(ASG,  "BEAMLINE")
-    field(DTYP, "asynOctetRead")
-    field(INP,  "@asyn($(PORT))PositionsReport")
-    field(FTVL, "CHAR")
-    field(NELM, "1024")
-    field(PINI, "YES")
-}
 
 record(longin, "$(P)CntGoodEvents")
 {
-    field(DESC, "Number of processed events")
+    field(DESC, "Number of good events")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))CntGoodEvents")
-    field(SCAN, "I/O Intr")
+    field(SCAN, "Passive")
     field(VAL,  "0")
     field(PINI, "YES")
+}
+record(calc, "$(P)RateGoodEvents")
+{
+    field(DESC, "Good events rate")
+    field(INPA, "$(P)CntGoodEvents NPP")
+    field(INPB, "$(P)CntGoodEvents PP")
+    field(CALC, "B-A")
+    field(EGU,  "ev/s")
+    field(SCAN, "1 second")
 }
 record(longin, "$(P)CntVetoEvents")
 {
     field(DESC, "Number of vetoed events")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))CntVetoEvents")
-    field(SCAN, "I/O Intr")
+    field(SCAN, "Passive")
     field(VAL,  "0")
     field(PINI, "YES")
+}
+record(calc, "$(P)RateVetoEvents")
+{
+    field(DESC, "Good events rate")
+    field(INPA, "$(P)CntVetoEvents NPP")
+    field(INPB, "$(P)CntVetoEvents PP")
+    field(CALC, "B-A")
+    field(EGU,  "ev/s")
+    field(SCAN, "1 second")
 }
 record(longin, "$(P)CntSplit")
 {

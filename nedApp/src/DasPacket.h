@@ -133,6 +133,16 @@ struct DasPacket
         };
 
         /**
+         * In non DSP-T environment, this defines the data type in packet.
+         */
+        enum DataTypeLegacy {
+            DATA_TYPE_NEUTRON_LEGACY    = 0x0,
+            DATA_TYPE_NEUTRON_NO_RTDL   = 0x1,
+            DATA_TYPE_METADATA          = 0x2,
+            DATA_TYPE_NEUTRON_RTDL      = 0x3,
+        };
+
+        /**
          * Command packet info breakdown structure.
          */
         struct CommandInfo {
@@ -177,9 +187,6 @@ struct DasPacket
             unsigned is_command:1;          //!< If 1, packet is command, data otherwise
 #endif
         };
-
-        static const uint32_t MinLength;    //!< Minumum total length of any DAS packet, at least the header must be present
-        static const uint32_t MaxLength;    //!< Maximum total length of DAS packets
 
     public: // Structure definition - represents OCC header
         uint32_t destination;                   //!< Destination id
@@ -248,6 +255,31 @@ struct DasPacket
         static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
 
         /**
+         * Allocate memory for new packet.
+         *
+         * @param[in] size Total size of the packet in bytes, gets rounded to next 4 byte boundary if not already.
+         * @return allocated un-initialized packet or 0 on error.
+         */
+        static DasPacket *alloc(uint32_t size);
+
+        /**
+         * Get minimum length of a packet in bytes.
+         */
+        static uint32_t getMinLength();
+
+        /**
+         * Get maximum length of a packet in bytes.
+         */
+        static uint32_t getMaxLength();
+
+        /**
+         * Set maximum packet size.
+         *
+         * @return A newly set maximum size.
+         */
+        static uint32_t setMaxLength(uint32_t size);
+
+        /**
          * Check if packet is valid, like the alignment check, size check, etc.
          */
         bool isValid() const;
@@ -255,7 +287,7 @@ struct DasPacket
         /**
          * Total length of the packet in bytes.
          */
-        uint32_t length() const;
+        uint32_t getLength() const;
 
         /**
          * Is this a command packet?
@@ -266,6 +298,11 @@ struct DasPacket
          * Is this a response packet?
          */
         bool isResponse() const;
+
+        /**
+         * Sets this packet to be a response to a command.
+         */
+        void setResponse();
 
         /**
          * Is this a data packet?
@@ -415,7 +452,15 @@ struct DasPacket
          */
         bool copyHeader(DasPacket *dest, uint32_t destSize) const;
 
+        /**
+         * Return type of data as returned by legacy DSP. For DSP-T environment
+         * RTDL header should be always present and different flags apply.
+         */
+        DataTypeLegacy getDataTypeLegacy() const;
+
     private:
+        static uint32_t MinLength;    //!< Minumum total length of any DAS packet, at least the header must be present
+        static uint32_t MaxLength;    //!< Maximum total length of DAS packets
 
         /**
          * Constructor for creating command packets

@@ -11,6 +11,9 @@
 #define FEM_PLUGIN_H
 
 #include "BaseModulePlugin.h"
+#include "McsFile.h"
+
+#include <memory>
 
 /**
  * Plugin for FEM module.
@@ -21,6 +24,42 @@ class FemPlugin : public BaseModulePlugin {
 
     private: // variables
         std::string m_version;              //!< Version string as passed to constructor
+        struct RemoteUpgrade {
+            /**
+             * Valid remote update statuses
+             */
+            enum Status {
+                NOT_SUPPORTED       = 0, //!< Remote update not supported by this modules
+                NOT_READY           = 1, //!< Supported but failed to initialize internal structures
+                LOADED              = 3, //!< Firmware file loaded and ready to start
+                IN_PROGRESS         = 4, //!< Some packets already sent, some left to be sent
+                WAITING             = 5, //!< Waiting for module to become ready
+                DONE                = 6, //!< Upgrade successful
+                ERROR               = 7, //!< Upgrade failed
+                ABORTED             = 8, //!< User aborted update
+            } status;
+
+            /**
+             * Valid state machine actions/state transitions.
+             */
+            typedef enum {
+                INIT,
+                LOAD_FILE,
+                START,
+                PROCESS_RESPONSE,
+                ABORT,
+                TIMEOUT,
+            } Action;
+
+            McsFile file;           //!< Firmware image file path, stays opened while in progress
+            std::shared_ptr<char> buffer;
+            uint32_t bufferSize;
+            uint32_t pktPayloadSize;//!< Size of allocated space in packet payload
+            uint32_t offset;        //!< Current data position, used as progress
+            uint32_t lastCount;     //!< Number of bytes sent in previous chunk
+            std::shared_ptr<Timer> timer; //!< Currently running timer for response timeout handling
+            epicsTimeStamp lastReadyTime; //!< Timestamp of last 'ready' response
+        } m_remoteUpgrade;          //!< Remote upgrade context
 
     public: // functions
 
@@ -37,6 +76,24 @@ class FemPlugin : public BaseModulePlugin {
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
         FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
+
+        /**
+         * Handle parameters write requests for integer type.
+         *
+         * When an integer parameter is written through PV, this function
+         * gets called with a new value. It handles the Command parameter
+         * as well as all configuration parameters.
+         *
+         * @param[in] pasynUser asyn handle
+         * @param[in] value New value to be applied
+         * @return asynSuccess on success, asynError otherwise
+         */
+        virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
+        /**
+         * Handle writing strings.
+         */
+        virtual asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
 
         /**
          * Try to parse the FEM version response packet an populate the structure.
@@ -99,6 +156,45 @@ class FemPlugin : public BaseModulePlugin {
          * Create and register all FEM9 v38 parameters to be exposed to EPICS.
          */
         void createParams_v320();
+
+        /**
+         * Response handler to be registers into BaseModulePlugin
+         *
+         * @return true when packet has been handled
+         */
+        bool remoteUpgradeRsp(const DasPacket *packet);
+
+        /**
+         * Remote upgrade state machine function.
+         */
+        bool remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *packet=0);
+
+        /**
+         * Module specific function to check for remote upgrade status response.
+         *
+         * Function should return RemoteUpgrade::DONE when last packet was accepted
+         * by module, RemoteUpgrade::IN_PROGRESS if module is busy and needs to
+         * be retried, or RemoteUpgrade::ERROR in case of any error that
+         * prevents this upgrade to succeed.
+         * Packet was already unpacked and all PVs populated before invoking
+         * this function.
+         */
+        FemPlugin::RemoteUpgrade::Status remoteUpgradeCheck();
+
+        /**
+         * Remote upgrade timeout handler.
+         */
+        float remoteUpgradeTimeout();
+
+    protected:
+        #define FIRST_FEMPLUGIN_PARAM UpgradeFile
+        int UpgradeFile;     //!< New firmware file to be programed
+        int UpgradeChunkSize;//!< Number of bytes to push in one transfer
+        int UpgradeStatus;   //!< Remote upgrade status
+        int UpgradeSize;     //!< Total firmware size in bytes
+        int UpgradePosition; //!< Bytes already sent to remote party
+        int UpgradeCmd;      //!< Command to send to update process (start, abort)
+        #define LAST_FEMPLUGIN_PARAM UpgradeCmd
 };
 
 #endif // DSP_PLUGIN_H

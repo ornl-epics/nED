@@ -60,23 +60,12 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("Verified",     asynParamInt32, &Verified, 0);              // READ - Flag whether module type and version were verified
     createParam("CfgSection",   asynParamInt32, &CfgSection, 0x0);          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
     createParam("CfgChannel",   asynParamInt32, &CfgChannel, 0);            // WRITE - Select channel to be configured, 0 means main configuration
-    createParam("UpgradeFile",  asynParamOctet, &UpgradeFile);              // WRITE - Path to the firmware file to be programmed
-    createParam("UpgradePktSize",asynParamInt32,&UpgradePktSize, 256);      // WRITE - Maximum payload size for split program file transfer
-    createParam("UpgradeStatus",asynParamInt32, &UpgradeStatus, UPGRADE_NOT_SUPPORTED); // READ -Remote upgrade status
-    createParam("UpgradeSize",  asynParamInt32, &UpgradeSize, 0);           // READ - Total firmware size in bytes
-    createParam("UpgradePos",   asynParamInt32, &UpgradePos, 0);            // READ - Bytes already sent to remote porty
-    createParam("UpgradeAbort", asynParamInt32, &UpgradeAbort, 0);          // WRITE - Abort current upgrade sequence
     createParam("NoRspTimeout", asynParamFloat64, &NoRspTimeout, NO_RESPONSE_TIMEOUT); // WRITE - Time to wait for response
 
     std::string hardwareIp = addr2ip(m_hardwareId);
     setStringParam(HwId, hardwareIp.c_str());
     setIntegerParam(CmdRsp, LAST_CMD_NONE);
     callParamCallbacks();
-
-    m_remoteUpgrade.inProgress = false;
-    m_remoteUpgrade.buffer = 0;
-    m_remoteUpgrade.bufferSize = 0;
-    m_remoteUpgrade.position = 0;
 }
 
 BaseModulePlugin::~BaseModulePlugin()
@@ -92,44 +81,8 @@ void BaseModulePlugin::setNumChannels(uint32_t n)
 asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == CmdReq) {
-        double timeout;
-        getDoubleParam(NoRspTimeout, &timeout);
-
-        if (m_waitingResponse != 0) {
-            LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", value, m_waitingResponse);
+        if (!processRequest(static_cast<DasPacket::CommandType>(value)))
             return asynError;
-        }
-
-        m_expectedChannel = 0;
-        m_cfgSectionCnt = 0; // used to correctly report CmdRsp when 0 channel succeeds but other channels don't have registers in particular section
-
-        setIntegerParam(CfgChannel, m_expectedChannel);
-        setIntegerParam(CmdRsp, LAST_CMD_WAIT);
-        callParamCallbacks();
-
-        do {
-            m_waitingResponse = handleRequest(static_cast<DasPacket::CommandType>(value), timeout);
-
-            if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
-                if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
-                   LOG_WARN("Failed to schedule CmdRsp timeout callback");
-                setIntegerParam(CmdRsp, LAST_CMD_WAIT);
-
-                // Increase this for all packets, although only used in rspWriteConfig()
-                m_cfgSectionCnt++;
-            } else {
-                // No such section for non-channel command, are the more channels to try?
-                m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
-                if (m_expectedChannel > 0) {
-                    continue;
-                }
-                setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
-            }
-            break; // Needs `break; } while(1)' because of continue
-        } while (1);
-
-        callParamCallbacks();
-
         return asynSuccess;
     }
     if (pasynUser->reason == CfgSection) {
@@ -141,23 +94,6 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         callParamCallbacks();
         return asynSuccess;
     }
-    if (pasynUser->reason == UpgradePktSize) {
-        // Enforce 4 bytes aligned transfers
-        value = ALIGN_UP(value, 4);
-        setIntegerParam(UpgradePktSize, value);
-        callParamCallbacks();
-        return BasePlugin::writeInt32(pasynUser, value);
-    }
-    if (pasynUser->reason == UpgradeAbort) {
-        if (remoteUpgradeInProgress() == true) {
-            remoteUpgradeStop();
-            setIntegerParam(UpgradeStatus, UPGRADE_USER_ABORT);
-            setIntegerParam(UpgradePos, 0);
-            callParamCallbacks();
-        }
-        return asynSuccess;
-    }
-
     // Not a command, it's probably one of the writeable parameters
     for (auto it = m_params.begin(); it != m_params.end(); it++) {
         if (it->second.readonly)
@@ -179,6 +115,49 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
     // Just issue default handler to see if it can handle it
     return BasePlugin::writeInt32(pasynUser, value);
+}
+
+bool BaseModulePlugin::processRequest(DasPacket::CommandType command)
+{
+    double timeout;
+    getDoubleParam(NoRspTimeout, &timeout);
+
+    if (m_waitingResponse != 0) {
+        LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", command, m_waitingResponse);
+        return false;
+    }
+
+    m_expectedChannel = 0;
+    m_cfgSectionCnt = 0; // used to correctly report CmdRsp when 0 channel succeeds but other channels don't have registers in particular section
+
+    setIntegerParam(CfgChannel, m_expectedChannel);
+    setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+    callParamCallbacks();
+
+    do {
+        m_waitingResponse = handleRequest(command, timeout);
+
+        if (m_waitingResponse != static_cast<DasPacket::CommandType>(0)) {
+            if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
+               LOG_WARN("Failed to schedule CmdRsp timeout callback");
+            setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+
+            // Increase this for all packets, although only used in rspWriteConfig()
+            m_cfgSectionCnt++;
+        } else {
+            // No such section for non-channel command, are the more channels to try?
+            m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
+            if (m_expectedChannel > 0) {
+                continue;
+            }
+            setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
+        }
+        break; // Needs `break; } while(1)' because of continue
+    } while (1);
+
+    callParamCallbacks();
+
+    return true;
 }
 
 DasPacket::CommandType BaseModulePlugin::handleRequest(DasPacket::CommandType command, double &timeout)
@@ -239,20 +218,6 @@ DasPacket::CommandType BaseModulePlugin::handleRequest(DasPacket::CommandType co
     }
 }
 
-asynStatus BaseModulePlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
-{
-    if (pasynUser->reason == UpgradeFile) {
-        uint32_t length;
-        if (fileSize(std::string(value, nChars), length) == false)
-            return asynError;
-
-        *nActual = nChars;
-        setIntegerParam(UpgradeSize, length);
-        callParamCallbacks();
-    }
-    return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
-}
-
 void BaseModulePlugin::sendToDispatcher(DasPacket::CommandType command, uint8_t channel, uint32_t *payload, uint32_t length)
 {
     DasPacket *packet;
@@ -296,6 +261,12 @@ void BaseModulePlugin::processData(const DasPacketList * const packetList)
 
 bool BaseModulePlugin::processResponse(const DasPacket *packet)
 {
+    // Handle internal state machines first
+    for (auto it=m_stateMachines.begin(); it!=m_stateMachines.end(); it++) {
+        if ((*it)(packet) == true)
+            return true;
+    }
+
     DasPacket::CommandType command = packet->getResponseType();
     if (m_waitingResponse != command) {
         LOG_WARN("Ignoring unexpected response %s (0x%02X)", cmd2str(command), command);
@@ -749,34 +720,24 @@ bool BaseModulePlugin::rspStop(const DasPacket *packet)
     return (packet->cmdinfo.command == DasPacket::RSP_ACK);
 }
 
-DasPacket::CommandType BaseModulePlugin::reqUpgrade()
+DasPacket::CommandType BaseModulePlugin::reqUpgrade(const char *data, uint32_t size)
 {
-    if (remoteUpgradeInProgress() == false) {
-        if (remoteUpgradeStart() == false) {
-            setIntegerParam(UpgradeStatus, UPGRADE_INIT_FAILED);
-            callParamCallbacks();
-            return static_cast<DasPacket::CommandType>(0);
-        }
+    if (data == 0 || size == 0) {
+        data = 0;
+        size = 0;
     }
-
-    setIntegerParam(UpgradeStatus, UPGRADE_IN_PROGRESS);
-    callParamCallbacks();
-
-    if (remoteUpgradeSend() == false) {
-        // No more data to send, retain status
-        return static_cast<DasPacket::CommandType>(0);
-    }
-
+    sendToDispatcher(DasPacket::CMD_UPGRADE, 0, (uint32_t*)data, size);
     return DasPacket::CMD_UPGRADE;
 }
 
 bool BaseModulePlugin::rspUpgrade(const DasPacket *packet)
 {
-    if (packet->cmdinfo.command != DasPacket::RSP_ACK) {
-        remoteUpgradeStop();
-        setIntegerParam(UpgradeStatus, UPGRADE_CANCELED);
-        setIntegerParam(UpgradePos, 0);
-        callParamCallbacks();
+    uint32_t wordsize = (m_behindDsp ? 2 : 4);
+    uint32_t length = ALIGN_UP(m_params["UPGRADE"].sizes[0]*wordsize, 4);
+    if (packet->getPayloadLength() != ALIGN_UP(length, 4)) {
+        LOG_ERROR("Received wrong READ_UPGRADE response based on length; "
+                  "received %u, expected %u",
+                  packet->getPayloadLength(), length);
         return false;
     }
 
@@ -844,6 +805,11 @@ void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32
     createRegParam("TEMPERATURE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
 }
 
+void BaseModulePlugin::createUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, BaseModulePlugin::ValueConverter conv)
+{
+    createRegParam("UPGRADE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
+}
+
 void BaseModulePlugin::linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
     linkRegParam("UPGRADE", name, true, 0, 0x0, offset, nBits, shift);
@@ -880,13 +846,6 @@ float BaseModulePlugin::noResponseCleanup(DasPacket::CommandType command)
         LOG_WARN("Timeout waiting for %s response", cmd2str(command));
         m_waitingResponse = static_cast<DasPacket::CommandType>(0);
         setIntegerParam(CmdRsp, LAST_CMD_TIMEOUT);
-
-        if (command == DasPacket::CMD_UPGRADE) {
-            remoteUpgradeStop();
-            setIntegerParam(UpgradeStatus, UPGRADE_CANCELED);
-            setIntegerParam(UpgradePos, 0);
-        }
-
         callParamCallbacks();
     }
     return 0;
@@ -922,96 +881,6 @@ void BaseModulePlugin::recalculateConfigParams()
             LOG_WARN("Section 0x%01X channel %u size=%u offset=%u", section, channel, m_configSectionSizes[currSectionId], m_configSectionOffsets[currSectionId]);
         }
     }
-}
-
-bool BaseModulePlugin::remoteUpgradeStart() {
-
-    if (m_remoteUpgrade.file.is_open())
-        m_remoteUpgrade.file.close();
-
-    char filepath[1024];
-    if (getStringParam(UpgradeFile, sizeof(filepath), filepath) != asynSuccess) {
-        LOG_WARN("No remote upgrade file provided");
-        return false;
-    }
-
-    // Open the file
-    m_remoteUpgrade.file.open(filepath, std::ifstream::in);
-    if (m_remoteUpgrade.file.fail()) {
-        LOG_ERROR("Can not open remote upgrade file '%s'", filepath);
-        return false;
-    }
-
-    // Determine file size
-    m_remoteUpgrade.file.seekg(0, m_remoteUpgrade.file.end);
-    int length = m_remoteUpgrade.file.tellg();
-    m_remoteUpgrade.file.seekg(0, m_remoteUpgrade.file.beg);
-
-    // Get user defined packet size
-    int chunkSize = 256; // should be good default
-    if (getIntegerParam(UpgradePktSize, &chunkSize) != asynSuccess) {
-        LOG_ERROR("No remote upgrade packet size defined");
-        m_remoteUpgrade.file.close();
-        return false;
-    }
-    chunkSize = ALIGN_UP(chunkSize, 4);
-
-    // Allocate buffer if required
-    if (chunkSize > m_remoteUpgrade.bufferSize) {
-        m_remoteUpgrade.buffer = reinterpret_cast<uint32_t*>(realloc(m_remoteUpgrade.buffer, chunkSize));
-        if (!m_remoteUpgrade.buffer) {
-            LOG_ERROR("Can not allocate memory for programming");
-            m_remoteUpgrade.bufferSize = 0;
-            m_remoteUpgrade.file.close();
-            return false;
-        }
-        m_remoteUpgrade.bufferSize = chunkSize;
-    }
-
-    m_remoteUpgrade.position = 0;
-    setIntegerParam(UpgradeSize, length);
-    setIntegerParam(UpgradePos, m_remoteUpgrade.position);
-    setIntegerParam(UpgradePktSize, chunkSize);
-    callParamCallbacks();
-
-    m_remoteUpgrade.inProgress = true;
-    return true;
-}
-
-bool BaseModulePlugin::remoteUpgradeSend()
-{
-    if (m_remoteUpgrade.file.good() == false)
-        return false;
-
-    m_remoteUpgrade.file.read(reinterpret_cast<char*>(m_remoteUpgrade.buffer), m_remoteUpgrade.bufferSize);
-    int nRead = m_remoteUpgrade.file.gcount();
-
-    if (nRead <= 0)
-        return false;
-
-    m_remoteUpgrade.position += nRead;
-    setIntegerParam(UpgradePos, m_remoteUpgrade.position);
-    callParamCallbacks();
-
-    sendToDispatcher(DasPacket::CMD_UPGRADE, 0, m_remoteUpgrade.buffer, nRead);
-    return true;
-}
-
-bool BaseModulePlugin::remoteUpgradeDone()
-{
-    return m_remoteUpgrade.file.eof();
-}
-
-bool BaseModulePlugin::remoteUpgradeInProgress()
-{
-    return m_remoteUpgrade.inProgress;
-}
-
-void BaseModulePlugin::remoteUpgradeStop()
-{
-    if (m_remoteUpgrade.file.is_open())
-        m_remoteUpgrade.file.close();
-    m_remoteUpgrade.inProgress = false;
 }
 
 size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, size_t size, uint8_t channel, uint8_t section)
@@ -1328,4 +1197,9 @@ const char *BaseModulePlugin::cmd2str(const DasPacket::CommandType cmd)
     default:
         return "<unknown>";
     }
+}
+
+void BaseModulePlugin::registerResponseHandler(std::function<bool(const DasPacket *)> &callback)
+{
+    m_stateMachines.push_back(callback);
 }

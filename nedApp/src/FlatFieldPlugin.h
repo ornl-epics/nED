@@ -69,7 +69,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * present -> use std::shared_ptr.
          */
         struct PositionTables {
-            bool init;                              //!< When set, the position is not sparse
+            unsigned nTables;                       //!< Number of loaded tables, when zero position is sparse and should be skipped
             bool enabled;                           //!< User has enabled this position - may not have other field
             std::shared_ptr<FlatFieldTable> corrX;  //!< Pointer to X correction table
             std::shared_ptr<FlatFieldTable> corrY;  //!< Pointer to Y correction table
@@ -159,6 +159,11 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         ~FlatFieldPlugin();
 
         /**
+         * Handle reading plugin integer parameters from PV.
+         */
+        asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
+
+        /**
          * Handle writing plugin integer parameters from PV.
          */
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
@@ -167,16 +172,6 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Handle writing plugin double parameters from PV.
          */
         asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
-
-        /**
-         * Handle writing array of Int8
-         */
-        asynStatus writeInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements);
-
-        /**
-         * Handle reading array of Int8
-         */
-        asynStatus readInt8Array(asynUser *pasynUser, epicsInt8 *values, size_t nElements, size_t *nIn);
 
         /**
          * Handle reading octets
@@ -289,7 +284,6 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         std::string generatePositionsReport(bool psEn, bool corrEn);
 
     private: // variables
-        int m_tablesErr;            //!< Flag whether all required tables are ready
         uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
         uint32_t m_bufferSize;      //!< Size of buffer
         uint32_t m_tableSizeX;      //!< X dimension size of all tables
@@ -311,9 +305,6 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int ImportReport;   //!< Generate textual file import report
         int ImportDir;      //!< Absolute path to pixel map file
         int BufferSize;     //!< Size of allocated buffer, 0 means alocation error
-        int Positions;      //!< Array of configured positions
-        int PositionsReport;//!< Generate textual configured positions report
-        int TablesErr;      //!< At least one table was not imported properly, check for reason with asynReport()
         int PsEn;           //!< Switch to toggle photosum elimination
         int CorrEn;         //!< Switch to toggle applying flat field correction
         int ConvEn;         //!< Switch to toggle converting data to pixel id format
@@ -330,6 +321,13 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int TablesSizeX;    //!< All tables size X
         int TablesSizeY;    //!< All tables size Y
         #define LAST_FLATFIELDPLUGIN_PARAM TablesSizeY
+
+        std::vector<int> PosEnable;
+        std::vector<int> PosId;
+        std::vector<int> PosCorrX;
+        std::vector<int> PosCorrY;
+        std::vector<int> PosPsUpX;
+        std::vector<int> PosPsLowX;
 };
 
 #endif // FLAT_FIELD_PLUGIN_H

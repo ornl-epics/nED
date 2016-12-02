@@ -327,6 +327,17 @@ class BasePlugin : public asynPortDriver {
          */
         bool sendParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value);
 
+        /**
+         * Returns the value for an integer from the parameter library.
+         *
+         * Convenience function to look by parameter name that only works for
+         * for first asynPort address plugins.
+         *
+         * @see asynPortDriver::getIntegerParam(int, int*)
+         */
+        asynStatus getIntegerParam(const char *name, int *value);
+        using asynPortDriver::getIntegerParam;
+        
     protected:
         #define FIRST_BASEPLUGIN_PARAM Enable
         int Enable;

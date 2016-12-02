@@ -20,8 +20,6 @@
 
 EPICS_REGISTER_PLUGIN(TimingPlugin, 2, "Port name", string, "Remote port name", string);
 
-const uint32_t TimingPlugin::PACKET_SIZE =  sizeof(DasPacket) + DasPacket::MaxLength;
-
 TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     : BaseDispatcherPlugin(portName, connectPortName, /*blocking=*/0, NUM_TIMINGPLUGIN_PARAMS)
     , m_nReceived(0)
@@ -81,6 +79,13 @@ TimingPlugin::TimingPlugin(const char *portName, const char *connectPortName)
     m_timer.schedule(timerCb, 0.01);
 }
 
+TimingPlugin::~TimingPlugin()
+{
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        delete it->packet;
+    }
+}
+
 asynStatus TimingPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Mode) {
@@ -130,7 +135,8 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
     for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
         const DasPacket *packet = *it;
 
-        if (packet->isData() && packet->getRtdlHeader() == 0) {
+        DasPacket::DataTypeLegacy type = packet->getDataTypeLegacy();
+        if (packet->isData() && type != DasPacket::DATA_TYPE_NEUTRON_RTDL) {
             RtdlHeader *rtdl = 0;
 
             if (packet->datainfo.subpacket_start) {
@@ -150,7 +156,7 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
             else
                 rtdl = &m_metaRtdl;
 
-            const DasPacket *timedPacket = timestampPacket(packet, rtdl);
+            const DasPacket *timedPacket = timestampPacket(packet, rtdl, type != DasPacket::DATA_TYPE_METADATA);
             if (timedPacket) {
                 modifiedPktsList.push_back(timedPacket);
                 m_nProcessed++;
@@ -195,17 +201,18 @@ void TimingPlugin::processDataUnlocked(const DasPacketList * const packetList)
     this->unlock();
 }
 
-const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlHeader *rtdl) {
+const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlHeader *rtdl, bool onlyNeutrons) {
     DasPacket *packet;
     uint32_t nDwords;
+    uint32_t maxSize = DasPacket::getMaxLength() - sizeof(RtdlHeader);
 
-    if (src->length() + sizeof(RtdlHeader) > PACKET_SIZE) {
-        LOG_WARN("Packet size %u exceeds upper limit %lu, not timestamping data packet", src->length(), PACKET_SIZE - sizeof(RtdlHeader));
+    if (src->getLength() > maxSize) {
+        LOG_WARN("Packet size %u exceeds upper limit %u, not timestamping data packet", src->getLength(), maxSize);
         return reinterpret_cast<DasPacket *>(0);
     }
 
     // Get new packet buffer
-    packet = allocPacket(src->length() + sizeof(RtdlHeader));
+    packet = allocPacket(src->getLength() + sizeof(RtdlHeader));
     if (!packet)
         return packet;
 
@@ -217,6 +224,7 @@ const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlH
     memcpy(rtdlHdr, rtdl, sizeof(RtdlHeader));
     packet->payload_length = sizeof(RtdlHeader);
     packet->datainfo.rtdl_present = 1;
+    packet->datainfo.only_neutron_data = onlyNeutrons;
 
     // And finally copy the payload
     uint32_t *destPayload = packet->getData(&nDwords);
@@ -229,21 +237,27 @@ const DasPacket *TimingPlugin::timestampPacket(const DasPacket *src, const RtdlH
 
 DasPacket *TimingPlugin::allocPacket(uint32_t size)
 {
-    DasPacket *packet;
+    DasPacket *packet = reinterpret_cast<DasPacket *>(0);
 
-    if (size > PACKET_SIZE) {
-        LOG_ERROR("New packet size must not exceed %u", PACKET_SIZE);
-        return reinterpret_cast<DasPacket *>(0);
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        if (it->size >= size && it->inUse == false) {
+            it->inUse = true;
+            packet = it->packet;
+            break;
+        }
     }
 
-    if (m_pool.size() > 0) {
-        packet = m_pool.front();
-        m_pool.pop_front();
-    } else {
-        packet = reinterpret_cast<DasPacket *>(calloc(1, PACKET_SIZE));
+    if (!packet) {
+        packet = DasPacket::alloc(size);
         if (!packet) {
             LOG_ERROR("Failed to allocate packet buffer");
-            return reinterpret_cast<DasPacket *>(0);
+        } else {
+            PoolEntry entry;
+            entry.inUse = true;
+            entry.size = size;
+            entry.packet = packet;
+            m_pool.push_back(entry);
+            LOG_DEBUG("Increased packet pool to %zu", m_pool.size());
         }
     }
 
@@ -252,7 +266,17 @@ DasPacket *TimingPlugin::allocPacket(uint32_t size)
 
 void TimingPlugin::freePacket(DasPacket *packet)
 {
-    m_pool.push_back(packet);
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        if (it->packet == packet) {
+            if (it->inUse == false) {
+                LOG_WARN("Corrupted pool, packet returned twice?");
+            }
+            it->inUse = false;
+            return;
+        }
+    }
+    LOG_WARN("Packet not found in pool, discarding");
+    delete packet;
 }
 
 double TimingPlugin::updateRtdl()
@@ -328,7 +352,7 @@ bool TimingPlugin::createFakeRtdl(DasPacket *packet)
     rtdl->cycle = (rtdl->cycle + 1) % 600;
     rtdl->last_cycle_veto = 0;
     rtdl->pulse.charge = 100000 + 5 * rand();
-    rtdl->tsync_width = (rtdl->cycle == 0x1 ? 166662 : 166661);
+    rtdl->tsync_period = (rtdl->cycle == 0x1 ? 166662 : 166661);
     rtdl->tstat = 30;
     rtdl->pulse.flavor = (rtdl->cycle > 0 ? RtdlHeader::RTDL_FLAVOR_TARGET_1 : RtdlHeader::RTDL_FLAVOR_NO_BEAM);
     rtdl->tof_full_offset = 1;
@@ -409,7 +433,7 @@ bool TimingPlugin::recvRtdlFromEtc(DasPacket *packet)
             rtdl->pulse.bad = (message.pulse_type >> 6) & 0x1;
             rtdl->pulse.charge = message.pulse_charge & 0xFFFFFF;
             rtdl->cycle = (rtdl->cycle + 1) % 600;
-            rtdl->tsync_width = (rtdl->cycle == 0x1 ? 166662 : 166661);
+            rtdl->tsync_period = (rtdl->cycle == 0x1 ? 166662 : 166661);
             rtdl->tsync_delay = 0x80000000;
 
             // Ring revolution period frame id is 4

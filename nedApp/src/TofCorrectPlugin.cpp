@@ -17,8 +17,6 @@
 
 EPICS_REGISTER_PLUGIN(TofCorrectPlugin, 2, "Port name", string, "Remote port name", string);
 
-const uint32_t TofCorrectPlugin::PACKET_SIZE =  sizeof(DasPacket) + DasPacket::MaxLength;
-
 TofCorrectPlugin::TofCorrectPlugin(const char *portName, const char *connectPortName)
     : BaseDispatcherPlugin(portName, connectPortName, /*blocking=*/0, NUM_TOFCORRECTPLUGIN_PARAMS)
     , m_nReceived(0)
@@ -37,6 +35,13 @@ TofCorrectPlugin::TofCorrectPlugin(const char *portName, const char *connectPort
     createParam("PixelId3",     asynParamInt32, &PixelId3,    0); // WRITE - Select pixel id
     createParam("FrameLen3",    asynParamInt32, &FrameLen3,   0); // WRITE - Frame length in nsec
     createParam("NCorrected3",  asynParamInt32, &NCorrected3, 0); // READ - Number of corrected events
+}
+
+TofCorrectPlugin::~TofCorrectPlugin()
+{
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        delete it->packet;
+    }
 }
 
 void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetList)
@@ -66,35 +71,37 @@ void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetLis
     getIntegerParam(NCorrected3, &nEvents[2]);
     this->unlock();
 
-    if (frameLen == 0 || tofOffset == 0) {
+    bool enabled = false;
+    for (int i=0; i<3; i++) {
+        if (pixelId[i] != 0) {
+            enabled = true;
+            if (frameLen[i] == 0)
+                frameLen[i] = 1;
+            tofOffset[i] /= 100;
+            frameLen[i] /= 100;
+            fineOffset[i] = tofOffset[i] % frameLen[i];
+            frameNum[i] = tofOffset[i] / frameLen[i];
+            coarseOffset[i] = frameNum[i] * frameLen[i];
+        }
+    }
+
+    if (enabled == false) {
         modifiedPktsList.reset(packetList); // reset() automatically reserves
         sendToPlugins(&modifiedPktsList);
         modifiedPktsList.release();
         modifiedPktsList.waitAllReleased();
         modifiedPktsList.clear();
     } else {
-        for (int i=0; i<3; i++) {
-            if (pixelId[i] != 0) {
-                if (frameLen[i] == 0)
-                    frameLen[i] = 1;
-                tofOffset[i] /= 100;
-                frameLen[i] /= 100;
-                fineOffset[i] = tofOffset[i] % frameLen[i];
-                frameNum[i] = tofOffset[i] / frameLen[i];
-                coarseOffset[i] = frameNum[i] * frameLen[i];
-            }
-        }
-
         for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
             const DasPacket *packet = *it;
 
             if (packet->isMetaData()) {
-                DasPacket *modifiedPacket = allocPacket(packet->length());
+                DasPacket *modifiedPacket = allocPacket(packet->getLength());
                 if (!modifiedPacket)
                     continue;
                 allocPktsList.push_back(modifiedPacket);
 
-                if (packet->copyHeader(modifiedPacket, packet->length())) {
+                if (packet->copyHeader(modifiedPacket, packet->getLength())) {
                     uint32_t nDwords;
                     uint32_t *dstData = modifiedPacket->getData(&nDwords);
                     const uint32_t *srcData = packet->getData(&nDwords);
@@ -167,21 +174,27 @@ void TofCorrectPlugin::processDataUnlocked(const DasPacketList * const packetLis
 
 DasPacket *TofCorrectPlugin::allocPacket(uint32_t size)
 {
-    DasPacket *packet;
+    DasPacket *packet = reinterpret_cast<DasPacket *>(0);
 
-    if (size > PACKET_SIZE) {
-        LOG_ERROR("New packet size must not exceed %u", PACKET_SIZE);
-        return reinterpret_cast<DasPacket *>(0);
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        if (it->size >= size && it->inUse == false) {
+            it->inUse = true;
+            packet = it->packet;
+            break;
+        }
     }
 
-    if (m_pool.size() > 0) {
-        packet = m_pool.front();
-        m_pool.pop_front();
-    } else {
-        packet = reinterpret_cast<DasPacket *>(calloc(1, PACKET_SIZE));
+    if (!packet) {
+        packet = DasPacket::alloc(size);
         if (!packet) {
             LOG_ERROR("Failed to allocate packet buffer");
-            return reinterpret_cast<DasPacket *>(0);
+        } else {
+            PoolEntry entry;
+            entry.inUse = true;
+            entry.size = size;
+            entry.packet = packet;
+            m_pool.push_back(entry);
+            LOG_DEBUG("Increased packet pool to %zu", m_pool.size());
         }
     }
 
@@ -190,5 +203,15 @@ DasPacket *TofCorrectPlugin::allocPacket(uint32_t size)
 
 void TofCorrectPlugin::freePacket(DasPacket *packet)
 {
-    m_pool.push_back(packet);
+    for (auto it=m_pool.begin(); it!=m_pool.end(); it++) {
+        if (it->packet == packet) {
+            if (it->inUse == false) {
+                LOG_WARN("Corrupted pool, packet returned twice?");
+            }
+            it->inUse = false;
+            return;
+        }
+    }
+    LOG_WARN("Packet not found in pool, discarding");
+    delete packet;
 }
