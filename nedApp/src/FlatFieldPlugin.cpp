@@ -168,7 +168,7 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == PsFractWidth) {
         if (value < 1 || value > 30)
             return asynError;
-    } else if (pasynUser->reason ==  || pasynUser->reason == YMaxOut) {
+    } else if (pasynUser->reason ==  XMaxOut || pasynUser->reason == YMaxOut) {
         if (value < 1 || value >= 1024)
             return asynError;
     } else if (pasynUser->reason == CorrEn) {
