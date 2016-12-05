@@ -26,9 +26,14 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVDoublePtr    proton_charge;    //!< Pulse proton charge in Coulombs
         epics::pvData::PVUIntArrayPtr time_of_flight;   //!< Time of flight offest from pulse start
         epics::pvData::PVUIntArrayPtr pixel;            //!< Pixel ID
-        epics::pvData::PVUIntArrayPtr sample_a1;        //!< LPSD ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_a2;        //!< CROC ONLY: TimeRange samples
-        epics::pvData::PVUIntArrayPtr sample_a8;        //!< AROC/ACPC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_a1;        //!< LPSD ONLY: ADC samples, or AROC ADC sample A1
+        epics::pvData::PVUIntArrayPtr sample_a2;        //!< CROC ONLY: TimeRange samples, or AROC ADC sample A2
+        epics::pvData::PVUIntArrayPtr sample_a3;        //!< AROC ADC sample A3
+        epics::pvData::PVUIntArrayPtr sample_a4;        //!< AROC ADC sample A4
+        epics::pvData::PVUIntArrayPtr sample_a5;        //!< AROC ADC sample A5
+        epics::pvData::PVUIntArrayPtr sample_a6;        //!< AROC ADC sample A6
+        epics::pvData::PVUIntArrayPtr sample_a7;        //!< AROC ADC sample A7
+        epics::pvData::PVUIntArrayPtr sample_a8;        //!< AROC ADC sample A8
         epics::pvData::PVUShortArrayPtr sample_x1;      //!< BNLROC & CROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_x2;      //!< BNLROC & CROC: ADC samples
         epics::pvData::PVUShortArrayPtr sample_x3;      //!< BNLROC & CROC: ADC samples
@@ -81,8 +86,14 @@ class PvaNeutronData : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUShortArrayPtr sample_g13;     //!< CROC: photon count in g13
         epics::pvData::PVUShortArrayPtr sample_g14;     //!< CROC: photon count in g14
         epics::pvData::PVUIntArrayPtr sample_a48;       //!< ACPC ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_b1;        //!< LPSD ONLY: ADC samples
-        epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC/ACPC ONLY: ADC samples
+        epics::pvData::PVUIntArrayPtr sample_b1;        //!< LPSD ONLY: ADC samples, or AROC ADC sample B1
+        epics::pvData::PVUIntArrayPtr sample_b2;        //!< AROC ADC sample B2
+        epics::pvData::PVUIntArrayPtr sample_b3;        //!< AROC ADC sample B3
+        epics::pvData::PVUIntArrayPtr sample_b4;        //!< AROC ADC sample B4
+        epics::pvData::PVUIntArrayPtr sample_b5;        //!< AROC ADC sample B5
+        epics::pvData::PVUIntArrayPtr sample_b6;        //!< AROC ADC sample B6
+        epics::pvData::PVUIntArrayPtr sample_b7;        //!< AROC ADC sample B7
+        epics::pvData::PVUIntArrayPtr sample_b8;        //!< AROC ADC sample B8
         epics::pvData::PVUIntArrayPtr sample_b12;       //!< AROC ONLY: Diagnostic values
         epics::pvData::PVUIntArrayPtr position_index;   //!< Position index mapping
         epics::pvData::PVFloatArrayPtr position_x;      //!< Position X

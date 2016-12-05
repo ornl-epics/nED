@@ -142,7 +142,21 @@ class AcpcPvaPlugin : public BasePvaPlugin {
             epics::pvData::PVFloatArray::svector position_y;
             epics::pvData::PVFloatArray::svector photo_sum_x;
             epics::pvData::PVFloatArray::svector photo_sum_y;
+            epics::pvData::PVUIntArray::svector sample_a1;
+            epics::pvData::PVUIntArray::svector sample_a2;
+            epics::pvData::PVUIntArray::svector sample_a3;
+            epics::pvData::PVUIntArray::svector sample_a4;
+            epics::pvData::PVUIntArray::svector sample_a5;
+            epics::pvData::PVUIntArray::svector sample_a6;
+            epics::pvData::PVUIntArray::svector sample_a7;
             epics::pvData::PVUIntArray::svector sample_a8;
+            epics::pvData::PVUIntArray::svector sample_b1;
+            epics::pvData::PVUIntArray::svector sample_b2;
+            epics::pvData::PVUIntArray::svector sample_b3;
+            epics::pvData::PVUIntArray::svector sample_b4;
+            epics::pvData::PVUIntArray::svector sample_b5;
+            epics::pvData::PVUIntArray::svector sample_b6;
+            epics::pvData::PVUIntArray::svector sample_b7;
             epics::pvData::PVUIntArray::svector sample_b8;
         } m_cache;
 

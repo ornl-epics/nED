@@ -129,19 +129,43 @@ void AcpcPvaPlugin::processRawData(const uint32_t *data, uint32_t count)
         m_cache.position_index.push_back(events->position_index & 0x7FFFFFFF);
 
         if (events->position_index & 0x10) {
-            for (int i = 0; i < 8; i++)
-                m_cache.sample_a8.push_back(events->sample_a[i]);
+            m_cache.sample_a1.push_back(events->sample_a[0]);
+            m_cache.sample_a2.push_back(events->sample_a[1]);
+            m_cache.sample_a3.push_back(events->sample_a[2]);
+            m_cache.sample_a4.push_back(events->sample_a[3]);
+            m_cache.sample_a5.push_back(events->sample_a[4]);
+            m_cache.sample_a6.push_back(events->sample_a[5]);
+            m_cache.sample_a7.push_back(events->sample_a[6]);
+            m_cache.sample_a8.push_back(events->sample_a[7]);
         } else {
-            for (int i = 7; i >= 0; i--)
-                m_cache.sample_a8.push_back(events->sample_a[i]);
+            m_cache.sample_a1.push_back(events->sample_a[7]);
+            m_cache.sample_a2.push_back(events->sample_a[6]);
+            m_cache.sample_a3.push_back(events->sample_a[5]);
+            m_cache.sample_a4.push_back(events->sample_a[4]);
+            m_cache.sample_a5.push_back(events->sample_a[3]);
+            m_cache.sample_a6.push_back(events->sample_a[2]);
+            m_cache.sample_a7.push_back(events->sample_a[1]);
+            m_cache.sample_a8.push_back(events->sample_a[0]);
         }
 
         if (events->position_index & 0x20) {
-            for (int i = 0; i < 8; i++)
-                m_cache.sample_b8.push_back(events->sample_b[i]);
+            m_cache.sample_b1.push_back(events->sample_b[0]);
+            m_cache.sample_b2.push_back(events->sample_b[1]);
+            m_cache.sample_b3.push_back(events->sample_b[2]);
+            m_cache.sample_b4.push_back(events->sample_b[3]);
+            m_cache.sample_b5.push_back(events->sample_b[4]);
+            m_cache.sample_b6.push_back(events->sample_b[5]);
+            m_cache.sample_b7.push_back(events->sample_b[6]);
+            m_cache.sample_b8.push_back(events->sample_b[7]);
         } else {
-            for (int i = 7; i >= 0; i--)
-                m_cache.sample_b8.push_back(events->sample_b[i]);
+            m_cache.sample_b1.push_back(events->sample_b[7]);
+            m_cache.sample_b2.push_back(events->sample_b[6]);
+            m_cache.sample_b3.push_back(events->sample_b[5]);
+            m_cache.sample_b4.push_back(events->sample_b[4]);
+            m_cache.sample_b5.push_back(events->sample_b[3]);
+            m_cache.sample_b6.push_back(events->sample_b[2]);
+            m_cache.sample_b7.push_back(events->sample_b[1]);
+            m_cache.sample_b8.push_back(events->sample_b[0]);
         }
 
         events++;
@@ -152,14 +176,42 @@ void AcpcPvaPlugin::postRawData(const PvaNeutronData::shared_pointer& pvRecord)
 {
     pvRecord->time_of_flight->replace(freeze(m_cache.time_of_flight));
     pvRecord->position_index->replace(freeze(m_cache.position_index));
+    pvRecord->sample_a1->replace(freeze(m_cache.sample_a1));
+    pvRecord->sample_a2->replace(freeze(m_cache.sample_a2));
+    pvRecord->sample_a3->replace(freeze(m_cache.sample_a3));
+    pvRecord->sample_a4->replace(freeze(m_cache.sample_a4));
+    pvRecord->sample_a5->replace(freeze(m_cache.sample_a5));
+    pvRecord->sample_a6->replace(freeze(m_cache.sample_a6));
+    pvRecord->sample_a7->replace(freeze(m_cache.sample_a7));
     pvRecord->sample_a8->replace(freeze(m_cache.sample_a8));
+    pvRecord->sample_b1->replace(freeze(m_cache.sample_b1));
+    pvRecord->sample_b2->replace(freeze(m_cache.sample_b2));
+    pvRecord->sample_b3->replace(freeze(m_cache.sample_b3));
+    pvRecord->sample_b4->replace(freeze(m_cache.sample_b4));
+    pvRecord->sample_b5->replace(freeze(m_cache.sample_b5));
+    pvRecord->sample_b6->replace(freeze(m_cache.sample_b6));
+    pvRecord->sample_b7->replace(freeze(m_cache.sample_b7));
     pvRecord->sample_b8->replace(freeze(m_cache.sample_b8));
 
     // Reduce gradual memory reallocation by pre-allocating instead of clear()
     m_cache.time_of_flight.reserve(CACHE_SIZE);
     m_cache.position_index.reserve(CACHE_SIZE);
-    m_cache.sample_a8.reserve(8 * CACHE_SIZE);
-    m_cache.sample_b8.reserve(8 * CACHE_SIZE);
+    m_cache.sample_a1.reserve(CACHE_SIZE);
+    m_cache.sample_a2.reserve(CACHE_SIZE);
+    m_cache.sample_a3.reserve(CACHE_SIZE);
+    m_cache.sample_a4.reserve(CACHE_SIZE);
+    m_cache.sample_a5.reserve(CACHE_SIZE);
+    m_cache.sample_a6.reserve(CACHE_SIZE);
+    m_cache.sample_a7.reserve(CACHE_SIZE);
+    m_cache.sample_a8.reserve(CACHE_SIZE);
+    m_cache.sample_b1.reserve(CACHE_SIZE);
+    m_cache.sample_b2.reserve(CACHE_SIZE);
+    m_cache.sample_b3.reserve(CACHE_SIZE);
+    m_cache.sample_b4.reserve(CACHE_SIZE);
+    m_cache.sample_b5.reserve(CACHE_SIZE);
+    m_cache.sample_b6.reserve(CACHE_SIZE);
+    m_cache.sample_b7.reserve(CACHE_SIZE);
+    m_cache.sample_b8.reserve(CACHE_SIZE);
 }
 
 void AcpcPvaPlugin::flushData()

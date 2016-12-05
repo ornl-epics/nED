@@ -26,6 +26,11 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("pixel",          standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_a1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_a2",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a3",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a4",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a5",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a6",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_a7",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_a8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_g1",      standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_g2",      standardField->scalarArray(epics::pvData::pvUShort, ""))
@@ -80,6 +85,12 @@ PvaNeutronData::shared_pointer PvaNeutronData::create(const std::string &recordN
         ->add("sample_y17",     standardField->scalarArray(epics::pvData::pvUShort, ""))
         ->add("sample_a48",     standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_b1",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b2",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b3",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b4",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b5",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b6",      standardField->scalarArray(epics::pvData::pvUInt, ""))
+        ->add("sample_b7",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_b8",      standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("sample_b12",     standardField->scalarArray(epics::pvData::pvUInt, ""))
         ->add("position_index", standardField->scalarArray(epics::pvData::pvUInt, ""))
@@ -130,6 +141,26 @@ bool PvaNeutronData::init()
 
     sample_a2 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a2.value");
     if (sample_a2.get() == NULL)
+        return false;
+
+    sample_a3 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a3.value");
+    if (sample_a3.get() == NULL)
+        return false;
+
+    sample_a4 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a4.value");
+    if (sample_a4.get() == NULL)
+        return false;
+
+    sample_a5 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a5.value");
+    if (sample_a5.get() == NULL)
+        return false;
+
+    sample_a6 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a6.value");
+    if (sample_a6.get() == NULL)
+        return false;
+
+    sample_a7 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a7.value");
+    if (sample_a7.get() == NULL)
         return false;
 
     sample_a8 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a8.value");
@@ -346,6 +377,30 @@ bool PvaNeutronData::init()
 
     sample_b1 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b1.value");
     if (sample_b1.get() == NULL)
+        return false;
+
+    sample_b2 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b2.value");
+    if (sample_b2.get() == NULL)
+        return false;
+
+    sample_b3 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b3.value");
+    if (sample_b3.get() == NULL)
+        return false;
+
+    sample_b4 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b4.value");
+    if (sample_b4.get() == NULL)
+        return false;
+
+    sample_b5 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b5.value");
+    if (sample_b5.get() == NULL)
+        return false;
+
+    sample_b6 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b6.value");
+    if (sample_b6.get() == NULL)
+        return false;
+
+    sample_b7 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b7.value");
+    if (sample_b7.get() == NULL)
         return false;
 
     sample_b8 = getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b8.value");
