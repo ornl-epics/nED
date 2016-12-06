@@ -21,17 +21,17 @@
 
 SUPPORT=/home/controls/epics
 
-ASYN=           $(SUPPORT)/asyn/master.RHEL6
-AUTOSAVE=       $(SUPPORT)/autosave/master.RHEL6
-STREAMDEVICE=   $(SUPPORT)/StreamDevice/master.RHEL6
-OCCLIB=         /home/controls/occ/master.RHEL6/lib
-SNCSEQ=		$(SUPPORT)/seq/master.RHEL6
-PVMEDIATOR=	$(SUPPORT)/pvMediator/master.RHEL6
-CALC=		$(SUPPORT)/calc/master.RHEL6
-BUSY=		$(SUPPORT)/busy/master.RHEL6
-GENERICIO=      $(SUPPORT)/genericIO/master.RHEL6
+ASYN=           $(SUPPORT)/asyn/master
+AUTOSAVE=       $(SUPPORT)/autosave/master
+STREAMDEVICE=   $(SUPPORT)/StreamDevice/master
+OCCLIB=         /home/controls/occ/master/lib
+SNCSEQ=		$(SUPPORT)/seq/master
+PVMEDIATOR=	$(SUPPORT)/pvMediator/master
+CALC=		$(SUPPORT)/calc/master
+BUSY=		$(SUPPORT)/busy/master
+GENERICIO=      $(SUPPORT)/genericIO/master
 
-EPICS_BASE=/home/controls/epics/base/master.RHEL6
-BASEV4=/home/controls/epics/basev4/master.RHEL6
+EPICS_BASE=/home/controls/epics/base/master
+BASEV4=/home/controls/epics/basev4/master
 
 include $(BASEV4)/RELEASE.local
