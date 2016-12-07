@@ -241,22 +241,22 @@ void ArocPlugin::createConfigParams_v23()
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",      '1',  0x0, 32,  0,    0); // Chan1 position index
 
-    createConfigParam("Ch1:A:InOffset",   '2',  0x0,  9,  0,  100); // Chan1 A input offset
-    createConfigParam("Ch2:A:InOffset",   '2',  0x1,  9,  0,  100); // Chan2 A input offset
-    createConfigParam("Ch3:A:InOffset",   '2',  0x2,  9,  0,  100); // Chan3 A input offset
-    createConfigParam("Ch4:A:InOffset",   '2',  0x3,  9,  0,  100); // Chan4 A input offset
-    createConfigParam("Ch5:A:InOffset",   '2',  0x4,  9,  0,  100); // Chan5 A input offset
-    createConfigParam("Ch6:A:InOffset",   '2',  0x5,  9,  0,  100); // Chan6 A input offset
-    createConfigParam("Ch7:A:InOffset",   '2',  0x6,  9,  0,  100); // Chan7 A input offset
-    createConfigParam("Ch8:A:InOffset",   '2',  0x7,  9,  0,  100); // Chan8 A input offset
-    createConfigParam("Ch1:B:InOffset",   '2',  0x8,  9,  0,  100); // Chan1 B input offset
-    createConfigParam("Ch2:B:InOffset",   '2',  0x9,  9,  0,  100); // Chan2 B input offset
-    createConfigParam("Ch3:B:InOffset",   '2',  0xA,  9,  0,  100); // Chan3 B input offset
-    createConfigParam("Ch4:B:InOffset",   '2',  0xB,  9,  0,  100); // Chan4 B input offset
-    createConfigParam("Ch5:B:InOffset",   '2',  0xC,  9,  0,  100); // Chan5 B input offset
-    createConfigParam("Ch6:B:InOffset",   '2',  0xD,  9,  0,  100); // Chan6 B input offset
-    createConfigParam("Ch7:B:InOffset",   '2',  0xE,  9,  0,  100); // Chan7 B input offset
-    createConfigParam("Ch8:B:InOffset",   '2',  0xF,  9,  0,  100); // Chan8 B input offset
+    createConfigParam("Ch1:A:InOffset",   '2',  0x0,  9,  0,  100, CONV_SIGN_MAGN); // Chan1 A input offset
+    createConfigParam("Ch2:A:InOffset",   '2',  0x1,  9,  0,  100, CONV_SIGN_MAGN); // Chan2 A input offset
+    createConfigParam("Ch3:A:InOffset",   '2',  0x2,  9,  0,  100, CONV_SIGN_MAGN); // Chan3 A input offset
+    createConfigParam("Ch4:A:InOffset",   '2',  0x3,  9,  0,  100, CONV_SIGN_MAGN); // Chan4 A input offset
+    createConfigParam("Ch5:A:InOffset",   '2',  0x4,  9,  0,  100, CONV_SIGN_MAGN); // Chan5 A input offset
+    createConfigParam("Ch6:A:InOffset",   '2',  0x5,  9,  0,  100, CONV_SIGN_MAGN); // Chan6 A input offset
+    createConfigParam("Ch7:A:InOffset",   '2',  0x6,  9,  0,  100, CONV_SIGN_MAGN); // Chan7 A input offset
+    createConfigParam("Ch8:A:InOffset",   '2',  0x7,  9,  0,  100, CONV_SIGN_MAGN); // Chan8 A input offset
+    createConfigParam("Ch1:B:InOffset",   '2',  0x8,  9,  0,  100, CONV_SIGN_MAGN); // Chan1 B input offset
+    createConfigParam("Ch2:B:InOffset",   '2',  0x9,  9,  0,  100, CONV_SIGN_MAGN); // Chan2 B input offset
+    createConfigParam("Ch3:B:InOffset",   '2',  0xA,  9,  0,  100, CONV_SIGN_MAGN); // Chan3 B input offset
+    createConfigParam("Ch4:B:InOffset",   '2',  0xB,  9,  0,  100, CONV_SIGN_MAGN); // Chan4 B input offset
+    createConfigParam("Ch5:B:InOffset",   '2',  0xC,  9,  0,  100, CONV_SIGN_MAGN); // Chan5 B input offset
+    createConfigParam("Ch6:B:InOffset",   '2',  0xD,  9,  0,  100, CONV_SIGN_MAGN); // Chan6 B input offset
+    createConfigParam("Ch7:B:InOffset",   '2',  0xE,  9,  0,  100, CONV_SIGN_MAGN); // Chan7 B input offset
+    createConfigParam("Ch8:B:InOffset",   '2',  0xF,  9,  0,  100, CONV_SIGN_MAGN); // Chan8 B input offset
 
     createConfigParam("Ch1:A:AdcOffset",  '2', 0x10,  8,  0,  100); // Chan1 A ADC offset
     createConfigParam("Ch2:A:AdcOffset",  '2', 0x11,  8,  0,  100); // Chan2 A ADC offset
@@ -432,19 +432,19 @@ void ArocPlugin::createConfigParams_v23()
 
     createConfigParam("TimeVetoLow",      'E',  0x0, 32,  0,    0); // Timestamp veto low
     createConfigParam("TimeVetoHigh",     'E',  0x2, 32,  0, 2147483647); // Timestamp veto high
-    createConfigParam("TriggerDelay",     'E',  0x4, 16,  0, 5000); // Type1 calibration trigger delay
+    createConfigParam("FakeTrigDelay",    'E',  0x4, 16,  0, 5000); // Type1 calibration trigger delay
     createConfigParam("Sample1",          'E',  0x5, 10,  0,    2); // Type1 calibration sample1
     createConfigParam("Sample2",          'E',  0x6, 10,  0,   12); // Type1 calibration sample2
-    createConfigParam("IntRelease",       'E',  0x7, 10,  0,  506); // Integrator release point
+    createConfigParam("IntRelease",       'E',  0x7, 10,  0,  -6, CONV_SIGN_2COMP); // Integrator release point
     createConfigParam("IbcMask",          'E',  0x8,  9,  0,  511); // IBC mask
     createConfigParam("TsyncDelay",       'E',  0x9, 32,  0,    0); // TSYNC delay
 
-    createConfigParam("Reset",            'F',  0x0,  1,  0,    0); // Reset enable                  (0=disable,1=enable)
-    createConfigParam("TclkSelect",       'F',  0x0,  1,  1,    0); // TCLK select                   (0=external,1=internal 10MHz)
-    createConfigParam("TsyncSelect",      'F',  0x0,  1,  2,    0); // TSYNC select                  (0=external,1=internal 60Hz)
-    createConfigParam("TxEnable",         'F',  0x0,  1,  3,    1); // TX enable                     (0=external,1=always enabled)
+    createConfigParam("TcResetMode",      'F',  0x0,  1,  0,    0); // Reset enable                  (0=disable,1=enable)
+    createConfigParam("TcTclkMode",       'F',  0x0,  1,  1,    0); // TCLK select                   (0=external,1=internal 10MHz)
+    createConfigParam("TcTsyncMode",      'F',  0x0,  1,  2,    0); // TSYNC select                  (0=external,1=internal 60Hz)
+    createConfigParam("TcTxEnMode",       'F',  0x0,  1,  3,    1); // TX enable                     (0=external,1=always enabled)
     createConfigParam("AcquireMode",      'F',  0x0,  2,  4,    0); // Acquire mode                  (0=idle,1=fakedata,2=normal,3=trigger)
-    createConfigParam("AutoCorrEn",       'F',  0x0,  1,  6,    0); // Auto correction enable        (0=enable,1=disable)
+    createConfigParam("AutoCorrectionEn", 'F',  0x0,  1,  6,    0); // Auto correction enable        (0=enable,1=disable)
     createConfigParam("IbcSelect",        'F',  0x0,  1,  7,    0); // IBC mode                      (0=external,1=internal))
     createConfigParam("XorderEn",         'F',  0x0,  1,  8,    1); // X order                       (0=disabled,1=enabled)
     createConfigParam("RawDiscOutput",    'F',  0x0,  1,  9,    1); // Raw disc output               (0=disabled,1=enabled)
