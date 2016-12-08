@@ -288,7 +288,7 @@ DasPacket::CommandType DasPacket::getCommandType() const
 DasPacket::CommandType DasPacket::getResponseType() const
 {
     CommandType command = getCommandType();
-    if (command != static_cast<CommandType>(0) && cmdinfo.is_response)
+    if (command != static_cast<CommandType>(0) && !cmdinfo.is_response)
         command = static_cast<CommandType>(0);
     return command;
 }
