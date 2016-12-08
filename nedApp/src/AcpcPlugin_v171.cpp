@@ -17,7 +17,7 @@
  * ACPC 17.01 is next version on Miljko's ACPC, which cleans up register interface.
  */
 
-void AcpcPlugin::createStatusParams_v171()
+void AcpcPlugin::createParams_v171()
 {
     createStatusParam("Lvds1:DataParseError", 0x0,  8,  0); // Data parser error status
     createStatusParam("Lvds1:DataParseGood",  0x0,  2,  8); // Data parser good status
@@ -101,12 +101,12 @@ void AcpcPlugin::createStatusParams_v171()
     createStatusParam("ErrPktLengthError",   0x1A,  1,  1); // Packet length error          (0=no error,1=error)
     createStatusParam("ErrCfgError",         0x1A,  1,  2); // Configuration error          (0=no error,1=error)
     createStatusParam("Configured",          0x1A,  1,  3); // Configured                   (0=not configured [alarm],1=configured)
-    createConfigParam("OutputModeRB",        0x1A,  2,  6); // Output mode                  (0=normal,1=off,2=raw,3=verbose)
-    createConfigParam("TcResetModeRB",       0x1A,  1,  8); // Reset mode                   (0=soft, 1=hard)
-    createConfigParam("TcTclkModeRB",        0x1A,  1,  9); // Tclk mode                    (0=external, 1=internal)
-    createConfigParam("TcTsynModeRB",        0x1A,  1, 10); // TSYNC mode                   (0=external, 1=internal)
-    createConfigParam("TcTxenModeRB",        0x1A,  1, 11); // TXen  mode                   (0=external, 1=internal)
-    createConfigParam("VerboseStatusRB",     0x1A,  1, 12); // Verbose status               (0=short, 1=long)
+    createStatusParam("OutputModeRB",        0x1A,  2,  6); // Output mode                  (0=normal,1=off,2=raw,3=verbose)
+    createStatusParam("TcResetModeRB",       0x1A,  1,  8); // Reset mode                   (0=soft, 1=hard)
+    createStatusParam("TcTclkModeRB",        0x1A,  1,  9); // Tclk mode                    (0=external, 1=internal)
+    createStatusParam("TcTsynModeRB",        0x1A,  1, 10); // TSYNC mode                   (0=external, 1=internal)
+    createStatusParam("TcTxenModeRB",        0x1A,  1, 11); // TXen  mode                   (0=external, 1=internal)
+    createStatusParam("VerboseStatusRB",     0x1A,  1, 12); // Verbose status               (0=short, 1=long)
     createStatusParam("Acquiring",           0x1A,  1, 13); // Acquiring data               (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Discovered",          0x1A,  1, 14); // Discovered                   (0=not discovered,1=discovered, archive:monitor)
 

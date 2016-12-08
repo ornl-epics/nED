@@ -17,7 +17,7 @@
  * ACPC 4.01 is Miljkos firmware that produces good X,Y position in normal mode.
  */
 
-void AcpcPlugin::createStatusParams_v144()
+void AcpcPlugin::createParams_v144()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                            | EPICS record description | (bi and mbbi description)
     createStatusParam("Ctrl:RxFlg",           0x0,  8,  0); // CTRL error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
@@ -199,10 +199,7 @@ void AcpcPlugin::createStatusParams_v144()
     createStatusParam("ErrTimeout",          0x21,  1, 10); // LVDS packet timeout           (0=no timeout,1=timeout)
     createStatusParam("ErrLength",           0x21,  1, 11); // LVDS packet length error      (0=no error,1=error)
     createStatusParam("SortHasData",         0x21,  1, 12); // Sort data available           (0=no data,1=has data)
-}
 
-void AcpcPlugin::createConfigParams_v144()
-{
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",        '1',  0x0, 32,  0,    0); // Chan1 position index
 
