@@ -75,7 +75,7 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
     uint32_t real_payload_length;
     real_payload_length = ALIGN_UP(payload_length, 2); // 2-byte aligned data for LVDS stuff
     real_payload_length *= 2; // 32 bits are devided into two dwords
-    real_payload_length += (destination != HWID_BROADCAST ? 2*sizeof(uint32_t) : 0); // First 2 dwords of the payload represent LVDS address for non-global commands
+    real_payload_length += (destination != HWID_BROADCAST_SW ? 2*sizeof(uint32_t) : 0); // First 2 dwords of the payload represent LVDS address for non-global commands
 
     cmdinfo.is_command = true;
     cmdinfo.is_passthru = true;
@@ -100,7 +100,7 @@ DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandT
         packet = new (addr) DasPacket(source, 0, cmdinfo, real_payload_length, 0);
 
         // Add 2 dwords for destination address, both LVDS pass-thru
-        if (destination != HWID_BROADCAST) {
+        if (destination != HWID_BROADCAST_SW) {
             packet->payload[offset] = destination & 0xFFFF;
             packet->payload[offset] |= (lvdsParity(packet->payload[offset]) << 16);
             offset++;

@@ -52,8 +52,9 @@ struct DasPacket
          * Well known hardware addresses, big-endian byte order.
          */
         enum HardwareId {
-            HWID_BROADCAST              = 0x0,      //!< Everybody should receive the packet
-            HWID_SELF                   = 0xF10CC,  //!< Preprocessor HWID
+            HWID_BROADCAST              = 0x0,          //!< Everybody should receive the packet
+            HWID_BROADCAST_SW           = 0xFFFFFFFF,   //!< Internal id only, creates a single word (global) LVDS command
+            HWID_SELF                   = 0xF10CC,      //!< Preprocessor HWID
         };
 
         /**
