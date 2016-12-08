@@ -161,6 +161,14 @@ record(mbbi, "$(P)RspCmdAck")
     field(TWVL, "65")
     field(TWST, "ACK")
 }
+record(bi, "$(P)RspFlag")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspFlag")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "")
+    field(ONAM, "RSP")
+}
 record(stringin, "$(P)RspSrc")
 {
     field(DTYP, "asynOctetRead")

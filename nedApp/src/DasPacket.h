@@ -335,6 +335,13 @@ struct DasPacket
         const RtdlHeader *getRtdlHeader() const;
 
         /**
+         * Return packet command type.
+         *
+         * @return Parsed command response type, or 0 if not response packet.
+         */
+        enum CommandType getCommandType() const;
+
+        /**
          * Return the actual response type.
          *
          * Response packet command field does not always contain the response

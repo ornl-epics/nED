@@ -268,10 +268,10 @@ uint32_t DasPacket::getDataLength() const
     return length;
 }
 
-DasPacket::CommandType DasPacket::getResponseType() const
+DasPacket::CommandType DasPacket::getCommandType() const
 {
     CommandType command = static_cast<CommandType>(0);
-    if (cmdinfo.is_command && cmdinfo.is_response) {
+    if (cmdinfo.is_command) {
         if (cmdinfo.command == RSP_ACK || cmdinfo.command == RSP_NACK) {
             if (cmdinfo.is_passthru) {
                 command = reinterpret_cast<const CommandInfo *>(&payload[1])->command;
@@ -282,6 +282,14 @@ DasPacket::CommandType DasPacket::getResponseType() const
             command = cmdinfo.command;
         }
     }
+    return command;
+}
+
+DasPacket::CommandType DasPacket::getResponseType() const
+{
+    CommandType command = getCommandType();
+    if (command != static_cast<CommandType>(0) && cmdinfo.is_response)
+        command = static_cast<CommandType>(0);
     return command;
 }
 
