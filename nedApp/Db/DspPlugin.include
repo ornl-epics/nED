@@ -46,10 +46,10 @@ record(sel, "$(P)RocDS")
 }
 record(sel, "$(P)AcpcDS")
 {
-    field(INPA, "12")
-    field(INPB, "16")
-    field(INPC, "12")
-    field(INPD, "12")
+    field(INPA, "6")
+    field(INPB, "36")
+    field(INPC, "68")
+    field(INPD, "68")
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")
 }
