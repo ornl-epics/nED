@@ -16,11 +16,11 @@ record(longin, "$(P)HwRev")
 }
 record(longin, "$(P)FwVer")
 {
-    field(HIGH, "16")
-    field(LOW,  "18")
+    field(HIGH, "18")
+    field(LOW,  "16")
 }
 record(longin, "$(P)FwRev")
 {
-    field(HIGH, "0")
-    field(LOW,  "2")
+    field(HIGH, "2")
+    field(LOW,  "0")
 }
