@@ -137,6 +137,7 @@ $(PROD_NAME)_SRCS  += PvaCalcVerifyData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
+$(PROD_NAME)_SRCS  += AcpcPlugin_v171.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
 $(PROD_NAME)_SRCS  += TimingPlugin.cpp

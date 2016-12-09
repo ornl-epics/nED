@@ -22,7 +22,6 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_GENERICMODULEPLUGIN_PARAMS, 1,
                  defaultInterfaceMask, defaultInterruptMask)
     , m_payloadLen(0)
-    , m_expectedResponse(static_cast<DasPacket::CommandType>(0))
 {
     createParam("ReqDest",      asynParamOctet, &ReqDest, 0x0); // WRITE - Module address to communicate with
     createParam("ReqCmd",       asynParamInt32, &ReqCmd, 0x0);  // WRITE - Command to be sent to module
@@ -30,6 +29,7 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     createParam("ReqSend",      asynParamInt32, &ReqSend);      // WRITE - Send cached packet
     createParam("RspCmd",       asynParamInt32, &RspCmd);       // READ - Response command (see DasPacket::CommandType)
     createParam("RspCmdAck",    asynParamInt32, &RspCmdAck);    // READ - Response ACK/NACK
+    createParam("RspFlag",      asynParamInt32, &RspFlag);      // READ - Response flag present
     createParam("RspHwType",    asynParamInt32, &RspHwType);    // READ - Hardware type (see DasPacket::ModuleType)
     createParam("RspSrc",       asynParamOctet, &RspSrc);       // READ - Response source address
     createParam("RspRouter",    asynParamOctet, &RspRouter);    // READ - Response router address
@@ -214,7 +214,6 @@ void DebugPlugin::sendPacket()
 {
     DasPacket *packet = reinterpret_cast<DasPacket *>(m_rawPacket);
     BasePlugin::sendToDispatcher(packet);
-    m_expectedResponse = packet->cmdinfo.command;
 
     int nSent = 0;
     getIntegerParam(TxCount, &nSent);
@@ -223,6 +222,7 @@ void DebugPlugin::sendPacket()
     // Invalidate all params
     setIntegerParam(RspCmd,     0);
     setIntegerParam(RspCmdAck,  0);
+    setIntegerParam(RspFlag,    0);
     setIntegerParam(RspHwType,  0);
     setStringParam(RspSrc,      "");
     setStringParam(RspRouter,   "");
@@ -246,11 +246,7 @@ void DebugPlugin::processData(const DasPacketList * const packetList)
     for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
         const DasPacket *packet = *it;
 
-        // Silently skip packets we're not interested in
-        if (!packet->isResponse() || packet->getResponseType() != m_expectedResponse)
-            continue;
-
-        if (response(packet))
+        if (parseCmd(packet))
             nProcessed++;
     }
 
@@ -259,14 +255,16 @@ void DebugPlugin::processData(const DasPacketList * const packetList)
     callParamCallbacks();
 }
 
-bool DebugPlugin::response(const DasPacket *packet)
+bool DebugPlugin::parseCmd(const DasPacket *packet)
 {
-    DasPacket::CommandType responseCmd = packet->getResponseType();
-    if (m_expectedResponse != responseCmd)
+    if (!packet->isCommand())
         return false;
+
+    DasPacket::CommandType responseCmd = packet->getCommandType();
 
     setIntegerParam(RspCmd,     responseCmd);
     setIntegerParam(RspCmdAck,  (packet->cmdinfo.command == DasPacket::RSP_NACK || packet->cmdinfo.command == DasPacket::RSP_ACK) ? packet->cmdinfo.command : 0);
+    setIntegerParam(RspFlag,    static_cast<int>(packet->isResponse()));
     setIntegerParam(RspHwType,  static_cast<int>(packet->cmdinfo.module_type));
     setStringParam(RspSrc,      BaseModulePlugin::addr2ip(packet->getSourceAddress()).c_str());
     setStringParam(RspRouter,   BaseModulePlugin::addr2ip(packet->getRouterAddress()).c_str());

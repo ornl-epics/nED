@@ -74,14 +74,14 @@ class AcpcPlugin : public BaseModulePlugin {
 
     private: // functions
         /**
-         * Create and register all status ROC v4.4/v4.5 parameters to be exposed to EPICS.
+         * Create and register all ACPC 14.4 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v144();
+        void createParams_v144();
 
         /**
-         * Create and register all config ROC v4.4/v4.5 parameters to be exposed to EPICS.
+         * Create and register all ACPC 17.1 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v144();
+        void createParams_v171();
 
     protected:
         #define FIRST_ACPCPLUGIN_PARAM Acquiring

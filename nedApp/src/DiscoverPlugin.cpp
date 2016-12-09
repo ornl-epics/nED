@@ -46,8 +46,15 @@ asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         callParamCallbacks();
 
         m_discovered.clear();
+        // Sending 3 packets to support every possible environment.
+        // Starting with DSP-T v6.5, he's no longer building discovery table
+        // so we need to send global discover packets. But not all modules are
+        // yet upgraded to respond to a 3 word command with global address
+        // 0.0.0.0. That's why we also need to send a single word discover
+        // command similar to DSP prior to 6.4 was doing.
         reqDiscover(DasPacket::HWID_BROADCAST);
-        reqLvdsDiscover(DasPacket::HWID_BROADCAST);    // DSP-T v6.5+ no longer forwards broadcast packets
+        reqLvdsDiscover(DasPacket::HWID_BROADCAST);
+        reqLvdsDiscover(DasPacket::HWID_BROADCAST_SW);
         return asynSuccess;
     }
     return BasePlugin::writeInt32(pasynUser, value);

@@ -52,8 +52,9 @@ struct DasPacket
          * Well known hardware addresses, big-endian byte order.
          */
         enum HardwareId {
-            HWID_BROADCAST              = 0x0,      //!< Everybody should receive the packet
-            HWID_SELF                   = 0xF10CC,  //!< Preprocessor HWID
+            HWID_BROADCAST              = 0x0,          //!< Everybody should receive the packet
+            HWID_BROADCAST_SW           = 0xFFFFFFFF,   //!< Internal id only, creates a single word (global) LVDS command
+            HWID_SELF                   = 0xF10CC,      //!< Preprocessor HWID
         };
 
         /**
@@ -333,6 +334,13 @@ struct DasPacket
          * Return starting address of RtdlHeader in the packet or 0 if header not present.
          */
         const RtdlHeader *getRtdlHeader() const;
+
+        /**
+         * Return packet command type.
+         *
+         * @return Parsed command response type, or 0 if not response packet.
+         */
+        enum CommandType getCommandType() const;
 
         /**
          * Return the actual response type.

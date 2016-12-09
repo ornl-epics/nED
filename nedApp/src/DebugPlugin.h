@@ -49,7 +49,6 @@ class DebugPlugin : public BasePlugin {
         uint32_t m_rawPacket[18];   //!< Cached packet data to be sent out
         uint32_t m_payload[256];    //!< Last packet payload
         uint32_t m_payloadLen;      //!< Last packet payload length, in number of elements in m_payload
-        DasPacket::CommandType m_expectedResponse; //!< Used to filter our responses that we didn't request
 
     public: // structures and defines
         /**
@@ -92,7 +91,7 @@ class DebugPlugin : public BasePlugin {
         /**
          * Process command response from currently selected module.
          */
-        bool response(const DasPacket *packet);
+        bool parseCmd(const DasPacket *packet);
 
         /**
          * Generate raw packet in cache from high level (ReqCmd, ReqIsDsp, etc.) parameters
@@ -112,6 +111,7 @@ class DebugPlugin : public BasePlugin {
         int ReqSend;        //!< Send cached packet
         int RspCmd;         //!< Response command, see DasPacket::CommandType
         int RspCmdAck;      //!< Response ACK/NACK
+        int RspFlag;        //!< Response flag present
         int RspHwType;      //!< Hardware type, see DasPacket::ModuleType
         int RspSrc;         //!< Response source address
         int RspRouter;      //!< Response router address
