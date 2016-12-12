@@ -273,8 +273,8 @@ bool DebugPlugin::parseCmd(const DasPacket *packet)
     setIntegerParam(RspDataLen, packet->getPayloadLength());
 
     // Cache the payload to read it through readOctet()
-    m_payloadLen = std::min(packet->getPayloadLength()/4, static_cast<uint32_t>(sizeof(m_payload)));
-    memcpy(m_payload, packet->getPayload(), m_payloadLen*4);
+    m_payloadLen = std::min(packet->getPayloadLength(), static_cast<uint32_t>(sizeof(m_payload)));
+    memcpy(m_payload, packet->getPayload(), m_payloadLen);
 
     return true;
 }
