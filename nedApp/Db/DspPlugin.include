@@ -46,7 +46,7 @@ record(sel, "$(P)RocDS")
 }
 record(sel, "$(P)AcpcDS")
 {
-    field(INPA, "6")
+    field(INPA, "12")
     field(INPB, "36")
     field(INPC, "68")
     field(INPD, "68")
