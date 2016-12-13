@@ -1,6 +1,6 @@
-/* ArocPlugin_v23.cpp
+/* ArocPlugin_v24.cpp
  *
- * Copyright (c) 2015 Oak Ridge National Laboratory.
+ * Copyright (c) 2016 Oak Ridge National Laboratory.
  * All rights reserved.
  * See file LICENSE that is included with this distribution.
  *
@@ -10,11 +10,11 @@
 #include "ArocPlugin.h"
 
 /**
- * @file ArocPlugin_v23.cpp
+ * @file ArocPlugin_v24.cpp
  *
- * AROC 2.3 parameters
+ * AROC 2.4 parameters
  */
-void ArocPlugin::createParams_v23()
+void ArocPlugin::createParams_v24()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                           | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrParity",          0x0,  1,  0); // LVDS parity error            (0=no error,1=error)
@@ -449,4 +449,10 @@ void ArocPlugin::createParams_v23()
     createConfigParam("VariableMode",     'F',  0x0,  1, 11,    0); // Variable sample mode          (0=disabled,1=enabled)
     createConfigParam("OutputMode",       'F',  0x0,  2, 12,    1); // Output mode                   (0=raw,1=calculated,2=extended)
     createConfigParam("TpSelect",         'F',  0x0,  2, 14,    2); // Test point select
+
+    createConfigParam("TestPatternId",    'F',  0x1, 12,  0,    0); // Test pattern id
+    createConfigParam("TestPatternDebug", 'F',  0x1,  2, 12,    0); // Engineering Use only
+    createConfigParam("TestPatternAltEn", 'F',  0x1,  1, 14,    0); // Alternate test pattern enable (0=disable,1=enable)
+    createConfigParam("TestPatternEn",    'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternRate",  'F',  0x2, 16,  0,    0); // Test pattern rate
 }

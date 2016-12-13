@@ -39,8 +39,10 @@ ArocPlugin::ArocPlugin(const char *portName, const char *dispatcherPortName, con
 {
     if (m_version == "v23") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v23();
-        createConfigParams_v23();
+        createParams_v23();
+    } else if (m_version == "v24") {
+        setIntegerParam(Supported, 1);
+        createParams_v24();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported AROC version '%s'", version);

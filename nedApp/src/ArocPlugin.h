@@ -78,14 +78,14 @@ class ArocPlugin : public BaseModulePlugin {
     private: // functions
 
         /**
-         * Create and register all status ROC v4.4/v4.5 parameters to be exposed to EPICS.
+         * Create and register all AROC v2.3 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v23();
+        void createParams_v23();
 
         /**
-         * Create and register all config AROC v2.3 parameters to be exposed to EPICS.
+         * Create and register all AROC v2.4 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v23();
+        void createParams_v24();
 };
 
 #endif // AROC_PLUGIN_H
