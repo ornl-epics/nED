@@ -281,6 +281,7 @@ void DspPlugin::createParams_v65() {
     createConfigParam("OptB:FilterCmd", 'E', 0x8,  2, 13, 0); // Optical TX B Command Filter
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
     createConfigParam("OptBlankEn",     'E', 0x8,  1, 17, 0); // Optical empty data frame CRC (0=no blank frame, 1=add blank frame)
+    createConfigParam("OptRspLimit",    'E', 0x8,  1, 18, 0); // 64 responses limit           (0=no limit, 1=limit to 64)
     createConfigParam("OptTxDelay",     'E', 0x8,  7, 24, 3); // Optical packet send delay    (0=0ns, 1=313ns, 3=1us, 100=31.3us)
     createConfigParam("OptTxDelayC",    'E', 0x8,  1, 31, 1); // Optical packet send delay ct (0=use OPT_TX_DELAY,1=prev word count)
 
@@ -439,6 +440,7 @@ void DspPlugin::createParams_v65() {
     createStatusParam("TxFifoFull",    0x0,  1,  5); // LVDS TxFIFO went full        (0=not full,1=full)
     createStatusParam("CmdErr",        0x0,  1,  6); // LVDS command error           (0=no error,1=error)
     createStatusParam("EepromInit",    0x0,  1,  7); // EEPROM initialization status (0=not ok,1=ok)
+    createStatusParam("OptRspLimitDef",0x0,  1,  8); // Responses limit default      (0=limit to 64,1=no limit)
     createStatusParam("OptA:TxStat",   0x0,  5, 16); // Optical port A TX status
     createStatusParam("OptA:TxOut",    0x0,  2, 22); // Optical port A TX output
     createStatusParam("OptB:TxStat",   0x0,  5, 24); // Optical port B TX status
