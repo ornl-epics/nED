@@ -139,7 +139,7 @@ asynStatus DebugPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChar
 
         *nActual = 0;
 
-        for (uint32_t i = 0; i < m_payloadLen; i++) {
+        for (uint32_t i = 0; i < m_payloadLen; i+=4) {
             int len;
             uint32_t val = m_payload[i];
             switch (byteGrp) {
