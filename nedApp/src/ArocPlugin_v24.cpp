@@ -455,4 +455,7 @@ void ArocPlugin::createParams_v24()
     createConfigParam("TestPatternAltEn", 'F',  0x1,  1, 14,    0); // Alternate test pattern enable (0=disable,1=enable)
     createConfigParam("TestPatternEn",    'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
     createConfigParam("TestPatternRate",  'F',  0x2, 16,  0,    0); // Test pattern rate
+
+//  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
 }
