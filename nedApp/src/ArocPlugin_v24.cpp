@@ -377,7 +377,7 @@ void ArocPlugin::createParams_v24()
 
     createConfigParam("Ch1:A:Offset",     'C', 0x10, 16,  0,    0); // Chan1 A Offset
     createConfigParam("Ch2:A:Offset",     'C', 0x11, 16,  0,    0); // Chan2 A Offset
-    createConfigParam("Ch3:A:Offset",     'C', 0x16, 16,  0,    0); // Chan3 A Offset
+    createConfigParam("Ch3:A:Offset",     'C', 0x12, 16,  0,    0); // Chan3 A Offset
     createConfigParam("Ch4:A:Offset",     'C', 0x13, 16,  0,    0); // Chan4 A Offset
     createConfigParam("Ch5:A:Offset",     'C', 0x14, 16,  0,    0); // Chan5 A Offset
     createConfigParam("Ch6:A:Offset",     'C', 0x15, 16,  0,    0); // Chan6 A Offset
@@ -411,7 +411,7 @@ void ArocPlugin::createParams_v24()
 
     createConfigParam("Ch1:A:AvgMax",     'D', 0x10, 16,  0, 4095); // Chan1 A average maximum
     createConfigParam("Ch2:A:AvgMax",     'D', 0x11, 16,  0, 4095); // Chan2 A average maximum
-    createConfigParam("Ch3:A:AvgMax",     'D', 0x16, 16,  0, 4095); // Chan3 A average maximum
+    createConfigParam("Ch3:A:AvgMax",     'D', 0x12, 16,  0, 4095); // Chan3 A average maximum
     createConfigParam("Ch4:A:AvgMax",     'D', 0x13, 16,  0, 4095); // Chan4 A average maximum
     createConfigParam("Ch5:A:AvgMax",     'D', 0x14, 16,  0, 4095); // Chan5 A average maximum
     createConfigParam("Ch6:A:AvgMax",     'D', 0x15, 16,  0, 4095); // Chan6 A average maximum
