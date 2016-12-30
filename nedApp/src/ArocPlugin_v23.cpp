@@ -14,7 +14,7 @@
  *
  * AROC 2.3 parameters
  */
-void ArocPlugin::createStatusParams_v23()
+void ArocPlugin::createParams_v23()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                           | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrParity",          0x0,  1,  0); // LVDS parity error            (0=no error,1=error)
@@ -234,11 +234,8 @@ void ArocPlugin::createStatusParams_v23()
     createStatusParam("Y8:AutoAdjSample",  0x1D,  1, 13); // Y8 Auto-Adjust Sample l      (0=not active,1=active)
     createStatusParam("Y8:AutoAdjTrig",    0x1D,  1, 14); // Y8 Auto-Adjust Got samp      (0=no sample,1=got sample)
     createStatusParam("Y8:AutoAdjEn",      0x1D,  1, 15); // Y8 Auto-Adjust Active        (0=not active,1=active)
-}
-
-void ArocPlugin::createConfigParams_v23()
-{
-//    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
+    
+    
     createConfigParam("PositionIdx",      '1',  0x0, 32,  0,    0); // Chan1 position index
 
     createConfigParam("Ch1:A:InOffset",   '2',  0x0,  9,  0,  100, CONV_SIGN_MAGN); // Chan1 A input offset
