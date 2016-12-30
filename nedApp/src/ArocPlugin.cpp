@@ -13,7 +13,7 @@
 
 EPICS_REGISTER_PLUGIN(ArocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
 
-const unsigned ArocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 400;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+const unsigned ArocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 440;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
 
 /**
  * AROC version response format

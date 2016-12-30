@@ -235,6 +235,41 @@ void ArocPlugin::createParams_v24()
     createStatusParam("Y8:AutoAdjTrig",    0x1D,  1, 14); // Y8 Auto-Adjust Got samp      (0=no sample,1=got sample)
     createStatusParam("Y8:AutoAdjEn",      0x1D,  1, 15); // Y8 Auto-Adjust Active        (0=not active,1=active)
 
+//     BLXXX:Det:RocXXX:| sig name       |                    | EPICS record description  | (bi and mbbi description)
+    createCounterParam("CntParity",          0x0, 16,  0); // LVDS parity error counter
+    createCounterParam("CntType",            0x1, 16,  0); // LVDS data type error counter
+    createCounterParam("CntLength",          0x2, 16,  0); // LVDS length error counter
+    createCounterParam("CntTimeout",         0x3, 16,  0); // LVDS timeout counter
+    createCounterParam("CntNoStart",         0x4, 16,  0); // LVDS no start error counter
+    createCounterParam("CntPreStart",        0x5, 16,  0); // LVDS start before stop cnt
+    createCounterParam("CntFifoFull",        0x6, 16,  0); // LVDS FIFO full error counter
+    createCounterParam("CntNoTsync",         0x7, 16,  0); // Timestamp overflow counter
+    createCounterParam("CntCmdBad",          0x8, 16,  0); // Unknown command counter
+    createCounterParam("CntCmdLength",       0x9, 16,  0); // Command length error counter
+    createCounterParam("CntProgramming",     0xA, 16,  0); // Write cnfg disallowed cnt
+    createCounterParam("CntEventFifoFull",   0xB, 16,  0); // Event FIFO full error counter
+    createCounterParam("CntDataAlmostFull" , 0xC, 16,  0); // Data almost full counter
+    createCounterParam("CntDataAlmostFull" , 0xD, 16,  0); // Data almost full counter
+    createCounterParam("CntMissClk",         0xE, 16,  0); // Link RX clock missing cnt
+    createCounterParam("Ch0:RateXInitDisc",  0xF, 16,  0); // Ch0 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch0:RateYInitDisc", 0x10, 16,  0); // Ch0 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch1:RateXInitDisc", 0x11, 16,  0); // Ch1 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch1:RateYInitDisc", 0x12, 16,  0); // Ch1 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:RateXInitDisc", 0x13, 16,  0); // Ch2 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:RateYInitDisc", 0x14, 16,  0); // Ch2 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:RateXInitDisc", 0x15, 16,  0); // Ch3 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:RateYInitDisc", 0x16, 16,  0); // Ch3 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:RateXInitDisc", 0x17, 16,  0); // Ch4 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:RateYInitDisc", 0x18, 16,  0); // Ch4 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:RateXInitDisc", 0x19, 16,  0); // Ch5 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:RateYInitDisc", 0x1A, 16,  0); // Ch5 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:RateXInitDisc", 0x1B, 16,  0); // Ch6 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:RateYInitDisc", 0x1C, 16,  0); // Ch6 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:RateXInitDisc", 0x1D, 16,  0); // Ch7 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:RateYInitDisc", 0x1E, 16,  0); // Ch7 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ibc:RateOut",       0x1F, 16,  0); // IBC outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("RateOut",           0x20, 16,  0); // Total outrate               (scale:19.0735,unit:cnts/s,prec:1)
+
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",      '1',  0x0, 32,  0,    0); // Chan1 position index
 
@@ -455,4 +490,7 @@ void ArocPlugin::createParams_v24()
     createConfigParam("TestPatternAltEn", 'F',  0x1,  1, 14,    0); // Alternate test pattern enable (0=disable,1=enable)
     createConfigParam("TestPatternEn",    'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
     createConfigParam("TestPatternRate",  'F',  0x2, 16,  0,    0); // Test pattern rate
+
+//  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
 }
