@@ -35,26 +35,40 @@ DiscoverPlugin::DiscoverPlugin(const char *portName, const char *dispatcherPortN
     createParam("Discovered",   asynParamInt32, &Discovered);   // READ - Modules found formatted in ASCII table
     createParam("Verified",     asynParamInt32, &Verified);     // READ - Modules found formatted in ASCII table
     createParam("Output",       asynParamOctet, &Output, "Not initialized");    // READ - Modules found formatted in ASCII table
+    createParam("OptBcast",     asynParamInt32, &OptBcast, 1);  // WRITE - Send optical broadcast packet as part of discovery
+    createParam("LvdsBcast",    asynParamInt32, &LvdsBcast, 1); // WRITE - Send LVDS broadcast packet as part of discovery
+    createParam("LvdsSingle",   asynParamInt32, &LvdsSingle, 1);// WRITE - Send LVDS single word packet as part of discovery
     callParamCallbacks();
 }
 
 asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Trigger) {
+        bool optBcast = true;
+        bool lvdsBcast = true;
+        bool lvdsSingle = true;
+
+        getBooleanParam(OptBcast, &optBcast);
+        getBooleanParam(LvdsBcast, &lvdsBcast);
+        getBooleanParam(LvdsSingle, &lvdsSingle);
+
         setIntegerParam(Discovered, 0);
         setIntegerParam(Verified, 0);
         callParamCallbacks();
 
         m_discovered.clear();
-        // Sending 3 packets to support every possible environment.
+        // Sending up to 3 packets to support every possible environment.
         // Starting with DSP-T v6.5, he's no longer building discovery table
         // so we need to send global discover packets. But not all modules are
         // yet upgraded to respond to a 3 word command with global address
         // 0.0.0.0. That's why we also need to send a single word discover
         // command similar to DSP prior to 6.4 was doing.
-        reqDiscover(DasPacket::HWID_BROADCAST);
-        reqLvdsDiscover(DasPacket::HWID_BROADCAST);
-        reqLvdsDiscover(DasPacket::HWID_BROADCAST_SW);
+        if (optBcast)
+            reqDiscover(DasPacket::HWID_BROADCAST);
+        if (lvdsBcast)
+            reqLvdsDiscover(DasPacket::HWID_BROADCAST);
+        if (lvdsSingle)
+            reqLvdsDiscover(DasPacket::HWID_BROADCAST_SW);
         return asynSuccess;
     }
     return BasePlugin::writeInt32(pasynUser, value);

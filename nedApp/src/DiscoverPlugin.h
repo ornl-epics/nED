@@ -112,7 +112,10 @@ class DiscoverPlugin : public BasePlugin {
         int Format;             //!< Output format
         int Discovered;         //!< Number of discovered modules
         int Verified;           //!< Number of detectors with version verified
-        #define LAST_DISCOVERPLUGIN_PARAM Verified
+        int OptBcast;           //!< Send optical broadcast packet as part of discover
+        int LvdsBcast;          //!< Send LVDS broadcast packet as part of discover
+        int LvdsSingle;         //!< Send LVDS single word packet as part of discover
+        #define LAST_DISCOVERPLUGIN_PARAM LvdsSingle
 };
 
 #endif // DISCOVER_PLUGIN_H
