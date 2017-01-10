@@ -21,7 +21,6 @@ EPICS_REGISTER_PLUGIN(DebugPlugin, 2, "Port name", string, "Dispatcher port name
 DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, int blocking)
     : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_GENERICMODULEPLUGIN_PARAMS, 1,
                  defaultInterfaceMask, defaultInterruptMask)
-    , m_payloadLen(0)
 {
     createParam("ReqDest",      asynParamOctet, &ReqDest, 0x0); // WRITE - Module address to communicate with
     createParam("ReqCmd",       asynParamInt32, &ReqCmd, 0x0);  // WRITE - Command to be sent to module
@@ -36,6 +35,7 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     createParam("RspDest",      asynParamOctet, &RspDest);      // READ - Response destination address
     createParam("RspLen",       asynParamInt32, &RspLen);       // READ - Response length in bytes
     createParam("RspDataLen",   asynParamInt32, &RspDataLen);   // READ - Response payload length in bytes
+    createParam("RspTimeStamp", asynParamFloat64, &RspTimeStamp);// READ - Response receive time
     createParam("RspData",      asynParamOctet, &RspData);      // READ - Response payload
     createParam("ByteGrp",      asynParamInt32, &ByteGrp);      // WRITE - Byte grouping mode
     createParam("Channel",      asynParamInt32, &Channel, 0);   // Raw packet dword 0
@@ -57,6 +57,9 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     createParam("RawPkt15",     asynParamInt32, &RawPkt15, 0);  // Raw packet dword 15
     createParam("RawPkt16",     asynParamInt32, &RawPkt16, 0);  // Raw packet dword 16
     createParam("RawPkt17",     asynParamInt32, &RawPkt17, 0);  // Raw packet dword 17
+    createParam("PktQueIndex",  asynParamInt32, &PktQueIndex, 0);   // Currently selected packet
+    createParam("PktQueSize",   asynParamInt32, &PktQueSize, 0);    // Number of elements in packet buffer
+    createParam("PktQueMaxSize",asynParamInt32, &PktQueMaxSize, 0); // Max num of elements in packet buffer
 
     callParamCallbacks();
 
@@ -116,6 +119,8 @@ asynStatus DebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         m_rawPacket[16] = value;
     } else if (pasynUser->reason == RawPkt17) {
         m_rawPacket[17] = value;
+    } else if (pasynUser->reason == PktQueIndex) {
+        selectPacket(value);
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }
@@ -135,31 +140,41 @@ asynStatus DebugPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChar
 {
     if (pasynUser->reason == RspData) {
         int byteGrp = GROUP_2_BYTES_SWAPPED;
+        int pktIndex = 0;
         getIntegerParam(ByteGrp, &byteGrp);
+        getIntegerParam(PktQueIndex, &pktIndex);
 
         *nActual = 0;
 
-        for (uint32_t i = 0; i < m_payloadLen/4; i++) {
-            int len;
-            uint32_t val = m_payload[i];
-            switch (byteGrp) {
-            case GROUP_2_BYTES:
-                len = snprintf(value, nChars, "%04X %04X ", (val >> 16) & 0xFFFF, val & 0xFFFF);
-                break;
-            case GROUP_4_BYTES:
-                len = snprintf(value, nChars, "%08X ", val);
-                break;
-            case GROUP_2_BYTES_SWAPPED:
-            default:
-                len = snprintf(value, nChars, "%04X %04X ", val & 0xFFFF, (val >> 16) & 0xFFFF);
-                break;
-            }
-            if (len >= static_cast<int>(nChars) || len == -1)
-                break;
+        if (pktIndex < 0)
+            pktIndex *= -1;
+        if (pktIndex < (int)m_lastPacketQueue.size()) {
+            auto pkt = m_lastPacketQueue.begin();
+            for (int i=0; i<pktIndex; i++)
+                pkt++;
 
-            nChars -= len;
-            *nActual += len;
-            value += len;
+            for (uint32_t i = 0; i < pkt->length/4; i++) {
+                int len;
+                uint32_t val = pkt->data[i];
+                switch (byteGrp) {
+                case GROUP_2_BYTES:
+                    len = snprintf(value, nChars, "%04X %04X ", (val >> 16) & 0xFFFF, val & 0xFFFF);
+                    break;
+                case GROUP_4_BYTES:
+                    len = snprintf(value, nChars, "%08X ", val);
+                    break;
+                case GROUP_2_BYTES_SWAPPED:
+                default:
+                    len = snprintf(value, nChars, "%04X %04X ", val & 0xFFFF, (val >> 16) & 0xFFFF);
+                    break;
+                }
+                if (len >= static_cast<int>(nChars) || len == -1)
+                    break;
+
+                nChars -= len;
+                *nActual += len;
+                value += len;
+            }
         }
         if (eomReason) *eomReason |= ASYN_EOM_EOS;
         return asynSuccess;
@@ -229,7 +244,9 @@ void DebugPlugin::sendPacket()
     setStringParam(RspDest,     "");
     setIntegerParam(RspLen,     0);
     setIntegerParam(RspDataLen, 0);
-    m_payloadLen = 0;
+    m_lastPacketQueue.erase(m_lastPacketQueue.begin(), m_lastPacketQueue.end());
+    setIntegerParam(PktQueIndex, 0);
+    setIntegerParam(PktQueSize, 0);
 
     callParamCallbacks();
 }
@@ -238,6 +255,7 @@ void DebugPlugin::processData(const DasPacketList * const packetList)
 {
     int nReceived = 0;
     int nProcessed = 0;
+    bool changePacket = false;
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
 
@@ -246,10 +264,17 @@ void DebugPlugin::processData(const DasPacketList * const packetList)
     for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
         const DasPacket *packet = *it;
 
-        if (parseCmd(packet))
+        if (parseCmd(packet)) {
             nProcessed++;
+            changePacket = true;
+        }
     }
 
+    if (changePacket) {
+        selectPacket(0);
+    }
+
+    setIntegerParam(PktQueSize, m_lastPacketQueue.size());
     setIntegerParam(RxCount,    nReceived);
     setIntegerParam(ProcCount,  nProcessed);
     callParamCallbacks();
@@ -257,11 +282,53 @@ void DebugPlugin::processData(const DasPacketList * const packetList)
 
 bool DebugPlugin::parseCmd(const DasPacket *packet)
 {
+    int maxQueSize = 0;
+    getIntegerParam(PktQueMaxSize, &maxQueSize);
+    if (maxQueSize <= 0)
+        return false;
+
     if (!packet->isCommand())
         return false;
 
-    DasPacket::CommandType responseCmd = packet->getCommandType();
+    // Cache the payload to read it through readOctet()
+    PacketDesc pkt;
+    pkt.length = std::min(packet->getLength(), static_cast<uint32_t>(sizeof(pkt.data)));
+    memcpy(pkt.data, packet, pkt.length);
+    epicsTimeGetCurrent(&pkt.timestamp);
+    if ((int)m_lastPacketQueue.size() >= maxQueSize)
+        m_lastPacketQueue.pop_back();
+    m_lastPacketQueue.push_front(pkt);
 
+    return true;
+}
+
+void DebugPlugin::selectPacket(int index) {
+    DasPacket *packet;
+    struct timespec rspTimeStamp; // In POSIX time
+
+    if (index < 0)
+        index *= -1;
+    if (index >= (int)m_lastPacketQueue.size())
+        index = (int)m_lastPacketQueue.size() - 1;
+
+    auto it = m_lastPacketQueue.begin();
+    for (int i=0; i<index; i++) {
+        if (it == m_lastPacketQueue.end())
+            break;
+        it++;
+    }
+    if (it == m_lastPacketQueue.end()) {
+        packet = reinterpret_cast<DasPacket*>(&m_lastPacketQueue.back().data);
+        epicsTimeToTimespec(&rspTimeStamp, &m_lastPacketQueue.back().timestamp);
+    } else {
+        packet = reinterpret_cast<DasPacket*>(it->data);
+        epicsTimeToTimespec(&rspTimeStamp, &it->timestamp);
+    }
+
+    // Return responses' POSIX time with milisecond precision
+    double rspTime = 1000*rspTimeStamp.tv_sec + (uint32_t)(rspTimeStamp.tv_nsec / 1e6);
+
+    DasPacket::CommandType responseCmd = packet->getCommandType();
     setIntegerParam(RspCmd,     responseCmd);
     setIntegerParam(RspCmdAck,  (packet->cmdinfo.command == DasPacket::RSP_NACK || packet->cmdinfo.command == DasPacket::RSP_ACK) ? packet->cmdinfo.command : 0);
     setIntegerParam(RspFlag,    static_cast<int>(packet->isResponse()));
@@ -271,10 +338,7 @@ bool DebugPlugin::parseCmd(const DasPacket *packet)
     setStringParam(RspDest,     BaseModulePlugin::addr2ip(packet->destination).c_str());
     setIntegerParam(RspLen,     sizeof(DasPacket) + packet->payload_length);
     setIntegerParam(RspDataLen, packet->getPayloadLength());
-
-    // Cache the payload to read it through readOctet()
-    m_payloadLen = std::min(packet->getPayloadLength(), static_cast<uint32_t>(sizeof(m_payload)));
-    memcpy(m_payload, packet->getPayload(), m_payloadLen);
-
-    return true;
+    setDoubleParam(RspTimeStamp,rspTime);
+    setIntegerParam(PktQueIndex,index);
+    callParamCallbacks();
 }

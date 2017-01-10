@@ -13,6 +13,7 @@
 #include "BasePlugin.h"
 
 #include <cstring>
+#include <list>
 
 /**
  * Generic module plugin is a tool to test and debug module communication.
@@ -43,12 +44,20 @@ class DebugPlugin : public BasePlugin {
             GROUP_4_BYTES           = 2,
         };
 
-        static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask;
-        static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask;
+        /**
+         * Structure describing single received packet.
+         */
+        struct PacketDesc {
+            uint32_t data[256];
+            uint32_t length;
+            epicsTimeStamp timestamp;
+        };
+
+        static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask | asynFloat64Mask;
+        static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask | asynFloat64Mask;
 
         uint32_t m_rawPacket[18];   //!< Cached packet data to be sent out
-        uint32_t m_payload[256];    //!< Last packet payload
-        uint32_t m_payloadLen;      //!< Last packet payload length, in number of elements in m_payload
+        std::list<PacketDesc> m_lastPacketQueue;
 
     public: // structures and defines
         /**
@@ -103,6 +112,13 @@ class DebugPlugin : public BasePlugin {
          */
         void sendPacket();
 
+        /**
+         * Change currently selected packet and update all related PVs.
+         *
+         * @param[in] index New index, 0 means current, negative values are converted to positive counterparts.
+         */
+        void selectPacket(int index);
+
     protected:
         #define FIRST_GENERICMODULEPLUGIN_PARAM ReqDest
         int ReqDest;        //!< Module address to communicate with
@@ -118,6 +134,7 @@ class DebugPlugin : public BasePlugin {
         int RspDest;        //!< Response destination address
         int RspLen;         //!< Response length in bytes
         int RspDataLen;     //!< Response payload length in bytes
+        int RspTimeStamp;   //!< Response receive time in msec precision
         int RspData;        //!< Response payload
         int ByteGrp;        //!< How many byte to group
         int Channel;        //!< Select channel to send command to (read/write config only)
@@ -139,7 +156,10 @@ class DebugPlugin : public BasePlugin {
         int RawPkt15;       //!< Raw packet data, dword 15
         int RawPkt16;       //!< Raw packet data, dword 16
         int RawPkt17;       //!< Raw packet data, dword 17
-        #define LAST_GENERICMODULEPLUGIN_PARAM RawPkt17
+        int PktQueIndex;    //!< Currently display packet index
+        int PktQueSize;     //!< Number of elements in packet buffer
+        int PktQueMaxSize;  //!< Max num of elements in packet buffer
+        #define LAST_GENERICMODULEPLUGIN_PARAM PktQueMaxSize
 };
 
 #endif // GENERIC_MODULE_PLUGIN_H
