@@ -295,7 +295,7 @@ bool DebugPlugin::parseCmd(const DasPacket *packet)
     pkt.length = std::min(packet->getLength(), static_cast<uint32_t>(sizeof(pkt.data)));
     memcpy(pkt.data, packet, pkt.length);
     epicsTimeGetCurrent(&pkt.timestamp);
-    if ((int)m_lastPacketQueue.size() >= maxQueSize)
+    while ((int)m_lastPacketQueue.size() >= maxQueSize)
         m_lastPacketQueue.pop_back();
     m_lastPacketQueue.push_front(pkt);
 
