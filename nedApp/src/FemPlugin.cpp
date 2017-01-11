@@ -109,6 +109,21 @@ asynStatus FemPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t 
     return ret;
 }
 
+
+DasPacket::CommandType FemPlugin::reqStart()
+{
+    // FEMs don't support starting/stopping
+    return static_cast<DasPacket::CommandType>(0);
+}
+
+
+DasPacket::CommandType FemPlugin::reqStop()
+{
+    // FEMs don't support starting/stopping
+    return static_cast<DasPacket::CommandType>(0);
+}
+
+
 bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
 {
     const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());

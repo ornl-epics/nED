@@ -93,6 +93,16 @@ class FemPlugin : public BaseModulePlugin {
         FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
 
         /**
+         * Overload start request and return 0 - skipped.
+         */
+        virtual DasPacket::CommandType reqStart();
+
+        /**
+         * Overload stop request and return 0 - skipped.
+         */
+        virtual DasPacket::CommandType reqStop();
+
+        /**
          * Handle parameters write requests for integer type.
          *
          * When an integer parameter is written through PV, this function
