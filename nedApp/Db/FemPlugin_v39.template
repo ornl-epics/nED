@@ -32,3 +32,7 @@ record(mbbo, "$(P)CmdReq")
     field(TTVL, "40")
     field(TTST, "Down reset LVDS")
 }
+record(bo, "$(P)Upg:Supported")
+{
+    field(VAL,  "1")
+}
