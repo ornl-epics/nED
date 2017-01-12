@@ -615,7 +615,7 @@ record(calc, "$(P)StatusCalc")
     field(INPC, "$(P)RxEnRb.SEVR")
     field(INPD, "$(P)FpgaTemp.SEVR")
     field(INPE, "$(P)RxEn")
-    field(CALC, "(A+B+C+D)=0||D=0")
+    field(CALC, "(A+B+C+D)=0||E=0")
     field(FLNK, "$(P)Status")
 }
 record(bi, "$(P)Status")
