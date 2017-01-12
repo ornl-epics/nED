@@ -247,8 +247,8 @@ void ArocPlugin::createParams_v24()
     createCounterParam("CntCmdBad",          0x8, 16,  0); // Unknown command counter
     createCounterParam("CntCmdLength",       0x9, 16,  0); // Command length error counter
     createCounterParam("CntProgramming",     0xA, 16,  0); // Write cnfg disallowed cnt
-    createCounterParam("CntEventFifoFull",   0xB, 16,  0); // Event FIFO full error counter
-    createCounterParam("CntDataAlmostFull" , 0xC, 16,  0); // Data almost full counter
+    createCounterParam("CntTimeFifoFull",    0xB, 16,  0); // Time FIFO full error counter
+    createCounterParam("CntEventFifoFull",   0xC, 16,  0); // Event FIFO full error counter
     createCounterParam("CntDataAlmostFull" , 0xD, 16,  0); // Data almost full counter
     createCounterParam("CntMissClk",         0xE, 16,  0); // Link RX clock missing cnt
     createCounterParam("Ch0:RateXInitDisc",  0xF, 16,  0); // Ch0 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
@@ -482,7 +482,7 @@ void ArocPlugin::createParams_v24()
     createConfigParam("RawDiscOutput",    'F',  0x0,  1,  9,    1); // Raw disc output               (0=disabled,1=enabled)
     createConfigParam("YorderEn",         'F',  0x0,  1, 10,    1); // Y order                       (0=disabled,1=enabled)
     createConfigParam("VariableMode",     'F',  0x0,  1, 11,    0); // Variable sample mode          (0=disabled,1=enabled)
-    createConfigParam("OutputMode",       'F',  0x0,  2, 12,    1); // Output mode                   (0=raw,1=calculated,2=extended)
+    createConfigParam("OutputMode",       'F',  0x0,  2, 12,    1); // Output mode                   (0=raw,1=normal,2=extended)
     createConfigParam("TpSelect",         'F',  0x0,  2, 14,    2); // Test point select
 
     createConfigParam("TestPatternId",    'F',  0x1, 12,  0,    0); // Test pattern id

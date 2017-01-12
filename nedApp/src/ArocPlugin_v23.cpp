@@ -234,8 +234,8 @@ void ArocPlugin::createParams_v23()
     createStatusParam("Y8:AutoAdjSample",  0x1D,  1, 13); // Y8 Auto-Adjust Sample l      (0=not active,1=active)
     createStatusParam("Y8:AutoAdjTrig",    0x1D,  1, 14); // Y8 Auto-Adjust Got samp      (0=no sample,1=got sample)
     createStatusParam("Y8:AutoAdjEn",      0x1D,  1, 15); // Y8 Auto-Adjust Active        (0=not active,1=active)
-    
-    
+
+
     createConfigParam("PositionIdx",      '1',  0x0, 32,  0,    0); // Chan1 position index
 
     createConfigParam("Ch1:A:InOffset",   '2',  0x0,  9,  0,  100, CONV_SIGN_MAGN); // Chan1 A input offset
@@ -447,7 +447,7 @@ void ArocPlugin::createParams_v23()
     createConfigParam("RawDiscOutput",    'F',  0x0,  1,  9,    1); // Raw disc output               (0=disabled,1=enabled)
     createConfigParam("YorderEn",         'F',  0x0,  1, 10,    1); // Y order                       (0=disabled,1=enabled)
     createConfigParam("VariableMode",     'F',  0x0,  1, 11,    0); // Variable sample mode          (0=disabled,1=enabled)
-    createConfigParam("OutputMode",       'F',  0x0,  2, 12,    1); // Output mode                   (0=raw,1=calculated,2=extended)
+    createConfigParam("OutputMode",       'F',  0x0,  2, 12,    1); // Output mode                   (0=raw,1=normal,2=extended)
     createConfigParam("TpSelect",         'F',  0x0,  2, 14,    2); // Test point select
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
