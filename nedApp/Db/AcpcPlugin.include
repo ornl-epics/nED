@@ -3,10 +3,11 @@ record(mbbo, "$(P)DataMode")
 {
     field(FLNK, "$(P)DataModeL")
 }
-record(longout, "$(P)DataModeL")
+# ACPCs OutputMode is different than everybody else
+record(calcout, "$(P)DataModeL")
 {
-    field(DOL,  "$(P)DataMode.RVAL NPP")
-    field(OMSL, "closed_loop")
+    field(INPA, "$(P)DataMode.RVAL NPP")
+    field(CALC, "A=0?0:A+1")
     field(OUT,  "$(P)OutputMode PP")
 }
 record(calc, "$(P)HwStatus")

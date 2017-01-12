@@ -113,17 +113,19 @@ void AcpcPlugin::createParams_v171()
     createStatusParam("Lvds9:FifoGotEf",     0x12,  1, 13); // LVDS9 FIFO got empty         (0=not full, 1=almost full)
     createStatusParam("Lvds9:CntDataError",  0x13, 16,  0); // LVDS9 data errors counter
 
-    createCounterParam("CntTimestampError",   0x0, 16,  0); // Timestamp errors
-    createCounterParam("CntFlushing",         0x1,  8,  0); // Flushing counter
-    createCounterParam("CntBusy",             0x2, 32,  0); // ACPC busy rejects
-    createCounterParam("CntEventsOut",        0x4, 32,  0); // Total events out
-    createCounterParam("CntEventsIn",         0x6, 32,  0); // Total events in
+    createCounterParam("RateTimestampError",  0x0, 16,  0); // Timestamp errors             (unit:cnts/s)
+    createCounterParam("RateFlushing",        0x1,  8,  0); // Flushing counter             (unit:cnts/s)
+    createCounterParam("RatePhotosumOver",    0x2, 16,  0); // PhotoSum over high threshold (unit:cnts/s)
+    createCounterParam("RatePhotosumUnder",   0x3, 16,  0); // PhotoSum under low threshold (unit:cnts/s)
+    createCounterParam("RateBusy",            0x4, 16,  0); // ACPC busy rejects            (unit:cnts/s)
+    createCounterParam("RateEventsOut",       0x5, 16,  0); // Total events out             (unit:cnts/s)
+    createCounterParam("RateEventsIn",        0x6, 32,  0); // Total events in              (unit:cnts/s)
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",        '1',  0x0, 32,  0,    0); // Chan1 position index
 
-    createConfigParam("PhotosumMin",        'E',  0x0, 32,  0,    0);
-    createConfigParam("PhotosumMax",        'E',  0x2, 32,  0,    0);
+    createConfigParam("PhotosumMin",        'E',  0x0, 32,  0,    0); // Low PhotoSum threshold        (scale:0.00003051757813)
+    createConfigParam("PhotosumMax",        'E',  0x2, 32,  0,    0); // High PhotoSum threshold       (scale:0.00003051757813)
     createConfigParam("TsyncDelay",         'E',  0x4, 32,  0,    0); // TSYNC delay
     createConfigParam("Ch1:Enable",         'E',  0x6,  1,  0,    0); // Channel 1 Enable              (0=enable, 1=disable)
     createConfigParam("Ch2:Enable",         'E',  0x6,  1,  1,    0); // Channel 2 Enable              (0=enable, 1=disable)
@@ -141,10 +143,10 @@ void AcpcPlugin::createParams_v171()
     createConfigParam("TcTsynMode",         'F',  0x0,  1,  2,    0); // TSYNC mode                    (0=external, 1=internal)
     createConfigParam("TcTxenMode",         'F',  0x0,  1,  3,    0); // TXen  mode                    (0=external, 1=internal)
     createConfigParam("OutputMode",         'F',  0x0,  2,  4,    0); // Output mode                   (0=normal,1=off,2=raw,2=verbose)
-    createConfigParam("VerboseStatus",      'F',  0x0,  1,  6,    1); // Verbose status                (0=short, 1=long)
-    createConfigParam("DetectorSelect",     'F',  0x0,  1, 10,    0); // Detector select               (0=MANDI/TOPAZ, 0=SNAP)
-    createConfigParam("MSEsamples",         'F',  0x0,  1, 11,    0); // MSE samples                   (0=five, 1=three)
-    createConfigParam("TestPatternRate",    'F',  0x0,  2, 12,    0); // Test pattern rate             (0=2700 ev/s, 1=9600 ev/s, 2=13000 ev/s, 3=59000 ev/s)
-    createConfigParam("TestPatternAltEn",   'F',  0x0,  1, 14,    0); // Test pattern mode             (0=pos calc, 1=packet)
-    createConfigParam("TestPatternEn",      'F',  0x0,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("DetectorSelect",     'F',  0x0,  1, 10,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
+    createConfigParam("MSEsamples",         'F',  0x0,  1, 14,    0); // MSE samples                   (0=five, 1=three)
+    createConfigParam("TestPatternEn",      'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternDebug",   'F',  0x1,  3, 12,    0); // Engineering Use only          (0=pos calc, 1=packet)
+    createConfigParam("TestPatternId",      'F',  0x1, 12,  0,    0); // Test pattern id
+    createConfigParam("TestPatternRate",    'F',  0x2, 16,  0,    0); // Test pattern rate             (0=2700 ev/s, 1=9600 ev/s, 2=13000 ev/s, 3=59000 ev/s)
 }

@@ -289,11 +289,11 @@ void AcpcPlugin::createParams_v144()
     createConfigParam("PeakMinThreshold",   'E', 0x11, 16,  0,    1); // ACPC peak min threshold
     createConfigParam("PeakMaxThreshold",   'E', 0x12, 16,  0, 0xFFFF); // ACPC peak max threshold
 
-    createConfigParam("LvdsResetMode",      'F',  0x0,  1,  0,    0); // Reset mode                   (0=internal,1=external)
+    createConfigParam("LvdsResetMode",      'F',  0x0,  1,  0,    0); // Reset mode                   (0=soft,1=hard)
     createConfigParam("LvdsTclkMode",       'F',  0x0,  1,  1,    0); // Reset mode                   (0=external,1=internal)
     createConfigParam("LvdsTsyncMode",      'F',  0x0,  1,  2,    0); // Reset mode                   (0=external,1=internal)
     createConfigParam("LvdsTxenMode",       'F',  0x0,  1,  3,    1); // Reset mode                   (0=external,1=internal)
-    createConfigParam("OutputMode",         'F',  0x0,  2,  4,    0); // Output mode                  (0=normal,1=raw,2=extended)
+    createConfigParam("OutputMode",         'F',  0x0,  2,  4,    0); // Output mode                  (0=normal,1=off,2=raw,2=verbose)
     createConfigParam("XorderEn",           'F',  0x0,  1,  6,    1); // X order                      (0=disabled,1=enabled)
     createConfigParam("YorderEn",           'F',  0x0,  1,  7,    1); // Y order                      (0=disabled,1=enabled)
     createConfigParam("SortEn",             'F',  0x0,  1,  8,    0); // Enable sorting               (0=disabled,1=enabled)
