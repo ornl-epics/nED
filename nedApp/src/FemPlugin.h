@@ -181,6 +181,13 @@ class FemPlugin : public BaseModulePlugin {
 
         /**
          * Remote upgrade state machine function.
+         *
+         * This state machine is FEM specific, although it could be generilized
+         * if modules follow similar approach. The state machine operates
+         * asynchronously in response-processing thread upon receiving response
+         * from the module.
+         *
+         * @image html images/RemoteUpgrade.svg
          */
         bool remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *packet=0);
 
