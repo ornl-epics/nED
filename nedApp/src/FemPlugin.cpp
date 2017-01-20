@@ -45,6 +45,7 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
     createParam("Upg:File",     asynParamOctet, &UpgradeFile);             // WRITE - Path to the firmware file to be programmed
     createParam("Upg:ChunkSize",asynParamInt32, &UpgradeChunkSize, 256);   // WRITE - Maximum payload size for split program file transfer
     createParam("Upg:Status",   asynParamInt32, &UpgradeStatus);           // READ Firmware update status
+    createParam("Upg:ErrorStr", asynParamOctet, &UpgradeErrorStr);         // READ - Error description
     createParam("Upg:Size",     asynParamInt32, &UpgradeSize, 0);          // READ - Total firmware size in bytes
     createParam("Upg:Position", asynParamInt32, &UpgradePosition, 0);      // READ - Bytes already sent to remote porty
     createParam("Upg:Cmd",      asynParamInt32, &UpgradeCmd, 0);           // WRITE - Upgrade command
@@ -80,6 +81,7 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);
     }
+    setStringParam(UpgradeErrorStr, "");
 
     callParamCallbacks();
     initParams();
@@ -181,6 +183,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
     switch (action) {
     case RemoteUpgrade::INIT:
+        // Everyone starts as not supported, when invoked this state changes that
         if (m_remoteUpgrade.status == RemoteUpgrade::NOT_SUPPORTED) {
             std::function<bool(const DasPacket *)> handler = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
             registerResponseHandler(handler);
@@ -203,11 +206,15 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
             if (getStringParam(UpgradeFile, sizeof(path), path) != asynSuccess) {
                 LOG_ERROR("Upgrade failed - no file specified");
+                setStringParam(UpgradeErrorStr, "no file");
                 ret = false;
             } else if (m_remoteUpgrade.file.import(path) == true) {
                 m_remoteUpgrade.status = RemoteUpgrade::LOADED;
+                setStringParam(UpgradeErrorStr, "");
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                LOG_ERROR("Upgrade failed - file '%s' can't be loaded", path);
+                setStringParam(UpgradeErrorStr, "can't load file");
                 ret = false;
             }
             setIntegerParam(UpgradePosition, 0);
@@ -225,6 +232,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
             if (m_remoteUpgrade.file.getSize() == 0) {
                 LOG_WARN("Upgrade can't start - file not loaded");
+                setStringParam(UpgradeErrorStr, "file not loaded");
                 ret = false;
                 break;
             }
@@ -240,6 +248,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                 m_remoteUpgrade.buffer.reset( (char *)malloc(chunkSize) );
                 if (!m_remoteUpgrade.buffer) {
                     LOG_ERROR("Upgrade can't start - failed to allocate buffer");
+                    setStringParam(UpgradeErrorStr, "buffer alloc failed");
                     m_remoteUpgrade.bufferSize = 0;
                     m_remoteUpgrade.status = RemoteUpgrade::LOADED;
                     ret = false;
@@ -253,8 +262,9 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             // This is a simplification for the state machine, ignoring the response
             for (int i=0; i<=1; i++) {
                 if (setIntegerParam("Upg:Enable", i) != asynSuccess) {
-                    LOG_ERROR("Upgdrade error - can't find Upg:Enable parameter, module not supported?");
                     m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                    LOG_ERROR("Upgdrade error - can't find Upg:Enable parameter, module not supported?");
+                    setStringParam(UpgradeErrorStr, "not supported");
                     ret = false;
                     break;
                 }
@@ -264,7 +274,6 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                 epicsThreadSleep(0.1);
             }
 
-
             // Start a periodic timer
             std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeStatusRefresh, this);
             m_remoteUpgrade.statusTimer = scheduleCallback(timeoutCb, 1.0);
@@ -272,6 +281,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             epicsTimeGetCurrent(&m_remoteUpgrade.eraseStartTime);
             m_remoteUpgrade.status = RemoteUpgrade::ERASING;
 
+            setStringParam(UpgradeErrorStr, "");
         } else {
             LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
             ret = false;
@@ -286,6 +296,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
         if (packet == 0) {
             LOG_ERROR("Upgrade assert - packet==0");
+            setStringParam(UpgradeErrorStr, "empty response");
             ret = false;
             break;
         } else if (packet->getResponseType() != DasPacket::CMD_UPGRADE) {
@@ -300,6 +311,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             break;
         } else if (rspUpgrade(packet) == false) {
             m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+            setStringParam(UpgradeErrorStr, "bad response");
             ret = false;
             break;
         }
@@ -321,8 +333,9 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             } else if (status == RemoteUpgrade::IN_PROGRESS) {
                 // Prevent waiting for 'erased' flag too long
                 if (timerExpired(&m_remoteUpgrade.eraseStartTime, UpgradeEraseTimeout)) {
-                    LOG_ERROR("Upgrade error - giving up waiting on module 'erased' flag");
                     m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                    LOG_ERROR("Upgrade error - giving up waiting on module 'erased' flag");
+                    setStringParam(UpgradeErrorStr, "erase timeout");
 
                     if (m_remoteUpgrade.statusTimer) {
                         m_remoteUpgrade.statusTimer->cancel();
@@ -332,6 +345,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
                 LOG_ERROR("Upgrade error - response check failed");
+                setStringParam(UpgradeErrorStr, "remote error");
                 if (m_remoteUpgrade.statusTimer) {
                     m_remoteUpgrade.statusTimer->cancel();
                     m_remoteUpgrade.statusTimer.reset();
@@ -389,6 +403,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                 if (timerExpired(&m_remoteUpgrade.lastReadyTime, UpgradeBusyTimeout)) {
                     m_remoteUpgrade.status = RemoteUpgrade::ERROR;
                     LOG_ERROR("Upgrade error - giving up waiting on module 'ready' flag");
+                    setStringParam(UpgradeErrorStr, "ready timeout");
                     ret = true;
                     break;
                 }
@@ -408,6 +423,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
                 LOG_ERROR("Upgrade error - response check failed");
+                setStringParam(UpgradeErrorStr, "remote error");
                 ret = true;
             }
         } else if (m_remoteUpgrade.status == RemoteUpgrade::FINALIZING) {
@@ -424,6 +440,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                 // Disable remote upgrade support
                 if (setIntegerParam("Upg:Enable", 0) != asynSuccess) {
                     LOG_ERROR("Upgdrade error - can't find Upg:Enable parameter, module not supported?");
+                    setStringParam(UpgradeErrorStr, "not supported");
                 } else {
                     // Push new configuration, but don't refresh upgrade status
                     // as it clears most registers
@@ -434,8 +451,9 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             } else if (status == RemoteUpgrade::IN_PROGRESS) {
                 // Prevent waiting for 'ready' flag too long
                 if (timerExpired(&m_remoteUpgrade.disableTime, UpgradeProgramTimeout)) {
-                    LOG_ERROR("Upgrade error - giving up waiting on module 'programmed' flag");
                     m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                    LOG_ERROR("Upgrade error - giving up waiting on module 'programmed' flag");
+                    setStringParam(UpgradeErrorStr, "program timeout");
 
                     if (m_remoteUpgrade.statusTimer) {
                         m_remoteUpgrade.statusTimer->cancel();
@@ -445,6 +463,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
                 LOG_ERROR("Upgrade error - response check failed");
+                setStringParam(UpgradeErrorStr, "remote error");
                 if (m_remoteUpgrade.statusTimer) {
                     m_remoteUpgrade.statusTimer->cancel();
                     m_remoteUpgrade.statusTimer.reset();
@@ -491,6 +510,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
             m_remoteUpgrade.status = RemoteUpgrade::ERROR;
             LOG_ERROR("Upgrade failed - didn't receive response in time");
+            setStringParam(UpgradeErrorStr, "response timeout");
 
         } else {
             LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);

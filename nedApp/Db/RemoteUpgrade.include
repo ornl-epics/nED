@@ -26,6 +26,24 @@ record(mbbi, "$(P)Upg:Status")
     field(EIST, "Error")
     field(NIVL, "9")
     field(NIST, "User aborted")
+    field(FLNK, "$(P)Upg:ErrorStr")
+}
+record(waveform, "$(P)Upg:ErrorStr")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Error description")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Upg:ErrorStr")
+    field(FTVL, "CHAR")
+    field(NELM, "64")
+}
+record(calc, "$(P)Upg:RunTime")
+{
+    field(INPA, "$(P)Upg:Status NPP")
+    field(INPB, "$(P)Upg:RunTime NPP")
+    field(CALC, "A>2&&A<8?B+1:B")
+    field(SCAN, "1 second")
+    field(EGU,  "s")
 }
 record(longin, "$(P)Upg:Size")
 {
@@ -88,7 +106,6 @@ record(waveform, "$(P)Upg:File")
     field(INP,  "@asyn($(PORT))Upg:File")
     field(FTVL, "CHAR")
     field(NELM, "1024")
-    field(ASG,  "BEAMLINE")
 }
 record(mbbo, "$(P)Upg:Cmd")
 {
@@ -102,31 +119,43 @@ record(mbbo, "$(P)Upg:Cmd")
     field(ONST, "Start")
     field(TWVL, "2")
     field(TWST, "Check")
+    field(FLNK, "$(P)Upg:OnStart")
+}
+# When Start command is detected, reset the RunTime PV to 0
+record(calcout, "$(P)Upg:OnStart")
+{
+    field(INPA, "$(P)Upg:Cmd NPP")
+    field(INPB, "$(P)Upg:RunTime NPP")
+    field(CALC, "A=1?0:B")
+    field(OUT,  "$(P)Upg:RunTime NPP")
 }
 record(ao, "$(P)Upg:EraseTimeout")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Max time to wait for erased flag")
-    field(DTYP, "asynInt32")
+    field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT))Upg:EraseTimeout")
     field(EGU,  "s")
+    field(PINI, "YES")
 }
 record(ao, "$(P)Upg:BusyTimeout")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Max time to wait for ready flag")
-    field(DTYP, "asynInt32")
+    field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT))Upg:BusyTimeout")
     field(EGU,  "s")
+    field(PINI, "YES")
 }
 record(ao, "$(P)Upg:ProgramTimeout")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Max time to wait for programmed flag")
-    field(DTYP, "asynInt32")
+    field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT))Upg:ProgramTimeout")
     field(EGU,  "s")
+    field(PINI, "YES")
 }

@@ -240,6 +240,7 @@ class FemPlugin : public BaseModulePlugin {
         int UpgradeFile;     //!< New firmware file to be programed
         int UpgradeChunkSize;//!< Number of bytes to push in one transfer
         int UpgradeStatus;   //!< Remote upgrade status
+        int UpgradeErrorStr; //!< Error description
         int UpgradeSize;     //!< Total firmware size in bytes
         int UpgradePosition; //!< Bytes already sent to remote party
         int UpgradeCmd;      //!< Command to send to update process (start, abort)

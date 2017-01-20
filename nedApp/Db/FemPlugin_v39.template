@@ -36,3 +36,16 @@ record(bo, "$(P)Upg:Supported")
 {
     field(VAL,  "1")
 }
+record(ao, "$(P)Upg:EraseTimeout")
+{
+    field(VAL,  "120")
+}
+record(ao, "$(P)Upg:BusyTimeout")
+{
+    field(VAL,  "5")
+}
+record(ao, "$(P)Upg:ProgramTimeout")
+{
+    field(VAL,  "10")
+}
+
