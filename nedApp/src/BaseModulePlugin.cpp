@@ -954,7 +954,7 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
         value = it->second.convert->toRaw(value);
         payload[offset] |= value << shift;
         if ((it->second.width + shift) > 32) {
-            payload[offset+1] |= value >> (it->second.width -(32 - shift + 1));
+            payload[offset+1] |= value >> (it->second.width -(32 - shift));
         }
     }
 

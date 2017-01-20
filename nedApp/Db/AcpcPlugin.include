@@ -7,7 +7,9 @@ record(mbbo, "$(P)DataMode")
 record(calcout, "$(P)DataModeL")
 {
     field(INPA, "$(P)DataMode.RVAL NPP")
-    field(CALC, "A=0?0:A+1")
+    # We're using ACPC off for getting AROC raw mode out.
+    # ACPC raw mode is not used!
+    field(CALC, "A>=2?3:A")
     field(OUT,  "$(P)OutputMode PP")
 }
 record(calc, "$(P)HwStatus")
