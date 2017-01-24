@@ -124,8 +124,8 @@ void AcpcPlugin::createParams_v171()
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",        '1',  0x0, 32,  0,    0); // Chan1 position index
 
-    createConfigParam("PhotosumMin",        'E',  0x0, 32,  0,    0); // Low PhotoSum threshold        (scale:0.00003051757813)
-    createConfigParam("PhotosumMax",        'E',  0x2, 32,  0,    0); // High PhotoSum threshold       (scale:0.00003051757813)
+    createConfigParam("PhotosumMin",        'E',  0x0, 32,  0,  600); // Low PhotoSum threshold        (scale:0.00003051757813)
+    createConfigParam("PhotosumMax",        'E',  0x2, 32,  0, 2700); // High PhotoSum threshold       (scale:0.00003051757813)
     createConfigParam("TsyncDelay",         'E',  0x4, 32,  0,    0); // TSYNC delay
     createConfigParam("Ch1:Enable",         'E',  0x6,  1,  0,    0); // Channel 1 Enable              (0=enable, 1=disable)
     createConfigParam("Ch2:Enable",         'E',  0x6,  1,  1,    0); // Channel 2 Enable              (0=enable, 1=disable)
@@ -136,13 +136,13 @@ void AcpcPlugin::createParams_v171()
     createConfigParam("Ch7:Enable",         'E',  0x6,  1,  6,    0); // Channel 7 Enable              (0=enable, 1=disable)
     createConfigParam("Ch8:Enable",         'E',  0x6,  1,  7,    0); // Channel 8 Enable              (0=enable, 1=disable)
     createConfigParam("Ch9:Enable",         'E',  0x6,  1,  8,    0); // Channel 9 Enable              (0=enable, 1=disable)
-    createConfigParam("TimeTolerance",      'E',  0x6,  7,  9,    0); // Time tolerance
+    createConfigParam("TimeTolerance",      'E',  0x6,  7,  9,   63); // Time tolerance
 
     createConfigParam("TcResetMode",        'F',  0x0,  1,  0,    0); // Reset mode                    (0=soft, 1=hard)
     createConfigParam("TcTclkMode",         'F',  0x0,  1,  1,    0); // Tclk mode                     (0=external, 1=internal)
     createConfigParam("TcTsynMode",         'F',  0x0,  1,  2,    0); // TSYNC mode                    (0=external, 1=internal)
     createConfigParam("TcTxenMode",         'F',  0x0,  1,  3,    0); // TXen  mode                    (0=external, 1=internal)
-    createConfigParam("OutputMode",         'F',  0x0,  2,  4,    0); // Output mode                   (0=normal,1=off,2=raw,2=verbose)
+    createConfigParam("OutputMode",         'F',  0x0,  2,  4,    1); // Output mode                   (0=normal,1=off,2=raw,2=verbose)
     createConfigParam("DetectorSelect",     'F',  0x0,  1, 10,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
     createConfigParam("MSEsamples",         'F',  0x0,  1, 14,    0); // MSE samples                   (0=five, 1=three)
     createConfigParam("TestPatternEn",      'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
