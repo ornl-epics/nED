@@ -41,7 +41,7 @@ record(calc, "$(P)Upg:RunTime")
 {
     field(INPA, "$(P)Upg:Status NPP")
     field(INPB, "$(P)Upg:RunTime NPP")
-    field(CALC, "A>2&&A<8?B+1:B")
+    field(CALC, "A>2&&A<7?B+1:B")
     field(SCAN, "1 second")
     field(EGU,  "s")
 }
@@ -137,6 +137,7 @@ record(ao, "$(P)Upg:EraseTimeout")
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT))Upg:EraseTimeout")
     field(EGU,  "s")
+    field(PREC, "1")
     field(PINI, "YES")
 }
 record(ao, "$(P)Upg:BusyTimeout")
@@ -147,6 +148,7 @@ record(ao, "$(P)Upg:BusyTimeout")
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT))Upg:BusyTimeout")
     field(EGU,  "s")
+    field(PREC, "1")
     field(PINI, "YES")
 }
 record(ao, "$(P)Upg:ProgramTimeout")
@@ -157,5 +159,44 @@ record(ao, "$(P)Upg:ProgramTimeout")
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT))Upg:ProgramTimeout")
     field(EGU,  "s")
+    field(PREC, "1")
     field(PINI, "YES")
+}
+record(ao, "$(P)Upg:NoRspTimeout")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max time to wait between upg responses")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))Upg:NoRspTimeout")
+    field(EGU,  "s")
+    field(PREC, "1")
+    field(PINI, "YES")
+}
+
+record(longout, "$(P)Upg:NoRspMaxRetries")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max times to retry upgrade step")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Upg:NoRspMaxRetries")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(longin, "$(P)Upg:NoRspSeqRetries")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number consecutive retries")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Upg:NoRspSeqRetries")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Upg:NoRspTotRetries")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number total retries in upgrade session")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Upg:NoRspTotRetries")
+    field(SCAN, "I/O Intr")
 }

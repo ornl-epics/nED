@@ -48,4 +48,11 @@ record(ao, "$(P)Upg:ProgramTimeout")
 {
     field(VAL,  "10")
 }
-
+record(ao, "$(P)Upg:NoRspTimeout")
+{
+    field(VAL,  "0.2")
+}
+record(longout, "$(P)Upg:NoRspMaxRetries")
+{
+    field(VAL,  "5")
+}

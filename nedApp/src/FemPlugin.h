@@ -74,6 +74,9 @@ class FemPlugin : public BaseModulePlugin {
             epicsTimeStamp lastReadyTime; //!< Timestamp of last 'ready' response
             epicsTimeStamp disableTime; //!< Timestamp when upgrade was disabled
             uint8_t expectedWrCfg;  //!< Counter how many write config responses to silently ignore
+            uint32_t expectedSeqId; //!< Packet sequence number for verifying remote end received packet
+            uint32_t seqRetries;    //!< Consequtive failed responses
+            uint32_t totRetries;    //!< Total number of retries during one upgrade session
         } m_remoteUpgrade;          //!< Remote upgrade context
 
     public: // functions
@@ -247,7 +250,11 @@ class FemPlugin : public BaseModulePlugin {
         int UpgradeEraseTimeout;    //!< Max time to wait for erased flag
         int UpgradeBusyTimeout;     //!< Max time to wait for ready flag
         int UpgradeProgramTimeout;  //!< Max time to wait for programmed flag
-        #define LAST_FEMPLUGIN_PARAM UpgradeCmd
+        int UpgradeNoRspTimeout;    //!< Max time to wait for response
+        int UpgradeNoRspMaxRetries; //!< Max times to retry when no response received
+        int UpgradeNoRspSeqRetries; //!< Number of consecutive retries
+        int UpgradeNoRspTotRetries; //!< Number of all retries in one upgrade session
+        #define LAST_FEMPLUGIN_PARAM UpgradeNoRspTotRetries
 };
 
 #endif // DSP_PLUGIN_H

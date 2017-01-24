@@ -52,6 +52,10 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
     createParam("Upg:EraseTimeout",asynParamFloat64, &UpgradeEraseTimeout, 120);   // WRITE - Max time to wait for erased flag
     createParam("Upg:BusyTimeout", asynParamFloat64, &UpgradeBusyTimeout,  1);     // WRITE - Max time to wait for ready flag
     createParam("Upg:ProgramTimeout",asynParamFloat64, &UpgradeProgramTimeout, 10);// WRITE - Max time to wait for programmed flag
+    createParam("Upg:NoRspTimeout",asynParamFloat64, &UpgradeNoRspTimeout, 0.2);   // WRITE - Max time to wait for response
+    createParam("Upg:NoRspMaxRetries",asynParamInt32,&UpgradeNoRspMaxRetries, 5);     // WRITE - Max times to retry when no response received
+    createParam("Upg:NoRspSeqRetries",asynParamInt32,&UpgradeNoRspSeqRetries, 5);  // READ - Number of consecutive retries
+    createParam("Upg:NoRspTotRetries",asynParamInt32,&UpgradeNoRspTotRetries, 5);  // READ - Number of all retries in one upgrade session
 
     m_remoteUpgrade.status = RemoteUpgrade::NOT_SUPPORTED;
 
@@ -190,8 +194,12 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
             m_remoteUpgrade.status = RemoteUpgrade::NOT_READY;
             m_remoteUpgrade.expectedWrCfg = 0;
+            m_remoteUpgrade.seqRetries = 0;
+            m_remoteUpgrade.totRetries = 0;
             setIntegerParam(UpgradePosition, 0);
             setIntegerParam(UpgradeSize, 0);
+            setIntegerParam(UpgradeNoRspSeqRetries, 0);
+            setIntegerParam(UpgradeNoRspTotRetries, 0);
         } else {
             LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
             ret = false;
@@ -210,7 +218,6 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                 ret = false;
             } else if (m_remoteUpgrade.file.import(path) == true) {
                 m_remoteUpgrade.status = RemoteUpgrade::LOADED;
-                setStringParam(UpgradeErrorStr, "");
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
                 LOG_ERROR("Upgrade failed - file '%s' can't be loaded", path);
@@ -219,6 +226,9 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             }
             setIntegerParam(UpgradePosition, 0);
             setIntegerParam(UpgradeSize, m_remoteUpgrade.file.getSize());
+            setStringParam(UpgradeErrorStr, "");
+
+            LOG_INFO("Upgrade - loaded file %s", path);
         } else {
             LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
             ret = false;
@@ -236,11 +246,16 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                 ret = false;
                 break;
             }
+            LOG_INFO("Upgrade - started");
 
-            setIntegerParam(UpgradePosition, 0);
             m_remoteUpgrade.offset = 0;
             m_remoteUpgrade.lastCount = 0;
             m_remoteUpgrade.expectedWrCfg = 0;
+            m_remoteUpgrade.seqRetries = 0;
+            m_remoteUpgrade.totRetries = 0;
+            setIntegerParam(UpgradePosition, 0);
+            setIntegerParam(UpgradeNoRspSeqRetries, 0);
+            setIntegerParam(UpgradeNoRspTotRetries, 0);
 
             getIntegerParam(UpgradeChunkSize, &chunkSize);
             chunkSize = (chunkSize < 0) ? 256 : ALIGN_UP(chunkSize, 4);
@@ -282,6 +297,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             m_remoteUpgrade.status = RemoteUpgrade::ERASING;
 
             setStringParam(UpgradeErrorStr, "");
+
+            LOG_INFO("Upgrade - erasing");
         } else {
             LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
             ret = false;
@@ -317,6 +334,9 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
         }
 
         if (m_remoteUpgrade.status == RemoteUpgrade::ERASING) {
+            m_remoteUpgrade.seqRetries = 0;
+            setIntegerParam(UpgradeNoRspSeqRetries, 0);
+
             // most likely triggered by the background periodic refresher
             int status = remoteUpgradeCheck(RemoteUpgrade::WAIT_ERASED);
             if (status == RemoteUpgrade::DONE) {
@@ -330,6 +350,9 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
                 // Sending another status request is redundant, but keeps SM sane
                 reqUpgrade();
+                m_remoteUpgrade.expectedSeqId = 0; // FEM resets counter to 0 every time upgrade is started
+
+                LOG_INFO("Upgrade - sending data");
             } else if (status == RemoteUpgrade::IN_PROGRESS) {
                 // Prevent waiting for 'erased' flag too long
                 if (timerExpired(&m_remoteUpgrade.eraseStartTime, UpgradeEraseTimeout)) {
@@ -358,13 +381,33 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             // Do all flags check out?
             int status = remoteUpgradeCheck(RemoteUpgrade::WAIT_READY);
             if (status == RemoteUpgrade::DONE) {
+                int seqId;
+                int maxRetries;
+                getIntegerParam("Upg:SeqId", &seqId);
+                getIntegerParam(UpgradeNoRspMaxRetries, &maxRetries);
 
                 // Switch from potential waiting state
                 m_remoteUpgrade.status = RemoteUpgrade::IN_PROGRESS;
 
                 epicsTimeGetCurrent(&m_remoteUpgrade.lastReadyTime);
 
-                m_remoteUpgrade.offset += m_remoteUpgrade.lastCount;
+                if ((unsigned)seqId == m_remoteUpgrade.expectedSeqId) {
+                    m_remoteUpgrade.offset += m_remoteUpgrade.lastCount;
+                    m_remoteUpgrade.expectedSeqId = (++seqId % 256);
+                    m_remoteUpgrade.seqRetries = 0;
+                    setIntegerParam(UpgradeNoRspSeqRetries, 0);
+                } else if (m_remoteUpgrade.seqRetries < (unsigned)maxRetries) {
+                    m_remoteUpgrade.seqRetries++;
+                    m_remoteUpgrade.totRetries++;
+                    setIntegerParam(UpgradeNoRspSeqRetries, m_remoteUpgrade.seqRetries);
+                    setIntegerParam(UpgradeNoRspTotRetries, m_remoteUpgrade.totRetries);
+                } else {
+                    m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                    LOG_ERROR("Upgrade error - giving up sending same chunk of data after %d retries", maxRetries);
+                    setStringParam(UpgradeErrorStr, "seq not incrementing");
+                    ret = true;
+                    break;
+                }
 
                 getIntegerParam(UpgradeChunkSize, &chunkSize);
                 chunkSize = ALIGN_UP(chunkSize, 4);
@@ -380,6 +423,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                     std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeStatusRefresh, this);
                     m_remoteUpgrade.statusTimer = scheduleCallback(timeoutCb, 1.0);
 
+                    LOG_INFO("Upgrade - programming");
                     break;
                 }
 
@@ -394,11 +438,14 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
                 // A packet was sent out, setup a timeout timer
                 double timeout;
-                getDoubleParam(NoRspTimeout, &timeout);
+                getDoubleParam(UpgradeNoRspTimeout, &timeout);
                 std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
                 m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
 
             } else if (status == RemoteUpgrade::IN_PROGRESS) {
+                m_remoteUpgrade.seqRetries = 0;
+                setIntegerParam(UpgradeNoRspSeqRetries, 0);
+
                 // Prevent waiting for 'ready' flag too long
                 if (timerExpired(&m_remoteUpgrade.lastReadyTime, UpgradeBusyTimeout)) {
                     m_remoteUpgrade.status = RemoteUpgrade::ERROR;
@@ -416,7 +463,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
 
                 // A packet was sent out, setup a timeout timer
                 double timeout;
-                getDoubleParam(NoRspTimeout, &timeout);
+                getDoubleParam(UpgradeNoRspTimeout, &timeout);
                 std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
                 m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
 
@@ -427,6 +474,9 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                 ret = true;
             }
         } else if (m_remoteUpgrade.status == RemoteUpgrade::FINALIZING) {
+            m_remoteUpgrade.seqRetries = 0;
+            setIntegerParam(UpgradeNoRspSeqRetries, 0);
+
             // most likely triggered by the background periodic refresher
             int status = remoteUpgradeCheck(RemoteUpgrade::WAIT_PROGRAMMED);
             if (status == RemoteUpgrade::DONE) {
@@ -447,6 +497,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                     m_remoteUpgrade.expectedWrCfg++;
                     reqWriteConfig();
                 }
+
+                LOG_INFO("Upgrade - complete");
 
             } else if (status == RemoteUpgrade::IN_PROGRESS) {
                 // Prevent waiting for 'ready' flag too long
@@ -492,6 +544,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             }
             m_remoteUpgrade.status = RemoteUpgrade::ABORTED;
 
+            LOG_INFO("Upgrade - user aborted");
+
         } else {
             LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
             ret = false;
@@ -508,9 +562,28 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
                 m_remoteUpgrade.timer.reset();
             }
 
-            m_remoteUpgrade.status = RemoteUpgrade::ERROR;
-            LOG_ERROR("Upgrade failed - didn't receive response in time");
-            setStringParam(UpgradeErrorStr, "response timeout");
+            int maxRetries;
+            getIntegerParam(UpgradeNoRspMaxRetries, &maxRetries);
+
+            if (m_remoteUpgrade.seqRetries >= (unsigned)maxRetries) {
+                m_remoteUpgrade.status = RemoteUpgrade::ERROR;
+                LOG_ERROR("Upgrade error - too many retries sending same chunk of data");
+                setStringParam(UpgradeErrorStr, "too many retries");
+            } else {
+                // Refresh status to see what packet has been received,
+                // rest of SM will take care of that
+                reqUpgrade();
+                m_remoteUpgrade.seqRetries++;
+                m_remoteUpgrade.totRetries++;
+                setIntegerParam(UpgradeNoRspSeqRetries, m_remoteUpgrade.seqRetries);
+                setIntegerParam(UpgradeNoRspTotRetries, m_remoteUpgrade.totRetries);
+
+                // A packet was sent out, setup a timeout timer
+                double timeout;
+                getDoubleParam(UpgradeNoRspTimeout, &timeout);
+                std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
+                m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
+            }
 
         } else {
             LOG_DEBUG("Upgrade SM action ignore - state=%d, action=%d", m_remoteUpgrade.status, action);
@@ -565,7 +638,7 @@ float FemPlugin::remoteUpgradeStatusRefresh()
 
     // A packet was sent out, setup a timeout timer
     double timeout;
-    getDoubleParam(NoRspTimeout, &timeout);
+    getDoubleParam(UpgradeNoRspTimeout, &timeout);
     std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
     m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
 

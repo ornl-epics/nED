@@ -351,6 +351,7 @@ void FemPlugin::createParams_v39()
 
     createUpgradeParam("Upg:OutVerifyOK",          0x1,  1,  0); // Upgrade SPI_outVerifyOK
     createUpgradeParam("Upg:OutPrgSwitchWordOK",   0x1,  1,  1); // Upgrade SPI_outProgramSwitch
+    createUpgradeParam("Upg:SeqId",                0x1,  8,  4); // Upgrade Sequence id
     createUpgradeParam("Upg:FifoEmpty",            0x1,  1, 12); // Upgrade SPI_fifo_empty
     createUpgradeParam("Upg:FifoProgFull",         0x1,  1, 13); // Upgrade SPI_fifo_progful
     createUpgradeParam("Upg:FifoFull",             0x1,  1, 14); // Upgrade SPI_fifo_full
