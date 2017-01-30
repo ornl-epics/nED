@@ -85,6 +85,11 @@ class ProxyPlugin : public BaseSocketPlugin {
          * Puts a dummy READ_STATUS response from OCC into a socket.
          */
         void sendHeartbeat();
+
+    protected:
+        #define FIRST_PROXYPLUGIN_PARAM ReadOnly
+        int ReadOnly;     //!< Flag whether channel is read-only
+        #define LAST_PROXYPLUGIN_PARAM ReadOnly
 };
 
 #endif // PROXY_PLUGIN_H

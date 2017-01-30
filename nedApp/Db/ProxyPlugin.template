@@ -74,3 +74,14 @@ record(ai, "$(P)ClientInactive")
 {
     field(FLNK, "$(P)AutoReset PP")
 }
+
+record(bo, "$(P)ReadOnly")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Is client allowed to write?")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}

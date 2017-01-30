@@ -24,6 +24,9 @@ ProxyPlugin::ProxyPlugin(const char *portName, const char *dispatcherPortName, i
     , m_nReceived(0)
     , m_recvThread("ProxyRecv", std::bind(&ProxyPlugin::sockReceive, this, std::placeholders::_1))
 {
+    createParam("ReadOnly", asynParamInt32, &ReadOnly, 0); // WRITE - prevents client to write any data
+    callParamCallbacks();
+
     m_recvThread.start();
 }
 
@@ -65,6 +68,7 @@ void ProxyPlugin::processData(const DasPacketList * const packetList)
 void ProxyPlugin::sockReceive(epicsEvent *shutdown)
 {
     DasPacketList packetsList;
+    epicsTimeStamp lastReadOnlyLog = {0,0};
 
     // Maximum time the loop will run. Too short and it will eat CPU time,
     // too long kills interactive shutdown. 1 second sounds reasonable tradeoff.
@@ -78,6 +82,7 @@ void ProxyPlugin::sockReceive(epicsEvent *shutdown)
 
     while (shutdown->tryWait() == false) {
         uint32_t received;
+        int readonly;
 
         this->lock();
         bool connected = isClientConnected();
@@ -90,20 +95,30 @@ void ProxyPlugin::sockReceive(epicsEvent *shutdown)
         }
 
         if (recv((uint32_t *)buffer, bufferSize, loopTime, &received) == true) {
-            uint32_t consumed = packetsList.reset(reinterpret_cast<uint8_t*>(buffer), received);
-            uint32_t nPackets = 0;
+            getIntegerParam(ReadOnly, &readonly);
+            if (readonly == 1) {
+                epicsTimeStamp now;
+                epicsTimeGetCurrent(&now);
+                if (epicsTimeDiffInSeconds(&now, &lastReadOnlyLog) > 60) {
+                    LOG_WARN("Blocked passing packet from client, socket is in read-only mode");
+                    epicsTimeGetCurrent(&lastReadOnlyLog);
+                }
+            } else {
+                uint32_t consumed = packetsList.reset(reinterpret_cast<uint8_t*>(buffer), received);
+                uint32_t nPackets = 0;
 
-            this->lock();
-            for (auto it = packetsList.cbegin(); it != packetsList.cend(); it++) {
-                sendToDispatcher(*it);
-                nPackets++;
+                this->lock();
+                for (auto it = packetsList.cbegin(); it != packetsList.cend(); it++) {
+                    sendToDispatcher(*it);
+                    nPackets++;
+                }
+                this->unlock();
+
+                packetsList.release();
+
+                if (consumed != received)
+                    LOG_WARN("Some data received from socket can't be parsed, received %u b, processed %u b (%u packets)", received, consumed, nPackets);
             }
-            this->unlock();
-
-            packetsList.release();
-
-            if (consumed != received)
-                LOG_WARN("Some data received from socket can't be parsed, received %u b, processed %u b (%u packets)", received, consumed, nPackets);
         }
     }
 }
