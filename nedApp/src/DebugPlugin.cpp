@@ -155,17 +155,18 @@ asynStatus DebugPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChar
 
             for (uint32_t i = 0; i < pkt->length/4; i++) {
                 int len;
+                char delimiter = ((i+1)%6 == 0 ? '\n' : ' ');
                 uint32_t val = pkt->data[i];
                 switch (byteGrp) {
                 case GROUP_2_BYTES:
-                    len = snprintf(value, nChars, "%04X %04X ", (val >> 16) & 0xFFFF, val & 0xFFFF);
+                    len = snprintf(value, nChars, "%04X %04X%c", (val >> 16) & 0xFFFF, val & 0xFFFF, delimiter);
                     break;
                 case GROUP_4_BYTES:
-                    len = snprintf(value, nChars, "%08X ", val);
+                    len = snprintf(value, nChars, "%08X%c", val, delimiter);
                     break;
                 case GROUP_2_BYTES_SWAPPED:
                 default:
-                    len = snprintf(value, nChars, "%04X %04X ", val & 0xFFFF, (val >> 16) & 0xFFFF);
+                    len = snprintf(value, nChars, "%04X %04X%c", val & 0xFFFF, (val >> 16) & 0xFFFF, delimiter);
                     break;
                 }
                 if (len >= static_cast<int>(nChars) || len == -1)
