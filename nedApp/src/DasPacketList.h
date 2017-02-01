@@ -37,6 +37,11 @@ class DasPacketList : public std::vector<const DasPacket *>
         DasPacketList();
 
         /**
+         * Destructor ensures the reference counter is at 0.
+         */
+        ~DasPacketList();
+
+        /**
          * Increase internal reference count.
          *
          * After making the reservation, data pointed to by this class
@@ -93,6 +98,8 @@ class DasPacketList : public std::vector<const DasPacket *>
          * object can not be reserved() again until next reset() returns.
          */
         void waitAllReleased() const;
+
+        unsigned long getRefCount() { unsigned long tmp; m_lock.lock(); tmp = m_refcount; m_lock.unlock(); return tmp; }
 
     private:
         unsigned long m_refcount;

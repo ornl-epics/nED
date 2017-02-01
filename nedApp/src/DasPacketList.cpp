@@ -17,6 +17,14 @@ DasPacketList::DasPacketList()
     //ctor
 }
 
+DasPacketList::~DasPacketList()
+{
+    m_lock.lock();
+    unsigned long refcount = m_refcount;
+    m_lock.unlock();
+    assert(refcount == 0);
+}
+
 const DasPacket *DasPacketList::verifyPacket(const uint8_t *data, uint32_t dataLen) const
 {
     const DasPacket *packet = reinterpret_cast<const DasPacket *>(data);

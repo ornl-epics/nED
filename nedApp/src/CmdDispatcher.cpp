@@ -42,6 +42,8 @@ void CmdDispatcher::processDataUnlocked(const DasPacketList * const packetList)
     if (!cmdList.empty()) {
         cmdList.reserve();
         BaseDispatcherPlugin::sendToPlugins(&cmdList);
+        cmdList.release();
+        cmdList.waitAllReleased();
     }
 
     // Update parameters
