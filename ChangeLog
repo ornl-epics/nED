@@ -8,11 +8,13 @@ Enhancements:
 * Debug plugin keeps multiple responses
 * Discovery supports 3 discovery methods
 * Support for DSP-T v6.6
+* Dynamic number of pixel to adjust TOF
 
 Fixed bugs:
 * Config register alignment problem
 * segfault when not able to connect to other plugin
 * OCC PV updated to work properly when not enabled
+* segfault: CmdDispatcher does not wait for consumer plugins
 
 Impact:
 * BL-4B - flat field position id change

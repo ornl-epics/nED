@@ -1,0 +1,27 @@
+record(longout, "$(P)PixelId$(ID)")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select meta pixel id to adjust")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PixelId$(ID)")
+    field(PINI, "YES")
+}
+record(longout, "$(P)TofOffset$(ID)")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "TOF offset to be applied")
+    field(DTYP, "asynInt32")
+    field(EGU,  "nsec")
+    field(OUT,  "@asyn($(PORT))TofOffset$(ID)")
+    field(PINI, "YES")
+}
+record(longout, "$(P)NCorrected$(ID)")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of corrected events")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))NCorrected$(ID)")
+    field(SCAN, "I/O Intr")
+}

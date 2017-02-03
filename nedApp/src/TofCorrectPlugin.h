@@ -29,7 +29,7 @@ class TofCorrectPlugin : public BaseDispatcherPlugin {
         /**
          * Constructor
          */
-        TofCorrectPlugin(const char *portName, const char *connectPortName);
+        TofCorrectPlugin(const char *portName, const char *connectPortName, int nPixels);
 
         /**
          * Destructor
@@ -47,10 +47,30 @@ class TofCorrectPlugin : public BaseDispatcherPlugin {
             bool inUse;                 //!< Currently used by someone
         } PoolEntry;
 
+        /**
+         * Structure describing one pixel id correction.
+         */
+        typedef struct {
+            bool enabled;
+            int pixelId;
+            int tofOffset;
+            uint32_t coarseOffset;
+            uint32_t fineOffset;
+            int32_t nEvents;
+
+        } CorrectionDesc;
+
         uint32_t m_nReceived;           //!< Number of received packets
         uint32_t m_nProcessed;          //!< Number of modified packets
         std::list<PoolEntry> m_pool;    //!< Pool of DasPacket allocated objects, all of the same size
         epicsMutex m_mutex;             //!< Mutex used solely to serialize sending data to plugins
+        std::vector<CorrectionDesc> m_corrections;//!< Limit to 3 pixel ids for now, also relates to PV hookups
+        uint32_t m_frameLen;            //!< Frame length in 100ns units
+
+        /**
+         * Handle writing integer pv
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
          * Process received packets.
@@ -94,21 +114,13 @@ class TofCorrectPlugin : public BaseDispatcherPlugin {
         void freePacket(DasPacket *packet);
 
     protected:
-        #define FIRST_TOFCORRECTPLUGIN_PARAM PoolSize
+        #define FIRST_TOFCORRECTPLUGIN_PARAM FrameLen
+        int FrameLen;           //!< Length of a frame in nsec
         int PoolSize;           //!< Number of allocated packets
-        int PixelId1;           //!< Select pixel id to correct
-        int TofOffset1;         //!< Apply this offset to every matched event
-        int FrameLen1;          //!< Length of a frame in nsec
-        int NCorrected1;        //!< Number of events corrected
-        int PixelId2;           //!< Select pixel id to correct
-        int TofOffset2;         //!< Apply this offset to every matched event
-        int FrameLen2;          //!< Length of a frame in nsec
-        int NCorrected2;        //!< Number of events corrected
-        int PixelId3;           //!< Select pixel id to correct
-        int TofOffset3;         //!< Apply this offset to every matched event
-        int FrameLen3;          //!< Length of a frame in nsec
-        int NCorrected3;        //!< Number of events corrected
-        #define LAST_TOFCORRECTPLUGIN_PARAM NCorrected3
-
+        int NPixels;            //!< Number of pixels to correct
+        #define LAST_TOFCORRECTPLUGIN_PARAM NPixels
+        std::vector<int> PixelIds;      //!< Selected pixel ids
+        std::vector<int> TofOffsets;    //!< Offset to be applied to TOF
+        std::vector<int> NCorrected;    //!< Number of corrected events
 };
 #endif // TOF_CORRECT_PLUGIN_H

@@ -33,6 +33,7 @@ DB += ApplyConfig.db
 DB += PulsedMagnet.db
 DB += TimingPlugin.db
 DB += TofCorrectPlugin.db
+DB += TofCorrectPixels.template
 DB += BnlFlatFieldPlugin.db
 DB += BnlPosCalcPlugin.db
 DB += CRocPosCalcPlugin.db
