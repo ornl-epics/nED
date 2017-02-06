@@ -32,7 +32,6 @@ import re
 import os
 import argparse
 
-
 __version__ = "0.2.0"
 
 PVTABLE_DIR_TMPL = "/home/controls/<beamline>/pvtable/<iocname>/"
@@ -93,14 +92,16 @@ def parse_st_cmd_plugins(st_cmd_filepath, bl_prefix, verbose):
 
 vars_cache = dict()
 def parse_src_file(path, mode):
+    """ Parses nED .cpp file to get register definition for a given register set.
+    Returns a dictionary of register names with defaults for values. """
 
     types = {
-      'status':  re.compile("createStatusParam\s*\(\s*\"([\w:]+)\"\s*,"),
-      'counter': re.compile("createCounterParam\s*\(\s*\"([\w:]+)\"\s*,"),
-      'config':  re.compile("createConfigParam\s*\(\s*\"([\w:]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
-      'config_ch': re.compile("createChanConfigParam\s*\(\s*\"([\w:]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
-      'config_meta': re.compile("createMetaConfigParam\s*\(\s*\"([\w:]+)\",[^,]*,\s*(\S+)\s*[,\)].*"),
-      'temp':    re.compile("createTempParam\s*\(\s*\"([\w:]+)\"\s*,"),
+      'status':  re.compile("createStatusParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'counter': re.compile("createCounterParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'config':  re.compile("createConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
+      'config_ch': re.compile("createChanConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
+      'config_meta': re.compile("createMetaConfigParam\s*\(\s*\"([^\"]+)\",[^,]*,\s*(\S+)\s*[,\)].*"),
+      'temp':    re.compile("createTempParam\s*\(\s*\"([^\"]+)\"\s*,"),
     }
 
     if path not in vars_cache:
@@ -109,6 +110,8 @@ def parse_src_file(path, mode):
             vars_cache[path] = dict([ (k,[]) for k in types.keys() ])
 
             for line in infile:
+                line = line.strip(" \t\n")
+                matched = False
                 for type,regex in types.items():
                     if type in [ "config_ch", "config_meta" ]:
                         type = "config"
@@ -118,9 +121,65 @@ def parse_src_file(path, mode):
                         if type == "config":
                             val = match.group(2)
                         vars_cache[path][type].append({ 'name': match.group(1), 'val': val })
+                        matched = True
                         break
+                if not matched and line.strip(" \t").startswith("create"):
+                    raise RuntimeError("Line '{0}' not parsed".format(line))
 
     return vars_cache[path][mode]
+
+def update_pvs_file(outpath, pv_prefix, vars):
+    name_regex = re.compile(".*<name>(.*)</name>.*")
+    xml_lines = []
+    xml_parts = {}
+    # Read existing PVs from XML files and remember them
+    with open(outpath, "r") as f:
+        while True:
+            line = f.readline()
+            if not line:
+                break
+            if "<pv>" in line:
+                xml_buffer = ""
+                # Eat all lines that belong to <pv>...</pv> group
+                while not "</pv>" in line:
+                    xml_buffer += line
+                    line = f.readline()
+                xml_buffer += line
+
+                m = name_regex.search(xml_buffer)
+                if m:
+                    xml_parts[ m.group(1) ] = xml_buffer
+                else:
+                    raise RuntimeError("Invalid xml, <name> tag missing")
+            else:
+                xml_lines.append(line)
+
+    with open(outpath, "w") as f:
+        # Match the beginning of XML file
+        while xml_lines:
+            line = xml_lines.pop(0)
+            f.write(line)
+            if "<pvlist>" in line:
+                break
+
+        # Now iterate over the new PVs, use existing XML parts in place
+        # or add new XML code
+        for var in vars:
+            pv_name = pv_prefix + var['name']
+            if pv_name in xml_parts:
+                f.write(xml_parts[pv_name])
+            else:
+                f.write("        <pv>\n")
+                f.write("            <selected>true</selected>\n")
+                f.write("            <name>{0}{1}</name>\n".format(pv_prefix, var["name"]))
+                f.write("            <tolerance>0.1</tolerance>\n")
+                f.write("            <saved_value>{0}</saved_value>\n".format(var["val"]))
+                f.write("        </pv>\n")
+
+        # Finally the XML tail
+        for line in xml_lines:
+            f.write(line)
+
 
 def write_pvs_file(outpath, pv_prefix, vars):
     with open(outpath, "w") as outfile:
@@ -141,11 +200,14 @@ def write_pvs_file(outpath, pv_prefix, vars):
         outfile.write("</pvtable>\n")
 
 def main():
-    desc = "Create .pvs files for all detector devices configured in st.cmd."
+    desc = "Create or update .pvs files for all detector and other modules. " \
+           "Based on st.cmd file it tries to figure out all settings automatically, " \
+           "with optional parameters to override those. By default it will not " \
+           "overwrite existing files unless --force is specified."
 
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("st_cmd", help="Path to nED IOC st.cmd file")
-    parser.add_argument("-b", "--bl-prefix", default=BL+":Det", help="Override beamline PREFIX, defaults to " + BL + ":Det")
+    parser.add_argument("-b", "--bl-prefix", default=BL+":Det", help="Override beamline PV prefix")
     parser.add_argument("-f", "--force", default=False, help="Overwrite existing files", action="store_true")
     parser.add_argument("-n", "--ned-dir", default=None, help="Path to nED root directory")
     parser.add_argument("-o", "--outdir", default=None, help="Override output directory")
@@ -165,12 +227,19 @@ def main():
             print " {0} = {1}".format(k, v)
 
     # Verify beamline prefix, command line overrides one from st.cmd
-    re_bl = re.compile("^BL[0-9]{1,2}.?:\w+$")
-    if not re_bl.search(args.bl_prefix):
-        raise UserWarning("Invalid BL prefix")
+    if args.bl_prefix:
+        re_bl = re.compile("^BL[0-9]{1,2}.?:\w+$")
+        if not re_bl.search(args.bl_prefix):
+            raise UserWarning("Invalid BL prefix")
+    elif 'PREFIX' in env:
+        args.bl_prefix = env['PREFIX']
+    else:
+        raise UserWarning("No BL PVs prefix found, must specify one with -b")
 
     if args.bl_prefix[-1] != ":":
         args.bl_prefix += ":"
+    if args.verbose:
+        print "Using BL prefix: {}".format(args.bl_prefix)
 
     # Verify output directory
     if args.outdir:
@@ -205,7 +274,6 @@ def main():
             print "ERROR: Can't detect nED root directory, use -n parameter to specify it"
             sys.exit(1)
     ned_dir = os.path.normpath(ned_dir)
-    print ned_dir
 
     plugins = parse_st_cmd_plugins(args.st_cmd, args.bl_prefix, args.verbose)
     if not plugins:
@@ -224,13 +292,28 @@ def main():
 
             try:
                 vars = parse_src_file(inpath, mode)
-            except:
+            except RuntimeError, e:
+                print "ERROR:", e
+                sys.exit(1)
+            except IOError:
                 print "ERROR: Unsupported plugin '{0}' found in IOC startup file".format(plugin["name"])
                 sys.exit(1)
 
             if vars:
                 outpath = os.path.join(outdir, plugin["device"] + "_" + mode + ".pvs")
-                if not os.path.isfile(outpath) or args.force:
+
+                file_exists = os.path.isfile(outpath)
+                if file_exists:
+                    if not args.force:
+                        print "File exists, skipping '{0}'".format(outpath)
+                        continue
+
+                    if mode == "config":
+                        update_pvs_file(outpath, plugin['pv_prefix'], vars)
+                    else:
+                        write_pvs_file(outpath, plugin['pv_prefix'], vars)
+                    print "Updated {0} from {1}".format(outpath, inpath)
+                else:
                     write_pvs_file(outpath, plugin['pv_prefix'], vars)
                     print "Created {0} from {1}".format(outpath, inpath)
 
