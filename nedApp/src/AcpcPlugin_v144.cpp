@@ -280,7 +280,16 @@ void AcpcPlugin::createParams_v144()
     createConfigParam("LowerPhotoSum",      'E',  0x9, 28,  0, 512000); // Lower PhotoSum
     createConfigParam("UpperPhotoSum",      'E',  0xB, 28,  0, 2867200); // Upper PhotoSum
     createConfigParam("TsyncDelay",         'E',  0xD, 32,  0,    0); // TSYNC delay
-    createConfigParam("TimeRange",          'E',  0xF, 32,  0, 3584); // Time range - TODO: not sure about name
+    createConfigParam("Lvds1:En",           'E',  0xF,  1,  0,    0); // Channel 1 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds2:En",           'E',  0xF,  1,  1,    0); // Channel 2 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds3:En",           'E',  0xF,  1,  2,    0); // Channel 3 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds4:En",           'E',  0xF,  1,  3,    0); // Channel 4 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds5:En",           'E',  0xF,  1,  4,    0); // Channel 5 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds6:En",           'E',  0xF,  1,  5,    0); // Channel 6 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds7:En",           'E',  0xF,  1,  6,    0); // Channel 7 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds8:En",           'E',  0xF,  1,  7,    0); // Channel 8 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds9:En",           'E',  0xF,  1,  8,    0); // Channel 9 Enable              (0=enable, 1=disable)
+    createConfigParam("TimeTolerance",      'E',  0xF,  7,  9,   63); // Time tolerance
     createConfigParam("LvdsSysrstCtrl",     'E', 0x10,  2,  0,    0); // LVDS T&C SYSRST# buffer ctrl (0=sysrst,1=sysrst,2=always 0,3=always 1)
     createConfigParam("LvdsTclkCtrl",       'E', 0x10,  2,  2,    0); // LVDS TX control T&C TCLK mod (0=TCLK,1=TCLK,2=always 0,3=always 1)
     createConfigParam("LvdsTsyncCtrl",      'E', 0x10,  2,  4,    0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
