@@ -134,6 +134,26 @@ struct DasPacket
         };
 
         /**
+         * Type of data events.
+         */
+        enum DataFormat {
+            DATA_FMT_LEGACY             = 0x0, //!< Legacy, format can't be determined
+            DATA_FMT_META               = 0x1, //!< Meta data as tof,pixel
+            DATA_FMT_PIXEL              = 0x2, //!< Neutrons as tof,pixel - standard SNS format
+            DATA_FMT_XY                 = 0x3, //!< X,Y position (BNL ROC)
+            DATA_FMT_XY_PS              = 0x4, //!< X,Y plus PhotoSum info (CROC, ANGER)
+            DATA_FMT_LPSD_RAW           = 0x5, //!< LPSD ROC raw
+            DATA_FMT_LPSD_VERBOSE       = 0x6, //!< LPSD ROC normal + raw
+            DATA_FMT_AROC_RAW           = 0x7, //!< AROC ROC raw
+            DATA_FMT_AROC_VERBOSE       = 0x8, //!< AROC ROC normal + raw
+            DATA_FMT_BNL_RAW            = 0x9, //!< BNL ROC raw
+            DATA_FMT_BNL_VERBOSE        = 0xA, //!< BNL ROC normal + raw
+            DATA_FMT_CROC_RAW           = 0xB, //!< CROC raw
+            DATA_FMT_CROC_VERBOSE       = 0xC, //!< CROC normal + raw
+            DATA_FMT_ACPC_VERBOSE       = 0xD, //!< ACPC normal X,Y,PS + AROC normal
+        };
+
+        /**
          * In non DSP-T environment, this defines the data type in packet.
          */
         enum DataTypeLegacy {
@@ -181,7 +201,7 @@ struct DasPacket
             unsigned unused4:1;             //!< Always zero?
             unsigned format_code:3;         //!< Format code, 000 for neutron data, 111 for RTDL data packet
             unsigned subpacket_count:16;    //!< Subpacket counter
-            unsigned unused24_27:4;         //!< Not used, should be all 0
+            DataFormat data_format:4;       //!< Not used, should be all 0
             unsigned last_subpacket:1;      //!< Is this the last subpacket?
             unsigned unused29:1;
             unsigned veto:1;                //!< Vetoed packet - XXX: Add more description
@@ -465,6 +485,11 @@ struct DasPacket
          * RTDL header should be always present and different flags apply.
          */
         DataTypeLegacy getDataTypeLegacy() const;
+
+        /**
+         * Return data format as defined in packet header.
+         */
+        DataFormat getDataFormat() const;
 
     private:
         static uint32_t MinLength;    //!< Minumum total length of any DAS packet, at least the header must be present
