@@ -211,7 +211,7 @@ def main():
 
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("st_cmd", help="Path to nED IOC st.cmd file")
-    parser.add_argument("-b", "--bl-prefix", default=BL+":Det", help="Override beamline PV prefix")
+    parser.add_argument("-b", "--bl-prefix", help="Override beamline PV prefix")
     parser.add_argument("-f", "--force", default=False, help="Overwrite existing files", action="store_true")
     parser.add_argument("-n", "--ned-dir", default=None, help="Path to nED root directory")
     parser.add_argument("-o", "--outdir", default=None, help="Override output directory")
