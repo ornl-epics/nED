@@ -95,7 +95,10 @@ def parse_src_file(path, mode):
     """ Parses nED .cpp file to get register definition for a given register set.
     Returns a dictionary of register names with defaults for values. """
 
+    ignore = [ "upgrade" ]
+
     types = {
+      'upgrade':  re.compile("createUpgradeParam\s*\(\s*\"([^\"]+)\"\s*,"),
       'status':  re.compile("createStatusParam\s*\(\s*\"([^\"]+)\"\s*,"),
       'counter': re.compile("createCounterParam\s*\(\s*\"([^\"]+)\"\s*,"),
       'config':  re.compile("createConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
@@ -117,11 +120,12 @@ def parse_src_file(path, mode):
                         type = "config"
                     match = regex.search(line)
                     if match:
-                        val = 0
-                        if type == "config":
-                            val = match.group(2)
-                        vars_cache[path][type].append({ 'name': match.group(1), 'val': val })
                         matched = True
+                        if type not in ignore:
+                            val = 0
+                            if type == "config":
+                                val = match.group(2)
+                            vars_cache[path][type].append({ 'name': match.group(1), 'val': val })
                         break
                 if not matched and line.strip(" \t").startswith("create"):
                     raise RuntimeError("Line '{0}' not parsed".format(line))
