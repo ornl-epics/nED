@@ -282,7 +282,7 @@ void DspPlugin::createParams_v66() {
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
     createConfigParam("OptBlankEn",     'E', 0x8,  1, 17, 0); // Optical empty data frame CRC (0=no blank frame, 1=add blank frame)
     createConfigParam("OptRspLimit",    'E', 0x8,  1, 18, 0); // 64 responses limit           (0=no limit, 1=limit to 64)
-    createConfigParam("OptDataFormat",  'E', 0x8,  4, 20, 0); // Data format
+    createConfigParam("OptDataFormat",  'E', 0x8,  4, 20, 0); // Data format                  (0=legacy,1=meta,2=pixel,3=XY,4=XY PS,5=LPSD raw,6=LPSD verbose,7=AROC raw,8=AROC verbose,9=BNL raw,10=BNL verbose,11=CROC raw,12=CROC verbose,13=ACPC verbose)
     createConfigParam("OptTxDelay",     'E', 0x8,  7, 24, 3); // Optical packet send delay    (0=0ns, 1=313ns, 3=1us, 100=31.3us)
     createConfigParam("OptTxDelayC",    'E', 0x8,  1, 31, 1); // Optical packet send delay ct (0=use OPT_TX_DELAY,1=prev word count)
 
@@ -420,17 +420,15 @@ void DspPlugin::createParams_v66() {
     createCounterParam("Lvds5:Rate",      0x2B, 24,  0); // LVDS Ch5 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
     createCounterParam("Lvds6:Rate",      0x2C, 24,  0); // LVDS Ch6 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
     createCounterParam("Lvds7:Rate",      0x2D, 24,  0); // LVDS Ch7 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("OptA:Rate",       0x2E, 24,  0); // Optic A rate             (calc:2*A*10^(3-B), calclink:RateMeterInt, unit:byte/s, prec:2)
-    createCounterParam("OptB:Rate",       0x2F, 24,  0); // Optic B rate             (calc:2*A*10^(3-B), calclink:RateMeterInt, unit:byte/s, prec:2)
-    createCounterParam("OptA:Payload",    0x30, 24,  0); // Optic A payload rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("RateDoutPls",     0x31, 24,  0); // TBD                      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("SCounters100",    0x32, 24,  0); // TBD                      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("SCounters102",    0x33, 24,  0); // TBD                      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("SCounters104",    0x34, 24,  0); // TBD
-    createCounterParam("SCounters106",    0x35, 16,  0); // TBD
-    createCounterParam("SCounters107",    0x35, 16, 16); // TBD
-    createCounterParam("SCounters108",    0x36, 16,  0); // TBD
-    createCounterParam("SCounters109",    0x36, 16, 16); // TBD
+    createCounterParam("Lvds1:ParserRate",0x2E, 24,  0); // LVDS Ch1 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds2:ParserRate",0x2F, 24,  0); // LVDS Ch2 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds3:ParserRate",0x30, 24,  0); // LVDS Ch3 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds4:ParserRate",0x31, 24,  0); // LVDS Ch4 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds5:ParserRate",0x32, 24,  0); // LVDS Ch5 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds6:ParserRate",0x33, 24,  0); // LVDS Ch6 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("NeutronsRate",    0x34, 24,  0); // Neutrons event rate      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("MetadataRate",    0x35, 24,  0); // Metadata event rate      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("OptA:Rate",       0x36, 24,  0); // Optic A rate             (calc:2*A*10^(3-B), calclink:RateMeterInt, unit:byte/s, prec:2)
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createStatusParam("Configured",    0x0,  1,  0); // Configured                   (0=not configured [alarm],1=configured, archive:monitor)

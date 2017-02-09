@@ -380,3 +380,8 @@ DasPacket::DataTypeLegacy DasPacket::getDataTypeLegacy() const
     int type = (datainfo.rtdl_present << 1 | datainfo.only_neutron_data);
     return static_cast<DataTypeLegacy>(type);
 }
+
+DasPacket::DataFormat DasPacket::getDataFormat() const
+{
+    return (isData() ? datainfo.data_format : DATA_FMT_LEGACY);
+}

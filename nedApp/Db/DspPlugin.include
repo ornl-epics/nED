@@ -1,6 +1,10 @@
 record(mbbo, "$(P)DataMode")
 {
-    field(FLNK, "$(P)DataSize")
+    field(FLNK, "$(P)DataModeFan")
+}
+record(mbbo, "$(P)DataModeFan")
+{
+    field(LNK1, "$(P)DataSize")
 }
 record(longout, "$(P)DataSize") {
     field(ASG,  "BEAMLINE")

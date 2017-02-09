@@ -9,6 +9,7 @@ Enhancements:
 * Discovery supports 3 discovery methods
 * Support for DSP-T v6.6
 * Dynamic number of pixel to adjust TOF
+* create_ioc_pvtable script supports modifying existing files
 
 Fixed bugs:
 * Config register alignment problem

@@ -140,7 +140,7 @@ void AcpcPlugin::createParams_v171()
 
     createConfigParam("TcResetMode",        'F',  0x0,  1,  0,    0); // Reset mode                    (0=soft, 1=hard)
     createConfigParam("TcTclkMode",         'F',  0x0,  1,  1,    0); // Tclk mode                     (0=external, 1=internal)
-    createConfigParam("TcTsynMode",         'F',  0x0,  1,  2,    0); // TSYNC mode                    (0=external, 1=internal)
+    createConfigParam("TcTsyncMode",        'F',  0x0,  1,  2,    0); // TSYNC mode                    (0=external, 1=internal)
     createConfigParam("TcTxenMode",         'F',  0x0,  1,  3,    0); // TXen  mode                    (0=external, 1=internal)
     createConfigParam("OutputMode",         'F',  0x0,  2,  4,    1); // Output mode                   (0=normal,1=off,2=raw,2=verbose)
     createConfigParam("DetectorSelect",     'F',  0x0,  1, 10,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
