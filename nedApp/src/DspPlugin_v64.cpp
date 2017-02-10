@@ -36,36 +36,37 @@ void DspPlugin::createParams_v64() {
     createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // Ref pulse delay         (scale:100,unit:ns)
     createConfigParam("TofFixOffset",   'C', 0xB,  32,  0, 0); // TOF fixed offset             (scale:100,unit:ns)
 
-    createConfigParam("ChopFr6",        'C', 0xC,   8,  0, 4); // RTDL Frame 6
-    createConfigParam("ChopFr7",        'C', 0xC,   8,  8, 5); // RTDL Frame 7
-    createConfigParam("ChopFr8",        'C', 0xC,   8, 16, 6); // RTDL Frame 8
-    createConfigParam("ChopFr9",        'C', 0xC,   8, 24, 7); // RTDL Frame 9
-    createConfigParam("ChopFr10",       'C', 0xD,   8,  0, 8); // RTDL Frame 10
-    createConfigParam("ChopFr11",       'C', 0xD,   8,  8, 15); // RTDL Frame 11
-    createConfigParam("ChopFr12",       'C', 0xD,   8, 16, 17); // RTDL Frame 12
-    createConfigParam("ChopFr13",       'C', 0xD,   8, 24, 24); // RTDL Frame 13
-    createConfigParam("ChopFr14",       'C', 0xE,   8,  0, 25); // RTDL Frame 14
-    createConfigParam("ChopFr15",       'C', 0xE,   8,  8, 26); // RTDL Frame 15
-    createConfigParam("ChopFr16",       'C', 0xE,   8, 16, 28); // RTDL Frame 16
-    createConfigParam("ChopFr17",       'C', 0xE,   8, 24, 29); // RTDL Frame 17
-    createConfigParam("ChopFr18",       'C', 0xF,   8,  0, 30); // RTDL Frame 18
-    createConfigParam("ChopFr19",       'C', 0xF,   8,  8, 31); // RTDL Frame 19
-    createConfigParam("ChopFr20",       'C', 0xF,   8, 16, 32); // RTDL Frame 20
-    createConfigParam("ChopFr21",       'C', 0xF,   8, 24, 33); // RTDL Frame 21
-    createConfigParam("ChopFr22",       'C', 0x10,  8,  0, 34); // RTDL Frame 22
-    createConfigParam("ChopFr23",       'C', 0x10,  8,  8, 35); // RTDL Frame 23
-    createConfigParam("ChopFr24",       'C', 0x10,  8, 16, 36); // RTDL Frame 24
-    createConfigParam("ChopFr25",       'C', 0x10,  8, 24, 37); // RTDL Frame 25
-    createConfigParam("ChopFr26",       'C', 0x11,  8,  0, 38); // RTDL Frame 26
-    createConfigParam("ChopFr27",       'C', 0x11,  8,  8, 39); // RTDL Frame 27
-    createConfigParam("ChopFr28",       'C', 0x11,  8, 16, 40); // RTDL Frame 28
-    createConfigParam("ChopFr29",       'C', 0x11,  8, 24, 41); // RTDL Frame 29
-    createConfigParam("ChopFr30",       'C', 0x12,  8,  0, 1); // RTDL Frame 30
-    createConfigParam("ChopFr31",       'C', 0x12,  8,  8, 2); // RTDL Frame 31
+    // 26 user configurable Frame Addresses
+    createConfigParam("RtdlFrAddr6",    'C', 0xC,   8,  0, 4); // RTDL Frame 6
+    createConfigParam("RtdlFrAddr7",    'C', 0xC,   8,  8, 5); // RTDL Frame 7
+    createConfigParam("RtdlFrAddr8",    'C', 0xC,   8, 16, 6); // RTDL Frame 8
+    createConfigParam("RtdlFrAddr9",    'C', 0xC,   8, 24, 7); // RTDL Frame 9
+    createConfigParam("RtdlFrAddr10",   'C', 0xD,   8,  0, 8); // RTDL Frame 10
+    createConfigParam("RtdlFrAddr11",   'C', 0xD,   8,  8, 15); // RTDL Frame 11
+    createConfigParam("RtdlFrAddr12",   'C', 0xD,   8, 16, 17); // RTDL Frame 12
+    createConfigParam("RtdlFrAddr13",   'C', 0xD,   8, 24, 24); // RTDL Frame 13
+    createConfigParam("RtdlFrAddr14",   'C', 0xE,   8,  0, 25); // RTDL Frame 14
+    createConfigParam("RtdlFrAddr15",   'C', 0xE,   8,  8, 26); // RTDL Frame 15
+    createConfigParam("RtdlFrAddr16",   'C', 0xE,   8, 16, 28); // RTDL Frame 16
+    createConfigParam("RtdlFrAddr17",   'C', 0xE,   8, 24, 29); // RTDL Frame 17
+    createConfigParam("RtdlFrAddr18",   'C', 0xF,   8,  0, 30); // RTDL Frame 18
+    createConfigParam("RtdlFrAddr19",   'C', 0xF,   8,  8, 31); // RTDL Frame 19
+    createConfigParam("RtdlFrAddr20",   'C', 0xF,   8, 16, 32); // RTDL Frame 20
+    createConfigParam("RtdlFrAddr21",   'C', 0xF,   8, 24, 33); // RTDL Frame 21
+    createConfigParam("RtdlFrAddr22",   'C', 0x10,  8,  0, 34); // RTDL Frame 22
+    createConfigParam("RtdlFrAddr23",   'C', 0x10,  8,  8, 35); // RTDL Frame 23
+    createConfigParam("RtdlFrAddr24",   'C', 0x10,  8, 16, 36); // RTDL Frame 24
+    createConfigParam("RtdlFrAddr25",   'C', 0x10,  8, 24, 37); // RTDL Frame 25
+    createConfigParam("RtdlFrAddr26",   'C', 0x11,  8,  0, 38); // RTDL Frame 26
+    createConfigParam("RtdlFrAddr27",   'C', 0x11,  8,  8, 39); // RTDL Frame 27
+    createConfigParam("RtdlFrAddr28",   'C', 0x11,  8, 16, 40); // RTDL Frame 28
+    createConfigParam("RtdlFrAddr29",   'C', 0x11,  8, 24, 41); // RTDL Frame 29
+    createConfigParam("RtdlFrAddr30",   'C', 0x12,  8,  0, 1); // RTDL Frame 30
+    createConfigParam("RtdlFrAddr31",   'C', 0x12,  8,  8, 2); // RTDL Frame 31
 
     createConfigParam("TrefTrigger",    'C', 0x13,  2,  0, 3); // TREF RTDL Strobe trigger     (0=Extract,1=Cycle Start,2=Beam On,3=TREF event)
     createConfigParam("TsyncFreq",      'C', 0x13,  4,  2, 1); // Out TSYNC frequency          (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("TsyncFrame",     'C', 0x13,  4,  8, 0); // TSYNC frame offset
+    createConfigParam("TsyncFrame",     'C', 0x13,  4,  8, 0); // TSYNC frame offset number
     createConfigParam("TrefEvent",      'C', 0x13,  8, 12, 39); // TREF event number
     createConfigParam("HystMinLow",     'C', 0x13,  4, 20, 4); // Chop HYST minimum low
     createConfigParam("HystMinHi",      'C', 0x13,  4, 24, 4); // Chop HYST minimum high
@@ -79,98 +80,110 @@ void DspPlugin::createParams_v64() {
     createConfigParam("FakeTimeHigh",   'C', 0x17, 32,  0, 0); // Fake mode time high DWord
 
     // Meta parameters
-    createConfigParam("Meta0:Mode",     'D', 0x0,   2,  0, 0); // ODB0 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta1:Mode",     'D', 0x0,   2,  2, 0); // ODB1 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta2:Mode",     'D', 0x0,   2,  4, 0); // ODB2 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta3:Mode",     'D', 0x0,   2,  6, 0); // ODB3 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta4:Mode",     'D', 0x0,   2,  8, 0); // ODB4 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta5:Mode",     'D', 0x0,   2, 10, 0); // ODB5 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta6:Mode",     'D', 0x0,   2, 12, 0); // ODB6 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta7:Mode",     'D', 0x0,   2, 14, 0); // ODB7 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta8:Mode",     'D', 0x0,   2, 16, 0); // ODB8 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta9:Mode",     'D', 0x0,   2, 18, 0); // ODB9 edge detection mode      (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta10:Mode",    'D', 0x0,   2, 20, 0); // ODB10 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta11:Mode",    'D', 0x0,   2, 22, 0); // ODB11 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta12:Mode",    'D', 0x0,   2, 24, 0); // ODB12 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta13:Mode",    'D', 0x0,   2, 26, 0); // ODB13 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta14:Mode",    'D', 0x0,   2, 28, 0); // ODB14 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta15:Mode",    'D', 0x0,   2, 30, 0); // ODB15 edge detection mode     (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta16:Mode",    'D', 0x1,   2,  0, 0); // Meta16 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta17:Mode",    'D', 0x1,   2,  2, 0); // Meta17 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta18:Mode",    'D', 0x1,   2,  4, 0); // Meta18 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta19:Mode",    'D', 0x1,   2,  6, 0); // Meta19 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta20:Mode",    'D', 0x1,   2,  8, 0); // Meta20 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta21:Mode",    'D', 0x1,   2, 10, 0); // Meta21 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta22:Mode",    'D', 0x1,   2, 12, 0); // Meta22 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta23:Mode",    'D', 0x1,   2, 14, 0); // Meta23 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta24:Mode",    'D', 0x1,   2, 16, 0); // Meta24 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta25:Mode",    'D', 0x1,   2, 18, 0); // Meta25 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta26:Mode",    'D', 0x1,   2, 20, 0); // Meta26 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta27:Mode",    'D', 0x1,   2, 22, 0); // Meta27 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta28:Mode",    'D', 0x1,   2, 24, 0); // Meta28 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta29:Mode",    'D', 0x1,   2, 26, 0); // Meta29 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta30:Mode",    'D', 0x1,   2, 28, 0); // Meta30 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
-    createConfigParam("Meta31:Mode",    'D', 0x1,   2, 30, 0); // Meta31 edge detection mode    (0=disable channel,1=detect ris edge,2=detect fall edge,3=detect any edge)
+    // - OFB board connectors JSC1 & JSC2
+    createConfigParam("Meta0:Mode",     'D', 0x0,   2,  0, 0); // OFB1 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta1:Mode",     'D', 0x0,   2,  2, 0); // OFB2 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta2:Mode",     'D', 0x0,   2,  4, 0); // OFB3 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta3:Mode",     'D', 0x0,   2,  6, 0); // OFB4 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta4:Mode",     'D', 0x0,   2,  8, 0); // OFB5 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta5:Mode",     'D', 0x0,   2, 10, 0); // OFB6 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta6:Mode",     'D', 0x0,   2, 12, 0); // OFB7 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta7:Mode",     'D', 0x0,   2, 14, 0); // OFB8 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta8:Mode",     'D', 0x0,   2, 16, 0); // OFB9 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta9:Mode",     'D', 0x0,   2, 18, 0); // OFB10 edge detection mode     (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    // - ODB inputs - chopper TDCs
+    createConfigParam("Meta10:Mode",    'D', 0x0,   2, 20, 0); // ODB0 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta11:Mode",    'D', 0x0,   2, 22, 0); // ODB1 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta12:Mode",    'D', 0x0,   2, 24, 0); // ODB2 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta13:Mode",    'D', 0x0,   2, 26, 0); // ODB3 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta14:Mode",    'D', 0x0,   2, 28, 0); // ODB4 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta15:Mode",    'D', 0x0,   2, 30, 0); // ODB5 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta16:Mode",    'D', 0x1,   2,  0, 0); // ODB6 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta17:Mode",    'D', 0x1,   2,  2, 0); // ODB7 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    // - ODB inputs - beam monitors, etc.
+    createConfigParam("Meta18:Mode",    'D', 0x1,   2,  4, 0); // ODB8 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta19:Mode",    'D', 0x1,   2,  6, 0); // ODB9 edge detection mode      (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta20:Mode",    'D', 0x1,   2,  8, 0); // ODB10 edge detection mode     (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta21:Mode",    'D', 0x1,   2, 10, 0); // ODB11 edge detection mode     (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta22:Mode",    'D', 0x1,   2, 12, 0); // ODB12 edge detection mode     (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta23:Mode",    'D', 0x1,   2, 14, 0); // ODB13 edge detection mode     (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta24:Mode",    'D', 0x1,   2, 16, 0); // ODB14 edge detection mode     (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta25:Mode",    'D', 0x1,   2, 18, 0); // ODB15 edge detection mode     (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    // - other internal
+    createConfigParam("Meta26:Mode",    'D', 0x1,   2, 20, 0); // lvds_tclk_in                  (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta27:Mode",    'D', 0x1,   2, 22, 0); // lvds_tsync_in                 (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta28:Mode",    'D', 0x1,   2, 24, 0); // lvds_sysrst_b_in              (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta29:Mode",    'D', 0x1,   2, 26, 0); // lvds_txen_b_in                (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta30:Mode",    'D', 0x1,   2, 28, 0); // TRefMasterStrbInput           (0=disable channel,1=rising edge,2=falling edge,3=detect both)
+    createConfigParam("Meta31:Mode",    'D', 0x1,   2, 30, 0); // eventLinkEndInjectStrb - ev39 (0=disable channel,1=rising edge,2=falling edge,3=detect both)
 
-    createConfigParam("Meta0:PixId",    'D', 0x2,  32,  0, 0x50000000); // ODB0 edge pixel id
-    createConfigParam("Meta1:PixId",    'D', 0x3,  32,  0, 0x50000002); // ODB1 edge pixel id
-    createConfigParam("Meta2:PixId",    'D', 0x4,  32,  0, 0x50000004); // ODB2 edge pixel id
-    createConfigParam("Meta3:PixId",    'D', 0x5,  32,  0, 0x50000006); // ODB3 edge pixel id
-    createConfigParam("Meta4:PixId",    'D', 0x6,  32,  0, 0x50000008); // ODB4 edge pixel id
-    createConfigParam("Meta5:PixId",    'D', 0x7,  32,  0, 0x5000000a); // ODB5 edge pixel id
-    createConfigParam("Meta6:PixId",    'D', 0x8,  32,  0, 0x5000000c); // ODB6 edge pixel id
-    createConfigParam("Meta7:PixId",    'D', 0x9,  32,  0, 0x5000000e); // ODB7 edge pixel id
-    createConfigParam("Meta8:PixId",    'D', 0xA,  32,  0, 0x50000010); // ODB8 edge pixel id
-    createConfigParam("Meta9:PixId",    'D', 0xB,  32,  0, 0x50000012); // ODB9 edge pixel id
-    createConfigParam("Meta10:PixId",   'D', 0xC,  32,  0, 0x50000014); // ODB10 edge pixel id
-    createConfigParam("Meta11:PixId",   'D', 0xD,  32,  0, 0x50000016); // ODB11 edge pixel id
-    createConfigParam("Meta12:PixId",   'D', 0xE,  32,  0, 0x50000018); // ODB12 edge pixel id
-    createConfigParam("Meta13:PixId",   'D', 0xF,  32,  0, 0x5000001a); // ODB13 edge pixel id
-    createConfigParam("Meta14:PixId",   'D', 0x10, 32,  0, 0x5000001c); // ODB14 edge pixel id
-    createConfigParam("Meta15:PixId",   'D', 0x11, 32,  0, 0x5000001e); // ODB15 edge pixel id
-    createConfigParam("Meta16:PixId",   'D', 0x12, 32,  0, 0x50000020); // Meta16 edge pixel id
-    createConfigParam("Meta17:PixId",   'D', 0x13, 32,  0, 0x50000022); // Meta17 edge pixel id
-    createConfigParam("Meta18:PixId",   'D', 0x14, 32,  0, 0x50000024); // Meta18 edge pixel id
-    createConfigParam("Meta19:PixId",   'D', 0x15, 32,  0, 0x50000026); // Meta19 edge pixel id
-    createConfigParam("Meta20:PixId",   'D', 0x16, 32,  0, 0x50000028); // Meta20 edge pixel id
-    createConfigParam("Meta21:PixId",   'D', 0x17, 32,  0, 0x5000002a); // Meta21 edge pixel id
-    createConfigParam("Meta22:PixId",   'D', 0x18, 32,  0, 0x5000002c); // Meta22 edge pixel id
-    createConfigParam("Meta23:PixId",   'D', 0x19, 32,  0, 0x5000002e); // Meta23 edge pixel id
-    createConfigParam("Meta24:PixId",   'D', 0x1A, 32,  0, 0x50000030); // Meta24 edge pixel id
-    createConfigParam("Meta25:PixId",   'D', 0x1B, 32,  0, 0x50000032); // Meta25 edge pixel id
-    createConfigParam("Meta26:PixId",   'D', 0x1C, 32,  0, 0x50000034); // Meta26 edge pixel id
-    createConfigParam("Meta27:PixId",   'D', 0x1D, 32,  0, 0x50000036); // Meta27 edge pixel id
-    createConfigParam("Meta28:PixId",   'D', 0x1E, 32,  0, 0x50000038); // Meta28 edge pixel id
-    createConfigParam("Meta29:PixId",   'D', 0x1F, 32,  0, 0x5000003a); // Meta29 edge pixel id
-    createConfigParam("Meta30:PixId",   'D', 0x20, 32,  0, 0x5000003c); // Meta30 edge pixel id
-    createConfigParam("Meta31:PixId",   'D', 0x21, 32,  0, 0x5000003e); // Meta31 edge pixel id
+    // - OFB board connectors JSC1 & JSC2
+    createConfigParam("Meta0:PixId",    'D', 0x2,  32,  0, 0x50000000); // OFB1 edge pixel id
+    createConfigParam("Meta1:PixId",    'D', 0x3,  32,  0, 0x50000002); // OFB2 edge pixel id
+    createConfigParam("Meta2:PixId",    'D', 0x4,  32,  0, 0x50000004); // OFB3 edge pixel id
+    createConfigParam("Meta3:PixId",    'D', 0x5,  32,  0, 0x50000006); // OFB4 edge pixel id
+    createConfigParam("Meta4:PixId",    'D', 0x6,  32,  0, 0x50000008); // OFB5 edge pixel id
+    createConfigParam("Meta5:PixId",    'D', 0x7,  32,  0, 0x5000000a); // OFB6 edge pixel id
+    createConfigParam("Meta6:PixId",    'D', 0x8,  32,  0, 0x5000000c); // OFB7 edge pixel id
+    createConfigParam("Meta7:PixId",    'D', 0x9,  32,  0, 0x5000000e); // OFB8 edge pixel id
+    createConfigParam("Meta8:PixId",    'D', 0xA,  32,  0, 0x50000010); // OFB9 edge pixel id
+    createConfigParam("Meta9:PixId",    'D', 0xB,  32,  0, 0x50000012); // OFB10 edge pixel id
+    // - ODB inputs - chopper TDCs
+    createConfigParam("Meta10:PixId",   'D', 0xC,  32,  0, 0x70010000); // ODB0 pixel id - chop1 TDC
+    createConfigParam("Meta11:PixId",   'D', 0xD,  32,  0, 0x70020000); // ODB1 pixel id - chop2 TDC
+    createConfigParam("Meta12:PixId",   'D', 0xE,  32,  0, 0x70030000); // ODB2 pixel id - chop3 TDC
+    createConfigParam("Meta13:PixId",   'D', 0xF,  32,  0, 0x70040000); // ODB3 pixel id - chop4 TDC
+    createConfigParam("Meta14:PixId",   'D', 0x10, 32,  0, 0x70010002); // ODB4 pixel id - chop1 trig
+    createConfigParam("Meta15:PixId",   'D', 0x11, 32,  0, 0x70020002); // ODB5 pixel id - chop2 trig
+    createConfigParam("Meta16:PixId",   'D', 0x12, 32,  0, 0x70030002); // ODB6 pixel id - chop3 trig
+    createConfigParam("Meta17:PixId",   'D', 0x13, 32,  0, 0x70040002); // ODB7 pixel id - chop4 trig
+    // - ODB inputs - beam monitors, etc.
+    createConfigParam("Meta18:PixId",   'D', 0x14, 32,  0, 0x40010000); // ODB8 pixel id - beammonitor1
+    createConfigParam("Meta19:PixId",   'D', 0x15, 32,  0, 0x40020000); // ODB9 pixel id - beammonitor2
+    createConfigParam("Meta20:PixId",   'D', 0x16, 32,  0, 0x40030000); // ODB10 pixel id - beammonitor3
+    createConfigParam("Meta21:PixId",   'D', 0x17, 32,  0, 0x40040000); // ODB11 pixel id - beammonitor4
+    createConfigParam("Meta22:PixId",   'D', 0x18, 32,  0, 0x5000002c); // ODB12 edge pixel id
+    createConfigParam("Meta23:PixId",   'D', 0x19, 32,  0, 0x5000002e); // ODB13 edge pixel id
+    createConfigParam("Meta24:PixId",   'D', 0x1A, 32,  0, 0x50000030); // ODB14 edge pixel id
+    createConfigParam("Meta25:PixId",   'D', 0x1B, 32,  0, 0x50000032); // ODB15 edge pixel id
+    // - other internal
+    createConfigParam("Meta26:PixId",   'D', 0x1C, 32,  0, 0x50000034); // lvds_tclk_in pixel id
+    createConfigParam("Meta27:PixId",   'D', 0x1D, 32,  0, 0x50000036); // lvds_tsync_in pixel id
+    createConfigParam("Meta28:PixId",   'D', 0x1E, 32,  0, 0x50000038); // lvds_sysrst_b_in pixel id
+    createConfigParam("Meta29:PixId",   'D', 0x1F, 32,  0, 0x5000003a); // lvds_txen_b_in pixel id
+    createConfigParam("Meta30:PixId",   'D', 0x20, 32,  0, 0x5000003c); // TRefMasterStrbInput pixel id
+    createConfigParam("Meta31:PixId",   'D', 0x21, 32,  0, 0x5000003e); // eventLinkEndInjectStrb pixel id
 
-    createConfigParam("Meta0:Cycle",    'D', 0x22,  5,  0, 0); // ODB0 edge cycle number adj
-    createConfigParam("Meta1:Cycle",    'D', 0x22,  5,  5, 0); // ODB1 edge cycle number adj
-    createConfigParam("Meta2:Cycle",    'D', 0x22,  5, 10, 0); // ODB2 edge cycle number adj
-    createConfigParam("Meta3:Cycle",    'D', 0x22,  5, 15, 0); // ODB3 edge cycle number adj
-    createConfigParam("Meta4:Cycle",    'D', 0x22,  5, 20, 0); // ODB4 edge cycle number adj
-    createConfigParam("Meta5:Cycle",    'D', 0x22,  5, 25, 0); // ODB5 edge cycle number adj
-    createConfigParam("Meta6:Cycle",    'D', 0x23,  5,  0, 0); // ODB6 edge cycle number adj
-    createConfigParam("Meta7:Cycle",    'D', 0x23,  5,  5, 0); // ODB7 edge cycle number adj
-    createConfigParam("Meta8:Cycle",    'D', 0x23,  5, 10, 0); // ODB8 edge cycle number adj
-    createConfigParam("Meta9:Cycle",    'D', 0x23,  5, 15, 0); // ODB9 edge cycle number adj
-    createConfigParam("Meta10:Cycle",   'D', 0x23,  5, 20, 0); // ODB10 edge cycle number adj
-    createConfigParam("Meta11:Cycle",   'D', 0x23,  5, 25, 0); // ODB11 edge cycle number adj
-    createConfigParam("Meta12:Cycle",   'D', 0x24,  5,  0, 0); // ODB12 edge cycle number adj
-    createConfigParam("Meta13:Cycle",   'D', 0x24,  5,  5, 0); // ODB13 edge cycle number adj
-    createConfigParam("Meta14:Cycle",   'D', 0x24,  5, 10, 0); // ODB14 edge cycle number adj
-    createConfigParam("Meta15:Cycle",   'D', 0x24,  5, 15, 0); // ODB15 edge cycle number adj
-    createConfigParam("Meta16:Cycle",   'D', 0x24,  5, 20, 0); // Meta16 edge cycle number adj
-    createConfigParam("Meta17:Cycle",   'D', 0x24,  5, 25, 0); // Meta17 edge cycle number adj
-    createConfigParam("Meta18:Cycle",   'D', 0x25,  5,  0, 0); // Meta18 edge cycle number adj
-    createConfigParam("Meta19:Cycle",   'D', 0x25,  5,  5, 0); // Meta19 edge cycle number adj
-    createConfigParam("Meta20:Cycle",   'D', 0x25,  5, 10, 0); // Meta20 edge cycle number adj
-    createConfigParam("Meta21:Cycle",   'D', 0x25,  5, 15, 0); // Meta21 edge cycle number adj
-    createConfigParam("Meta22:Cycle",   'D', 0x25,  5, 20, 0); // Meta22 edge cycle number adj
-    createConfigParam("Meta23:Cycle",   'D', 0x25,  5, 25, 0); // Meta23 edge cycle number adj
-    createConfigParam("Meta24:Cycle",   'D', 0x26,  5,  0, 0); // Meta24 edge cycle number adj
-    createConfigParam("Meta25:Cycle",   'D', 0x26,  5,  5, 0); // Meta25 edge cycle number adj
+    // - OFB board connectors JSC1 & JSC2
+    createConfigParam("Meta0:Cycle",    'D', 0x22,  5,  0, 0); // OFB1 edge cycle number adj
+    createConfigParam("Meta1:Cycle",    'D', 0x22,  5,  5, 0); // OFB2 edge cycle number adj
+    createConfigParam("Meta2:Cycle",    'D', 0x22,  5, 10, 0); // OFB3 edge cycle number adj
+    createConfigParam("Meta3:Cycle",    'D', 0x22,  5, 15, 0); // OFB4 edge cycle number adj
+    createConfigParam("Meta4:Cycle",    'D', 0x22,  5, 20, 0); // OFB5 edge cycle number adj
+    createConfigParam("Meta5:Cycle",    'D', 0x22,  5, 25, 0); // OFB6 edge cycle number adj
+    createConfigParam("Meta6:Cycle",    'D', 0x23,  5,  0, 0); // OFB7 edge cycle number adj
+    createConfigParam("Meta7:Cycle",    'D', 0x23,  5,  5, 0); // OFB8 edge cycle number adj
+    createConfigParam("Meta8:Cycle",    'D', 0x23,  5, 10, 0); // OFB9 edge cycle number adj
+    createConfigParam("Meta9:Cycle",    'D', 0x23,  5, 15, 0); // OFB10 edge cycle number adj
+    // - ODB inputs - chopper TDCs
+    createConfigParam("Meta10:Cycle",   'D', 0x23,  5, 20, 0); // ODB0 edge cycle number adj
+    createConfigParam("Meta11:Cycle",   'D', 0x23,  5, 25, 0); // ODB1 edge cycle number adj
+    createConfigParam("Meta12:Cycle",   'D', 0x24,  5,  0, 0); // ODB2 edge cycle number adj
+    createConfigParam("Meta13:Cycle",   'D', 0x24,  5,  5, 0); // ODB3 edge cycle number adj
+    createConfigParam("Meta14:Cycle",   'D', 0x24,  5, 10, 0); // ODB4 edge cycle number adj
+    createConfigParam("Meta15:Cycle",   'D', 0x24,  5, 15, 0); // ODB5 edge cycle number adj
+    createConfigParam("Meta16:Cycle",   'D', 0x24,  5, 20, 0); // ODB6 edge cycle number adj
+    createConfigParam("Meta17:Cycle",   'D', 0x24,  5, 25, 0); // ODB7 edge cycle number adj
+    // - ODB inputs - beam monitors, etc.
+    createConfigParam("Meta18:Cycle",   'D', 0x25,  5,  0, 0); // ODB8 edge cycle number adj
+    createConfigParam("Meta19:Cycle",   'D', 0x25,  5,  5, 0); // ODB9 edge cycle number adj
+    createConfigParam("Meta20:Cycle",   'D', 0x25,  5, 10, 0); // ODB10 edge cycle number adj
+    createConfigParam("Meta21:Cycle",   'D', 0x25,  5, 15, 0); // ODB11 edge cycle number adj
+    createConfigParam("Meta22:Cycle",   'D', 0x25,  5, 20, 0); // ODB12 edge cycle number adj
+    createConfigParam("Meta23:Cycle",   'D', 0x25,  5, 25, 0); // ODB13 edge cycle number adj
+    createConfigParam("Meta24:Cycle",   'D', 0x26,  5,  0, 0); // ODB14 edge cycle number adj
+    createConfigParam("Meta25:Cycle",   'D', 0x26,  5,  5, 0); // ODB15 edge cycle number adj
+    // - other internal
     createConfigParam("Meta26:Cycle",   'D', 0x26,  5, 10, 0); // Meta26 edge cycle number adj
     createConfigParam("Meta27:Cycle",   'D', 0x26,  5, 15, 0); // Meta27 edge cycle number adj
     createConfigParam("Meta28:Cycle",   'D', 0x26,  5, 20, 0); // Meta28 edge cycle number adj
@@ -178,32 +191,36 @@ void DspPlugin::createParams_v64() {
     createConfigParam("Meta30:Cycle",   'D', 0x27,  5,  0, 0); // Meta30 edge cycle number adj
     createConfigParam("Meta31:Cycle",   'D', 0x27,  5,  5, 0); // Meta31 edge cycle number adj
 
-    createConfigParam("Meta0:Delay",    'D', 0x28, 32,  0, 0); // ODB0 edge delay
-    createConfigParam("Meta1:Delay",    'D', 0x29, 32,  0, 0); // ODB1 edge delay
-    createConfigParam("Meta2:Delay",    'D', 0x2A, 32,  0, 0); // ODB2 edge delay
-    createConfigParam("Meta3:Delay",    'D', 0x2B, 32,  0, 0); // ODB3 edge delay
-    createConfigParam("Meta4:Delay",    'D', 0x2C, 32,  0, 0); // ODB4 edge delay
-    createConfigParam("Meta5:Delay",    'D', 0x2D, 32,  0, 0); // ODB5 edge delay
-    createConfigParam("Meta6:Delay",    'D', 0x2E, 32,  0, 0); // ODB6 edge delay
-    createConfigParam("Meta7:Delay",    'D', 0x2F, 32,  0, 0); // ODB7 edge delay
-    createConfigParam("Meta8:Delay",    'D', 0x30, 32,  0, 0); // ODB8 edge delay
-    createConfigParam("Meta9:Delay",    'D', 0x31, 32,  0, 0); // ODB9 edge delay
-    createConfigParam("Meta10:Delay",   'D', 0x32, 32,  0, 0); // ODB10 edge delay
-    createConfigParam("Meta11:Delay",   'D', 0x33, 32,  0, 0); // ODB11 edge delay
-    createConfigParam("Meta12:Delay",   'D', 0x34, 32,  0, 0); // ODB12 edge delay
-    createConfigParam("Meta13:Delay",   'D', 0x35, 32,  0, 0); // ODB13 edge delay
-    createConfigParam("Meta14:Delay",   'D', 0x36, 32,  0, 0); // ODB14 edge delay
-    createConfigParam("Meta15:Delay",   'D', 0x37, 32,  0, 0); // ODB15 edge delay
-    createConfigParam("Meta16:Delay",   'D', 0x38, 32,  0, 0); // Meta16 edge delay
-    createConfigParam("Meta17:Delay",   'D', 0x39, 32,  0, 0); // Meta17 edge delay
-    createConfigParam("Meta18:Delay",   'D', 0x3A, 32,  0, 0); // Meta18 edge delay
-    createConfigParam("Meta19:Delay",   'D', 0x3B, 32,  0, 0); // Meta19 edge delay
-    createConfigParam("Meta20:Delay",   'D', 0x3C, 32,  0, 0); // Meta20 edge delay
-    createConfigParam("Meta21:Delay",   'D', 0x3D, 32,  0, 0); // Meta21 edge delay
-    createConfigParam("Meta22:Delay",   'D', 0x3E, 32,  0, 0); // Meta22 edge delay
-    createConfigParam("Meta23:Delay",   'D', 0x3F, 32,  0, 0); // Meta23 edge delay
-    createConfigParam("Meta24:Delay",   'D', 0x40, 32,  0, 0); // Meta24 edge delay
-    createConfigParam("Meta25:Delay",   'D', 0x41, 32,  0, 0); // Meta25 edge delay
+    // - OFB board connectors JSC1 & JSC2
+    createConfigParam("Meta0:Delay",    'D', 0x28, 32,  0, 0); // OFB1 edge delay
+    createConfigParam("Meta1:Delay",    'D', 0x29, 32,  0, 0); // OFB2 edge delay
+    createConfigParam("Meta2:Delay",    'D', 0x2A, 32,  0, 0); // OFB3 edge delay
+    createConfigParam("Meta3:Delay",    'D', 0x2B, 32,  0, 0); // OFB4 edge delay
+    createConfigParam("Meta4:Delay",    'D', 0x2C, 32,  0, 0); // OFB5 edge delay
+    createConfigParam("Meta5:Delay",    'D', 0x2D, 32,  0, 0); // OFB6 edge delay
+    createConfigParam("Meta6:Delay",    'D', 0x2E, 32,  0, 0); // OFB7 edge delay
+    createConfigParam("Meta7:Delay",    'D', 0x2F, 32,  0, 0); // OFB8 edge delay
+    createConfigParam("Meta8:Delay",    'D', 0x30, 32,  0, 0); // OFB9 edge delay
+    createConfigParam("Meta9:Delay",    'D', 0x31, 32,  0, 0); // OFB10 edge delay
+    // - ODB inputs - chopper TDCs
+    createConfigParam("Meta10:Delay",   'D', 0x32, 32,  0, 0); // ODB0 edge delay
+    createConfigParam("Meta11:Delay",   'D', 0x33, 32,  0, 0); // ODB1 edge delay
+    createConfigParam("Meta12:Delay",   'D', 0x34, 32,  0, 0); // ODB2 edge delay
+    createConfigParam("Meta13:Delay",   'D', 0x35, 32,  0, 0); // ODB3 edge delay
+    createConfigParam("Meta14:Delay",   'D', 0x36, 32,  0, 0); // ODB4 edge delay
+    createConfigParam("Meta15:Delay",   'D', 0x37, 32,  0, 0); // ODB5 edge delay
+    createConfigParam("Meta16:Delay",   'D', 0x38, 32,  0, 0); // ODB6 edge delay
+    createConfigParam("Meta17:Delay",   'D', 0x39, 32,  0, 0); // ODB7 edge delay
+    // - ODB inputs - beam monitors, etc.
+    createConfigParam("Meta18:Delay",   'D', 0x3A, 32,  0, 0); // ODB8 edge delay
+    createConfigParam("Meta19:Delay",   'D', 0x3B, 32,  0, 0); // ODB9 edge delay
+    createConfigParam("Meta20:Delay",   'D', 0x3C, 32,  0, 0); // ODB10 edge delay
+    createConfigParam("Meta21:Delay",   'D', 0x3D, 32,  0, 0); // ODB11 edge delay
+    createConfigParam("Meta22:Delay",   'D', 0x3E, 32,  0, 0); // ODB12 edge delay
+    createConfigParam("Meta23:Delay",   'D', 0x3F, 32,  0, 0); // ODB13 edge delay
+    createConfigParam("Meta24:Delay",   'D', 0x40, 32,  0, 0); // ODB14 edge delay
+    createConfigParam("Meta25:Delay",   'D', 0x41, 32,  0, 0); // ODB15 edge delay
+    // - other internal
     createConfigParam("Meta26:Delay",   'D', 0x42, 32,  0, 0); // Meta26 edge delay
     createConfigParam("Meta27:Delay",   'D', 0x43, 32,  0, 0); // Meta27 edge delay
     createConfigParam("Meta28:Delay",   'D', 0x44, 32,  0, 0); // Meta28 edge delay
@@ -244,7 +261,7 @@ void DspPlugin::createParams_v64() {
     createConfigParam("LvdsTclkMode",   'E', 0x2,  1,  0, 0); // LVDS TX control TCLK mode    (0=TCLK from int,1=TCLK from LVDS)
     createConfigParam("LvdsTclkCtrl",   'E', 0x2,  2,  2, 0); // LVDS TX control T&C TCLK mod (0=TCLK,1=TCLK,2=always 0,3=always 1)
     createConfigParam("LvdsTsyncMode",  'E', 0x2,  2,  4, 1); // LVDS TSYNC_O mode            (0=local TSYNC,1=TSYNC from TREF,2=TSYNC from LVDS,3=TSYNC from opt)
-    createConfigParam("LvdsTsyncCtrl",  'E', 0x2,  2,  6, 0); // LVDS TSYNC_NORMAL control    (0=polarity,1=TSYNC WIDTH,2=always 0,3=always 1)
+    createConfigParam("LvdsTsyncWdCtrl",'E', 0x2,  2,  6, 0); // LVDS TSYNC width control     (0=polarization,1=TSYNC WIDTH,2=always 0,3=always 1)
     createConfigParam("LvdsSysrstCtrl", 'E', 0x2,  2,  8, 0); // LVDS T&C SYSRST# buffer ctrl (0=sysrst,1=sysrst,2=always 0,3=always 1)
     createConfigParam("LvdsTxenCtrl",   'E', 0x2,  2, 10, 0); // LVDS T&C TXEN# control       (0=ChLnk parser,1=ChLnk parser,2=ChLnk RX,3=ChLnk inv RX)
     createConfigParam("LvdsOutClck",    'E', 0x2,  2, 16, 0); // LVDS output clock mode       (0=35.3 Mhz, 1=30.2 Mhz, 2=26.5 Mhz, 3=23.6 Mhz)
@@ -259,24 +276,26 @@ void DspPlugin::createParams_v64() {
     createConfigParam("LvdsTstPattern", 'E', 0x2,  1, 30, 0); // LVDS T&C test pattern        (0=disable,1=enable)
     createConfigParam("LvdsTestEn",     'E', 0x2,  1, 31, 0); // LVDS test enable             (0=disable,1=enable)
 
-    createConfigParam("Lvds1:SrcCtrl",  'E', 0x3,  2,  0, 0); // LVDS ch1 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Lvds2:SrcCtrl",  'E', 0x3,  2,  2, 0); // LVDS ch2 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Lvds3:SrcCtrl",  'E', 0x3,  2,  4, 0); // LVDS ch3 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Lvds4:SrcCtrl",  'E', 0x3,  2,  6, 0); // LVDS ch4 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Lvds5:SrcCtrl",  'E', 0x3,  2,  8, 0); // LVDS ch5 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("Lvds6:SrcCtrl",  'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_LOCAL str,2=TSYNC_LOCA no s,3=TRefStrbFixed)
-    createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB[0])
+    // TSYNC_LOCAL has not delay
+    createConfigParam("Lvds1:SrcCtrl",  'E', 0x3,  2,  0, 0); // LVDS ch1 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_BASIC,2=TSYNC_LOCAL,3=TRefStrbFixed)
+    createConfigParam("Lvds2:SrcCtrl",  'E', 0x3,  2,  2, 0); // LVDS ch2 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_BASIC,2=TSYNC_LOCAL,3=TRefStrbFixed)
+    createConfigParam("Lvds3:SrcCtrl",  'E', 0x3,  2,  4, 0); // LVDS ch3 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_BASIC,2=TSYNC_LOCAL,3=TRefStrbFixed)
+    createConfigParam("Lvds4:SrcCtrl",  'E', 0x3,  2,  6, 0); // LVDS ch4 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_BASIC,2=TSYNC_LOCAL,3=TRefStrbFixed)
+    createConfigParam("Lvds5:SrcCtrl",  'E', 0x3,  2,  8, 0); // LVDS ch5 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_BASIC,2=TSYNC_LOCAL,3=TRefStrbFixed)
+    createConfigParam("Lvds6:SrcCtrl",  'E', 0x3,  2, 10, 0); // LVDS ch6 TSYNC T&C src ctrl  (0=TSYNC_NORMAL,1=TSYNC_BASIC,2=TSYNC_LOCAL,3=TRefStrbFixed)
+    createConfigParam("RtdlFakeTsyncSrc",'E',0x3,  2, 12, 0); // RTDL fake TSYNC source
+    createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB0)
 
-    createConfigParam("LvdsTsyncGen",   'E', 0x4, 32,  0, 0); // LVDS TSYNC period
+    createConfigParam("LvdsTsyncPeriod",'E', 0x4, 32,  0, 166660); // LVDS TSYNC period       (scale:100,unit:ns)
     createConfigParam("TsyncDelay",     'E', 0x5, 32,  0, 0); // LVDS TSYNC delay             (scale:9.4,unit:ns)
     createConfigParam("TsyncWidth",     'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (scale:100,unit:ns)
 
-    createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
-    createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (1=Send to trans A,2=send to trans B)
+    createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=data,1=forward,2=chopper,3=timing master)
+    createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (0=not used,1=send to A,2=send to B,3=not used2)
     createConfigParam("OptA:EOC",       'E', 0x8,  1,  4, 1); // Optical TX A End of Chain
     createConfigParam("OptA:FilterCmd", 'E', 0x8,  2,  5, 0); // Optical TX A Command Filter
-    createConfigParam("OptB:TxMode",    'E', 0x8,  2,  8, 3); // Optical TX B output mode     (0=Normal,1=Timing,2=Chopper,3=Timing master)
-    createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 2); // Crossbar Switch Pass ctrl B  (1=Send to trans A,2=send to trans B)
+    createConfigParam("OptB:TxMode",    'E', 0x8,  2,  8, 3); // Optical TX B output mode     (0=data,1=forward,2=chopper,3=timing master)
+    createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 2); // Crossbar Switch Pass ctrl B  (0=not used,1=send to A,2=send to B,3=not used2)
     createConfigParam("OptB:EOC",       'E', 0x8,  1, 12, 1); // Optical TX B End of Chain
     createConfigParam("OptB:FilterCmd", 'E', 0x8,  2, 13, 0); // Optical TX B Command Filter
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
@@ -287,13 +306,13 @@ void DspPlugin::createParams_v64() {
     createConfigParam("OptMaxSize",     'E', 0x9, 16,  0, 3600); // Optical packet max dwords
     createConfigParam("OptNeutronEop",  'E', 0x9,  1, 16, 1); // Optical Neutron send EOP     (0=disabled,1=enabled)
     createConfigParam("OptMetaEop",     'E', 0x9,  1, 17, 0); // Optical Metadata send EOP    (0=disabled,1=enabled)
-    createConfigParam("OptTofCtrl",     'E', 0x9,  1, 18, 1); // TOF control                  (0=fixed TOF,1=full time offset)
+    createConfigParam("OptTofCtrl",     'E', 0x9,  1, 18, 1); // TOF control - use_full_time  (0=fixed TOF,1=full time offset)
 
-    createConfigParam("FakeTrig",       'E', 0xA, 32,  0, 2621480); // Fake Trigger Information
+    createConfigParam("Meta:FakeTrig",  'E', 0xA, 32,  0, 2621480); // Fake Trigger Information
 
     createConfigParam("SysRstMode",     'F', 0x0,  2,  0, 0); // Reset mode => SYSRST_O#      (0=not used,1=not used,2=from LVDS T&C,3=from optical T&C)
     createConfigParam("SysStartMode",   'F', 0x0,  3,  4, 0); // Start/Stop mode              (0=normal, 1=fake data mode,2=not defined,3=not defined)
-    createConfigParam("SysFakeEn",      'F', 0x0,  1,  7, 0); // Fake metadata trigger enable (0=disabled,1=enabled)
+    createConfigParam("Meta:FakeEn",    'F', 0x0,  1,  7, 0); // Fake metadata trigger enable (0=disabled,1=enabled)
     createConfigParam("SysFastEn",      'F', 0x0,  1,  8, 0); // Send data immediately switch (0=big packets,1=send immediately)
     createConfigParam("SysPassEn",      'F', 0x0,  1,  9, 0); // Response for passthru cmd    (0=don't send,1=send)
     createConfigParam("SysStartEn",     'F', 0x0,  1, 10, 1); // Wait for Start/Stop response (0=don't wait,1=wait)

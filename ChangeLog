@@ -10,6 +10,7 @@ Enhancements:
 * Support for DSP-T v6.6
 * Dynamic number of pixel to adjust TOF
 * create_ioc_pvtable script supports modifying existing files
+* DSP registers changes
 
 Fixed bugs:
 * Config register alignment problem
@@ -19,6 +20,7 @@ Fixed bugs:
 
 Impact:
 * BL-4B - flat field position id change
+* DSP-T register changed, care when upgrading as some might not get restored
 
 1.7.1 - Nov 21 2016
 Enhancements:
