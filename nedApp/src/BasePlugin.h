@@ -43,6 +43,11 @@ struct ParamsExch {
 class Timer;
 
 /**
+ * Convenience macro to increment current parameter value.
+ */
+#define addIntegerParam(param, value) { int tmp; getIntegerParam(param, &tmp); setIntegerParam(param, value+tmp); }
+
+/**
  * Registers plugin with EPICS system.
  *
  * Each plugin class should call this macro somewhere in the .c/.cpp file. The macro
