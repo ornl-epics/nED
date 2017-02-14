@@ -71,13 +71,6 @@ class CRocPlugin : public BaseModulePlugin {
         }
 
         /**
-         * Configured version must match actual.
-         *
-         * @return true when they match, false otherwise.
-         */
-        bool checkVersion(const BaseModulePlugin::Version &version);
-
-        /**
          * Handle passing parameters from other plugins.
          */
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);

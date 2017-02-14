@@ -59,28 +59,39 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
 
     m_remoteUpgrade.status = RemoteUpgrade::NOT_SUPPORTED;
 
-    if (m_version == "v32" || m_version == "v34") {
+    if (m_version == "v32") {
         setIntegerParam(Supported, 1);
         createParams_v32();
+        setExpectedVersion(3, 2);
+    } else if (m_version == "v34") {
+        setIntegerParam(Supported, 1);
+        createParams_v32();
+        setExpectedVersion(3, 4);
     } else if (m_version == "v35") {
         setIntegerParam(Supported, 1);
         createParams_v35();
+        setExpectedVersion(3, 5);
     } else if (m_version == "v36") {
         setIntegerParam(Supported, 1);
         createParams_v36();
+        setExpectedVersion(3, 6);
     } else if (m_version == "v37") {
         setIntegerParam(Supported, 1);
         createParams_v37();
+        setExpectedVersion(3, 7);
     } else if (m_version == "v38") {
         setIntegerParam(Supported, 1);
         createParams_v38();
+        setExpectedVersion(3, 8);
     } else if (m_version == "v39") {
         setIntegerParam(Supported, 1);
         createParams_v39();
         remoteUpgradeSM(RemoteUpgrade::INIT);
+        setExpectedVersion(3, 9, 10, 9);
     } else if (m_version == "v320") {
         setIntegerParam(Supported, 1);
         createParams_v320();
+        setExpectedVersion(3, 20);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);
@@ -158,19 +169,6 @@ bool FemPlugin::timerExpired(epicsTimeStamp *timer, int timeoutParam)
     epicsTimeStamp now;
     epicsTimeGetCurrent(&now);
     return (epicsTimeDiffInSeconds(&now, timer) > timeout);
-}
-
-bool FemPlugin::checkVersion(const BaseModulePlugin::Version &version)
-{
-    if ((version.hw_version == 10 && version.hw_revision == 2) ||
-        (version.hw_version == 10 && version.hw_revision == 9)) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
-        if (m_version == ver)
-            return true;
-    }
-
-    return false;
 }
 
 bool FemPlugin::remoteUpgradeRsp(const DasPacket *packet)

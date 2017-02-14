@@ -179,6 +179,7 @@ class BaseModulePlugin : public BasePlugin {
         uint8_t m_expectedChannel;                      //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
         uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
         uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
+        Version m_expectedVersion;                      //!< Variable assigned in constructor to match against the version returned from module
 
     private: // variables
         bool m_behindDsp;
@@ -832,11 +833,25 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version) = 0;
 
         /**
-         * Configured version must match actual.
+         * Compare version returned from the module to the expected one.
+         *
+         * Only non-zero fields in expected version are compared.
          *
          * @return true when they match, false otherwise.
          */
-        virtual bool checkVersion(const BaseModulePlugin::Version &version) = 0;
+        virtual bool checkVersion(const BaseModulePlugin::Version &version);
+
+        /**
+         * Sets the version to be matched against one returned from the module.
+         *
+         * Only non-zero fields in expected version are compared.
+         *
+         * @param[in] fw_version Firmware version number
+         * @param[in] fw_revision Firmware revision number
+         * @param[in] hw_version Hardware version number
+         * @param[in] hw_revision Hardware revision number
+         */
+        virtual void setExpectedVersion(uint8_t fw_version, uint8_t fw_revision, uint8_t hw_version=0, uint8_t hw_revision=0);
 
         /**
          * Pack parameters into raw format

@@ -70,33 +70,52 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         setNumChannels(8);
         setIntegerParam(Supported, 1);
         createParams_v14();
-    } else if (m_version == "v45" || m_version == "v44") {
+        setExpectedVersion(1, 4);
+    } else if (m_version == "v44") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
         createParams_v45();
+        setExpectedVersion(4, 4);
+    } else if (m_version == "v45") {
+        setNumChannels(8);
+        setIntegerParam(Supported, 1);
+        createParams_v45();
+        setExpectedVersion(4, 5);
     } else if (m_version == "v47") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
         createParams_v47();
+        setExpectedVersion(4, 7);
     } else if (m_version == "v51") {
         setIntegerParam(Supported, 1);
         createParams_v51();
+        setExpectedVersion(5, 1);
     } else if (m_version == "v52") {
         setIntegerParam(Supported, 1);
         createParams_v52();
-    } else if (m_version == "v54" || m_version == "v55") {
+        setExpectedVersion(5, 2);
+    } else if (m_version == "v54") {
         setIntegerParam(Supported, 1);
         createParams_v54();
         createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
+        setExpectedVersion(5, 4);
+    } else if (m_version == "v55") {
+        setIntegerParam(Supported, 1);
+        createParams_v54();
+        createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
+        setExpectedVersion(5, 5);
     } else if (m_version == "v56") {
         setIntegerParam(Supported, 1);
         createParams_v56();
+        setExpectedVersion(5, 6);
     } else if (m_version == "v57") {
         setIntegerParam(Supported, 1);
         createParams_v57();
+        setExpectedVersion(5, 7);
     } else if (m_version == "v58") {
         setIntegerParam(Supported, 1);
         createParams_v58();
+        setExpectedVersion(5, 8);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);
@@ -220,18 +239,6 @@ bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
         // Skip vendor id from V5.4
 
         return true;
-    }
-
-    return false;
-}
-
-bool RocPlugin::checkVersion(const BaseModulePlugin::Version &version)
-{
-    if (version.hw_version == 5 || version.hw_version == 2) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
-        if (m_version == ver)
-            return true;
     }
 
     return false;

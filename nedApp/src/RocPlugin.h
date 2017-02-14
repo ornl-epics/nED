@@ -140,13 +140,6 @@ epicsTimeStamp m_sendHvTime;
             return parseVersionRsp(packet, version);
         }
 
-        /**
-         * Configured version must match actual.
-         *
-         * @return true when they match, false otherwise.
-         */
-        bool checkVersion(const BaseModulePlugin::Version &version);
-
     private: // functions
 
         /**

@@ -45,16 +45,19 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
         createStatusParams_v02();
         createConfigParams_v02();
         createCounterParams_v02();
+        setExpectedVersion(0, 2);
     } else if (m_version == "v03") {
         setIntegerParam(Supported, 1);
         createStatusParams_v03();
         createConfigParams_v03();
         createCounterParams_v03();
+        setExpectedVersion(0, 3);
     } else if (m_version == "v05") {
         setIntegerParam(Supported, 1);
         createStatusParams_v05();
         createConfigParams_v05();
         createCounterParams_v05();
+        setExpectedVersion(0, 5);
     }  else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ADC ROC version '%s'", version);
@@ -88,18 +91,6 @@ bool AdcRocPlugin::handleResponse(const DasPacket *packet)
     default:
         return BaseModulePlugin::handleResponse(packet);
     }
-}
-
-bool AdcRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
-{
-    if (version.hw_version == 0) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
-        if (m_version == ver)
-            return true;
-    }
-
-    return false;
 }
 
 bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)

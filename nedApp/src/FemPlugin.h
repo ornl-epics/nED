@@ -142,13 +142,6 @@ class FemPlugin : public BaseModulePlugin {
             return parseVersionRsp(packet, version);
         }
 
-        /**
-         * Configured version must match actual.
-         *
-         * @return true when they match, false otherwise.
-         */
-        bool checkVersion(const BaseModulePlugin::Version &version);
-
     private: // functions
         /**
          * Create and register all FEM10 parameters to be exposed to EPICS.

@@ -52,14 +52,17 @@ BnlRocPlugin::BnlRocPlugin(const char *portName, const char *dispatcherPortName,
         createStatusParams_v00();
         createConfigParams_v00();
         // createCounterParams_v00();
+        setExpectedVersion(0, 0);
     } else if (m_version == "v20") {
         setIntegerParam(Supported, 1);
         createStatusParams_v20();
         createConfigParams_v20();
+        setExpectedVersion(2, 0);
     } else if (m_version == "v21") {
         setIntegerParam(Supported, 1);
         createStatusParams_v20();
         createConfigParams_v20();
+        setExpectedVersion(2, 1);
     }  else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported BNL ROC version '%s'", version);
@@ -67,19 +70,6 @@ BnlRocPlugin::BnlRocPlugin(const char *portName, const char *dispatcherPortName,
 
     callParamCallbacks();
     initParams();
-}
-
-bool BnlRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
-{
-    if (version.hw_version == 1) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version,
-                version.fw_revision);
-        if (m_version == ver)
-            return true;
-    }
-
-    return false;
 }
 
 bool BnlRocPlugin::parseVersionRsp(const DasPacket *packet,

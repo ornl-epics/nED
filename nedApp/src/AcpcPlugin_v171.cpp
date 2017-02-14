@@ -136,13 +136,13 @@ void AcpcPlugin::createParams_v171()
     createConfigParam("Lvds7:En",           'E',  0x6,  1,  6,    0); // Channel 7 Enable              (0=enable, 1=disable)
     createConfigParam("Lvds8:En",           'E',  0x6,  1,  7,    0); // Channel 8 Enable              (0=enable, 1=disable)
     createConfigParam("Lvds9:En",           'E',  0x6,  1,  8,    0); // Channel 9 Enable              (0=enable, 1=disable)
-    createConfigParam("TimeTolerance",      'E',  0x6,  7,  9,   63); // Time tolerance
+    createConfigParam("TimeTolerance",      'E',  0x6,  7,  9,   31); // Time tolerance
 
     createConfigParam("TcResetMode",        'F',  0x0,  1,  0,    0); // Reset mode                    (0=soft, 1=hard)
     createConfigParam("TcTclkMode",         'F',  0x0,  1,  1,    0); // Tclk mode                     (0=external, 1=internal)
     createConfigParam("TcTsyncMode",        'F',  0x0,  1,  2,    0); // TSYNC mode                    (0=external, 1=internal)
     createConfigParam("TcTxenMode",         'F',  0x0,  1,  3,    0); // TXen  mode                    (0=external, 1=internal)
-    createConfigParam("OutputMode",         'F',  0x0,  2,  4,    1); // Output mode                   (0=normal,1=raw,2=raw synced,2=verbose)
+    createConfigParam("OutputMode",         'F',  0x0,  2,  4,    1); // Output mode                   (0=normal,1=raw,2=raw synced,3=verbose)
     createConfigParam("DetectorSelect",     'F',  0x0,  1, 10,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
     createConfigParam("MSEsamples",         'F',  0x0,  1, 14,    0); // MSE samples                   (0=five, 1=three)
     createConfigParam("TestPatternEn",      'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)

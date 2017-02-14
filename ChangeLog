@@ -12,6 +12,7 @@ Enhancements:
 * create_ioc_pvtable script supports modifying existing files
 * DSP registers changes
 * Support for ACPC 17.2
+* Change the way we verify module version
 
 Fixed bugs:
 * Config register alignment problem
@@ -22,6 +23,7 @@ Fixed bugs:
 Impact:
 * BL-4B - flat field position id change
 * DSP-T register changed, care when upgrading as some might not get restored
+* Version checking has changed
 
 1.7.1 - Nov 21 2016
 Enhancements:

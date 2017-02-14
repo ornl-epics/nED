@@ -1203,3 +1203,32 @@ void BaseModulePlugin::registerResponseHandler(std::function<bool(const DasPacke
 {
     m_stateMachines.push_back(callback);
 }
+
+bool BaseModulePlugin::checkVersion(const BaseModulePlugin::Version &version)
+{
+    if (m_expectedVersion.fw_version != 0 && m_expectedVersion.fw_version != version.fw_version) {
+        LOG_ERROR("Expecting firmware version %u, module returned %u", m_expectedVersion.fw_version, version.fw_version);
+        return false;
+    }
+    if (m_expectedVersion.fw_revision != 0 && m_expectedVersion.fw_revision != version.fw_revision) {
+        LOG_ERROR("Expecting firmware revision %u, module returned %u", m_expectedVersion.fw_revision, version.fw_revision);
+        return false;
+    }
+    if (m_expectedVersion.hw_version != 0 && m_expectedVersion.hw_version != version.hw_version) {
+        LOG_ERROR("Expecting hardware version %u, module returned %u", m_expectedVersion.hw_version, version.hw_version);
+        return false;
+    }
+    if (m_expectedVersion.hw_revision != 0 && m_expectedVersion.hw_revision != version.hw_revision) {
+        LOG_ERROR("Expecting hardware revision %u, module returned %u", m_expectedVersion.hw_revision, version.hw_revision);
+        return false;
+    }
+    return true;
+}
+
+void BaseModulePlugin::setExpectedVersion(uint8_t fw_version, uint8_t fw_revision, uint8_t hw_version, uint8_t hw_revision)
+{
+    m_expectedVersion.fw_version  = fw_version;
+    m_expectedVersion.fw_revision = fw_revision;
+    m_expectedVersion.hw_version  = hw_version;
+    m_expectedVersion.hw_revision = hw_revision;
+}

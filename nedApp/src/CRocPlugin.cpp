@@ -27,9 +27,11 @@ CRocPlugin::CRocPlugin(const char *portName, const char *dispatcherPortName, con
     } else if (m_version == "v93") {
         setIntegerParam(Supported, 1);
         createParams_v93();
+        setExpectedVersion(9, 3);
     } else if (m_version == "v94") {
         setIntegerParam(Supported, 1);
         createParams_v94();
+        setExpectedVersion(9, 4);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported CROC version '%s'", version);
@@ -76,18 +78,6 @@ bool CRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Vers
     version.fw_day      = HEX_BYTE_TO_DEC(response->day);
 
     return true;
-}
-
-bool CRocPlugin::checkVersion(const BaseModulePlugin::Version &version)
-{
-    if (version.fw_version == 9 || version.fw_version == 3) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
-        if (m_version == ver)
-            return true;
-    }
-
-    return false;
 }
 
 asynStatus CRocPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)

@@ -83,13 +83,6 @@ class AdcRocPlugin : public BaseModulePlugin {
             return parseVersionRsp(packet, version);
         }
 
-        /**
-         * Configured version must match actual.
-         *
-         * @return true when they match, false otherwise.
-         */
-        bool checkVersion(const BaseModulePlugin::Version &version);
-
     private: // functions
 
         /**
@@ -180,7 +173,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          * Create and register all status counter ADCROC v0.3 parameters to be exposed to EPICS.
          */
         void createCounterParams_v03();
-        
+
         /**
          * Create and register all status ADCROC v0.5 parameters to be exposed to EPICS.
          */

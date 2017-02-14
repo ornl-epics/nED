@@ -65,13 +65,6 @@ class AcpcPlugin : public BaseModulePlugin {
             return parseVersionRsp(packet, version);
         }
 
-        /**
-         * Configured version must match actual.
-         *
-         * @return true when they match, false otherwise.
-         */
-        bool checkVersion(const BaseModulePlugin::Version &version);
-
     private: // functions
         /**
          * Create and register all ACPC 14.4 parameters to be exposed to EPICS.

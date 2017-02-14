@@ -46,12 +46,15 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, con
     } else if (m_version == "v144") {
         setIntegerParam(Supported, 1);
         createParams_v144();
+        setExpectedVersion(14, 4);
     } else if (m_version == "v171") {
         setIntegerParam(Supported, 1);
         createParams_v171();
+        setExpectedVersion(17, 1);
     } else if (m_version == "v172") {
         setIntegerParam(Supported, 1);
         createParams_v172();
+        setExpectedVersion(17, 2);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ACPC version '%s'", version);
@@ -59,18 +62,6 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, con
 
     callParamCallbacks();
     initParams();
-}
-
-bool AcpcPlugin::checkVersion(const BaseModulePlugin::Version &version)
-{
-    if (version.hw_version == 2 && version.hw_revision == 6) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
-        if (m_version == ver)
-            return true;
-    }
-
-    return false;
 }
 
 bool AcpcPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
