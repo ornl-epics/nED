@@ -49,6 +49,9 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, con
     } else if (m_version == "v171") {
         setIntegerParam(Supported, 1);
         createParams_v171();
+    } else if (m_version == "v172") {
+        setIntegerParam(Supported, 1);
+        createParams_v172();
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ACPC version '%s'", version);

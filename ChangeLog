@@ -11,6 +11,7 @@ Enhancements:
 * Dynamic number of pixel to adjust TOF
 * create_ioc_pvtable script supports modifying existing files
 * DSP registers changes
+* Support for ACPC 17.2
 
 Fixed bugs:
 * Config register alignment problem
