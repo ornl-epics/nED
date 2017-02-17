@@ -31,7 +31,7 @@ record(mbbo, "$(P)CmdReq")
     field(TTVL, "39")
     field(TTST, "Down reset LVDS")
 }
-record(mbbo, "$(P)DataModeFan")
+record(fanout, "$(P)DataModeFan")
 {
     field(LNK2, "$(P)DataFmt")
 }
@@ -62,8 +62,8 @@ record(sel, "$(P)RocDF")
 record(sel, "$(P)AcpcDF")
 {
     field(INPA, "4")
-    field(INPB, "7")
-    field(INPC, "13")
+    field(INPB, "8")
+    field(INPC, "7")
     field(INPD, "13")
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")

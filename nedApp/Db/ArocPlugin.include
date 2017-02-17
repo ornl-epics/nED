@@ -4,10 +4,12 @@ record(mbbo, "$(P)DataMode")
     field(FLNK, "$(P)DataModeL")
 }
 # AROCs OutputMode raw and normal mode are swapped compared to every other module
+# We don't do extended, instead we switch to normal to get 'dbg raw normal' 
+# mode.
 record(calcout, "$(P)DataModeL")
 {
     field(INPA, "$(P)DataMode.RVAL NPP")
-    field(CALC, "A=0?1:A=1?0:A")
+    field(CALC, "(A=0||A=2)?1:A=1?0:A")
     field(OUT,  "$(P)OutputMode PP")
 }
 # Add Discovered to the list of checks

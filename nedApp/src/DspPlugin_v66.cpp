@@ -301,7 +301,7 @@ void DspPlugin::createParams_v66() {
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
     createConfigParam("OptBlankEn",     'E', 0x8,  1, 17, 0); // Optical empty data frame CRC (0=no blank frame, 1=add blank frame)
     createConfigParam("OptRspLimit",    'E', 0x8,  1, 18, 0); // 64 responses limit           (0=no limit, 1=limit to 64)
-    createConfigParam("OptDataFormat",  'E', 0x8,  4, 20, 0); // Data format                  (0=legacy,1=meta,2=pixel,3=XY,4=XY PS,5=LPSD raw,6=LPSD verbose,7=AROC raw,8=AROC verbose,9=BNL raw,10=BNL verbose,11=CROC raw,12=CROC verbose,13=ACPC verbose)
+    createConfigParam("OptDataFormat",  'E', 0x8,  4, 20, 0); // Data format                  (0=legacy,1=meta,2=pixel,3=XY,4=XY PS,5=LPSD raw,6=LPSD verbose,7=AROC normal,8=AROC raw,9=BNL raw,10=BNL verbose,11=CROC raw,12=CROC verbose,13=ACPC verbose)
     createConfigParam("OptTxDelay",     'E', 0x8,  7, 24, 3); // Optical packet send delay    (0=0ns, 1=313ns, 3=1us, 100=31.3us)
     createConfigParam("OptTxDelayC",    'E', 0x8,  1, 31, 1); // Optical packet send delay ct (0=use OPT_TX_DELAY,1=prev word count)
 

@@ -2,7 +2,7 @@ record(mbbo, "$(P)DataMode")
 {
     field(FLNK, "$(P)DataModeFan")
 }
-record(mbbo, "$(P)DataModeFan")
+record(fanout, "$(P)DataModeFan")
 {
     field(LNK1, "$(P)DataSize")
 }
@@ -52,8 +52,8 @@ record(sel, "$(P)AcpcDS")
 {
     field(INPA, "12")
     field(INPB, "36")
-    field(INPC, "68")
-    field(INPD, "68")
+    field(INPC, "36")
+    field(INPD, "336")
     field(NVL,  "$(P)DataMode.RVAL NPP")
     field(SELM, "Specified")
 }

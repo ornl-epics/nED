@@ -4,11 +4,11 @@ record(mbbo, "$(P)DataMode")
     field(FLNK, "$(P)DataModeL")
 }
 # ACPCs OutputMode is different than everybody else
+# We don't use raw synced, instead we want raw always
 record(calcout, "$(P)DataModeL")
 {
     field(INPA, "$(P)DataMode.RVAL NPP")
-    # ACPC 'raw synced' mode is not used!
-    field(CALC, "A>=2?3:A")
+    field(CALC, "A=2?1:A")
     field(OUT,  "$(P)OutputMode PP")
 }
 record(calc, "$(P)HwStatus")

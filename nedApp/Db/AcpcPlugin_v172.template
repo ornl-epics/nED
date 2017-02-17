@@ -24,3 +24,12 @@ record(longin, "$(P)FwRev")
     field(HIGH, "3")
     field(LOW,  "1")
 }
+
+# ACPC 17.2 OutputMode is even more different than 17.1.
+# It changes index of verbose, event sizes change also!!!
+record(calcout, "$(P)DataModeL")
+{
+    field(INPA, "$(P)DataMode.RVAL NPP")
+    field(CALC, "A<2?A:A=2?1:4")
+    field(OUT,  "$(P)OutputMode PP")
+}
