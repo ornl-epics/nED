@@ -124,8 +124,8 @@ void AcpcPlugin::createParams_v171()
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",        '1',  0x0, 32,  0,    0); // Chan1 position index
 
-    createConfigParam("PhotosumMin",        'E',  0x0, 32,  0,  600); // Low PhotoSum threshold        (scale:0.00003051757813)
-    createConfigParam("PhotosumMax",        'E',  0x2, 32,  0, 2700); // High PhotoSum threshold       (scale:0.00003051757813)
+    createConfigParam("PhotosumMin",        'E',  0x0, 32,  0,  600); // Low PhotoSum threshold        (scale:0.0009765625)
+    createConfigParam("PhotosumMax",        'E',  0x2, 32,  0, 2700); // High PhotoSum threshold       (scale:0.0009765625)
     createConfigParam("TsyncDelay",         'E',  0x4, 32,  0,    0); // TSYNC delay
     createConfigParam("Lvds1:En",           'E',  0x6,  1,  0,    0); // Channel 1 Enable              (0=enable, 1=disable)
     createConfigParam("Lvds2:En",           'E',  0x6,  1,  1,    0); // Channel 2 Enable              (0=enable, 1=disable)
