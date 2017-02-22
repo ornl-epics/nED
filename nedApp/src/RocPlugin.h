@@ -279,6 +279,11 @@ epicsTimeStamp m_sendHvTime;
          */
         void createParams_v58();
 
+        /**
+         * Create and register all ROC v15.15 parameters.
+         */
+        void createParams_v1515();
+
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring
         int Acquiring;
