@@ -68,13 +68,6 @@ class ArocPlugin : public BaseModulePlugin {
             return parseVersionRsp(packet, version);
         }
 
-        /**
-         * Configured version must match actual.
-         *
-         * @return true when they match, false otherwise.
-         */
-        bool checkVersion(const BaseModulePlugin::Version &version);
-
     private: // functions
 
         /**
@@ -86,6 +79,11 @@ class ArocPlugin : public BaseModulePlugin {
          * Create and register all AROC v2.4 parameters to be exposed to EPICS.
          */
         void createParams_v24();
+
+        /**
+         * Create and register all AROC v255.255 parameters to be exposed to EPICS.
+         */
+        void createParams_v255255();
 };
 
 #endif // AROC_PLUGIN_H
