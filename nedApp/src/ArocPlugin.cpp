@@ -40,9 +40,15 @@ ArocPlugin::ArocPlugin(const char *portName, const char *dispatcherPortName, con
     if (m_version == "v23") {
         setIntegerParam(Supported, 1);
         createParams_v23();
+        setExpectedVersion(2, 3);
     } else if (m_version == "v24") {
         setIntegerParam(Supported, 1);
         createParams_v24();
+        setExpectedVersion(2, 4);
+    } else if (m_version == "v255255") {
+        setIntegerParam(Supported, 1);
+        createParams_v255255();
+        setExpectedVersion(255, 255);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported AROC version '%s'", version);
@@ -71,18 +77,6 @@ bool ArocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Vers
     version.fw_day      = HEX_BYTE_TO_DEC(response->day);
 
     return true;
-}
-
-bool ArocPlugin::checkVersion(const BaseModulePlugin::Version &version)
-{
-    if (version.hw_version == 2) {
-        char ver[10];
-        snprintf(ver, sizeof(ver), "v%u%u", version.fw_version, version.fw_revision);
-        if (m_version == ver)
-            return true;
-    }
-
-    return false;
 }
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
