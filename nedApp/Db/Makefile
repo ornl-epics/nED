@@ -21,6 +21,7 @@ DB += RtdlPlugin.db
 DB += AdaraPlugin.db
 DB += CmdDispatcherPlugin.db
 DB += DebugPlugin.db
+DB += DataDiagPlugin.db
 DB += FlatFieldPlugin.db
 DB += FlatFieldPosition.db
 DB += ProxyPlugin.db
