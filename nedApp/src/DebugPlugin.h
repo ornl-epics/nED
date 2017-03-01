@@ -120,7 +120,7 @@ class DebugPlugin : public BasePlugin {
         void selectPacket(int index);
 
     protected:
-        #define FIRST_GENERICMODULEPLUGIN_PARAM ReqDest
+        #define FIRST_DEBUGPLUGIN_PARAM ReqDest
         int ReqDest;        //!< Module address to communicate with
         int ReqCmd;         //!< Command to be sent
         int ReqIsDsp;       //!< Is the module we communicate with behinds the DSP, using LVDS link
@@ -159,7 +159,7 @@ class DebugPlugin : public BasePlugin {
         int PktQueIndex;    //!< Currently display packet index
         int PktQueSize;     //!< Number of elements in packet buffer
         int PktQueMaxSize;  //!< Max num of elements in packet buffer
-        #define LAST_GENERICMODULEPLUGIN_PARAM PktQueMaxSize
+        #define LAST_DEBUGPLUGIN_PARAM PktQueMaxSize
 };
 
-#endif // GENERIC_MODULE_PLUGIN_H
+#endif // DEBUG_PLUGIN_H

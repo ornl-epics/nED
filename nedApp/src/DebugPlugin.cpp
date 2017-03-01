@@ -16,10 +16,10 @@
 
 EPICS_REGISTER_PLUGIN(DebugPlugin, 2, "Port name", string, "Dispatcher port name", string);
 
-#define NUM_GENERICMODULEPLUGIN_PARAMS      ((int)(&LAST_GENERICMODULEPLUGIN_PARAM - &FIRST_GENERICMODULEPLUGIN_PARAM + 1))
+#define NUM_DEBUGPLUGIN_PARAMS      ((int)(&LAST_DEBUGPLUGIN_PARAM - &FIRST_DEBUGPLUGIN_PARAM + 1))
 
 DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, int blocking)
-    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_GENERICMODULEPLUGIN_PARAMS, 1,
+    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_DEBUGPLUGIN_PARAMS, 1,
                  defaultInterfaceMask, defaultInterruptMask)
 {
     createParam("ReqDest",      asynParamOctet, &ReqDest, 0x0); // WRITE - Module address to communicate with
