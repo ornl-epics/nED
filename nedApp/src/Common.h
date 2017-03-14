@@ -16,6 +16,8 @@
 #define ALIGN_UP(number, boundary)      (((number) + (boundary) - 1) & ~((boundary) - 1))
 #define HEX_BYTE_TO_DEC(a)              ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
 
+namespace Common {
+
 /**
  * Determine file size.
  *
@@ -25,6 +27,14 @@
  * @retval false on failure, possibly file doesn't exist.
  */
 bool fileSize(const std::string &path, uint32_t &size);
+
+/**
+ * Check if path is directory.
+ *
+ * @param[in] path Relative or absolute path to regular file.
+ * @return true when path is directory, false otherwise or when path does not exist.
+ */
+bool isDir(const std::string &path);
 
 /**
  * Split a string and return a vector of tokens.
@@ -45,5 +55,8 @@ std::vector<std::string> split(const std::string &s, char delim);
  * @return the elements vector for ease of use
  */
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
+
+}; // namespace Common
+
 
 #endif // NED_COMMON_HPP
