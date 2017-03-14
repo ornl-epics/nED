@@ -10,11 +10,16 @@
 #include "ArocPlugin.h"
 
 /**
- * @file ArocPlugin_v24.cpp
+ * @file ArocPlugin_v255255.cpp
  *
- * AROC 2.4 parameters
+ * AROC 255.255 parameters
+ *
+ * The AROC 255.255 firmware is based on v2.4 but adds functionality specific
+ * to testing in the lab. In particular, it multiply number of responses
+ * returned.
+ *
  */
-void ArocPlugin::createParams_v24()
+void ArocPlugin::createParams_v255255()
 {
 //    BLXXX:Det:RocXXX:| sig nam|                           | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrParity",          0x0,  1,  0); // LVDS parity error            (0=no error,1=error)
@@ -252,20 +257,20 @@ void ArocPlugin::createParams_v24()
     createCounterParam("CntDataAlmostFull" , 0xD, 16,  0); // Data almost full counter
     createCounterParam("CntMissClk",         0xE, 16,  0); // Link RX clock missing cnt
     createCounterParam("Ch1:X:RateInitDisc",  0xF, 16,  0); // Ch1 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch2:X:RateInitDisc", 0x10, 16,  0); // Ch2 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch3:X:RateInitDisc", 0x11, 16,  0); // Ch3 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch4:X:RateInitDisc", 0x12, 16,  0); // Ch4 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch5:X:RateInitDisc", 0x13, 16,  0); // Ch5 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch6:X:RateInitDisc", 0x14, 16,  0); // Ch6 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch7:X:RateInitDisc", 0x15, 16,  0); // Ch7 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch8:X:RateInitDisc", 0x16, 16,  0); // Ch8 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch1:Y:RateInitDisc", 0x17, 16,  0); // Ch1 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch2:Y:RateInitDisc", 0x18, 16,  0); // Ch2 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch3:Y:RateInitDisc", 0x19, 16,  0); // Ch3 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch4:Y:RateInitDisc", 0x1A, 16,  0); // Ch4 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch5:Y:RateInitDisc", 0x1B, 16,  0); // Ch5 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch6:Y:RateInitDisc", 0x1C, 16,  0); // Ch6 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch7:Y:RateInitDisc", 0x1D, 16,  0); // Ch7 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch1:Y:RateInitDisc", 0x10, 16,  0); // Ch1 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:X:RateInitDisc", 0x11, 16,  0); // Ch2 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:Y:RateInitDisc", 0x12, 16,  0); // Ch2 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:X:RateInitDisc", 0x13, 16,  0); // Ch3 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:Y:RateInitDisc", 0x14, 16,  0); // Ch3 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:X:RateInitDisc", 0x15, 16,  0); // Ch4 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:Y:RateInitDisc", 0x16, 16,  0); // Ch4 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:X:RateInitDisc", 0x17, 16,  0); // Ch5 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:Y:RateInitDisc", 0x18, 16,  0); // Ch5 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:X:RateInitDisc", 0x19, 16,  0); // Ch6 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:Y:RateInitDisc", 0x1A, 16,  0); // Ch6 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:X:RateInitDisc", 0x1B, 16,  0); // Ch7 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:Y:RateInitDisc", 0x1C, 16,  0); // Ch7 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch8:X:RateInitDisc", 0x1D, 16,  0); // Ch8 X init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
     createCounterParam("Ch8:Y:RateInitDisc", 0x1E, 16,  0); // Ch8 Y init discriminator    (scale:19.0735,unit:cnts/s,prec:1)
     createCounterParam("Ibc:RateOut",       0x1F, 16,  0); // IBC outrate                 (scale:19.0735,unit:cnts/s,prec:1)
     createCounterParam("RateOut",           0x20, 16,  0); // Total outrate               (scale:19.0735,unit:cnts/s,prec:1)
@@ -490,7 +495,9 @@ void ArocPlugin::createParams_v24()
     createConfigParam("TestPatternAltEn", 'F',  0x1,  1, 14,    0); // Alternate test pattern enable (0=disable,1=enable)
     createConfigParam("TestPatternEn",    'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
     createConfigParam("TestPatternRate",  'F',  0x2, 16,  0,    0); // Test pattern rate
+    createConfigParam("RspMultiplier",    'F',  0x3,  8,  0,    0); // Number of multiplied rsps
+
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:38,hihi:45,archive:monitor)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
 }

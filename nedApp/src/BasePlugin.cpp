@@ -49,7 +49,7 @@ BasePlugin::BasePlugin(const char *portName, const char *dispatcherPortNames, in
     createParam("TxCount",      asynParamInt32,     &TxCount,   0); // READ - Number packets sent to OCC
     createParam("DataMode",     asynParamInt32,     &DataModeP, DATA_MODE_NORMAL); // WRITE - Data format mode (see BasePlugin::DataMode)
 
-    std::vector<std::string> portNames = split(dispatcherPortNames, ',');
+    std::vector<std::string> portNames = Common::split(dispatcherPortNames, ',');
     for (auto it=portNames.begin(); it!=portNames.end(); it++) {
         asynUser *pasynuser = pasynManager->createAsynUser(0, 0);
         if (pasynuser == 0) {

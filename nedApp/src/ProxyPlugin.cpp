@@ -15,7 +15,7 @@
 
 EPICS_REGISTER_PLUGIN(ProxyPlugin, 3, "port name", string, "dispatcher port", string, "blocking callbacks", int);
 
-#define NUM_PROXYPLUGIN_PARAMS      0
+#define NUM_PROXYPLUGIN_PARAMS      ((int)(&LAST_PROXYPLUGIN_PARAM - &FIRST_PROXYPLUGIN_PARAM + 1))
 
 ProxyPlugin::ProxyPlugin(const char *portName, const char *dispatcherPortName, int blocking)
     : BaseSocketPlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_PROXYPLUGIN_PARAMS)

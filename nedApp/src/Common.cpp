@@ -9,8 +9,12 @@
 
 #include "Common.h"
 
+#include <sys/stat.h>
+
 #include <fstream>
 #include <sstream>
+
+namespace Common {
 
 bool fileSize(const std::string &path, uint32_t &size)
 {
@@ -23,6 +27,14 @@ bool fileSize(const std::string &path, uint32_t &size)
     }
 
     return false;
+}
+
+bool isDir(const std::string &path)
+{
+    struct stat st;
+    if (stat(path.c_str(), &st) != 0)
+        return false;
+    return S_ISDIR(st.st_mode);
 }
 
 std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems) {
@@ -39,3 +51,5 @@ std::vector<std::string> split(const std::string &s, char delim) {
     split(s, delim, elems);
     return elems;
 }
+
+};

@@ -126,6 +126,7 @@ $(PROD_NAME)_SRCS  += DumpPlugin.cpp
 $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += DebugPlugin.cpp
+$(PROD_NAME)_SRCS  += DataDiagPlugin.cpp
 $(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += FlatFieldTable.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronData.cpp
@@ -143,13 +144,14 @@ $(PROD_NAME)_SRCS  += AcpcPlugin_v172.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v24.cpp
+$(PROD_NAME)_SRCS  += ArocPlugin_v255255.cpp
 $(PROD_NAME)_SRCS  += TimingPlugin.cpp
 $(PROD_NAME)_SRCS  += TofCorrectPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlFlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPvaPlugin.cpp
-$(PROD_NAME)_SRCS  += PvaXyPlugin.cpp
+#$(PROD_NAME)_SRCS  += PvaXyPlugin.cpp
 
 #===========================
 

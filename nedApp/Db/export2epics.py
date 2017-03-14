@@ -63,8 +63,12 @@ def parse_one(type, params_str, desc_str, extra_str):
                 param['unit'] = e[5:].strip(" ")
             elif e.startswith("low:"):
                 param['low'] = e[4:].strip(" ")
+            elif e.startswith("lolo:"):
+                param['lolo'] = e[5:].strip(" ")
             elif e.startswith("high:"):
                 param['high'] = e[5:].strip(" ")
+            elif e.startswith("hihi:"):
+                param['hihi'] = e[5:].strip(" ")
             elif e.startswith("archive:"):
                 param['archive'] = e[8:].strip(" ")
             elif e.startswith("scale:"):
@@ -140,10 +144,16 @@ def _aiao_val(param, outfile, default_value=None):
         outfile.write("    field(EGU,  \"{0}\")\n".format(param['unit']))
     if "low" in param:
         outfile.write("    field(LOW,  \"{0}\")\n".format(param['low']))
-        outfile.write("    field(LSV,  \"MAJOR\")\n")
+        outfile.write("    field(LSV,  \"{0}\")\n".format("MINOR" if "lolo" in param else "MAJOR"))
+    if "lolo" in param:
+        outfile.write("    field(LOLO, \"{0}\")\n".format(param['lolo']))
+        outfile.write("    field(LLSV, \"MAJOR\")\n")
     if "high" in param:
         outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
-        outfile.write("    field(HSV,  \"MAJOR\")\n")
+        outfile.write("    field(HSV,  \"{0}\")\n".format("MINOR" if "hihi" in param else "MAJOR"))
+    if "hihi" in param:
+        outfile.write("    field(HIHI, \"{0}\")\n".format(param['hihi']))
+        outfile.write("    field(HHSV, \"{0}\")\n".format("MAJOR"))
     if "slope_scale" in param:
         outfile.write("    field(ESLO, \"{0}\")\n".format(param['slope_scale']))
         outfile.write("    field(LINR, \"SLOPE\")\n")
@@ -225,11 +235,17 @@ def _longinlongout_val(param, outfile, default_value=None):
         outfile.write("    field(EGU,  \"{0}\")\n".format(param['unit']))
     if "low" in param:
         outfile.write("    field(LOW,  \"{0}\")\n".format(param['low']))
-        outfile.write("    field(LSV,  \"MAJOR\")\n")
+        outfile.write("    field(LSV,  \"{0}\")\n".format("MINOR" if "lolo" in param else "MAJOR"))
+    if "lolo" in param:
+        outfile.write("    field(LOLO, \"{0}\")\n".format(param['lolo']))
+        outfile.write("    field(LLSV, \"MAJOR\")\n")
     if "high" in param:
         outfile.write("    field(HIGH, \"{0}\")\n".format(param['high']))
-        outfile.write("    field(HSV,  \"MAJOR\")\n")
-
+        outfile.write("    field(HSV,  \"{0}\")\n".format("MINOR" if "hihi" in param else "MAJOR"))
+    if "hihi" in param:
+        outfile.write("    field(HIHI, \"{0}\")\n".format(param['hihi']))
+        outfile.write("    field(HHSV, \"{0}\")\n".format("MAJOR"))
+        
 def _calc_record(param, outfile, link=None):
     flnk = None
     if 'calcwrite' in param:
@@ -275,7 +291,7 @@ def _calc_record(param, outfile, link=None):
         outfile.write("    field(OUT,  \"$(P){0} PP\")\n".format(param['name']))
         outfile.write("}\n")
     return flnk
-    
+
 def generate_db_record(param, outfile):
     if "options" in param:
         if len(param['options']) == 2 and param['width'] == 1:
