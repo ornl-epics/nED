@@ -74,7 +74,7 @@ asynStatus BasePvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == PvMetadataEn) {
         m_metadataEn = (value > 0);
     } else if (pasynUser->reason == DataModeP) {
-        flushData();
+        //flushData();
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }

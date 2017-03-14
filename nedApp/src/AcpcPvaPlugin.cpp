@@ -53,7 +53,7 @@ asynStatus AcpcPvaPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             LOG_ERROR("Ignoring invalid output mode %d", value);
             return asynError;
         }
-        flushData();
+        //flushData();
     } else if (pasynUser->reason == XyFractWidth) {
         m_xyDivider = 1 << value;
         return asynSuccess;
