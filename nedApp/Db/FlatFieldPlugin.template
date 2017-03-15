@@ -35,6 +35,21 @@ record(bi, "$(P)Status")
     field(ZSV,  "MAJOR")
     field(INP,  "$(P)StatusCalc")
 }
+record(mbbi, "$(P)ImportStatus")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ImportStatus")
+    field(SCAN, "I/O Intr")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "None")
+    field(ONST, "Error")
+    field(TWST, "In progress")
+    field(THST, "Done")
+}
 record(waveform, "$(P)ImportReport")
 {
     field(ASG,  "BEAMLINE")
@@ -46,8 +61,9 @@ record(waveform, "$(P)ImportReport")
 }
 record(waveform, "$(P)ImportDir")
 {
+    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
-    field(DTYP, "asynOctetRead")
+    field(DTYP, "asynOctetWrite")
     field(INP,  "@asyn($(PORT))ImportDir")
     field(FTVL, "CHAR")
     field(NELM, "1024")

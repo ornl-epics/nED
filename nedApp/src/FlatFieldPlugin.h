@@ -80,30 +80,6 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         };
 
         /**
-         * Possible errors
-         */
-        typedef enum {
-            FF_ERR_NONE         = 0, //!< No error
-            FF_ERR_NO_FILE      = 1, //!< Failed to find file
-            FF_ERR_PARSE        = 2, //!< Failed to parse file
-            FF_ERR_NO_MEM       = 3, //!< Failed to allocate internal buffer
-            FF_ERR_EXIST        = 4, //!< Correction table for this position already imported
-            FF_ERR_BAD_FORMAT   = 5, //!< Unrecognized file format
-            FF_ERR_BAD_SIZE     = 6, //!< One or more tables dimension size mismatched
-            FF_ERR_INCOMPLETE   = 7, //!< One or more tables missing
-        } ImportError;
-
-        /**
-         * Enable or disable mapping mode
-         */
-        typedef enum {
-            FF_PASS_THRU        = 0, //!< Passthru mode
-            FF_FLATTEN          = 1, //!< Transform neutron events
-            FF_CONVERT_ONLY     = 2, //!< Convert X,Y event into TOF,pixel id only,
-                                     //!< no flat-field correction or photo sum elimination is applied
-        } FfMode_t;
-
-        /**
          * Event veto qualifier.
          */
         typedef enum {
@@ -113,6 +89,16 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
             VETO_POSITION_CFG,       //!< Position configuration error - overlaps pixel id
             VETO_PHOTOSUM,           //!< Photosum range
         } VetoType;
+
+        /**
+         * Import status enumeration.
+         */
+        enum {
+            IMPORT_STATUS_NONE,     //!< No imports yet
+            IMPORT_STATUS_ERROR,    //!< Import failed, using previous import if available
+            IMPORT_STATUS_BUSY,     //!< Import in progress
+            IMPORT_STATUS_DONE,     //!< Import succesfully done
+        };
 
         /**
          * Structure used for returning event counters from processPacket() function.
@@ -158,13 +144,13 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Constructor for FlatFieldPlugin
          *
          * Constructor will create and populate PVs with default values.
-         * It will also try to parse all files it finds in importDir as X and Y
-         * flat-field correction tables. See FlatFieldPlugin::importFile() for
-         * file format details.
+         * Based on coma delimited list of positions, it will also create 4 PVs
+         * per position. Note that unless position is specified in constructor, any
+         * event from that position will be rejected.
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] importDir Directory path where all correction tables are.
+         * @param[in] positions Coma delimited list of position ids (not pixel offsets)
          * @param[in] bufSize Transformation buffer size.
          */
         FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importFilePath, int bufSize);
@@ -175,11 +161,6 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         ~FlatFieldPlugin();
 
         /**
-         * Handle reading plugin integer parameters from PV.
-         */
-        asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
-
-        /**
          * Handle writing plugin integer parameters from PV.
          */
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
@@ -188,6 +169,11 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Handle writing plugin double parameters from PV.
          */
         asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
+
+        /**
+         * Handle writing octets
+         */
+        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
 
         /**
          * Handle reading octets
@@ -282,8 +268,15 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @note Should work on WIN32 as well, but not tested.
          * @param[in] dir Relative or absolute path to a directory with
          *                correction table files.
+         * @return true when folder was found and some files may be imported,
+         *         false when folder does not exist.
          */
         void importFiles(const std::string &dir);
+
+        /**
+         * Callback function invoked from a thread to prevent blocking other plugins.
+         */
+        float importFilesCb(const std::string &dir);
 
         /**
          * Generate printable report of loaded positions
@@ -305,6 +298,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         uint32_t m_tableSizeY;      //!< Y dimension size of all tables
         std::map<uint32_t, PositionTables> m_tables; //!< Map of lookup tables/number of detectors is usually small so hashing should be somewhat equally fast as vector, index is pixel_offset
         std::string m_importReport; //!< Text to be printed when asynReport() is called
+        std::shared_ptr<Timer> m_importTimer; //!< Timer is used as a worker thread for importing files
 
         // Following member variables must be carefully set since they're used un-locked
         double m_xScaleIn;          //!< Scaling factor to transform raw X range to [0 .. m_tableSizeX)
@@ -319,6 +313,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
     protected:
         #define FIRST_FLATFIELDPLUGIN_PARAM ImportReport
         int ImportReport;   //!< Generate textual file import report
+        int ImportStatus;   //!< Import status
         int ImportDir;      //!< Absolute path to pixel map file
         int BufferSize;     //!< Size of allocated buffer, 0 means alocation error
         int PsEn;           //!< Switch to toggle photosum elimination

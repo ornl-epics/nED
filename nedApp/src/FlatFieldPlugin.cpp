@@ -8,6 +8,7 @@
  */
 
 #include "Bits.h"
+#include "Common.h"
 #include "FlatFieldPlugin.h"
 #include "likely.h"
 #include "Log.h"
@@ -24,14 +25,14 @@
 #define NUM_FLATFIELDPLUGIN_PARAMS ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1)) + (MAX_POSITIONS * 6)
 
 #if defined(WIN32) || defined(_WIN32)
-#   define PATH_SEPARATOR "\\"
+#   define PATH_SEPARATOR '\\'
 #else
-#   define PATH_SEPARATOR "/"
+#   define PATH_SEPARATOR '/'
 #endif
 
-EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Dispatcher port name", string, "Correction tables file", string, "Buffer size", int);
+EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Dispatcher port name", string, "Positions", string, "Buffer size", int);
 
-FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importDir, int bufSize)
+FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *positions, int bufSize)
     : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_FLATFIELDPLUGIN_PARAMS, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
     , m_tableSizeX(0)
     , m_tableSizeY(0)
@@ -47,10 +48,9 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
         LOG_ERROR("Failed to allocate transformation buffer");
     }
 
-    importFiles(importDir);
-
     createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
-    createParam("ImportDir",    asynParamOctet, &ImportDir, importDir); // Path to correction tables directory
+    createParam("ImportStatus", asynParamInt32, &ImportStatus, IMPORT_STATUS_NONE); // Import status
+    createParam("ImportDir",    asynParamOctet, &ImportDir);            // Path to correction tables directory
     createParam("BufferSize",   asynParamInt32, &BufferSize, (int)m_bufferSize); // Allocated buffer size
     createParam("PsEn",         asynParamInt32, &PsEn, 0);              // Switch to toggle photosum elimination
     createParam("CorrEn",       asynParamInt32, &CorrEn, 0);            // Switch to toggle applying flat field correction
@@ -74,41 +74,42 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
 
     int nParams = ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1));
 
-    for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
-        PosEnable[it->second.position_id] = -1;
-        if (it->second.nTables > 0) {
-            int param;
-            char name[16];
+    std::vector<std::string> positions_ = Common::split(positions, ',');
+    for (auto it=positions_.begin(); it!=positions_.end(); it++) {
+        int position_id = stoi(*it);
+        PosEnable[position_id] = -1;
 
-            if ((nParams + 4) > NUM_FLATFIELDPLUGIN_PARAMS) {
-                LOG_ERROR("Parameter table size not big enough, skipping some positions");
-                break;
-            }
+        int param;
+        char name[16];
 
-            snprintf(name, sizeof(name), "Pos%u:Enable", it->second.position_id);
-            createParam(name, asynParamInt32, &param, 0);
-            PosEnable[it->second.position_id] = param;
-
-            snprintf(name, sizeof(name), "Pos%u:Id", it->second.position_id);
-            createParam(name, asynParamInt32, &param, 0);
-            PosId[it->second.position_id] = param;
-
-            snprintf(name, sizeof(name), "Pos%u:CorrX", it->second.position_id);
-            createParam(name, asynParamInt32, &param, 0);
-            PosCorrX[it->second.position_id] = param;
-
-            snprintf(name, sizeof(name), "Pos%u:CorrY", it->second.position_id);
-            createParam(name, asynParamInt32, &param, 0);
-            PosCorrY[it->second.position_id] = param;
-
-            snprintf(name, sizeof(name), "Pos%u:PsUpX", it->second.position_id);
-            createParam(name, asynParamInt32, &param, 0);
-            PosPsUpX[it->second.position_id] = param;
-
-            snprintf(name, sizeof(name), "Pos%u:PsLowX", it->second.position_id);
-            createParam(name, asynParamInt32, &param, 0);
-            PosPsLowX[it->second.position_id] = param;
+        if ((nParams + 4) > NUM_FLATFIELDPLUGIN_PARAMS) {
+            LOG_ERROR("Parameter table size not big enough, skipping some positions");
+            break;
         }
+
+        snprintf(name, sizeof(name), "Pos%u:Enable", position_id);
+        createParam(name, asynParamInt32, &param, 0);
+        PosEnable[position_id] = param;
+
+        snprintf(name, sizeof(name), "Pos%u:Id", position_id);
+        createParam(name, asynParamInt32, &param, position_id);
+        PosId[position_id] = param;
+
+        snprintf(name, sizeof(name), "Pos%u:CorrX", position_id);
+        createParam(name, asynParamInt32, &param, 0);
+        PosCorrX[position_id] = param;
+
+        snprintf(name, sizeof(name), "Pos%u:CorrY", position_id);
+        createParam(name, asynParamInt32, &param, 0);
+        PosCorrY[position_id] = param;
+
+        snprintf(name, sizeof(name), "Pos%u:PsUpX", position_id);
+        createParam(name, asynParamInt32, &param, 0);
+        PosPsUpX[position_id] = param;
+
+        snprintf(name, sizeof(name), "Pos%u:PsLowX", position_id);
+        createParam(name, asynParamInt32, &param, 0);
+        PosPsLowX[position_id] = param;
     }
 
     callParamCallbacks();
@@ -118,32 +119,6 @@ FlatFieldPlugin::~FlatFieldPlugin()
 {
     if (m_buffer != 0)
         free(m_buffer);
-}
-
-asynStatus FlatFieldPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
-{
-    for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
-        if (pasynUser->reason == PosEnable[it->second.position_id]) {
-            *value = it->second.enabled;
-            return asynSuccess;
-        } else if (pasynUser->reason == PosId[it->second.position_id]) {
-            *value = (int)it->second.position_id;
-            return asynSuccess;
-        } else if (pasynUser->reason == PosCorrX[it->second.position_id]) {
-            *value = (it->second.corrX != 0);
-            return asynSuccess;
-        } else if (pasynUser->reason == PosCorrY[it->second.position_id]) {
-            *value = (it->second.corrY != 0);
-            return asynSuccess;
-        } else if (pasynUser->reason == PosPsUpX[it->second.position_id]) {
-            *value = (it->second.psLowX != 0);
-            return asynSuccess;
-        } else if (pasynUser->reason == PosPsLowX[it->second.position_id]) {
-            *value = (it->second.psUpX != 0);
-            return asynSuccess;
-        }
-    }
-    return BaseDispatcherPlugin::readInt32(pasynUser, value);
 }
 
 asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -237,6 +212,42 @@ asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t n
         return asynSuccess;
     }
     return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
+}
+
+asynStatus FlatFieldPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+{
+    if (pasynUser->reason == ImportDir) {
+        *nActual = nChars;
+        if (nChars >0) {
+            if (value[nChars-1] == 0)
+                nChars--;
+            std::string path(value, nChars);
+
+            DIR *dir = opendir(path.c_str());
+            if (dir == NULL) {
+                LOG_ERROR("ImportDir '%s' is not directory", path.c_str());
+                setIntegerParam(ImportStatus, IMPORT_STATUS_ERROR);
+                callParamCallbacks();
+                return asynError;
+            } else if (m_importTimer.get() != 0) {
+                LOG_ERROR("Importing files in progress");
+                return asynError;
+            } else {
+                std::function<float(void)> importCb = std::bind(&FlatFieldPlugin::importFilesCb, this, path);
+                m_importTimer = scheduleCallback(importCb, 0.1);
+                if (m_importTimer.get() == 0) {
+                    LOG_ERROR("Failed to schedule importing directory");
+                    setIntegerParam(ImportStatus, IMPORT_STATUS_ERROR);
+                    callParamCallbacks();
+                    return asynError;
+                }
+            }
+            setIntegerParam(ImportStatus, IMPORT_STATUS_BUSY);
+            callParamCallbacks();
+        }
+        return asynSuccess;
+    }
+    return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
 void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList)
@@ -498,32 +509,71 @@ FlatFieldPlugin::VetoType FlatFieldPlugin::checkPhotoSumLimits(double x, double 
     else
         return VETO_PHOTOSUM;
 }
-void FlatFieldPlugin::importFiles(const std::string &path)
+
+float FlatFieldPlugin::importFilesCb(const std::string &path)
+{
+    // Importing takes quite some time, don't starve other plugins in the mean time.
+    // So let's unsubscribe temporarily from receiving any data
+    int enabled;
+    getIntegerParam(Enable, &enabled);
+    if (enabled) {
+        this->unlock();
+        enableCallbacks(false);
+        this->lock();
+    }
+    importFiles(path);
+    if (enabled) {
+        this->unlock();
+        enableCallbacks(true);
+        this->lock();
+    }
+    m_importTimer.reset();
+    return 0.0;
+}
+
+void FlatFieldPlugin::importFiles(const std::string &path_)
 {
     struct dirent entry, *result;
     bool foundCorrTables = false;
     bool foundPsTables = false;
     std::ostringstream importReport;
+    std::string path(path_);
 
+    if (path.empty()) {
+        LOG_ERROR("Invalid import directory");
+        m_importReport = "none (invalid directory)";
+        setIntegerParam(ImportStatus, IMPORT_STATUS_ERROR);
+        callParamCallbacks();
+        return;
+    } else if (path[path.length()] != PATH_SEPARATOR) {
+        path += PATH_SEPARATOR;
+    }
+
+    LOG_INFO("Importing files from %s", path.c_str());
     importReport << "Importing files from " << path << ":" << std::endl;
 
     DIR *dir = opendir(path.c_str());
     if (dir == NULL) {
         LOG_ERROR("Failed to read import directory '%s': %s", path.c_str(), strerror(errno));
-        importReport << "none (failed to read directory)" << std::endl;
+        m_importReport = "none (failed to read directory)";
+        setIntegerParam(ImportStatus, IMPORT_STATUS_ERROR);
+        callParamCallbacks();
         return;
     }
 
+    this->unlock();
+    std::map<uint32_t, PositionTables> tables;
     while (readdir_r(dir, &entry, &result) == 0 && result != NULL) {
-        std::string filename = entry.d_name;
-        if (filename != ".." && filename != ".") {
+        std::string filename(entry.d_name);
+        std::string filepath(path + filename);
+        if (!Common::isDir(filepath)) {
             std::shared_ptr<FlatFieldTable> table(new FlatFieldTable());
             if (table.get() == 0) {
                 LOG_ERROR("Failed to initialize table");
                 importReport << " * " << filename << ": error - failed to allocate table" << std::endl;
                 continue;
             }
-            if (table->import(path + PATH_SEPARATOR + filename) == false) {
+            if (table->import(filepath) == false) {
                 LOG_ERROR("Failed to import file '%s': %s", filename.c_str(), table->getImportError().c_str());
                 importReport << " * " << filename << ": error - " << table->getImportError() << std::endl;
                 continue;
@@ -544,47 +594,55 @@ void FlatFieldPlugin::importFiles(const std::string &path)
 
             // Push table to tables container
             if (table->type == FlatFieldTable::TYPE_X_CORR) {
-                if (m_tables[table->pixel_offset].corrX.get() == 0) {
-                    m_tables[table->pixel_offset].corrX = table;
-                    m_tables[table->pixel_offset].position_id = table->position_id;
-                    m_tables[table->pixel_offset].nTables++;
+                if (tables[table->pixel_offset].corrX.get() == 0) {
+                    tables[table->pixel_offset].corrX = table;
+                    tables[table->pixel_offset].position_id = table->position_id;
+                    tables[table->pixel_offset].nTables++;
                     foundCorrTables = true;
+                    setIntegerParam(PosCorrX[table->position_id], 1);
                 } else {
                     LOG_ERROR("Correction X table already loaded for position %u (pixel offset=%u)", table->position_id, table->pixel_offset);
                     importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    setIntegerParam(PosCorrX[table->position_id], 0);
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_Y_CORR) {
-                if (m_tables[table->pixel_offset].corrY.get() == 0) {
-                    m_tables[table->pixel_offset].corrY = table;
-                    m_tables[table->pixel_offset].position_id = table->position_id;
-                    m_tables[table->pixel_offset].nTables++;
+                if (tables[table->pixel_offset].corrY.get() == 0) {
+                    tables[table->pixel_offset].corrY = table;
+                    tables[table->pixel_offset].position_id = table->position_id;
+                    tables[table->pixel_offset].nTables++;
                     foundCorrTables = true;
+                    setIntegerParam(PosCorrY[table->position_id], 1);
                 } else {
                     LOG_ERROR("Correction Y table already loaded for position %u (pixel offset=%u)", table->position_id, table->pixel_offset);
                     importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    setIntegerParam(PosCorrY[table->position_id], 0);
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_X_PS_LOW) {
-                if (m_tables[table->pixel_offset].psLowX.get() == 0) {
-                    m_tables[table->pixel_offset].psLowX = table;
-                    m_tables[table->pixel_offset].position_id = table->position_id;
-                    m_tables[table->pixel_offset].nTables++;
+                if (tables[table->pixel_offset].psLowX.get() == 0) {
+                    tables[table->pixel_offset].psLowX = table;
+                    tables[table->pixel_offset].position_id = table->position_id;
+                    tables[table->pixel_offset].nTables++;
                     foundPsTables = true;
+                    setIntegerParam(PosPsLowX[table->position_id], 1);
                 } else {
                     LOG_ERROR("Photosum low X table already loaded for position %u (pixel offset=%u)", table->position_id, table->pixel_offset);
                     importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    setIntegerParam(PosPsLowX[table->position_id], 0);
                     continue;
                 }
             } else if (table->type == FlatFieldTable::TYPE_X_PS_UP) {
-                if (m_tables[table->pixel_offset].psUpX.get() == 0) {
-                    m_tables[table->pixel_offset].psUpX = table;
-                    m_tables[table->pixel_offset].position_id = table->position_id;
-                    m_tables[table->pixel_offset].nTables++;
+                if (tables[table->pixel_offset].psUpX.get() == 0) {
+                    tables[table->pixel_offset].psUpX = table;
+                    tables[table->pixel_offset].position_id = table->position_id;
+                    tables[table->pixel_offset].nTables++;
                     foundPsTables = true;
+                    setIntegerParam(PosPsUpX[table->position_id], 1);
                 } else {
                     LOG_ERROR("Photosum upper X table already loaded for position %u (pixel offset=%u)", table->position_id, table->pixel_offset);
                     importReport << " * " << filename << ": error - table for this position already loaded" << std::endl;
+                    setIntegerParam(PosPsUpX[table->position_id], 0);
                     continue;
                 }
             }
@@ -594,6 +652,9 @@ void FlatFieldPlugin::importFiles(const std::string &path)
         }
     }
     closedir(dir);
+
+    this->lock();
+    m_tables = tables;
     m_importReport = importReport.str();
 
     // Check tables constraints for each position:
@@ -608,24 +669,32 @@ void FlatFieldPlugin::importFiles(const std::string &path)
 
         nPositions++;
 
+        it->second.enabled = true;
         if (foundCorrTables == true) {
             if (it->second.corrX.get() == 0) {
                 LOG_ERROR("Missing X correction table for position %u", it->second.position_id);
+                it->second.enabled = false;
             }
             if (it->second.corrY.get() == 0) {
                 LOG_ERROR("Missing Y correction table for position %u", it->second.position_id);
+                it->second.enabled = false;
             }
         }
 
         if (foundPsTables == true) {
             if (it->second.psLowX.get() == 0) {
                 LOG_ERROR("Missing lower X photosum correction table for position %u", it->second.position_id);
+                it->second.enabled = false;
             }
             if (it->second.psUpX.get() == 0) {
                 LOG_ERROR("Missing upper X photosum correction table for position %u", it->second.position_id);
+                it->second.enabled = false;
             }
         }
+        setIntegerParam(PosEnable[it->second.position_id], it->second.enabled);
     }
+    setIntegerParam(ImportStatus, IMPORT_STATUS_DONE);
+    callParamCallbacks();
 }
 
 std::string FlatFieldPlugin::generatePositionsReport(bool psEn, bool corrEn)
