@@ -95,10 +95,11 @@ def parse_src_file(path, mode):
     """ Parses nED .cpp file to get register definition for a given register set.
     Returns a dictionary of register names with defaults for values. """
 
-    ignore = [ "upgrade" ]
+    ignore = [ "upgrade", "version" ]
 
     types = {
-      'upgrade':  re.compile("createUpgradeParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'version': re.compile("createVersionParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'upgrade': re.compile("createUpgradeParam\s*\(\s*\"([^\"]+)\"\s*,"),
       'status':  re.compile("createStatusParam\s*\(\s*\"([^\"]+)\"\s*,"),
       'counter': re.compile("createCounterParam\s*\(\s*\"([^\"]+)\"\s*,"),
       'config':  re.compile("createConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),

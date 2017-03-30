@@ -94,27 +94,6 @@ class BaseModulePlugin : public BasePlugin {
         };
 
         /**
-         * Possible module verification statuses
-         */
-        enum TypeVersionStatus {
-            ST_TYPE_VERSION_INIT    = 0,
-            ST_TYPE_OK              = 1,
-            ST_TYPE_ERR             = 2,
-            ST_VERSION_OK           = 3,
-            ST_VERSION_ERR          = 4,
-            ST_TYPE_VERSION_OK      = 5,
-        };
-
-        /**
-         * Valid register raw value converters
-         */
-        enum ValueConverter {
-            CONV_UNSIGN             = 0,
-            CONV_SIGN_2COMP         = 1,
-            CONV_SIGN_MAGN          = 2,
-        };
-
-        /**
          * Structure describing the status parameters obtained from modules.
          */
         struct ParamDesc {
@@ -124,7 +103,7 @@ class BaseModulePlugin : public BasePlugin {
             uint8_t section;        //!< Section name, valid values [0x0..0xF] (configuration params only)
             uint8_t channel;        //!< Channel number in range [1..8], 0 means global configuration (configuration params only)
             int32_t initVal;        //!< Initial value after object is created or configuration reset is being requested (configuration params only)
-            std::shared_ptr<BaseConvert> convert; //!< Selected from/to raw value converter
+            std::shared_ptr<const BaseConvert> convert; //!< Selected from/to raw value converter
         };
 
         /**
@@ -170,6 +149,9 @@ class BaseModulePlugin : public BasePlugin {
     public: // variables
         static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask | asynFloat64Mask;
         static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask | asynFloat64Mask;
+        static const UnsignConvert *CONV_UNSIGN;
+        static const Sign2sComplementConvert *CONV_SIGN_2COMP;
+        static const SignMagnitudeConvert *CONV_SIGN_MAGN;
 
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
@@ -179,7 +161,6 @@ class BaseModulePlugin : public BasePlugin {
         uint8_t m_expectedChannel;                      //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
         uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
         uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
-        Version m_expectedVersion;                      //!< Variable assigned in constructor to match against the version returned from module
 
     private: // variables
         bool m_behindDsp;
@@ -711,12 +692,12 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Create and register single integer config parameter.
          */
-        void createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, ValueConverter conv=CONV_UNSIGN);
+        void createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv=CONV_UNSIGN);
 
         /**
          * Convenience function for modules that don't split configuration for channels.
          */
-        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, ValueConverter conv=CONV_UNSIGN)
+        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv=CONV_UNSIGN)
         {
             createChanConfigParam(name, 0, section, offset, nBits, shift, value, conv);
         }
@@ -728,21 +709,21 @@ class BaseModulePlugin : public BasePlugin {
          * register. It's value is cached in software only and possibly sent to
          * connected PVs.
          */
-        void createMetaConfigParam(const char *name, uint32_t nBits, int value, BaseModulePlugin::ValueConverter conv=CONV_UNSIGN);
+        void createMetaConfigParam(const char *name, uint32_t nBits, int value, const BaseConvert *conv=CONV_UNSIGN);
 
         /**
          * Create and register single integer temperature parameter.
          *
          * Temperature values are returned in READ_TEMPERATURE response payload.
          */
-        void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, ValueConverter conv=CONV_UNSIGN);
+        void createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, const BaseConvert *conv=CONV_UNSIGN);
 
         /**
          * Create and register single integer upgrade parameter.
          *
          * Upgrade values are returned in CMD_UPGRATE response payload.
          */
-        void createUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, ValueConverter conv=CONV_UNSIGN);
+        void createUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, const BaseConvert *conv=CONV_UNSIGN);
 
         /**
          * Link existing parameter to upgrade parameters table.
@@ -904,7 +885,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] value represents initial value for writable registers
          * @param[in] conv selects from/to raw value converter
          */
-        void createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, ValueConverter conv=CONV_UNSIGN);
+        void createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, const BaseConvert *conv=CONV_UNSIGN);
 
         /**
          * Link existing parameter to upgrade parameters table.
@@ -979,9 +960,13 @@ class BaseModulePlugin : public BasePlugin {
         int HwType;         //!< Configured module type
         int HwVer;          //!< Module hardware version
         int HwRev;          //!< Module hardware revision
+        int HwExpectVer;    //!< Module hardware version
+        int HwExpectRev;    //!< Module hardware revision
         int HwDate;         //!< Module hardware date
         int FwVer;          //!< Module firmware version
         int FwRev;          //!< Module firmware revision
+        int FwExpectVer;    //!< Module firmware version
+        int FwExpectRev;    //!< Module firmware revision
         int FwDate;         //!< Module firmware date
         int Supported;      //!< Flag whether module is supported
         int Verified;       //!< Hardware id, version and type all verified

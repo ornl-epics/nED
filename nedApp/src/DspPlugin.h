@@ -17,8 +17,7 @@
  */
 class DspPlugin : public BaseModulePlugin {
     private: // structures and definitions
-        static const unsigned NUM_DSPPLUGIN_CONFIGPARAMS;   //!< This is used as a runtime assert check and must match number of configuration parameters
-        static const unsigned NUM_DSPPLUGIN_STATUSPARAMS;   //!< This is used as a runtime assert check and must match number of status parameters
+        static const unsigned NUM_DSPPLUGIN_PARAMS;         //!< This is used as a runtime assert check and must match number of status parameters
         static const double DSP_RESPONSE_TIMEOUT;           //!< Default DSP response timeout, in seconds
         std::string m_version;
 

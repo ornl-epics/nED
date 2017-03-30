@@ -16,50 +16,48 @@
  * Base value converter class.
  */
 class BaseConvert {
-    protected:
-        uint8_t m_bits;
     public:
 
-        BaseConvert(uint8_t bits);
+        BaseConvert();
 
-        virtual int fromRaw(uint32_t value) = 0;
+        virtual int fromRaw(uint32_t value, uint8_t bits=32) const = 0;
 
-        virtual uint32_t toRaw(int value) = 0;
+        virtual uint32_t toRaw(int value, uint8_t bits=32) const = 0;
 
-        virtual bool checkBounds(int value) = 0;
+        virtual bool checkBounds(int value, uint8_t bits=32) const = 0;
 };
 
 class UnsignConvert : public BaseConvert {
     public:
-        UnsignConvert(uint8_t bits);
+        UnsignConvert();
 
-        int fromRaw(uint32_t value);
+        int fromRaw(uint32_t value, uint8_t bits=32) const;
 
-        uint32_t toRaw(int value);
+        uint32_t toRaw(int value, uint8_t bits=32) const;
 
-        bool checkBounds(int value);
+        bool checkBounds(int value, uint8_t bits=32) const;
 };
 
 class Sign2sComplementConvert : public BaseConvert {
     public:
-        Sign2sComplementConvert(uint8_t bits);
+        Sign2sComplementConvert();
 
-        int fromRaw(uint32_t value);
+        int fromRaw(uint32_t value, uint8_t bits=32) const;
 
-        uint32_t toRaw(int value);
+        uint32_t toRaw(int value, uint8_t bits=32) const;
 
-        bool checkBounds(int value);
+        bool checkBounds(int value, uint8_t bits=32) const;
 };
 
 class SignMagnitudeConvert : public BaseConvert {
     public:
-        SignMagnitudeConvert(uint8_t bits);
+        SignMagnitudeConvert();
 
-        int fromRaw(uint32_t value);
+        int fromRaw(uint32_t value, uint8_t bits=32) const;
 
-        uint32_t toRaw(int value);
+        uint32_t toRaw(int value, uint8_t bits=32) const;
 
-        bool checkBounds(int value);
+        bool checkBounds(int value, uint8_t bits=32) const;
 };
 
 #endif // VALUE_CONVERT_H

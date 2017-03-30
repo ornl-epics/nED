@@ -15,7 +15,7 @@
 
 EPICS_REGISTER_PLUGIN(CRocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "PosCalc port name", string);
 
-const unsigned CRocPlugin::NUM_CROCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+const unsigned CRocPlugin::NUM_CROCPLUGIN_DYNPARAMS       = 230;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
 
 CRocPlugin::CRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, const char *posCalcPortName)
     : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_CROC, true, 0,
@@ -35,6 +35,7 @@ CRocPlugin::CRocPlugin(const char *portName, const char *dispatcherPortName, con
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported CROC version '%s'", version);
+        return;
     }
 
     callParamCallbacks();
@@ -86,8 +87,3 @@ asynStatus CRocPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         BasePlugin::sendParam(m_posCalcPort, getParamName(pasynUser->reason), value);
     return BaseModulePlugin::writeInt32(pasynUser, value);
 }
-
-// createParams_v* function is implemented in custom files for two
-// reasons:
-// * easy parsing through scripts in tools/ directory
-// * easily compare PVs between ROC versions

@@ -13,8 +13,6 @@
 #include "BaseModulePlugin.h"
 #include "Fifo.h"
 
-#include <list>
-
 /**
  * Plugin for ADC ROC module.
  *
@@ -145,50 +143,19 @@ class AdcRocPlugin : public BaseModulePlugin {
         bool rspClearPulseMagnet(const DasPacket *packet);
 
         /**
-         * Create and register all status ADCROC v0.2 parameters to be exposed to EPICS.
+         * Create and register all ADCROC v0.2 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v02();
+        void createParams_v02();
 
         /**
-         * Create and register all config ADCROC v0.2 parameters to be exposed to EPICS.
+         * Create and register all ADCROC v0.3 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v02();
+        void createParams_v03();
 
         /**
-         * Create and register all status counter ADCROC v0.2 parameters to be exposed to EPICS.
+         * Create and register all ADCROC v0.5 parameters to be exposed to EPICS.
          */
-        void createCounterParams_v02();
-
-        /**
-         * Create and register all status ADCROC v0.3 parameters to be exposed to EPICS.
-         */
-        void createStatusParams_v03();
-
-        /**
-         * Create and register all config ADCROC v0.3 parameters to be exposed to EPICS.
-         */
-        void createConfigParams_v03();
-
-        /**
-         * Create and register all status counter ADCROC v0.3 parameters to be exposed to EPICS.
-         */
-        void createCounterParams_v03();
-
-        /**
-         * Create and register all status ADCROC v0.5 parameters to be exposed to EPICS.
-         */
-        void createStatusParams_v05();
-
-        /**
-         * Create and register all config ADCROC v0.5 parameters to be exposed to EPICS.
-         */
-        void createConfigParams_v05();
-
-        /**
-         * Create and register all status counter ADCROC v0.5 parameters to be exposed to EPICS.
-         */
-        void createCounterParams_v05();
-
+        void createParams_v05();
 };
 
 #endif // ADC_ROC_PLUGIN_H

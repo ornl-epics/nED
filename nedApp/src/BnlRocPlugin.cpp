@@ -49,23 +49,20 @@ BnlRocPlugin::BnlRocPlugin(const char *portName, const char *dispatcherPortName,
     if (0) {
     } else if (m_version == "v00") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v00();
-        createConfigParams_v00();
-        // createCounterParams_v00();
+        createParams_v00();
         setExpectedVersion(0, 0);
     } else if (m_version == "v20") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v20();
-        createConfigParams_v20();
+        createParams_v20();
         setExpectedVersion(2, 0);
     } else if (m_version == "v21") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v20();
-        createConfigParams_v20();
+        createParams_v20();
         setExpectedVersion(2, 1);
     }  else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported BNL ROC version '%s'", version);
+        return;
     }
 
     callParamCallbacks();

@@ -244,6 +244,46 @@ record(longin, "$(P)HwVer")
     field(HSV,  "MAJOR")
     field(LSV,  "MAJOR")
 }
+record(longin, "$(P)HwExpectRev")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))HwExpectRev")
+    field(PINI, "YES")
+    field(FLNK, "$(P)HwRevMax")
+}
+record(calcout, "$(P)HwRevMax")
+{
+    field(INPA, "$(P)HwExpectRev NPP")
+    field(CALC, "A#0?A+1:1000")
+    field(OUT,  "$(P)HwRev.HIGH")
+    field(FLNK, "$(P)HwRevMin")
+}
+record(calcout, "$(P)HwRevMin")
+{
+    field(INPA, "$(P)HwExpectRev NPP")
+    field(CALC, "A#0?A-1:-1")
+    field(OUT,  "$(P)HwRev.LOW")
+}
+record(longin, "$(P)HwExpectVer")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))HwExpectVer")
+    field(PINI, "YES")
+    field(FLNK, "$(P)HwVerMax")
+}
+record(calcout, "$(P)HwVerMax")
+{
+    field(INPA, "$(P)HwExpectVer NPP")
+    field(CALC, "A#0?A+1:1000")
+    field(OUT,  "$(P)HwVer.HIGH")
+    field(FLNK, "$(P)HwVerMin")
+}
+record(calcout, "$(P)HwVerMin")
+{
+    field(INPA, "$(P)HwExpectVer NPP")
+    field(CALC, "A#0?A-1:-1")
+    field(OUT,  "$(P)HwVer.LOW")
+}
 record(scalcout, "$(P)HwVerStr")
 {
     field(DESC, "HW version concatenated")
@@ -278,6 +318,46 @@ record(longin, "$(P)FwVer")
     field(FLNK, "$(P)FwVerStr")
     field(HSV,  "MAJOR")
     field(LSV,  "MAJOR")
+}
+record(longin, "$(P)FwExpectRev")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))FwExpectRev")
+    field(PINI, "YES")
+    field(FLNK, "$(P)FwRevMax")
+}
+record(calcout, "$(P)FwRevMax")
+{
+    field(INPA, "$(P)FwExpectRev NPP")
+    field(CALC, "A#0?A+1:1000")
+    field(OUT,  "$(P)FwRev.HIGH")
+    field(FLNK, "$(P)FwRevMin")
+}
+record(calcout, "$(P)FwRevMin")
+{
+    field(INPA, "$(P)FwExpectRev NPP")
+    field(CALC, "A#0?A-1:-1")
+    field(OUT,  "$(P)FwRev.LOW")
+}
+record(longin, "$(P)FwExpectVer")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))FwExpectVer")
+    field(PINI, "YES")
+    field(FLNK, "$(P)FwVerMax")
+}
+record(calcout, "$(P)FwVerMax")
+{
+    field(INPA, "$(P)FwExpectVer NPP")
+    field(CALC, "A#0?A+1:1000")
+    field(OUT,  "$(P)FwVer.HIGH")
+    field(FLNK, "$(P)FwVerMin")
+}
+record(calcout, "$(P)FwVerMin")
+{
+    field(INPA, "$(P)FwExpectVer NPP")
+    field(CALC, "A#0?A-1:-1")
+    field(OUT,  "$(P)FwVer.LOW")
 }
 record(scalcout, "$(P)FwVerStr")
 {

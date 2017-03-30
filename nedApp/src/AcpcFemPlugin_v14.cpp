@@ -9,7 +9,7 @@
 
 #include "AcpcFemPlugin.h"
 
-void AcpcFemPlugin::createStatusParams_v14()
+void AcpcFemPlugin::createParams_v14()
 {
 //     BLXXX:Det:FemXX:| sig name |                          | EPICS record description | (bi and mbbi description)
     createStatusParam("Lvds2:ErrFifoFull",    0x0,  1, 15); // Chan2 FIFO went full         (0=no,1=yes)

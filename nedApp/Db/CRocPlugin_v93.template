@@ -6,26 +6,6 @@ include "GlobalConD.include"
 include "CRocPmt.db"
 include "CRocPmts.include"
 
-record(longin, "$(P)HwVer")
-{
-    field(HIGH, "2")
-    field(LOW,  "0")
-}
-record(longin, "$(P)HwRev")
-{
-    field(HIGH, "3")
-    field(LOW,  "1")
-}
-record(longin, "$(P)FwVer")
-{
-    field(HIGH, "10")
-    field(LOW,  "8")
-}
-record(longin, "$(P)FwRev")
-{
-    field(HIGH, "4")
-    field(LOW,  "2")
-}
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")

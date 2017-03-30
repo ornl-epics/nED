@@ -79,7 +79,3 @@ bool ArocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Vers
     return true;
 }
 
-// createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
-// reasons:
-// * easy parsing through scripts in tools/ directory
-// * easily compare PVs between ROC versions

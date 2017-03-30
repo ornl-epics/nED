@@ -13,8 +13,6 @@
 #include "BaseModulePlugin.h"
 #include "Fifo.h"
 
-#include <list>
-
 /**
  * Plugin for BNL ROC module.
  *
@@ -85,35 +83,14 @@ class BnlRocPlugin : public BaseModulePlugin {
 
     private: // functions
         /**
-         * Create and register all status BNLROC v0.0 parameters to be exposed to EPICS.
+         * Create and register all BNLROC v0.0 parameters to be exposed to EPICS.
          */
-        void createStatusParams_v00();
+        void createParams_v00();
 
         /**
-         * Create and register all config BNLROC v0.0 parameters to be exposed to EPICS.
+         * Create and register all BNLROC v2.0 parameters to be exposed to EPICS.
          */
-        void createConfigParams_v00();
-
-        /**
-         * Create and register all status counter BNLROC v0.0 parameters to be exposed to EPICS.
-         */
-        //void createCounterParams_v00();
-        /**
-         * Create and register all status BNLROC v2.0 parameters to be exposed to EPICS.
-         */
-        void createStatusParams_v20();
-
-        /**
-         * Create and register all config BNLROC v2.0 parameters to be exposed to EPICS.
-         */
-        void createConfigParams_v20();
-
-        /**
-         * Create and register all status counter BNLROC v2.0 parameters to be exposed to EPICS.
-         */
-        //void createCounterParams_v20();
-
-    protected:
+        void createParams_v20();
 };
 
 #endif // BNL_ROC_PLUGIN_H

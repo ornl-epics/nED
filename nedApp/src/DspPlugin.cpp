@@ -18,12 +18,9 @@
 #include <functional>
 #include <string>
 
-#define NUM_DSPPLUGIN_PARAMS    0 // ((int)(&LAST_DSPPLUGIN_PARAM - &FIRST_DSPPLUGIN_PARAM + 1))
-
 EPICS_REGISTER_PLUGIN(DspPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Version", string, "Blocking", int);
 
-const unsigned DspPlugin::NUM_DSPPLUGIN_CONFIGPARAMS    = 500;
-const unsigned DspPlugin::NUM_DSPPLUGIN_STATUSPARAMS    = 116;
+const unsigned DspPlugin::NUM_DSPPLUGIN_PARAMS          = 630; // + ((int)(&LAST_DSPPLUGIN_PARAM - &FIRST_DSPPLUGIN_PARAM + 1))
 const double DspPlugin::DSP_RESPONSE_TIMEOUT            = 1.0;
 
 /**
@@ -54,7 +51,7 @@ struct RspReadVersion {
 
 DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
     : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_DSP, false,
-                       blocking, NUM_DSPPLUGIN_PARAMS + NUM_DSPPLUGIN_CONFIGPARAMS + NUM_DSPPLUGIN_STATUSPARAMS)
+                       blocking, NUM_DSPPLUGIN_PARAMS)
     , m_version(version)
 {
     if (m_version == "v51") {
@@ -84,6 +81,7 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported DSP version '%s'", version);
+        return;
     }
 
     callParamCallbacks();

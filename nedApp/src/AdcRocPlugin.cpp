@@ -42,25 +42,20 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
     if (0) {
     } else if (m_version == "v02") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v02();
-        createConfigParams_v02();
-        createCounterParams_v02();
+        createParams_v02();
         setExpectedVersion(0, 2);
     } else if (m_version == "v03") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v03();
-        createConfigParams_v03();
-        createCounterParams_v03();
+        createParams_v03();
         setExpectedVersion(0, 3);
     } else if (m_version == "v05") {
         setIntegerParam(Supported, 1);
-        createStatusParams_v05();
-        createConfigParams_v05();
-        createCounterParams_v05();
+        createParams_v05();
         setExpectedVersion(0, 5);
     }  else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ADC ROC version '%s'", version);
+        return;
     }
 
     callParamCallbacks();

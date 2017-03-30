@@ -32,6 +32,9 @@
 
 const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 1.0; // Default value, user can override
 const float BaseModulePlugin::RESET_NO_RESPONSE_TIMEOUT = 5.0; // Overrides m_noResponseTimeout for CMD_RESET
+const UnsignConvert *BaseModulePlugin::CONV_UNSIGN = new UnsignConvert();
+const Sign2sComplementConvert *BaseModulePlugin::CONV_SIGN_2COMP = new Sign2sComplementConvert();
+const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitudeConvert();
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherPortName,
                                    const char *hardwareId, DasPacket::ModuleType hardwareType,
@@ -53,9 +56,13 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     createParam("HwDate",       asynParamOctet, &HwDate);                   // READ - Module hardware date
     createParam("HwVer",        asynParamInt32, &HwVer);                    // READ - Module hardware version
     createParam("HwRev",        asynParamInt32, &HwRev);                    // READ - Module hardware revision
+    createParam("HwExpectVer",  asynParamInt32, &HwExpectVer);              // READ - Module expected hardware version
+    createParam("HwExpectRev",  asynParamInt32, &HwExpectRev);              // READ - Module expected hardware revision
     createParam("FwDate",       asynParamOctet, &FwDate);                   // READ - Module firmware date
     createParam("FwVer",        asynParamInt32, &FwVer);                    // READ - Module firmware version
     createParam("FwRev",        asynParamInt32, &FwRev);                    // READ - Module firmware revision
+    createParam("FwExpectVer",  asynParamInt32, &FwExpectVer);              // READ - Module expected firmware version
+    createParam("FwExpectRev",  asynParamInt32, &FwExpectRev);              // READ - Module expected firmware revision
     createParam("Supported",    asynParamInt32, &Supported);                // READ - Is requested module version supported (0=not supported,1=supported)
     createParam("Verified",     asynParamInt32, &Verified, 0);              // READ - Flag whether module type and version were verified
     createParam("CfgSection",   asynParamInt32, &CfgSection, 0x0);          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
@@ -103,7 +110,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         if (jt == it->second.mapping.end())
             continue;
 
-        if (jt->second.convert->checkBounds(value) == false) {
+        if (jt->second.convert->checkBounds(value, jt->second.width) == false) {
             LOG_ERROR("Parameter %s value %d out of bounds", getParamName(jt->first), value);
             return asynError;
         } else {
@@ -781,7 +788,7 @@ void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uin
     createRegParam("COUNTERS", name, true, 0, 0x0, offset, nBits, shift, 0);
 }
 
-void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, BaseModulePlugin::ValueConverter conv)
+void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv)
 {
     if (section >= '1' && section <= '9')
         section = section - '1' + 1;
@@ -795,17 +802,17 @@ void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, 
     createRegParam("CONFIG", name, false, channel, section, offset, nBits, shift, value, conv);
 }
 
-void BaseModulePlugin::createMetaConfigParam(const char *name, uint32_t nBits, int value, BaseModulePlugin::ValueConverter conv)
+void BaseModulePlugin::createMetaConfigParam(const char *name, uint32_t nBits, int value, const BaseConvert *conv)
 {
     createRegParam("META", name, false, 0, 0, 0, nBits, 0, value, conv);
 }
 
-void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, BaseModulePlugin::ValueConverter conv)
+void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, const BaseConvert *conv)
 {
     createRegParam("TEMPERATURE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
 }
 
-void BaseModulePlugin::createUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, BaseModulePlugin::ValueConverter conv)
+void BaseModulePlugin::createUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, const BaseConvert *conv)
 {
     createRegParam("UPGRADE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
 }
@@ -951,7 +958,7 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
             continue;
         }
 
-        value = it->second.convert->toRaw(value);
+        value = it->second.convert->toRaw(value, it->second.width);
         payload[offset] |= value << shift;
         if ((it->second.width + shift) > 32) {
             payload[offset+1] |= value >> (it->second.width -(32 - shift));
@@ -992,13 +999,13 @@ void BaseModulePlugin::unpackRegParams(const char *group, const uint32_t *payloa
             value |= payload[offset + 1] << (32 - shift);
         }
         value &= (0x1ULL << it->second.width) - 1;
-        value = it->second.convert->fromRaw(value);
+        value = it->second.convert->fromRaw(value, it->second.width);
         setIntegerParam(it->first, value);
     }
     callParamCallbacks();
 }
 
-void BaseModulePlugin::createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value, BaseModulePlugin::ValueConverter conv)
+void BaseModulePlugin::createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value, const BaseConvert *conv)
 {
     int index;
     if (createParam(name, asynParamInt32, &index) != asynSuccess) {
@@ -1019,12 +1026,7 @@ void BaseModulePlugin::createRegParam(const char *group, const char *name, bool 
     desc.offset  = offset;
     desc.shift   = shift;
     desc.width   = nBits;
-    if (conv == CONV_SIGN_2COMP)
-        desc.convert.reset(new Sign2sComplementConvert(nBits));
-    else if (conv == CONV_SIGN_MAGN)
-        desc.convert.reset(new SignMagnitudeConvert(nBits));
-    else
-        desc.convert.reset(new UnsignConvert(nBits));
+    desc.convert.reset(conv);
     m_params[group].mapping[index] = desc;
 
     uint32_t length = offset + 1;
@@ -1060,7 +1062,7 @@ void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool re
     desc.offset  = offset;
     desc.shift   = shift;
     desc.width   = nBits;
-    desc.convert.reset(new UnsignConvert(nBits));
+    desc.convert.reset(CONV_UNSIGN);
     m_params[group].mapping[index] = desc;
 
     uint32_t length = offset + 1;
@@ -1206,20 +1208,29 @@ void BaseModulePlugin::registerResponseHandler(std::function<bool(const DasPacke
 
 bool BaseModulePlugin::checkVersion(const BaseModulePlugin::Version &version)
 {
-    if (m_expectedVersion.fw_version != 0 && m_expectedVersion.fw_version != version.fw_version) {
-        LOG_ERROR("Expecting firmware version %u, module returned %u", m_expectedVersion.fw_version, version.fw_version);
+    int hw_version;
+    int hw_revision;
+    int fw_version;
+    int fw_revision;
+    getIntegerParam(HwExpectVer, &hw_version);
+    getIntegerParam(HwExpectRev, &hw_revision);
+    getIntegerParam(FwExpectVer, &fw_version);
+    getIntegerParam(FwExpectRev, &fw_revision);
+
+    if (fw_version != 0 && static_cast<uint8_t>(fw_version) != version.fw_version) {
+        LOG_ERROR("Expecting firmware version %d, module returned %u", fw_version, version.fw_version);
         return false;
     }
-    if (m_expectedVersion.fw_revision != 0 && m_expectedVersion.fw_revision != version.fw_revision) {
-        LOG_ERROR("Expecting firmware revision %u, module returned %u", m_expectedVersion.fw_revision, version.fw_revision);
+    if (fw_revision != 0 && static_cast<uint8_t>(fw_revision) != version.fw_revision) {
+        LOG_ERROR("Expecting firmware revision %d, module returned %u", fw_revision, version.fw_revision);
         return false;
     }
-    if (m_expectedVersion.hw_version != 0 && m_expectedVersion.hw_version != version.hw_version) {
-        LOG_ERROR("Expecting hardware version %u, module returned %u", m_expectedVersion.hw_version, version.hw_version);
+    if (hw_version != 0 && static_cast<uint8_t>(hw_version) != version.hw_version) {
+        LOG_ERROR("Expecting hardware version %d, module returned %u", hw_version, version.hw_version);
         return false;
     }
-    if (m_expectedVersion.hw_revision != 0 && m_expectedVersion.hw_revision != version.hw_revision) {
-        LOG_ERROR("Expecting hardware revision %u, module returned %u", m_expectedVersion.hw_revision, version.hw_revision);
+    if (hw_revision != 0 && static_cast<uint8_t>(hw_revision) != version.hw_revision) {
+        LOG_ERROR("Expecting hardware revision %d, module returned %u", hw_revision, version.hw_revision);
         return false;
     }
     return true;
@@ -1227,8 +1238,8 @@ bool BaseModulePlugin::checkVersion(const BaseModulePlugin::Version &version)
 
 void BaseModulePlugin::setExpectedVersion(uint8_t fw_version, uint8_t fw_revision, uint8_t hw_version, uint8_t hw_revision)
 {
-    m_expectedVersion.fw_version  = fw_version;
-    m_expectedVersion.fw_revision = fw_revision;
-    m_expectedVersion.hw_version  = hw_version;
-    m_expectedVersion.hw_revision = hw_revision;
+    setIntegerParam(HwExpectVer, hw_version);
+    setIntegerParam(HwExpectRev, hw_revision);
+    setIntegerParam(FwExpectVer, fw_version);
+    setIntegerParam(FwExpectRev, fw_revision);
 }

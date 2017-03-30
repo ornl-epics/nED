@@ -3,24 +3,3 @@ include "BaseModulePlugin.include"
 include "ArocPlugin_v255255.generated"
 include "ArocPlugin.include"
 include "GlobalConD.include"
-
-record(longin, "$(P)HwVer")
-{
-    field(HIGH, "3")
-    field(LOW,  "1")
-}
-record(longin, "$(P)HwRev")
-{
-    field(HIGH, "3")
-    field(LOW,  "1")
-}
-record(longin, "$(P)FwVer")
-{
-    field(HIGH, "256")
-    field(LOW,  "254")
-}
-record(longin, "$(P)FwRev")
-{
-    field(HIGH, "256")
-    field(LOW,  "254")
-}

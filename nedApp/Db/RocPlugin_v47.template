@@ -5,27 +5,6 @@ include "RocPlugin_v47.generated"
 include "RocPlugin.include"
 include "GlobalConD.include"
 
-record(longin, "$(P)HwVer")
-{
-    field(HIGH, "3")
-    field(LOW,  "1")
-}
-record(longin, "$(P)HwRev")
-{
-    field(HIGH, "1")
-    field(LOW,  "-1")
-}
-record(longin, "$(P)FwVer")
-{
-    field(HIGH, "5")
-    field(LOW,  "3")
-}
-record(longin, "$(P)FwRev")
-{
-    field(HIGH, "8")
-    field(LOW,  "6")
-}
-
 record(dfanout, "$(P)A:SampleMin")
 {
     info(autosaveFields, "VAL")

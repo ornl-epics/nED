@@ -95,6 +95,7 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported FEM version '%s'", version);
+        return;
     }
     setStringParam(UpgradeErrorStr, "");
 

@@ -5,26 +5,6 @@ include "FemPlugin_v39.generated"
 include "GlobalConD.include"
 include "RemoteUpgrade.include"
 
-record(longin, "$(P)HwVer")
-{
-    field(HIGH, "11")
-    field(LOW,  "9")
-}
-record(longin, "$(P)HwRev")
-{
-    field(HIGH, "10")
-    field(LOW,  "8")
-}
-record(longin, "$(P)FwVer")
-{
-    field(HIGH, "4")
-    field(LOW,  "2")
-}
-record(longin, "$(P)FwRev")
-{
-    field(HIGH, "10")
-    field(LOW,  "8")
-}
 record(mbbo, "$(P)CmdReq")
 {
     field(TVVL, "41")
