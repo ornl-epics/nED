@@ -126,6 +126,7 @@ struct DasPacket
             MOD_TYPE_BIDIMROC           = 0x2B,
             MOD_TYPE_ADCROC             = 0x2D,
             MOD_TYPE_DSP                = 0x30,
+            MOD_TYPE_DSPW               = 0x31,
             MOD_TYPE_SANSROC            = 0x40,
             MOD_TYPE_ACPC               = 0xA0,
             MOD_TYPE_ACPCFEM            = 0xA1,
