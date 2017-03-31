@@ -44,6 +44,7 @@ registrar("ArocPluginRegister")
 registrar("BnlRocPluginRegister")
 registrar("CRocPluginRegister")
 registrar("DspPluginRegister")
+registrar("DspWPluginRegister")
 registrar("FemPluginRegister")
 registrar("RocPluginRegister")
 
