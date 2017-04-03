@@ -50,6 +50,9 @@ class DataDiagPlugin : public BasePlugin {
         epicsTimeStamp m_lastNeutronTime;
         epicsTimeStamp m_lastMetadataTime;
 
+        uint16_t m_packetSeq;
+        bool m_packetSeqInit;
+
     public: // structures and defines
         /**
          * Constructor for DataDiagPlugin
@@ -87,15 +90,22 @@ class DataDiagPlugin : public BasePlugin {
          * Check that time in data packets is incrementing.
          */
         uint32_t checkIncTime(const DasPacket *packet);
+
+        /**
+         * Check packet sequence number is monotonically increasing.
+         */
+        uint32_t checkPacketSeq(const DasPacket *packet);
     protected:
         #define FIRST_DATADIAGPLUGIN_PARAM Data
         int Data;           //!< Read data formatted as hex string
         int CheckEqTofPix;  //!< Enable TOF==pixid check
         int CheckIncTime;   //!< Enable incrementing time check
+        int CheckPktSeq;    //!< Enable packet sequence check
         int QueIndex;       //!< Currently display packet index
         int QueSize;        //!< Number of elements in packet buffer
         int QueMaxSize;     //!< Max num of elements in packet buffer
-        #define LAST_DATADIAGPLUGIN_PARAM QueMaxSize
+        int Reset;          //!< Clear buffers
+        #define LAST_DATADIAGPLUGIN_PARAM Reset
 };
 
 #endif // DATA_DIAG_PLUGIN_H

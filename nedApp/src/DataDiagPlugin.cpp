@@ -21,20 +21,27 @@ DataDiagPlugin::DataDiagPlugin(const char *portName, const char *dispatcherPortN
 {
     createParam("Data",         asynParamOctet, &Data); // Data
     createParam("CheckEqTofPix",asynParamInt32, &CheckEqTofPix, 0); // Enable TOF==pixid check
-    createParam("CheckIncTime", asynParamInt32, &CheckIncTime, 0); // Enable incrementing time check
-    createParam("QueIndex",     asynParamInt32, &QueIndex, 0);  // Currently selected error data
-    createParam("QueSize",      asynParamInt32, &QueSize, 0);   // Number of elements in errors buffer
-    createParam("QueMaxSize",   asynParamInt32, &QueMaxSize, 0); // Max num of elements in errors buffer
+    createParam("CheckIncTime", asynParamInt32, &CheckIncTime, 0);  // Enable incrementing time check
+    createParam("CheckPktSeq",  asynParamInt32, &CheckPktSeq, 0);   // Enable packet sequence check
+    createParam("QueIndex",     asynParamInt32, &QueIndex, 0);      // Currently selected error data
+    createParam("QueSize",      asynParamInt32, &QueSize, 0);       // Number of elements in errors buffer
+    createParam("QueMaxSize",   asynParamInt32, &QueMaxSize, 0);    // Max num of elements in errors buffer
+    createParam("Reset",        asynParamInt32, &Reset, 0);         // Clear buffers
+
+    m_packetSeq = 0;
+    m_packetSeqInit = false;
 
     callParamCallbacks();
 }
 
 asynStatus DataDiagPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    /*
-    if (pasynUser->reason == ReqSend) {
+    if (pasynUser->reason == Reset) {
+        m_errorsQue.clear();
+        setIntegerParam(QueSize, 0);
+        callParamCallbacks();
+        return asynSuccess;
     }
-    */
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
@@ -82,10 +89,12 @@ void DataDiagPlugin::processData(const DasPacketList * const packetList)
     int nProcessed = 0;
     bool equalTofPixel = false;
     bool incTime = false;
+    bool pktSeq = false;
     getIntegerParam(RxCount,    &nReceived);
     getIntegerParam(ProcCount,  &nProcessed);
     getBooleanParam(CheckEqTofPix, &equalTofPixel);
     getBooleanParam(CheckIncTime, &incTime);
+    getBooleanParam(CheckPktSeq,  &pktSeq);
     uint32_t batchLen = 0;
     uint32_t errorOffset = 0;
 
@@ -117,7 +126,17 @@ void DataDiagPlugin::processData(const DasPacketList * const packetList)
             }
         }
 
-        batchOffset += packet->getLength();
+        if (pktSeq == true) {
+            errorOffset = checkPacketSeq(packet);
+            if (errorOffset != 0) {
+                errorOffset += batchOffset;
+                break;
+            } else {
+                processed = true;
+            }
+        }
+
+        batchOffset += packet->getLength()/sizeof(uint32_t);
 
         if (processed)
             nProcessed++;
@@ -142,12 +161,12 @@ void DataDiagPlugin::processData(const DasPacketList * const packetList)
             }
 
             while ((int)m_errorsQue.size() >= maxQueSize)
-                m_errorsQue.pop_back();
-            m_errorsQue.push_front(error);
+                m_errorsQue.pop_front();
+            m_errorsQue.push_back(error);
         }
     }
 
-    setIntegerParam(QueSize, m_errorsQue.size());
+    setIntegerParam(QueSize,    m_errorsQue.size());
     setIntegerParam(RxCount,    nReceived);
     setIntegerParam(ProcCount,  nProcessed);
     callParamCallbacks();
@@ -173,18 +192,32 @@ uint32_t DataDiagPlugin::checkIncTime(const DasPacket *packet) {
 }
 
 uint32_t DataDiagPlugin::checkEqualTofPixel(const DasPacket *packet) {
-    uint32_t errorOffset = 0;
     uint32_t length = 0;
     const uint32_t *events = packet->getData(&length);
 
     // Treat all events as TOF,pixid pairs, 8 bytes total
     for (uint32_t i=0; i<length/8; i++) {
-        uint32_t tof = *events++;
-        uint32_t pixel = *events++;
-        if (tof == pixel) {
-            errorOffset = (events - reinterpret_cast<const uint32_t*>(packet) - 2);
-            break;
+        uint32_t tof = events[0];
+        uint32_t pixelid = events[1];
+        if (tof == pixelid) {
+            return (events - reinterpret_cast<const uint32_t*>(packet));
+        }
+        events += 2;
+    }
+    return 0;
+}
+
+uint32_t DataDiagPlugin::checkPacketSeq(const DasPacket *packet) {
+    if (packet->isData()) {
+        if (m_packetSeqInit == false) {
+            m_packetSeqInit = true;
+            m_packetSeq = packet->datainfo.subpacket_count;
+            return 0;
+        }
+
+        if (packet->datainfo.subpacket_count != ++m_packetSeq) {
+            return 3;
         }
     }
-    return errorOffset;
+    return 0;
 }
