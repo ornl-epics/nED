@@ -108,7 +108,7 @@ record(mbbi, "$(P)RspHwType")
     field(FTVL, "45")
     field(FTST, "ADCROC")
     field(FFVL, "49")
-    field(FFST, "ADCROC")
+    field(FFST, "DSP-W")
 }
 record(mbbi, "$(P)RspCmd")
 {

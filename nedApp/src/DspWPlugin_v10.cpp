@@ -54,7 +54,7 @@ void DspWPlugin::createParams_v10() {
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createStatusParam("Status1",       0x0, 32,  0); // RTDL frame CRC errors count
-    createStatusParam("Status2",       0x0, 32,  0); // RTDL frame CRC errors count
-    createStatusParam("Status3",       0x0, 32,  0); // RTDL frame CRC errors count
-    createStatusParam("Status4",       0x1, 32,  0); // RTDL frame CRC errors count
+    createStatusParam("Status2",       0x1, 32,  0); // RTDL frame CRC errors count
+    createStatusParam("Status3",       0x2, 32,  0); // RTDL frame CRC errors count
+    createStatusParam("Status4",       0x3, 32,  0); // RTDL frame CRC errors count
 }

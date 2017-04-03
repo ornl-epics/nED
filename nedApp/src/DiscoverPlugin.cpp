@@ -15,6 +15,7 @@
 #include "CRocPlugin.h"
 #include "DiscoverPlugin.h"
 #include "DspPlugin.h"
+#include "DspWPlugin.h"
 #include "FemPlugin.h"
 #include "Log.h"
 #include "RocPlugin.h"
@@ -148,6 +149,9 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
                 case DasPacket::MOD_TYPE_ROC:
                     RocPlugin::parseVersionRsp(packet, m_discovered[source].version);
                     break;
+                case DasPacket::MOD_TYPE_DSPW:
+                    DspWPlugin::parseVersionRsp(packet, m_discovered[source].version);
+                    break;
                 default:
                     break;
                 }
@@ -163,7 +167,7 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
     for (auto it=m_discovered.begin(); it!=m_discovered.end(); it++) {
         if (it->second.type != 0)
             nDiscovered++;
-        if (it->second.version.fw_version != 0 && it->second.version.fw_revision !=0)
+        if (it->second.version.fw_version != 0 || it->second.version.fw_revision !=0)
             nVerified++;
     }
 
@@ -200,6 +204,7 @@ uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_BNLROC:    type = "BNLROC";    break;
             case DasPacket::MOD_TYPE_CROC:      type = "CROC";      break;
             case DasPacket::MOD_TYPE_DSP:       type = "DSP";       break;
+            case DasPacket::MOD_TYPE_DSPW:      type = "DSP-W";     break;
             case DasPacket::MOD_TYPE_FFC:       type = "FFC";       break;
             case DasPacket::MOD_TYPE_FEM:       type = "FEM";       break;
             case DasPacket::MOD_TYPE_HROC:      type = "HROC";      break;
@@ -254,6 +259,7 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
             case DasPacket::MOD_TYPE_BNLROC:    plugin = "BnlRocPlugin";    type = "broc";    break;
             case DasPacket::MOD_TYPE_CROC:      plugin = "CRocPlugin";      type = "croc";    break;
             case DasPacket::MOD_TYPE_DSP:       plugin = "DspPlugin";       type = "dsp";     break;
+            case DasPacket::MOD_TYPE_DSPW:      plugin = "DspWPlugin";      type = "dspw";    break;
             case DasPacket::MOD_TYPE_FEM:       plugin = "FemPlugin";       type = "fem";     break;
             case DasPacket::MOD_TYPE_ROC:       plugin = "RocPlugin";       type = "roc";     break;
 /*
