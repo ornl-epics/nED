@@ -21,23 +21,16 @@ const double DspWPlugin::DSPW_RESPONSE_TIMEOUT       = 1.0;
  */
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
-    struct {
-        unsigned day:8;
-        unsigned month:8;
-        unsigned year:8;
-        unsigned revision:4;
-        unsigned version:4;
-    } hardware;
-    struct {
-        unsigned day:8;
-        unsigned month:8;
-        unsigned year:8;
-        unsigned revision:4;
-        unsigned version:4;
-    } firmware;
+    unsigned hw_revision:8;     // Board revision number
+    unsigned hw_version:8;      // Board version number
+    unsigned fw_revision:8;     // Firmware revision number
+    unsigned fw_version:8;      // Firmware version number
+    unsigned year:16;           // Year
+    unsigned day:8;             // Day
+    unsigned month:8;           // Month
 #else
-#error Missing DspWVersionRegister declaration
-#endif
+#error Missing RspReadVersion declaration
+#endif // BITFIELD_LSB_FIRST
 };
 
 DspWPlugin::DspWPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version)
@@ -65,16 +58,16 @@ bool DspWPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Vers
     }
 
     const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
-    version.hw_version  = response->hardware.version;
-    version.hw_revision = response->hardware.revision;
-    version.hw_year     = HEX_BYTE_TO_DEC(response->hardware.year) + 2000;
-    version.hw_month    = HEX_BYTE_TO_DEC(response->hardware.month);
-    version.hw_day      = HEX_BYTE_TO_DEC(response->hardware.day);
-    version.fw_version  = response->firmware.version;
-    version.fw_revision = response->firmware.revision;
-    version.fw_year     = HEX_BYTE_TO_DEC(response->firmware.year) + 2000;
-    version.fw_month    = HEX_BYTE_TO_DEC(response->firmware.month);
-    version.fw_day      = HEX_BYTE_TO_DEC(response->firmware.day);
+    version.hw_version  = response->hw_version;
+    version.hw_revision = response->hw_revision;
+    version.hw_year     = 0;
+    version.hw_month    = 0;
+    version.hw_day      = 0;
+    version.fw_version  = response->fw_version;
+    version.fw_revision = response->fw_revision;
+    version.fw_year     = HEX_BYTE_TO_DEC(response->year) + 2000;
+    version.fw_month    = HEX_BYTE_TO_DEC(response->month);
+    version.fw_day      = HEX_BYTE_TO_DEC(response->day);
 
     return true;
 }
