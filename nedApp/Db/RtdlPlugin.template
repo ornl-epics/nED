@@ -4,6 +4,7 @@ include "BasePlugin.include"
 record(bo, "$(P)Enable")
 {
     info(autosaveFields, "VAL")
+    field(VAL,  "1")
     field(PINI, "YES")
 }
 record(stringin, "$(P)Timestamp")
@@ -43,6 +44,7 @@ record(mbbi, "$(P)PulseFlavor")
     field(SXST, "Physics 1")
     field(SVVL, "7")
     field(SVST, "Physics 2")
+    field(FLNK, "$(P)BeamEnergy")
 }
 record(ai, "$(P)PulseCharge")
 {
@@ -53,6 +55,7 @@ record(ai, "$(P)PulseCharge")
     field(PREC, "12")
     field(ASLO, "0.00000000001")
     field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)BeamPower")
 }
 record(bi, "$(P)BadVetoFrame")
 {
@@ -123,4 +126,133 @@ record(longin, "$(P)TofFixOffset")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))TofFixOffset")
     field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RingPeriod")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Ring revolution period")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RingPeriod")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "ps")
+    field(FLNK, "$(P)Beta")
+}
+# Logic to obtain proton repetition rate from accelerator network. Due to
+# complex network topology, this may get disconnected in a strange way and
+# the only way to reconnect is to force new INP value.
+record(ai, "$(P)RepRate")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Acc repetition rate")
+    field(INP,  "ICS_Tim:Gate_BeamOn:RR CP MSI")
+    field(PREC, "1")
+    field(EGU,  "Hz")
+}
+record(calcout, "$(P)RepRateCheck")
+{
+    field(INPA, "$(P)RepRate.SEVR NPP NMS")
+    field(CALC, "A=3")
+    field(OOPT, "When Non-zero")
+    field(SCAN, "Passive")
+    field(OUT,  "$(P)RepRateNull.PROC")
+}
+record(stringout, "$(P)RepRateNull")
+{
+    field(VAL,  "")
+    field(OUT,  "$(P)RepRate.INP CA")
+    field(DTYP, "Soft Channel")
+    field(FLNK, "$(P)RepRateSetDly")
+}
+record(calcout, "$(P)RepRateSetDly")
+{
+    field(CALC, "1")
+    field(OOPT, "Every Time")
+    field(OUT,  "$(P)RepRateSet.PROC")
+    field(ODLY, "2.0")
+}
+record(stringout, "$(P)RepRateSet")
+{
+    field(VAL,  "ICS_Tim:Gate_BeamOn:RR CP MSI")
+    field(OUT,  "$(P)RepRate.INP CA")
+    field(DTYP, "Soft Channel")
+}
+# The following fields are using RepRate from accelerator and local PVs from
+# RTDL to calculate local beam energy and power.
+record(calc, "$(P)Beta")
+{
+    field(ASG,  "BEAMLINE")
+    # Ring distance
+    field(INPA, "248")
+    field(INPB, "$(P)RingPeriod NPP")
+    # Speed of light
+    field(INPC, "299792458")
+    field(CALC, "1e12*A/B/C")
+    field(FLNK, "$(P)BeamEnergy")
+}
+record(mbbo, "$(P)PulseFlavorSel")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Selected pulse flavor")
+    field(ZRVL, "0")
+    field(ZRST, "No beam")
+    field(ONVL, "1")
+    field(ONST, "Target 1")
+    field(TWVL, "2")
+    field(TWST, "Target 2")
+    field(THVL, "3")
+    field(THST, "10us diagnostic")
+    field(FRVL, "4")
+    field(FRST, "50us diagnostic")
+    field(FVVL, "5")
+    field(FVST, "100us diagnostic")
+    field(SXVL, "6")
+    field(SXST, "Physics 1")
+    field(SVVL, "7")
+    field(SVST, "Physics 2")
+    field(PINI, "YES")
+}
+record(calc, "$(P)BeamEnergy")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)PulseFlavorSel NPP")
+    field(INPB, "$(P)PulseFlavor NPP")
+    # Rest energy of proton
+    field(INPC, "938.26")
+    field(INPD, "$(P)Beta PP")
+    field(CALC, "A=B?(C/SQR(1-(D*D)))-C:0")
+    field(EGU,  "MeV")
+    field(PREC, "1")
+    field(FLNK, "$(P)BeamPower")
+}
+record(calc, "$(P)BeamPower")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)BeamEnergy NPP")
+    field(INPB, "$(P)PulseCharge NPP")
+    field(INPC, "$(P)RepRate PP")
+    field(CALC, "A*B*C")
+    field(EGU,  "MW")
+    field(PREC, "3")
+    field(FLNK, "$(P)BeamPowerAvgC")
+}
+record(calc, "$(P)BeamPowerAvgC")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)PulseFlavorSel NPP")
+    field(INPB, "$(P)PulseFlavor NPP")
+    field(INPC, "$(P)BeamPower NPP")
+    field(INPD, "$(P)BeamPowerAvgC NPP")
+    field(CALC, "A=B?C:D")
+    field(EGU,  "MW")
+    field(PREC, "3")
+    field(FLNK, "$(P)BeamPowerAvg")
+}
+record(ai, "$(P)BeamPowerAvg")
+{
+    field(ASG,  "BEAMLINE")
+    field(SMOO, "0.5")
+    field(INP,  "$(P)BeamPowerAvgC NPP")
+    field(PREC, "3")
+    field(EGU,  "MW")
 }

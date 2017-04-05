@@ -50,7 +50,8 @@ class RtdlPlugin : public BasePlugin {
         int TofFullOffset;
         int FrameOffset;
         int TofFixOffset;
-        #define LAST_RTDLPLUGIN_PARAM TofFixOffset
+        int RingPeriod;
+        #define LAST_RTDLPLUGIN_PARAM RingPeriod
 };
 
 #endif // RTDL_PLUGIN_H

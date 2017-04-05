@@ -35,6 +35,7 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *dispatcherPortName, int
     createParam("TofFullOffset",    asynParamInt32, &TofFullOffset);// READ - TOF full offset
     createParam("FrameOffset",      asynParamInt32, &FrameOffset);  // READ - Frame offset
     createParam("TofFixOffset",     asynParamInt32, &TofFixOffset); // READ - TOF fixed offset
+    createParam("RingPeriod",       asynParamInt32, &RingPeriod);   // READ - Ring revolution period
 }
 
 void RtdlPlugin::processData(const DasPacketList * const packetList)
@@ -46,6 +47,8 @@ void RtdlPlugin::processData(const DasPacketList * const packetList)
 
         if (packet->isRtdl()) {
             const RtdlHeader *rtdl = reinterpret_cast<const RtdlHeader *>(packet->getPayload());
+            const uint32_t *rtdlFrames = packet->getPayload() + sizeof(RtdlHeader)/sizeof(uint32_t);
+            uint32_t ringPeriod = *rtdlFrames & 0xFFFFFF;
             epicsTimeStamp rtdlTime;
             char rtdlTimeStr[64];
 
@@ -67,6 +70,7 @@ void RtdlPlugin::processData(const DasPacketList * const packetList)
             setIntegerParam(TofFullOffset,      rtdl->tof_full_offset);
             setIntegerParam(FrameOffset,        rtdl->frame_offset);
             setIntegerParam(TofFixOffset,       rtdl->tof_fixed_offset);
+            setIntegerParam(RingPeriod,         ringPeriod);
 
             m_processedCount++;
         }
