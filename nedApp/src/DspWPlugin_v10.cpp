@@ -67,6 +67,7 @@ void DspWPlugin::createParams_v10() {
     createStatusParam("Ch7:LinkStatus",   0x0,  1, 10); // Channel 7 link status        (0=connected,1=disconnected)
     createStatusParam("Ch8:LinkStatus",   0x0,  1, 11); // Channel 8 link status        (0=connected,1=disconnected)
     createStatusParam("NtpStatus",        0x0,  1, 12); // NTP timing status            (0=present,1=absent)
+    createStatusParam("Configured",       0x0,  1, 13); // Configured                   (0=not configured [alarm],1=configured, archive:monitor)
     createStatusParam("Ch1:MetaData",     0x0,  1, 16); // Channel 1 seen meta data     (0=yes,1=no)
     createStatusParam("Ch2:MetaData",     0x0,  1, 17); // Channel 2 seen meta data     (0=yes,1=no)
     createStatusParam("Ch3:MetaData",     0x0,  1, 18); // Channel 3 seen meta data     (0=yes,1=no)
@@ -84,20 +85,20 @@ void DspWPlugin::createParams_v10() {
     createStatusParam("Ch7:NeutronData",  0x0,  1, 30); // Channel 7 seen neutron data  (0=yes,1=no)
     createStatusParam("Ch8:NeutronData",  0x0,  1, 31); // Channel 8 seen neutron data  (0=yes,1=no)
     createStatusParam("Acquiring",        0x1,  1,  0); // Acquiring data               (0=not acquiring,1=acquiring, archive:monitor)
-    createConfigParam("RunModeRB",        0x1,  3,  1); // Run mode                     (0=histogram,1=stroboscopic,2=test,3=loopback)
-    createConfigParam("RateCounterSelRB", 0x1,  4,  4); // Rate counter select          (0=segment0,1=segment1,2=segment2,3=segment3,4=segment4,5=segment5,6=segment6=,7=segement7,8=neutrons,9=rollover,10=rejected)
-    createConfigParam("RateCounter",      0x2, 32,  0); // Selected rate counter
-    createConfigParam("OverTemp",         0x3,  1,  0); // Over temperature alarm       (0=no alarm,1=alarm)
-    createConfigParam("UserTemp",         0x3,  1,  1); // User temperature alarm       (0=no alarm,1=alarm)
-    createConfigParam("VccInt",           0x3,  1,  2); // VCCINT alarm                 (0=no alarm,1=alarm)
-    createConfigParam("VccAux",           0x3,  1,  3); // VCCAUX alarm                 (0=no alarm,1=alarm)
+    createStatusParam("RunModeRB",        0x1,  3,  1); // Run mode                     (0=histogram,1=stroboscopic,2=test,3=loopback)
+    createStatusParam("RateCounterSelRB", 0x1,  4,  4); // Rate counter select          (0=segment0,1=segment1,2=segment2,3=segment3,4=segment4,5=segment5,6=segment6,7=segement7,8=neutrons,9=rollover,10=rejected)
+    createStatusParam("RateCounter",      0x2, 32,  0); // Selected rate counter        (unit:cnts/s,prec:1)
+    createStatusParam("OverTemp",         0x3,  1,  0); // Over temperature alarm       (0=no alarm,1=alarm [alarm])
+    createStatusParam("UserTemp",         0x3,  1,  1); // User temperature alarm       (0=no alarm,1=alarm [alarm])
+    createStatusParam("VccInt",           0x3,  1,  2); // VCCINT alarm                 (0=no alarm,1=alarm [alarm])
+    createStatusParam("VccAux",           0x3,  1,  3); // VCCAUX alarm                 (0=no alarm,1=alarm [alarm])
 
-    createCounterParam("Ch1:EventRate",   0x0, 16,  0); // Channel 1 event rate
-    createCounterParam("Ch2:EventRate",   0x0, 16, 16); // Channel 2 event rate
-    createCounterParam("Ch3:EventRate",   0x1, 16,  0); // Channel 3 event rate
-    createCounterParam("Ch4:EventRate",   0x1, 16, 16); // Channel 4 event rate
-    createCounterParam("Ch5:EventRate",   0x2, 16,  0); // Channel 5 event rate
-    createCounterParam("Ch6:EventRate",   0x2, 16, 16); // Channel 6 event rate
-    createCounterParam("Ch7:EventRate",   0x3, 16,  0); // Channel 7 event rate
-    createCounterParam("Ch8:EventRate",   0x3, 16, 16); // Channel 8 event rate
+    createCounterParam("Ch1:EventRate",   0x0, 16,  0); // Channel 1 event rate         (scale:16,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:EventRate",   0x0, 16, 16); // Channel 2 event rate         (scale:16,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:EventRate",   0x1, 16,  0); // Channel 3 event rate         (scale:16,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:EventRate",   0x1, 16, 16); // Channel 4 event rate         (scale:16,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:EventRate",   0x2, 16,  0); // Channel 5 event rate         (scale:16,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:EventRate",   0x2, 16, 16); // Channel 6 event rate         (scale:16,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:EventRate",   0x3, 16,  0); // Channel 7 event rate         (scale:16,unit:cnts/s,prec:1)
+    createCounterParam("Ch8:EventRate",   0x3, 16, 16); // Channel 8 event rate         (scale:16,unit:cnts/s,prec:1)
 }
