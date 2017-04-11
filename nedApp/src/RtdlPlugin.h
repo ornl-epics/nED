@@ -34,6 +34,7 @@ class RtdlPlugin : public BasePlugin {
     private:
         uint64_t m_receivedCount;
         uint64_t m_processedCount;
+        epicsTimeStamp m_lastRtdlTime;  //!< Time from last processed RTDL packet
 
     private: // asyn parameters
         #define FIRST_RTDLPLUGIN_PARAM Timestamp

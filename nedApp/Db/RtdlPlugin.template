@@ -7,6 +7,13 @@ record(bo, "$(P)Enable")
     field(VAL,  "1")
     field(PINI, "YES")
 }
+record(fanout, "$(P)Refresh")
+{
+    field(LNK1, "$(P)PrevPulseFlavor")
+    # LNK2 must be the only trigger to beam power/energy calculations
+    # to prevent double triggering that can cause to false results
+    field(LNK2, "$(P)BeamEnergy")
+}
 record(stringin, "$(P)Timestamp")
 {
     field(DTYP, "asynOctetRead")
@@ -44,7 +51,12 @@ record(mbbi, "$(P)PulseFlavor")
     field(SXST, "Physics 1")
     field(SVVL, "7")
     field(SVST, "Physics 2")
-    field(FLNK, "$(P)BeamEnergy")
+    #field(FLNK, "$(P)PrevPulseFlavor")
+}
+record(calc, "$(P)PrevPulseFlavor")
+{
+    field(INPA, "$(P)PulseFlavor NPP")
+    field(CALC, "B; B:=A")
 }
 record(ai, "$(P)PulseCharge")
 {
@@ -55,7 +67,6 @@ record(ai, "$(P)PulseCharge")
     field(PREC, "12")
     field(ASLO, "0.00000000001")
     field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)BeamPower")
 }
 record(bi, "$(P)BadVetoFrame")
 {
@@ -95,6 +106,7 @@ record(longin, "$(P)Cycle")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))Cycle")
     field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Refresh")
 }
 record(longin, "$(P)IntraPulseTime")
 {
@@ -186,8 +198,7 @@ record(calc, "$(P)Beta")
     field(INPB, "$(P)RingPeriod NPP")
     # Speed of light
     field(INPC, "299792458")
-    field(CALC, "1e12*A/B/C")
-    field(FLNK, "$(P)BeamEnergy")
+    field(CALC, "B>0?1e12*A/B/C:0")
 }
 record(mbbo, "$(P)PulseFlavorSel")
 {
@@ -216,10 +227,10 @@ record(calc, "$(P)BeamEnergy")
 {
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)PulseFlavorSel NPP")
-    field(INPB, "$(P)PulseFlavor NPP")
+    field(INPB, "$(P)PrevPulseFlavor NPP")
     # Rest energy of proton
     field(INPC, "938.26")
-    field(INPD, "$(P)Beta PP")
+    field(INPD, "$(P)Beta NPP")
     field(CALC, "A=B?(C/SQR(1-(D*D)))-C:0")
     field(EGU,  "MeV")
     field(PREC, "1")
@@ -234,15 +245,15 @@ record(calc, "$(P)BeamPower")
     field(CALC, "A*B*C")
     field(EGU,  "MW")
     field(PREC, "3")
-    field(FLNK, "$(P)BeamPowerAvgC")
+    field(FLNK, "$(P)BeamPowerSel")
 }
-record(calc, "$(P)BeamPowerAvgC")
+record(calc, "$(P)BeamPowerSel")
 {
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)PulseFlavorSel NPP")
-    field(INPB, "$(P)PulseFlavor NPP")
+    field(INPB, "$(P)PrevPulseFlavor NPP")
     field(INPC, "$(P)BeamPower NPP")
-    field(INPD, "$(P)BeamPowerAvgC NPP")
+    field(INPD, "$(P)BeamPowerSel NPP")
     field(CALC, "A=B?C:D")
     field(EGU,  "MW")
     field(PREC, "3")
@@ -251,8 +262,8 @@ record(calc, "$(P)BeamPowerAvgC")
 record(ai, "$(P)BeamPowerAvg")
 {
     field(ASG,  "BEAMLINE")
-    field(SMOO, "0.5")
-    field(INP,  "$(P)BeamPowerAvgC NPP")
+    field(SMOO, "0.8")
+    field(INP,  "$(P)BeamPower NPP")
     field(PREC, "3")
     field(EGU,  "MW")
 }

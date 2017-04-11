@@ -47,32 +47,50 @@ void RtdlPlugin::processData(const DasPacketList * const packetList)
 
         if (packet->isRtdl()) {
             const RtdlHeader *rtdl = reinterpret_cast<const RtdlHeader *>(packet->getPayload());
-            const uint32_t *rtdlFrames = packet->getPayload() + sizeof(RtdlHeader)/sizeof(uint32_t);
-            uint32_t ringPeriod = *rtdlFrames & 0xFFFFFF;
+
             epicsTimeStamp rtdlTime;
-            char rtdlTimeStr[64];
-
-            // Format time
             rtdlTime.secPastEpoch = rtdl->timestamp_sec;
-            rtdlTime.nsec = rtdl->timestamp_nsec;
-            epicsTimeToStrftime(rtdlTimeStr, sizeof(rtdlTimeStr), TIMESTAMP_FORMAT, &rtdlTime);
+            rtdlTime.nsec         = rtdl->timestamp_nsec;
 
-            setStringParam(Timestamp,           rtdlTimeStr);
-            setIntegerParam(BadPulse,           rtdl->pulse.bad);
-            setIntegerParam(PulseFlavor,        rtdl->pulse.flavor);
-            setIntegerParam(PulseCharge,        rtdl->pulse.charge);
-            setIntegerParam(BadVetoFrame,       rtdl->bad_veto_frame);
-            setIntegerParam(BadCycleFrame,      rtdl->bad_cycle_frame);
-            setIntegerParam(Tstat,              rtdl->tstat);
-            setIntegerParam(PrevCycleVeto,      rtdl->last_cycle_veto);
-            setIntegerParam(Cycle,              rtdl->cycle);
-            setIntegerParam(IntraPulseTime,     rtdl->tsync_period * 100);
-            setIntegerParam(TofFullOffset,      rtdl->tof_full_offset);
-            setIntegerParam(FrameOffset,        rtdl->frame_offset);
-            setIntegerParam(TofFixOffset,       rtdl->tof_fixed_offset);
-            setIntegerParam(RingPeriod,         ringPeriod);
+            if (epicsTimeGreaterThan(&rtdlTime, &m_lastRtdlTime)) {
+                const uint32_t *rtdlFrames = packet->getPayload() + sizeof(RtdlHeader)/sizeof(uint32_t);
+                uint32_t nRtdlFrames = (packet->getPayloadLength() - sizeof(RtdlHeader))/sizeof(uint32_t);
+                char rtdlTimeStr[64];
+                uint32_t ringPeriod = 0;
 
-            m_processedCount++;
+                // Usually frame 4 follows RTLD header, but let's make it generic
+                for (uint32_t i=0; i<nRtdlFrames; i++) {
+                     if ((*rtdlFrames>>24) == 4) {
+                         ringPeriod = *rtdlFrames & 0xFFFFFF;
+                         break;
+                     }
+                     rtdlFrames++;
+                 }
+
+                // Format time
+                rtdlTime.secPastEpoch = rtdl->timestamp_sec;
+                rtdlTime.nsec = rtdl->timestamp_nsec;
+                epicsTimeToStrftime(rtdlTimeStr, sizeof(rtdlTimeStr), TIMESTAMP_FORMAT, &rtdlTime);
+
+                setStringParam(Timestamp,           rtdlTimeStr);
+                setIntegerParam(BadPulse,           rtdl->pulse.bad);
+                setIntegerParam(PulseFlavor,        rtdl->pulse.flavor);
+                setIntegerParam(PulseCharge,        rtdl->pulse.charge);
+                setIntegerParam(BadVetoFrame,       rtdl->bad_veto_frame);
+                setIntegerParam(BadCycleFrame,      rtdl->bad_cycle_frame);
+                setIntegerParam(Tstat,              rtdl->tstat);
+                setIntegerParam(PrevCycleVeto,      rtdl->last_cycle_veto);
+                setIntegerParam(Cycle,              rtdl->cycle);
+                setIntegerParam(IntraPulseTime,     rtdl->tsync_period * 100);
+                setIntegerParam(TofFullOffset,      rtdl->tof_full_offset);
+                setIntegerParam(FrameOffset,        rtdl->frame_offset);
+                setIntegerParam(TofFixOffset,       rtdl->tof_fixed_offset);
+                setIntegerParam(RingPeriod,         ringPeriod);
+
+                m_lastRtdlTime = rtdlTime;
+
+                m_processedCount++;
+            }
         }
     }
 
