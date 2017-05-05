@@ -13,6 +13,11 @@ Enhancements:
 * DSP registers changes
 * Support for ACPC 17.2
 * Change the way we verify module version
+* Support for DSP-W
+* DataDiag plugin
+* AROC temperature alarms set to 38C
+* FlatField can be reloaded through PV
+* Beam power&energy PVs extracted from optics
 
 Fixed bugs:
 * Config register alignment problem
