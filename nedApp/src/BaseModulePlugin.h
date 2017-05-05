@@ -946,6 +946,19 @@ class BaseModulePlugin : public BasePlugin {
          */
         void registerResponseHandler(std::function<bool(const DasPacket *)> &callback);
 
+        /**
+         * Returns a name of the module from the global database.
+         *
+         * Whenever a module is registered, it makes a record in a global table
+         * that maps its hardwareId to the name.
+         * There's the implied thread safety guarantee that the table is only
+         * populated on startup when modules are created.
+         *
+         * @param[in] hardwareId unique id.
+         * @return Name of the module or empty string.
+         */
+        static std::string getModuleName(uint32_t hardwareId);
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.

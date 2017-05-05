@@ -12,6 +12,7 @@
 #include "Log.h"
 #include "ValueConvert.h"
 
+#include <map>
 #include <osiSock.h>
 #include <string.h>
 
@@ -35,6 +36,14 @@ const float BaseModulePlugin::RESET_NO_RESPONSE_TIMEOUT = 5.0; // Overrides m_no
 const UnsignConvert *BaseModulePlugin::CONV_UNSIGN = new UnsignConvert();
 const Sign2sComplementConvert *BaseModulePlugin::CONV_SIGN_2COMP = new Sign2sComplementConvert();
 const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitudeConvert();
+
+/**
+ * This is a global map from hardwareId to plugin name. Whenever a module is
+ * registered, it is added to this map. Luckily modules are registered on
+ * startup only and this global variable is read only afterwards => no need
+ * for thread safety mechanisms.
+ */
+static std::map<uint32_t, std::string> g_namesMap;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherPortName,
                                    const char *hardwareId, DasPacket::ModuleType hardwareType,
@@ -73,6 +82,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *dispatcherP
     setStringParam(HwId, hardwareIp.c_str());
     setIntegerParam(CmdRsp, LAST_CMD_NONE);
     callParamCallbacks();
+
+    g_namesMap[ip2addr(hardwareId)] = portName;
 }
 
 BaseModulePlugin::~BaseModulePlugin()
@@ -1242,4 +1253,12 @@ void BaseModulePlugin::setExpectedVersion(uint8_t fw_version, uint8_t fw_revisio
     setIntegerParam(HwExpectRev, hw_revision);
     setIntegerParam(FwExpectVer, fw_version);
     setIntegerParam(FwExpectRev, fw_revision);
+}
+
+std::string BaseModulePlugin::getModuleName(uint32_t hardwareId)
+{
+    auto name = g_namesMap.find(hardwareId);
+    if (name != g_namesMap.end())
+        return name->second;
+    return "";
 }

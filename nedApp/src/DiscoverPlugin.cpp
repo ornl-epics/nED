@@ -20,6 +20,7 @@
 #include "Log.h"
 #include "RocPlugin.h"
 
+#include <algorithm>
 #include <cstring>
 #include <sstream>
 
@@ -181,11 +182,13 @@ void DiscoverPlugin::processData(const DasPacketList * const packetList)
 uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
 {
     int ret;
-    int length = size;
+    size_t length = size;
     uint32_t i = 1;
+    std::map<std::string, uint32_t> ids;
+    std::vector<std::string> lines;
 
     ret = snprintf(buffer, length, "Discovered modules:\n");
-    if (ret > length)
+    if (ret > (int)length)
         return 0;
     length -= ret;
     buffer += ret;
@@ -193,46 +196,69 @@ uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
     for (std::map<uint32_t, ModuleDesc>::iterator it = m_discovered.begin(); it != m_discovered.end(); it++, i++) {
         std::string moduleId(BaseModulePlugin::addr2ip(it->first));
         std::string parentId(BaseModulePlugin::addr2ip(it->second.parent));
+        std::string name(BaseModulePlugin::getModuleName(it->first));
         const char *type;
         BaseModulePlugin::Version version = it->second.version;
+        char line[128];
 
         switch (it->second.type) {
-            case DasPacket::MOD_TYPE_ACPC:      type = "ACPC";      break;
-            case DasPacket::MOD_TYPE_ACPCFEM:   type = "ACPC FEM";  break;
-            case DasPacket::MOD_TYPE_AROC:      type = "AROC";      break;
-            case DasPacket::MOD_TYPE_BIDIMROC:  type = "BIDIMROC";  break;
-            case DasPacket::MOD_TYPE_BNLROC:    type = "BNLROC";    break;
-            case DasPacket::MOD_TYPE_CROC:      type = "CROC";      break;
-            case DasPacket::MOD_TYPE_DSP:       type = "DSP";       break;
-            case DasPacket::MOD_TYPE_DSPW:      type = "DSP-W";     break;
-            case DasPacket::MOD_TYPE_FFC:       type = "FFC";       break;
-            case DasPacket::MOD_TYPE_FEM:       type = "FEM";       break;
-            case DasPacket::MOD_TYPE_HROC:      type = "HROC";      break;
-            case DasPacket::MOD_TYPE_IROC:      type = "IROC";      break;
-            case DasPacket::MOD_TYPE_ROC:       type = "ROC";       break;
-            case DasPacket::MOD_TYPE_ADCROC:    type = "ADCROC";    break;
-            case DasPacket::MOD_TYPE_SANSROC:   type = "SANSROC";   break;
+            case DasPacket::MOD_TYPE_ACPC:      type = "acpc";      break;
+            case DasPacket::MOD_TYPE_ACPCFEM:   type = "acpcfem";   break;
+            case DasPacket::MOD_TYPE_AROC:      type = "aroc";      break;
+            case DasPacket::MOD_TYPE_BIDIMROC:  type = "bidimroc";  break;
+            case DasPacket::MOD_TYPE_BNLROC:    type = "bnlroc";    break;
+            case DasPacket::MOD_TYPE_CROC:      type = "croc";      break;
+            case DasPacket::MOD_TYPE_DSP:       type = "dsp";       break;
+            case DasPacket::MOD_TYPE_DSPW:      type = "dsp-w";     break;
+            case DasPacket::MOD_TYPE_FFC:       type = "ffc";       break;
+            case DasPacket::MOD_TYPE_FEM:       type = "fem";       break;
+            case DasPacket::MOD_TYPE_HROC:      type = "hroc";      break;
+            case DasPacket::MOD_TYPE_IROC:      type = "iroc";      break;
+            case DasPacket::MOD_TYPE_ROC:       type = "roc";       break;
+            case DasPacket::MOD_TYPE_ADCROC:    type = "adcrod";    break;
+            case DasPacket::MOD_TYPE_SANSROC:   type = "sansroc";   break;
             default:                            type = "unknown";
         }
 
+        std::stringstream id;
+        if (name.empty()) {
+            if (ids.find(type) == ids.end())
+                ids.insert(std::pair<std::string, uint32_t>(type, 1));
+            id << type << ids[type]++;
+        } else {
+            id << name;
+        }
+
         if (it->second.parent != 0) {
-            ret = snprintf(buffer, length,
-                           "  %3u %-8s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d (DSP=%s)\n",
-                           i, type, moduleId.c_str(), version.hw_version, version.hw_revision,
+            ret = snprintf(line, sizeof(line),
+                           "%-12s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d (DSP=%s)\n",
+                           id.str().c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
                            version.fw_version, version.fw_revision, version.fw_year,
                            version.fw_month, version.fw_day, parentId.c_str());
         } else {
-            ret = snprintf(buffer, length,
-                           "  %3u %-8s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d\n",
-                           i, type, moduleId.c_str(), version.hw_version, version.hw_revision,
+            ret = snprintf(line, sizeof(line),
+                           "%-12s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d\n",
+                           id.str().c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
                            version.fw_version, version.fw_revision, version.fw_year,
                            version.fw_month, version.fw_day);
         }
-        if (ret == -1 || ret > length)
-            break;
+        if (ret == -1) {
+            LOG_WARN("String exceeds limit of %u bytes", (unsigned)sizeof(line));
+        } else {
+            lines.push_back(line);
+        }
+    }
 
-        length -= ret;
-        buffer += ret;
+    std::sort(lines.begin(), lines.end());
+    for (auto line = lines.begin(); line != lines.end(); line++) {
+        if (line->length() >= length) {
+            LOG_WARN("Truncating output, buffer to short");
+            break;
+        }
+
+        strncpy(buffer, line->c_str(), line->length());
+        length -= line->length();
+        buffer += line->length();
     }
     return (size - length);
 }
@@ -240,16 +266,19 @@ uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
 uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
 {
     int ret;
-    int length = size;
+    size_t length = size;
     uint32_t i = 1;
 
+    std::vector<std::string> lines;
     std::map<std::string, uint32_t> ids;
 
     for (std::map<uint32_t, ModuleDesc>::iterator it = m_discovered.begin(); it != m_discovered.end(); it++, i++) {
         std::string moduleId(BaseModulePlugin::addr2ip(it->first));
+        std::string name(BaseModulePlugin::getModuleName(it->first));
         const char *plugin;
         const char *type;
         BaseModulePlugin::Version version = it->second.version;
+        char line[128];
 
         switch (it->second.type) {
             case DasPacket::MOD_TYPE_ACPCFEM:   plugin = "AcpcFemPlugin";   type = "afem";    break;
@@ -273,18 +302,34 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
             default:                            plugin = "Unknown";         type = "unkn";    break;
         }
 
-        if (ids.find(type) == ids.end())
-            ids.insert(std::pair<std::string, uint32_t>(type, 1));
         std::stringstream id;
-        id << type << ids[type]++;
+        if (name.empty()) {
+            if (ids.find(type) == ids.end())
+                ids.insert(std::pair<std::string, uint32_t>(type, 1));
+            id << type << ids[type]++;
+        } else {
+            id << name;
+        }
 
-        ret = snprintf(buffer, length, "{ PLUGIN=%s, ID=%s, IP=%s, VER=%d%d }\n",
+        ret = snprintf(line, sizeof(line), "{ PLUGIN=%s, ID=%s, IP=%s, VER=%d%d }\n",
                        plugin, id.str().c_str(), moduleId.c_str(), version.fw_version, version.fw_revision);
-        if (ret == -1 || ret > length)
-            break;
+        if (ret == -1) {
+            LOG_WARN("String exceeds limit of %u bytes", (unsigned)sizeof(line));
+        } else {
+            lines.push_back(line);
+        }
+    }
 
-        length -= ret;
-        buffer += ret;
+    std::sort(lines.begin(), lines.end());
+    for (auto line = lines.begin(); line != lines.end(); line++) {
+        if (line->length() >= length) {
+            LOG_WARN("Truncating output, buffer to short");
+            break;
+        }
+
+        strncpy(buffer, line->c_str(), line->length());
+        length -= line->length();
+        buffer += line->length();
     }
     return (size - length);
 }
