@@ -106,6 +106,7 @@ $(PROD_NAME)_SRCS  += RocPlugin.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v14.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v47.cpp
+$(PROD_NAME)_SRCS  += RocPlugin_v50.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
 $(PROD_NAME)_SRCS  += RocPlugin_v54.cpp

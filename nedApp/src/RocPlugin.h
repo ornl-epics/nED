@@ -27,7 +27,10 @@
  * Several firmware version are supported:
  *
  * * ROC hw=2.65 fw=1.4 as v14 (GE board)
- * * ROC hw=2.0 fw=4.5 as v45 (IN PROGRESS)
+ * * ROC hw=2.0 fw=4.4 as v44
+ * * ROC hw=2.0 fw=4.5 as v45
+ * * ROC hw=2.0 fw=4.7 as v47
+ * * ROC hw=2.0 fw=5.0 as v50 (NOTE: potential fw version clash with hw=5.2 fw=5.0)
  * * ROC hw=5.2 fw=5.1 as v51
  * * ROC hw=5.2 fw=5.2 as v52
  * * ROC hw=5.2 fw=5.4 as v54
@@ -248,6 +251,11 @@ epicsTimeStamp m_sendHvTime;
          * Create and register all ROC v4.7 parameters to be exposed to EPICS.
          */
         void createParams_v47();
+
+        /**
+         * Create and register all ROC v5.0 parameters to be exposed to EPICS.
+         */
+        void createParams_v50();
 
         /**
          * Create and register all ROC v5.1 parameters to be exposed to EPICS.
