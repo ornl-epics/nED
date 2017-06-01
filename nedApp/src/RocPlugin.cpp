@@ -213,6 +213,11 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
             if (*nActual == nChars)          *eomReason |= ASYN_EOM_CNT;
         }
 
+        char buffer[256];
+        memset(buffer, 0, 256);
+        strncpy(buffer, value, *nActual);
+        LOG_DEBUG("HV: %s", buffer);
+
         this->lock();
 
         return status;

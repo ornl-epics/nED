@@ -241,10 +241,24 @@ record(mbbi, "$(P)hv:Status") {
 }
 
 #
+# Allow to invalidate MaxV records if boards don't support it
+#
+record(scalcout, "$(P)hv:MaxVDis")
+{
+   info(autosaveFields, "A")
+   field(INPA, "1")
+   field(AA,   "stream")
+   field(BB,   "Soft Channel")
+   field(CALC, "A=1?AA:BB")
+   field(OUT,  "$(P)hv:MaxV.DTYP")
+   field(PINI, "YES")
+}
+
+#
 # Max Voltage readback. 
 #
 record(ai, "$(P)hv:MaxV") {
-   field(DTYP, "stream")
+   field(DTYP, "")
    field(DESC, "maximum voltage Readback")
    field(INP, "@ROCHV.proto getNum(MV) $(PORT) 0")
    field(EGU, "V")
@@ -254,7 +268,7 @@ record(ai, "$(P)hv:MaxV") {
 # set max voltage.  This is in volts, not raw DAC counts...
 #
 record(ao, "$(P)hv:MaxVSet") {
-   field(DTYP, "stream")
+   field(DTYP, "")
    field(DESC, "Requested voltage limit")
    field(ASG, "BEAMLINE")
    field(OUT, "@ROCHV.proto setNum(M) $(PORT) 0")
