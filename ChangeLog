@@ -1,4 +1,14 @@
-1.8.0 - next release
+current
+Enhancements:
+* Support for ROC2 firmware 5.0
+* Support for ROC2 firmware 4.3
+* Prevent pixel-mapping metadata in Neutron packets.
+* Use autosaved detectors status on startup to prevent false errors
+* DSP-T alarm to prevet false port A&B configuration
+* DSP-W register updates
+* Old HV boards support without MaxV functionality
+
+1.8.1 - May 08 2017
 Enhancements:
 * FEM remote upgrade
 * Configurable max DAS packet size
