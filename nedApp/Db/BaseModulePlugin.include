@@ -122,6 +122,7 @@ record(calcout, "$(P)AcquiringCalc")
 }
 record(bi, "$(P)AcquiringSet")
 {
+    info(autosaveFields, "VAL")
     field(ZNAM, "not acquiring")
     field(ONAM, "acquiring")
     field(VAL,  "0")
