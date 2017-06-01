@@ -200,6 +200,13 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasPacket *srcPac
             destEvent->pixelid = m_map[srcEvent->pixelid];
             destEvent++;
             nDestEvents++;
+        } else if ((srcEvent->pixelid & 0x70000000) != 0) {
+            // This must be some fast-metadata events put into neutron packet
+            // Let them through as is
+            destEvent->tof = srcEvent->tof;
+            destEvent->pixelid = srcEvent->pixelid;
+            destEvent++;
+            nDestEvents++;
         } else if (passVetos == true) {
             destEvent->tof = srcEvent->tof;
             destEvent->pixelid = srcEvent->pixelid;
