@@ -291,11 +291,11 @@ void DspPlugin::createParams_v64() {
     createConfigParam("TsyncWidth",     'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (scale:100,unit:ns)
 
     createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=data,1=forward,2=chopper,3=timing master)
-    createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (0=not used,1=send to A,2=send to B,3=not used2)
+    createConfigParam("OptA:CrossA",    'E', 0x8,  2,  2, 1); // Crossbar Switch Pass ctrl A  (0=not used [alarm],1=send to A,2=send to B [alarm],3=not used2 [alarm])
     createConfigParam("OptA:EOC",       'E', 0x8,  1,  4, 1); // Optical TX A End of Chain
     createConfigParam("OptA:FilterCmd", 'E', 0x8,  2,  5, 0); // Optical TX A Command Filter
     createConfigParam("OptB:TxMode",    'E', 0x8,  2,  8, 3); // Optical TX B output mode     (0=data,1=forward,2=chopper,3=timing master)
-    createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 2); // Crossbar Switch Pass ctrl B  (0=not used,1=send to A,2=send to B,3=not used2)
+    createConfigParam("OptB:CrossB",    'E', 0x8,  2, 10, 2); // Crossbar Switch Pass ctrl B  (0=not used [alarm],1=send to A [alarm],2=send to B,3=not used2 [alarm])
     createConfigParam("OptB:EOC",       'E', 0x8,  1, 12, 1); // Optical TX B End of Chain
     createConfigParam("OptB:FilterCmd", 'E', 0x8,  2, 13, 0); // Optical TX B Command Filter
     createConfigParam("OptHystEn",      'E', 0x8,  1, 16, 0); // Optical hysteresis enable    (0=from TLK data,1=match optical)
