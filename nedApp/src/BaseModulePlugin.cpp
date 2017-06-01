@@ -595,9 +595,14 @@ bool BaseModulePlugin::rspReadStatus(const DasPacket *packet, uint8_t channel)
     uint32_t section = SECTION_ID(0x0, channel);
     uint32_t length = ALIGN_UP(m_params["STATUS"].sizes[section]*wordsize, 4);
     if (packet->getPayloadLength() != length) {
-        LOG_ERROR("Received wrong READ_STATUS response based on length; "
-                  "received %u, expected %u",
-                  packet->getPayloadLength(), length);
+        if (channel == 0)
+            LOG_ERROR("Received wrong READ_STATUS response based on length; "
+                      "received %u, expected %u",
+                      packet->getPayloadLength(), length);
+        else
+            LOG_ERROR("Received wrong channel %u READ_STATUS response based on length; "
+                      "received %u, expected %u",
+                      channel, packet->getPayloadLength(), length);
         return false;
     }
 
@@ -668,8 +673,12 @@ bool BaseModulePlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
     length *= wordsize;
 
     if (packet->getPayloadLength() != ALIGN_UP(length, 4)) {
-        LOG_ERROR("Received wrong READ_CONFIG response based on length; received %uB, expected %uB",
-                  packet->getPayloadLength(), ALIGN_UP(length, 4));
+        if (channel == 0)
+            LOG_ERROR("Received wrong READ_CONFIG response based on length; received %uB, expected %uB",
+                      packet->getPayloadLength(), ALIGN_UP(length, 4));
+        else
+            LOG_ERROR("Received wrong channel %u READ_CONFIG response based on length; received %uB, expected %uB",
+                      channel, packet->getPayloadLength(), ALIGN_UP(length, 4));
         return false;
     }
 
