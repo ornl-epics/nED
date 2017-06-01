@@ -27,6 +27,7 @@
  * Several firmware version are supported:
  *
  * * ROC hw=2.65 fw=1.4 as v14 (GE board)
+ * * ROC hw=2.0 fw=4.3 as v43
  * * ROC hw=2.0 fw=4.4 as v44
  * * ROC hw=2.0 fw=4.5 as v45
  * * ROC hw=2.0 fw=4.7 as v47
@@ -54,7 +55,7 @@
 class RocPlugin : public BaseModulePlugin {
     public: // variables
 
-epicsTimeStamp m_sendHvTime;
+        epicsTimeStamp m_sendHvTime;
 
         static const int defaultInterfaceMask = BaseModulePlugin::defaultInterfaceMask | asynOctetMask;
         static const int defaultInterruptMask = BaseModulePlugin::defaultInterruptMask | asynOctetMask;
@@ -241,6 +242,11 @@ epicsTimeStamp m_sendHvTime;
          * Create and register all ROC v1.4 parameters to be exposed to EPICS.
          */
         void createParams_v14();
+
+        /**
+         * Create and register all ROC v4.3 parameters to be exposed to EPICS.
+         */
+        void createParams_v43();
 
         /**
          * Create and register all ROC v4.4/v4.5 parameters to be exposed to EPICS.

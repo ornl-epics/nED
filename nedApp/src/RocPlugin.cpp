@@ -71,6 +71,11 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 1);
         createParams_v14();
         setExpectedVersion(1, 4);
+    } else if (m_version == "v43") {
+        setNumChannels(8);
+        setIntegerParam(Supported, 1);
+        createParams_v43();
+        setExpectedVersion(4, 3);
     } else if (m_version == "v44") {
         setNumChannels(8);
         setIntegerParam(Supported, 1);
