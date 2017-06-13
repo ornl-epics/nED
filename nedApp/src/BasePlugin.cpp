@@ -18,7 +18,7 @@
 
 #define NUM_BASEPLUGIN_PARAMS ((int)(&LAST_BASEPLUGIN_PARAM - &FIRST_BASEPLUGIN_PARAM + 1))
 
-#define MESSAGE_QUEUE_SIZE 1   //!< Size of the message queue for callbacks. Since using the synchronous callbacks, 1 should be enough.
+#define MESSAGE_QUEUE_SIZE 5   //!< Size of the message queue for callbacks. Increased to 5 to allow multiple parent plugins.
 
 /* Helper C functions for asyn/EPICS registration
  */
@@ -195,6 +195,7 @@ void BasePlugin::dispatcherCallback(asynUser *pasynUser, void *genericPointer)
         if (m_messageQueue.trySend(&packetList, sizeof(&packetList)) == -1) {
             packetList->release();
             LOG_ERROR("Message queue full");
+            m_messageQueue.show();
         }
     }
 }
