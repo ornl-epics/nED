@@ -147,6 +147,7 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
     auto it = m_detParamsByName.find(detector);
     if (it == m_detParamsByName.end()) {
         params = new CRocParams;
+        params->position = 0xFFFFFFFF;
         m_detParamsByName[detector] = params;
     } else {
         params = it->second;
@@ -154,11 +155,11 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
 
     // Now translate parameter described by string into the structure
     if (param == "PositionId") {
+        if (params->position != 0xFFFFFFFF)
+            m_detParamsByPosition.erase(params->position);
         // Make an entry in lookup-by-position table
-        m_detParamsByPosition.erase(params->position);
-        m_detParamsByPosition[value] = params;
-
         params->position = value;
+        m_detParamsByPosition[params->position] = params;
         LOG_INFO("Registered detector %s, position %d", detector.c_str(), value);
     } else if (param == "TimeRange1") {
         params->timeRange1 = value;
