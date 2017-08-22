@@ -451,5 +451,5 @@ void ArocPlugin::createParams_v23()
     createConfigParam("TpSelect",         'F',  0x0,  2, 14,    2); // Test point select
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:38,hihi:45,archive:monitor)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:C,prec:1,low:-50,high:38,hihi:45,archive:monitor)
 }

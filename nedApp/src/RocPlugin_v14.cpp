@@ -417,7 +417,7 @@ void RocPlugin::createParams_v14()
     createChanConfigParam("Ch8:Sample2",      8, '8',  0x7,  9, 0, 15);     // Chan8 Sample 2 point [0:10]
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
-    createTempParam("TempPreampA",      0x1, 16, 0, CONV_SIGN_2COMP); // Preamp A temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
-    createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
+    createTempParam("TempPreampA",      0x1, 16, 0, CONV_SIGN_2COMP); // Preamp A temperature in degC    (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
+    createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
 }

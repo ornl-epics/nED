@@ -19,7 +19,8 @@ record(bi, "$(P)AcquiringSet")
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")
-    field(CALC, "A=0")
+    field(INPB, "$(P)DieTemp.SEVR NPP")
+    field(CALC, "(A+B)=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 } 

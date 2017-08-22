@@ -628,7 +628,7 @@ void RocPlugin::createParams_v56()
     createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
-    createTempParam("TempPreampA",      0x1, 16, 0, CONV_SIGN_2COMP); // Preamp A temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
-    createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:50)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
+    createTempParam("TempPreampA",      0x1, 16, 0, CONV_SIGN_2COMP); // Preamp A temperature in degC    (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
+    createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
 }

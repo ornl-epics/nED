@@ -492,5 +492,5 @@ void ArocPlugin::createParams_v24()
     createConfigParam("TestPatternRate",  'F',  0x2, 16,  0,    0); // Test pattern rate
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
-    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:Celsius,prec:1,low:-50,high:38,hihi:45,archive:monitor)
+    createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:C,prec:1,low:-50,high:38,hihi:45,archive:monitor)
 }

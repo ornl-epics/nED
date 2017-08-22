@@ -17,7 +17,8 @@ record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")
     field(INPB, "$(P)Discovered.SEVR NPP")
-    field(CALC, "(A+B)=0")
+    field(INPC, "$(P)TempBoard.SEVR NPP")
+    field(CALC, "(A+B+C)=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 }

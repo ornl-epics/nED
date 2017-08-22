@@ -7,7 +7,10 @@ include "GlobalConD.include"
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")
-    field(CALC, "A=0")
+    field(INPC, "$(P)TempBoard.SEVR NPP")
+    field(INPD, "$(P)TempPreampA.SEVR NPP")
+    field(INPE, "$(P)TempPreampB.SEVR NPP")
+    field(CALC, "(A+C+D+E)=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 }
