@@ -195,6 +195,10 @@ void CRocPosCalcPlugin::saveDetectorParam(const std::string &detector, const std
         params->gGapMin1 = value;
     } else if (param == "GGapMin2") {
         params->gGapMin2 = value;
+    } else if (param == "G1GapMin") {
+        params->g1GapMin = value;
+    } else if (param == "X1GapMin") {
+        params->x1GapMin = value;
     } else if (param == "GNoiseThreshold") {
         params->gNoiseThreshold = value;
     } else if (param == "XNoiseThreshold") {
@@ -617,6 +621,17 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
             }
             if ((xIndex == 0  && gSorted[0] < gSorted[1]) || (xIndex == 10 && gSorted[0] > gSorted[1])) {
                 gIndex = gSorted[1];
+            }
+        } else if ((detParams->g1GapMin != 0 || detParams->x1GapMin != 0) && (xIndex == 1 || xIndex ==9)) {
+            if (event->photon_count_g[gSorted[0]] < detParams->g1GapMin) {
+                return CRocDataPacket::VETO_G_LOW_SIGNAL;
+            }
+            if (event->photon_count_x[xSorted[0]] < detParams->x1GapMin) {
+                return CRocDataPacket::VETO_X_LOW_SIGNAL;
+            }
+            uint8_t gThreshold = m_calcParams.gNongapMaxRatio * event->photon_count_g[gSorted[0]];
+            if (event->photon_count_g[gSorted[1]] > gThreshold) {
+                return CRocDataPacket::VETO_G_HIGH_SIGNAL;
             }
         } else {
             if (event->photon_count_g[gSorted[0]] < detParams->gMin) {

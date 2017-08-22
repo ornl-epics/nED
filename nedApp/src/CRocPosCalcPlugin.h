@@ -55,6 +55,8 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             uint32_t gMin2;
             uint32_t gGapMin1;
             uint32_t gGapMin2;
+            uint32_t g1GapMin;
+            uint32_t x1GapMin;
 
             typedef enum {
                 FIBER_CODING_V2,

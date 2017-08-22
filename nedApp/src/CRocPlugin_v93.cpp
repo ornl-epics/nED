@@ -132,6 +132,8 @@ void CRocPlugin::createParams_v93()
     createMetaConfigParam("FiberCoding",              8,    0);     // Type of mapping algorithm     (0=v2,1=v3)
     createMetaConfigParam("GGapMin1",                 8,    0);     // Num of X above threshold
     createMetaConfigParam("GGapMin2",                 8,    0);     // Num of X above threshold
+    createMetaConfigParam("G1GapMin",                 8,    0);     // Gap+1 G threshold
+    createMetaConfigParam("X1GapMin",                 8,    0);     // Gap+1 X threshold
     createMetaConfigParam("GMin2",                    8,    0);     // Num of X above threshold
 
     createMetaConfigParam("GNoiseThreshold",         32,    8);     // G noise threshold
