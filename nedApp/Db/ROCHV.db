@@ -5,11 +5,13 @@
 
 
 record(calc, "$(P)hv:VoltDiff") {
-   field(CALC, "(abs(A-B))>50.0")
+   field(CALC, "(abs(A-B))>C")
    field(INPA, "$(P)hv:Volt CP NMS")
    field(INPB, "$(P)hv:VoltCmd CP NMS")
+   field(INPC, "50")
    field(HIHI, "0.5")
    field(HHSV, "MAJOR")
+   info(autosaveFields, "INPC")
 }
 #
 # Summary alarm status
