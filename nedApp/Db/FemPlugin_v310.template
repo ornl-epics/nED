@@ -1,0 +1,38 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "FemPlugin.include"
+include "FemPlugin_v310.generated"
+include "GlobalConD.include"
+include "RemoteUpgrade.include"
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TVVL, "41")
+    field(TVST, "Down reset")
+    field(TTVL, "40")
+    field(TTST, "Down reset LVDS")
+}
+record(bo, "$(P)Upg:Supported")
+{
+    field(VAL,  "1")
+}
+record(ao, "$(P)Upg:EraseTimeout")
+{
+    field(VAL,  "120")
+}
+record(ao, "$(P)Upg:BusyTimeout")
+{
+    field(VAL,  "5")
+}
+record(ao, "$(P)Upg:ProgramTimeout")
+{
+    field(VAL,  "10")
+}
+record(ao, "$(P)Upg:NoRspTimeout")
+{
+    field(VAL,  "0.2")
+}
+record(longout, "$(P)Upg:NoRspMaxRetries")
+{
+    field(VAL,  "5")
+}

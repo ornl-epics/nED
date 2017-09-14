@@ -53,6 +53,7 @@ DB += FemPlugin_v36.db
 DB += FemPlugin_v37.db
 DB += FemPlugin_v38.db
 DB += FemPlugin_v39.db
+DB += FemPlugin_v310.db
 DB += AcpcFemPlugin_v14.db
 DB += AcpcFemPlugin_v22.db
 DB += RocPlugin_v14.db

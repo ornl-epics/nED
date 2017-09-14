@@ -88,6 +88,11 @@ FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const
         createParams_v39();
         remoteUpgradeSM(RemoteUpgrade::INIT);
         setExpectedVersion(3, 9, 10, 9);
+    } else if (m_version == "v310") {
+        setIntegerParam(Supported, 1);
+        createParams_v310();
+        remoteUpgradeSM(RemoteUpgrade::INIT);
+        setExpectedVersion(3, 10, 10, 9);
     } else if (m_version == "v320") {
         setIntegerParam(Supported, 1);
         createParams_v320();
