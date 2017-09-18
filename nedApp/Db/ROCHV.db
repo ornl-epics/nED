@@ -11,7 +11,7 @@ record(calc, "$(P)hv:VoltDiff") {
    field(INPC, "50")
    field(HIHI, "0.5")
    field(HHSV, "MAJOR")
-   info(autosaveFields, "INPC")
+   info(autosaveFields, "C")
 }
 #
 # Summary alarm status
