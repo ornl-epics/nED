@@ -1,4 +1,4 @@
-/* DspPlugin_v64.cpp
+/* DspPlugin_v66.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -32,9 +32,19 @@ void DspPlugin::createParams_v66() {
     createConfigParam("Trig6:Freq",     'C', 0x8,   4, 24, 6); // Trigger 6 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
     createConfigParam("Trig7:Freq",     'C', 0x8,   4, 28, 7); // Trigger 7 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
 
-    createConfigParam("ChopDutyCycle",  'C', 0x9,  32,  0, 83400); // Ref pulse hold time      (scale:100,unit:ns)
-    createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // Ref pulse delay         (scale:100,unit:ns)
-    createConfigParam("TofFixOffset",   'C', 0xB,  32,  0, 0); // TOF fixed offset             (scale:100,unit:ns)
+    createConfigParam("Trig0:Width",    'C', 0x9,  16,  0, 0); // Trigger 0 width                  (scale:75.35,unit:ns)
+    createConfigParam("Trig1:Width",    'C', 0x9,  16, 16, 0); // Trigger 1 width                  (scale:75.35,unit:ns)
+    createConfigParam("Trig2:Width",    'C', 0xA,   3,  0, 0); // Trigger 2 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig3:Width",    'C', 0xA,   3,  3, 0); // Trigger 3 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig4:Width",    'C', 0xA,   3,  6, 0); // Trigger 4 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig5:Width",    'C', 0xA,   3,  9, 0); // Trigger 5 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig6:Width",    'C', 0xA,   3, 12, 0); // Trigger 6 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig7:Width",    'C', 0xA,   3, 15, 0); // Trigger 7 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+
+    createConfigParam("Chop0:Freq",     'C', 0xA,   4, 24, 0); // Chopper 0 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Chop1:Freq",     'C', 0xA,   4, 28, 0); // Chopper 1 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+
+    createConfigParam("TofFixOffset",   'C', 0xB,  32,  0, 0); // TOF fixed offset                 (scale:100,unit:ns)
 
     // 26 user configurable Frame Addresses
     createConfigParam("RtdlFrAddr6",    'C', 0xC,   8,  0, 4); // RTDL Frame 6
@@ -341,13 +351,12 @@ void DspPlugin::createParams_v66() {
     createConfigParam("TestPatAlt2Rate",'F', 0x2, 12, 20, 0); // Fake onboard ch1-ch6 rate
 
     createConfigParam("ODBOutSel",      'F', 0x3,  2,  0, 0); // ODB output select
-    createConfigParam("Trig27:Width",   'F', 0x3,  3,  2, 0); // Triggers 2-7 width select    (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("GCtrlReg3Dbg2",  'F', 0x3,  3,  2, 0); // TBD
     createConfigParam("GCtrlReg3Dbg3",  'F', 0x3,  3,  5, 0); // TBD
     createConfigParam("GCtrlReg3Dbg5",  'F', 0x3,  8,  8, 0); // TBD
     createConfigParam("GCtrlReg3Dbg6",  'F', 0x3, 16, 16, 0); // TBD
 
-    createConfigParam("Trig0:Width",    'F', 0x4, 16,  8, 0); // Trigger 0 width              (scale:75.35,unit:ns)
-    createConfigParam("Trig1:Width",    'F', 0x4, 16, 16, 0); // Trigger 1 width              (scale:75.35,unit:ns)
+    createConfigParam("GCtrlReg4Dbg",   'F', 0x4, 32,  0, 0); // TBD
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createCounterParam("PktLenErrCnt",     0x0, 16,  0); // TBD
