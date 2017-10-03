@@ -80,9 +80,7 @@ void DspPlugin::createParams_v66() {
     createConfigParam("TrefEvent",      'C', 0x13,  8, 12, 39); // TREF event number
     createConfigParam("HystMinLow",     'C', 0x13,  4, 20, 4); // Chop HYST minimum low
     createConfigParam("HystMinHi",      'C', 0x13,  4, 24, 4); // Chop HYST minimum high
-    createConfigParam("ChopFreqCtrl",   'C', 0x13,  2, 28, 1); // Chop frequency count mode    (0=strobe at X, 1=strobe at X-1, 2=strobe at X-2)
-    createConfigParam("ChopFreqCycle",  'C', 0x13,  1, 30, 1); // Chop frequency cycle select  (0=Present cycle number, 1=Next cycle number)
-    createConfigParam("ChopSweepEn",    'C', 0x13,  1, 31, 0); // Chop sweep enable            (0=TOF fixed off,1=TOF fract off)
+    createConfigParam("ChopType",       'C', 0x13,  2, 28, 0); // Chopper controller type      (0=SKF, 1=Astrium)
 
     createConfigParam("STsyncDelMax",   'C', 0x14, 32,  0, 0); // Synth mast strobe max delay
     createConfigParam("STsyncDelAdj",   'C', 0x15, 32,  0, 0); // Synth mast strobe delay adj
