@@ -530,3 +530,30 @@ void OccPortDriver::sendToPlugins(int messageType, const DasPacketList *packetLi
     const void *addr = reinterpret_cast<const void *>(packetList);
     doCallbacksGenericPointer(const_cast<void *>(addr), messageType, 0);
 }
+
+asynStatus OccPortDriver::getParamStatus(int list, int index, asynStatus *paramStatus)
+{
+    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
+        *paramStatus = asynSuccess;
+        return asynSuccess;
+    }
+    return asynPortDriver::getParamStatus(list, index, paramStatus);
+}
+
+asynStatus OccPortDriver::getParamAlarmStatus(int list, int index, int *alarmStatus)
+{
+    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
+        *alarmStatus = 0;
+        return asynSuccess;
+    }
+    return asynPortDriver::getParamAlarmStatus(list, index, alarmStatus);
+}
+
+asynStatus OccPortDriver::getParamAlarmSeverity(int list, int index, int *alarmSeverity)
+{
+    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
+        *alarmSeverity = 0;
+        return asynSuccess;
+    }
+    return asynPortDriver::getParamAlarmSeverity(list, index, alarmSeverity);
+}

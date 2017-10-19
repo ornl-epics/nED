@@ -354,6 +354,12 @@ class BasePlugin : public asynPortDriver {
         asynStatus setIntegerParam(const char *name, int value);
         using asynPortDriver::setIntegerParam;
 
+        asynStatus getParamStatus(int list, int index, asynStatus *paramStatus);
+
+        asynStatus getParamAlarmStatus(int list, int index, int *alarmStatus);
+
+        asynStatus getParamAlarmSeverity(int list, int index, int *alarmSeverity);
+
     protected:
         #define FIRST_BASEPLUGIN_PARAM Enable
         int Enable;

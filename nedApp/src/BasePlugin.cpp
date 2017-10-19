@@ -348,3 +348,30 @@ asynStatus BasePlugin::setIntegerParam(const char *name, int value)
         ret = setIntegerParam(param, value);
     return ret;
 }
+
+asynStatus BasePlugin::getParamStatus(int list, int index, asynStatus *paramStatus)
+{
+    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
+        *paramStatus = asynSuccess;
+        return asynSuccess;
+    }
+    return asynPortDriver::getParamStatus(list, index, paramStatus);
+}
+
+asynStatus BasePlugin::getParamAlarmStatus(int list, int index, int *alarmStatus)
+{
+    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
+        *alarmStatus = 0;
+        return asynSuccess;
+    }
+    return asynPortDriver::getParamAlarmStatus(list, index, alarmStatus);
+}
+
+asynStatus BasePlugin::getParamAlarmSeverity(int list, int index, int *alarmSeverity)
+{
+    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
+        *alarmSeverity = 0;
+        return asynSuccess;
+    }
+    return asynPortDriver::getParamAlarmSeverity(list, index, alarmSeverity);
+}

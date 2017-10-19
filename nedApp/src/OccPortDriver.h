@@ -117,6 +117,12 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         asynStatus createParam(const char *name, asynParamType type, int *index, int defaultValue);
         using asynPortDriver::createParam;
 
+        asynStatus getParamStatus(int list, int index, asynStatus *paramStatus);
+
+        asynStatus getParamAlarmStatus(int list, int index, int *alarmStatus);
+
+        asynStatus getParamAlarmSeverity(int list, int index, int *alarmSeverity);
+
         /**
          * Report an error detected in receive data thread
          */
