@@ -1,0 +1,50 @@
+include "BasePlugin.include"
+
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI,  "YES")
+}
+record(longin, "$(P)PktPoolSize")
+{
+    field(DESC,  "Num allocated packets")
+    field(DTYP,  "asynInt32")
+    field(INP,   "@asyn($(PORT))PktPoolSize")
+    field(SCAN,  "I/O Intr")
+    field(PINI,  "YES")
+}
+record(longout, "$(P)SkipPulses")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of pulses to skip")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))SkipPulses")
+    field(PINI, "YES")
+    field(VAL,  "0")
+}
+record(mbbo, "$(P)Freq")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enforced frequency, drives SkipPulses")
+    field(OUT,  "$(P)SkipPulses PP")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "60 Hz")
+    field(ONVL, "1")
+    field(ONST, "30 Hz")
+    field(TWVL, "2")
+    field(TWST, "20 Hz")
+}
+record(bo, "$(P)InjectEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable injecting empty pulse packets")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))InjectEn")
+    field(PINI, "YES")
+    field(ZNAM, "Off")
+    field(ONAM, "On")
+}

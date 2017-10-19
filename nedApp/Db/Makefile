@@ -39,6 +39,7 @@ DB += BnlFlatFieldPlugin.db
 DB += BnlPosCalcPlugin.db
 DB += CRocPosCalcPlugin.db
 DB += CRocPvaPlugin.db
+DB += EmptyPulsePlugin.db
 
 DB += DspPlugin_v51.db
 DB += DspPlugin_v52.db
@@ -106,6 +107,7 @@ FemPlugin_v36.template: FemPlugin_v36.generated
 FemPlugin_v37.template: FemPlugin_v37.generated
 FemPlugin_v38.template: FemPlugin_v38.generated
 FemPlugin_v39.template: FemPlugin_v39.generated
+FemPlugin_v310.template: FemPlugin_v310.generated
 AcpcFemPlugin_v14.template: AcpcFemPlugin_v14.generated
 AcpcFemPlugin_v22.template: AcpcFemPlugin_v22.generated
 RocPlugin_v14.template: RocPlugin_v14.generated
