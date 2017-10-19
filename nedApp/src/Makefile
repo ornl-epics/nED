@@ -90,6 +90,7 @@ $(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v64.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v65.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v66.cpp
+$(PROD_NAME)_SRCS  += DspPlugin_v67.cpp
 $(PROD_NAME)_SRCS  += DspWPlugin.cpp
 $(PROD_NAME)_SRCS  += DspWPlugin_v10.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp

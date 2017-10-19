@@ -1,0 +1,68 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "DspPlugin_v67.generated"
+include "DspPlugin.include"
+include "GlobalConD.include"
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TVVL, "129")
+    field(TVST, "Down reset")
+    field(TTVL, "39")
+    field(TTST, "Down reset LVDS")
+}
+record(fanout, "$(P)DataModeFan")
+{
+    field(LNK2, "$(P)DataFmt")
+}
+record(longout, "$(P)DataFmt") {
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)DataFmtSel.VAL PP")
+    field(OMSL, "closed_loop")
+    field(DTYP, "Soft Channel")
+    field(OUT,  "$(P)OptDataFormat PP")
+}
+record(sel, "$(P)DataFmtSel")
+{
+    field(INPA, "$(P)RocDF.VAL PP")
+    field(INPB, "$(P)AcpcDF.VAL PP")
+    field(INPC, "$(P)BnlDF.VAL PP")
+    field(INPD, "$(P)CrocDF.VAL PP")
+    field(NVL,  "$(P)DetTypeSel.VAL PP")
+}
+record(sel, "$(P)RocDF")
+{
+    field(INPA, "2") # Normal mode
+    field(INPB, "5") # Raw mode
+    field(INPC, "6") # Extended mode
+    field(INPD, "6") # Verbose mode
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+record(sel, "$(P)AcpcDF")
+{
+    field(INPA, "4")
+    field(INPB, "8")
+    field(INPC, "7")
+    field(INPD, "13")
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+record(sel, "$(P)BnlDF")
+{
+    field(INPA, "4") # Normal mode
+    field(INPB, "9") # Raw mode
+    field(INPC, "10") # Extended mode
+    field(INPD, "10") # Verbose mode
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}
+record(sel, "$(P)CrocDF")
+{
+    field(INPA, "2") # Normal mode
+    field(INPB, "11") # Raw mode
+    field(INPC, "12") # Extended mode
+    field(INPD, "12") # Verbose mode
+    field(NVL,  "$(P)DataMode.RVAL NPP")
+    field(SELM, "Specified")
+}

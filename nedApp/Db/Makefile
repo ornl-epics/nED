@@ -47,6 +47,7 @@ DB += DspPlugin_v63.db
 DB += DspPlugin_v64.db
 DB += DspPlugin_v65.db
 DB += DspPlugin_v66.db
+DB += DspPlugin_v67.db
 DB += DspWPlugin_v10.db
 DB += FemPlugin_v32.db
 DB += FemPlugin_v35.db
@@ -100,6 +101,7 @@ DspPlugin_v63.template: DspPlugin_v63.generated
 DspPlugin_v64.template: DspPlugin_v64.generated
 DspPlugin_v65.template: DspPlugin_v65.generated
 DspPlugin_v66.template: DspPlugin_v66.generated
+DspPlugin_v67.template: DspPlugin_v67.generated
 DspWPlugin_v10.template: DspWPlugin_v10.generated
 FemPlugin_v32.template: FemPlugin_v32.generated
 FemPlugin_v35.template: FemPlugin_v35.generated

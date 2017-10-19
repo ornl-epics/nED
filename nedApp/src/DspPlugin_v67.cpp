@@ -1,4 +1,4 @@
-/* DspPlugin_v64.cpp
+/* DspPlugin_v67.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -9,32 +9,42 @@
 
 #include "DspPlugin.h"
 
-void DspPlugin::createParams_v66() {
+void DspPlugin::createParams_v67() {
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
     createConfigParam("PixIdOff",       'B', 0x0,  32,  0, 0); // Pixel id offset
 
     // Chopper parameters
-    createConfigParam("Chop0:Delay",    'C', 0x0,  32,  0, 0); // Chop0 delay for N*9.4ns cyc
-    createConfigParam("Chop1:Delay",    'C', 0x1,  32,  0, 0); // Chop1 delay for N*9.4ns cyc
-    createConfigParam("Chop2:Delay",    'C', 0x2,  32,  0, 0); // Chop2 delay for N*9.4ns cyc
-    createConfigParam("Chop3:Delay",    'C', 0x3,  32,  0, 0); // Chop3 delay for N*9.4ns cyc
-    createConfigParam("Chop4:Delay",    'C', 0x4,  32,  0, 0); // Chop4 delay for N*9.4ns cyc
-    createConfigParam("Chop5:Delay",    'C', 0x5,  32,  0, 0); // Chop5 delay for N*9.4ns cyc
-    createConfigParam("Chop6:Delay",    'C', 0x6,  32,  0, 0); // Chop6 delay for N*9.4ns cyc
-    createConfigParam("Chop7:Delay",    'C', 0x7,  32,  0, 0); // Chop7 delay for N*9.4ns cyc
+    createConfigParam("Trig0:Delay",    'C', 0x0,  32,  0, 0); // Trigger 0 delay                  (scale:9.4,unit:ns)
+    createConfigParam("Trig1:Delay",    'C', 0x1,  32,  0, 0); // Trigger 1 delay                  (scale:9.4,unit:ns)
+    createConfigParam("Trig2:Delay",    'C', 0x2,  32,  0, 0); // Trigger 2 delay                  (scale:9.4,unit:ns)
+    createConfigParam("Trig3:Delay",    'C', 0x3,  32,  0, 0); // Trigger 3 delay                  (scale:9.4,unit:ns)
+    createConfigParam("Trig4:Delay",    'C', 0x4,  32,  0, 0); // Trigger 4 delay                  (scale:9.4,unit:ns)
+    createConfigParam("Trig5:Delay",    'C', 0x5,  32,  0, 0); // Trigger 5 delay                  (scale:9.4,unit:ns)
+    createConfigParam("Trig6:Delay",    'C', 0x6,  32,  0, 0); // Trigger 6 delay                  (scale:9.4,unit:ns)
+    createConfigParam("Trig7:Delay",    'C', 0x7,  32,  0, 0); // Trigger 7 delay                  (scale:9.4,unit:ns)
 
-    createConfigParam("Chop0:Freq",     'C', 0x8,   4,  0, 0); // Chop0 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("Chop1:Freq",     'C', 0x8,   4,  4, 1); // Chop1 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("Chop2:Freq",     'C', 0x8,   4,  8, 2); // Chop2 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("Chop3:Freq",     'C', 0x8,   4, 12, 3); // Chop3 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("Chop4:Freq",     'C', 0x8,   4, 16, 4); // Chop4 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("Chop5:Freq",     'C', 0x8,   4, 20, 5); // Chop5 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("Chop6:Freq",     'C', 0x8,   4, 24, 6); // Chop6 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
-    createConfigParam("Chop7:Freq",     'C', 0x8,   4, 28, 7); // Chop7 frequency selector     (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Trig0:Freq",     'C', 0x8,   4,  0, 0); // Trigger 0 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Trig1:Freq",     'C', 0x8,   4,  4, 1); // Trigger 1 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Trig2:Freq",     'C', 0x8,   4,  8, 2); // Trigger 2 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Trig3:Freq",     'C', 0x8,   4, 12, 3); // Trigger 3 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Trig4:Freq",     'C', 0x8,   4, 16, 4); // Trigger 4 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Trig5:Freq",     'C', 0x8,   4, 20, 5); // Trigger 5 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Trig6:Freq",     'C', 0x8,   4, 24, 6); // Trigger 6 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Trig7:Freq",     'C', 0x8,   4, 28, 7); // Trigger 7 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
 
-    createConfigParam("ChopDutyCycle",  'C', 0x9,  32,  0, 83400); // Ref pulse hold time      (scale:100,unit:ns)
-    createConfigParam("ChopMaxPeriod",  'C', 0xA,  32,  0, 166800); // Ref pulse delay         (scale:100,unit:ns)
-    createConfigParam("TofFixOffset",   'C', 0xB,  32,  0, 0); // TOF fixed offset             (scale:100,unit:ns)
+    createConfigParam("Trig0:Width",    'C', 0x9,  16,  0, 0); // Trigger 0 width                  (scale:75.35,unit:ns)
+    createConfigParam("Trig1:Width",    'C', 0x9,  16, 16, 0); // Trigger 1 width                  (scale:75.35,unit:ns)
+    createConfigParam("Trig2:Width",    'C', 0xA,   3,  0, 0); // Trigger 2 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig3:Width",    'C', 0xA,   3,  3, 0); // Trigger 3 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig4:Width",    'C', 0xA,   3,  6, 0); // Trigger 4 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig5:Width",    'C', 0xA,   3,  9, 0); // Trigger 5 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig6:Width",    'C', 0xA,   3, 12, 0); // Trigger 6 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("Trig7:Width",    'C', 0xA,   3, 15, 0); // Trigger 7 width                  (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+
+    createConfigParam("Chop0:Freq",     'C', 0xA,   4, 24, 0); // Chopper 0 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+    createConfigParam("Chop1:Freq",     'C', 0xA,   4, 28, 0); // Chopper 1 frequency select       (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=12.5Hz,5=10Hz,6=7.5Hz,7=6Hz,8=5Hz,9=4Hz,10=3Hz,11=2.4Hz,12=2Hz,13=1.5Hz,14=1.25Hz,15=1Hz)
+
+    createConfigParam("TofFixOffset",   'C', 0xB,  32,  0, 0); // TOF fixed offset                 (scale:100,unit:ns)
 
     // 26 user configurable Frame Addresses
     createConfigParam("RtdlFrAddr6",    'C', 0xC,   8,  0, 4); // RTDL Frame 6
@@ -70,9 +80,7 @@ void DspPlugin::createParams_v66() {
     createConfigParam("TrefEvent",      'C', 0x13,  8, 12, 39); // TREF event number
     createConfigParam("HystMinLow",     'C', 0x13,  4, 20, 4); // Chop HYST minimum low
     createConfigParam("HystMinHi",      'C', 0x13,  4, 24, 4); // Chop HYST minimum high
-    createConfigParam("ChopFreqCtrl",   'C', 0x13,  2, 28, 1); // Chop frequency count mode    (0=strobe at X, 1=strobe at X-1, 2=strobe at X-2)
-    createConfigParam("ChopFreqCycle",  'C', 0x13,  1, 30, 1); // Chop frequency cycle select  (0=Present cycle number, 1=Next cycle number)
-    createConfigParam("ChopSweepEn",    'C', 0x13,  1, 31, 0); // Chop sweep enable            (0=TOF fixed off,1=TOF fract off)
+    createConfigParam("ChopType",       'C', 0x13,  2, 28, 0); // Chopper controller type      (0=SKF, 1=Astrium)
 
     createConfigParam("STsyncDelMax",   'C', 0x14, 32,  0, 0); // Synth mast strobe max delay
     createConfigParam("STsyncDelAdj",   'C', 0x15, 32,  0, 0); // Synth mast strobe delay adj
@@ -340,17 +348,13 @@ void DspPlugin::createParams_v66() {
     createConfigParam("TestPatAlt2ChEn",'F', 0x2,  2, 18, 0); // LVDS fake channel select     (0=none,1=ch1-ch3,2=ch4-ch6,3=ch1-ch6)
     createConfigParam("TestPatAlt2Rate",'F', 0x2, 12, 20, 0); // Fake onboard ch1-ch6 rate
 
-    createConfigParam("ChopSubFreqSel", 'F', 0x3,  2,  0, 0); // ODB timing testing
-    createConfigParam("GCtrlReg3Dbg2",  'F', 0x3,  1,  2, 0); // TBD
-    createConfigParam("GCtrlReg3Dbg3",  'F', 0x3,  1,  3, 0); // TBD
-    createConfigParam("GCtrlReg3Dbg4",  'F', 0x3,  4,  4, 0); // TBD
+    createConfigParam("ODBOutSel",      'F', 0x3,  2,  0, 0); // ODB output select
+    createConfigParam("GCtrlReg3Dbg2",  'F', 0x3,  3,  2, 0); // TBD
+    createConfigParam("GCtrlReg3Dbg3",  'F', 0x3,  3,  5, 0); // TBD
     createConfigParam("GCtrlReg3Dbg5",  'F', 0x3,  8,  8, 0); // TBD
     createConfigParam("GCtrlReg3Dbg6",  'F', 0x3, 16, 16, 0); // TBD
 
-    createConfigParam("GCtrlReg4Dbg1",  'F', 0x4,  4,  0, 0); // TBD
-    createConfigParam("GCtrlReg4Dbg2",  'F', 0x4,  4,  4, 0); // TBD
-    createConfigParam("GCtrlReg4Dbg3",  'F', 0x4,  8,  8, 0); // TBD
-    createConfigParam("GCtrlReg4Dbg4",  'F', 0x4, 16, 16, 0); // TBD
+    createConfigParam("GCtrlReg4Dbg",   'F', 0x4, 32,  0, 0); // TBD
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createCounterParam("PktLenErrCnt",     0x0, 16,  0); // TBD
