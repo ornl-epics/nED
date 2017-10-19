@@ -8,6 +8,15 @@ Enhancements:
 * DSP-W register updates
 * Old HV boards support without MaxV functionality
 * Increased inter-plugin queue size to 5, needed for VULCAN 3 OCCs setup
+* ROC 4.3 registers update, added missing register mapping
+* CROC position calculation fix, previously ignoring position 0
+* Archive all temperature PVs
+* CROC position calculation update, add LN-4WideGap algorithm from dcom
+* HV difference threshold now configurable
+* FEM 3.10 support
+* DSP 6.7 suport
+* asyn R3-10 support
+* New EmptyPulsePlugin
 
 1.8.1 - May 08 2017
 Enhancements:
