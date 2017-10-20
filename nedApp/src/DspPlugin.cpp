@@ -79,7 +79,7 @@ DspPlugin::DspPlugin(const char *portName, const char *dispatcherPortName, const
         setIntegerParam(Supported, 1);
         setExpectedVersion(6, 6);
     } else if (m_version == "v67") {
-        createParams_v66();
+        createParams_v67();
         setIntegerParam(Supported, 1);
         setExpectedVersion(6, 7);
     } else {
