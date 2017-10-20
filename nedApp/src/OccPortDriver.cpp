@@ -50,7 +50,7 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     createParam("HwType",           asynParamInt32,     &HwType);                   // READ - OCC board type                (1=SNS PCI-X,2=SNS PCIe,15=simulator)
     createParam("HwVer",            asynParamInt32,     &HwVer);                    // READ - OCC board hardware version
     createParam("FwVer",            asynParamInt32,     &FwVer);                    // READ - OCC board firmware version
-    createParam("FwDate",           asynParamInt32,     &FwDate);                   // READ - OCC board firmware date
+    createParam("FwDate",           asynParamOctet,     &FwDate);                   // READ - OCC board firmware date
     createParam("ConStatus",        asynParamInt32,     &ConStatus);                // READ - Optical connection status     (0=connected,1=no SFP,2=no cable,3=laser fault)
     createParam("Command",          asynParamInt32,     &Command);                  // WRITE - Issue OccPortDriver command  (see OccPortDriver::Command)
     createParam("FpgaSn",           asynParamOctet,     &FpgaSn);                   // READ - FPGA serial number in hex str
@@ -196,14 +196,17 @@ void OccPortDriver::refreshOccStatus(bool basic_status)
         setIntegerParam(LastErr, -ret);
         LOG_ERROR("Failed to query OCC status: %s(%d)", strerror(-ret), ret);
     } else {
-        char sn[20];
-        snprintf(sn, sizeof(sn), "%jX", m_occStatusCache.fpga_serial_number);
-        setStringParam(FpgaSn,          sn);
+        char buf[20];
+        snprintf(buf, sizeof(buf), "%jX", m_occStatusCache.fpga_serial_number);
+        setStringParam(FpgaSn,          buf);
+        snprintf(buf, sizeof(buf), "%04X/%02X/%02X",  m_occStatusCache.firmware_date        & 0xFFFF,
+                                                     (m_occStatusCache.firmware_date >> 24) & 0xFF,
+                                                     (m_occStatusCache.firmware_date >> 16) & 0xFF);
+        setStringParam(FwDate,          buf);
 
         setIntegerParam(HwType,         m_occStatusCache.board);
         setIntegerParam(HwVer,          m_occStatusCache.hardware_ver);
         setIntegerParam(FwVer,          m_occStatusCache.firmware_ver);
-        setIntegerParam(FwDate,         m_occStatusCache.firmware_date);
         setIntegerParam(ConStatus,      m_occStatusCache.optical_signal);
         setIntegerParam(RxEnRb,         m_occStatusCache.rx_enabled);
         setIntegerParam(ErrPktEnRb,     m_occStatusCache.err_packets_enabled);
