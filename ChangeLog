@@ -1,4 +1,8 @@
-current
+1.8.5 - Nov 7 2017
+Bugfix:
+* AdaraPlugin race condition between sending RTDL and heart beat packets
+
+1.8.4 - Oct 20 2017
 Enhancements:
 * Support for ROC2 firmware 5.0
 * Support for ROC2 firmware 4.3

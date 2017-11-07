@@ -11,6 +11,7 @@
 #include "Log.h"
 
 #include <algorithm>
+#include <string.h>
 
 EPICS_REGISTER_PLUGIN(AdaraPlugin, 4, "port name", string, "dispatcher port", string, "blocking callbacks", int, "Neutron source id", int);
 
@@ -111,19 +112,17 @@ void AdaraPlugin::sendHeartbeat()
 
 bool AdaraPlugin::sendRtdl(const uint32_t data[32])
 {
-    uint32_t outpacket[2];
+    uint32_t outpacket[34];
     bool ret;
-
-    outpacket[0] = 30*sizeof(uint32_t);
-    outpacket[1] = ADARA_PKT_TYPE_RTDL;
 
     // The RTDL packet contents is just what ADARA expects.
     // Prefix that with the length and type of packet.
+    outpacket[0] = 30*sizeof(uint32_t);
+    outpacket[1] = ADARA_PKT_TYPE_RTDL;
+    memcpy(&outpacket[2], data, 32*sizeof(uint32_t));
+
     this->unlock();
-    ret = send(outpacket, 2*sizeof(uint32_t));
-    if (ret) {
-        ret = send(data, 32*sizeof(uint32_t));
-    }
+    ret = send(outpacket, sizeof(outpacket));
     this->lock();
     return ret;
 }
