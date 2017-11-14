@@ -10,12 +10,9 @@
 #ifndef OCCPORTDRIVER_H
 #define OCCPORTDRIVER_H
 
+#include "BasePlugin.h"
 #include "BaseCircularBuffer.h"
-#include "DasPacketList.h"
 #include "Thread.h"
-
-#include <asynPortDriver.h>
-#include <epicsThread.h>
 
 #include <occlib.h>
 
@@ -33,7 +30,7 @@
  * Another thread is created to periodically poll OCC status with two user
  * configurable intervals (basic vs extended status).
  */
-class epicsShareFunc OccPortDriver : public asynPortDriver {
+class epicsShareFunc OccPortDriver : public BasePlugin {
     private:
         /**
          * Valid statuses of the OccPortDriver and the OCC infrastructure.
@@ -89,14 +86,6 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         static const int DEFAULT_EXTENDED_STATUS_INTERVAL;
 
         /**
-         * Send list of packets to the plugins.
-         *
-         * @param messageType Message type to which plugins are registered to receive.
-         * @param packetList List of packets received from OCC.
-         */
-        void sendToPlugins(int messageType, const DasPacketList *packetList);
-
-        /**
          * Overloaded method.
          */
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
@@ -109,19 +98,7 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
         /**
          * Overloaded method.
          */
-        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
-
-        /**
-         * Helper function to create output asynPortDriver param with default value.
-         */
-        asynStatus createParam(const char *name, asynParamType type, int *index, int defaultValue);
-        using asynPortDriver::createParam;
-
-        asynStatus getParamStatus(int list, int index, asynStatus *paramStatus);
-
-        asynStatus getParamAlarmStatus(int list, int index, int *alarmStatus);
-
-        asynStatus getParamAlarmSeverity(int list, int index, int *alarmSeverity);
+        void recvUpstream(asynUser *pasynUser, void *pointer);
 
         /**
          * Report an error detected in receive data thread
@@ -134,6 +111,26 @@ class epicsShareFunc OccPortDriver : public asynPortDriver {
          * This function must not be called during global lock.
          */
         void reset();
+
+        /**
+         * Process all available data from buffer.
+         *
+         * This is the worker function called from the thread. It parses through the
+         * buffer until no more packets can be extracted. Each packet is verified to
+         * be valid or exception is thrown. Received packets are put in lists and sent
+         * to all subscribed plugins. Function returns number of bytes left in
+         * the buffer.
+         * To allow to debug incoming data, function tries to eat as much data as
+         * possible and return the number of bytes processed. It only throws when
+         * it can't process even a single packet from the beginning of the buffer.
+         *
+         * @param[in] ptr to buffer to be processed
+         * @param[in] size of data to be processed
+         * @raise std::range_error when supported packet verifcation failed
+         * @raise std::runtime_error when non-supported packet was received
+         * @return Number of bytes not processed.
+         */
+        uint32_t processOccData(uint8_t *ptr, uint32_t size);
 
         /**
          * Process data from OCC buffer and dispatch it to the registered plugins.

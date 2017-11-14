@@ -246,7 +246,7 @@ struct DasPacket
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
+        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload = 0);
 
         /**
          * Create DasPacket LVDS command (non DSPs)
@@ -274,7 +274,7 @@ struct DasPacket
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload = 0);
+        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload = 0);
 
         /**
          * Allocate memory for new packet.

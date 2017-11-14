@@ -10,7 +10,7 @@
 #ifndef PLUGIN_DRIVER_H
 #define PLUGIN_DRIVER_H
 
-#include "DasPacketList.h"
+#include "PluginMessage.h"
 #include "EpicsRegister.h"
 #include "Thread.h"
 
@@ -18,27 +18,10 @@
 #include <string>
 #include <functional>
 #include <list>
-#include <map>
 #include <memory>
 #include <asynPortDriver.h>
 #include <epicsMessageQueue.h>
 #include <epicsThread.h>
-
-/**
- * Valid reasons when sending data from dispatchers to plugins.
- */
-enum {
-    // Numbers should be unique within the asyn driver. All asynPortDriver parameters
-    // share the same space. asynPortDriver start with 0 and increments the index for
-    // each parameter. Pick reasonably high unique numbers here.
-    REASON_OCCDATA          = 10000,
-    REASON_PARAMS_EXCH      = 10001,
-};
-
-struct ParamsExch {
-    std::string portName;
-    std::string paramName;
-};
 
 class Timer;
 
@@ -78,17 +61,17 @@ class Timer;
 /**
  * Abstract base plugin class.
  *
- * The class provides basis for all plugins. It provides connection to the
- * dispatcher. It's derived from asynPortDriver for the callback mechanism
- * and ease of parameters<->PV translation.
+ * The class provides basis for all plugins with helper functions for creating
+ * parameters and exchange of data with other plugins. Plugin connections are
+ * established by child plugins subscribing to parent plugins. The usual data
+ * flow is from parent plugin(s) to child plugins and is called downstream
+ * flow. Downstream flow can be optimized by creating a thread handling the 
+ * data - also called blocking mode. The opposite direction is called upstream
+ * and is executed in callers' thread.
  *
- * Designer of the new plugin should pay special attention to parameters that
- * configure the plugin. There are some parameters which need to be static
- * during runtime, like the buffer size or dispatcher port. Those should be
- * made parameters to the plugin constructor.
- * However, most parameters should be made visible through PVs. Those need to
- * be created in the plugin constructor using asynPortDriver::createParam()
- * function.
+ * Parameters to be exposed to EPICS are created using asynPortDriver *param
+ * mechanism. There's plenty of helper functions in this class to help derived
+ * classes with managing those parameters.
  *
  * Plugin instances can be loaded at compile time or at run time. For compile
  * time inclusion simply instantiate a new object of the plugin class somewhere
@@ -99,48 +82,27 @@ class Timer;
 class BasePlugin : public asynPortDriver {
     public:
         static const int defaultInterfaceMask = asynInt32Mask | asynGenericPointerMask | asynDrvUserMask;
-        static const int defaultInterruptMask = asynInt32Mask;
-
-        /**
-         * Detector data modes.
-         *
-         * Detectors can output data in various formats based on the configuration.
-         * They can switch between these values. The data format depends on the
-         * detector type.
-         */
-        typedef enum {
-            DATA_MODE_NORMAL    = 0, //!< Usually provides at least tof,pixel id
-            DATA_MODE_RAW       = 1, //!< Raw sample values
-            DATA_MODE_VERBOSE   = 2, //!< Usually raw sample values and the calculated pixel id
-            DATA_MODE_EXTENDED  = 2, //!< Typically single sample at multiple times, for testing detector firmware
-        } DataMode;
+        static const int defaultInterruptMask = asynInt32Mask | asynGenericPointerMask;
 
         /**
          * Constructor
          *
          * Initialize internal state of the class. This includes calling asynPortDriver
          * constructor, creating and setting default values for class parameters and creating
-         * worker thread for received data callbacks. It does not, however, register to the
-         * dispatcher messages. It needs to be manually enabled by the derived classes after
-         * BasePlugin object has been fully constructed or through Enable asyn parameter.
+         * worker thread for received data callbacks if requested by blocking parameter.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Comma separated list of remote ports to connect to.
-         * @param[in] reason Type of the messages to receive callbacks for.
+         * @param[in] parentPorts Comma separated list of remote ports to connect to.
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
-         * @param[in] numParams The number of parameters that the derived class supports.
-         * @param[in] maxAddr The maximum  number of asyn addr addresses this driver supports. 1 is minimum.
-         * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
-         * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
+         * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports, this bit mask is added to default one.
+         * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks), this bit mask is added to default one.
+         * @param[in] queueSize Max number of inter-plugin messages
          * @param[in] asynFlags Flags when creating the asyn port driver; includes ASYN_CANBLOCK and ASYN_MULTIDEVICE.
-         * @param[in] autoConnect The autoConnect flag for the asyn port driver.
          * @param[in] priority The thread priority for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          * @param[in] stackSize The stack size for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          */
-        BasePlugin(const char *portName, const char *dispatcherPortNames, int reason, int blocking=0,
-                   int numParams=0, int maxAddr=1, int interfaceMask=BasePlugin::defaultInterfaceMask,
-                   int interruptMask=BasePlugin::defaultInterruptMask, int asynFlags=0, int autoConnect=1,
-                   int priority=0, int stackSize=0);
+        BasePlugin(const char *portName, int blocking=0, int interfaceMask=0, int interruptMask=0, 
+                   int queueSize=5, int asynFlags=0, int priority=0, int stackSize=0);
 
         /**
          * Destructor.
@@ -148,78 +110,41 @@ class BasePlugin : public asynPortDriver {
         virtual ~BasePlugin() = 0;
 
         /**
-         * Process the DAS packets received from the dispatcher.
+         * Connect to one or many parent plugins.
          *
-         * The derived processData() implementation should process as much packets
-         * as possible from the DAS packets list, ideally all packets that it
-         * knows how to handle. Only packets that are not processed by any
-         * plugin will be delivered again through this function.
-         *
-         * No packet can be modified in place, if the processData implementation
-         * wants to modify data it must copy it to new memory and work there.
-         *
-         * BasePlugin guarantees to put a lock around this function.
-         *
-         * @param[in] packetList List of received packets.
-         * @return Last packet from the list that this function processed, or 0 for none.
+         * For each ports in a list connect to all messages types requested. If succesfull,
+         * bi-directional communication with connectes plugins is enabled. If some plugins
+         * were previously connected, they're disconnected first. Port must not be locked
+         * when calling this function.
+         * 
+         * @param[in] ports to connect to
+         * @param[in] messageTypes each number must be one of the integers registers by Msg* parameters.
          */
-        virtual void processData(const DasPacketList * const packetList) {};
+        bool connect(const std::list<std::string> &ports, const std::list<int> &messageTypes);
 
         /**
-         * Unlocked version of processData()
+         * Connect to one or many parent plugins.
          *
-         * Sometimes locking the entire processData() isn't desirable. Derived
-         * class should implement either one but not both.
+         * Helper functions accepting comma-separated string of remote ports.
          */
-        virtual void processDataUnlocked(const DasPacketList * const packetList);
+        bool connect(const std::string &ports, const std::list<int> &messageTypes);
 
         /**
-         * Handle integer parameter value change.
+         * Connect to one or many parent plugins.
          *
-         * Derived plugins might reimplement this function to get notified about the
-         * value change for the registered parameter. Parameter index can be obtained
-         * from pasynUser->reason.
-         *
-         * The derived implementations should invoke parents writeInt32 before returning.
-         *
-         * @param[in] pasynUser asyn port handle.
-         * @param[in] value New value.
-         * @return asynSuccess on success
+         * Helper functions accepting comma-separated string of remote ports.
          */
-        virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+        bool connect(const std::string &ports, int messageType)
+        {
+            std::list<int> msgs;
+            msgs.push_back(messageType);
+            return connect(ports, msgs);
+        }
 
         /**
-         * Helper function to create output asynPortDriver param with initial value set.
+         * Disconnect from all parent plugins.
          */
-        asynStatus createParam(const char *name, asynParamType type, int *index, int initValue);
-
-        /**
-         * Helper function to create output asynPortDriver param with initial value set.
-         */
-        asynStatus createParam(const char *name, asynParamType type, int *index, double initValue);
-        /**
-         * Helper function to create output asynPortDriver param with initial value set.
-         */
-        asynStatus createParam(const char *name, asynParamType type, int *index, const char *initValue);
-
-        using asynPortDriver::createParam;
-
-        /**
-         * Wrapper around getIntegerParam to retrieve parameter as boolean value
-         *
-         * A positive value is converted to true, false otherwise.
-         */
-        asynStatus getBooleanParam(int index, bool *value);
-
-        /**
-         * Send single packet to the dispatcher to transmit it through optics.
-         *
-         * This is always blocking call, it will only return when the dispatcher
-         * is done with the data.
-         *
-         * @param[in] packet Packet to be sent out.
-         */
-        void sendToDispatcher(const DasPacket *packet);
+        bool disconnect();
 
         /**
          * Request a custom callback function to be called at some time in the future.
@@ -240,87 +165,109 @@ class BasePlugin : public asynPortDriver {
         std::shared_ptr<Timer> scheduleCallback(std::function<float(void)> &callback, double delay);
 
         /**
+         * A callback function called by asyn upon receiving message from parent plugin.
+         *
+         * Evaluates generic pointer as PluginMessage. Skips messages that plugin
+         * is not subscribed to. Executes recvDownstream() if plugin is in
+         * non-blocking mode, otherwise it queues message for receive thread
+         * to pick up and execute same function in custom thread.
+         *
+         * Should be private but is called from C scope and must be public.
+         * It's called in the context of parent plugin thread.
+         */
+        void recvDownstreamCb(asynUser *pasynUser, void *ptr);
+
+        /**
+         * A worker function to process messages from parent plugins.
+         *
+         * This function is the first one called when a new message from parents
+         * is received by current plugin. Default implementation simply invokes
+         * corresponding function based on type parameter.
+         */
+        virtual void recvDownstream(int type, PluginMessage *msg);
+
+        /**
+         * A worker function to process DasPacket messages from parent plugins.
+         */
+        virtual void recvDownstream(const DasPacketList *packets) {};
+
+        /**
+         * A worker function to process DasCmdPacket messages from parent plugins.
+         */
+        virtual void recvDownstream(const DasCmdPacketList *packets) {};
+
+        /**
+         * A worker function to process DasRtdlPacket messages from parent plugins.
+         */
+        virtual void recvDownstream(const DasRtdlPacketList *packets) {};
+
+        /**
+         * Send PluginMessage to any connected child plugins.
+         */
+        void sendDownstream(int type, PluginMessage *msg);
+
+        /**
+         * Send DasPackets to any connected child plugins.
+         */
+        void sendDownstream(DasPacketList *packets);
+
+        /**
+         * Send DasCmdPackets to any connected child plugins.
+         */
+        void sendDownstream(DasCmdPacketList *packets);
+
+        /**
+         * Send DasRtdlPackets to any connected child plugins.
+         */
+        void sendDownstream(DasRtdlPacketList *packets);
+
+        /**
+         * A callback function called upon receiving message from child plugin.
+         *
+         * The default operation is pass-thru messages to parent plugins.
+         */
+        void recvUpstream(asynUser * pasynUser, void *ptr);
+
+        /**
+         * Send single DasPacket to parent plugins.
+         */
+        virtual void sendUpstream(const DasPacket *packet);
+
+        /**
+         * Send single DasCmdPacket to parent plugins.
+         */
+        virtual void sendUpstream(const DasCmdPacket *packet);
+
+        /**
          * Return the name of the asyn parameter.
          *
          * @param[in] index asyn parameter index
          * @return Name of the parameter used when parameter was registered.
          */
-        const char *getParamName(int index);
+        const std::string getParamName(int index);
 
         /**
-         * Enable or disable callbacks from dispatcher.
-         *
-         * Connecting to dispatcher means connecting to asyn port that the dispatcher
-         * provides in order to receive asynPortDriver callbacks from that port.
-         * By default callbacks are disabled. They can be enabled through the Enable
-         * asyn parameter or using this function.
-         *
-         * @param[in] enable Enable callbacks when true, disable otherwise.
-         * @note This function must be called with the lock released, otherwise a
-         *       deadlock can occur in the call to cancelInterruptUser.
-         * @return true if operation succeeded.
+         * Helper function to create output asynPortDriver param with initial value set.
          */
-        bool enableCallbacks(bool enable);
+        asynStatus createParam(const std::string &name, asynParamType type, int *index, int initValue);
 
         /**
-         * Return current data mode.
-         *
-         * Data mode can be switched through DataMode PV. It tells how
-         * the incoming OCC data should be parsed. Detectors must be switched
-         * to the same mode or parsing data will be erronous. DasPacket does
-         * not provide information what it contains.
-         *
-         * Default data mode is DATA_MODE_NORMAL until switched using DataMode PV.
-         *
-         * @return Currently configured data mode.
+         * Helper function to create output asynPortDriver param with initial value set.
          */
-        inline DataMode getDataMode() { return m_dataMode; };
+        asynStatus createParam(const std::string &name, asynParamType type, int *index, double initValue);
+        /**
+         * Helper function to create output asynPortDriver param with initial value set.
+         */
+        asynStatus createParam(const std::string &name, asynParamType type, int *index, const std::string &initValue);
 
-    protected:
-        std::string m_portName;                     //!< Port name
+        using asynPortDriver::createParam;
 
         /**
-         * Structure to describe asyn interface.
-         */
-        struct RemotePort {
-            asynUser *pasynuser;    //!< asynUser handler for asyn management
-            void *asynGenericPointerInterrupt;  //!< Generic pointer interrupt handler
-        };
-
-        /**
-         * Map of all registered remote ports.
+         * Wrapper around getIntegerParam to retrieve parameter as boolean value
          *
-         * Key is remote port name. Value holds the remote port connection
-         * information and handle.
+         * A positive value is converted to true, false otherwise.
          */
-        std::map<std::string, RemotePort> m_remotePorts;
-
-    private:
-        epicsMessageQueue m_messageQueue;           //!< Message queue for non-blocking mode
-        Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
-        bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
-        std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
-        DataMode m_dataMode;                        //!< Member copy of DataMode parameter, used often in processData() - needs to be efficient
-
-        /**
-         * Called from epicsTimer when timer expires.
-         */
-        float timerExpire(std::shared_ptr<Timer> &timer, std::function<float(void)> callback);
-
-    public: // public only for C linkage, don't use outside the class
-        /**
-         * Called from dispatcher in its thread context.
-         *
-         * Should processing block, do it in separate thread.
-         */
-        void dispatcherCallback(asynUser *pasynUser, void *genericPointer);
-
-        /**
-         * Background worker thread main function.
-         *
-         * Thread will automatically stop when PluginBlockingCallbacks is set to 0.
-         */
-        void processDataThread(epicsEvent *shutdown);
+        asynStatus getBooleanParam(int index, bool &value);
 
         /**
          * Send int32 parameter to another plugin.
@@ -340,7 +287,7 @@ class BasePlugin : public asynPortDriver {
          *
          * @see asynPortDriver::getIntegerParam(int, int*)
          */
-        asynStatus getIntegerParam(const char *name, int *value);
+        asynStatus getIntegerParam(const std::string &name, int &value);
         using asynPortDriver::getIntegerParam;
 
         /**
@@ -351,23 +298,65 @@ class BasePlugin : public asynPortDriver {
          *
          * @see asynPortDriver::setIntegerParam(int, int)
          */
-        asynStatus setIntegerParam(const char *name, int value);
+        asynStatus setIntegerParam(const std::string &name, int value);
         using asynPortDriver::setIntegerParam;
 
-        asynStatus getParamStatus(int list, int index, asynStatus *paramStatus);
+        /**
+         * Overloaded asynPortDriver function to receive messges from child plugins.
+         *
+         * To comply with name terminology in this class, the functions is a 
+         * simple wrapper around cbDownstream().
+         */
+        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer)
+        {
+            recvUpstream(pasynUser, pointer);
+            return asynSuccess;
+        }
 
-        asynStatus getParamAlarmStatus(int list, int index, int *alarmStatus);
+    private:
+        /**
+         * Receive threads' main function when in blocking mode.
+         *
+         * Thread is taking messages from internal queue and executes recvDownstream()
+         * function for each message.
+         *
+         * Runs until the shutdown flag is not set. It monitors message queue
+         * and processes every message in receive thread context. Deffers
+         * the actual work to processUpstreamMsg() function.
+         *
+         * @param[out] shutdown Flags when the thread should stop.
+         */
+        void recvDownstreamThread(epicsEvent *shutdown);
 
-        asynStatus getParamAlarmSeverity(int list, int index, int *alarmSeverity);
+        /**
+         * Called from epicsTimer when timer expires.
+         */
+        float timerExpire(std::shared_ptr<Timer> &timer, std::function<float(void)> callback);
+
+    private:
+        /**
+         * Structure to describe asyn interface.
+         */
+        struct RemotePort {
+            std::string portName;                   //!< Name of connected port
+            asynUser *pasynuser;                    //!< asynUser handler for asyn management
+            void *asynGenericPointerInterrupt;      //!< Generic pointer interrupt handler
+        };
+
+        std::string m_portName;                     //!< Port name
+        std::list<RemotePort> m_connectedPorts;     //!< List of connected remote ports.
+        epicsMessageQueue m_messageQueue;           //!< Message queue for non-blocking mode
+        Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
+        bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
+        std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
 
     protected:
-        #define FIRST_BASEPLUGIN_PARAM Enable
-        int Enable;
-        int RxCount;
-        int TxCount;        //!< Number of sent commands
-        int ProcCount;
-        int DataModeP;      //!< Currently selected data mode
-        #define LAST_BASEPLUGIN_PARAM DataModeP
+        #define FIRST_BASEPLUGIN_PARAM MsgOldDas
+        int MsgOldDas;
+        int MsgDasCmd;
+        int MsgDasRtdl;
+        int MsgParamExch;
+        #define LAST_BASEPLUGIN_PARAM MsgParamExch
 };
 
 #endif // PLUGIN_DRIVER_H

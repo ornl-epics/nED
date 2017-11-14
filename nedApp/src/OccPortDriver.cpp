@@ -11,34 +11,20 @@
 #include "OccPortDriver.h"
 #include "DmaCircularBuffer.h"
 #include "DmaCopier.h"
-#include "EpicsRegister.h"
 #include "BasePlugin.h"
 #include "Log.h"
 
-#include <algorithm> // std::min
 #include <cstring> // strerror
-#include <cstddef>
-#include <errno.h>
 #include <occlib.h>
 #include <math.h>
-
-#include "DspPlugin.h"
-
-static const int asynMaxAddr       = 1;
-static const int asynInterfaceMask = asynInt32Mask | asynOctetMask | asynGenericPointerMask | asynDrvUserMask | asynFloat64Mask; // don't remove DrvUserMask or you'll break callback's reasons
-static const int asynInterruptMask = asynInt32Mask | asynOctetMask | asynGenericPointerMask | asynFloat64Mask;
-static const int asynFlags         = 0;
-static const int asynAutoConnect   = 1;
-static const int asynPriority      = 0;
-static const int asynStackSize     = 0;
+#include <sstream>
 
 #define NUM_OCCPORTDRIVER_PARAMS ((int)(&LAST_OCCPORTDRIVER_PARAM - &FIRST_OCCPORTDRIVER_PARAM + 1))
 
 EPICS_REGISTER(Occ, OccPortDriver, 3, "Port name", string, "OCC connection string", string, "Local buffer size", int);
 
 OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize)
-    : asynPortDriver(portName, asynMaxAddr, NUM_OCCPORTDRIVER_PARAMS, asynInterfaceMask,
-                     asynInterruptMask, asynFlags, asynAutoConnect, asynPriority, asynStackSize)
+    : BasePlugin(portName, 0, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
     , m_occ(NULL)
 {
     int status;
@@ -293,9 +279,6 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
         // There's a thread to refresh OCC status, including error packets enabled
         m_statusEvent.signal();
-    } else if (pasynUser->reason == MaxPktSize) {
-        DasPacket::setMaxLength(value);
-        return asynSuccess;
     }
     return asynPortDriver::writeInt32(pasynUser, value);
 }
@@ -324,37 +307,44 @@ asynStatus OccPortDriver::readInt32(asynUser *pasynUser, epicsInt32 *value)
     return asynPortDriver::readInt32(pasynUser, value);
 }
 
-asynStatus OccPortDriver::writeGenericPointer(asynUser *pasynUser, void *pointer)
+void OccPortDriver::recvUpstream(asynUser *pasynUser, void *ptr)
 {
+    int msgType = pasynUser->reason;
+
     if (m_occ == NULL) {
         LOG_ERROR("OCC device not initialized");
-        return asynError;
+        return;
     }
 
-    if (pasynUser->reason == REASON_OCCDATA) {
-        DasPacketList *packetList = reinterpret_cast<DasPacketList *>(pointer);
+    if (msgType == MsgDasCmd) {
+        DasCmdPacketList *cmds = reinterpret_cast<DasCmdPacketList *>(ptr);
 
-        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-            const DasPacket *packet = *it;
+        for (auto it = cmds->cbegin(); it != cmds->cend(); it++) {
+            DasCmdPacket *packet = *it;
+            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->length, 4));
+            if (ret != 0) {
+                setIntegerParam(LastErr, -ret);
+                setIntegerParam(Status, STAT_OCC_ERROR);
+                callParamCallbacks();
+                LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
+                break;
+            }
+        }
+    } else if (msgType == MsgOldDas) {
+        DasPacketList *pkts = reinterpret_cast<DasPacketList *>(ptr);
+
+        for (auto it = pkts->cbegin(); it != pkts->cend(); it++) {
+            DasPacket *packet = *it;
             int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->getLength(), 4));
             if (ret != 0) {
                 setIntegerParam(LastErr, -ret);
                 setIntegerParam(Status, STAT_OCC_ERROR);
                 callParamCallbacks();
                 LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
-                return asynError;
+                break;
             }
         }
     }
-    return asynSuccess;
-}
-
-asynStatus OccPortDriver::createParam(const char *name, asynParamType type, int *index, int defaultValue)
-{
-    asynStatus status = asynPortDriver::createParam(name, type, index);
-    if (status == asynSuccess)
-        status = setIntegerParam(*index, defaultValue);
-    return status;
 }
 
 void OccPortDriver::reset() {
@@ -463,14 +453,11 @@ void OccPortDriver::dump(const char *data, uint32_t len)
 
 void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 {
-    void *data;
-    uint32_t length;
-    uint32_t consumed;
-    DasPacketList packetsList;
     uint32_t retryCounter = 0;
 
     while (shutdown->tryWait() == false) {
-        consumed = 0;
+        void *data;
+        uint32_t length;
 
         // Wait for data, use a timeout for data rate out calculation
         int ret = m_circularBuffer->wait(&data, &length, 1.0);
@@ -482,81 +469,124 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
             break;
         }
 
-        consumed = packetsList.reset(reinterpret_cast<uint8_t*>(data), length);
-
-        if (packetsList.empty() == false) {
-            // Notify everybody about new data
-            sendToPlugins(REASON_OCCDATA, &packetsList);
-
-            // Decrease reference counter and wait for everybody else to do the same
-            packetsList.release(); // reset() set it to 1
-            packetsList.waitAllReleased();
-
-            // Nobody is using data anymore
-            m_circularBuffer->consume(consumed);
-
+        try {
+            uint32_t left = processOccData(reinterpret_cast<uint8_t*>(data), length);
+            m_circularBuffer->consume(length - left);
             retryCounter = 0;
-
-        } else {
-            packetsList.release();
-
+        } catch (std::runtime_error &e) {
             if (retryCounter < 7) {
-                uint32_t packetLen = 0;
-                if (length >= DasPacket::getMinLength())
-                    packetLen = reinterpret_cast<DasPacket *>(data)->getLength();
-                LOG_DEBUG("Consumed %u of %u (expecting %u), retry %u/6", consumed, length, packetLen, retryCounter);
+                LOG_DEBUG("Partial data in buffer, waiting for more (retry %u/6)", retryCounter);
                 // Exponentially sleep up to ~1.1s, first pass doesn't sleep
                 epicsThreadSleep(1e-5 * pow(10, retryCounter++));
                 continue;
             }
 
-            // OCC still doesn't have enough data, check what's going on
-            DasPacket *packet = reinterpret_cast<DasPacket *>(data);
-            if (length < DasPacket::getMinLength()) {
-                LOG_ERROR("Aborting processing thread, not enough input data to describe packet");
-            } else if (packet->getLength() > packet->getMaxLength()) {
-                LOG_ERROR("Aborting processing thread, packet size %u bigger than supported %u", packet->getLength(), packet->getMaxLength());
-            } else if (packet->getLength() > length) {
-                LOG_ERROR("Aborting processing thread, expecting %u bytes but only have %u", packet->getLength(), length);
-            } else {
-                LOG_ERROR("Aborting processing thread, undetermined error");
-            }
-            dump((char *)data + consumed, length - consumed);
+            // OCC still doesn't have enough data, abort thread
+            LOG_ERROR("Aborting processing thread: %s", e.what());
+            dump(reinterpret_cast<const char *>(data), length);
             handleRecvError(-ERANGE);
             break;
         }
     }
 }
 
-void OccPortDriver::sendToPlugins(int messageType, const DasPacketList *packetList)
+uint32_t OccPortDriver::processOccData(uint8_t *ptr, uint32_t size)
 {
-    const void *addr = reinterpret_cast<const void *>(packetList);
-    doCallbacksGenericPointer(const_cast<void *>(addr), messageType, 0);
-}
+    int maxPktSize;
+    getIntegerParam(MaxPktSize, &maxPktSize);
+    bool first = true;
 
-asynStatus OccPortDriver::getParamStatus(int list, int index, asynStatus *paramStatus)
-{
-    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
-        *paramStatus = asynSuccess;
-        return asynSuccess;
-    }
-    return asynPortDriver::getParamStatus(list, index, paramStatus);
-}
+    DasPacketList oldDas;
+    DasCmdPacketList dasCmd;
+    DasRtdlPacketList dasRtdl;
 
-asynStatus OccPortDriver::getParamAlarmStatus(int list, int index, int *alarmStatus)
-{
-    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
-        *alarmStatus = 0;
-        return asynSuccess;
-    }
-    return asynPortDriver::getParamAlarmStatus(list, index, alarmStatus);
-}
+    uint8_t *end = ptr + size;
+    while (ptr < end) {
+        uint32_t bytesLeft = (end - ptr);
+        uint32_t bytesProcessed = 0;
 
-asynStatus OccPortDriver::getParamAlarmSeverity(int list, int index, int *alarmSeverity)
-{
-    if (index == REASON_OCCDATA || index == REASON_PARAMS_EXCH) {
-        *alarmSeverity = 0;
-        return asynSuccess;
+        // We don't know what we're receiving. It could be old DAS packet or 
+        // a new DAS header. They differ in the most significant 4 bits of the
+        // first 32 bits received.
+        uint32_t version = (*reinterpret_cast<uint32_t *>(ptr) >> 28);
+
+        try {
+            if (version == 0) {
+                // Old DAS packet
+                DasPacket *packet = reinterpret_cast<DasPacket *>(ptr);
+
+                if (bytesLeft < sizeof(DasPacket)) {
+                    std::ostringstream error;
+                    error << "Not enough data to describe old DAS packet header, needed " << bytesLeft << " got " << sizeof(DasPacket) << " bytes";
+                    throw std::range_error(error.str());
+                }
+                if (bytesLeft < packet->getLength()) {
+                    std::ostringstream error;
+                    error << "Not enough data to describe old DAS packet, needed " << bytesLeft << " got " << packet->getLength() << " bytes";
+                    throw std::range_error(error.str());
+                }
+                if (static_cast<uint32_t>(maxPktSize) < packet->getLength()) {
+                    std::ostringstream error;
+                    error << "Old DAS packet of " << packet->getLength() << " bytes exceeds " << maxPktSize << " bytes threshold";
+                    throw std::range_error(error.str());
+                }
+
+                oldDas.push_back(packet);
+                bytesProcessed = packet->getLength();
+
+            } else if (version == 1) {
+                // New DAS header
+                Packet *packet = reinterpret_cast<Packet *>(ptr);
+
+                if (bytesLeft < sizeof(Packet)) {
+                    std::ostringstream error;
+                    error << "Not enough data to describe DAS packet header, needed " << bytesLeft << " got " << sizeof(Packet) << " bytes";
+                    throw std::range_error(error.str());
+                }
+                if (bytesLeft < packet->length) {
+                    std::ostringstream error;
+                    error << "Not enough data to describe DAS packet, needed " << bytesLeft << " got " << packet->length << " bytes";
+                    throw std::range_error(error.str());
+                }
+                if (static_cast<uint32_t>(maxPktSize) < packet->length) {
+                    std::ostringstream error;
+                    error << "DAS packet of " << packet->length << " bytes exceeds " << maxPktSize << " bytes threshold";
+                    throw std::range_error(error.str());
+                }
+
+                if (packet->type == Packet::TYPE_DAS_CMD)
+                    dasCmd.push_back(reinterpret_cast<DasCmdPacket *>(packet));
+                else if (packet->type == Packet::TYPE_DAS_RTDL)
+                    dasRtdl.push_back(reinterpret_cast<DasRtdlPacket *>(packet));
+
+                bytesProcessed = packet->length;
+
+            } else {
+                throw std::runtime_error("Unsupported packet received");
+            }
+        } catch (std::exception &e) {
+            if (first)
+                throw;
+            else
+                break;
+        }
+
+        ptr += bytesProcessed;
+        first = false;
     }
-    return asynPortDriver::getParamAlarmSeverity(list, index, alarmSeverity);
+
+    // Publish all packets in parallel ..
+    if (!oldDas.empty())
+        sendDownstream(&oldDas);
+    if (!dasCmd.empty())
+        sendDownstream(&dasCmd);
+    if (!dasRtdl.empty())
+        sendDownstream(&dasRtdl);
+
+    // .. and wait for all of them to get released
+    oldDas.waitAllReleased();
+    dasCmd.waitAllReleased();
+    dasRtdl.waitAllReleased();
+
+    return (end - ptr);
 }

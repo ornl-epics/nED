@@ -21,15 +21,15 @@ class StatPlugin : public BasePlugin {
          * Constructor
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] parentPlugins coma separated list of parent plugins
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        StatPlugin(const char *portName, const char *dispatcherPortName, int blocking);
+        StatPlugin(const char *portName, const char *parentPlugins, int blocking);
 
         /**
          * Overloaded function to receive all OCC data.
          */
-        void processData(const DasPacketList * const packetList);
+        void recvDownstream(int type, PluginMessage *msg);
 
         /**
          * Overloaded function
@@ -69,7 +69,6 @@ class StatPlugin : public BasePlugin {
         RtdlHeader::PulseFlavor m_pulseType;
 
     private: // asyn parameters
-        #define FIRST_STATPLUGIN_PARAM Reset
         int Reset;              //!< Reset counters
         int CmdCnt;             //!< Number of command response packets
         int DataCnt;            //!< Number of data packets
@@ -88,7 +87,6 @@ class StatPlugin : public BasePlugin {
         int NeutronPCharge;     //!< Accumulated neutron proton charge since last reset
         int RtdlPCharge;        //!< Accumulated RTDL (accelerator) proton charge since last reset
         int PulseType;          //!< Select pulse type to collect proton charge for
-        #define LAST_STATPLUGIN_PARAM PulseType
 };
 
 #endif // STAT_PLUGIN_H

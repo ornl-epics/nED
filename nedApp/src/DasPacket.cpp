@@ -43,7 +43,7 @@ DasPacket *DasPacket::alloc(uint32_t size)
     return packet;
 }
 
-DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload)
+DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload)
 {
     DasPacket *packet = 0;
     CommandInfo cmdinfo;
@@ -60,11 +60,11 @@ DasPacket *DasPacket::createOcc(uint32_t source, uint32_t destination, CommandTy
 
     void *addr = malloc(sizeof(DasPacket) + ALIGN_UP(payload_length, 4));
     if (addr)
-        packet = new (addr) DasPacket(source, destination, cmdinfo, payload_length, payload);
+        packet = new (addr) DasPacket(source, destination, cmdinfo, payload_length, const_cast<uint32_t *>(payload));
     return packet;
 }
 
-DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, uint32_t *payload)
+DasPacket *DasPacket::createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload)
 {
     DasPacket *packet = 0;
     CommandInfo cmdinfo;
