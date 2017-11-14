@@ -1,4 +1,4 @@
-/* OccPortDriver.cpp
+/* OccPlugin.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -8,7 +8,7 @@
  */
 
 #include "Common.h"
-#include "OccPortDriver.h"
+#include "OccPlugin.h"
 #include "DmaCircularBuffer.h"
 #include "DmaCopier.h"
 #include "BasePlugin.h"
@@ -19,11 +19,9 @@
 #include <math.h>
 #include <sstream>
 
-#define NUM_OCCPORTDRIVER_PARAMS ((int)(&LAST_OCCPORTDRIVER_PARAM - &FIRST_OCCPORTDRIVER_PARAM + 1))
+EPICS_REGISTER_PLUGIN(OccPlugin, 3, "Port name", string, "OCC connection string", string, "Local buffer size", int);
 
-EPICS_REGISTER(Occ, OccPortDriver, 3, "Port name", string, "OCC connection string", string, "Local buffer size", int);
-
-OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize)
+OccPlugin::OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize)
     : BasePlugin(portName, 0, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
     , m_occ(NULL)
 {
@@ -31,14 +29,14 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
 
     // Register params with asyn
     //           0123456789
-    createParam("Status",           asynParamInt32,     &Status,        STAT_OK);   // READ - Status of OccPortDriver       (see OccPortDriver::Status)
+    createParam("Status",           asynParamInt32,     &Status,        STAT_OK);   // READ - Status of OccPlugin       (see OccPlugin::Status)
     createParam("LastErr",          asynParamInt32,     &LastErr,       0);         // READ - Last error code returned by OCC API
     createParam("HwType",           asynParamInt32,     &HwType);                   // READ - OCC board type                (1=SNS PCI-X,2=SNS PCIe,15=simulator)
     createParam("HwVer",            asynParamInt32,     &HwVer);                    // READ - OCC board hardware version
     createParam("FwVer",            asynParamInt32,     &FwVer);                    // READ - OCC board firmware version
     createParam("FwDate",           asynParamOctet,     &FwDate);                   // READ - OCC board firmware date
     createParam("ConStatus",        asynParamInt32,     &ConStatus);                // READ - Optical connection status     (0=connected,1=no SFP,2=no cable,3=laser fault)
-    createParam("Command",          asynParamInt32,     &Command);                  // WRITE - Issue OccPortDriver command  (see OccPortDriver::Command)
+    createParam("Command",          asynParamInt32,     &Command);                  // WRITE - Issue OccPlugin command  (see OccPlugin::Command)
     createParam("FpgaSn",           asynParamOctet,     &FpgaSn);                   // READ - FPGA serial number in hex str
     createParam("FpgaTemp",         asynParamFloat64,   &FpgaTemp);                 // READ - FPGA temperature in Celsius
     createParam("FpgaCoreV",        asynParamFloat64,   &FpgaCoreV);                // READ - FPGA core voltage in Volts
@@ -104,14 +102,14 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
 
         m_occBufferReadThread = new Thread(
             "Process incoming data",
-            std::bind(&OccPortDriver::processOccDataThread, this, std::placeholders::_1),
+            std::bind(&OccPlugin::processOccDataThread, this, std::placeholders::_1),
             epicsThreadGetStackSize(epicsThreadStackMedium),
             epicsThreadPriorityHigh
         );
         m_occBufferReadThread->start();
         m_occStatusRefreshThread = new Thread(
             "OCC status",
-            std::bind(&OccPortDriver::refreshOccStatusThread, this, std::placeholders::_1),
+            std::bind(&OccPlugin::refreshOccStatusThread, this, std::placeholders::_1),
             epicsThreadGetStackSize(epicsThreadStackSmall),
             epicsThreadPriorityLow
         );
@@ -119,7 +117,7 @@ OccPortDriver::OccPortDriver(const char *portName, const char *devfile, uint32_t
     }
 }
 
-OccPortDriver::~OccPortDriver()
+OccPlugin::~OccPlugin()
 {
     m_occBufferReadThread->stop();
     m_occStatusRefreshThread->stop();
@@ -136,7 +134,7 @@ OccPortDriver::~OccPortDriver()
     }
 }
 
-void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
+void OccPlugin::refreshOccStatusThread(epicsEvent *shutdown)
 {
     epicsTimeStamp now;
     epicsTimeStamp lastExtStatusUpdate = { 0, 0 };
@@ -171,7 +169,7 @@ void OccPortDriver::refreshOccStatusThread(epicsEvent *shutdown)
     }
 }
 
-void OccPortDriver::refreshOccStatus(bool basic_status)
+void OccPlugin::refreshOccStatus(bool basic_status)
 {
     // This one can take long time to execute, don't lock the driver while it's executing
     int ret = occ_status(m_occ, &m_occStatusCache, basic_status ? OCC_STATUS_FAST : OCC_STATUS_FULL);
@@ -226,7 +224,7 @@ void OccPortDriver::refreshOccStatus(bool basic_status)
     this->unlock();
 }
 
-asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
+asynStatus OccPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     int ret;
 
@@ -283,7 +281,7 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return asynPortDriver::writeInt32(pasynUser, value);
 }
 
-asynStatus OccPortDriver::readInt32(asynUser *pasynUser, epicsInt32 *value)
+asynStatus OccPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
 {
     if (m_occ == NULL) {
         // OCC not initialized, nothing that we can do here
@@ -307,7 +305,7 @@ asynStatus OccPortDriver::readInt32(asynUser *pasynUser, epicsInt32 *value)
     return asynPortDriver::readInt32(pasynUser, value);
 }
 
-void OccPortDriver::recvUpstream(asynUser *pasynUser, void *ptr)
+void OccPlugin::recvUpstream(asynUser *pasynUser, void *ptr)
 {
     int msgType = pasynUser->reason;
 
@@ -347,7 +345,7 @@ void OccPortDriver::recvUpstream(asynUser *pasynUser, void *ptr)
     }
 }
 
-void OccPortDriver::reset() {
+void OccPlugin::reset() {
     int rxEnabled = 0;
     int errPktEnabled = 0;
     DmaCopier *dmaCopier = 0;
@@ -393,7 +391,7 @@ void OccPortDriver::reset() {
     this->unlock();
 }
 
-void OccPortDriver::handleRecvError(int ret)
+void OccPlugin::handleRecvError(int ret)
 {
     this->lock();
 
@@ -423,7 +421,7 @@ void OccPortDriver::handleRecvError(int ret)
     this->unlock();
 }
 
-void OccPortDriver::dump(const char *data, uint32_t len)
+void OccPlugin::dump(const char *data, uint32_t len)
 {
     char buffer[64] = { 0 };
     char *ptr = buffer;
@@ -451,7 +449,7 @@ void OccPortDriver::dump(const char *data, uint32_t len)
     }
 }
 
-void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
+void OccPlugin::processOccDataThread(epicsEvent *shutdown)
 {
     uint32_t retryCounter = 0;
 
@@ -490,7 +488,7 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
     }
 }
 
-uint32_t OccPortDriver::processOccData(uint8_t *ptr, uint32_t size)
+uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
 {
     int maxPktSize;
     getIntegerParam(MaxPktSize, &maxPktSize);

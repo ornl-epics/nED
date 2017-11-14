@@ -1,4 +1,4 @@
-/* OccPortDriver.h
+/* OccPlugin.h
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -19,25 +19,25 @@
 /**
  * OCC interface and top level data dispatcher
  *
- * An OccPortDriver instance connects to OCC device for data exchange and status
+ * An OccPlugin instance connects to OCC device for data exchange and status
  * querying. Incoming data (data received from OCC device) is distributed to
  * all registered plugins. Plugins receive pointer to read-only DMA memory and
  * it's their responsibility to process all data received. Optionally
- * OccPortDriver can be enabled to copy data to a bigger buffer in application
+ * OccPlugin can be enabled to copy data to a bigger buffer in application
  * memory space. In such case copying is done in dedicated thread. Outgoing data
  * sent by plugins is forwarded intact to the OCC device.
  *
  * Another thread is created to periodically poll OCC status with two user
  * configurable intervals (basic vs extended status).
  */
-class epicsShareFunc OccPortDriver : public BasePlugin {
+class epicsShareFunc OccPlugin : public BasePlugin {
     private:
         /**
-         * Valid statuses of the OccPortDriver and the OCC infrastructure.
+         * Valid statuses of the OccPlugin and the OCC infrastructure.
          */
         enum Status {
             STAT_OK             = 0,    //!< No error
-            STAT_RESETTING      = 1,    //!< Resetting OCC and internal OccPortDriver state
+            STAT_RESETTING      = 1,    //!< Resetting OCC and internal OccPlugin state
             STAT_BUFFER_FULL    = 2,    //!< Copy buffer full
             STAT_BAD_DATA       = 3,    //!< Bad or corrupted data detected in queue
             STAT_PARTIAL_DATA   = 4,    //!< Partial data received, no more data afterwards
@@ -65,12 +65,12 @@ class epicsShareFunc OccPortDriver : public BasePlugin {
          *            where all data from OCC DMA buffer will be copied to as soon
          *            as it is available.
          */
-        OccPortDriver(const char *portName, const char *devfile, uint32_t localBufferSize);
+        OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize);
 
         /**
          * Destructor
          */
-        ~OccPortDriver();
+        ~OccPlugin();
 
     private:
         int m_version;

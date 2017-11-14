@@ -12,7 +12,7 @@ include "sCalcoutRecord.dbd"
 registrar(iocshSystemCommand)
 
 # OCC plugin is special
-registrar("OccRegister")
+registrar("OccPluginRegister")
 registrar("Das1CompatibilityRegister")
 
 # Non-detector plugins (alphabetically)
