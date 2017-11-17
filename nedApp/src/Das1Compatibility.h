@@ -17,7 +17,7 @@
  *
  * The DAS 1.0 compatibility plugin converts old packet format into internal
  * structure and vise-versa. On downstream path it intercepts packets that
- * begin with upper 4 bits as zero and passes through other packets intact. 
+ * begin with upper 4 bits as zero and passes through other packets intact.
  * Upstream DasCmdPacket is converted to DAS 1.0 format.
  */
 class Das1Compatibility : public BasePlugin {
@@ -32,12 +32,26 @@ class Das1Compatibility : public BasePlugin {
          */
         void recvDownstream(int type, PluginMessage *msg);
 
+        /**
+         * Convert DAS 2.0 packets to DAS 1.0 before sending them to parents.
+         */
+        void recvUpstream(DasCmdPacketList *packets);
+
     private:
+        /**
+         * Select output packet type.
+         */
+        enum Das1PacketType {
+            DAS1_OPTICAL,
+            DAS1_LVDS,
+            DAS1_LVDS_SINGLE_WORD,
+        };
+
         std::vector<uint32_t> m_rtdlSources;        //!< Mapping between DSP address and 8-bit number
-        
+
         DasRtdlPacket *old2new_rtdl(const DasPacket *packet);
         DasCmdPacket *old2new_cmd(const DasPacket *packet);
-        DasPacket *new2old_cmd(const DasCmdPacket *packet, bool lvds);
+        DasPacket *new2old_cmd(const DasCmdPacket *packet, enum Das1PacketType mode);
 };
 
 #endif // OLD_DAS_PACKET_CONVERTER_H

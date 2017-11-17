@@ -11,9 +11,7 @@
 #include "Common.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(AcpcPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
-
-const unsigned AcpcPlugin::NUM_ACPCPLUGIN_DYNPARAMS       = 260;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+EPICS_REGISTER_PLUGIN(AcpcPlugin, 4, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Hw & SW version", string);
 
 /**
  * ACPC version response format
@@ -37,9 +35,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ACPC, true, blocking,
-                       NUM_ACPCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
+AcpcPlugin::AcpcPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_ACPC, true)
     , m_version(version)
 {
     if (0) {
@@ -64,12 +61,12 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *dispatcherPortName, con
     initParams();
 }
 
-bool AcpcPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
+bool AcpcPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    if (packet->getPayloadLength() != sizeof(RspReadVersion))
+    if ((packet->length - sizeof(DasCmdPacket)) != sizeof(RspReadVersion))
         return false;
 
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
 
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;

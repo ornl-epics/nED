@@ -44,24 +44,54 @@ void Das1Compatibility::recvDownstream(int type, PluginMessage *msg)
         }
 
         if (!rtdls.empty()) {
-            rtdls.claim();
             BasePlugin::sendDownstream(&rtdls);
-            rtdls.release();
-            rtdls.waitAllReleased();
             for (auto it = rtdls.begin(); it != rtdls.end(); it++) {
                 free(*it);
             }
         }
 
         if (!cmds.empty()) {
-            cmds.claim();
             BasePlugin::sendDownstream(&cmds);
-            cmds.release();
-            cmds.waitAllReleased();
             for (auto it = cmds.begin(); it != cmds.end(); it++) {
                 free(*it);
             }
         }
+    }
+}
+
+void Das1Compatibility::recvUpstream(DasCmdPacketList *packets)
+{
+    DasPacketList das1Packets;
+
+    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        DasPacket *packet;
+
+        // We send out 2 packets, optical and LVDS. This adds more traffic
+        // to the channel but doesn't hurt since each packet is addressed
+        // to a specific module. Even when broadcast is selected, any given
+        // module will likely only respond once due to DSP-T implementation.
+        // But other plugins should drop packets they don't expect.
+        packet = new2old_cmd(*it, DAS1_OPTICAL);
+        if (packet)
+            das1Packets.push_back(packet);
+
+        packet = new2old_cmd(*it, DAS1_LVDS);
+        if (packet)
+            das1Packets.push_back(packet);
+
+        // DSP-T prior to 6.5 will intercept global discover command and do his
+        // own discovery. To work around that we need to send a single word
+        // LVDS command.
+        if ((*it)->command == DasCmdPacket::CMD_DISCOVER && (*it)->module_id == DasCmdPacket::BROADCAST_ID) {
+            packet = new2old_cmd(*it, DAS1_LVDS_SINGLE_WORD);
+            if (packet)
+                das1Packets.push_back(packet);
+        }
+    }
+    sendUpstream(MsgOldDas, &das1Packets);
+
+    for (auto it = das1Packets.begin(); it != das1Packets.end(); it++) {
+        delete *it;
     }
 }
 
@@ -92,23 +122,37 @@ DasRtdlPacket *Das1Compatibility::old2new_rtdl(const DasPacket *packet)
 
 DasCmdPacket *Das1Compatibility::old2new_cmd(const DasPacket *packet)
 {
-    return DasCmdPacket::create(packet->source,
-                                packet->destination,
-                                static_cast<DasCmdPacket::CommandType>(packet->getCommandType()),
-                                (packet->cmdinfo.command != DasPacket::RSP_NACK),
-                                packet->cmdinfo.is_response,
-                                (packet->cmdinfo.is_channel ? packet->cmdinfo.channel + 1 : 0),
-                                packet->getPayload(),
-                                packet->getPayloadLength());
+    if (packet->getCommandType() == DasPacket::CMD_DISCOVER) {
+        uint32_t module_type = static_cast<uint32_t>(packet->cmdinfo.module_type);
+        return DasCmdPacket::create(packet->source,
+                                    DasCmdPacket::CMD_DISCOVER,
+                                    true,
+                                    packet->cmdinfo.is_response,
+                                    0,
+                                    &module_type,
+                                    sizeof(module_type));
+    } else {
+        return DasCmdPacket::create(packet->source,
+                                    static_cast<DasCmdPacket::CommandType>(packet->getCommandType()),
+                                    (packet->cmdinfo.command != DasPacket::RSP_NACK),
+                                    packet->cmdinfo.is_response,
+                                    (packet->cmdinfo.is_channel ? packet->cmdinfo.channel + 1 : 0),
+                                    packet->getPayload(),
+                                    packet->getPayloadLength());
+    }
 }
 
-DasPacket *Das1Compatibility::new2old_cmd(const DasCmdPacket *packet, bool lvds)
+DasPacket *Das1Compatibility::new2old_cmd(const DasCmdPacket *packet, enum Das1PacketType mode)
 {
     size_t payload_length = packet->length - sizeof(DasCmdPacket);
     DasPacket::CommandType command = static_cast<DasPacket::CommandType>(packet->command);
-    if (lvds) {
-        return DasPacket::createLvds(packet->source, packet->destination, command, packet->channel, payload_length, packet->payload);
-    } else {
-        return DasPacket::createOcc(packet->source, packet->destination, command, packet->channel, payload_length, packet->payload);
+    switch (mode) {
+    case DAS1_LVDS_SINGLE_WORD:
+        return DasPacket::createLvds(DasCmdPacket::OCC_ID, DasPacket::HWID_BROADCAST_SW, command, packet->channel, payload_length, packet->payload);
+    case DAS1_LVDS:
+        return DasPacket::createLvds(DasCmdPacket::OCC_ID, packet->module_id, command, packet->channel, payload_length, packet->payload);
+    case DAS1_OPTICAL:
+    default:
+        return DasPacket::createOcc(DasCmdPacket::OCC_ID, packet->module_id, command, packet->channel, payload_length, packet->payload);
     }
 }

@@ -16,8 +16,6 @@
 #include <epicsThread.h>
 #include <string>
 
-#define NUM_BASEPLUGIN_PARAMS ((int)(&LAST_BASEPLUGIN_PARAM - &FIRST_BASEPLUGIN_PARAM + 1))
-
 #define MESSAGE_QUEUE_SIZE 5   //!< Size of the message queue for callbacks. Increased to 5 to allow multiple parent plugins.
 
 /* Helper C functions for asyn/EPICS registration
@@ -180,7 +178,7 @@ void BasePlugin::recvDownstreamCb(asynUser *pasynUser, void *ptr)
              */
             msg->claim();
             std::pair<int, PluginMessage*> *q = new std::pair<int, PluginMessage *>(msgType, msg);
-            if (m_messageQueue.trySend(q, sizeof(q)) == -1) {
+            if (m_messageQueue.trySend(&q, sizeof(&q)) == -1) {
                 msg->release();
                 LOG_ERROR("Message queue full, discarding message");
                 m_messageQueue.show();
@@ -193,7 +191,7 @@ void BasePlugin::recvDownstreamThread(epicsEvent *shutdown)
 {
     while (!m_shutdown) {
         std::pair<int, PluginMessage *> *q = NULL;
-        if (m_messageQueue.receive(q, sizeof(q)) <= 0)
+        if (m_messageQueue.receive(&q, sizeof(&q)) <= 0)
             continue;
 
         int msgType = q->first;
@@ -223,93 +221,90 @@ void BasePlugin::recvDownstream(int type, PluginMessage *msg)
     }
 }
 
-void BasePlugin::sendDownstream(int type, PluginMessage *msg)
+void BasePlugin::sendDownstream(int type, PluginMessage *msg, bool wait, bool locked)
 {
+    if (locked)
+        this->unlock();
     msg->claim();
     void *ptr = const_cast<void *>(reinterpret_cast<void *>(msg));
     doCallbacksGenericPointer(ptr, type, 0);
     msg->release();
+    if (wait)
+        msg->waitAllReleased();
+    if (locked)
+        this->lock();
 }
 
-void BasePlugin::sendDownstream(DasPacketList *packets)
+void BasePlugin::sendDownstream(DasPacketList *packets, bool wait, bool locked)
 {
-    packets->claim();
-    sendDownstream(MsgOldDas, dynamic_cast<PluginMessage*>(packets));
-    packets->release();
+    sendDownstream(MsgOldDas, dynamic_cast<PluginMessage*>(packets), wait, locked);
 }
 
-void BasePlugin::sendDownstream(DasCmdPacketList *packets)
+void BasePlugin::sendDownstream(DasCmdPacketList *packets, bool wait, bool locked)
 {
-    packets->claim();
-    sendDownstream(MsgDasCmd, dynamic_cast<PluginMessage*>(packets));
-    packets->release();
+    sendDownstream(MsgDasCmd, dynamic_cast<PluginMessage*>(packets), wait, locked);
 }
 
-void BasePlugin::sendDownstream(DasRtdlPacketList *packets)
+void BasePlugin::sendDownstream(DasRtdlPacketList *packets, bool wait, bool locked)
 {
-    packets->claim();
-    sendDownstream(MsgDasRtdl, dynamic_cast<PluginMessage*>(packets));
-    packets->release();
+    sendDownstream(MsgDasRtdl, dynamic_cast<PluginMessage*>(packets), wait, locked);
 }
 
-void BasePlugin::recvUpstream(asynUser *pasynUser, void *ptr)
+asynStatus BasePlugin::writeGenericPointer(asynUser *pasynUser, void *ptr)
 {
+    int msgType = pasynUser->reason;
+    PluginMessage *msg = reinterpret_cast<PluginMessage *>(ptr);
+    if (msg == 0)
+        return asynError;
+
+    recvUpstream(msgType, msg);
+    return asynSuccess;
+}
+
+void BasePlugin::recvUpstream(int type, PluginMessage *msg)
+{
+    if (type == MsgOldDas) {
+        recvUpstream( dynamic_cast<DasPacketList*>(msg) );
+    } else if (type == MsgDasCmd) {
+        recvUpstream( dynamic_cast<DasCmdPacketList*>(msg) );
+    } else {
+        LOG_ERROR("Skipping sending unsupported message upstream");
+    }
+}
+
+void BasePlugin::sendUpstream(int type, PluginMessage *msg)
+{
+    msg->claim();
     for (auto it=m_connectedPorts.begin(); it!=m_connectedPorts.end(); it++) {
-        if (it->asynGenericPointerInterrupt) {
-
+        if (it->pasynuser->reason == type) {
             asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
             if (!interface) {
-                LOG_ERROR("Can't find writeGenericPointer interface on remote plugin %s", it->portName.c_str());
+                LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, it->portName.c_str());
                 continue;
             }
 
             asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-            void *ptr = reinterpret_cast<void *>(reinterpret_cast<DasPacketList *>(ptr));
+            void *ptr = reinterpret_cast<void *>(msg);
             asynGenericPointerInterface->write(interface->drvPvt, it->pasynuser, ptr);
         }
     }
+
+    msg->release();
+    msg->waitAllReleased();
 }
 
 void BasePlugin::sendUpstream(const DasCmdPacket *packet)
 {
-    DasCmdPacketList packetsList;
-    packetsList.claim();
-    packetsList.push_back(const_cast<DasCmdPacket*>(packet));
-
-    for (auto it=m_connectedPorts.begin(); it!=m_connectedPorts.end(); it++) {
-        asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
-        if (!interface) {
-            LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, it->portName.c_str());
-            continue;
-        }
-
-        asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-        void *ptr = reinterpret_cast<void *>(const_cast<DasCmdPacketList *>(&packetsList));
-        asynGenericPointerInterface->write(interface->drvPvt, it->pasynuser, ptr);
-    }
-
-    packetsList.release();
+    DasCmdPacketList packets;
+    packets.push_back(const_cast<DasCmdPacket*>(packet));
+    sendUpstream(MsgDasCmd, &packets);
 }
 
 void BasePlugin::sendUpstream(const DasPacket *packet)
 {
-    DasPacketList packetsList;
-    packetsList.claim();
-    packetsList.push_back(const_cast<DasPacket*>(packet));
-
-    for (auto it=m_connectedPorts.begin(); it!=m_connectedPorts.end(); it++) {
-        asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
-        if (!interface) {
-            LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, it->portName.c_str());
-            continue;
-        }
-
-        asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-        void *ptr = reinterpret_cast<void *>(const_cast<DasPacketList *>(&packetsList));
-        asynGenericPointerInterface->write(interface->drvPvt, it->pasynuser, ptr);
-    }
-
-    packetsList.release();
+    DasPacketList packets;
+    packets.push_back(const_cast<DasPacket*>(packet));
+    sendUpstream(MsgOldDas, &packets);
 }
 
 std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &callback, double delay)

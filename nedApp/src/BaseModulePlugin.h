@@ -155,9 +155,9 @@ class BaseModulePlugin : public BasePlugin {
 
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
-        DasPacket::ModuleType m_hardwareType;           //!< Hardware type
+        DasCmdPacket::ModuleType m_hardwareType;           //!< Hardware type
         std::map<std::string, ParamTable> m_params;     //!< Maps of exported parameters
-        DasPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
+        DasCmdPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
         uint8_t m_expectedChannel;                      //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
         uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
         uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
@@ -167,7 +167,7 @@ class BaseModulePlugin : public BasePlugin {
         std::map<int, uint32_t> m_configSectionSizes;   //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
         std::map<int, uint32_t> m_configSectionOffsets; //!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
         std::shared_ptr<Timer> m_timeoutTimer;          //!< Currently running timer for response timeout handling
-        std::list<std::function<bool(const DasPacket *)> > m_stateMachines; //!< Active internal state machines
+        std::list<std::function<bool(const DasCmdPacket *)> > m_stateMachines; //!< Active internal state machines
 
     public: // functions
 
@@ -187,10 +187,9 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
          * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
-        BaseModulePlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId,
-                         DasPacket::ModuleType hardwareType, bool behindDsp, int blocking=0, int numParams=0,
-                         int interfaceMask=BaseModulePlugin::defaultInterfaceMask,
-                         int interruptMask=BaseModulePlugin::defaultInterruptMask);
+        BaseModulePlugin(const char *portName, const char *parentPlugins, const char *hardwareId,
+                         DasCmdPacket::ModuleType hardwareType, bool behindDsp,
+                         int interfaceMask=0, int interruptMask=0);
 
         /**
          * Abstract destructor
@@ -242,7 +241,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] payload Payload to be sent out, can be NULL if length is also 0.
          * @param[in] length Payload length in bytes.
          */
-        void sendToDispatcher(DasPacket::CommandType command, uint8_t channel=0, uint32_t *payload=0, uint32_t length=0);
+        void sendUpstream(DasCmdPacket::CommandType command, uint8_t channel=0, uint32_t *payload=0, uint32_t length=0);
 
         /**
          * Overloaded incoming data handler.
@@ -257,7 +256,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @param[in] packets List of packets received in this batch.
          */
-        virtual void processData(const DasPacketList * const packets);
+        virtual void recvDownstream(DasCmdPacketList *packets);
 
         /**
          * Check response packets before handling their content.
@@ -284,7 +283,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] packet to be processed.
          * @return true if packet has been processed, false otherwise
          */
-        virtual bool processResponse(const DasPacket *packet);
+        virtual bool processResponse(const DasCmdPacket *packet);
 
         /**
          * Send a request to the module.
@@ -300,7 +299,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] command to be sent
          * @return true if request has been handled, false otherwise
          */
-        virtual bool processRequest(DasPacket::CommandType command);
+        virtual bool processRequest(DasCmdPacket::CommandType command);
 
         /**
          * Handle common command requests.
@@ -309,25 +308,25 @@ class BaseModulePlugin : public BasePlugin {
          * writeInt32 CmdReq parameter. Function is called form writeInt32()
          * handler to send out corresponding command. Default implementation
          * supports these commands:
-         * - DasPacket::CMD_READ_VERSION
-         * - DasPacket::CMD_READ_CONFIG
-         * - DasPacket::CMD_READ_STATUS
-         * - DasPacket::CMD_READ_TEMPERATURE
-         * - DasPacket::CMD_READ_STATUS_COUNTERS
-         * - DasPacket::CMD_RESET_STATUS_COUNTERS
-         * - DasPacket::CMD_WRITE_CONFIG
-         * - DasPacket::CMD_DISCOVER
-         * - DasPacket::CMD_RESET
-         * - DasPacket::CMD_START
-         * - DasPacket::CMD_STOP
-         * - DasPacket::CMD_UPGRADE
+         * - DasCmdPacket::CMD_READ_VERSION
+         * - DasCmdPacket::CMD_READ_CONFIG
+         * - DasCmdPacket::CMD_READ_STATUS
+         * - DasCmdPacket::CMD_READ_TEMPERATURE
+         * - DasCmdPacket::CMD_READ_STATUS_COUNTERS
+         * - DasCmdPacket::CMD_RESET_STATUS_COUNTERS
+         * - DasCmdPacket::CMD_WRITE_CONFIG
+         * - DasCmdPacket::CMD_DISCOVER
+         * - DasCmdPacket::CMD_RESET
+         * - DasCmdPacket::CMD_START
+         * - DasCmdPacket::CMD_STOP
+         * - DasCmdPacket::CMD_UPGRADE
          * Detector specific commands can be issued by overloading this function.
          *
          * @param[in] command requested.
          * @param[out] timeout before giving up waiting for response, default is 2.0
          * @return Response to be waited for.
          */
-        virtual DasPacket::CommandType handleRequest(DasPacket::CommandType command, double &timeout);
+        virtual DasCmdPacket::CommandType handleRequest(DasCmdPacket::CommandType command, double &timeout);
 
         /**
          * Handles common responses.
@@ -347,17 +346,17 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] packet to be processed.
          * @return true if packet has been processed successfuly, false otherwise
          */
-        virtual bool handleResponse(const DasPacket *packet);
+        virtual bool handleResponse(const DasCmdPacket *packet);
 
         /**
          * Send request to module to do a reset.
          */
-        virtual DasPacket::CommandType reqReset();
+        virtual DasCmdPacket::CommandType reqReset();
 
         /**
          * Handle RESET response.
          */
-        virtual bool rspReset(const DasPacket *packet);
+        virtual bool rspReset(const DasCmdPacket *packet);
 
         /**
          * Send request to reset LVDS chips.
@@ -365,22 +364,22 @@ class BaseModulePlugin : public BasePlugin {
          * ROC boards does a full power-cycle of all LVDS chips when it receives
          * this command.
          */
-        virtual DasPacket::CommandType reqResetLvds();
+        virtual DasCmdPacket::CommandType reqResetLvds();
 
         /**
          * Handle RESET_LVDS response.
          */
-        virtual bool rspResetLvds(const DasPacket *packet);
+        virtual bool rspResetLvds(const DasCmdPacket *packet);
 
         /**
          * Send request to LVDS switch to send a long T&C SysReset signal.
          */
-        virtual DasPacket::CommandType reqTcReset();
+        virtual DasCmdPacket::CommandType reqTcReset();
 
         /**
          * Handle T&C_RESET response.
          */
-        virtual bool rspTcReset(const DasPacket *packet);
+        virtual bool rspTcReset(const DasCmdPacket *packet);
 
         /**
          * Send request to LVDS switch to send a short T&C SysReset signal.
@@ -388,12 +387,12 @@ class BaseModulePlugin : public BasePlugin {
          * ROC boards does a full power-cycle of all LVDS chips when it receives
          * this command.
          */
-        virtual DasPacket::CommandType reqTcResetLvds();
+        virtual DasCmdPacket::CommandType reqTcResetLvds();
 
         /**
          * Handle T&C_RESET_LVDS response.
          */
-        virtual bool rspTcResetLvds(const DasPacket *packet);
+        virtual bool rspTcResetLvds(const DasCmdPacket *packet);
 
         /**
          * Called when discover request to the module should be made.
@@ -403,7 +402,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqDiscover();
+        virtual DasCmdPacket::CommandType reqDiscover();
 
         /**
          * Default handler for DISCOVER response.
@@ -413,7 +412,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] packet with response to DISCOVER
          * @return true if timeout has not yet expired, false otherwise.
          */
-        virtual bool rspDiscover(const DasPacket *packet);
+        virtual bool rspDiscover(const DasCmdPacket *packet);
 
         /**
          * Called when read version request to the module should be made.
@@ -423,7 +422,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadVersion();
+        virtual DasCmdPacket::CommandType reqReadVersion();
 
         /**
          * Default handler for READ_VERSION response.
@@ -433,7 +432,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] packet with response to READ_VERSION
          * @return true if timeout has not yet expired, false otherwise.
          */
-        virtual bool rspReadVersion(const DasPacket *packet);
+        virtual bool rspReadVersion(const DasCmdPacket *packet);
 
         /**
          * Send request to module to read all status registers.
@@ -449,7 +448,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] channel to be selected, 0 selects main/control part.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadStatus(uint8_t channel);
+        virtual DasCmdPacket::CommandType reqReadStatus(uint8_t channel);
 
         /**
          * Default handler for READ_STATUS response.
@@ -460,7 +459,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] channel selected
          * @return true if packet was parsed and module version verified.
          */
-        virtual bool rspReadStatus(const DasPacket *packet, uint8_t channel);
+        virtual bool rspReadStatus(const DasCmdPacket *packet, uint8_t channel);
 
         /**
          * Called when read status counters request to the module should be made.
@@ -470,7 +469,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadStatusCounters();
+        virtual DasCmdPacket::CommandType reqReadStatusCounters();
 
         /**
          * Called when reset status counters request to the module should be made.
@@ -480,7 +479,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqResetStatusCounters();
+        virtual DasCmdPacket::CommandType reqResetStatusCounters();
 
         /**
          * Default handler for READ_STATUS_COUNTERS response.
@@ -490,7 +489,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] packet with response to READ_STATUS_COUNTERS
          * @return true if packet was parsed and module version verified.
          */
-        virtual bool rspReadStatusCounters(const DasPacket *packet);
+        virtual bool rspReadStatusCounters(const DasCmdPacket *packet);
 
         /**
          * Default handler for RESET_STATUS_COUNTERS response.
@@ -499,7 +498,7 @@ class BaseModulePlugin : public BasePlugin {
          * @retval true Timeout has not yet occurred
          * @retval false Timeout has occurred and response is invalid.
          */
-        virtual bool rspResetStatusCounters(const DasPacket *packet);
+        virtual bool rspResetStatusCounters(const DasCmdPacket *packet);
 
         /**
          * Send request to module to read configuration request.
@@ -515,7 +514,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] channel to be selected, 0 selects main/control part.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadConfig(uint8_t channel);
+        virtual DasCmdPacket::CommandType reqReadConfig(uint8_t channel);
 
         /**
          * Default handler for READ_CONFIG response.
@@ -526,7 +525,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] channel selected
          * @return true if packet was parsed and module version verified.
          */
-        virtual bool rspReadConfig(const DasPacket *packet, uint8_t channel);
+        virtual bool rspReadConfig(const DasCmdPacket *packet, uint8_t channel);
 
         /**
          * Construct WRITE_CONFIG payload and send it to module.
@@ -558,7 +557,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] channel to be selected, 0 selects main/control part.
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqWriteConfig(uint8_t section=0, uint8_t channel=0);
+        virtual DasCmdPacket::CommandType reqWriteConfig(uint8_t section=0, uint8_t channel=0);
 
         /**
          * Default handler for READ_CONFIG response.
@@ -571,7 +570,7 @@ class BaseModulePlugin : public BasePlugin {
          * @retval true Timeout has not yet occurred
          * @retval false Timeout has occurred and response is invalid.
          */
-        virtual bool rspWriteConfig(const DasPacket *packet, uint8_t channel);
+        virtual bool rspWriteConfig(const DasCmdPacket *packet, uint8_t channel);
 
         /**
          * Send START command to module.
@@ -580,7 +579,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqStart();
+        virtual DasCmdPacket::CommandType reqStart();
 
         /**
          * Default handler for START response.
@@ -589,7 +588,7 @@ class BaseModulePlugin : public BasePlugin {
          * @retval true Timeout has not yet occurred
          * @retval false Timeout has occurred and response is invalid.
          */
-        virtual bool rspStart(const DasPacket *packet);
+        virtual bool rspStart(const DasCmdPacket *packet);
 
         /**
          * Send STOP command to module.
@@ -598,7 +597,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqStop();
+        virtual DasCmdPacket::CommandType reqStop();
 
         /**
          * Default handler for STOP response.
@@ -607,7 +606,7 @@ class BaseModulePlugin : public BasePlugin {
          * @retval true Received command ACK in time.
          * @retval false Timeout has occurred or NACK received.
          */
-        virtual bool rspStop(const DasPacket *packet);
+        virtual bool rspStop(const DasCmdPacket *packet);
 
         /**
          * Send firmware upgrade packet.
@@ -618,9 +617,9 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @param[in] data to be sent
          * @param[in] size of data in bytes
-         * @return DasPacket::CMD_UPGRADE or 0 when no packet was sent for some reason.
+         * @return DasCmdPacket::CMD_UPGRADE or 0 when no packet was sent for some reason.
          */
-        virtual DasPacket::CommandType reqUpgrade(const char *data=0, uint32_t size=0);
+        virtual DasCmdPacket::CommandType reqUpgrade(const char *data=0, uint32_t size=0);
 
         /**
          * Default handler for CMD_UPGRADE response.
@@ -630,7 +629,7 @@ class BaseModulePlugin : public BasePlugin {
          * @retval true Response was succesfully unpacked.
          * @retval false Could not process response.
          */
-        virtual bool rspUpgrade(const DasPacket *packet);
+        virtual bool rspUpgrade(const DasCmdPacket *packet);
 
         /**
          * Called when read temperature request to the module should be made.
@@ -640,7 +639,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @return Response to wait for.
          */
-        virtual DasPacket::CommandType reqReadTemperature();
+        virtual DasCmdPacket::CommandType reqReadTemperature();
 
         /**
          * Default handler for READ_TEMP response.
@@ -650,7 +649,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] packet with response to READ_TEMP
          * @return true if packet was parsed and temperature extracted.
          */
-        virtual bool rspReadTemperature(const DasPacket *packet);
+        virtual bool rspReadTemperature(const DasCmdPacket *packet);
 
         /**
          * Create and register single integer status parameter.
@@ -769,7 +768,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] command Command sent to module for which response should be received.
          * @return true if the timeout function did the cleanup, that is received was *not* received.
          */
-        virtual float noResponseCleanup(DasPacket::CommandType command);
+        virtual float noResponseCleanup(DasCmdPacket::CommandType command);
 
         /**
          * Request a custom callback function to be called at some time in the future.
@@ -784,7 +783,7 @@ class BaseModulePlugin : public BasePlugin {
          * @retval true if callback was scheduled
          * @retval false if callback was not scheduled
          */
-        bool scheduleTimeoutCallback(DasPacket::CommandType command, double delay);
+        bool scheduleTimeoutCallback(DasCmdPacket::CommandType command, double delay);
 
         /**
          * Cancel any pending timeout callback and release the timer.
@@ -811,7 +810,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[out] version structure to be populated
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        virtual bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version) = 0;
+        virtual bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version) = 0;
 
         /**
          * Compare version returned from the module to the expected one.
@@ -922,7 +921,7 @@ class BaseModulePlugin : public BasePlugin {
          * @parma[in] command to be converted.
          * @return String describing the command.
          */
-        const char *cmd2str(DasPacket::CommandType command);
+        const char *cmd2str(DasCmdPacket::CommandType command);
 
         /**
          * Register callback function for the handling responses internally.
@@ -944,7 +943,7 @@ class BaseModulePlugin : public BasePlugin {
          * are called in the order they're registered. There's no mechanism to
          * prevent overlap in case - it's strictly first come first served.
          */
-        void registerResponseHandler(std::function<bool(const DasPacket *)> &callback);
+        void registerResponseHandler(std::function<bool(const DasCmdPacket *)> &callback);
 
         /**
          * Returns a name of the module from the global database.
@@ -966,7 +965,6 @@ class BaseModulePlugin : public BasePlugin {
         void recalculateConfigParams();
 
     protected:
-        #define FIRST_BASEMODULEPLUGIN_PARAM CmdReq
         int CmdReq;         //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
         int CmdRsp;         //!< Last command response status
         int HwId;           //!< Hw ID that this object is controlling
@@ -986,7 +984,6 @@ class BaseModulePlugin : public BasePlugin {
         int CfgSection;     //!< Selected configuration section to be written
         int CfgChannel;     //!< Selected channel to be configured
         int NoRspTimeout;   //!< Time to wait for response
-        #define LAST_BASEMODULEPLUGIN_PARAM NoRspTimeout
 };
 
 #endif // BASE_MODULE_PLUGIN_H

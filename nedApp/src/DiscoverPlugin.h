@@ -16,7 +16,7 @@
 #include <map>
 
 /**
- * Module discovery plugin.
+ * Plugin to discover detector modules.
  *
  * The plugin will discover all modules and remember them internally. asyn report
  * can be used to print details of all discovered details.
@@ -28,13 +28,13 @@ class DiscoverPlugin : public BasePlugin {
          * Module description.
          */
         struct ModuleDesc {
-            DasPacket::ModuleType type;
+            DasCmdPacket::ModuleType type;
             uint32_t parent;
             BaseModulePlugin::Version version;
             bool verified;
 
             ModuleDesc()
-                : type(static_cast<DasPacket::ModuleType>(0))
+                : type(static_cast<DasCmdPacket::ModuleType>(0))
                 , parent(0)
                 , verified(false)
             {}
@@ -52,7 +52,7 @@ class DiscoverPlugin : public BasePlugin {
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          */
-        DiscoverPlugin(const char *portName, const char *dispatcherPortName);
+        DiscoverPlugin(const char *portName, const char *parentPlugins);
 
     private:
         /**
@@ -61,9 +61,9 @@ class DiscoverPlugin : public BasePlugin {
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
-         * Process incoming packets.
+         * Process incoming command packets.
          */
-        void processData(const DasPacketList * const packetList);
+        void recvDownstream(DasCmdPacketList *packetList);
 
         /**
          * Overloaded method to handle reading the output string.
@@ -78,22 +78,17 @@ class DiscoverPlugin : public BasePlugin {
         /**
          * Send out a broadcast DISCOVER command to all modules.
          */
-        void reqDiscover(uint32_t hardwareId);
-
-        /**
-         * Send a DISCOVER command to a particular module through LVDS on DSP.
-         */
-        void reqLvdsDiscover(uint32_t hardwareId);
+        void reqDiscover(uint32_t moduleId=DasCmdPacket::BROADCAST_ID);
 
         /**
          * Send a READ_VERSION command to a particular DSP.
          */
-        void reqVersion(uint32_t hardwareId);
+        void reqVersion(uint32_t moduleId);
 
         /**
          * Send a READ_VERSION command to a particular module through LVDS.
          */
-        void reqLvdsVersion(uint32_t hardwareId);
+        void reqLvdsVersion(uint32_t moduleId);
 
         /**
          * Print discovered modules in human format
@@ -106,7 +101,6 @@ class DiscoverPlugin : public BasePlugin {
         uint32_t formatSubstitution(char *buffer, uint32_t size);
 
     private:
-        #define FIRST_DISCOVERPLUGIN_PARAM Trigger
         int Trigger;            //!< Trigger discovery of modules
         int Output;
         int Format;             //!< Output format
@@ -115,7 +109,6 @@ class DiscoverPlugin : public BasePlugin {
         int OptBcast;           //!< Send optical broadcast packet as part of discover
         int LvdsBcast;          //!< Send LVDS broadcast packet as part of discover
         int LvdsSingle;         //!< Send LVDS single word packet as part of discover
-        #define LAST_DISCOVERPLUGIN_PARAM LvdsSingle
 };
 
 #endif // DISCOVER_PLUGIN_H

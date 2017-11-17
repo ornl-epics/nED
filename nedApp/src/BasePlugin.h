@@ -65,7 +65,7 @@ class Timer;
  * parameters and exchange of data with other plugins. Plugin connections are
  * established by child plugins subscribing to parent plugins. The usual data
  * flow is from parent plugin(s) to child plugins and is called downstream
- * flow. Downstream flow can be optimized by creating a thread handling the 
+ * flow. Downstream flow can be optimized by creating a thread handling the
  * data - also called blocking mode. The opposite direction is called upstream
  * and is executed in callers' thread.
  *
@@ -101,7 +101,7 @@ class BasePlugin : public asynPortDriver {
          * @param[in] priority The thread priority for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          * @param[in] stackSize The stack size for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          */
-        BasePlugin(const char *portName, int blocking=0, int interfaceMask=0, int interruptMask=0, 
+        BasePlugin(const char *portName, int blocking=0, int interfaceMask=0, int interruptMask=0,
                    int queueSize=5, int asynFlags=0, int priority=0, int stackSize=0);
 
         /**
@@ -116,7 +116,7 @@ class BasePlugin : public asynPortDriver {
          * bi-directional communication with connectes plugins is enabled. If some plugins
          * were previously connected, they're disconnected first. Port must not be locked
          * when calling this function.
-         * 
+         *
          * @param[in] ports to connect to
          * @param[in] messageTypes each number must be one of the integers registers by Msg* parameters.
          */
@@ -189,44 +189,80 @@ class BasePlugin : public asynPortDriver {
         /**
          * A worker function to process DasPacket messages from parent plugins.
          */
-        virtual void recvDownstream(const DasPacketList *packets) {};
+        virtual void recvDownstream(DasPacketList *packets) {};
 
         /**
          * A worker function to process DasCmdPacket messages from parent plugins.
          */
-        virtual void recvDownstream(const DasCmdPacketList *packets) {};
+        virtual void recvDownstream(DasCmdPacketList *packets) {};
 
         /**
          * A worker function to process DasRtdlPacket messages from parent plugins.
          */
-        virtual void recvDownstream(const DasRtdlPacketList *packets) {};
+        virtual void recvDownstream(DasRtdlPacketList *packets) {};
 
         /**
          * Send PluginMessage to any connected child plugins.
+         *
+         * When sending messages the plugin must not be locked. All BasePlugin
+         * interfaces automatically lock the plugin but there are cases when
+         * plugin is not locked (for example calling from custom thread).
+         * When this function is called from non-locked environment, it should
+         * set the locked flag to false.
+         *
+         * The function will return only after all subscribed plugins have
+         * received and processed the message. This can be turned off with wait
+         * flag and is usually used in conjunction with locked=false. Be
+         * mindful of potential race-condition when wait=false and locked=true -
+         * waiting after locked has been reacuired is not will lead to dead-lock.
+         *
+         * @param[in] type of message to be sent
+         * @param[in] msg to be sent
+         * @param[in] wait for plugins to process message before returning
+         * @param[in] locked flags whether the plugin is currently in locked state
          */
-        void sendDownstream(int type, PluginMessage *msg);
+        void sendDownstream(int type, PluginMessage *msg, bool wait=true, bool locked=true);
 
         /**
          * Send DasPackets to any connected child plugins.
          */
-        void sendDownstream(DasPacketList *packets);
+        void sendDownstream(DasPacketList *packets, bool wait=true, bool locked=true);
 
         /**
          * Send DasCmdPackets to any connected child plugins.
          */
-        void sendDownstream(DasCmdPacketList *packets);
+        void sendDownstream(DasCmdPacketList *packets, bool wait=true, bool locked=true);
 
         /**
          * Send DasRtdlPackets to any connected child plugins.
          */
-        void sendDownstream(DasRtdlPacketList *packets);
+        void sendDownstream(DasRtdlPacketList *packets, bool wait=true, bool locked=true);
 
         /**
          * A callback function called upon receiving message from child plugin.
          *
-         * The default operation is pass-thru messages to parent plugins.
+         * The default operation is to call function corresponding to supported
+         * message type.
          */
-        void recvUpstream(asynUser * pasynUser, void *ptr);
+        virtual void recvUpstream(int type, PluginMessage *msg);
+
+        /**
+         * Receive DasPacket list from children plugins.
+         */
+        virtual void recvUpstream(DasPacketList *packets) {};
+
+        /**
+         * Receive DasCmdPacket list from children plugins.
+         */
+        virtual void recvUpstream(DasCmdPacketList *packets) {};
+
+        /**
+         * Send message to parent plugins.
+         *
+         * Function find connected parent plugins and sends message only if
+         * message type is also subscribed to.
+         */
+        virtual void sendUpstream(int type, PluginMessage *msg);
 
         /**
          * Send single DasPacket to parent plugins.
@@ -304,14 +340,10 @@ class BasePlugin : public asynPortDriver {
         /**
          * Overloaded asynPortDriver function to receive messges from child plugins.
          *
-         * To comply with name terminology in this class, the functions is a 
+         * To comply with name terminology in this class, the functions is a
          * simple wrapper around cbDownstream().
          */
-        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer)
-        {
-            recvUpstream(pasynUser, pointer);
-            return asynSuccess;
-        }
+        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
 
     private:
         /**
@@ -351,12 +383,10 @@ class BasePlugin : public asynPortDriver {
         std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
 
     protected:
-        #define FIRST_BASEPLUGIN_PARAM MsgOldDas
         int MsgOldDas;
         int MsgDasCmd;
         int MsgDasRtdl;
         int MsgParamExch;
-        #define LAST_BASEPLUGIN_PARAM MsgParamExch
 };
 
 #endif // PLUGIN_DRIVER_H

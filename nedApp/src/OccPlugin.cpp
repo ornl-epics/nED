@@ -305,17 +305,15 @@ asynStatus OccPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
     return asynPortDriver::readInt32(pasynUser, value);
 }
 
-void OccPlugin::recvUpstream(asynUser *pasynUser, void *ptr)
+void OccPlugin::recvUpstream(int type, PluginMessage *msg)
 {
-    int msgType = pasynUser->reason;
-
     if (m_occ == NULL) {
         LOG_ERROR("OCC device not initialized");
         return;
     }
 
-    if (msgType == MsgDasCmd) {
-        DasCmdPacketList *cmds = reinterpret_cast<DasCmdPacketList *>(ptr);
+    if (type == MsgDasCmd) {
+        DasCmdPacketList *cmds = reinterpret_cast<DasCmdPacketList *>(msg);
 
         for (auto it = cmds->cbegin(); it != cmds->cend(); it++) {
             DasCmdPacket *packet = *it;
@@ -328,8 +326,8 @@ void OccPlugin::recvUpstream(asynUser *pasynUser, void *ptr)
                 break;
             }
         }
-    } else if (msgType == MsgOldDas) {
-        DasPacketList *pkts = reinterpret_cast<DasPacketList *>(ptr);
+    } else if (type == MsgOldDas) {
+        DasPacketList *pkts = reinterpret_cast<DasPacketList *>(msg);
 
         for (auto it = pkts->cbegin(); it != pkts->cend(); it++) {
             DasPacket *packet = *it;
@@ -342,6 +340,8 @@ void OccPlugin::recvUpstream(asynUser *pasynUser, void *ptr)
                 break;
             }
         }
+    } else {
+        LOG_ERROR("Skipping sending message type '%d', not supported by protocol", type);
     }
 }
 
@@ -503,7 +503,7 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
         uint32_t bytesLeft = (end - ptr);
         uint32_t bytesProcessed = 0;
 
-        // We don't know what we're receiving. It could be old DAS packet or 
+        // We don't know what we're receiving. It could be old DAS packet or
         // a new DAS header. They differ in the most significant 4 bits of the
         // first 32 bits received.
         uint32_t version = (*reinterpret_cast<uint32_t *>(ptr) >> 28);
@@ -575,11 +575,11 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
 
     // Publish all packets in parallel ..
     if (!oldDas.empty())
-        sendDownstream(&oldDas);
+        sendDownstream(&oldDas, false, false);
     if (!dasCmd.empty())
-        sendDownstream(&dasCmd);
+        sendDownstream(&dasCmd, false, false);
     if (!dasRtdl.empty())
-        sendDownstream(&dasRtdl);
+        sendDownstream(&dasRtdl, false, false);
 
     // .. and wait for all of them to get released
     oldDas.waitAllReleased();

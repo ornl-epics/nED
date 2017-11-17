@@ -142,6 +142,35 @@ class DasRtdlPacket : public Packet {
 class DasCmdPacket : public Packet {
     public: /* Variables */
 
+        static const uint32_t BROADCAST_ID = 0x0;
+        static const uint32_t OCC_ID       = 0x0CC;
+
+        /**
+         * Module types as returned in discover response.
+         */
+        enum ModuleType {
+            MOD_TYPE_ROC                = 0x20,   //!< ROC (or LPSD) module
+            MOD_TYPE_AROC               = 0x21,   //!< AROC
+            MOD_TYPE_HROC               = 0x22,
+            MOD_TYPE_BNLROC             = 0x25,
+            MOD_TYPE_CROC               = 0x29,
+            MOD_TYPE_IROC               = 0x2A,
+            MOD_TYPE_BIDIMROC           = 0x2B,
+            MOD_TYPE_ADCROC             = 0x2D,
+            MOD_TYPE_DSP                = 0x30,
+            MOD_TYPE_DSPW               = 0x31,
+            MOD_TYPE_SANSROC            = 0x40,
+            MOD_TYPE_ACPC               = 0xA0,
+            MOD_TYPE_ACPCFEM            = 0xA1,
+            MOD_TYPE_FFC                = 0xA2,
+            MOD_TYPE_FEM                = 0xAA,
+        };
+
+        /**
+         * Type of commands supported by modules.
+         *
+         * It's up to the module whether he implements particular command.
+         */
         enum CommandType {
             CMD_READ_VERSION            = 0x20, //!< Read module version
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
@@ -182,16 +211,18 @@ class DasCmdPacket : public Packet {
         };
 
         struct {
+            unsigned cmd_length:12;     //!< Command payload length
+            unsigned __reserved2:4;
             enum CommandType command:8; //!< Type of command
-            bool response:1;            //!< Flags this command packet as response
+            union {
+                unsigned channel:5;     //!< Command sequence id
+                unsigned cmd_sequence:5;//!< Command sequence id
+            };
             bool acknowledge:1;         //!< Flag whether command was succesful, only valid in response
-            unsigned channel:5;         //!< Selects individual channel on module, where applicable
-            unsigned padded:1;          //!< Last dword is half way (16 bits) padded
-            unsigned rspId:8;           //!< Command/response id, to be matched in response
-            unsigned __reserved2:8;
+            bool response:1;            //!< Flags this command packet as response
+            unsigned lvds_version;      //!< LVDS protocol version, used only by hardware
         };
-        uint32_t source;                //!< Senders' address
-        uint32_t destination;           //!< Destination address
+        uint32_t module_id;             //!< Destination address
         uint32_t payload[0];            //!< Dynamic sized command payload
 
     public: /* Functions */
@@ -203,12 +234,12 @@ class DasCmdPacket : public Packet {
          * @param[in] size payload size only
          * @return Returns a newly created packet or 0 on error.
          */
-        static DasCmdPacket *create(uint32_t src, uint32_t dest, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload, size_t payloadSize);
+        static DasCmdPacket *create(uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, const uint32_t *payload=0, size_t payloadSize=0);
 
         /**
          * Initialize packet fields.
          */
-        void init(uint32_t src, uint32_t dest, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize);
+        void init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize);
 };
 
 #endif // PACKET_H
