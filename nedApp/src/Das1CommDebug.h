@@ -1,4 +1,4 @@
-/* DebugPlugin.h
+/* Das1CommDebug.h
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -7,8 +7,8 @@
  * @author Klemen Vodopivec
  */
 
-#ifndef DEBUG_PLUGIN_H
-#define DEBUG_PLUGIN_H
+#ifndef DAS1_COMM_DEBUG_H
+#define DAS1_COMM_DEBUG_H
 
 #include "BasePlugin.h"
 
@@ -33,7 +33,7 @@
  * User can send any 8 bit OCC command. The plugin does not check command value
  * and thus allows extensibility through EPICS database.
  */
-class DebugPlugin : public BasePlugin {
+class Das1CommDebug : public BasePlugin {
     private: // variables
         /**
          * Valid byte grouping modes.
@@ -53,23 +53,19 @@ class DebugPlugin : public BasePlugin {
             epicsTimeStamp timestamp;
         };
 
-        static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask | asynFloat64Mask;
-        static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask | asynFloat64Mask;
-
         uint32_t m_rawPacket[18];   //!< Cached packet data to be sent out
         std::list<PacketDesc> m_lastPacketQueue;
 
     public: // structures and defines
         /**
-         * Constructor for DebugPlugin
+         * Constructor for Das1CommDebug
          *
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
+         * @param[in] parentPlugins list of plugins to connect to.
          */
-        DebugPlugin(const char *portName, const char *dispatcherPortName, int blocking=0);
+        Das1CommDebug(const char *portName, const char *parentPlugins);
 
         /**
          * Overloaded function to handle writing strings and byte arrays.
@@ -89,7 +85,7 @@ class DebugPlugin : public BasePlugin {
         /**
          * Overloaded function to process incoming OCC packets.
          */
-        virtual void processData(const DasPacketList * const packetList);
+        void recvDownstream(DasPacketList *packetList);
 
     private:
         /**
@@ -120,7 +116,6 @@ class DebugPlugin : public BasePlugin {
         void selectPacket(int index);
 
     protected:
-        #define FIRST_DEBUGPLUGIN_PARAM ReqDest
         int ReqDest;        //!< Module address to communicate with
         int ReqCmd;         //!< Command to be sent
         int ReqIsDsp;       //!< Is the module we communicate with behinds the DSP, using LVDS link
@@ -159,7 +154,6 @@ class DebugPlugin : public BasePlugin {
         int PktQueIndex;    //!< Currently display packet index
         int PktQueSize;     //!< Number of elements in packet buffer
         int PktQueMaxSize;  //!< Max num of elements in packet buffer
-        #define LAST_DEBUGPLUGIN_PARAM PktQueMaxSize
 };
 
-#endif // DEBUG_PLUGIN_H
+#endif // DAS1_COMM_DEBUG_H

@@ -1,4 +1,4 @@
-/* DebugPlugin.cpp
+/* Das1CommDebug.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -8,19 +8,16 @@
  */
 
 #include "BaseModulePlugin.h"
-#include "DebugPlugin.h"
+#include "Das1CommDebug.h"
 #include "Common.h"
 #include "Log.h"
 
 #include <algorithm>
 
-EPICS_REGISTER_PLUGIN(DebugPlugin, 2, "Port name", string, "Dispatcher port name", string);
+EPICS_REGISTER_PLUGIN(Das1CommDebug, 2, "Port name", string, "Parent plugins", string);
 
-#define NUM_DEBUGPLUGIN_PARAMS      ((int)(&LAST_DEBUGPLUGIN_PARAM - &FIRST_DEBUGPLUGIN_PARAM + 1))
-
-DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, int blocking)
-    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_DEBUGPLUGIN_PARAMS, 1,
-                 defaultInterfaceMask, defaultInterruptMask)
+Das1CommDebug::Das1CommDebug(const char *portName, const char *parentPlugins)
+    : BasePlugin(portName, 0, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
 {
     createParam("ReqDest",      asynParamOctet, &ReqDest, 0x0); // WRITE - Module address to communicate with
     createParam("ReqCmd",       asynParamInt32, &ReqCmd, 0x0);  // WRITE - Command to be sent to module
@@ -59,14 +56,16 @@ DebugPlugin::DebugPlugin(const char *portName, const char *dispatcherPortName, i
     createParam("RawPkt17",     asynParamInt32, &RawPkt17, 0);  // Raw packet dword 17
     createParam("PktQueIndex",  asynParamInt32, &PktQueIndex, 0);   // Currently selected packet
     createParam("PktQueSize",   asynParamInt32, &PktQueSize, 0);    // Number of elements in packet buffer
-    createParam("PktQueMaxSize",asynParamInt32, &PktQueMaxSize, 0); // Max num of elements in packet buffer
+    createParam("PktQueMaxSize",asynParamInt32, &PktQueMaxSize, 10);// Max num of elements in packet buffer
 
     callParamCallbacks();
+
+    BasePlugin::connect(parentPlugins, MsgOldDas);
 
     generatePacket();
 }
 
-asynStatus DebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+asynStatus Das1CommDebug::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == ReqSend) {
         if (value == 1)
@@ -125,7 +124,7 @@ asynStatus DebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
-asynStatus DebugPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+asynStatus Das1CommDebug::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
 {
     if (pasynUser->reason == ReqDest) {
         setStringParam(ReqDest, value);
@@ -136,7 +135,7 @@ asynStatus DebugPlugin::writeOctet(asynUser *pasynUser, const char *value, size_
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);;
 }
 
-asynStatus DebugPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
+asynStatus Das1CommDebug::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
 {
     if (pasynUser->reason == RspData) {
         int byteGrp = GROUP_2_BYTES_SWAPPED;
@@ -183,7 +182,7 @@ asynStatus DebugPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChar
     return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
 }
 
-void DebugPlugin::generatePacket()
+void Das1CommDebug::generatePacket()
 {
     DasPacket *packet;
     int cmd, isDsp;
@@ -226,14 +225,10 @@ void DebugPlugin::generatePacket()
     callParamCallbacks();
 }
 
-void DebugPlugin::sendPacket()
+void Das1CommDebug::sendPacket()
 {
     DasPacket *packet = reinterpret_cast<DasPacket *>(m_rawPacket);
-    BasePlugin::sendToDispatcher(packet);
-
-    int nSent = 0;
-    getIntegerParam(TxCount, &nSent);
-    setIntegerParam(TxCount, ++nSent);
+    BasePlugin::sendUpstream(packet);
 
     // Invalidate all params
     setIntegerParam(RspCmd,     0);
@@ -252,21 +247,14 @@ void DebugPlugin::sendPacket()
     callParamCallbacks();
 }
 
-void DebugPlugin::processData(const DasPacketList * const packetList)
+void Das1CommDebug::recvDownstream(DasPacketList *packetList)
 {
-    int nReceived = 0;
-    int nProcessed = 0;
     bool changePacket = false;
-    getIntegerParam(RxCount,    &nReceived);
-    getIntegerParam(ProcCount,  &nProcessed);
-
-    nReceived += packetList->size();
 
     for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
         const DasPacket *packet = *it;
 
         if (parseCmd(packet)) {
-            nProcessed++;
             changePacket = true;
         }
     }
@@ -276,12 +264,10 @@ void DebugPlugin::processData(const DasPacketList * const packetList)
     }
 
     setIntegerParam(PktQueSize, m_lastPacketQueue.size());
-    setIntegerParam(RxCount,    nReceived);
-    setIntegerParam(ProcCount,  nProcessed);
     callParamCallbacks();
 }
 
-bool DebugPlugin::parseCmd(const DasPacket *packet)
+bool Das1CommDebug::parseCmd(const DasPacket *packet)
 {
     int maxQueSize = 0;
     getIntegerParam(PktQueMaxSize, &maxQueSize);
@@ -303,7 +289,7 @@ bool DebugPlugin::parseCmd(const DasPacket *packet)
     return true;
 }
 
-void DebugPlugin::selectPacket(int index) {
+void Das1CommDebug::selectPacket(int index) {
     DasPacket *packet;
     struct timespec rspTimeStamp; // In POSIX time
 

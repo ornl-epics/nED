@@ -16,7 +16,6 @@ Das1Compatibility::Das1Compatibility(const char *portName, const char *parentPlu
     : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos)
 {
     // Permanently connect to all parent plugins
-    static std::list<int> msgs = { MsgOldDas, MsgDasCmd, MsgDasRtdl };
     BasePlugin::connect(parentPlugins, MsgOldDas);
 }
 
