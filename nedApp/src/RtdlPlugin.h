@@ -22,22 +22,18 @@ class RtdlPlugin : public BasePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        RtdlPlugin(const char *portName, const char *dispatcherPortName, int blocking);
+        RtdlPlugin(const char *portName, const char *parentPlugins);
 
         /**
-         * Overloaded function to receive all OCC data.
+         * Process downstream RTDL packets
          */
-        void processData(const DasPacketList * const packetList);
+        void recvDownstream(DasRtdlPacketList *packets);
 
     private:
-        uint64_t m_receivedCount;
-        uint64_t m_processedCount;
-        epicsTimeStamp m_lastRtdlTime;  //!< Time from last processed RTDL packet
+        epicsTime m_lastRtdlTime;  //!< Time from last processed RTDL packet
 
     private: // asyn parameters
-        #define FIRST_RTDLPLUGIN_PARAM Timestamp
         int Timestamp;
         int BadPulse;
         int PulseFlavor;
@@ -52,7 +48,8 @@ class RtdlPlugin : public BasePlugin {
         int FrameOffset;
         int TofFixOffset;
         int RingPeriod;
-        #define LAST_RTDLPLUGIN_PARAM RingPeriod
+        int ErrorsFutureTime;
+        int ErrorsPastTime;
 };
 
 #endif // RTDL_PLUGIN_H

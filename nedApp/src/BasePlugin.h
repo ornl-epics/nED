@@ -26,11 +26,6 @@
 class Timer;
 
 /**
- * Convenience macro to increment current parameter value.
- */
-#define addIntegerParam(param, value) { int tmp; getIntegerParam(param, &tmp); setIntegerParam(param, value+tmp); }
-
-/**
  * Registers plugin with EPICS system.
  *
  * Each plugin class should call this macro somewhere in the .c/.cpp file. The macro
@@ -336,6 +331,16 @@ class BasePlugin : public asynPortDriver {
          */
         asynStatus setIntegerParam(const std::string &name, int value);
         using asynPortDriver::setIntegerParam;
+
+        /**
+         * Convenience function to increment current parameter value.
+         */
+        asynStatus addIntegerParam(const std::string &name, int increment);
+
+        /**
+         * Convenience function to increment current parameter value.
+         */
+        asynStatus addIntegerParam(int param, int increment);
 
         /**
          * Overloaded asynPortDriver function to receive messges from child plugins.

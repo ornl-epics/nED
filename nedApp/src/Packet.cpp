@@ -38,7 +38,7 @@ void DasRtdlPacket::init(uint8_t src, const RtdlHeader *hdr, const uint32_t *fra
 
     // Use memcpy for performance reasons
     memcpy(&this->timestamp_sec, hdr, sizeof(RtdlHeader));
-    memcpy(this->payload, frames, nFrames*sizeof(uint32_t));
+    memcpy(this->frames, frames, nFrames*sizeof(uint32_t));
 }
 
 DasCmdPacket *DasCmdPacket::create(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload, size_t payloadSize)

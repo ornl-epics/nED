@@ -1,12 +1,5 @@
 include "BasePlugin.include"
 
-# Upgrade BasePlugin::Enable PV
-record(bo, "$(P)Enable")
-{
-    info(autosaveFields, "VAL")
-    field(VAL,  "1")
-    field(PINI, "YES")
-}
 record(fanout, "$(P)Refresh")
 {
     field(LNK1, "$(P)PrevPulseFlavor")
@@ -266,4 +259,26 @@ record(ai, "$(P)BeamPowerAvg")
     field(INP,  "$(P)BeamPower NPP")
     field(PREC, "3")
     field(EGU,  "MW")
+}
+record(longin, "$(P)ErrorsFutureTime")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of future time errors")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrorsFutureTime")
+    field(SCAN, "I/O Intr")
+    field(HIGH, "1")
+    field(HSV,  "MINOR")
+}
+record(longin, "$(P)ErrorsPastTime")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of past time errors")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrorsPastTime")
+    field(SCAN, "I/O Intr")
+    field(HIGH, "1")
+    field(HSV,  "MINOR")
 }

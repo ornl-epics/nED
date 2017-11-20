@@ -119,7 +119,7 @@ class DasRtdlPacket : public Packet {
             };
         } correction;
 
-        uint32_t payload[0];                //!< Placeholder for dynamic buffer of RTDL frame data
+        uint32_t frames[0];                 //!< Placeholder for dynamic buffer of RTDL frame data
 
     public: /* Functions */
         /**
@@ -220,7 +220,10 @@ class DasCmdPacket : public Packet {
             };
             bool acknowledge:1;         //!< Flag whether command was succesful, only valid in response
             bool response:1;            //!< Flags this command packet as response
-            unsigned lvds_version;      //!< LVDS protocol version, used only by hardware
+            unsigned lvds_version;      //!< LVDS protocol version,
+                                        //!< hardware uses this flag ti distinguish protocol in responses
+                                        //!< but doesn't use it from optical side, software will reuse
+                                        //!< to distinguish DSP and other modules
         };
         uint32_t module_id;             //!< Destination address
         uint32_t payload[0];            //!< Dynamic sized command payload

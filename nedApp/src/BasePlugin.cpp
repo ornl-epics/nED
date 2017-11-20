@@ -214,6 +214,9 @@ void BasePlugin::recvDownstream(int type, PluginMessage *msg)
     } else if (type == MsgDasCmd) {
         DasCmdPacketList *pkts = dynamic_cast<DasCmdPacketList*>(msg);
         recvDownstream(pkts);
+    } else if (type == MsgDasRtdl) {
+        DasRtdlPacketList *pkts = dynamic_cast<DasRtdlPacketList*>(msg);
+        recvDownstream(pkts);
     } else if (type == MsgParamExch) {
 
     } else {
@@ -428,3 +431,15 @@ asynStatus BasePlugin::setIntegerParam(const std::string &name, int value)
         ret = setIntegerParam(param, value);
     return ret;
 }
+
+asynStatus BasePlugin::addIntegerParam(const std::string &name, int increment) {
+    int tmp;
+    getIntegerParam(name, tmp);
+    return setIntegerParam(name, tmp+increment);
+};
+
+asynStatus BasePlugin::addIntegerParam(int param, int increment) {
+    epicsInt32 tmp;
+    asynPortDriver::getIntegerParam(param, &tmp);
+    return asynPortDriver::setIntegerParam(param, tmp+increment);
+};
