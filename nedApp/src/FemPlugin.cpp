@@ -11,11 +11,7 @@
 #include "FemPlugin.h"
 #include "Log.h"
 
-#define NUM_FEMPLUGIN_PARAMS    ((int)(&LAST_FEMPLUGIN_PARAM - &FIRST_FEMPLUGIN_PARAM + 1))
-
-EPICS_REGISTER_PLUGIN(FemPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
-
-const unsigned FemPlugin::NUM_FEMPLUGIN_DYNPARAMS       = 320; // MAX(`for file in FemPlugin_v3*; do grep create $file | grep Param | wc -l; done`)
+EPICS_REGISTER_PLUGIN(FemPlugin, 4, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Hw & SW version", string);
 
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
@@ -37,9 +33,8 @@ struct RspReadVersion {
 // GCC specific - but very efficient 1 CPU cycle
 #define BYTE_SWAP(a) __builtin_bswap32(a)
 
-FemPlugin::FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_FEM, true,
-                       blocking, NUM_FEMPLUGIN_PARAMS + NUM_FEMPLUGIN_DYNPARAMS)
+FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_FEM, 2)
     , m_version(version)
 {
     createParam("Upg:File",     asynParamOctet, &UpgradeFile);             // WRITE - Path to the firmware file to be programmed
@@ -116,7 +111,7 @@ asynStatus FemPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         } else if (value == 1) {
             return remoteUpgradeSM(RemoteUpgrade::START) ? asynSuccess : asynError;
         } else {
-            return processRequest(DasPacket::CMD_UPGRADE) ? asynSuccess : asynError;
+            return processRequest(DasCmdPacket::CMD_UPGRADE) ? asynSuccess : asynError;
         }
     }
     return BaseModulePlugin::writeInt32(pasynUser, value);
@@ -133,25 +128,26 @@ asynStatus FemPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t 
 }
 
 
-DasPacket::CommandType FemPlugin::reqStart()
+DasCmdPacket::CommandType FemPlugin::reqStart()
 {
     // FEMs don't support starting/stopping
-    return static_cast<DasPacket::CommandType>(0);
+    return static_cast<DasCmdPacket::CommandType>(0);
 }
 
 
-DasPacket::CommandType FemPlugin::reqStop()
+DasCmdPacket::CommandType FemPlugin::reqStop()
 {
     // FEMs don't support starting/stopping
-    return static_cast<DasPacket::CommandType>(0);
+    return static_cast<DasCmdPacket::CommandType>(0);
 }
 
 
-bool FemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
+bool FemPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+    uint32_t payloadLength = packet->cmd_length - packet->getHeaderLen();
 
-    if (packet->getPayloadLength() != sizeof(RspReadVersion)) {
+    if (payloadLength != sizeof(RspReadVersion)) {
         return false;
     }
 
@@ -177,13 +173,13 @@ bool FemPlugin::timerExpired(epicsTimeStamp *timer, int timeoutParam)
     return (epicsTimeDiffInSeconds(&now, timer) > timeout);
 }
 
-bool FemPlugin::remoteUpgradeRsp(const DasPacket *packet)
+bool FemPlugin::remoteUpgradeRsp(const DasCmdPacket *packet)
 {
     return remoteUpgradeSM(RemoteUpgrade::PROCESS_RESPONSE, packet);
 }
 
 // Big fat state machine
-bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *packet)
+bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket *packet)
 {
     int chunkSize;
     bool ret = true;
@@ -193,7 +189,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
     case RemoteUpgrade::INIT:
         // Everyone starts as not supported, when invoked this state changes that
         if (m_remoteUpgrade.status == RemoteUpgrade::NOT_SUPPORTED) {
-            std::function<bool(const DasPacket *)> handler = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
+            std::function<bool(const DasCmdPacket *)> handler = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
             registerResponseHandler(handler);
 
             m_remoteUpgrade.status = RemoteUpgrade::NOT_READY;
@@ -320,8 +316,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             setStringParam(UpgradeErrorStr, "empty response");
             ret = false;
             break;
-        } else if (packet->getResponseType() != DasPacket::CMD_UPGRADE) {
-            if (packet->getResponseType() == DasPacket::CMD_WRITE_CONFIG && m_remoteUpgrade.expectedWrCfg > 0) {
+        } else if (packet->command != DasCmdPacket::CMD_UPGRADE) {
+            if (packet->command == DasCmdPacket::CMD_WRITE_CONFIG && m_remoteUpgrade.expectedWrCfg > 0) {
                 // Eat write config responses from enabling/disabling remote upgrade
                 m_remoteUpgrade.expectedWrCfg--;
                 ret = true;
@@ -387,7 +383,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *p
             if (status == RemoteUpgrade::DONE) {
                 int seqId;
                 int maxRetries;
-                getIntegerParam("Upg:SeqId", &seqId);
+                getIntegerParam("Upg:SeqId", seqId);
                 getIntegerParam(UpgradeNoRspMaxRetries, &maxRetries);
 
                 // Switch from potential waiting state
@@ -606,25 +602,25 @@ FemPlugin::RemoteUpgrade::Status FemPlugin::remoteUpgradeCheck(RemoteUpgrade::Ch
     int param;
 
     // This is all very FEM 3.9 specific
-    getIntegerParam("Upg:OutError",            &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutError",            &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutErrorIdCode",      &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutErrorErase",       &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutErrorProgram",     &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutErrorCrc",         &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutErrorBlockLocked", &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutErrorVPP",         &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutErrorCmdSeq",      &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:OutErrorTimeOut",     &param); if (param == 1) return RemoteUpgrade::ERROR;
-    getIntegerParam("Upg:FifoFull",            &param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutError",            param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutError",            param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutErrorIdCode",      param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutErrorErase",       param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutErrorProgram",     param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutErrorCrc",         param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutErrorBlockLocked", param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutErrorVPP",         param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutErrorCmdSeq",      param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:OutErrorTimeOut",     param); if (param == 1) return RemoteUpgrade::ERROR;
+    getIntegerParam("Upg:FifoFull",            param); if (param == 1) return RemoteUpgrade::ERROR;
     if (type == RemoteUpgrade::WAIT_ERASED) {
-        getIntegerParam("Upg:OutErase",        &param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
+        getIntegerParam("Upg:OutErase",        param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
     } else if (type == RemoteUpgrade::WAIT_READY) {
-        getIntegerParam("Upg:Ready",           &param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
-        getIntegerParam("Upg:FifoProgFull",    &param); if (param == 1) return RemoteUpgrade::IN_PROGRESS;
+        getIntegerParam("Upg:Ready",           param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
+        getIntegerParam("Upg:FifoProgFull",    param); if (param == 1) return RemoteUpgrade::IN_PROGRESS;
     } else if (type == RemoteUpgrade::WAIT_PROGRAMMED) {
-        getIntegerParam("Upg:OutProgram",      &param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
-        getIntegerParam("Upg:OutVerifyOK",     &param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
+        getIntegerParam("Upg:OutProgram",      param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
+        getIntegerParam("Upg:OutVerifyOK",     param); if (param == 0) return RemoteUpgrade::IN_PROGRESS;
     }
 
     return RemoteUpgrade::DONE;

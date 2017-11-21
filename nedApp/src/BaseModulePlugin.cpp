@@ -246,6 +246,10 @@ void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t c
         return;
     }
 
+    // Hopefully this is a temporary hack until either DSP7 implements
+    // DasCmdPacket->LVDS convertion or all ROCs switch to new format
+    packet->__reserved2 = (m_wordSize == 2);
+
     BasePlugin::sendUpstream(packet);
     delete packet;
 }

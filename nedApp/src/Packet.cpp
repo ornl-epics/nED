@@ -46,7 +46,6 @@ DasCmdPacket *DasCmdPacket::create(uint32_t moduleId, CommandType cmd, bool ack,
     assert(payloadSize < 1024*1024);
     DasCmdPacket *packet = reinterpret_cast<DasCmdPacket*>(malloc(sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4)));
     if (packet) {
-        packet->length = sizeof(DasCmdPacket) + payloadSize;
         packet->init(moduleId, cmd, ack, rsp, ch, payload, payloadSize);
     }
     return packet;
@@ -54,12 +53,12 @@ DasCmdPacket *DasCmdPacket::create(uint32_t moduleId, CommandType cmd, bool ack,
 
 void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize)
 {
-    assert(this->length >= (sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4)));
-    memset(this, 0, (sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4)));
+    uint32_t packetLength = sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4);
+    memset(this, 0, packetLength);
 
     this->version = 0x1;
     this->type = TYPE_DAS_CMD;
-    this->length = sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4);
+    this->length = packetLength;
 
     this->module_id = moduleId;
     if (ch > 0)

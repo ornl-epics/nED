@@ -243,6 +243,11 @@ class DasCmdPacket : public Packet {
          * Initialize packet fields.
          */
         void init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize);
+
+        /**
+         * Return length of inner header in bytes.
+         */
+        static uint32_t getHeaderLen() { return 6; }
 };
 
 #endif // PACKET_H

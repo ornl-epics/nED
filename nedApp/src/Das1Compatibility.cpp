@@ -72,16 +72,9 @@ void Das1Compatibility::recvUpstream(DasCmdPacketList *packets)
     for (auto it = packets->cbegin(); it != packets->cend(); it++) {
         DasPacket *packet;
 
-        // We send out 2 packets, optical and LVDS. This adds more traffic
-        // to the channel but doesn't hurt since each packet is addressed
-        // to a specific module. Even when broadcast is selected, any given
-        // module will likely only respond once due to DSP-T implementation.
-        // But other plugins should drop packets they don't expect.
-        packet = new2old_cmd(*it, DAS1_OPTICAL);
-        if (packet)
-            das1Packets.push_back(packet);
-
-        packet = new2old_cmd(*it, DAS1_LVDS);
+        // We use a trick implemented in BaseModulePlugin that puts behind-DSP
+        // flag in reserved section of the new packet.
+        packet = new2old_cmd(*it, (*it)->__reserved2 == 0 ? DAS1_OPTICAL : DAS1_LVDS);
         if (packet)
             das1Packets.push_back(packet);
 
@@ -150,7 +143,7 @@ DasCmdPacket *Das1Compatibility::old2new_cmd(const DasPacket *packet)
 
 DasPacket *Das1Compatibility::new2old_cmd(const DasCmdPacket *packet, enum Das1PacketType mode)
 {
-    size_t payload_length = packet->length - sizeof(DasCmdPacket);
+    size_t payload_length = packet->cmd_length - packet->getHeaderLen();
     DasPacket::CommandType command = static_cast<DasPacket::CommandType>(packet->command);
     switch (mode) {
     case DAS1_LVDS_SINGLE_WORD:

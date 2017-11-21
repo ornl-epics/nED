@@ -19,9 +19,6 @@
  * Plugin for FEM module.
  */
 class FemPlugin : public BaseModulePlugin {
-    private: // structures and definitions
-        static const unsigned NUM_FEMPLUGIN_DYNPARAMS;  //!< Maximum number of asyn parameters, including the status and configuration parameters
-
     private: // variables
         std::string m_version;              //!< Version string as passed to constructor
         struct RemoteUpgrade {
@@ -87,23 +84,22 @@ class FemPlugin : public BaseModulePlugin {
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] parentPlugins to connect to.
          * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version FEM HW&SW version, ie. V10_50
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        FemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
+        FemPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
 
         /**
          * Overload start request and return 0 - skipped.
          */
-        virtual DasPacket::CommandType reqStart();
+        virtual DasCmdPacket::CommandType reqStart();
 
         /**
          * Overload stop request and return 0 - skipped.
          */
-        virtual DasPacket::CommandType reqStop();
+        virtual DasCmdPacket::CommandType reqStop();
 
         /**
          * Handle parameters write requests for integer type.
@@ -130,14 +126,14 @@ class FemPlugin : public BaseModulePlugin {
          * @param[out] version structure to be populated
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
 
         /**
          * Member counterpart of parseVersionRsp().
          *
          * @see FemPlugin::parseVersionRsp()
          */
-        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
         {
             return parseVersionRsp(packet, version);
         }
@@ -188,7 +184,7 @@ class FemPlugin : public BaseModulePlugin {
          *
          * @return true when packet has been handled
          */
-        bool remoteUpgradeRsp(const DasPacket *packet);
+        bool remoteUpgradeRsp(const DasCmdPacket *packet);
 
         /**
          * Remote upgrade state machine function.
@@ -200,7 +196,7 @@ class FemPlugin : public BaseModulePlugin {
          *
          * @image html images/RemoteUpgrade.svg
          */
-        bool remoteUpgradeSM(RemoteUpgrade::Action action, const DasPacket *packet=0);
+        bool remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket *packet=0);
 
         /**
          * Module specific function to check for remote upgrade status response.
@@ -237,7 +233,6 @@ class FemPlugin : public BaseModulePlugin {
         bool timerExpired(epicsTimeStamp *timer, int timeoutParam);
 
     protected:
-        #define FIRST_FEMPLUGIN_PARAM UpgradeFile
         int UpgradeFile;     //!< New firmware file to be programed
         int UpgradeChunkSize;//!< Number of bytes to push in one transfer
         int UpgradeStatus;   //!< Remote upgrade status
@@ -252,7 +247,6 @@ class FemPlugin : public BaseModulePlugin {
         int UpgradeNoRspMaxRetries; //!< Max times to retry when no response received
         int UpgradeNoRspSeqRetries; //!< Number of consecutive retries
         int UpgradeNoRspTotRetries; //!< Number of all retries in one upgrade session
-        #define LAST_FEMPLUGIN_PARAM UpgradeNoRspTotRetries
 };
 
 #endif // DSP_PLUGIN_H

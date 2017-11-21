@@ -16,7 +16,7 @@
 #include "DiscoverPlugin.h"
 #include "DspPlugin.h"
 //#include "DspWPlugin.h"
-//#include "FemPlugin.h"
+#include "FemPlugin.h"
 #include "Log.h"
 //#include "RocPlugin.h"
 
@@ -120,10 +120,10 @@ void DiscoverPlugin::recvDownstream(DasCmdPacketList *packets)
                 case DasCmdPacket::MOD_TYPE_DSP:
                     DspPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
-                    /*
                 case DasCmdPacket::MOD_TYPE_FEM:
                     FemPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
+                    /*
                 case DasCmdPacket::MOD_TYPE_ROC:
                     RocPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;

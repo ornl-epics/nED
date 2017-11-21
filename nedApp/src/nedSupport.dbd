@@ -47,7 +47,7 @@ registrar("StatPluginRegister")
 #registrar("CRocPluginRegister")
 registrar("DspPluginRegister")
 #registrar("DspWPluginRegister")
-#registrar("FemPluginRegister")
+registrar("FemPluginRegister")
 #registrar("RocPluginRegister")
 
 # Sequences
