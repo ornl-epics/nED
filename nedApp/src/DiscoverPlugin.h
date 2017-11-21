@@ -42,6 +42,8 @@ class DiscoverPlugin : public BasePlugin {
 
         std::map<uint32_t, ModuleDesc> m_discovered;    //!< Map of modules discovered, key is module's hardware id
         static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask;
+        Timer m_disableTimer;                           //!< Timer to trigger disabling the module after inactivity timeout
+        std::string m_parentPlugins;                    //!< Used to automatically connect
 
     public:
         /**

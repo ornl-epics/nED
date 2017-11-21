@@ -142,6 +142,11 @@ class BasePlugin : public asynPortDriver {
         bool disconnect();
 
         /**
+         * Return true if connected to *any* plugin, false when not connected.
+         */
+        bool isConnected();
+
+        /**
          * Request a custom callback function to be called at some time in the future.
          *
          * Using this function, the plugin can request asynchronous task to be

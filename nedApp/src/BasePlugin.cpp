@@ -122,6 +122,7 @@ bool BasePlugin::connect(const std::list<std::string> &ports, const std::list<in
         }
     }
 
+    LOG_INFO("Connected to parent plugins: %s", std::accumulate(ports.begin(), ports.end(), std::string(",")).substr(1).c_str());
     return true;
 }
 
@@ -155,8 +156,15 @@ bool BasePlugin::disconnect()
             }
         }
     }
+    if (!m_connectedPorts.empty())
+        LOG_INFO("Disconnected from parent plugins");
     m_connectedPorts.clear();
     return true;
+}
+
+bool BasePlugin::isConnected()
+{
+    return !m_connectedPorts.empty();
 }
 
 void BasePlugin::recvDownstreamCb(asynUser *pasynUser, void *ptr)
