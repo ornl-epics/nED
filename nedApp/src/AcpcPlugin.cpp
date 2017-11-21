@@ -36,7 +36,7 @@ struct RspReadVersion {
 };
 
 AcpcPlugin::AcpcPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_ACPC, true)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_ACPC, 2)
     , m_version(version)
 {
     if (0) {

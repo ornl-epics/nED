@@ -12,6 +12,7 @@
 #include "Log.h"
 #include "ValueConvert.h"
 
+#include <alarm.h>
 #include <map>
 #include <osiSock.h>
 #include <string.h>
@@ -45,15 +46,18 @@ static std::map<uint32_t, std::string> g_namesMap;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugins,
                                    const char *hardwareId, DasCmdPacket::ModuleType hardwareType,
-                                   bool behindDsp, int interfaceMask, int interruptMask)
+                                   uint8_t wordSize, int interfaceMask, int interruptMask)
     : BasePlugin(portName, 0, interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
     , m_hardwareId(ip2addr(hardwareId))
     , m_hardwareType(hardwareType)
     , m_waitingResponse(static_cast<DasCmdPacket::CommandType>(0))
     , m_expectedChannel(0)
     , m_numChannels(0)
-    , m_behindDsp(behindDsp)
+    , m_wordSize(wordSize)
 {
+    // DSP uses 4 byte words, everybody else 2 bytes
+    assert(wordSize==2 || wordSize==4);
+
     createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
     createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasCmdPacket::CommandType)
     createParam("HwId",         asynParamOctet, &HwId);                     // READ - Connected module hardware id
@@ -565,9 +569,8 @@ DasCmdPacket::CommandType BaseModulePlugin::reqReadStatus(uint8_t channel)
 
 bool BaseModulePlugin::rspReadStatus(const DasCmdPacket *packet, uint8_t channel)
 {
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
     uint32_t section = SECTION_ID(0x0, channel);
-    uint32_t expectLength = ALIGN_UP(m_params["STATUS"].sizes[section]*wordsize, 4);
+    uint32_t expectLength = ALIGN_UP(m_params["STATUS"].sizes[section]*m_wordSize, 4);
     uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
     if (payloadLength != expectLength) {
         if (channel == 0)
@@ -576,9 +579,11 @@ bool BaseModulePlugin::rspReadStatus(const DasCmdPacket *packet, uint8_t channel
         else
             LOG_ERROR("Received wrong channel %u READ_STATUS response based on length; "
                       "received %u, expected %u", channel, payloadLength, expectLength);
+        setParamsAlarm("STATUS", epicsAlarmRead);
         return false;
     }
 
+    setParamsAlarm("STATUS", epicsAlarmNone);
     unpackRegParams("STATUS", packet->payload, payloadLength, channel);
     return true;
 }
@@ -607,15 +612,16 @@ bool BaseModulePlugin::rspResetStatusCounters(const DasCmdPacket *packet)
 
 bool BaseModulePlugin::rspReadStatusCounters(const DasCmdPacket *packet)
 {
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    uint32_t expectLength = ALIGN_UP(m_params["COUNTERS"].sizes[0]*wordsize, 4);
+    uint32_t expectLength = ALIGN_UP(m_params["COUNTERS"].sizes[0]*m_wordSize, 4);
     uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
     if (payloadLength != expectLength) {
         LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; "
                   "received %u, expected %u", payloadLength, expectLength);
+        setParamsAlarm("COUNTERS", epicsAlarmRead);
         return false;
     }
 
+    setParamsAlarm("COUNTERS", epicsAlarmNone);
     unpackRegParams("COUNTERS", packet->payload, payloadLength);
     return true;
 }
@@ -640,9 +646,8 @@ DasCmdPacket::CommandType BaseModulePlugin::reqReadConfig(uint8_t channel)
 bool BaseModulePlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel)
 {
     // Response contains registers for all sections for a selected channel or global configuration
-    int wordsize = (m_behindDsp ? 2 : 4);
     uint32_t section_f = SECTION_ID(0xF, channel);
-    uint32_t expectLength = ALIGN_UP(wordsize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]), 4);
+    uint32_t expectLength = ALIGN_UP(m_wordSize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]), 4);
     uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
 
     if (payloadLength != expectLength) {
@@ -652,9 +657,10 @@ bool BaseModulePlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel
         else
             LOG_ERROR("Received wrong channel %u READ_CONFIG response based on length; received %uB, expected %uB",
                       channel, payloadLength, expectLength);
+        setParamsAlarm("CONFIG", epicsAlarmRead);
         return false;
     }
-
+    setParamsAlarm("CONFIG", epicsAlarmNone);
     unpackRegParams("CONFIG", packet->payload, payloadLength, channel);
     return true;
 }
@@ -695,6 +701,8 @@ DasCmdPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t section, uint
 
 bool BaseModulePlugin::rspWriteConfig(const DasCmdPacket *packet, uint8_t channel)
 {
+    int alarm = (packet->acknowledge ? epicsAlarmNone : epicsAlarmWrite);
+    setParamsAlarm("CONFIG", alarm);
     return packet->acknowledge;
 }
 
@@ -732,8 +740,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqUpgrade(const char *data, uint32_
 
 bool BaseModulePlugin::rspUpgrade(const DasCmdPacket *packet)
 {
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    uint32_t expectLength = ALIGN_UP(m_params["UPGRADE"].sizes[0]*wordsize, 4);
+    uint32_t expectLength = ALIGN_UP(m_params["UPGRADE"].sizes[0]*m_wordSize, 4);
     uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
     if (payloadLength != expectLength) {
         LOG_ERROR("Received wrong READ_UPGRADE response based on length; "
@@ -758,17 +765,41 @@ DasCmdPacket::CommandType BaseModulePlugin::reqReadTemperature()
 
 bool BaseModulePlugin::rspReadTemperature(const DasCmdPacket *packet)
 {
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    uint32_t expectLength = ALIGN_UP(m_params["TEMPERATURE"].sizes[0]*wordsize, 4);
+    uint32_t expectLength = ALIGN_UP(m_params["TEMPERATURE"].sizes[0]*m_wordSize, 4);
     uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
     if (payloadLength != expectLength) {
         LOG_ERROR("Received wrong READ_TEMP response based on length; "
                   "received %u, expected %u", payloadLength, expectLength);
+        setParamsAlarm("TEMPERATURE", epicsAlarmNone);
         return false;
     }
 
+    setParamsAlarm("TEMPERATURE", epicsAlarmNone);
     unpackRegParams("TEMPERATURE", packet->payload, payloadLength);
     return true;
+}
+
+void BaseModulePlugin::setParamsAlarm(DasCmdPacket::CommandType command, int alarm)
+{
+    switch (command) {
+    case DasCmdPacket::CMD_READ_STATUS:         setParamsAlarm("STATUS",      alarm); break;
+    case DasCmdPacket::CMD_READ_STATUS_COUNTERS:setParamsAlarm("COUNTERS",    alarm); break;
+    case DasCmdPacket::CMD_READ_CONFIG:         setParamsAlarm("CONFIG",      alarm); break;
+    case DasCmdPacket::CMD_WRITE_CONFIG:        setParamsAlarm("CONFIG",      alarm); break;
+    case DasCmdPacket::CMD_READ_TEMPERATURE:    setParamsAlarm("TEMPERATURE", alarm); break;
+    default:                                    break;
+    }
+}
+
+void BaseModulePlugin::setParamsAlarm(const std::string &section, int alarm)
+{
+    auto it = m_params.find(section);
+    if (it != m_params.end()) {
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++){
+            setParamAlarmStatus(jt->first, alarm);
+            setParamAlarmSeverity(jt->first, alarm != epicsAlarmNone ? epicsSevInvalid : 0);
+        }
+    }
 }
 
 void BaseModulePlugin::createStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift)
@@ -845,6 +876,7 @@ float BaseModulePlugin::noResponseCleanup(DasCmdPacket::CommandType command)
     if (m_waitingResponse == command) {
         LOG_WARN("Timeout waiting for %s response", cmd2str(command));
         m_waitingResponse = static_cast<DasCmdPacket::CommandType>(0);
+        setParamsAlarm(command, epicsAlarmTimeout);
         setIntegerParam(CmdRsp, LAST_CMD_TIMEOUT);
         callParamCallbacks();
     }
@@ -900,8 +932,7 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
         uint32_t sectionId = SECTION_ID(section, channel);
         payloadLength = m_params[group].sizes[sectionId];
     }
-    int wordsize = (m_behindDsp ? 2 : 4);
-    payloadLength *= wordsize;
+    payloadLength *= m_wordSize;
 
     if (payloadLength > size) {
         LOG_ERROR("Buffer not big enough to put register data into");
@@ -940,7 +971,7 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
             return false;
         }
 
-        if (m_behindDsp) {
+        if (m_wordSize == 2) {
             shift += (offset % 2 == 0 ? 0 : 16);
             offset /= 2;
         }
@@ -954,7 +985,7 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
         value = it->second.convert->toRaw(value, it->second.width);
         payload[offset] |= value << shift;
         if ((it->second.width + shift) > 32) {
-            payload[offset+1] |= value >> (it->second.width -(32 - shift));
+            payload[offset+1] |= value >> (it->second.width - (32 - shift));
         }
     }
 
@@ -983,7 +1014,7 @@ void BaseModulePlugin::unpackRegParams(const char *group, const uint32_t *payloa
             }
         }
 
-        if (m_behindDsp) {
+        if (m_wordSize) {
             shift += (offset % 2 == 0 ? 0 : 16);
             offset /= 2;
         }
@@ -1023,7 +1054,7 @@ void BaseModulePlugin::createRegParam(const char *group, const char *name, bool 
     m_params[group].mapping[index] = desc;
 
     uint32_t length = offset + 1;
-    if (m_behindDsp && nBits > 16)
+    if (m_wordSize == 2 && nBits > 16)
         length++;
 
     uint32_t sectionId = SECTION_ID(section, channel);
@@ -1059,10 +1090,9 @@ void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool re
     m_params[group].mapping[index] = desc;
 
     uint32_t length = offset + 1;
-    if (m_behindDsp && nBits > 16)
+    if (m_wordSize == 2 && nBits > 16)
         length++;
-    uint32_t wordsize = (m_behindDsp ? 2 : 4);
-    length *= wordsize;
+    length *= m_wordSize;
 
     uint32_t sectionId = SECTION_ID(section, channel);
     m_params[group].sizes[sectionId] = std::max(m_params[group].sizes[sectionId], length);

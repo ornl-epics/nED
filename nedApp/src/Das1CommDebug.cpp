@@ -274,7 +274,7 @@ bool Das1CommDebug::parseCmd(const DasPacket *packet)
     if (maxQueSize <= 0)
         return false;
 
-    if (!packet->isCommand())
+    if (!packet->isCommand() || packet->isRtdl() || packet->getCommandType() == DasPacket::CMD_TSYNC)
         return false;
 
     // Cache the payload to read it through readOctet()

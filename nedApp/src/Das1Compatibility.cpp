@@ -31,11 +31,18 @@ void Das1Compatibility::recvDownstream(int type, PluginMessage *msg)
 
         for (auto it = packets->cbegin(); it != packets->cend(); it++) {
             const DasPacket *packet = *it;
-            if (packet->isRtdl() && packet->isCommand()) {
-                rtdls.push_back(old2new_rtdl(packet));
-            } else if (packet->isCommand() && !packet->isRtdl()) {
-                cmds.push_back(old2new_cmd(packet));
-            } else if (packet->isData() && !packet->isRtdl()) {
+            if (packet->isRtdl()) {
+                // Eliminate data flavor of RTDL packets - they're the same
+                if (packet->isCommand()) {
+                    rtdls.push_back(old2new_rtdl(packet));
+                }
+            } else if (packet->isCommand()) {
+                // RTDL command case has been handled, additionally filter out
+                // some command pretenders
+                if (packet->getCommandType() != DasPacket::CMD_TSYNC) {
+                    cmds.push_back(old2new_cmd(packet));
+                }
+            } else if (packet->isData()) {
                 // TODO!!!
             } else {
                 // Discard other packets
@@ -123,7 +130,7 @@ DasCmdPacket *Das1Compatibility::old2new_cmd(const DasPacket *packet)
 {
     if (packet->getCommandType() == DasPacket::CMD_DISCOVER) {
         uint32_t module_type = static_cast<uint32_t>(packet->cmdinfo.module_type);
-        return DasCmdPacket::create(packet->source,
+        return DasCmdPacket::create(packet->getSourceAddress(),
                                     DasCmdPacket::CMD_DISCOVER,
                                     true,
                                     packet->cmdinfo.is_response,
@@ -131,7 +138,7 @@ DasCmdPacket *Das1Compatibility::old2new_cmd(const DasPacket *packet)
                                     &module_type,
                                     sizeof(module_type));
     } else {
-        return DasCmdPacket::create(packet->source,
+        return DasCmdPacket::create(packet->getSourceAddress(),
                                     static_cast<DasCmdPacket::CommandType>(packet->getCommandType()),
                                     (packet->cmdinfo.command != DasPacket::RSP_NACK),
                                     packet->cmdinfo.is_response,

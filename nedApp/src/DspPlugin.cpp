@@ -49,7 +49,7 @@ struct RspReadVersion {
 };
 
 DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_DSP, false)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_DSP, 4)
     , m_version(version)
 {
     if (m_version == "v51") {
