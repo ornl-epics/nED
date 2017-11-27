@@ -23,6 +23,8 @@ EPICS_REGISTER_PLUGIN(OccPlugin, 3, "Port name", string, "OCC connection string"
 
 OccPlugin::OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize)
     : BasePlugin(portName, 0, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
+    , m_sendId(0)
+    , m_recvId(0xFFFFFFFF)
     , m_occ(NULL)
 {
     int status;
@@ -317,6 +319,7 @@ void OccPlugin::recvUpstream(int type, PluginMessage *msg)
 
         for (auto it = cmds->cbegin(); it != cmds->cend(); it++) {
             DasCmdPacket *packet = *it;
+            packet->sequence = (++m_sendId % 255);
             int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->length, 4));
             if (ret != 0) {
                 setIntegerParam(LastErr, -ret);
@@ -533,7 +536,7 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
                 bytesProcessed = packet->getLength();
 
             } else if (version == 1) {
-                // New DAS header
+                // New SNS packet header
                 Packet *packet = reinterpret_cast<Packet *>(ptr);
 
                 if (bytesLeft < sizeof(Packet)) {
@@ -551,6 +554,11 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
                     error << "DAS packet of " << packet->length << " bytes exceeds " << maxPktSize << " bytes threshold";
                     throw std::range_error(error.str());
                 }
+
+                if (m_recvId != 0xFFFFFFFF && packet->sequence != ((m_recvId+1) % 255)) {
+                    LOG_ERROR("Expecting packet with sequence number %u, got %u", (m_recvId+1)%255, packet->sequence);
+                }
+                m_recvId = packet->sequence;
 
                 if (packet->type == Packet::TYPE_DAS_CMD)
                     dasCmd.push_back(reinterpret_cast<DasCmdPacket *>(packet));
@@ -575,11 +583,11 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
 
     // Publish all packets in parallel ..
     if (!oldDas.empty())
-        sendDownstream(&oldDas, false, false);
+        sendDownstream(&oldDas, false);
     if (!dasCmd.empty())
-        sendDownstream(&dasCmd, false, false);
+        sendDownstream(&dasCmd, false);
     if (!dasRtdl.empty())
-        sendDownstream(&dasRtdl, false, false);
+        sendDownstream(&dasRtdl, false);
 
     // .. and wait for all of them to get released
     oldDas.waitAllReleased();

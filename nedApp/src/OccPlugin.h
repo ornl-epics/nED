@@ -75,6 +75,8 @@ class epicsShareFunc OccPlugin : public BasePlugin {
     private:
         int m_version;
         int m_test;
+        unsigned m_sendId;       //!< Output packets sequence number
+        unsigned m_recvId;       //!< Last received packet sequence number
 
         struct occ_handle *m_occ;
         occ_status_t m_occStatusCache;
