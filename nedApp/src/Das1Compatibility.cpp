@@ -22,7 +22,9 @@ Das1Compatibility::Das1Compatibility(const char *portName, const char *parentPlu
 void Das1Compatibility::recvDownstream(int type, PluginMessage *msg)
 {
     if (type != MsgOldDas) {
-        sendDownstream(type, msg);
+        this->unlock();
+        sendDownstream(type, msg, false);
+        this->lock();
     } else {
         DasCmdPacketList cmds;
         DasRtdlPacketList rtdls;
@@ -49,18 +51,21 @@ void Das1Compatibility::recvDownstream(int type, PluginMessage *msg)
             }
         }
 
-        if (!rtdls.empty()) {
-            BasePlugin::sendDownstream(&rtdls);
-            for (auto it = rtdls.begin(); it != rtdls.end(); it++) {
-                free(*it);
-            }
-        }
+        this->unlock();
+        if (!rtdls.empty())
+            BasePlugin::sendDownstream(&rtdls, false);
+        if (!cmds.empty())
+            BasePlugin::sendDownstream(&cmds, false);
 
-        if (!cmds.empty()) {
-            BasePlugin::sendDownstream(&cmds);
-            for (auto it = cmds.begin(); it != cmds.end(); it++) {
-                free(*it);
-            }
+        rtdls.waitAllReleased();
+        cmds.waitAllReleased();
+        this->lock();
+
+        for (auto it = rtdls.begin(); it != rtdls.end(); it++) {
+            free(*it);
+        }
+        for (auto it = cmds.begin(); it != cmds.end(); it++) {
+            free(*it);
         }
     }
 }
@@ -72,9 +77,12 @@ void Das1Compatibility::recvUpstream(DasCmdPacketList *packets)
     for (auto it = packets->cbegin(); it != packets->cend(); it++) {
         DasPacket *packet;
 
-        // We use a trick implemented in BaseModulePlugin that puts behind-DSP
-        // flag in reserved section of the new packet.
-        packet = new2old_cmd(*it, (*it)->__reserved2 == 0 ? DAS1_OPTICAL : DAS1_LVDS);
+        // Since we don't know whether target is DSP or other module, we send
+        // out both flavors of the command.
+        packet = new2old_cmd(*it, DAS1_OPTICAL);
+        if (packet)
+            das1Packets.push_back(packet);
+        packet = new2old_cmd(*it, DAS1_LVDS);
         if (packet)
             das1Packets.push_back(packet);
 
@@ -147,11 +155,11 @@ DasPacket *Das1Compatibility::new2old_cmd(const DasCmdPacket *packet, enum Das1P
     DasPacket::CommandType command = static_cast<DasPacket::CommandType>(packet->command);
     switch (mode) {
     case DAS1_LVDS_SINGLE_WORD:
-        return DasPacket::createLvds(DasCmdPacket::OCC_ID, DasPacket::HWID_BROADCAST_SW, command, packet->channel, payload_length, packet->payload);
+        return DasPacket::createLvds(DasCmdPacket::OCC_ID, DasPacket::HWID_BROADCAST_SW, command, packet->cmd_sequence, payload_length, packet->payload);
     case DAS1_LVDS:
-        return DasPacket::createLvds(DasCmdPacket::OCC_ID, packet->module_id, command, packet->channel, payload_length, packet->payload);
+        return DasPacket::createLvds(DasCmdPacket::OCC_ID, packet->module_id, command, packet->cmd_sequence, payload_length, packet->payload);
     case DAS1_OPTICAL:
     default:
-        return DasPacket::createOcc(DasCmdPacket::OCC_ID, packet->module_id, command, packet->channel, payload_length, packet->payload);
+        return DasPacket::createOcc(DasCmdPacket::OCC_ID, packet->module_id, command, packet->cmd_sequence, payload_length, packet->payload);
     }
 }

@@ -232,33 +232,67 @@ void BasePlugin::recvDownstream(int type, PluginMessage *msg)
     }
 }
 
-void BasePlugin::sendDownstream(int type, PluginMessage *msg, bool wait, bool locked)
+void BasePlugin::sendDownstream(int type, PluginMessage *msg, bool wait)
 {
-    if (locked)
-        this->unlock();
-    msg->claim();
-    void *ptr = const_cast<void *>(reinterpret_cast<void *>(msg));
-    doCallbacksGenericPointer(ptr, type, 0);
-    msg->release();
-    if (wait)
-        msg->waitAllReleased();
-    if (locked)
-        this->lock();
+    if (type == MsgOldDas) {
+        sendDownstream(reinterpret_cast<DasPacketList *>(msg), wait);
+    } else if (type == MsgDasCmd) {
+        sendDownstream(reinterpret_cast<DasCmdPacketList *>(msg), wait);
+    } else if (type == MsgDasRtdl) {
+        sendDownstream(reinterpret_cast<DasRtdlPacketList *>(msg), wait);
+    } else if (type == MsgParamExch) {
+
+    } else {
+        LOG_ERROR("Ignoring not supported message type '%d'", type);
+    }
 }
 
-void BasePlugin::sendDownstream(DasPacketList *packets, bool wait, bool locked)
+void BasePlugin::sendDownstream(DasPacketList *packets, bool wait)
 {
-    sendDownstream(MsgOldDas, dynamic_cast<PluginMessage*>(packets), wait, locked);
+    DasPacketList l;
+    if (wait) {
+        std::copy(packets->begin(), packets->end(), l.begin());
+        packets = &l;
+    }
+    packets->claim();
+    void *ptr = const_cast<void *>(reinterpret_cast<void *>(packets));
+    doCallbacksGenericPointer(ptr, MsgOldDas, 0);
+    packets->release();
+    if (wait) {
+        l.waitAllReleased();
+    }
 }
 
-void BasePlugin::sendDownstream(DasCmdPacketList *packets, bool wait, bool locked)
+void BasePlugin::sendDownstream(DasCmdPacketList *packets, bool wait)
 {
-    sendDownstream(MsgDasCmd, dynamic_cast<PluginMessage*>(packets), wait, locked);
+    DasCmdPacketList l;
+    if (wait) {
+        std::copy(packets->begin(), packets->end(), l.begin());
+        packets = &l;
+    }
+    packets->claim();
+    void *ptr = const_cast<void *>(reinterpret_cast<void *>(packets));
+    doCallbacksGenericPointer(ptr, MsgDasCmd, 0);
+    packets->release();
+    if (wait) {
+        l.waitAllReleased();
+    }
 }
 
-void BasePlugin::sendDownstream(DasRtdlPacketList *packets, bool wait, bool locked)
+void BasePlugin::sendDownstream(DasRtdlPacketList *packets, bool wait)
 {
-    sendDownstream(MsgDasRtdl, dynamic_cast<PluginMessage*>(packets), wait, locked);
+    DasRtdlPacketList l;
+    if (wait) {
+        std::copy(packets->begin(), packets->end(), l.begin());
+        packets = &l;
+    }
+    packets->claim();
+    void *ptr = const_cast<void *>(reinterpret_cast<void *>(packets));
+    doCallbacksGenericPointer(ptr, MsgDasRtdl, 0);
+    packets->release();
+    if (wait) {
+        l.waitAllReleased();
+    }
 }
 
 asynStatus BasePlugin::writeGenericPointer(asynUser *pasynUser, void *ptr)
@@ -285,7 +319,6 @@ void BasePlugin::recvUpstream(int type, PluginMessage *msg)
 
 void BasePlugin::sendUpstream(int type, PluginMessage *msg)
 {
-    msg->claim();
     for (auto it=m_connectedPorts.begin(); it!=m_connectedPorts.end(); it++) {
         if (it->pasynuser->reason == type) {
             asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
@@ -299,23 +332,26 @@ void BasePlugin::sendUpstream(int type, PluginMessage *msg)
             asynGenericPointerInterface->write(interface->drvPvt, it->pasynuser, ptr);
         }
     }
-
-    msg->release();
-    msg->waitAllReleased();
 }
 
 void BasePlugin::sendUpstream(const DasCmdPacket *packet)
 {
     DasCmdPacketList packets;
     packets.push_back(const_cast<DasCmdPacket*>(packet));
+    packets.claim();
     sendUpstream(MsgDasCmd, &packets);
+    packets.release();
+    packets.waitAllReleased();
 }
 
 void BasePlugin::sendUpstream(const DasPacket *packet)
 {
     DasPacketList packets;
     packets.push_back(const_cast<DasPacket*>(packet));
+    packets.claim();
     sendUpstream(MsgOldDas, &packets);
+    packets.release();
+    packets.waitAllReleased();
 }
 
 std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &callback, double delay)

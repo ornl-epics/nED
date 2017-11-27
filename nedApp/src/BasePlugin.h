@@ -204,39 +204,31 @@ class BasePlugin : public asynPortDriver {
         /**
          * Send PluginMessage to any connected child plugins.
          *
-         * When sending messages the plugin must not be locked. All BasePlugin
-         * interfaces automatically lock the plugin but there are cases when
-         * plugin is not locked (for example calling from custom thread).
-         * When this function is called from non-locked environment, it should
-         * set the locked flag to false.
+         * Plugin must be unlocked when sending messages.
          *
-         * The function will return only after all subscribed plugins have
-         * received and processed the message. This can be turned off with wait
-         * flag and is usually used in conjunction with locked=false. Be
-         * mindful of potential race-condition when wait=false and locked=true -
-         * waiting after locked has been reacuired is not will lead to dead-lock.
+         * When in wait mode, the function will return only after all subscribed
+         * plugins have received and processed the message.
          *
          * @param[in] type of message to be sent
          * @param[in] msg to be sent
          * @param[in] wait for plugins to process message before returning
-         * @param[in] locked flags whether the plugin is currently in locked state
          */
-        void sendDownstream(int type, PluginMessage *msg, bool wait=true, bool locked=true);
+        void sendDownstream(int type, PluginMessage *msg, bool wait=true);
 
         /**
          * Send DasPackets to any connected child plugins.
          */
-        void sendDownstream(DasPacketList *packets, bool wait=true, bool locked=true);
+        void sendDownstream(DasPacketList *packets, bool wait=true);
 
         /**
          * Send DasCmdPackets to any connected child plugins.
          */
-        void sendDownstream(DasCmdPacketList *packets, bool wait=true, bool locked=true);
+        void sendDownstream(DasCmdPacketList *packets, bool wait=true);
 
         /**
          * Send DasRtdlPackets to any connected child plugins.
          */
-        void sendDownstream(DasRtdlPacketList *packets, bool wait=true, bool locked=true);
+        void sendDownstream(DasRtdlPacketList *packets, bool wait=true);
 
         /**
          * A callback function called upon receiving message from child plugin.
@@ -261,16 +253,22 @@ class BasePlugin : public asynPortDriver {
          *
          * Function find connected parent plugins and sends message only if
          * message type is also subscribed to.
+         * Function returns immediately and doesn't wait for receiver to process
+         * packets.
          */
         virtual void sendUpstream(int type, PluginMessage *msg);
 
         /**
          * Send single DasPacket to parent plugins.
+         *
+         * Waits until receiver processes the packet.
          */
         virtual void sendUpstream(const DasPacket *packet);
 
         /**
          * Send single DasCmdPacket to parent plugins.
+         *
+         * Waits until receiver processes the packet.
          */
         virtual void sendUpstream(const DasCmdPacket *packet);
 

@@ -63,7 +63,7 @@ asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         if (!isConnected()) {
             connect(m_parentPlugins, MsgDasCmd);
         }
-        std::function<float(void)> disableCb = [this](){ disconnect(); return 0; };
+        std::function<float(void)> disableCb = [this](){ this->lock(); disconnect(); this->unlock(); return 0; };
         m_disableTimer.schedule(disableCb, 10);
 
         m_discovered.clear();

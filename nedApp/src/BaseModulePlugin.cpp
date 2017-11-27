@@ -417,14 +417,14 @@ bool BaseModulePlugin::handleResponse(const DasCmdPacket *packet)
         setIntegerParam(Verified, verified);
         return ack;
     case DasCmdPacket::CMD_READ_CONFIG:
-        if (! ((m_expectedChannel == 0 && packet->channel == 0) || m_expectedChannel != packet->channel) ) {
-            LOG_ERROR("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, packet->channel);
+        if (! ((m_expectedChannel == 0 && packet->cmd_sequence == 0) || m_expectedChannel != packet->cmd_sequence) ) {
+            LOG_ERROR("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmd_sequence);
             return false;
         }
         return rspReadConfig(packet, m_expectedChannel);
     case DasCmdPacket::CMD_READ_STATUS:
-        if (! ((m_expectedChannel == 0 && packet->channel == 0) || m_expectedChannel != packet->channel) ) {
-            LOG_ERROR("Expecting read status response for channel %d, got for channel %d\n", m_expectedChannel, packet->channel);
+        if (! ((m_expectedChannel == 0 && packet->cmd_sequence == 0) || m_expectedChannel != packet->cmd_sequence) ) {
+            LOG_ERROR("Expecting read status response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmd_sequence);
             return false;
         }
         return rspReadStatus(packet, m_expectedChannel);
@@ -448,8 +448,8 @@ bool BaseModulePlugin::handleResponse(const DasCmdPacket *packet)
     case DasCmdPacket::CMD_WRITE_CONFIG_D:
     case DasCmdPacket::CMD_WRITE_CONFIG_E:
     case DasCmdPacket::CMD_WRITE_CONFIG_F:
-        if (! ((m_expectedChannel == 0 && packet->channel == 0) || m_expectedChannel != packet->channel) ) {
-            LOG_ERROR("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, packet->channel);
+        if (! ((m_expectedChannel == 0 && packet->cmd_sequence == 0) || m_expectedChannel != packet->cmd_sequence) ) {
+            LOG_ERROR("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmd_sequence);
             return false;
         }
         return rspWriteConfig(packet, m_expectedChannel);
