@@ -28,7 +28,7 @@ class Packet {
             TYPE_ACC_TIME   = 0x10,
         };
 
-        struct {
+        struct __attribute__ ((__packed__)) {
             unsigned sequence:8;    //!< Packet sequence number, incremented by sender for each sent packet
             enum PacketType type:8; //!< Packet type
             bool priority:1;        //!< Flag to denote high priority handling, used by hardware to optimize interrupt handling
@@ -87,7 +87,7 @@ class DasRtdlPacket : public Packet {
             RTDL_VETO_60_HZ_ERROR       = (1 << 11), //!< 60 Hz line phase error is out of tolerance
         };
 
-        struct {
+        struct __attribute__ ((__packed__)) {
             uint8_t num_frames;             //!< Number of RTDL frames included
             uint8_t source;                 //!< Unique source id number
             uint16_t __rtdl_rsv1;
@@ -96,7 +96,7 @@ class DasRtdlPacket : public Packet {
         uint32_t timestamp_sec;             //!< Accelerator time (seconds) of event 39
         uint32_t timestamp_nsec;            //!< Accelerator time (nano-seconds) of event 39
 
-        struct {
+        struct __attribute__ ((__packed__)) {
             unsigned charge:24;         //!< Pulse charge in 10 pC unit
             enum PulseFlavor flavor:6;  //!< Pulse flavor of the next cycle
             unsigned bad:1;             //!< Bad pulse flavor frame
@@ -109,9 +109,9 @@ class DasRtdlPacket : public Packet {
             unsigned bad_veto_frame:1;  //!< Bad last cycle veto frame
         } pulse;
 
-        struct {
+        struct __attribute__ ((__packed__)) {
             uint32_t tsync_period;
-            struct {
+            struct __attribute__ ((__packed__)) {
                 unsigned tof_fixed_offset:24; //!< TOF fixed offset
                 unsigned frame_offset:4;    //!< RTDL frame offset
                 unsigned unused28:3;        //!< "000"
@@ -214,13 +214,10 @@ class DasCmdPacket : public Packet {
             unsigned cmd_length:12;     //!< Command payload length
             unsigned __reserved2:4;
             enum CommandType command:8; //!< Type of command
-            union {
-                unsigned channel:5;     //!< Command sequence id
-                unsigned cmd_sequence:5;//!< Command sequence id
-            };
+            unsigned cmd_sequence:5;    //!< Command sequence id
             bool acknowledge:1;         //!< Flag whether command was succesful, only valid in response
             bool response:1;            //!< Flags this command packet as response
-            unsigned lvds_version;      //!< LVDS protocol version,
+            unsigned lvds_version:1;    //!< LVDS protocol version,
                                         //!< hardware uses this flag ti distinguish protocol in responses
                                         //!< but doesn't use it from optical side, software will reuse
                                         //!< to distinguish DSP and other modules
