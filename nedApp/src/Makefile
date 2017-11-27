@@ -135,6 +135,7 @@ $(PROD_NAME)_SRCS  += DiscoverPlugin.cpp
 $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += Das1CommDebug.cpp
+$(PROD_NAME)_SRCS  += CommDebug.cpp
 #$(PROD_NAME)_SRCS  += DataDiagPlugin.cpp
 #$(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 #$(PROD_NAME)_SRCS  += FlatFieldTable.cpp
