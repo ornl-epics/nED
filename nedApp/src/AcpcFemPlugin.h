@@ -30,27 +30,26 @@ class AcpcFemPlugin : public BaseModulePlugin {
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] parentPlugins Plugins to connect to
          * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version ACPC FEM HW&SW version, ie. V10_50
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        AcpcFemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
+        AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
 
         /**
          * Try to parse the ACPC FEM version response packet an populate the structure.
          *
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
 
         /**
          * Member counterpart of parseVersionRsp().
          *
          * @see AcpcFemPlugin::parseVersionRsp()
          */
-        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
         {
             return parseVersionRsp(packet, version);
         }

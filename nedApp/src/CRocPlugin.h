@@ -17,13 +17,6 @@
  *
  */
 class CRocPlugin : public BaseModulePlugin {
-    public: // variables
-        static const int defaultInterfaceMask = BaseModulePlugin::defaultInterfaceMask;
-        static const int defaultInterruptMask = BaseModulePlugin::defaultInterruptMask;
-
-    private: // structures and definitions
-        static const unsigned NUM_CROCPLUGIN_DYNPARAMS;     //!< Maximum number of asyn parameters, including the status and configuration parameters
-
     private: // variables
         std::string m_version;                              //!< Version string as passed to constructor
         std::string m_posCalcPort;                          //!< Name of the CRocPosCalcPlugin port for sending this CROC parameters
@@ -36,13 +29,13 @@ class CRocPlugin : public BaseModulePlugin {
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] parentPlugins Plugins to connect to
          * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version ROC HW&SW version, ie. V5_50
          * @param[in] posCalcPortName Name of the CROC position calculation plugin
          */
-        CRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, const char *posCalcPortName=0);
+        CRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version, const char *posCalcPortName=0);
 
         /**
          * Try to parse the ROC version response packet an populate the structure.
@@ -58,14 +51,14 @@ class CRocPlugin : public BaseModulePlugin {
          * @param[out] version structure to be populated
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
 
         /**
          * Member counterpart of parseVersionRsp().
          *
          * @see RocPlugin::parseVersionRsp()
          */
-        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
         {
             return parseVersionRsp(packet, version);
         }

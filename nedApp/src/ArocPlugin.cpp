@@ -11,9 +11,7 @@
 #include "Log.h"
 #include "Common.h"
 
-EPICS_REGISTER_PLUGIN(ArocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
-
-const unsigned ArocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 440;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+EPICS_REGISTER_PLUGIN(ArocPlugin, 4, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string);
 
 /**
  * AROC version response format
@@ -32,9 +30,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-ArocPlugin::ArocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_AROC, true, blocking,
-                       NUM_ROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
+ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_AROC, 2)
     , m_version(version)
 {
     if (m_version == "v23") {
@@ -58,12 +55,12 @@ ArocPlugin::ArocPlugin(const char *portName, const char *dispatcherPortName, con
     initParams();
 }
 
-bool ArocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
+bool ArocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
     if (packet->getPayloadLength() != sizeof(RspReadVersion))
         return false;
 
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion *>(packet->getPayload());
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion *>(packet->payload);
 
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;
@@ -78,4 +75,3 @@ bool ArocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Vers
 
     return true;
 }
-

@@ -70,3 +70,13 @@ void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, 
     this->lvds_version = 1;
     memcpy(this->payload, payload_, payloadSize);
 }
+
+uint32_t DasCmdPacket::getPayloadLength() const
+{
+    if (this->cmd_length < (sizeof(DasCmdPacket) - 6))
+        return 0;
+    if (this->length < (sizeof(DasCmdPacket) - 6 + this->cmd_length))
+        return 0;
+
+    return this->cmd_length - 6;
+}

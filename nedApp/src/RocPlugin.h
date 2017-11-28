@@ -57,12 +57,6 @@ class RocPlugin : public BaseModulePlugin {
 
         epicsTimeStamp m_sendHvTime;
 
-        static const int defaultInterfaceMask = BaseModulePlugin::defaultInterfaceMask | asynOctetMask;
-        static const int defaultInterruptMask = BaseModulePlugin::defaultInterruptMask | asynOctetMask;
-
-    private: // structures and definitions
-        static const unsigned NUM_ROCPLUGIN_DYNPARAMS;      //!< Maximum number of asyn parameters, including the status and configuration parameters
-
     private: // variables
         std::string m_version;                              //!< Version string as passed to constructor
         Fifo<char> m_hvBuffer;                              //!< FIFO buffer for data received from HV module but not yet processed
@@ -75,18 +69,12 @@ class RocPlugin : public BaseModulePlugin {
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] parentPlugins Plugins to connect to
          * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version ROC HW&SW version, ie. V5_50
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        RocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
-
-        /**
-         * Process RS232 packets only, let base implementation do the rest.
-         */
-        bool processResponse(const DasPacket *packet);
+        RocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
 
         /**
          * Process ROC custom commands.
@@ -97,7 +85,7 @@ class RocPlugin : public BaseModulePlugin {
          * @param[out] timeout before giving up waiting for response, default is 2.0
          * @return Response to be waited for.
          */
-        DasPacket::CommandType handleRequest(DasPacket::CommandType command, double &timeout);
+        DasCmdPacket::CommandType handleRequest(DasCmdPacket::CommandType command, double &timeout);
 
         /**
          * Process ROC custom response commands.
@@ -106,7 +94,7 @@ class RocPlugin : public BaseModulePlugin {
          *
          * @param[in] packet to be handled
          */
-        bool handleResponse(const DasPacket *packet);
+        bool handleResponse(const DasCmdPacket *packet);
 
         /**
          * Send string/byte data to PVs
@@ -132,14 +120,14 @@ class RocPlugin : public BaseModulePlugin {
          * @param[out] version structure to be populated
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
 
         /**
          * Member counterpart of parseVersionRsp().
          *
          * @see RocPlugin::parseVersionRsp()
          */
-        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
         {
             return parseVersionRsp(packet, version);
         }
@@ -156,7 +144,7 @@ class RocPlugin : public BaseModulePlugin {
          * For non-v5.4 firmwares the function simply invokes BaseModulePlugin::rspReadConfig()
          * passing it the original packet.
          */
-        bool rspReadConfig(const DasPacket *packet, uint8_t channel);
+        bool rspReadConfig(const DasCmdPacket *packet, uint8_t channel);
 
         /**
          * Override START response handler.
@@ -165,7 +153,7 @@ class RocPlugin : public BaseModulePlugin {
          * and record it through Acquiring parameter. Other ROC version have a dedicated
          * status register for that.
          */
-        bool rspStart(const DasPacket *packet);
+        bool rspStart(const DasCmdPacket *packet);
 
         /**
          * Override STOP response handler.
@@ -174,7 +162,7 @@ class RocPlugin : public BaseModulePlugin {
          * and record it through Acquiring parameter. Other ROC version have a dedicated
          * status register for that.
          */
-        bool rspStop(const DasPacket *packet);
+        bool rspStop(const DasCmdPacket *packet);
 
         /**
          * Pass user command to HighVoltage module through RS232.
@@ -198,7 +186,7 @@ class RocPlugin : public BaseModulePlugin {
          * @param[in] packet with HV module response
          * @return true if packet was processed
          */
-        bool rspHvCmd(const DasPacket *packet);
+        bool rspHvCmd(const DasCmdPacket *packet);
 
         /**
          * Sends pre-amp configuration.
@@ -207,7 +195,7 @@ class RocPlugin : public BaseModulePlugin {
          *
          * @return Response to wait for.
          */
-        DasPacket::CommandType reqConfigPreAmp();
+        DasCmdPacket::CommandType reqConfigPreAmp();
 
         /**
          * Sends a pre-amp trigger command.
@@ -216,17 +204,17 @@ class RocPlugin : public BaseModulePlugin {
          *
          * @return Response to wait for.
          */
-        DasPacket::CommandType reqTriggerPreAmp();
+        DasCmdPacket::CommandType reqTriggerPreAmp();
 
         /**
          * Handle pre-amp configuration response.
          */
-        bool rspConfigPreAmp(const DasPacket *packet);
+        bool rspConfigPreAmp(const DasCmdPacket *packet);
 
         /**
          * Handle pre-amp trigger response.
          */
-        bool rspTriggerPreAmp(const DasPacket *packet);
+        bool rspTriggerPreAmp(const DasCmdPacket *packet);
 
         /**
          * Create pre-amp config parameter.

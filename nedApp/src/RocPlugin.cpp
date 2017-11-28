@@ -13,9 +13,7 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
-
-const unsigned RocPlugin::NUM_ROCPLUGIN_DYNPARAMS       = 670;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+EPICS_REGISTER_PLUGIN(RocPlugin, 4, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Hw & SW version", string);
 
 /**
  * ROC V5 version response format
@@ -60,9 +58,8 @@ struct RspReadVersionGE {
 #endif // BITFIELD_LSB_FIRST
 };
 
-RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ROC, true, blocking,
-                       NUM_ROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
+RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_ROC, 2)
     , m_version(version)
 {
     if (0) {
@@ -138,45 +135,30 @@ RocPlugin::RocPlugin(const char *portName, const char *dispatcherPortName, const
     initParams();
 }
 
-bool RocPlugin::processResponse(const DasPacket *packet)
-{
-    DasPacket::CommandType command = packet->getResponseType();
-
-    // Once HV command is initiated with CMD_HV_SEND, ROC board first ACKs the CMD_HV_SEND.
-    // Train of CMD_HV_RECV packets follow, one character from response per packet.
-    // Number ov CMD_HV_RECV packets is dynamic, depending on the response length.
-    switch (command) {
-    case DasPacket::CMD_HV_SEND:
-        return asynSuccess;
-    case DasPacket::CMD_HV_RECV:
-        rspHvCmd(packet);
-        return asynSuccess;
-    default:
-        return BaseModulePlugin::processResponse(packet);
-    }
-}
-
-DasPacket::CommandType RocPlugin::handleRequest(DasPacket::CommandType command, double &timeout)
+DasCmdPacket::CommandType RocPlugin::handleRequest(DasCmdPacket::CommandType command, double &timeout)
 {
     switch (command) {
-    case DasPacket::CMD_PREAMP_TEST_CONFIG:
+    case DasCmdPacket::CMD_PREAMP_TEST_CONFIG:
         return reqConfigPreAmp();
-    case DasPacket::CMD_PREAMP_TEST_TRIGGER:
+    case DasCmdPacket::CMD_PREAMP_TEST_TRIGGER:
         return reqTriggerPreAmp();
     default:
         return BaseModulePlugin::handleRequest(command, timeout);
     }
 }
 
-bool RocPlugin::handleResponse(const DasPacket *packet)
+bool RocPlugin::handleResponse(const DasCmdPacket *packet)
 {
-    DasPacket::CommandType command = packet->getResponseType();
-
-    switch (command) {
-    case DasPacket::CMD_PREAMP_TEST_CONFIG:
+    switch (packet->command) {
+    case DasCmdPacket::CMD_PREAMP_TEST_CONFIG:
         return rspConfigPreAmp(packet);
-    case DasPacket::CMD_PREAMP_TEST_TRIGGER:
+    case DasCmdPacket::CMD_PREAMP_TEST_TRIGGER:
         return rspTriggerPreAmp(packet);
+    case DasCmdPacket::CMD_HV_SEND:
+        return asynSuccess;
+    case DasCmdPacket::CMD_HV_RECV:
+        rspHvCmd(packet);
+        return asynSuccess;
     default:
         return BaseModulePlugin::handleResponse(packet);
     }
@@ -225,12 +207,12 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
     return BaseModulePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
 }
 
-bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
+bool RocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
     memset(&version, 0, sizeof(BaseModulePlugin::Version));
 
     if (packet->getPayloadLength() == sizeof(RspReadVersionGE)) {
-        const RspReadVersionGE *response = reinterpret_cast<const RspReadVersionGE*>(packet->getPayload());
+        const RspReadVersionGE *response = reinterpret_cast<const RspReadVersionGE*>(packet->payload);;
 
         version.hw_version  = response->hw_version;
         version.hw_revision = response->hw_revision;
@@ -242,7 +224,7 @@ bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
     } else if (packet->getPayloadLength() == sizeof(RspReadVersion) ||
                packet->getPayloadLength() == sizeof(RspReadVersion_v54)) {
 
-        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
 
         version.hw_version  = response->hw_version;
         version.hw_revision = response->hw_revision;
@@ -259,26 +241,26 @@ bool RocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Versi
     return false;
 }
 
-bool RocPlugin::rspReadConfig(const DasPacket *packet, uint8_t channel)
+bool RocPlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel)
 {
+    uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
     if (m_version == "v54") {
-        uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
 
-        if (packet->getLength() > sizeof(buffer)) {
+        if (packet->length > sizeof(buffer)) {
             LOG_ERROR("Received v5.4 READ_CONFIG response bigger than expected");
             return asynError;
         }
 
         // Packet in shared queue must not be modified. So we make a copy.
-        memcpy(buffer, packet, packet->getLength());
-        packet = reinterpret_cast<const DasPacket *>(buffer);
-        const_cast<DasPacket *>(packet)->payload_length -= 4; // This is the only reason we're doing all the buffering
+        memcpy(buffer, packet, packet->length);
+        packet = reinterpret_cast<const DasCmdPacket *>(buffer);
+        const_cast<DasCmdPacket *>(packet)->cmd_length -= 4; // This is the only reason we're doing all the buffering
     }
 
     return BaseModulePlugin::rspReadConfig(packet, channel);
 }
 
-bool RocPlugin::rspStart(const DasPacket *packet)
+bool RocPlugin::rspStart(const DasCmdPacket *packet)
 {
     bool ack = BaseModulePlugin::rspStart(packet);
     if (m_version == "v54" || m_version == "v55") {
@@ -288,7 +270,7 @@ bool RocPlugin::rspStart(const DasPacket *packet)
     return ack;
 }
 
-bool RocPlugin::rspStop(const DasPacket *packet)
+bool RocPlugin::rspStop(const DasCmdPacket *packet)
 {
     bool ack = BaseModulePlugin::rspStop(packet);
     if (m_version == "v54" || m_version == "v55") {
@@ -307,14 +289,14 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
     for (uint32_t i = 0; i < length; i++) {
         buffer[i/2] |= data[i] << (16*(i%2));
     }
-    sendToDispatcher(DasPacket::CMD_HV_SEND, 0, buffer, bufferLen);
+    sendUpstream(DasCmdPacket::CMD_HV_SEND, 0, buffer, bufferLen);
 
     epicsTimeGetCurrent(&m_sendHvTime);
 }
 
-bool RocPlugin::rspHvCmd(const DasPacket *packet)
+bool RocPlugin::rspHvCmd(const DasCmdPacket *packet)
 {
-    const uint32_t *payload = packet->getPayload();
+    const uint32_t *payload = packet->payload;
     epicsTimeStamp now;
     double diff;
 
@@ -343,40 +325,40 @@ bool RocPlugin::rspHvCmd(const DasPacket *packet)
     return true;
 }
 
-DasPacket::CommandType RocPlugin::reqConfigPreAmp()
+DasCmdPacket::CommandType RocPlugin::reqConfigPreAmp()
 {
     uint32_t buffer[128];
     uint32_t length = packRegParams("PREAMP_CFG", buffer, sizeof(buffer));
 
     if (length == 0)
-        return static_cast<DasPacket::CommandType>(0);
+        return static_cast<DasCmdPacket::CommandType>(0);
 
-    sendToDispatcher(DasPacket::CMD_PREAMP_TEST_CONFIG, 0, buffer, length);
-    return DasPacket::CMD_PREAMP_TEST_CONFIG;
+    sendUpstream(DasCmdPacket::CMD_PREAMP_TEST_CONFIG, 0, buffer, length);
+    return DasCmdPacket::CMD_PREAMP_TEST_CONFIG;
 }
 
-DasPacket::CommandType RocPlugin::reqTriggerPreAmp()
+DasCmdPacket::CommandType RocPlugin::reqTriggerPreAmp()
 {
     uint32_t recharge = 0xFFFF;
     uint32_t buffer[128];
     uint32_t length = packRegParams("PREAMP_TRIG", buffer, sizeof(buffer));
 
     if (length == 0)
-        return static_cast<DasPacket::CommandType>(0);
+        return static_cast<DasCmdPacket::CommandType>(0);
 
-    sendToDispatcher(DasPacket::CMD_PREAMP_TEST_TRIGGER, 0, &recharge, length);
-    sendToDispatcher(DasPacket::CMD_PREAMP_TEST_TRIGGER, 0, buffer, length);
-    return DasPacket::CMD_PREAMP_TEST_TRIGGER;
+    sendUpstream(DasCmdPacket::CMD_PREAMP_TEST_TRIGGER, 0, &recharge, length);
+    sendUpstream(DasCmdPacket::CMD_PREAMP_TEST_TRIGGER, 0, buffer, length);
+    return DasCmdPacket::CMD_PREAMP_TEST_TRIGGER;
 }
 
-bool RocPlugin::rspConfigPreAmp(const DasPacket *packet)
+bool RocPlugin::rspConfigPreAmp(const DasCmdPacket *packet)
 {
-    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+    return packet->acknowledge;
 }
 
-bool RocPlugin::rspTriggerPreAmp(const DasPacket *packet)
+bool RocPlugin::rspTriggerPreAmp(const DasCmdPacket *packet)
 {
-    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+    return packet->acknowledge;
 }
 
 void RocPlugin::createPreAmpCfgParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)

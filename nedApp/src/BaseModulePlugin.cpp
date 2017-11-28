@@ -538,7 +538,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqDiscover()
 
 bool BaseModulePlugin::rspDiscover(const DasCmdPacket *packet)
 {
-    if (packet->length >= sizeof(uint32_t))
+    if (packet->getPayloadLength() >= sizeof(uint32_t))
         return (m_hardwareType == static_cast<DasCmdPacket::ModuleType>(packet->payload[0]));
     return false;
 }
@@ -594,7 +594,7 @@ bool BaseModulePlugin::rspReadStatus(const DasCmdPacket *packet, uint8_t channel
 {
     uint32_t section = SECTION_ID(0x0, channel);
     uint32_t expectLength = ALIGN_UP(m_params["STATUS"].sizes[section]*m_wordSize, 4);
-    uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
+    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
     if (payloadLength != expectLength) {
         if (channel == 0)
             LOG_ERROR("Received wrong READ_STATUS response based on length; "
@@ -636,7 +636,7 @@ bool BaseModulePlugin::rspResetStatusCounters(const DasCmdPacket *packet)
 bool BaseModulePlugin::rspReadStatusCounters(const DasCmdPacket *packet)
 {
     uint32_t expectLength = ALIGN_UP(m_params["COUNTERS"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
+    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
     if (payloadLength != expectLength) {
         LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; "
                   "received %u, expected %u", payloadLength, expectLength);
@@ -671,7 +671,7 @@ bool BaseModulePlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel
     // Response contains registers for all sections for a selected channel or global configuration
     uint32_t section_f = SECTION_ID(0xF, channel);
     uint32_t expectLength = ALIGN_UP(m_wordSize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]), 4);
-    uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
+    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
 
     if (payloadLength != expectLength) {
         if (channel == 0)
@@ -764,7 +764,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqUpgrade(const char *data, uint32_
 bool BaseModulePlugin::rspUpgrade(const DasCmdPacket *packet)
 {
     uint32_t expectLength = ALIGN_UP(m_params["UPGRADE"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
+    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
     if (payloadLength != expectLength) {
         LOG_ERROR("Received wrong READ_UPGRADE response based on length; "
                   "received %u, expected %u", payloadLength, expectLength);
@@ -789,7 +789,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqReadTemperature()
 bool BaseModulePlugin::rspReadTemperature(const DasCmdPacket *packet)
 {
     uint32_t expectLength = ALIGN_UP(m_params["TEMPERATURE"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = packet->length - sizeof(DasCmdPacket);
+    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
     if (payloadLength != expectLength) {
         LOG_ERROR("Received wrong READ_TEMP response based on length; "
                   "received %u, expected %u", payloadLength, expectLength);

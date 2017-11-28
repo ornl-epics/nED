@@ -11,9 +11,8 @@
 #include "DspWPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(DspWPlugin, 4, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Version", string);
+EPICS_REGISTER_PLUGIN(DspWPlugin, 4, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Version", string);
 
-const unsigned DspWPlugin::NUM_DSPWPLUGIN_PARAMS     = 100; // + ((int)(&LAST_DSPWPLUGIN_PARAM - &FIRST_DSPWPLUGIN_PARAM + 1))
 const double DspWPlugin::DSPW_RESPONSE_TIMEOUT       = 1.0;
 
 /**
@@ -33,9 +32,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-DspWPlugin::DspWPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_DSPW, false,
-                       0, NUM_DSPWPLUGIN_PARAMS)
+DspWPlugin::DspWPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_DSPW, 4)
     , m_version(version)
 {
     if (m_version == "v10") {
@@ -51,7 +49,7 @@ DspWPlugin::DspWPlugin(const char *portName, const char *dispatcherPortName, con
     initParams();
 }
 
-bool DspWPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
+bool DspWPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
     if (packet->getPayloadLength() != sizeof(RspReadVersion)) {
         return false;

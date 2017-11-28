@@ -13,9 +13,7 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(AdcRocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
-
-const unsigned AdcRocPlugin::NUM_ADCROCPLUGIN_DYNPARAMS       = 650;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
+EPICS_REGISTER_PLUGIN(AdcRocPlugin, 4, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Hw & SW version", string);
 
 /**
  * ADC ROC version response format
@@ -34,9 +32,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ADCROC, true, blocking,
-                       NUM_ADCROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
+AdcRocPlugin::AdcRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_ADCROC, 2)
     , m_version(version)
 {
     if (0) {
@@ -62,37 +59,35 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *dispatcherPortName,
     initParams();
 }
 
-DasPacket::CommandType AdcRocPlugin::handleRequest(DasPacket::CommandType command, double &timeout)
+DasCmdPacket::CommandType AdcRocPlugin::handleRequest(DasCmdPacket::CommandType command, double &timeout)
 {
     switch (command) {
-    case DasPacket::CMD_PM_PULSE_RQST_ON:
+    case DasCmdPacket::CMD_PM_PULSE_RQST_ON:
         return reqTriggerPulseMagnet();
-    case DasPacket::CMD_PM_PULSE_RQST_OFF:
+    case DasCmdPacket::CMD_PM_PULSE_RQST_OFF:
         return reqClearPulseMagnet();
     default:
         return BaseModulePlugin::handleRequest(command, timeout);
     }
 }
 
-bool AdcRocPlugin::handleResponse(const DasPacket *packet)
+bool AdcRocPlugin::handleResponse(const DasCmdPacket *packet)
 {
-    DasPacket::CommandType command = packet->getResponseType();
-
-    switch (command) {
-    case DasPacket::CMD_PM_PULSE_RQST_ON:
+    switch (packet->command) {
+    case DasCmdPacket::CMD_PM_PULSE_RQST_ON:
         return rspTriggerPulseMagnet(packet);
-    case DasPacket::CMD_PM_PULSE_RQST_OFF:
+    case DasCmdPacket::CMD_PM_PULSE_RQST_OFF:
         return rspClearPulseMagnet(packet);
     default:
         return BaseModulePlugin::handleResponse(packet);
     }
 }
 
-bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
+bool AdcRocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
     const RspReadVersion *response;
     if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+        response = reinterpret_cast<const RspReadVersion*>(packet->length);
     } else {
         return false;
     }
@@ -110,26 +105,26 @@ bool AdcRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Ve
     return true;
 }
 
-DasPacket::CommandType AdcRocPlugin::reqTriggerPulseMagnet()
+DasCmdPacket::CommandType AdcRocPlugin::reqTriggerPulseMagnet()
 {
-    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_ON);
-    return DasPacket::CMD_PM_PULSE_RQST_ON;
+    sendUpstream(DasCmdPacket::CMD_PM_PULSE_RQST_ON);
+    return DasCmdPacket::CMD_PM_PULSE_RQST_ON;
 }
 
-DasPacket::CommandType AdcRocPlugin::reqClearPulseMagnet()
+DasCmdPacket::CommandType AdcRocPlugin::reqClearPulseMagnet()
 {
-    sendToDispatcher(DasPacket::CMD_PM_PULSE_RQST_OFF);
-    return DasPacket::CMD_PM_PULSE_RQST_OFF;
+    sendUpstream(DasCmdPacket::CMD_PM_PULSE_RQST_OFF);
+    return DasCmdPacket::CMD_PM_PULSE_RQST_OFF;
 }
 
-bool AdcRocPlugin::rspTriggerPulseMagnet(const DasPacket *packet)
+bool AdcRocPlugin::rspTriggerPulseMagnet(const DasCmdPacket *packet)
 {
-    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+    return packet->acknowledge;
 }
 
-bool AdcRocPlugin::rspClearPulseMagnet(const DasPacket *packet)
+bool AdcRocPlugin::rspClearPulseMagnet(const DasCmdPacket *packet)
 {
-    return (packet->cmdinfo.command == DasPacket::RSP_ACK);
+    return packet->acknowledge;
 }
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two

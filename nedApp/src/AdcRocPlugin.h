@@ -30,13 +30,6 @@
  *
  */
 class AdcRocPlugin : public BaseModulePlugin {
-    public: // variables
-        static const int defaultInterfaceMask = BaseModulePlugin::defaultInterfaceMask | asynOctetMask;
-        static const int defaultInterruptMask = BaseModulePlugin::defaultInterruptMask | asynOctetMask;
-
-    private: // structures and definitions
-        static const unsigned NUM_ADCROCPLUGIN_DYNPARAMS;      //!< Maximum number of asyn parameters, including the status and configuration parameters
-
     private: // variables
         std::string m_version;                              //!< Version string as passed to constructor
 
@@ -48,13 +41,12 @@ class AdcRocPlugin : public BaseModulePlugin {
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] parentPlugins Plugins to connect to
          * @param[in] hardwareId Hardware ID of the ADCROC module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version ADCROC HW&SW version, ie. V5_50
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        AdcRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking=0);
+        AdcRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
 
         /**
          * Try to parse the ADCROC version response packet an populate the structure.
@@ -69,14 +61,14 @@ class AdcRocPlugin : public BaseModulePlugin {
          *                        verify the parsed packet matches this one
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
 
         /**
          * Member counterpart of parseVersionRsp().
          *
          * @see AdcRocPlugin::parseVersionRsp()
          */
-        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
         {
             return parseVersionRsp(packet, version);
         }
@@ -92,7 +84,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          * @param[out] timeout before giving up waiting for response, default is 2.0
          * @return Response to be waited for.
          */
-        DasPacket::CommandType handleRequest(DasPacket::CommandType command, double &timeout);
+        DasCmdPacket::CommandType handleRequest(DasCmdPacket::CommandType command, double &timeout);
 
         /**
          * Process ADC ROC custom response commands.
@@ -101,7 +93,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          *
          * @param[in] packet to be handled
          */
-        bool handleResponse(const DasPacket *packet);
+        bool handleResponse(const DasCmdPacket *packet);
 
         /**
          * Request a single pulse magnet pulse
@@ -112,7 +104,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          *
          * Valid only on modified ADC ROC that supports pulse magnet interface.
          */
-        DasPacket::CommandType reqTriggerPulseMagnet();
+        DasCmdPacket::CommandType reqTriggerPulseMagnet();
 
         /**
          * Request clearing previous pulse magnet pulse.
@@ -122,7 +114,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          *
          * Valid only on modified ADC ROC that supports pulse magnet interface.
          */
-        DasPacket::CommandType reqClearPulseMagnet();
+        DasCmdPacket::CommandType reqClearPulseMagnet();
 
         /**
          * Handle pulsed magnet trigger response.
@@ -131,7 +123,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          * @retval true Received command ACK in time.
          * @retval false Timeout has occurred or NACK received.
          */
-        bool rspTriggerPulseMagnet(const DasPacket *packet);
+        bool rspTriggerPulseMagnet(const DasCmdPacket *packet);
 
         /**
          * Handle pulsed magnet clear response.
@@ -140,7 +132,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          * @retval true Received command ACK in time.
          * @retval false Timeout has occurred or NACK received.
          */
-        bool rspClearPulseMagnet(const DasPacket *packet);
+        bool rspClearPulseMagnet(const DasCmdPacket *packet);
 
         /**
          * Create and register all ADCROC v0.2 parameters to be exposed to EPICS.

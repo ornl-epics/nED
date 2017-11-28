@@ -17,7 +17,6 @@
  */
 class DspWPlugin : public BaseModulePlugin {
     private: // structures and definitions
-        static const unsigned NUM_DSPWPLUGIN_PARAMS;         //!< This is used as a runtime assert check and must match number of all parameters
         static const double DSPW_RESPONSE_TIMEOUT;           //!< Default DSP-W response timeout, in seconds
         std::string m_version;
 
@@ -29,26 +28,26 @@ class DspWPlugin : public BaseModulePlugin {
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] parentPlugins Plugins to connect to
          * @param[in] hardwareId Hardware ID of the DSP module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version Configured module version, must match the actual version
          */
-        DspWPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version);
+        DspWPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
 
         /**
          * Try to parse the DSP-W version response packet an populate the structure.
          *
          * @return true if succesful, false if version response packet could not be parsed.
          */
-        static bool parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version);
+        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
 
         /**
          * Member counterpart of parseVersionRsp().
          *
          * @see DspPlugin::parseVersionRsp()
          */
-        bool parseVersionRspM(const DasPacket *packet, BaseModulePlugin::Version &version)
+        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
         {
             return parseVersionRsp(packet, version);
         }

@@ -245,6 +245,11 @@ class DasCmdPacket : public Packet {
          * Return length of inner header in bytes.
          */
         static uint32_t getHeaderLen() { return 6; }
+
+        /**
+         * Return number of bytes of command payload.
+         */
+        uint32_t getPayloadLength() const;
 };
 
 #endif // PACKET_H

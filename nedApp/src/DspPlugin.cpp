@@ -92,7 +92,7 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
 
 bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    if ((packet->length - sizeof(DasCmdPacket)) != sizeof(RspReadVersion)) {
+    if (packet->getPayloadLength() != sizeof(RspReadVersion)) {
         return false;
     }
 

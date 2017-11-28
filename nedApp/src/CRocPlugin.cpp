@@ -13,13 +13,10 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(CRocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "PosCalc port name", string);
+EPICS_REGISTER_PLUGIN(CRocPlugin, 5, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Hw & SW version", string, "PosCalc port name", string);
 
-const unsigned CRocPlugin::NUM_CROCPLUGIN_DYNPARAMS       = 230;  //!< Since supporting multiple versions with different number of PVs, this is just a maximum value
-
-CRocPlugin::CRocPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, const char *posCalcPortName)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_CROC, true, 0,
-                       NUM_CROCPLUGIN_DYNPARAMS, defaultInterfaceMask, defaultInterruptMask)
+CRocPlugin::CRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version, const char *posCalcPortName)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_CROC, 2)
     , m_version(version)
     , m_posCalcPort(posCalcPortName)
 {
@@ -42,7 +39,7 @@ CRocPlugin::CRocPlugin(const char *portName, const char *dispatcherPortName, con
     initParams();
 }
 
-bool CRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
+bool CRocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
 /**
  * ROC V5 version response format
@@ -63,7 +60,7 @@ bool CRocPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Vers
 
     const RspReadVersion *response;
     if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+        response = reinterpret_cast<const RspReadVersion*>(packet->payload);
     } else {
         return false;
     }

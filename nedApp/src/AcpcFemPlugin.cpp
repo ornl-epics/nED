@@ -11,11 +11,7 @@
 #include "AcpcFemPlugin.h"
 #include "Log.h"
 
-#define NUM_ACPCFEMPLUGIN_PARAMS    0 //((int)(&LAST_ACPCFEMPLUGIN_PARAM - &FIRST_ACPCFEMPLUGIN_PARAM + 1))
-
-EPICS_REGISTER_PLUGIN(AcpcFemPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hardware ID", string, "Hw & SW version", string, "Blocking", int);
-
-const unsigned AcpcFemPlugin::NUM_ACPCFEMPLUGIN_DYNPARAMS       = 250;
+EPICS_REGISTER_PLUGIN(AcpcFemPlugin, 4, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Hw & SW version", string);
 
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
@@ -35,9 +31,8 @@ struct RspReadVersion {
 };
 
 
-AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *dispatcherPortName, const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId, DasPacket::MOD_TYPE_ACPCFEM, true,
-                       blocking, NUM_ACPCFEMPLUGIN_PARAMS + NUM_ACPCFEMPLUGIN_DYNPARAMS)
+AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_ACPCFEM, 2)
     , m_version(version)
 {
     if (m_version == "v14") {
@@ -65,12 +60,12 @@ bool AcpcFemPlugin::checkVersion(const BaseModulePlugin::Version &version)
     return false;
 }
 
-bool AcpcFemPlugin::parseVersionRsp(const DasPacket *packet, BaseModulePlugin::Version &version)
+bool AcpcFemPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
     if (packet->getPayloadLength() != sizeof(RspReadVersion))
         return false;
 
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;
     version.hw_year     = HEX_BYTE_TO_DEC(response->hw_year) + 2000;

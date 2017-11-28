@@ -13,13 +13,9 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(BnlRocPlugin, 5, "Port name", string,
-        "Dispatcher port name", string, "Hardware ID", string,
-        "Hw & SW version", string, "Blocking", int);
-
-/* Since supporting multiple versions with different number of PVs, this is
- * just a maximum value. */
-const unsigned BnlRocPlugin::NUM_BNLROCPLUGIN_DYNPARAMS       = 650;
+EPICS_REGISTER_PLUGIN(BnlRocPlugin, 4, "Port name", string,
+        "Parent plugins", string, "Hardware ID", string,
+        "Hw & SW version", string);
 
 /**
  * BNL ROC version response format
@@ -38,12 +34,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-BnlRocPlugin::BnlRocPlugin(const char *portName, const char *dispatcherPortName,
-        const char *hardwareId, const char *version, int blocking)
-    : BaseModulePlugin(portName, dispatcherPortName, hardwareId,
-            DasPacket::MOD_TYPE_BNLROC, true, blocking,
-            NUM_BNLROCPLUGIN_DYNPARAMS, defaultInterfaceMask,
-            defaultInterruptMask)
+BnlRocPlugin::BnlRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_BNLROC, 2)
     , m_version(version)
 {
     if (0) {
@@ -69,12 +61,11 @@ BnlRocPlugin::BnlRocPlugin(const char *portName, const char *dispatcherPortName,
     initParams();
 }
 
-bool BnlRocPlugin::parseVersionRsp(const DasPacket *packet,
-        BaseModulePlugin::Version &version)
+bool BnlRocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
     const RspReadVersion *response;
     if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->getPayload());
+        response = reinterpret_cast<const RspReadVersion*>(packet->payload);
     } else {
         return false;
     }
