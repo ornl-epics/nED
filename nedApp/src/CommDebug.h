@@ -31,12 +31,13 @@ class CommDebug : public BasePlugin {
         struct PacketDesc {
             uint32_t data[256];
             uint32_t length;
-            epicsTimeStamp timestamp;
         };
 
         uint32_t m_buffer[8];   //!< Cached packet data to be sent out
         DasCmdPacket *m_packet;
-        std::list<PacketDesc> m_lastPacketQueue;
+        DasCmdPacket m_emptyPacket;
+        std::list<PacketDesc> m_recvQue;
+        std::list<PacketDesc> m_sendQue;
 
     public: // structures and defines
         /**
@@ -78,7 +79,7 @@ class CommDebug : public BasePlugin {
         /**
          * Process command response from currently selected module.
          */
-        bool savePacket(const DasCmdPacket *packet);
+        void savePacket(const DasCmdPacket *packet, std::list<PacketDesc> &que, int maxQueSize);
 
         /**
          * Generate raw packet in cache from high level (ReqCmd, ReqIsDsp, etc.) parameters
@@ -91,20 +92,53 @@ class CommDebug : public BasePlugin {
         void sendPacket();
 
         /**
-         * Populate PVs for sent package.
-         */
-        void showSendPacket();
-
-        /**
          * Change currently selected packet and update all related PVs.
          *
          * @param[in] index New index, 0 means current, negative values are converted to positive counterparts.
          */
         void selectRecvPacket(int index);
 
+        /**
+         * Populate PVs from packet obtained from sent queue in position defined by index.
+         *
+         * Negative index value displays first packet. Index over the end of the
+         * queue shows last packet.
+         *
+         * @param[in] index of packet to be displayed.
+         */
+        void showSentPacket(int index);
+
+        /**
+         * Populate PVs from packet.
+         *
+         * @param[in] packet to be used.
+         * @param[in] index to be displayed
+         */
+        void showSentPacket(DasCmdPacket *packet, int index=0);
+
+        /**
+         * Show packet from receive queue in position defined by index.
+         *
+         * Negative index value displays first packet. Index over the end of the
+         * queue shows last packet.
+         *
+         * @param[in] index of packet to be displayed.
+         */
+        void showRecvPacket(int index);
+
+        /**
+         * Populate PVs from packet.
+         *
+         * @param[in] packet to be used.
+         * @param[in] index to be displayed
+         */
+        void showRecvPacket(DasCmdPacket *packet, int index=0);
+
     protected:
         int ReqSend;        //!< Send cached packet
-        int ReqSniffer;     //!< Enables listening to other plugins messages
+        int Sniffer;        //!< Enables listening to other plugins messages
+        int FilterCmd;      //!< Enables filtering by command
+        int FilterModule;   //!< Enables filtering by hardware id
 
         int ReqVersion;     //!< Packet version to be sent out
         int ReqPriority;    //!< Packet priority - usually set by modules only
@@ -126,6 +160,7 @@ class CommDebug : public BasePlugin {
         int ReqRaw5;        //!< Request packet raw word 5
         int ReqRaw6;        //!< Request packet raw word 6
         int ReqRaw7;        //!< Request packet raw word 7
+        int ReqTimeStamp;   //!< Request receive time in msec precision
 
         int RspVersion;     //!< Packet version
         int RspPriority;    //!< Packet priority - usually set by modules only
@@ -149,9 +184,12 @@ class CommDebug : public BasePlugin {
         int RspRaw7;        //!< Response packet raw word 7
         int RspTimeStamp;   //!< Response receive time in msec precision
 
-        int PktQueIndex;    //!< Currently display packet index
-        int PktQueSize;     //!< Number of elements in packet buffer
-        int PktQueMaxSize;  //!< Max num of elements in packet buffer
+        int SendQueIndex;   //!< Currently display sent packet index
+        int SendQueSize;    //!< Number of elements in send buffer
+        int SendQueMaxSize; //!< Max num of elements in send buffer
+        int RecvQueIndex;   //!< Currently display received packet index
+        int RecvQueSize;    //!< Number of elements in receive buffer
+        int RecvQueMaxSize; //!< Max num of elements in receive buffer
 };
 
 #endif // COMM_DEBUG_H

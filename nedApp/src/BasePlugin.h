@@ -331,6 +331,28 @@ class BasePlugin : public asynPortDriver {
         using asynPortDriver::getIntegerParam;
 
         /**
+         * Convenient function, return -1 on error which can be ambigous.
+         */
+        int getIntegerParam(int index)
+        {
+            int val;
+            if (getIntegerParam(index, &val) == asynSuccess)
+                return val;
+            return -1;
+        }
+
+        /**
+         * Convenient function, return -1 on error which can be ambigous.
+         */
+        int getIntegerParam(const std::string &name)
+        {
+            int val;
+            if (getIntegerParam(name, val) == asynSuccess)
+                return val;
+            return -1;
+        }
+
+        /**
          * Sets new value of an integer in the parameter library.
          *
          * Convenience function to look by parameter name that only works for
@@ -340,6 +362,18 @@ class BasePlugin : public asynPortDriver {
          */
         asynStatus setIntegerParam(const std::string &name, int value);
         using asynPortDriver::setIntegerParam;
+
+        /**
+         * Convenient function, return -1 on error which can be ambigous.
+         */
+        std::string getStringParam(int index)
+        {
+            char buffer[256];
+            if (getStringParam(index, sizeof(buffer), buffer) == asynSuccess)
+                return std::string(buffer);
+            return std::string();
+        }
+        using asynPortDriver::getStringParam;
 
         /**
          * Convenience function to increment current parameter value.

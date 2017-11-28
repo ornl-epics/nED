@@ -66,37 +66,58 @@ CommDebug::CommDebug(const char *portName, const char *parentPlugins)
     createParam("RspTimeStamp", asynParamFloat64, &RspTimeStamp);   // Response time stamp in seconds with msec precision
 
     createParam("ReqSend",      asynParamInt32, &ReqSend);          // WRITE - Send cached packet
-    createParam("ReqSniffer",   asynParamInt32, &ReqSniffer);       // WRITE - Enables listening to other plugins messages
-    createParam("PktQueIndex",  asynParamInt32, &PktQueIndex, 0);   // Currently selected packet
-    createParam("PktQueSize",   asynParamInt32, &PktQueSize, 0);    // Number of elements in packet buffer
-    createParam("PktQueMaxSize",asynParamInt32, &PktQueMaxSize, 10);// Max num of elements in packet buffer
+    createParam("SendQueIndex", asynParamInt32, &SendQueIndex, 0);  // Currently selected sent packet
+    createParam("SendQueSize",  asynParamInt32, &SendQueSize, 0);   // Number of elements in sent send buffer
+    createParam("SendQueMaxSize",asynParamInt32,&SendQueMaxSize, 50);// Max num of elements in send buffer
+    createParam("RecvQueIndex", asynParamInt32, &RecvQueIndex, 0);  // Currently selected receive packet
+    createParam("RecvQueSize",  asynParamInt32, &RecvQueSize, 0);   // Number of elements in receive buffer
+    createParam("RecvQueMaxSize",asynParamInt32,&RecvQueMaxSize, 50);// Max num of elements in receive buffer
+
+    createParam("Sniffer",      asynParamInt32, &Sniffer);          // WRITE - Enables listening to other plugins messages
+    createParam("FilterCmd",    asynParamInt32, &FilterCmd);        // WRITE - Enables filtering based on command
+    createParam("FilterModule", asynParamOctet, &FilterModule);     // WRITE - Enables filtering based on hardware id
 
     callParamCallbacks();
 
     BasePlugin::connect(parentPlugins, MsgDasCmd);
 
     generatePacket(false);
+    memset(&m_emptyPacket, 0, sizeof(DasCmdPacket));
 }
 
 asynStatus CommDebug::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     std::list<int> raws = { ReqRaw0, ReqRaw1, ReqRaw2, ReqRaw3, ReqRaw4, ReqRaw5, ReqRaw6, ReqRaw7 };
+    std::list<int> reqPvs = { ReqVersion, ReqPriority, ReqType, ReqSequence, ReqLength, ReqCmdLen, ReqCmd, ReqVerifyId, ReqAck, ReqRsp, ReqCmdVer, ReqModule };
     bool fromRaw = false;
+    bool regenerate = false;
 
     if (pasynUser->reason == ReqSend) {
+        m_recvQue.clear();
+        m_sendQue.clear();
         generatePacket(false);
-        sendPacket();
+        BasePlugin::sendUpstream(m_packet);
+        showSentPacket(m_packet);
+        showRecvPacket(&m_emptyPacket);
         return asynSuccess;
-    } else if (pasynUser->reason == PktQueIndex) {
-        selectRecvPacket(value);
+    } else if (pasynUser->reason == SendQueIndex) {
+        showSentPacket(value);
+        return asynSuccess;
+    } else if (pasynUser->reason == RecvQueIndex) {
+        showRecvPacket(value);
         return asynSuccess;
     } else if (std::find(raws.begin(), raws.end(), pasynUser->reason) != raws.end()) {
         fromRaw = true;
+        regenerate = true;
+    } else if (std::find(reqPvs.begin(), reqPvs.end(), pasynUser->reason) != reqPvs.end()) {
+        regenerate = true;
     }
 
     asynStatus ret = BasePlugin::writeInt32(pasynUser, value);
-    generatePacket(fromRaw);
-    showSendPacket();
+    if (regenerate) {
+        generatePacket(fromRaw);
+        showSentPacket(m_packet);
+    }
     return ret;
 }
 
@@ -105,7 +126,7 @@ asynStatus CommDebug::writeOctet(asynUser *pasynUser, const char *value, size_t 
     if (pasynUser->reason == ReqModule) {
         setStringParam(ReqModule, value);
         generatePacket(false);
-        showSendPacket();
+        showSentPacket(m_packet);
         *nActual = nChars;
         return asynSuccess;
     }
@@ -160,58 +181,23 @@ void CommDebug::generatePacket(bool fromRawPvs)
     }
 }
 
-void CommDebug::sendPacket()
-{
-    // Invalidate all params
-    setIntegerParam(RspVersion,   0);
-    setIntegerParam(RspPriority,  0);
-    setIntegerParam(RspType,      0);
-    setIntegerParam(RspSequence,  0);
-    setIntegerParam(RspLength,    0);
-    setIntegerParam(RspCmdLen,    0);
-    setIntegerParam(RspCmd,       0);
-    setIntegerParam(RspVerifyId,  0);
-    setIntegerParam(RspAck,       0);
-    setIntegerParam(RspRsp,       0);
-    setIntegerParam(RspCmdVer,    0);
-    setStringParam(RspModule,    "");
-    setIntegerParam(RspRaw0,      0);
-    setIntegerParam(RspRaw1,      0);
-    setIntegerParam(RspRaw2,      0);
-    setIntegerParam(RspRaw3,      0);
-    setIntegerParam(RspRaw4,      0);
-    setIntegerParam(RspRaw5,      0);
-    setIntegerParam(RspRaw6,      0);
-    setIntegerParam(RspRaw7,      0);
-    setDoubleParam(RspTimeStamp,  0);
-
-    m_lastPacketQueue.erase(m_lastPacketQueue.begin(), m_lastPacketQueue.end());
-    setIntegerParam(PktQueIndex, 0);
-    setIntegerParam(PktQueSize, 0);
-
-    callParamCallbacks();
-
-    BasePlugin::sendUpstream(m_packet);
-}
-
 void CommDebug::recvDownstream(DasCmdPacketList *packets)
 {
-    bool changePacket = false;
+    int filterCmd = getIntegerParam(FilterCmd);
+    int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
+    uint32_t moduleId = BaseModulePlugin::ip2addr( getStringParam(FilterModule) );
 
     for (auto it = packets->cbegin(); it != packets->cend(); it++) {
         const DasCmdPacket *packet = *it;
 
-        if (savePacket(packet)) {
-            changePacket = true;
+        if ((moduleId == 0 || moduleId == packet->module_id) &&
+            (filterCmd == 0 || filterCmd == packet->command)) {
+
+            savePacket(packet, m_recvQue, recvQueMaxSize);
         }
     }
 
-    if (changePacket) {
-        selectRecvPacket(0);
-    }
-
-    setIntegerParam(PktQueSize, m_lastPacketQueue.size());
-    callParamCallbacks();
+    showRecvPacket(0);
 
     this->unlock();
     sendDownstream(packets, false);
@@ -223,83 +209,112 @@ void CommDebug::recvUpstream(DasCmdPacketList *packets)
     bool sniffer = false;
     sendUpstream(MsgDasCmd, packets);
 
-    getBooleanParam(ReqSniffer, sniffer);
+    getBooleanParam(Sniffer, sniffer);
 
     if (sniffer && !packets->empty()) {
-        DasCmdPacket *packet = packets->back();
-        memcpy(m_buffer, packet, std::min(sizeof(m_buffer), static_cast<size_t>(packet->length)));
-        m_packet->length = std::min(sizeof(m_buffer), static_cast<size_t>(packet->length));
-        showSendPacket();
+        int filterCmd;
+        char moduleStr[20];
+        uint32_t moduleId;
+
+        getIntegerParam(FilterCmd, &filterCmd);
+        getStringParam(FilterModule,   sizeof(moduleStr), moduleStr);
+        moduleId = BaseModulePlugin::ip2addr(moduleStr);
+
+        for (auto it = packets->begin(); it != packets->end(); it++) {
+            DasCmdPacket *packet = *it;
+
+            if ((moduleId == 0 || moduleId == packet->module_id) &&
+                (filterCmd == 0 || filterCmd == packet->command)) {
+
+                savePacket(packet, m_sendQue, getIntegerParam(SendQueMaxSize));
+            }
+        }
+        showSentPacket(0);
     }
 }
 
-bool CommDebug::savePacket(const DasCmdPacket *packet)
+void CommDebug::savePacket(const DasCmdPacket *packet, std::list<PacketDesc> &que, int maxQueSize)
 {
-    int maxQueSize = 0;
-    getIntegerParam(PktQueMaxSize, &maxQueSize);
-    if (maxQueSize <= 0)
-        return false;
+    if (maxQueSize < 1)
+        maxQueSize = 1;
 
     // Cache the payload to read it through readOctet()
     PacketDesc pkt;
     pkt.length = std::min(packet->length, static_cast<uint32_t>(sizeof(pkt.data)));
     memcpy(pkt.data, packet, pkt.length);
-    epicsTimeGetCurrent(&pkt.timestamp);
-    while ((int)m_lastPacketQueue.size() >= maxQueSize)
-        m_lastPacketQueue.pop_back();
-    m_lastPacketQueue.push_front(pkt);
-
-    return true;
+    while ((int)que.size() >= maxQueSize)
+        que.pop_back();
+    que.push_front(pkt);
 }
 
-void CommDebug::showSendPacket()
+void CommDebug::showSentPacket(int index)
 {
-    setIntegerParam(ReqVersion,   m_packet->version);
-    setIntegerParam(ReqPriority,  m_packet->priority);
-    setIntegerParam(ReqType,      m_packet->type);
-    setIntegerParam(ReqSequence,  m_packet->sequence);
-    setIntegerParam(ReqLength,    m_packet->length);
-    setIntegerParam(ReqCmdLen,    m_packet->cmd_length);
-    setIntegerParam(ReqCmd,       m_packet->command);
-    setIntegerParam(ReqVerifyId,  m_packet->cmd_sequence);
-    setIntegerParam(ReqAck,       m_packet->acknowledge);
-    setIntegerParam(ReqRsp,       m_packet->response);
-    setIntegerParam(ReqCmdVer,    m_packet->lvds_version);
-    setStringParam(ReqModule,     BaseModulePlugin::addr2ip(m_packet->module_id));
+    if (!m_sendQue.empty()) {
+        if (index < 0)
+            index = 0;
+        if ((size_t)index >= m_sendQue.size())
+            index = m_sendQue.size() - 1;
 
-    setIntegerParam(ReqRaw0,      m_buffer[0]);
-    setIntegerParam(ReqRaw1,      m_buffer[1]);
-    setIntegerParam(ReqRaw2,      m_buffer[2]);
-    setIntegerParam(ReqRaw3,      m_buffer[3]);
-    setIntegerParam(ReqRaw4,      m_buffer[4]);
-    setIntegerParam(ReqRaw5,      m_buffer[5]);
-    setIntegerParam(ReqRaw6,      m_buffer[6]);
-    setIntegerParam(ReqRaw7,      m_buffer[7]);
+        auto it = m_sendQue.begin();
+        for (int i = 0; i < index; i++) {
+            it++;
+        }
 
+        showSentPacket( reinterpret_cast<DasCmdPacket*>(it->data), index );
+    }
+}
+
+void CommDebug::showSentPacket(DasCmdPacket *packet, int index)
+{
+    uint32_t *raw = reinterpret_cast<uint32_t *>(packet);
+
+    setIntegerParam(ReqVersion,   packet->version);
+    setIntegerParam(ReqPriority,  packet->priority);
+    setIntegerParam(ReqType,      packet->type);
+    setIntegerParam(ReqSequence,  packet->sequence);
+    setIntegerParam(ReqLength,    packet->length);
+    setIntegerParam(ReqCmdLen,    packet->cmd_length);
+    setIntegerParam(ReqCmd,       packet->command);
+    setIntegerParam(ReqVerifyId,  packet->cmd_sequence);
+    setIntegerParam(ReqAck,       packet->acknowledge);
+    setIntegerParam(ReqRsp,       packet->response);
+    setIntegerParam(ReqCmdVer,    packet->lvds_version);
+    setStringParam(ReqModule,     BaseModulePlugin::addr2ip(packet->module_id));
+
+    if (packet->length >=  0) setIntegerParam(ReqRaw0, raw[0]);
+    if (packet->length >=  4) setIntegerParam(ReqRaw1, raw[1]);
+    if (packet->length >=  8) setIntegerParam(ReqRaw2, raw[2]);
+    if (packet->length >= 12) setIntegerParam(ReqRaw3, raw[3]);
+    if (packet->length >= 16) setIntegerParam(ReqRaw4, raw[4]);
+    if (packet->length >= 20) setIntegerParam(ReqRaw5, raw[5]);
+    if (packet->length >= 24) setIntegerParam(ReqRaw6, raw[6]);
+    if (packet->length >= 28) setIntegerParam(ReqRaw7, raw[7]);
+
+    setIntegerParam(SendQueIndex, index);
+    setIntegerParam(SendQueSize, m_sendQue.size());
     callParamCallbacks();
 }
 
-void CommDebug::selectRecvPacket(int index)
+void CommDebug::showRecvPacket(int index)
 {
-    struct timespec rspTimeStamp; // In POSIX time
+    if (!m_recvQue.empty()) {
+        if (index < 0)
+            index = 0;
+        if ((size_t)index >= m_recvQue.size())
+            index = m_recvQue.size() - 1;
 
-    if (m_lastPacketQueue.empty())
-        return;
-
-    if (index < 0)
-        index *= -1;
-    if (index >= (int)m_lastPacketQueue.size())
-        index = (int)m_lastPacketQueue.size() - 1;
-
-    auto it = m_lastPacketQueue.begin();
-    for (int i=0; i<index; i++) {
-        if (it == m_lastPacketQueue.end()) {
-            return;
+        auto it = m_recvQue.begin();
+        for (int i = 0; i < index; i++) {
+            it++;
         }
-        it++;
-    }
 
-    DasCmdPacket *packet = reinterpret_cast<DasCmdPacket*>(it->data);
+        showRecvPacket( reinterpret_cast<DasCmdPacket *>(it->data), index );
+    }
+}
+
+void CommDebug::showRecvPacket(DasCmdPacket *packet, int index)
+{
+    uint32_t *raw = reinterpret_cast<uint32_t *>(packet);
 
     setIntegerParam(RspVersion,   packet->version);
     setIntegerParam(RspPriority,  packet->priority);
@@ -314,19 +329,16 @@ void CommDebug::selectRecvPacket(int index)
     setIntegerParam(RspCmdVer,    packet->lvds_version);
     setStringParam(RspModule,     BaseModulePlugin::addr2ip(packet->module_id));
 
-    if (it->length >=  0) setIntegerParam(RspRaw0, it->data[0]);
-    if (it->length >=  4) setIntegerParam(RspRaw1, it->data[1]);
-    if (it->length >=  8) setIntegerParam(RspRaw2, it->data[2]);
-    if (it->length >= 12) setIntegerParam(RspRaw3, it->data[3]);
-    if (it->length >= 16) setIntegerParam(RspRaw4, it->data[4]);
-    if (it->length >= 20) setIntegerParam(RspRaw5, it->data[5]);
-    if (it->length >= 24) setIntegerParam(RspRaw6, it->data[6]);
-    if (it->length >= 28) setIntegerParam(RspRaw7, it->data[7]);
+    if (packet->length >=  0) setIntegerParam(RspRaw0, raw[0]);
+    if (packet->length >=  4) setIntegerParam(RspRaw1, raw[1]);
+    if (packet->length >=  8) setIntegerParam(RspRaw2, raw[2]);
+    if (packet->length >= 12) setIntegerParam(RspRaw3, raw[3]);
+    if (packet->length >= 16) setIntegerParam(RspRaw4, raw[4]);
+    if (packet->length >= 20) setIntegerParam(RspRaw5, raw[5]);
+    if (packet->length >= 24) setIntegerParam(RspRaw6, raw[6]);
+    if (packet->length >= 28) setIntegerParam(RspRaw7, raw[7]);
 
-    // Return responses' POSIX time with milisecond precision
-    epicsTimeToTimespec(&rspTimeStamp, &it->timestamp);
-    double rspTime = 1000*rspTimeStamp.tv_sec + (uint32_t)(rspTimeStamp.tv_nsec / 1e6);
-    setDoubleParam(RspTimeStamp,rspTime);
-    setIntegerParam(PktQueIndex,index);
+    setIntegerParam(RecvQueIndex, index);
+    setIntegerParam(RecvQueSize, m_recvQue.size());
     callParamCallbacks();
 }
