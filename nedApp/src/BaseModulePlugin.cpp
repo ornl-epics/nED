@@ -32,6 +32,7 @@
 
 const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 1.0; // Default value, user can override
 const float BaseModulePlugin::RESET_NO_RESPONSE_TIMEOUT = 5.0; // Overrides m_noResponseTimeout for CMD_RESET
+const float BaseModulePlugin::CONN_CLOSE_TIMEOUT = 0.5;
 const UnsignConvert *BaseModulePlugin::CONV_UNSIGN = new UnsignConvert();
 const Sign2sComplementConvert *BaseModulePlugin::CONV_SIGN_2COMP = new Sign2sComplementConvert();
 const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitudeConvert();
@@ -54,10 +55,12 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     , m_expectedChannel(0)
     , m_numChannels(0)
     , m_wordSize(wordSize)
+    , m_connTimer(false)
 {
     // DSP uses 4 byte words, everybody else 2 bytes
     assert(wordSize==2 || wordSize==4);
 
+    createParam("Enable",       asynParamInt32, &Enable,    1);             // WRITE - Enables this module
     createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
     createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasCmdPacket::CommandType)
     createParam("HwId",         asynParamOctet, &HwId);                     // READ - Connected module hardware id
@@ -85,7 +88,10 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
 
     g_namesMap[ip2addr(hardwareId)] = portName;
 
+    // Let connect the first time, helps diagnose start-up problems
     BasePlugin::connect(parentPlugins, MsgDasCmd);
+    std::function<float(void)> checkConnCb = std::bind(&BaseModulePlugin::checkConnection, this);
+    m_connTimer.schedule(checkConnCb, CONN_CLOSE_TIMEOUT + 0.1);
 }
 
 BaseModulePlugin::~BaseModulePlugin()
@@ -139,8 +145,15 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 bool BaseModulePlugin::processRequest(DasCmdPacket::CommandType command)
 {
+    bool enabled;
     double timeout;
     getDoubleParam(NoRspTimeout, &timeout);
+    getBooleanParam(Enable, enabled);
+
+    if (!enabled) {
+        LOG_WARN("Plugin not enabled");
+        return false;
+    }
 
     if (m_waitingResponse != 0) {
         LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", command, m_waitingResponse);
@@ -155,9 +168,13 @@ bool BaseModulePlugin::processRequest(DasCmdPacket::CommandType command)
     callParamCallbacks();
 
     do {
+        if (!isConnected())
+            connect();
+
         m_waitingResponse = handleRequest(command, timeout);
 
         if (m_waitingResponse != static_cast<DasCmdPacket::CommandType>(0)) {
+            m_connStaleTime = epicsTime::getCurrent() + timeout + CONN_CLOSE_TIMEOUT;
             if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
                LOG_WARN("Failed to schedule CmdRsp timeout callback");
             setIntegerParam(CmdRsp, LAST_CMD_WAIT);
@@ -248,7 +265,7 @@ void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t c
 
     // Hopefully this is a temporary hack until either DSP7 implements
     // DasCmdPacket->LVDS convertion or all ROCs switch to new format
-    packet->__reserved2 = (m_wordSize == 2);
+    packet->__reserved2 = m_wordSize;
 
     BasePlugin::sendUpstream(packet);
     delete packet;
@@ -281,6 +298,7 @@ bool BaseModulePlugin::processResponse(const DasCmdPacket *packet)
     }
     m_waitingResponse = static_cast<DasCmdPacket::CommandType>(0);
 
+    m_connStaleTime = epicsTime::getCurrent() + CONN_CLOSE_TIMEOUT;
     if (!cancelTimeoutCallback()) {
         LOG_WARN("Received %s response after timeout", cmd2str(packet->command));
         return false;
@@ -371,6 +389,7 @@ bool BaseModulePlugin::processResponse(const DasCmdPacket *packet)
             if (m_waitingResponse != static_cast<DasCmdPacket::CommandType>(0)) {
                 double timeout;
                 getDoubleParam(NoRspTimeout, &timeout);
+                m_connStaleTime = epicsTime::getCurrent() + timeout + CONN_CLOSE_TIMEOUT;
                 if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
                     LOG_WARN("Failed to schedule CmdRsp timeout callback");
                 setIntegerParam(CmdRsp, LAST_CMD_WAIT);
@@ -1261,4 +1280,14 @@ std::string BaseModulePlugin::getModuleName(uint32_t hardwareId)
     if (name != g_namesMap.end())
         return name->second;
     return "";
+}
+
+float BaseModulePlugin::checkConnection()
+{
+    lock();
+    if (isConnected() && m_connStaleTime < epicsTime::getCurrent()) {
+        disconnect();
+    }
+    unlock();
+    return std::max(CONN_CLOSE_TIMEOUT, 0.5f) + 0.1;
 }

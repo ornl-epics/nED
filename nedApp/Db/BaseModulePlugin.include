@@ -1,6 +1,11 @@
 record(bo, "$(P)Enable")
 {
     info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Enable")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
     field(PINI, "YES")
     field(FLNK, "$(P)StatusCalc")
 }

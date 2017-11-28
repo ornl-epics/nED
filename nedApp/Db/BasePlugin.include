@@ -1,11 +1,11 @@
-record(bo, "$(P)Enable")
-{
-    field(ASG,  "BEAMLINE")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))Enable")
-    field(ZNAM, "No")
-    field(ONAM, "Yes")
-}
+#record(bo, "$(P)Enable")
+#{
+#    field(ASG,  "BEAMLINE")
+#    field(DTYP, "asynInt32")
+#    field(OUT,  "@asyn($(PORT))Enable")
+#    field(ZNAM, "No")
+#    field(ONAM, "Yes")
+#}
 record(longin, "$(P)ProcCount")
 {
     field(DESC, "Number of processed pkts")

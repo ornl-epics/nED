@@ -69,11 +69,16 @@ BasePlugin::~BasePlugin()
     disconnect();
 }
 
-bool BasePlugin::connect(const std::list<std::string> &ports, const std::list<int> &messageTypes)
+bool BasePlugin::connect()
+{
+    return connect(m_lastConnectedPlugins, m_lastConnectedTypes);
+}
+
+bool BasePlugin::connect(const std::list<std::string> &plugins, const std::list<int> &messageTypes)
 {
     disconnect();
 
-    for (auto it=ports.begin(); it!=ports.end(); it++) {
+    for (auto it=plugins.begin(); it!=plugins.end(); it++) {
         for (auto jt=messageTypes.begin(); jt!= messageTypes.end(); jt++) {
 
             asynUser *pasynuser = pasynManager->createAsynUser(0, 0);
@@ -115,14 +120,17 @@ bool BasePlugin::connect(const std::list<std::string> &ports, const std::list<in
             }
 
             RemotePort port;
-            port.portName = *it;
+            port.pluginName = *it;
             port.pasynuser = pasynuser;
             port.asynGenericPointerInterrupt = asynGenericPointerInterrupt;
             m_connectedPorts.push_back(port);
         }
     }
 
-    LOG_INFO("Connected to parent plugins: %s", std::accumulate(ports.begin(), ports.end(), std::string(",")).substr(1).c_str());
+    m_lastConnectedPlugins = plugins;
+    m_lastConnectedTypes = messageTypes;
+
+    LOG_DEBUG("Connected to parent plugins: %s", std::accumulate(plugins.begin(), plugins.end(), std::string(",")).substr(1).c_str());
     return true;
 }
 
@@ -140,7 +148,7 @@ bool BasePlugin::disconnect()
 
             asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
             if (!interface) {
-                LOG_ERROR("Can't find asynGenericPointer interface on remote plugin %s", it->portName.c_str());
+                LOG_ERROR("Can't find asynGenericPointer interface on remote plugin %s", it->pluginName.c_str());
             } else {
                 asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
                 asynStatus status = asynGenericPointerInterface->cancelInterruptUser(
@@ -157,7 +165,7 @@ bool BasePlugin::disconnect()
         }
     }
     if (!m_connectedPorts.empty())
-        LOG_INFO("Disconnected from parent plugins");
+        LOG_DEBUG("Disconnected from parent plugins");
     m_connectedPorts.clear();
     return true;
 }
@@ -323,7 +331,7 @@ void BasePlugin::sendUpstream(int type, PluginMessage *msg)
         if (it->pasynuser->reason == type) {
             asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
             if (!interface) {
-                LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, it->portName.c_str());
+                LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, it->pluginName.c_str());
                 continue;
             }
 

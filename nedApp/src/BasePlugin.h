@@ -114,6 +114,7 @@ class BasePlugin : public asynPortDriver {
          *
          * @param[in] ports to connect to
          * @param[in] messageTypes each number must be one of the integers registers by Msg* parameters.
+         * @return true if connected to remote ports, false otherwise.
          */
         bool connect(const std::list<std::string> &ports, const std::list<int> &messageTypes);
 
@@ -123,6 +124,11 @@ class BasePlugin : public asynPortDriver {
          * Helper functions accepting comma-separated string of remote ports.
          */
         bool connect(const std::string &ports, const std::list<int> &messageTypes);
+
+        /**
+         * Connect to same ports and message type as last time.
+         */
+        bool connect();
 
         /**
          * Connect to one or many parent plugins.
@@ -378,7 +384,7 @@ class BasePlugin : public asynPortDriver {
          * Structure to describe asyn interface.
          */
         struct RemotePort {
-            std::string portName;                   //!< Name of connected port
+            std::string pluginName;                 //!< Name of connected port
             asynUser *pasynuser;                    //!< asynUser handler for asyn management
             void *asynGenericPointerInterrupt;      //!< Generic pointer interrupt handler
         };
@@ -389,6 +395,8 @@ class BasePlugin : public asynPortDriver {
         Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
         std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
+        std::list<std::string> m_lastConnectedPlugins; //!< Names of ports used for last connection
+        std::list<int> m_lastConnectedTypes;        //!< Message types used for last connection
 
     protected:
         int MsgOldDas;

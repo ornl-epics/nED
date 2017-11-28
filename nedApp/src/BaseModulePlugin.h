@@ -145,6 +145,7 @@ class BaseModulePlugin : public BasePlugin {
 
         static const float NO_RESPONSE_TIMEOUT;         //!< Number of seconds to wait for module response
         static const float RESET_NO_RESPONSE_TIMEOUT;   //!< Number of seconds to wait for module RESET response
+        static const float CONN_CLOSE_TIMEOUT;          //!< Number of seconds to wait after response or timeout before closing connection to parent plugins
 
     public: // variables
         static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask | asynFloat64Mask;
@@ -168,6 +169,8 @@ class BaseModulePlugin : public BasePlugin {
         std::map<int, uint32_t> m_configSectionOffsets; //!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
         std::shared_ptr<Timer> m_timeoutTimer;          //!< Currently running timer for response timeout handling
         std::list<std::function<bool(const DasCmdPacket *)> > m_stateMachines; //!< Active internal state machines
+        epicsTime m_connStaleTime;                      //!< Time when connection becomes candidate to close, used for book-keeping the connection
+        Timer m_connTimer;                              //!< Periodic timer to check whether connection can be closed.
 
     public: // functions
 
@@ -974,7 +977,24 @@ class BaseModulePlugin : public BasePlugin {
          */
         void recalculateConfigParams();
 
+        /**
+         * Check if connection to parent plugins can be closed and close it.
+         *
+         * The idea behind automatic connect/disconnect to parent plugins is to
+         * not process packets (and save CPU time) while we're not expecting them.
+         * This is particularly important for installations with large number
+         * of modules.
+         *
+         * Function is called periodically. To minimize establishing
+         * connection to parent plugins during busy periods, function waits 0.5s
+         * longer than either response is received or no-response timer expires.
+         * This gives external sequences enough time to issue new command and
+         * not disconnect from parent plugins.
+         */
+        float checkConnection();
+
     protected:
+        int Enable;         //!< Enable this module
         int CmdReq;         //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
         int CmdRsp;         //!< Last command response status
         int HwId;           //!< Hw ID that this object is controlling

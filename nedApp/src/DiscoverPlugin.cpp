@@ -29,7 +29,6 @@ EPICS_REGISTER_PLUGIN(DiscoverPlugin, 2, "Port name", string, "Parent plugins", 
 DiscoverPlugin::DiscoverPlugin(const char *portName, const char *parentPlugins)
     : BasePlugin(portName, 1, asynOctetMask, asynOctetMask)
     , m_disableTimer(true)
-    , m_parentPlugins(parentPlugins)
 {
     createParam("Trigger",      asynParamInt32, &Trigger);      // WRITE - Trigger discovery of modules
     createParam("Format",       asynParamInt32, &Format);       // READ - Modules found formatted in ASCII table
@@ -40,6 +39,10 @@ DiscoverPlugin::DiscoverPlugin(const char *portName, const char *parentPlugins)
     createParam("LvdsBcast",    asynParamInt32, &LvdsBcast, 1); // WRITE - Send LVDS broadcast packet as part of discovery
     createParam("LvdsSingle",   asynParamInt32, &LvdsSingle, 1);// WRITE - Send LVDS single word packet as part of discovery
     callParamCallbacks();
+
+    // Check parent plugins exist, force saving connect information
+    connect(parentPlugins, MsgDasCmd);
+    disconnect();
 }
 
 asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -58,12 +61,12 @@ asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         callParamCallbacks();
 
         // Stay connected to parent plugins for 10 seconds after discover has
-        // been issued. Usually responses come in under a second.
+        // been issued. Usually responses come back in under a second.
         m_disableTimer.cancel();
         if (!isConnected()) {
-            connect(m_parentPlugins, MsgDasCmd);
+            connect();
         }
-        std::function<float(void)> disableCb = [this](){ this->lock(); disconnect(); this->unlock(); return 0; };
+        std::function<float(void)> disableCb = [this](){ lock(); disconnect(); unlock(); return 0; };
         m_disableTimer.schedule(disableCb, 10);
 
         m_discovered.clear();
