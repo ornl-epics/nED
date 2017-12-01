@@ -38,6 +38,7 @@ class CommDebug : public BasePlugin {
         DasCmdPacket m_emptyPacket;
         std::list<PacketDesc> m_recvQue;
         std::list<PacketDesc> m_sendQue;
+        epicsTime m_liveTimeout;        //!< How long to receive packets after manually send it (not in sniffer mode)
 
     public: // structures and defines
         /**
@@ -139,6 +140,7 @@ class CommDebug : public BasePlugin {
         int Sniffer;        //!< Enables listening to other plugins messages
         int FilterCmd;      //!< Enables filtering by command
         int FilterModule;   //!< Enables filtering by hardware id
+        int ResetQues;      //!< Clears packet FIFOs
 
         int ReqVersion;     //!< Packet version to be sent out
         int ReqPriority;    //!< Packet priority - usually set by modules only

@@ -12,6 +12,14 @@ record(bo, "$(P)ReqSend")
     field(SDIS, "$(P)ReqSniffer NPP")
     field(DISV, "1")
 }
+record(longout, "$(P)ResetQues")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Clear packet FIFOs")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetQues")
+    field(VAL,  "1")
+}
 record(bo, "$(P)Sniffer")
 {
     field(ASG,  "BEAMLINE")

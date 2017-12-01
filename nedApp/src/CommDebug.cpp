@@ -76,6 +76,7 @@ CommDebug::CommDebug(const char *portName, const char *parentPlugins)
     createParam("Sniffer",      asynParamInt32, &Sniffer);          // WRITE - Enables listening to other plugins messages
     createParam("FilterCmd",    asynParamInt32, &FilterCmd);        // WRITE - Enables filtering based on command
     createParam("FilterModule", asynParamOctet, &FilterModule);     // WRITE - Enables filtering based on hardware id
+    createParam("ResetQues",    asynParamInt32, &ResetQues);        // WRITE - Clears packet FIFOs
 
     callParamCallbacks();
 
@@ -98,6 +99,13 @@ asynStatus CommDebug::writeInt32(asynUser *pasynUser, epicsInt32 value)
         generatePacket(false);
         BasePlugin::sendUpstream(m_packet);
         showSentPacket(m_packet);
+        showRecvPacket(&m_emptyPacket);
+        m_liveTimeout = epicsTime::getCurrent() + 0.5; // Allow .5 seconds for responses to arrive
+        return asynSuccess;
+    } else if (pasynUser->reason == ResetQues) {
+        m_recvQue.clear();
+        m_sendQue.clear();
+        showSentPacket(&m_emptyPacket);
         showRecvPacket(&m_emptyPacket);
         return asynSuccess;
     } else if (pasynUser->reason == SendQueIndex) {
@@ -186,30 +194,39 @@ void CommDebug::recvDownstream(DasCmdPacketList *packets)
     int filterCmd = getIntegerParam(FilterCmd);
     int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
     uint32_t moduleId = BaseModulePlugin::ip2addr( getStringParam(FilterModule) );
+    bool sniffer = getBooleanParam(Sniffer);
+
+    this->unlock();
+    sendDownstream(packets, false);
+    this->lock();
+
+    if (!sniffer) {
+        epicsTime now = epicsTime::getCurrent();
+        if (now > m_liveTimeout)
+            return;
+    }
 
     for (auto it = packets->cbegin(); it != packets->cend(); it++) {
         const DasCmdPacket *packet = *it;
 
-        if ((moduleId == 0 || moduleId == packet->module_id) &&
-            (filterCmd == 0 || filterCmd == packet->command)) {
+        if (sniffer) {
+            if ((moduleId == 0 || moduleId == packet->module_id) &&
+                (filterCmd == 0 || filterCmd == packet->command)) {
 
+                savePacket(packet, m_recvQue, recvQueMaxSize);
+            }
+        } else {
             savePacket(packet, m_recvQue, recvQueMaxSize);
         }
     }
 
     showRecvPacket(0);
-
-    this->unlock();
-    sendDownstream(packets, false);
-    this->lock();
 }
 
 void CommDebug::recvUpstream(DasCmdPacketList *packets)
 {
-    bool sniffer = false;
+    bool sniffer = getBooleanParam(Sniffer);
     sendUpstream(MsgDasCmd, packets);
-
-    getBooleanParam(Sniffer, sniffer);
 
     if (sniffer && !packets->empty()) {
         int filterCmd;

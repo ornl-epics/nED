@@ -310,6 +310,17 @@ class BasePlugin : public asynPortDriver {
         asynStatus getBooleanParam(int index, bool &value);
 
         /**
+         * Convenient function, return false on error which can be ambigous.
+         */
+        int getBooleanParam(int index)
+        {
+            int val;
+            if (getIntegerParam(index, &val) == asynSuccess)
+                return (val > 0);
+            return false;
+        }
+
+        /**
          * Send int32 parameter to another plugin.
          *
          * @param[in] remotePort name of the remote plugin.
