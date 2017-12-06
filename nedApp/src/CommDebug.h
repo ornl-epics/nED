@@ -64,7 +64,7 @@ class CommDebug : public BasePlugin {
         /**
          * Receive packets from modules.
          */
-        void recvDownstream(DasCmdPacketList *packets);
+        void recvDownstream(int type, PluginMessage *packets);
 
         /**
          * Receive packets from plugins to modules.
@@ -80,7 +80,7 @@ class CommDebug : public BasePlugin {
         /**
          * Process command response from currently selected module.
          */
-        void savePacket(const DasCmdPacket *packet, std::list<PacketDesc> &que, int maxQueSize);
+        void savePacket(const Packet *packet, std::list<PacketDesc> &que, int maxQueSize);
 
         /**
          * Generate raw packet in cache from high level (ReqCmd, ReqIsDsp, etc.) parameters
@@ -133,11 +133,12 @@ class CommDebug : public BasePlugin {
          * @param[in] packet to be used.
          * @param[in] index to be displayed
          */
-        void showRecvPacket(DasCmdPacket *packet, int index=0);
+        void showRecvPacket(Packet *packet, int index=0);
 
     protected:
         int ReqSend;        //!< Send cached packet
         int Sniffer;        //!< Enables listening to other plugins messages
+        int FilterPktType;  //!< Enables filtering by packet type
         int FilterCmd;      //!< Enables filtering by command
         int FilterModule;   //!< Enables filtering by hardware id
         int ResetQues;      //!< Clears packet FIFOs
@@ -169,13 +170,6 @@ class CommDebug : public BasePlugin {
         int RspType;        //!< Packet type - only works with 8
         int RspSequence;    //!< Packet sequence number
         int RspLength;      //!< Packet length in bytes
-        int RspCmdLen;      //!< Command payload length
-        int RspCmd;         //!< Command to be sent to module
-        int RspVerifyId;    //!< Command payload length
-        int RspAck;         //!< Command payload length
-        int RspRsp;         //!< Command payload length
-        int RspCmdVer;      //!< Command payload length
-        int RspModule;      //!< Module address to communicate with
         int RspRaw0;        //!< Response packet raw word 0
         int RspRaw1;        //!< Response packet raw word 1
         int RspRaw2;        //!< Response packet raw word 2
@@ -185,6 +179,37 @@ class CommDebug : public BasePlugin {
         int RspRaw6;        //!< Response packet raw word 6
         int RspRaw7;        //!< Response packet raw word 7
         int RspTimeStamp;   //!< Response receive time in msec precision
+
+        // Command packet PVs
+        int RspErrSourceId; //!< Error packet source id
+        int RspErrCode;     //!< Error type
+
+        // Command packet PVs
+        int RspCmdLen;      //!< Command payload length
+        int RspCmd;         //!< Command to be sent to module
+        int RspCmdVerifyId; //!< Command verification id
+        int RspCmdAck;      //!< Command acknowledge flag
+        int RspCmdRsp;      //!< Command response flag
+        int RspCmdVer;      //!< Command version (always 1)
+        int RspCmdModule;   //!< Module address to communicate with
+
+        // RTDL packet PVs
+        int RspRtdlSourceId;//!< RTDL source id field
+        int RspRtdlFrames;  //!< RTDL number of frames
+        int RspRtdlTime;    //!< RTDL time, seconds converter to time string in ETC
+        int RspRtdlTimeNsec;//!< RTDL time, nano-seconds
+        int RspRtdlPcharge; //!< RTDL pulse proton charge
+        int RspRtdlFlavor;  //!< RTDL pulse flavors
+        int RspRtdlBad;     //!< RTDL bad pulse flag
+        int RspRtdlCycle;   //!< RTDL pulse cycle number (0-599)
+        int RspRtdlVeto;    //!< RTDL last pulse veto
+        int RspRtdlTstat;   //!< RTDL tstat
+        int RspRtdlBadFr;   //!< RTDL bad cycle frame
+        int RspRtdlBadVeto; //!< RTDL bad last cycle veto frame
+        int RspRtdlTsync;   //!< RTDL applied TSYNC
+        int RspRtdlTofOff;  //!< RTDL applied TOF offset
+        int RspRtdlFrOff;   //!< RTDL applied frame offset
+        int RspRtdlOffEn;   //!< RTDL TOF enabled flag
 
         int SendQueIndex;   //!< Currently display sent packet index
         int SendQueSize;    //!< Number of elements in send buffer
