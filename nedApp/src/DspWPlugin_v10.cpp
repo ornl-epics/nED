@@ -11,7 +11,7 @@
 
 void DspWPlugin::createParams_v10() {
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
-    createConfigParam("TestEwentPeriod",  '1', 0x0,  8,  0, 15); // Test event period          
+    createConfigParam("TestEventPeriod",  '1', 0x0,  8,  0, 15); // Test event period
     createConfigParam("TsyncFreq",        '1', 0x0,  8,  8, 60); // TSYNC frequency            (unit:Hz)
     createConfigParam("Ch0:Enable",       '1', 0x1,  1,  0, 1);  // Channel 0 enable           (0=disable,1=enable)
     createConfigParam("Ch1:Enable",       '1', 0x1,  1,  1, 1);  // Channel 1 enable           (0=disable,1=enable)
@@ -45,65 +45,65 @@ void DspWPlugin::createParams_v10() {
     createConfigParam("Opt1:Enable",      '1', 0x2,  1,  1, 1);  // Optical 1 TX enable        (0=disable,1=enable)
     createConfigParam("Opt2:Enable",      '1', 0x2,  1,  2, 0);  // Optical 2 TX enable        (0=disable,1=enable)
     createConfigParam("Opt3:Enable",      '1', 0x2,  1,  3, 0);  // Optical 3 TX enable        (0=disable,1=enable)
-    createConfigParam("Ch0:OptEn",        '1', 0x2,  1,  4, 0);  // Channel 0 optical TX en    (0=disable,1=enable)
-    createConfigParam("Ch1:OptEn",        '1', 0x2,  1,  5, 0);  // Channel 1 optical TX en    (0=disable,1=enable)
-    createConfigParam("Ch2:OptEn",        '1', 0x2,  1,  6, 0);  // Channel 2 optical TX en    (0=disable,1=enable)
-    createConfigParam("Ch3:OptEn",        '1', 0x2,  1,  7, 0);  // Channel 3 optical TX en    (0=disable,1=enable)
-    createConfigParam("Ch4:OptEn",        '1', 0x2,  1,  8, 0);  // Channel 4 optical TX en    (0=disable,1=enable)
-    createConfigParam("Ch5:OptEn",        '1', 0x2,  1,  9, 0);  // Channel 5 optical TX en    (0=disable,1=enable)
-    createConfigParam("Ch6:OptEn",        '1', 0x2,  1, 10, 0);  // Channel 6 optical TX en    (0=disable,1=enable)
-    createConfigParam("Ch7:OptEn",        '1', 0x2,  1, 11, 0);  // Channel 7 optical TX en    (0=disable,1=enable)
-    createConfigParam("OptFMC1En",        '1', 0x2,  8, 12, 0);  // OptFMC1En    
+    createConfigParam("Ch0:OptEn",        '1', 0x2,  1,  4, 0);  // Channel 0 optical TX en    (0=enable,1=disable)
+    createConfigParam("Ch1:OptEn",        '1', 0x2,  1,  5, 0);  // Channel 1 optical TX en    (0=enable,1=disable)
+    createConfigParam("Ch2:OptEn",        '1', 0x2,  1,  6, 0);  // Channel 2 optical TX en    (0=enable,1=disable)
+    createConfigParam("Ch3:OptEn",        '1', 0x2,  1,  7, 0);  // Channel 3 optical TX en    (0=enable,1=disable)
+    createConfigParam("Ch4:OptEn",        '1', 0x2,  1,  8, 0);  // Channel 4 optical TX en    (0=enable,1=disable)
+    createConfigParam("Ch5:OptEn",        '1', 0x2,  1,  9, 0);  // Channel 5 optical TX en    (0=enable,1=disable)
+    createConfigParam("Ch6:OptEn",        '1', 0x2,  1, 10, 0);  // Channel 6 optical TX en    (0=enable,1=disable)
+    createConfigParam("Ch7:OptEn",        '1', 0x2,  1, 11, 0);  // Channel 7 optical TX en    (0=enable,1=disable)
+    createConfigParam("OptFMC1En",        '1', 0x2,  8, 12, 0);  // OptFMC1En
     createConfigParam("MaxDataPktSize",   '1', 0x2,  3, 20, 0);  // Max data packet size       (0=2000 bytes, 1=4000 bytes, 2=6000 bytes, 3=8000 bytes, 4=10000 bytes, 5=6000 bytes, 6=7000 bytes, 7=8000 bytes)
     createConfigParam("MetaDisable",      '1', 0x2,  1, 23, 0);  // Meta Disable               (1=disable,0=enable)
-    createConfigParam("DetectModeCh0",    '1', 0x3,  2,  0, 0);  // Detect Mode Channel0       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh1",    '1', 0x3,  2,  2, 0);  // Detect Mode Channel1       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh2",    '1', 0x3,  2,  4, 0);  // Detect Mode Channel2       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh3",    '1', 0x3,  2,  6, 1);  // Detect Mode Channel3       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh4",    '1', 0x3,  2,  8, 1);  // Detect Mode Channel4       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh5",    '1', 0x3,  2, 10, 1);  // Detect Mode Channel5       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh6",    '1', 0x3,  2, 12, 1);  // Detect Mode Channel6       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh7",    '1', 0x3,  2, 14, 1);  // Detect Mode Channel7       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh8",    '1', 0x3,  2, 16, 1);  // Detect Mode Channel8       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh9",    '1', 0x3,  2, 18, 1);  // Detect Mode Channel9       (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh10",   '1', 0x3,  2, 20, 1);  // Detect Mode Channel10      (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh11",   '1', 0x3,  2, 22, 1);  // Detect Mode Channel11      (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh12",   '1', 0x3,  2, 24, 1);  // Detect Mode Channel12      (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh13",   '1', 0x3,  2, 26, 1);  // Detect Mode Channel13      (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh14",   '1', 0x3,  2, 28, 1);  // Detect Mode Channel14      (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("DetectModeCh15",   '1', 0x3,  2, 30, 1);  // Detect Mode Channel15      (0=disable,1=rising edge,2=falling edge,3=both edges)
-    createConfigParam("MetaType0",        '1', 0x4,  4,  0, 0);  // Meta Type0
-    createConfigParam("MetaType1",        '1', 0x4,  4,  4, 0);  // Meta Type1
-    createConfigParam("MetaType2",        '1', 0x4,  4,  8, 0);  // Meta Type2
-    createConfigParam("MetaType3",        '1', 0x4,  4, 12, 0);  // Meta Type3
-    createConfigParam("MetaType4",        '1', 0x4,  4, 16, 0);  // Meta Type4
-    createConfigParam("MetaType5",        '1', 0x4,  4, 20, 0);  // Meta Type5
-    createConfigParam("MetaType6",        '1', 0x4,  4, 24, 0);  // Meta Type6
-    createConfigParam("MetaType7",        '1', 0x4,  4, 28, 0);  // Meta Type7
-    createConfigParam("MetaType8",        '1', 0x5,  4,  0, 0);  // Meta Type8
-    createConfigParam("MetaType9",        '1', 0x5,  4,  4, 0);  // Meta Type9
-    createConfigParam("MetaType10",       '1', 0x5,  4,  8, 0);  // Meta Type10
-    createConfigParam("MetaType11",       '1', 0x5,  4, 12, 0);  // Meta Type11
-    createConfigParam("MetaType12",       '1', 0x5,  4, 16, 0);  // Meta Type12
-    createConfigParam("MetaType13",       '1', 0x5,  4, 20, 0);  // Meta Type13
-    createConfigParam("MetaType14",       '1', 0x5,  4, 24, 0);  // Meta Type14
-    createConfigParam("MetaType15",       '1', 0x5,  4, 28, 0);  // Meta Type15
-    createConfigParam("MetaChannel0",     '1', 0x6,  4,  0, 0);  // Detect Channel0
-    createConfigParam("MetaChannel1",     '1', 0x6,  4,  4, 1);  // Detect Channel1
-    createConfigParam("MetaChannel2",     '1', 0x6,  4,  8, 2);  // Detect Channel2
-    createConfigParam("MetaChannel3",     '1', 0x6,  4, 12, 3);  // Detect Channel3
-    createConfigParam("MetaChannel4",     '1', 0x6,  4, 16, 4);  // Detect Channel4
-    createConfigParam("MetaChannel5",     '1', 0x6,  4, 20, 5);  // Detect Channel5
-    createConfigParam("MetaChannel6",     '1', 0x6,  4, 24, 6);  // Detect Channel6
-    createConfigParam("MetaChannel7",     '1', 0x6,  4, 28, 7);  // Detect Channel7
-    createConfigParam("MetaChannel8",     '1', 0x7,  4,  0, 8);  // Detect Channel8
-    createConfigParam("MetaChannel9",     '1', 0x7,  4,  4, 9);  // Detect Channel9
-    createConfigParam("MetaChannel10",    '1', 0x7,  4,  8,10);  // Detect Channel10
-    createConfigParam("MetaChannel11",    '1', 0x7,  4, 12,11);  // Detect Channel11
-    createConfigParam("MetaChannel12",    '1', 0x7,  4, 16,12);  // Detect Channel12
-    createConfigParam("MetaChannel13",    '1', 0x7,  4, 20,13);  // Detect Channel13
-    createConfigParam("MetaChannel14",    '1', 0x7,  4, 24,14);  // Detect Channel14
-    createConfigParam("MetaChannel15",    '1', 0x7,  4, 28,15);  // Detect Channel15
+    createConfigParam("Odb0:Mode",        '1', 0x3,  2,  0, 0);  // Detect Mode Channel0       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb1:Mode",        '1', 0x3,  2,  2, 0);  // Detect Mode Channel1       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb2:Mode",        '1', 0x3,  2,  4, 0);  // Detect Mode Channel2       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb3:Mode",        '1', 0x3,  2,  6, 1);  // Detect Mode Channel3       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb4:Mode",        '1', 0x3,  2,  8, 1);  // Detect Mode Channel4       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb5:Mode",        '1', 0x3,  2, 10, 1);  // Detect Mode Channel5       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb6:Mode",        '1', 0x3,  2, 12, 1);  // Detect Mode Channel6       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb7:Mode",        '1', 0x3,  2, 14, 1);  // Detect Mode Channel7       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb8:Mode",        '1', 0x3,  2, 16, 1);  // Detect Mode Channel8       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb9:Mode",        '1', 0x3,  2, 18, 1);  // Detect Mode Channel9       (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb10:Mode",       '1', 0x3,  2, 20, 1);  // Detect Mode Channel10      (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb11:Mode",       '1', 0x3,  2, 22, 1);  // Detect Mode Channel11      (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb12:Mode",       '1', 0x3,  2, 24, 1);  // Detect Mode Channel12      (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb13:Mode",       '1', 0x3,  2, 26, 1);  // Detect Mode Channel13      (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb14:Mode",       '1', 0x3,  2, 28, 1);  // Detect Mode Channel14      (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb15:Mode",       '1', 0x3,  2, 30, 1);  // Detect Mode Channel15      (0=disable,1=rising edge,2=falling edge,3=both edges)
+    createConfigParam("Odb0:Type",        '1', 0x4,  4,  0, 0);  // Meta event type 0          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb1:Type",        '1', 0x4,  4,  4, 0);  // Meta event type 1          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb2:Type",        '1', 0x4,  4,  8, 0);  // Meta event type 2          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb3:Type",        '1', 0x4,  4, 12, 0);  // Meta event type 3          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb4:Type",        '1', 0x4,  4, 16, 0);  // Meta event type 4          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb5:Type",        '1', 0x4,  4, 20, 0);  // Meta event type 5          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb6:Type",        '1', 0x4,  4, 24, 0);  // Meta event type 6          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb7:Type",        '1', 0x4,  4, 28, 0);  // Meta event type 7          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb8:Type",        '1', 0x5,  4,  0, 0);  // Meta event type 8          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb9:Type",        '1', 0x5,  4,  4, 0);  // Meta event type 9          (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb10:Type",       '1', 0x5,  4,  8, 0);  // Meta event type 10         (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb11:Type",       '1', 0x5,  4, 12, 0);  // Meta event type 11         (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb12:Type",       '1', 0x5,  4, 16, 0);  // Meta event type 12         (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb13:Type",       '1', 0x5,  4, 20, 0);  // Meta event type 13         (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb14:Type",       '1', 0x5,  4, 24, 0);  // Meta event type 14         (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb15:Type",       '1', 0x5,  4, 28, 0);  // Meta event type 15         (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
+    createConfigParam("Odb0:Id",          '1', 0x6,  4,  0, 0);  // Detect Channel0
+    createConfigParam("Odb1:Id",          '1', 0x6,  4,  4, 1);  // Detect Channel1
+    createConfigParam("Odb2:Id",          '1', 0x6,  4,  8, 2);  // Detect Channel2
+    createConfigParam("Odb3:Id",          '1', 0x6,  4, 12, 3);  // Detect Channel3
+    createConfigParam("Odb4:Id",          '1', 0x6,  4, 16, 4);  // Detect Channel4
+    createConfigParam("Odb5:Id",          '1', 0x6,  4, 20, 5);  // Detect Channel5
+    createConfigParam("Odb6:Id",          '1', 0x6,  4, 24, 6);  // Detect Channel6
+    createConfigParam("Odb7:Id",          '1', 0x6,  4, 28, 7);  // Detect Channel7
+    createConfigParam("Odb8:Id",          '1', 0x7,  4,  0, 8);  // Detect Channel8
+    createConfigParam("Odb9:Id",          '1', 0x7,  4,  4, 9);  // Detect Channel9
+    createConfigParam("Odb10:Id",         '1', 0x7,  4,  8,10);  // Detect Channel10
+    createConfigParam("Odb11:Id",         '1', 0x7,  4, 12,11);  // Detect Channel11
+    createConfigParam("Odb12:Id",         '1', 0x7,  4, 16,12);  // Detect Channel12
+    createConfigParam("Odb13:Id",         '1', 0x7,  4, 20,13);  // Detect Channel13
+    createConfigParam("Odb14:Id",         '1', 0x7,  4, 24,14);  // Detect Channel14
+    createConfigParam("Odb15:Id",         '1', 0x7,  4, 28,15);  // Detect Channel15
 
 //      BLXXX:Det:DspX:| sig nam|                          | EPICS record description | (bi and mbbi description)
     createStatusParam("OccLinkStatus",    0x0,  1,  0); // OCC link status              (0=connected,1=disconnected)
@@ -175,5 +175,5 @@ void DspWPlugin::createParams_v10() {
     createCounterParam("UTCDay",          0xD,  9, 17); // UTCDay                       (unit:day)
     createCounterParam("UTCYear",         0xD,  6, 26); // UTCYear                      (unit:year)
     createCounterParam("TotalMetaRate",   0xE, 32,  0); // Total Meta Rate              (unit:cnts/s)
-    createCounterParam("UnusedCount0",    0xF, 32,  0); // UnusedCount0                 
+    createCounterParam("UnusedCount0",    0xF, 32,  0); // UnusedCount0
 }
