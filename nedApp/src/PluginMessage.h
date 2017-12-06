@@ -82,5 +82,6 @@ class ParamsExch : public PluginMessage {
 class DasPacketList : public PluginMessage, public std::vector<DasPacket*> {};
 class DasCmdPacketList : public PluginMessage, public std::vector<DasCmdPacket*> {};
 class DasRtdlPacketList : public PluginMessage, public std::vector<DasRtdlPacket*> {};
+class ErrorPacketList : public PluginMessage, public std::vector<ErrorPacket*> {};
 
 #endif // PLUGIN_MESSAGE_H

@@ -20,17 +20,18 @@
  */
 class Packet {
     public: /* Variables */
-        enum PacketType {
+        typedef enum {
             TYPE_LEGACY     = 0x0,
+            TYPE_ERROR      = 0x1,
             TYPE_DAS_RTDL   = 0x6,
             TYPE_DAS_DATA   = 0x7,
             TYPE_DAS_CMD    = 0x8,
             TYPE_ACC_TIME   = 0x10,
-        };
+        } PacketType;
 
         struct __attribute__ ((__packed__)) {
             unsigned sequence:8;    //!< Packet sequence number, incremented by sender for each sent packet
-            enum PacketType type:8; //!< Packet type
+            PacketType type:8;      //!< Packet type
             bool priority:1;        //!< Flag to denote high priority handling, used by hardware to optimize interrupt handling
             unsigned __reserved1:11;
             unsigned version:4;     //<! Packet version
@@ -49,6 +50,29 @@ class Packet {
         static Packet *create(size_t size);
 };
 
+/**
+ * Error packet is produced by the receiver hardware when incoming packet is not valid.
+ */
+class ErrorPacket : public Packet {
+    public:
+        typedef enum {
+            TYPE_NO_ERROR   = 0x0,
+            TYPE_ERR_FRAME  = 0x1,
+            TYPE_ERR_LENGTH = 0x2,
+            TYPE_ERR_CRC    = 0x3,
+        } ErrorCode;
+
+        struct __attribute__ ((__packed__)) {
+            uint8_t source;         //!< Unique source id number
+            ErrorCode code:4;       //!< Pulse flavor of the next cycle
+            unsigned __err_rsv1:20;
+        };
+        uint32_t frame_count;       //!< Number of frame errors
+        uint32_t length_count;      //!< Number of length errors
+        uint32_t crc_count;         //!< Number of CRC errors
+        uint32_t orig[0];           //!< Recovered data, dynamic length defined by packet length field
+};
+
 class DasRtdlPacket : public Packet {
     public: /* Variables */
         /**
@@ -56,7 +80,7 @@ class DasRtdlPacket : public Packet {
          * SNS Timing Master Functional System description
          * document.
          */
-        enum PulseFlavor {
+        typedef enum {
             RTDL_FLAVOR_NO_BEAM         = 0,    //!< No Beam
             RTDL_FLAVOR_TARGET_1        = 1,    //!< Normal Beam (Target 1)
             RTDL_FLAVOR_TARGET_2        = 2,    //!< Normal Beam (Target 2)
@@ -65,14 +89,14 @@ class DasRtdlPacket : public Packet {
             RTDL_FLAVOR_DIAG_100US      = 5,    //!< 100 uSecond Diagnostic Pulse
             RTDL_FLAVOR_PHYSICS_1       = 6,    //!< Special Physics Pulse 1
             RTDL_FLAVOR_PHYSICS_2       = 7,    //!< Special Physics Pulse 2
-        };
+        } PulseFlavor;
 
         /**
          * Previous cycle veto status as described in Chapter 5.1.8 of
          * SNS Timing Master Functional System description
          * document.
          */
-        enum CycleVeto {
+        typedef enum {
             RTDL_VETO_NO_BEAM           = (1 << 0), //!< No beam was delivered on the previous pulse.
             RTDL_VETO_NOT_TARGET_1      = (1 << 1), //!< Beam was delivered to target 2 (not to target 1)
             RTDL_VETO_NOT_TARGET_2      = (1 << 2), //!< Beam was delivered to target 1 (not to target 2)
@@ -85,11 +109,11 @@ class DasRtdlPacket : public Packet {
             RTDL_VETO_RING_RF_SYNCH     = (1 << 9), //!< Timing system has lost synch with the Ring RF signal
             RTDL_VETO_RING_RF_FREQ      = (1 << 10), //!< Measured ring RF frequency is outside acceptable range
             RTDL_VETO_60_HZ_ERROR       = (1 << 11), //!< 60 Hz line phase error is out of tolerance
-        };
+        } CycleVeto;
 
         struct __attribute__ ((__packed__)) {
-            uint8_t num_frames;             //!< Number of RTDL frames included
             uint8_t source;                 //!< Unique source id number
+            uint8_t num_frames;             //!< Number of RTDL frames included
             uint16_t __rtdl_rsv1;
         };
 
@@ -98,7 +122,7 @@ class DasRtdlPacket : public Packet {
 
         struct __attribute__ ((__packed__)) {
             unsigned charge:24;         //!< Pulse charge in 10 pC unit
-            enum PulseFlavor flavor:6;  //!< Pulse flavor of the next cycle
+            PulseFlavor flavor:6;       //!< Pulse flavor of the next cycle
             unsigned bad:1;             //!< Bad pulse flavor frame
             unsigned unused31:1;        //!< not used
 
@@ -148,7 +172,7 @@ class DasCmdPacket : public Packet {
         /**
          * Module types as returned in discover response.
          */
-        enum ModuleType {
+        typedef enum {
             MOD_TYPE_ROC                = 0x20,   //!< ROC (or LPSD) module
             MOD_TYPE_AROC               = 0x21,   //!< AROC
             MOD_TYPE_HROC               = 0x22,
@@ -164,14 +188,14 @@ class DasCmdPacket : public Packet {
             MOD_TYPE_ACPCFEM            = 0xA1,
             MOD_TYPE_FFC                = 0xA2,
             MOD_TYPE_FEM                = 0xAA,
-        };
+        } ModuleType;
 
         /**
          * Type of commands supported by modules.
          *
          * It's up to the module whether he implements particular command.
          */
-        enum CommandType {
+        typedef enum {
             CMD_READ_VERSION            = 0x20, //!< Read module version
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
             CMD_READ_STATUS             = 0x22, //!< Read module status
@@ -208,12 +232,12 @@ class DasCmdPacket : public Packet {
             CMD_PM_PULSE_RQST_OFF       = 0x91, //!< Clears one pulse request for Pulsed Magnet
             CMD_PREAMP_TEST_CONFIG      = 0x92, //!< Send pulse settings
             CMD_PREAMP_TEST_TRIGGER     = 0x93, //!< Send a single pre-amp pulse request
-        };
+        } CommandType;
 
         struct {
             unsigned cmd_length:12;     //!< Command payload length
             unsigned __reserved2:4;
-            enum CommandType command:8; //!< Type of command
+            CommandType command:8;      //!< Type of command
             unsigned cmd_sequence:5;    //!< Command sequence id
             bool acknowledge:1;         //!< Flag whether command was succesful, only valid in response
             bool response:1;            //!< Flags this command packet as response

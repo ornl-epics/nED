@@ -38,6 +38,7 @@ BasePlugin::BasePlugin(const char *portName, int blocking, int interfaceMask, in
     , m_shutdown(false)
 {
     createParam("MsgOldDas",    asynParamGenericPointer,    &MsgOldDas);
+    createParam("MsgError",     asynParamGenericPointer,    &MsgError);
     createParam("MsgDasCmd",    asynParamGenericPointer,    &MsgDasCmd);
     createParam("MsgDasRtdl",   asynParamGenericPointer,    &MsgDasRtdl);
     createParam("MsgParamExch", asynParamGenericPointer,    &MsgParamExch);

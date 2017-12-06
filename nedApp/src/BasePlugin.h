@@ -445,6 +445,7 @@ class BasePlugin : public asynPortDriver {
 
     protected:
         int MsgOldDas;
+        int MsgError;
         int MsgDasCmd;
         int MsgDasRtdl;
         int MsgParamExch;
