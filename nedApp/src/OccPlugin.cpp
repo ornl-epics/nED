@@ -19,12 +19,13 @@
 #include <math.h>
 #include <sstream>
 
-EPICS_REGISTER_PLUGIN(OccPlugin, 3, "Port name", string, "OCC connection string", string, "Local buffer size", int);
+EPICS_REGISTER_PLUGIN(OccPlugin, 4, "Port name", string, "OCC connection string", string, "Local buffer size", int, "Source id", int);
 
-OccPlugin::OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize)
+OccPlugin::OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize, uint8_t sourceId)
     : BasePlugin(portName, 0, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
     , m_sendId(0)
     , m_recvId(0xFFFFFFFF)
+    , m_sourceId(sourceId)
     , m_occ(NULL)
 {
     int status;
@@ -500,6 +501,7 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
     DasPacketList oldDas;
     DasCmdPacketList dasCmd;
     DasRtdlPacketList dasRtdl;
+    ErrorPacketList errors;
 
     uint8_t *end = ptr + size;
     while (ptr < end) {
@@ -560,10 +562,15 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
                 }
                 m_recvId = packet->sequence;
 
-                if (packet->type == Packet::TYPE_DAS_CMD)
+                if (packet->type == Packet::TYPE_DAS_CMD) {
                     dasCmd.push_back(reinterpret_cast<DasCmdPacket *>(packet));
-                else if (packet->type == Packet::TYPE_DAS_RTDL)
+                } else if (packet->type == Packet::TYPE_DAS_RTDL) {
+                    reinterpret_cast<DasRtdlPacket *>(packet)->source = m_sourceId;
                     dasRtdl.push_back(reinterpret_cast<DasRtdlPacket *>(packet));
+                } else if (packet->type == Packet::TYPE_ERROR) {
+                    reinterpret_cast<ErrorPacket *>(packet)->source = m_sourceId;
+                    dasRtdl.push_back(reinterpret_cast<DasRtdlPacket *>(packet));
+                }
 
                 bytesProcessed = packet->length;
 
@@ -588,11 +595,14 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
         sendDownstream(&dasCmd, false);
     if (!dasRtdl.empty())
         sendDownstream(&dasRtdl, false);
+    if (!errors.empty())
+        sendDownstream(&errors, false);
 
     // .. and wait for all of them to get released
     oldDas.waitAllReleased();
     dasCmd.waitAllReleased();
     dasRtdl.waitAllReleased();
+    errors.waitAllReleased();
 
     return (end - ptr);
 }

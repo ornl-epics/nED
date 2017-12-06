@@ -304,6 +304,22 @@ void BasePlugin::sendDownstream(DasRtdlPacketList *packets, bool wait)
     }
 }
 
+void BasePlugin::sendDownstream(ErrorPacketList *packets, bool wait)
+{
+    ErrorPacketList l;
+    if (wait) {
+        std::copy(packets->begin(), packets->end(), l.begin());
+        packets = &l;
+    }
+    packets->claim();
+    void *ptr = const_cast<void *>(reinterpret_cast<void *>(packets));
+    doCallbacksGenericPointer(ptr, MsgError, 0);
+    packets->release();
+    if (wait) {
+        l.waitAllReleased();
+    }
+}
+
 asynStatus BasePlugin::writeGenericPointer(asynUser *pasynUser, void *ptr)
 {
     int msgType = pasynUser->reason;

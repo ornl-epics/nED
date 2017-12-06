@@ -64,8 +64,9 @@ class epicsShareFunc OccPlugin : public BasePlugin {
          * @param[in] localBufferSize If not zero, a local buffer will be created
          *            where all data from OCC DMA buffer will be copied to as soon
          *            as it is available.
+         * @param[in] sourceId number gets added to some packets.
          */
-        OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize);
+        OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize, uint8_t sourceId);
 
         /**
          * Destructor
@@ -75,8 +76,9 @@ class epicsShareFunc OccPlugin : public BasePlugin {
     private:
         int m_version;
         int m_test;
-        unsigned m_sendId;       //!< Output packets sequence number
-        unsigned m_recvId;       //!< Last received packet sequence number
+        unsigned m_sendId;          //!< Output packets sequence number
+        unsigned m_recvId;          //!< Last received packet sequence number
+        uint8_t m_sourceId;         //!< Source id number gets added to some packets
 
         struct occ_handle *m_occ;
         occ_status_t m_occStatusCache;

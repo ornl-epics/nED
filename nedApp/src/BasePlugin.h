@@ -237,6 +237,11 @@ class BasePlugin : public asynPortDriver {
         void sendDownstream(DasRtdlPacketList *packets, bool wait=true);
 
         /**
+         * Send ErrorPackets to any connected child plugins.
+         */
+        void sendDownstream(ErrorPacketList *packets, bool wait=true);
+
+        /**
          * A callback function called upon receiving message from child plugin.
          *
          * The default operation is to call function corresponding to supported
