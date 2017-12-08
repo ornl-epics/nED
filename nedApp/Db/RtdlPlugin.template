@@ -58,7 +58,6 @@ record(ai, "$(P)PulseCharge")
     field(INP,  "@asyn($(PORT))PulseCharge")
     field(EGU,  "C")
     field(PREC, "12")
-    field(ASLO, "0.00000000001")
     field(SCAN, "I/O Intr")
 }
 record(bi, "$(P)BadVetoFrame")
@@ -101,11 +100,11 @@ record(longin, "$(P)Cycle")
     field(SCAN, "I/O Intr")
     field(FLNK, "$(P)Refresh")
 }
-record(longin, "$(P)IntraPulseTime")
+record(longin, "$(P)TsyncPeriod")
 {
     field(DESC, "Number of ns between reference pulses")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))IntraPulseTime")
+    field(INP,  "@asyn($(PORT))TsyncPeriod")
     field(EGU,  "ns")
     field(SCAN, "I/O Intr")
 }
@@ -131,6 +130,7 @@ record(longin, "$(P)TofFixOffset")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))TofFixOffset")
     field(SCAN, "I/O Intr")
+    field(EGU,  "ns")
 }
 record(longin, "$(P)RingPeriod")
 {

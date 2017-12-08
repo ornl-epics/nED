@@ -673,7 +673,7 @@ record(longin, "$(P)RspRtdlTsync")
     field(DESC, "RTDL applied TSYNC")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))RspRtdlTsync")
-    field(EGU,  "x100ns")
+    field(EGU,  "ns")
     field(SCAN, "I/O Intr")
 }
 
@@ -682,6 +682,7 @@ record(longin, "$(P)RspRtdlTofOff")
     field(DESC, "RTDL applied TOF offset")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))RspRtdlTofOff")
+    field(EGU,  "ns")
     field(SCAN, "I/O Intr")
 }
 

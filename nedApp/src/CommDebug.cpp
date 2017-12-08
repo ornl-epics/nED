@@ -420,8 +420,8 @@ void CommDebug::showRecvPacket(Packet *packet, int index)
             setIntegerParam(RspRtdlTstat,   rtdlPacket->pulse.tstat);
             setIntegerParam(RspRtdlBadFr,   rtdlPacket->pulse.bad_cycle_frame);
             setIntegerParam(RspRtdlBadVeto, rtdlPacket->pulse.bad_veto_frame);
-            setIntegerParam(RspRtdlTsync,   rtdlPacket->correction.tsync_period);
-            setIntegerParam(RspRtdlTofOff,  rtdlPacket->correction.tof_fixed_offset);
+            setIntegerParam(RspRtdlTsync,   rtdlPacket->correction.tsync_period * 100);
+            setIntegerParam(RspRtdlTofOff,  rtdlPacket->correction.tof_fixed_offset * 100);
             setIntegerParam(RspRtdlFrOff,   rtdlPacket->correction.frame_offset);
             setIntegerParam(RspRtdlOffEn,   rtdlPacket->correction.tof_full_offset);
         }
