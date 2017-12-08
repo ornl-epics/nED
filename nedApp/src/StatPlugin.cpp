@@ -60,56 +60,36 @@ StatPlugin::StatPlugin(const char *portName, const char *parentPlugins, int bloc
     BasePlugin::connect(parentPlugins, msgs);
 }
 
-void StatPlugin::recvDownstream(int type, PluginMessage *msg)
+void StatPlugin::recvDownstream(DasPacketList *packets)
 {
-    if (type == MsgOldDas) {
-        DasPacketList *packetList = reinterpret_cast<DasPacketList *>(msg);
-        m_receivedCount += packetList->size();
+    m_receivedCount += packets->size();
 
-        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-            const DasPacket *packet = *it;
+    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        const DasPacket *packet = *it;
 
-            m_receivedBytes += packet->getLength();
-            if (packet->isResponse()) {
-                m_cmdCount++;
-                m_cmdBytes += packet->getLength();
-            } else if (packet->isNeutronData()) {
-                accumulatePCharge(m_neutronPulseTime, packet->getRtdlHeader(), m_neutronPCharge);
-                m_dataCount++;
-                m_dataBytes += packet->getLength();
-            } else if (packet->isMetaData()) {
-                m_metaCount++;
-                m_metaBytes += packet->getLength();
-            } else if (packet->isRtdl()) {
-                accumulatePCharge(m_rtdlPulseTime, packet->getRtdlHeader(), m_rtdlPCharge);
-                m_rtdlCount++;
-                m_rtdlBytes += packet->getLength();
-            } else if (packet->cmdinfo.is_command && packet->cmdinfo.command == DasPacket::CMD_TSYNC) {
-                m_tsyncCount++;
-                m_tsyncBytes += packet->getLength();
-            } else if (packet->isBad()) {
-                m_badCount++;
-                m_badBytes += packet->getLength();
-            }
-        }
-    } else if (type == MsgDasCmd) {
-        DasCmdPacketList *packets = reinterpret_cast<DasCmdPacketList *>(msg);
-        m_receivedCount += packets->size();
-        m_cmdCount += packets->size();
-        for (auto it = packets->begin(); it != packets->end(); it++) {
-            m_receivedBytes += (*it)->length;
-            m_cmdBytes += (*it)->length;
-        }
-    } else if (type == MsgDasRtdl) {
-        DasRtdlPacketList *packets = reinterpret_cast<DasRtdlPacketList *>(msg);
-        m_receivedCount += packets->size();
-        m_rtdlCount += packets->size();
-        for (auto it = packets->begin(); it != packets->end(); it++) {
-            m_receivedBytes += (*it)->length;
-            m_rtdlBytes += (*it)->length;
+        m_receivedBytes += packet->getLength();
+        if (packet->isResponse()) {
+            m_cmdCount++;
+            m_cmdBytes += packet->getLength();
+        } else if (packet->isNeutronData()) {
+            accumulatePCharge(m_neutronPulseTime, packet->getRtdlHeader(), m_neutronPCharge);
+            m_dataCount++;
+            m_dataBytes += packet->getLength();
+        } else if (packet->isMetaData()) {
+            m_metaCount++;
+            m_metaBytes += packet->getLength();
+        } else if (packet->isRtdl()) {
+            accumulatePCharge(m_rtdlPulseTime, packet->getRtdlHeader(), m_rtdlPCharge);
+            m_rtdlCount++;
+            m_rtdlBytes += packet->getLength();
+        } else if (packet->cmdinfo.is_command && packet->cmdinfo.command == DasPacket::CMD_TSYNC) {
+            m_tsyncCount++;
+            m_tsyncBytes += packet->getLength();
+        } else if (packet->isBad()) {
+            m_badCount++;
+            m_badBytes += packet->getLength();
         }
     }
-
     setIntegerParam(TotCnt,   m_receivedCount % INT_MAX);
     setIntegerParam(CmdCnt,   m_cmdCount % INT_MAX);
     setIntegerParam(DataCnt,  m_dataCount % INT_MAX);
@@ -129,6 +109,36 @@ void StatPlugin::recvDownstream(int type, PluginMessage *msg)
     setDoubleParam(NeutronPCharge, m_neutronPCharge);
     setDoubleParam(RtdlPCharge, m_rtdlPCharge);
 
+    callParamCallbacks();
+}
+
+void StatPlugin::recvDownstream(DasCmdPacketList *packets)
+{
+    m_receivedCount += packets->size();
+    m_cmdCount += packets->size();
+    for (auto it = packets->begin(); it != packets->end(); it++) {
+        m_receivedBytes += (*it)->length;
+        m_cmdBytes += (*it)->length;
+    }
+    setIntegerParam(TotCnt,   m_receivedCount % INT_MAX);
+    setIntegerParam(CmdCnt,   m_cmdCount % INT_MAX);
+    setIntegerParam(TotByte,  m_receivedBytes % INT_MAX);
+    setIntegerParam(CmdByte,  m_cmdBytes % INT_MAX);
+    callParamCallbacks();
+}
+
+void StatPlugin::recvDownstream(DasRtdlPacketList *packets)
+{
+    m_receivedCount += packets->size();
+    m_rtdlCount += packets->size();
+    for (auto it = packets->begin(); it != packets->end(); it++) {
+        m_receivedBytes += (*it)->length;
+        m_rtdlBytes += (*it)->length;
+    }
+    setIntegerParam(TotCnt,   m_receivedCount % INT_MAX);
+    setIntegerParam(TotByte,  m_receivedBytes % INT_MAX);
+    setIntegerParam(RtdlCnt,  m_rtdlCount % INT_MAX);
+    setIntegerParam(RtdlByte, m_rtdlBytes % INT_MAX);
     callParamCallbacks();
 }
 

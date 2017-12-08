@@ -100,9 +100,14 @@ class epicsShareFunc OccPlugin : public BasePlugin {
         asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
 
         /**
-         * Send MsgDasCmd and MsgOldDas messages to OCC.
+         * Send MsgDasCmd packets to OCC.
          */
-        void recvUpstream(int type, PluginMessage *msg);
+        void recvUpstream(DasCmdPacketList *packets);
+
+        /**
+         * Send MsgOldDas packets to OCC.
+         */
+        void recvUpstream(DasPacketList *packets);
 
         /**
          * Report an error detected in receive data thread

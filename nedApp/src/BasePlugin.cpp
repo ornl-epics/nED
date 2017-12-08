@@ -28,6 +28,15 @@ extern "C" {
     }
 }
 
+/**
+ * Structure used for exchanging parameters.
+ */
+struct ParamsExch {
+    std::string portName;
+    std::string paramName;
+};
+
+
 BasePlugin::BasePlugin(const char *portName, int blocking, int interfaceMask, int interruptMask,
                        int queueSize, int asynFlags, int priority, int stackSize)
     : asynPortDriver(portName, /*maxAddr=*/0, interfaceMask | defaultInterfaceMask,
@@ -225,99 +234,59 @@ void BasePlugin::recvDownstreamThread(epicsEvent *shutdown)
 
 void BasePlugin::recvDownstream(int type, PluginMessage *msg)
 {
-    if (type == MsgOldDas) {
-        DasPacketList *pkts = dynamic_cast<DasPacketList*>(msg);
-        recvDownstream(pkts);
-    } else if (type == MsgDasCmd) {
-        DasCmdPacketList *pkts = dynamic_cast<DasCmdPacketList*>(msg);
-        recvDownstream(pkts);
-    } else if (type == MsgDasRtdl) {
-        DasRtdlPacketList *pkts = dynamic_cast<DasRtdlPacketList*>(msg);
-        recvDownstream(pkts);
-    } else if (type == MsgParamExch) {
+    if (msg) {
+        if (type == MsgOldDas) {
+            recvDownstream( msg->get<DasPacketList>() );
+        } else if (type == MsgDasCmd) {
+            recvDownstream( msg->get<DasCmdPacketList>() );
+        } else if (type == MsgDasRtdl) {
+            recvDownstream( msg->get<DasRtdlPacketList>() );
+        } else if (type == MsgParamExch) {
 
-    } else {
-        LOG_ERROR("Ignoring not supported message type '%d'", type);
+        } else {
+            LOG_ERROR("Ignoring not supported message type '%d'", type);
+        }
     }
 }
 
-void BasePlugin::sendDownstream(int type, PluginMessage *msg, bool wait)
+void BasePlugin::sendDownstream(int type, std::shared_ptr<PluginMessage> &msg, bool wait)
 {
-    if (type == MsgOldDas) {
-        sendDownstream(reinterpret_cast<DasPacketList *>(msg), wait);
-    } else if (type == MsgDasCmd) {
-        sendDownstream(reinterpret_cast<DasCmdPacketList *>(msg), wait);
-    } else if (type == MsgDasRtdl) {
-        sendDownstream(reinterpret_cast<DasRtdlPacketList *>(msg), wait);
-    } else if (type == MsgParamExch) {
-
-    } else {
-        LOG_ERROR("Ignoring not supported message type '%d'", type);
+    if (msg) {
+        msg->claim();
+        void *ptr = reinterpret_cast<void *>(msg.get());
+        doCallbacksGenericPointer(ptr, type, 0);
+        msg->release();
+        if (wait)
+            msg->waitAllReleased();
     }
 }
 
-void BasePlugin::sendDownstream(DasPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasPacketList *packets, bool wait)
 {
-    DasPacketList l;
-    if (wait) {
-        std::copy(packets->begin(), packets->end(), l.begin());
-        packets = &l;
-    }
-    packets->claim();
-    void *ptr = const_cast<void *>(reinterpret_cast<void *>(packets));
-    doCallbacksGenericPointer(ptr, MsgOldDas, 0);
-    packets->release();
-    if (wait) {
-        l.waitAllReleased();
-    }
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    sendDownstream(MsgOldDas, msg, wait);
+    return msg;
 }
 
-void BasePlugin::sendDownstream(DasCmdPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasCmdPacketList *packets, bool wait)
 {
-    DasCmdPacketList l;
-    if (wait) {
-        std::copy(packets->begin(), packets->end(), l.begin());
-        packets = &l;
-    }
-    packets->claim();
-    void *ptr = const_cast<void *>(reinterpret_cast<void *>(packets));
-    doCallbacksGenericPointer(ptr, MsgDasCmd, 0);
-    packets->release();
-    if (wait) {
-        l.waitAllReleased();
-    }
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    sendDownstream(MsgDasCmd, msg, wait);
+    return msg;
 }
 
-void BasePlugin::sendDownstream(DasRtdlPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasRtdlPacketList *packets, bool wait)
 {
-    DasRtdlPacketList l;
-    if (wait) {
-        std::copy(packets->begin(), packets->end(), l.begin());
-        packets = &l;
-    }
-    packets->claim();
-    void *ptr = const_cast<void *>(reinterpret_cast<void *>(packets));
-    doCallbacksGenericPointer(ptr, MsgDasRtdl, 0);
-    packets->release();
-    if (wait) {
-        l.waitAllReleased();
-    }
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    sendDownstream(MsgDasRtdl, msg, wait);
+    return msg;
 }
 
-void BasePlugin::sendDownstream(ErrorPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(ErrorPacketList *packets, bool wait)
 {
-    ErrorPacketList l;
-    if (wait) {
-        std::copy(packets->begin(), packets->end(), l.begin());
-        packets = &l;
-    }
-    packets->claim();
-    void *ptr = const_cast<void *>(reinterpret_cast<void *>(packets));
-    doCallbacksGenericPointer(ptr, MsgError, 0);
-    packets->release();
-    if (wait) {
-        l.waitAllReleased();
-    }
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    sendDownstream(MsgError, msg, wait);
+    return msg;
 }
 
 asynStatus BasePlugin::writeGenericPointer(asynUser *pasynUser, void *ptr)
@@ -334,15 +303,15 @@ asynStatus BasePlugin::writeGenericPointer(asynUser *pasynUser, void *ptr)
 void BasePlugin::recvUpstream(int type, PluginMessage *msg)
 {
     if (type == MsgOldDas) {
-        recvUpstream( dynamic_cast<DasPacketList*>(msg) );
+        recvUpstream( msg->get<DasPacketList>() );
     } else if (type == MsgDasCmd) {
-        recvUpstream( dynamic_cast<DasCmdPacketList*>(msg) );
+        recvUpstream( msg->get<DasCmdPacketList>() );
     } else {
         LOG_ERROR("Skipping sending unsupported message upstream");
     }
 }
 
-void BasePlugin::sendUpstream(int type, PluginMessage *msg)
+void BasePlugin::sendUpstream(int type, std::shared_ptr<PluginMessage> &msg)
 {
     for (auto it=m_connectedPorts.begin(); it!=m_connectedPorts.end(); it++) {
         if (it->pasynuser->reason == type) {
@@ -353,30 +322,46 @@ void BasePlugin::sendUpstream(int type, PluginMessage *msg)
             }
 
             asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-            void *ptr = reinterpret_cast<void *>(msg);
+            void *ptr = reinterpret_cast<void *>(msg.get());
             asynGenericPointerInterface->write(interface->drvPvt, it->pasynuser, ptr);
         }
     }
 }
 
-void BasePlugin::sendUpstream(const DasCmdPacket *packet)
+void BasePlugin::sendUpstream(DasCmdPacketList *packet)
 {
-    DasCmdPacketList packets;
-    packets.push_back(const_cast<DasCmdPacket*>(packet));
-    packets.claim();
-    sendUpstream(MsgDasCmd, &packets);
-    packets.release();
-    packets.waitAllReleased();
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(packet));
+    if (msg) {
+        msg->claim();
+        sendUpstream(MsgDasCmd, msg);
+        msg->release();
+        msg->waitAllReleased();
+    }
 }
 
-void BasePlugin::sendUpstream(const DasPacket *packet)
+void BasePlugin::sendUpstream(DasCmdPacket *packet)
 {
-    DasPacketList packets;
-    packets.push_back(const_cast<DasPacket*>(packet));
-    packets.claim();
-    sendUpstream(MsgOldDas, &packets);
-    packets.release();
-    packets.waitAllReleased();
+    DasCmdPacketList l;
+    l.push_back(packet);
+    sendUpstream(&l);
+}
+
+void BasePlugin::sendUpstream(DasPacketList *packet)
+{
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(packet));
+    if (msg) {
+        msg->claim();
+        sendUpstream(MsgOldDas, msg);
+        msg->release();
+        msg->waitAllReleased();
+    }
+}
+
+void BasePlugin::sendUpstream(DasPacket *packet)
+{
+    DasPacketList l;
+    l.push_back(packet);
+    sendUpstream(&l);
 }
 
 std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &callback, double delay)

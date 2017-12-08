@@ -210,7 +210,7 @@ void CommDebug::generatePacket(bool fromRawPvs)
     }
 }
 
-void CommDebug::recvDownstream(int type, PluginMessage *message)
+void CommDebug::recvDownstream(DasCmdPacketList *packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int filterCmd = getIntegerParam(FilterCmd);
@@ -219,7 +219,7 @@ void CommDebug::recvDownstream(int type, PluginMessage *message)
     bool sniffer = getBooleanParam(Sniffer);
 
     this->unlock();
-    sendDownstream(type, message, false);
+    sendDownstream(packets, false);
     this->lock();
 
     if (!sniffer) {
@@ -229,48 +229,67 @@ void CommDebug::recvDownstream(int type, PluginMessage *message)
         filterType = Packet::TYPE_DAS_CMD;
     }
 
-    static std::map<int, int> typeMap = {
-        { Packet::TYPE_ERROR,       MsgError },
-        { Packet::TYPE_DAS_CMD,     MsgDasCmd },
-        { Packet::TYPE_DAS_RTDL,    MsgDasRtdl },
-    };
+    if (filterType == 0 || filterType == Packet::TYPE_DAS_CMD) {
+        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+            const DasCmdPacket *packet = *it;
 
-    if (filterType == 0 || typeMap[filterType] == type) {
-        if (type == MsgDasCmd) {
-            DasCmdPacketList *packets = reinterpret_cast<DasCmdPacketList *>(message);
-            for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-                const DasCmdPacket *packet = *it;
+            if (sniffer) {
+                if ((moduleId == 0 || moduleId == packet->module_id) &&
+                    (filterCmd == 0 || filterCmd == packet->command)) {
 
-                if (sniffer) {
-                    if ((moduleId == 0 || moduleId == packet->module_id) &&
-                        (filterCmd == 0 || filterCmd == packet->command)) {
-
-                        savePacket(packet, m_recvQue, recvQueMaxSize);
-                    }
-                } else {
                     savePacket(packet, m_recvQue, recvQueMaxSize);
                 }
-            }
-        } else if (type == MsgDasRtdl) {
-            DasRtdlPacketList *packets = reinterpret_cast<DasRtdlPacketList *>(message);
-            for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-                savePacket(*it, m_recvQue, recvQueMaxSize);
-            }
-        } else if (type == MsgError) {
-            ErrorPacketList *packets = reinterpret_cast<ErrorPacketList *>(message);
-            for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-                savePacket(*it, m_recvQue, recvQueMaxSize);
+            } else {
+                savePacket(packet, m_recvQue, recvQueMaxSize);
             }
         }
+        if (!packets->empty())
+            showRecvPacket(0);
+    }
+}
 
-        showRecvPacket(0);
+void CommDebug::recvDownstream(DasRtdlPacketList *packets)
+{
+    int filterType = getIntegerParam(FilterPktType);
+    int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
+    bool sniffer = getBooleanParam(Sniffer);
+
+    this->unlock();
+    sendDownstream(packets, false);
+    this->lock();
+
+    if (sniffer && (filterType == 0 || filterType == Packet::TYPE_DAS_RTDL)) {
+        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+            savePacket(*it, m_recvQue, recvQueMaxSize);
+        }
+        if (!packets->empty())
+            showRecvPacket(0);
+    }
+}
+
+void CommDebug::recvDownstream(ErrorPacketList *packets)
+{
+    int filterType = getIntegerParam(FilterPktType);
+    int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
+    bool sniffer = getBooleanParam(Sniffer);
+
+    this->unlock();
+    sendDownstream(packets, false);
+    this->lock();
+
+    if (sniffer && (filterType == 0 || filterType == Packet::TYPE_ERROR)) {
+        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+            savePacket(*it, m_recvQue, recvQueMaxSize);
+        }
+        if (!packets->empty())
+            showRecvPacket(0);
     }
 }
 
 void CommDebug::recvUpstream(DasCmdPacketList *packets)
 {
     bool sniffer = getBooleanParam(Sniffer);
-    sendUpstream(MsgDasCmd, packets);
+    sendUpstream(packets);
 
     if (sniffer && !packets->empty()) {
         int filterCmd;

@@ -308,44 +308,44 @@ asynStatus OccPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
     return asynPortDriver::readInt32(pasynUser, value);
 }
 
-void OccPlugin::recvUpstream(int type, PluginMessage *msg)
+void OccPlugin::recvUpstream(DasCmdPacketList *packets)
 {
     if (m_occ == NULL) {
         LOG_ERROR("OCC device not initialized");
         return;
     }
 
-    if (type == MsgDasCmd) {
-        DasCmdPacketList *cmds = reinterpret_cast<DasCmdPacketList *>(msg);
-
-        for (auto it = cmds->cbegin(); it != cmds->cend(); it++) {
-            DasCmdPacket *packet = *it;
-            packet->sequence = (++m_sendId % 255);
-            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->length, 4));
-            if (ret != 0) {
-                setIntegerParam(LastErr, -ret);
-                setIntegerParam(Status, STAT_OCC_ERROR);
-                callParamCallbacks();
-                LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
-                break;
-            }
+    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        DasCmdPacket *packet = *it;
+        packet->sequence = (++m_sendId % 255);
+        int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->length, 4));
+        if (ret != 0) {
+            setIntegerParam(LastErr, -ret);
+            setIntegerParam(Status, STAT_OCC_ERROR);
+            callParamCallbacks();
+            LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
+            break;
         }
-    } else if (type == MsgOldDas) {
-        DasPacketList *pkts = reinterpret_cast<DasPacketList *>(msg);
+    }
+}
 
-        for (auto it = pkts->cbegin(); it != pkts->cend(); it++) {
-            DasPacket *packet = *it;
-            int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->getLength(), 4));
-            if (ret != 0) {
-                setIntegerParam(LastErr, -ret);
-                setIntegerParam(Status, STAT_OCC_ERROR);
-                callParamCallbacks();
-                LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
-                break;
-            }
+void OccPlugin::recvUpstream(DasPacketList *packets)
+{
+    if (m_occ == NULL) {
+        LOG_ERROR("OCC device not initialized");
+        return;
+    }
+
+    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        DasPacket *packet = *it;
+        int ret = occ_send(m_occ, reinterpret_cast<const void *>(packet), ALIGN_UP(packet->getLength(), 4));
+        if (ret != 0) {
+            setIntegerParam(LastErr, -ret);
+            setIntegerParam(Status, STAT_OCC_ERROR);
+            callParamCallbacks();
+            LOG_ERROR("Unable to send data to OCC - %s(%d)\n", strerror(-ret), ret);
+            break;
         }
-    } else {
-        LOG_ERROR("Skipping sending message type '%d', not supported by protocol", type);
     }
 }
 
@@ -589,20 +589,22 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
     }
 
     // Publish all packets in parallel ..
+    std::vector< std::shared_ptr<PluginMessage> > messages;
     if (!oldDas.empty())
-        sendDownstream(&oldDas, false);
+        messages.push_back(sendDownstream(&oldDas, false));
     if (!dasCmd.empty())
-        sendDownstream(&dasCmd, false);
+        messages.push_back(sendDownstream(&dasCmd, false));
     if (!dasRtdl.empty())
-        sendDownstream(&dasRtdl, false);
+        messages.push_back(sendDownstream(&dasRtdl, false));
     if (!errors.empty())
-        sendDownstream(&errors, false);
+        messages.push_back(sendDownstream(&errors, false));
 
     // .. and wait for all of them to get released
-    oldDas.waitAllReleased();
-    dasCmd.waitAllReleased();
-    dasRtdl.waitAllReleased();
-    errors.waitAllReleased();
+    for (auto it = messages.begin(); it != messages.end(); it++) {
+        if (!!(*it)) {
+            (*it)->waitAllReleased();
+        }
+    }
 
     return (end - ptr);
 }

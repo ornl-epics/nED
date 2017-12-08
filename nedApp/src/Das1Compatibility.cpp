@@ -19,54 +19,71 @@ Das1Compatibility::Das1Compatibility(const char *portName, const char *parentPlu
     BasePlugin::connect(parentPlugins, MsgOldDas);
 }
 
-void Das1Compatibility::recvDownstream(int type, PluginMessage *msg)
+void Das1Compatibility::recvDownstream(DasCmdPacketList *packets)
 {
-    if (type != MsgOldDas) {
-        this->unlock();
-        sendDownstream(type, msg, false);
-        this->lock();
-    } else {
-        DasCmdPacketList cmds;
-        DasRtdlPacketList rtdls;
+    unlock();
+    sendDownstream(packets);
+    lock();
+}
 
-        const DasPacketList *packets = dynamic_cast<const DasPacketList*>(msg);
+void Das1Compatibility::recvDownstream(DasRtdlPacketList *packets)
+{
+    unlock();
+    sendDownstream(packets);
+    lock();
+}
 
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-            const DasPacket *packet = *it;
-            if (packet->isRtdl()) {
-                // Eliminate data flavor of RTDL packets - they're the same
-                if (packet->isCommand()) {
-                    rtdls.push_back(old2new_rtdl(packet));
-                }
-            } else if (packet->isCommand()) {
-                // RTDL command case has been handled, additionally filter out
-                // some command pretenders
-                if (packet->getCommandType() != DasPacket::CMD_TSYNC) {
-                    cmds.push_back(old2new_cmd(packet));
-                }
-            } else if (packet->isData()) {
-                // TODO!!!
-            } else {
-                // Discard other packets
+void Das1Compatibility::recvDownstream(ErrorPacketList *packets)
+{
+    unlock();
+    sendDownstream(packets);
+    lock();
+}
+
+void Das1Compatibility::recvDownstream(DasPacketList *packets)
+{
+    DasCmdPacketList cmds;
+    DasRtdlPacketList rtdls;
+
+    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        const DasPacket *packet = *it;
+        if (packet->isRtdl()) {
+            // Eliminate data flavor of RTDL packets - they're the same
+            if (packet->isCommand()) {
+                rtdls.push_back(old2new_rtdl(packet));
             }
+        } else if (packet->isCommand()) {
+            // RTDL command case has been handled, additionally filter out
+            // some command pretenders
+            if (packet->getCommandType() != DasPacket::CMD_TSYNC) {
+                cmds.push_back(old2new_cmd(packet));
+            }
+        } else if (packet->isData()) {
+            // TODO!!!
+        } else {
+            // Discard other packets
         }
+    }
 
-        this->unlock();
-        if (!rtdls.empty())
-            BasePlugin::sendDownstream(&rtdls, false);
-        if (!cmds.empty())
-            BasePlugin::sendDownstream(&cmds, false);
+    this->unlock();
+    std::vector< std::shared_ptr<PluginMessage> > messages;
+    if (!rtdls.empty())
+        messages.push_back(BasePlugin::sendDownstream(&rtdls, false));
+    if (!cmds.empty())
+        messages.push_back(BasePlugin::sendDownstream(&cmds, false));
 
-        rtdls.waitAllReleased();
-        cmds.waitAllReleased();
-        this->lock();
-
-        for (auto it = rtdls.begin(); it != rtdls.end(); it++) {
-            free(*it);
+    for (auto it = messages.begin(); it != messages.end(); it++) {
+        if (!!(*it)) {
+            (*it)->waitAllReleased();
         }
-        for (auto it = cmds.begin(); it != cmds.end(); it++) {
-            free(*it);
-        }
+    }
+    this->lock();
+
+    for (auto it = rtdls.begin(); it != rtdls.end(); it++) {
+        free(*it);
+    }
+    for (auto it = cmds.begin(); it != cmds.end(); it++) {
+        free(*it);
     }
 }
 
@@ -95,7 +112,7 @@ void Das1Compatibility::recvUpstream(DasCmdPacketList *packets)
                 das1Packets.push_back(packet);
         }
     }
-    sendUpstream(MsgOldDas, &das1Packets);
+    sendUpstream(&das1Packets);
 
     for (auto it = das1Packets.begin(); it != das1Packets.end(); it++) {
         delete *it;

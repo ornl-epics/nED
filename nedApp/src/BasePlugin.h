@@ -25,6 +25,11 @@
 
 class Timer;
 
+typedef std::vector<DasPacket*> DasPacketList;
+typedef std::vector<DasCmdPacket*> DasCmdPacketList;
+typedef std::vector<DasRtdlPacket*> DasRtdlPacketList;
+typedef std::vector<ErrorPacket*> ErrorPacketList;
+
 /**
  * Registers plugin with EPICS system.
  *
@@ -210,6 +215,10 @@ class BasePlugin : public asynPortDriver {
         /**
          * Send PluginMessage to any connected child plugins.
          *
+         * PluginMessage must be unique and not previously used. Use with care
+         * and only when really necessary. Use specialized sendDownstream()
+         * interfaces instead.
+         *
          * Plugin must be unlocked when sending messages.
          *
          * When in wait mode, the function will return only after all subscribed
@@ -219,27 +228,27 @@ class BasePlugin : public asynPortDriver {
          * @param[in] msg to be sent
          * @param[in] wait for plugins to process message before returning
          */
-        void sendDownstream(int type, PluginMessage *msg, bool wait=true);
+        void sendDownstream(int type, std::shared_ptr<PluginMessage> &msg, bool wait=true);
 
         /**
          * Send DasPackets to any connected child plugins.
          */
-        void sendDownstream(DasPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(DasPacketList *packets, bool wait=true);
 
         /**
          * Send DasCmdPackets to any connected child plugins.
          */
-        void sendDownstream(DasCmdPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(DasCmdPacketList *packets, bool wait=true);
 
         /**
          * Send DasRtdlPackets to any connected child plugins.
          */
-        void sendDownstream(DasRtdlPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(DasRtdlPacketList *packets, bool wait=true);
 
         /**
          * Send ErrorPackets to any connected child plugins.
          */
-        void sendDownstream(ErrorPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(ErrorPacketList *packets, bool wait=true);
 
         /**
          * A callback function called upon receiving message from child plugin.
@@ -267,21 +276,35 @@ class BasePlugin : public asynPortDriver {
          * Function returns immediately and doesn't wait for receiver to process
          * packets.
          */
-        virtual void sendUpstream(int type, PluginMessage *msg);
+        virtual void sendUpstream(int type, std::shared_ptr<PluginMessage> &msg);
+
+        /**
+         * Send DasPacketList to parent plugins.
+         *
+         * Waits until receiver processes the packet.
+         */
+        virtual void sendUpstream(DasPacketList *packet);
 
         /**
          * Send single DasPacket to parent plugins.
          *
          * Waits until receiver processes the packet.
          */
-        virtual void sendUpstream(const DasPacket *packet);
+        virtual void sendUpstream(DasPacket *packet);
+
+        /**
+         * Send single DasCmdPacketList to parent plugins.
+         *
+         * Waits until receiver processes the packet.
+         */
+        virtual void sendUpstream(DasCmdPacketList *packet);
 
         /**
          * Send single DasCmdPacket to parent plugins.
          *
          * Waits until receiver processes the packet.
          */
-        virtual void sendUpstream(const DasCmdPacket *packet);
+        virtual void sendUpstream(DasCmdPacket *packet);
 
         /**
          * Return the name of the asyn parameter.

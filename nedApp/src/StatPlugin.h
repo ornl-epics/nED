@@ -27,9 +27,19 @@ class StatPlugin : public BasePlugin {
         StatPlugin(const char *portName, const char *parentPlugins, int blocking);
 
         /**
-         * Overloaded function to receive all OCC data.
+         * Overloaded function to receive DAS 1.0 packets.
          */
-        void recvDownstream(int type, PluginMessage *msg);
+        void recvDownstream(DasPacketList *packets);
+
+        /**
+         * Overloaded function to receive command packets.
+         */
+        void recvDownstream(DasCmdPacketList *packets);
+
+        /**
+         * Overloaded function to receive RTDL packets.
+         */
+        void recvDownstream(DasRtdlPacketList *packets);
 
         /**
          * Overloaded function

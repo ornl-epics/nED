@@ -28,9 +28,16 @@ class Das1Compatibility : public BasePlugin {
         Das1Compatibility(const char *portName, const char *parentPlugins);
 
         /**
-         * Intercept DAS 1.0 packets and convert them, pass thru the rest.
+         * Pass-thru DAS 2.0 packets.
          */
-        void recvDownstream(int type, PluginMessage *msg);
+        void recvDownstream(DasCmdPacketList *packets);
+        void recvDownstream(DasRtdlPacketList *packets);
+        void recvDownstream(ErrorPacketList *packets);
+
+        /**
+         * Intercept DAS 1.0 packets and convert them.
+         */
+        void recvDownstream(DasPacketList *packets);
 
         /**
          * Convert DAS 2.0 packets to DAS 1.0 before sending them to parents.

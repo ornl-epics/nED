@@ -27,7 +27,7 @@ class PluginMessage
         /**
          * Constructor initializes internal structures.
          */
-        PluginMessage();
+        PluginMessage(void *msg);
 
         /**
          * Destructor, asserts when refcount != 0.
@@ -67,21 +67,20 @@ class PluginMessage
          */
         bool released();
 
+        /**
+         * Return raw message casted to desirable type.
+         */
+        template<typename T>
+        T* get()
+        {
+            return reinterpret_cast<T*>(m_msg);
+        };
+
     private:
         unsigned long m_refcount;
         mutable epicsMutex m_lock;
         mutable epicsEvent m_event;
+        void *m_msg;
 };
-
-class ParamsExch : public PluginMessage {
-    public:
-        std::string portName;
-        std::string paramName;
-};
-
-class DasPacketList : public PluginMessage, public std::vector<DasPacket*> {};
-class DasCmdPacketList : public PluginMessage, public std::vector<DasCmdPacket*> {};
-class DasRtdlPacketList : public PluginMessage, public std::vector<DasRtdlPacket*> {};
-class ErrorPacketList : public PluginMessage, public std::vector<ErrorPacket*> {};
 
 #endif // PLUGIN_MESSAGE_H

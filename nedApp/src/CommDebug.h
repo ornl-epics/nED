@@ -62,9 +62,19 @@ class CommDebug : public BasePlugin {
         virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
-         * Receive packets from modules.
+         * Receive and process command packets.
          */
-        void recvDownstream(int type, PluginMessage *packets);
+        void recvDownstream(DasCmdPacketList *packets);
+
+        /**
+         * Receive and process RTDL packets.
+         */
+        void recvDownstream(DasRtdlPacketList *packets);
+
+        /**
+         * Receive and process error packets.
+         */
+        void recvDownstream(ErrorPacketList *packets);
 
         /**
          * Receive packets from plugins to modules.

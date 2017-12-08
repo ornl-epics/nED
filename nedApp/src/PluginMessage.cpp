@@ -9,8 +9,9 @@
 
 #include "PluginMessage.h"
 
-PluginMessage::PluginMessage()
+PluginMessage::PluginMessage(void *msg)
     : m_refcount(0)
+    , m_msg(msg)
 {}
 
 PluginMessage::~PluginMessage()
