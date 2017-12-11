@@ -50,6 +50,7 @@ DB += DspPlugin_v64.db
 DB += DspPlugin_v65.db
 DB += DspPlugin_v66.db
 DB += DspPlugin_v67.db
+DB += DspPlugin_v70.db
 DB += DspWPlugin_v10.db
 DB += FemPlugin_v32.db
 DB += FemPlugin_v35.db

@@ -1,0 +1,13 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "DspPlugin_v70.generated"
+include "DspPlugin.include"
+include "GlobalConD.include"
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TVVL, "129")
+    field(TVST, "Down reset")
+    field(TTVL, "39")
+    field(TTST, "Down reset LVDS")
+}

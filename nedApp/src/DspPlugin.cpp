@@ -25,8 +25,8 @@ const double DspPlugin::DSP_RESPONSE_TIMEOUT            = 1.0;
 /**
  * DSP 6.x version response format
  */
-struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
+struct RspReadVersion {
     struct {
         unsigned day:8;
         unsigned month:8;
@@ -43,10 +43,20 @@ struct RspReadVersion {
     } firmware;
     uint32_t eeprom_code1;
     uint32_t eeprom_code2;
+};
+
+struct RspReadVersion7 {
+    unsigned hw_revision:8;     // Board revision number
+    unsigned hw_version:8;      // Board version number
+    unsigned fw_revision:8;     // Firmware revision number
+    unsigned fw_version:8;      // Firmware version number
+    unsigned year:16;           // Year
+    unsigned day:8;             // Day
+    unsigned month:8;           // Month
+};
 #else
 #error Missing DspVersionRegister declaration
 #endif
-};
 
 DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
     : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_DSP, 4)
@@ -80,6 +90,10 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
         createParams_v67();
         setIntegerParam(Supported, 1);
         setExpectedVersion(6, 7);
+    } else if (m_version == "v70") {
+        createParams_v70();
+        setIntegerParam(Supported, 1);
+        setExpectedVersion(7, 0);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported DSP version '%s'", version);
@@ -92,21 +106,34 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
 
 bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    if (packet->getPayloadLength() != sizeof(RspReadVersion)) {
-        return false;
+    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
+        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+        version.hw_version  = response->hardware.version;
+        version.hw_revision = response->hardware.revision;
+        version.hw_year     = HEX_BYTE_TO_DEC(response->hardware.year) + 2000;
+        version.hw_month    = HEX_BYTE_TO_DEC(response->hardware.month);
+        version.hw_day      = HEX_BYTE_TO_DEC(response->hardware.day);
+        version.fw_version  = response->firmware.version;
+        version.fw_revision = response->firmware.revision;
+        version.fw_year     = HEX_BYTE_TO_DEC(response->firmware.year) + 2000;
+        version.fw_month    = HEX_BYTE_TO_DEC(response->firmware.month);
+        version.fw_day      = HEX_BYTE_TO_DEC(response->firmware.day);
+    
+        return true;
+    } else if (packet->getPayloadLength() == sizeof(RspReadVersion7)) {
+        const RspReadVersion7 *response = reinterpret_cast<const RspReadVersion7*>(packet->payload);
+        version.hw_version  = response->hw_version;
+        version.hw_revision = response->hw_revision;
+        version.hw_year     = 0;
+        version.hw_month    = 0;
+        version.hw_day      = 0;
+        version.fw_version  = response->fw_version;
+        version.fw_revision = response->fw_revision;
+        version.fw_year     = HEX_BYTE_TO_DEC(response->year);
+        version.fw_month    = HEX_BYTE_TO_DEC(response->month);
+        version.fw_day      = HEX_BYTE_TO_DEC(response->day);
+    
+        return true;
     }
-
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
-    version.hw_version  = response->hardware.version;
-    version.hw_revision = response->hardware.revision;
-    version.hw_year     = HEX_BYTE_TO_DEC(response->hardware.year) + 2000;
-    version.hw_month    = HEX_BYTE_TO_DEC(response->hardware.month);
-    version.hw_day      = HEX_BYTE_TO_DEC(response->hardware.day);
-    version.fw_version  = response->firmware.version;
-    version.fw_revision = response->firmware.revision;
-    version.fw_year     = HEX_BYTE_TO_DEC(response->firmware.year) + 2000;
-    version.fw_month    = HEX_BYTE_TO_DEC(response->firmware.month);
-    version.fw_day      = HEX_BYTE_TO_DEC(response->firmware.day);
-
-    return true;
+    return false;
 }
