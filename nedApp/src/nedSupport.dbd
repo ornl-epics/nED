@@ -11,11 +11,9 @@ include "sCalcoutRecord.dbd"
 # Make system() command available
 registrar(iocshSystemCommand)
 
-# OCC plugin is special
+# Non-detector plugins (alphabetically)
 registrar("OccPluginRegister")
 registrar("Das1CompatibilityRegister")
-
-# Non-detector plugins (alphabetically)
 #registrar("AcpcPvaPluginRegister")
 #registrar("AdaraPluginRegister")
 #registrar("BnlFlatFieldPluginRegister")
@@ -30,7 +28,7 @@ registrar("CommDebugRegister")
 #registrar("DataDiagPluginRegister")
 #registrar("DumpPluginRegister")
 #registrar("FlatFieldPluginRegister")
-#registrar("PixelMapPluginRegister")
+registrar("PixelMapPluginRegister")
 #registrar("ProxyPluginRegister")
 #registrar("RocPvaPluginRegister")
 registrar("RtdlPluginRegister")

@@ -10,8 +10,8 @@
 #ifndef PIXEL_MAP_PLUGIN_H
 #define PIXEL_MAP_PLUGIN_H
 
-#include "BaseDispatcherPlugin.h"
-#include "DasPacketList.h"
+#include "BasePlugin.h"
+#include "ObjectPool.h"
 
 #include <limits>
 #include <vector>
@@ -33,7 +33,7 @@
  * every split. Splitting batches has performance impact, ideally buffer is big
  * enough and no splits occur.
  */
-class PixelMapPlugin : public BaseDispatcherPlugin {
+class PixelMapPlugin : public BasePlugin {
     private:
         /**
          * Structure used for returning error counters from pixel mapping function.
@@ -94,18 +94,10 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          * Initialize mapping tables from file.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] parentPlugins is a comma separated list of plugins to connect to
          * @param[in] pixelMapFile Input file to read mapping from
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        PixelMapPlugin(const char *portName, const char *dispatcherPortName, int blocking, const char *pixelMapFile, int bufSize);
-
-        /**
-         * Destructor
-         *
-         * Closes the dump file to make sure unsynced data gets flushed to filesystem.
-         */
-        ~PixelMapPlugin();
+        PixelMapPlugin(const char *portName, const char *parentPlugins, const char *pixelMapFile);
 
         /**
          * Overloaded function.
@@ -113,9 +105,9 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
-         * Overloaded function to receive all OCC data.
+         * Overloaded function to receive data packets.
          */
-        void processDataUnlocked(const DasPacketList * const packetList);
+        void recvDownstream(DasDataPacketList *packets);
 
     private: // functions
         /**
@@ -131,7 +123,7 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
          * @param[in] passVetoes Should vetoed events be included in dest packet
          * @return Number of unmapped pixel ids.
          */
-        PixelMapErrors packetMap(const DasPacket *srcPacket, DasPacket *destPacket, bool passVetoes);
+        PixelMapErrors packetMap(const DasDataPacket *srcPacket, DasDataPacket *destPacket, bool passVetoes);
 
         /**
          * Read mapping table from a file.
@@ -142,23 +134,20 @@ class PixelMapPlugin : public BaseDispatcherPlugin {
         ImportError importPixelMapFile(const char *filepath);
 
     private:
-        uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
-        uint32_t m_bufferSize;      //!< Size of buffer
         DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins
 
         std::vector<uint32_t> m_map; //!< Pixel mapping, index is raw pixel id, value is translated pixel id
 
+        ObjectPool<uint32_t> m_packetsPool; //!< Pool of packets to be used for modified data
+
     private: // asyn parameters
-        #define FIRST_PIXELMAPPLUGIN_PARAM FilePath
         int FilePath;       //!< Absolute path to pixel map file
         int ErrImport;      //!< Import mapping file error (see PixelMapPlugin::ImportError)
         int CntUnmap;       //!< Number of unmapped pixels
         int CntError;       //!< Number of generic error pixel ids detected
-        int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int MapEn;          //!< Toggle pixel mapping
         int VetoMode;       //!< Select what to do with veto events
-        #define LAST_PIXELMAPPLUGIN_PARAM VetoMode
 };
 
 #endif // PIXEL_MAP_PLUGIN_H
