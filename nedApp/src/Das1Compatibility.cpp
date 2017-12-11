@@ -8,6 +8,7 @@
  */
 
 #include "Das1Compatibility.h"
+#include "Log.h"
 #include "Packet.h"
 
 EPICS_REGISTER_PLUGIN(Das1Compatibility, 2, "Port name", string, "Parent port name(s)", string);
@@ -15,6 +16,8 @@ EPICS_REGISTER_PLUGIN(Das1Compatibility, 2, "Port name", string, "Parent port na
 Das1Compatibility::Das1Compatibility(const char *portName, const char *parentPlugins)
     : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos)
 {
+    createParam("DataFormat",   asynParamInt32, &DataFormat, DasDataPacket::DATA_FMT_PIXEL); // Default data format when not defined by DSP
+
     // Permanently connect to all parent plugins
     BasePlugin::connect(parentPlugins, MsgOldDas);
 }
@@ -44,6 +47,7 @@ void Das1Compatibility::recvDownstream(DasPacketList *packets)
 {
     DasCmdPacketList cmds;
     DasRtdlPacketList rtdls;
+    DasDataPacketList datas;
 
     for (auto it = packets->cbegin(); it != packets->cend(); it++) {
         const DasPacket *packet = *it;
@@ -59,7 +63,11 @@ void Das1Compatibility::recvDownstream(DasPacketList *packets)
                 cmds.push_back(old2new_cmd(packet));
             }
         } else if (packet->isData()) {
-            // TODO!!!
+            if (packet->getRtdlHeader() == 0) {
+                LOG_ERROR("Skipping data packet without RTDL header");
+            } else {
+                datas.push_back(old2new_data(packet));
+            }
         } else {
             // Discard other packets
         }
@@ -71,6 +79,8 @@ void Das1Compatibility::recvDownstream(DasPacketList *packets)
         messages.push_back(BasePlugin::sendDownstream(&rtdls, false));
     if (!cmds.empty())
         messages.push_back(BasePlugin::sendDownstream(&cmds, false));
+    if (!datas.empty())
+        messages.push_back(BasePlugin::sendDownstream(&datas, false));
 
     for (auto it = messages.begin(); it != messages.end(); it++) {
         if (!!(*it)) {
@@ -83,6 +93,9 @@ void Das1Compatibility::recvDownstream(DasPacketList *packets)
         free(*it);
     }
     for (auto it = cmds.begin(); it != cmds.end(); it++) {
+        free(*it);
+    }
+    for (auto it = datas.begin(); it != datas.end(); it++) {
         free(*it);
     }
 }
@@ -123,25 +136,11 @@ DasRtdlPacket *Das1Compatibility::old2new_rtdl(const DasPacket *packet)
 {
     const uint32_t *frames = (packet->payload + sizeof(RtdlHeader)/sizeof(uint32_t));
     size_t nFrames = (packet->payload_length - sizeof(RtdlHeader))/sizeof(uint32_t);
-    uint32_t sourceId = 0;
-    bool found = false;
 
-    // Map 32-bit DSP-T address to unique source id number
-    for (sourceId = 0; sourceId < m_rtdlSources.size(); sourceId++) {
-        if (m_rtdlSources[sourceId] == packet->source) {
-            found = true;
-            break;
-        }
-    }
-    if (!found && m_rtdlSources.size() < 255) { // 255 comes from size of DasRtdlPacket::source
-        sourceId = m_rtdlSources.size();
-        m_rtdlSources.push_back(packet->source);
-    }
+    DasRtdlPacket *pkt = DasRtdlPacket::create(packet->getRtdlHeader(), frames, nFrames);
+    if (pkt) pkt->source = mapSourceId(packet);
 
-    return DasRtdlPacket::create(sourceId,
-                                 packet->getRtdlHeader(),
-                                 frames,
-                                 nFrames);
+    return pkt;
 }
 
 DasCmdPacket *Das1Compatibility::old2new_cmd(const DasPacket *packet)
@@ -166,6 +165,23 @@ DasCmdPacket *Das1Compatibility::old2new_cmd(const DasPacket *packet)
     }
 }
 
+DasDataPacket *Das1Compatibility::old2new_data(const DasPacket *packet)
+{
+    const RtdlHeader *rtdl = packet->getRtdlHeader();
+    assert(rtdl != 0);
+    uint32_t count = 0;
+    const uint32_t *data = packet->getData(&count);
+    DasDataPacket::DataFormat format = static_cast<DasDataPacket::DataFormat>(packet->datainfo.data_format);
+    if (format == static_cast<DasDataPacket::DataFormat>(0)) {
+        format = static_cast<DasDataPacket::DataFormat>(getIntegerParam(DataFormat));
+    }
+
+    DasDataPacket *pkt = DasDataPacket::create(format, rtdl->timestamp_sec, rtdl->timestamp_nsec, data, count);
+    if (pkt) pkt->source = mapSourceId(packet);
+
+    return pkt;
+}
+
 DasPacket *Das1Compatibility::new2old_cmd(const DasCmdPacket *packet, enum Das1PacketType mode)
 {
     size_t payload_length = packet->cmd_length - packet->getHeaderLen();
@@ -179,4 +195,23 @@ DasPacket *Das1Compatibility::new2old_cmd(const DasCmdPacket *packet, enum Das1P
     default:
         return DasPacket::createOcc(DasCmdPacket::OCC_ID, packet->module_id, command, packet->cmd_sequence, payload_length, packet->payload);
     }
+}
+
+uint8_t Das1Compatibility::mapSourceId(const DasPacket *packet)
+{
+    uint8_t sourceId;
+
+    // Map 32-bit DSP-T address to unique source id number
+    for (sourceId = 0; sourceId < m_sources.size(); sourceId++) {
+        if (m_sources[sourceId] == packet->source) {
+            return sourceId;
+        }
+    }
+
+    if (m_sources.size() < 255) { // 255 comes from size of DasRtdlPacket::source
+        sourceId = m_sources.size();
+        m_sources.push_back(packet->source);
+    }
+
+    return sourceId;
 }

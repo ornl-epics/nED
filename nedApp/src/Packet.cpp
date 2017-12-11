@@ -13,18 +13,18 @@
 #include <string.h>
 #include <assert.h>
 
-DasRtdlPacket *DasRtdlPacket::create(uint8_t src, const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
+DasRtdlPacket *DasRtdlPacket::create(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
 {
     assert(nFrames == 26);
     DasRtdlPacket *packet = reinterpret_cast<DasRtdlPacket*>(malloc(sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t)));
     if (packet) {
         packet->length = sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t);
-        packet->init(src, hdr, frames, nFrames);
+        packet->init(hdr, frames, nFrames);
     }
     return packet;
 }
 
-void DasRtdlPacket::init(uint8_t src, const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
+void DasRtdlPacket::init(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
 {
     assert(this->length >= (sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t)));
     memset(this, 0, (sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t)));
@@ -33,7 +33,6 @@ void DasRtdlPacket::init(uint8_t src, const RtdlHeader *hdr, const uint32_t *fra
     this->type = TYPE_DAS_RTDL;
     this->length = sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t);
 
-    this->source = src;
     this->num_frames = nFrames;
 
     // Use memcpy for performance reasons
@@ -79,4 +78,28 @@ uint32_t DasCmdPacket::getPayloadLength() const
         return 0;
 
     return this->cmd_length - 6;
+}
+
+DasDataPacket *DasDataPacket::create(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count)
+{
+    DasDataPacket *packet = reinterpret_cast<DasDataPacket*>(malloc(sizeof(DasDataPacket) + count*4));
+    if (packet) {
+        packet->init(format, time_sec, time_nsec, data, count);
+    }
+    return packet;
+}
+
+void DasDataPacket::init(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count)
+{
+    uint32_t packetLength = sizeof(DasDataPacket) + count*4;
+    memset(this, 0, packetLength);
+
+    this->version = 0x1;
+    this->type = TYPE_DAS_DATA;
+    this->length = packetLength;
+
+    this->format = format;
+    this->timestamp_sec = time_sec;
+    this->timestamp_nsec = time_nsec;
+    memcpy(this->events, data, count*4);
 }

@@ -28,6 +28,7 @@ class Timer;
 typedef std::vector<DasPacket*> DasPacketList;
 typedef std::vector<DasCmdPacket*> DasCmdPacketList;
 typedef std::vector<DasRtdlPacket*> DasRtdlPacketList;
+typedef std::vector<DasDataPacket*> DasDataPacketList;
 typedef std::vector<ErrorPacket*> ErrorPacketList;
 
 /**
@@ -203,6 +204,11 @@ class BasePlugin : public asynPortDriver {
         virtual void recvDownstream(DasPacketList *packets) {};
 
         /**
+         * A worker function to process DasDataPacket messages from parent plugins.
+         */
+        virtual void recvDownstream(DasDataPacketList *packets) {};
+
+        /**
          * A worker function to process DasCmdPacket messages from parent plugins.
          */
         virtual void recvDownstream(DasCmdPacketList *packets) {};
@@ -234,6 +240,11 @@ class BasePlugin : public asynPortDriver {
          * Send DasPackets to any connected child plugins.
          */
         std::shared_ptr<PluginMessage> sendDownstream(DasPacketList *packets, bool wait=true);
+
+        /**
+         * Send DasDataPackets to any connected child plugins.
+         */
+        std::shared_ptr<PluginMessage> sendDownstream(DasDataPacketList *packets, bool wait=true);
 
         /**
          * Send DasCmdPackets to any connected child plugins.
@@ -474,6 +485,7 @@ class BasePlugin : public asynPortDriver {
     protected:
         int MsgOldDas;
         int MsgError;
+        int MsgDasData;
         int MsgDasCmd;
         int MsgDasRtdl;
         int MsgParamExch;

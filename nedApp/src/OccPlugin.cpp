@@ -499,6 +499,7 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
     bool first = true;
 
     DasPacketList oldDas;
+    DasDataPacketList dasData;
     DasCmdPacketList dasCmd;
     DasRtdlPacketList dasRtdl;
     ErrorPacketList errors;
@@ -562,11 +563,14 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
                 }
                 m_recvId = packet->sequence;
 
-                if (packet->type == Packet::TYPE_DAS_CMD) {
-                    dasCmd.push_back(reinterpret_cast<DasCmdPacket *>(packet));
+                if (packet->type == Packet::TYPE_DAS_DATA) {
+                    reinterpret_cast<DasDataPacket *>(packet)->source = m_sourceId;
+                    dasData.push_back(reinterpret_cast<DasDataPacket *>(packet));
                 } else if (packet->type == Packet::TYPE_DAS_RTDL) {
                     reinterpret_cast<DasRtdlPacket *>(packet)->source = m_sourceId;
                     dasRtdl.push_back(reinterpret_cast<DasRtdlPacket *>(packet));
+                } else if (packet->type == Packet::TYPE_DAS_CMD) {
+                    dasCmd.push_back(reinterpret_cast<DasCmdPacket *>(packet));
                 } else if (packet->type == Packet::TYPE_ERROR) {
                     reinterpret_cast<ErrorPacket *>(packet)->source = m_sourceId;
                     dasRtdl.push_back(reinterpret_cast<DasRtdlPacket *>(packet));
@@ -594,6 +598,8 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
         messages.push_back(sendDownstream(&oldDas, false));
     if (!dasCmd.empty())
         messages.push_back(sendDownstream(&dasCmd, false));
+    if (!dasData.empty())
+        messages.push_back(sendDownstream(&dasData, false));
     if (!dasRtdl.empty())
         messages.push_back(sendDownstream(&dasRtdl, false));
     if (!errors.empty())

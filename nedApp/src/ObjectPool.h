@@ -30,6 +30,22 @@ class ObjectPool {
         : m_recycleSmaller(recycleSmaller)
         {}
 
+        ~ObjectPool()
+        {
+            m_mutex.lock();
+            while (!m_ready.empty()) {
+                Object &obj = m_ready.front();
+                m_ready.pop_front();
+                free(obj.mem);
+            }
+            while (!m_used.empty()) {
+                Object &obj = m_ready.front();
+                m_ready.pop_front();
+                free(obj.mem);
+            }
+            m_mutex.unlock();
+        }
+
         /**
          * Retrieve object from queue.
          *

@@ -73,6 +73,62 @@ class ErrorPacket : public Packet {
         uint32_t orig[0];           //!< Recovered data, dynamic length defined by packet length field
 };
 
+class DasDataPacket : public Packet {
+    public: /* Variables */
+        typedef enum {
+            DATA_FMT_RESERVED       = 0,
+            DATA_FMT_META           = 1,    //!< meta data (for choppers, beam monitors, ADC sampling etc.) in tof,pixel format
+            DATA_FMT_PIXEL          = 2,    //!< neutron data in tof,pixel format
+            DATA_FMT_XY             = 3,    //!< X,Y format
+            DATA_FMT_XY_PHOTO_SUM   = 4,    //!< X,Y,Photo sum format
+            DATA_FMT_LPSD_RAW       = 16,    //!< LPSD raw format
+            DATA_FMT_LPSD_VERBOSE   = 17,    //!< LPSD verbose format
+            DATA_FMT_ACPC_RAW       = 18,   //!< ACPC raw format
+            DATA_FMT_ACPC_VERBOSE   = 19,   //!< ACPC verbose format
+            DATA_FMT_AROC_RAW       = 20,   //!< AROC raw format
+            DATA_FMT_BNL_RAW        = 21,   //!< BNL raw format
+            DATA_FMT_BNL_VERBOSE    = 22,   //!< BNL verbose format
+            DATA_FMT_CROC_RAW       = 23,   //!< CROC raw format
+            DATA_FMT_CROC_VERBOSE   = 24,   //!< CROC verbose format
+        } DataFormat;
+
+        struct __attribute__ ((__packed__)) {
+            uint8_t source;                 //!< Unique source id number
+            unsigned subpacket:4;           //!< Subpacket count
+            unsigned __data_rsv1:4;
+            DataFormat format:8;            //!< Data format
+            bool mapped:1;                  //!< Flag whether events are mapped to logical ids
+            bool corrected:1;               //!< Flag whether geometrical correction has been applied
+            unsigned __data_rsv2:6;
+        };
+
+        uint32_t timestamp_sec;             //!< Accelerator time (seconds) of event 39
+        uint32_t timestamp_nsec;            //!< Accelerator time (nano-seconds) of event 39
+
+        uint32_t events[0];                 //!< Placeholder for dynamic buffer of events
+
+    public: /* Functions */
+        /**
+         * Allocates a new data packet for selected payload size.
+         *
+         * Packet is zeroed out before returned except for the length field.
+         *
+         * @param[in] format of events
+         * @param[in] time_sec seconds part of timestamp
+         * @param[in] time_nsec nan seconds part of timestamp
+         * @param[in] data pointer to data
+         * @param[in] count size of data in 4-byte units
+         * @return Returns a newly created packet or 0 on error.
+         */
+        static DasDataPacket *create(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count);
+
+        /**
+         * Initialize packet fields.
+         */
+        void init(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count);
+
+};
+
 class DasRtdlPacket : public Packet {
     public: /* Variables */
         /**
@@ -134,9 +190,9 @@ class DasRtdlPacket : public Packet {
         } pulse;
 
         struct __attribute__ ((__packed__)) {
-            uint32_t tsync_period;
+            uint32_t tsync_period;      //!< Time between two TSYNCs, in 100ns units
             struct __attribute__ ((__packed__)) {
-                unsigned tof_fixed_offset:24; //!< TOF fixed offset
+                unsigned tof_fixed_offset:24; //!< TOF fixed offset, in 100ns units
                 unsigned frame_offset:4;    //!< RTDL frame offset
                 unsigned unused28:3;        //!< "000"
                 unsigned tof_full_offset:1; //!< TOF full offset enabled
@@ -154,12 +210,12 @@ class DasRtdlPacket : public Packet {
          * @param[in] size payload size only
          * @return Returns a newly created packet or 0 on error.
          */
-        static DasRtdlPacket *create(uint8_t src, const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
+        static DasRtdlPacket *create(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
 
         /**
          * Initialize packet fields.
          */
-        void init(uint8_t src, const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
+        void init(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
 
 };
 

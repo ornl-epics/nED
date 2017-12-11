@@ -54,11 +54,17 @@ class Das1Compatibility : public BasePlugin {
             DAS1_LVDS_SINGLE_WORD,
         };
 
-        std::vector<uint32_t> m_rtdlSources;        //!< Mapping between DSP address and 8-bit number
+        std::vector<uint32_t> m_sources;    //!< Mapping between DSP address and 8-bit number
 
         DasRtdlPacket *old2new_rtdl(const DasPacket *packet);
         DasCmdPacket *old2new_cmd(const DasPacket *packet);
+        DasDataPacket *old2new_data(const DasPacket *packet);
         DasPacket *new2old_cmd(const DasCmdPacket *packet, enum Das1PacketType mode);
+
+        uint8_t mapSourceId(const DasPacket *packet);
+
+    private:
+        int DataFormat;
 };
 
 #endif // OLD_DAS_PACKET_CONVERTER_H

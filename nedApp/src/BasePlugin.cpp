@@ -48,6 +48,7 @@ BasePlugin::BasePlugin(const char *portName, int blocking, int interfaceMask, in
 {
     createParam("MsgOldDas",    asynParamGenericPointer,    &MsgOldDas);
     createParam("MsgError",     asynParamGenericPointer,    &MsgError);
+    createParam("MsgDasData",   asynParamGenericPointer,    &MsgDasData);
     createParam("MsgDasCmd",    asynParamGenericPointer,    &MsgDasCmd);
     createParam("MsgDasRtdl",   asynParamGenericPointer,    &MsgDasRtdl);
     createParam("MsgParamExch", asynParamGenericPointer,    &MsgParamExch);
@@ -241,6 +242,8 @@ void BasePlugin::recvDownstream(int type, PluginMessage *msg)
             recvDownstream( msg->get<DasCmdPacketList>() );
         } else if (type == MsgDasRtdl) {
             recvDownstream( msg->get<DasRtdlPacketList>() );
+        } else if (type == MsgDasData) {
+            recvDownstream( msg->get<DasDataPacketList>() );
         } else if (type == MsgParamExch) {
 
         } else {
@@ -267,6 +270,14 @@ std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasPacketList *packets
     sendDownstream(MsgOldDas, msg, wait);
     return msg;
 }
+
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasDataPacketList *packets, bool wait)
+{
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    sendDownstream(MsgDasData, msg, wait);
+    return msg;
+}
+
 
 std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasCmdPacketList *packets, bool wait)
 {
