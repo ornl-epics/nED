@@ -12,6 +12,7 @@
 
 #include "RtdlHeader.h"
 
+#include <cassert>
 #include <stdint.h>
 #include <cstddef>
 
@@ -127,6 +128,20 @@ class DasDataPacket : public Packet {
          */
         void init(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count);
 
+        /**
+         * Templated function to cast generic packet events to the format of callers' preference.
+         *
+         * Function does a simple cast and does not check for format integrity.
+         * As a convenience it also returns number of events based on the
+         * requested event format.
+         */
+        template<typename T>
+        T *getEvents(uint32_t &count)
+        {
+            assert(sizeof(T) % 4 == 0);
+            count = (this->length - sizeof(DasDataPacket)) / sizeof(T);
+            return reinterpret_cast<T *>(this->events);
+        }
 };
 
 class DasRtdlPacket : public Packet {

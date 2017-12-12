@@ -86,8 +86,11 @@ void PixelMapPlugin::recvDownstream(DasDataPacketList *packets)
             allocatedPackets.push_back(newPacket);
 
             errors += packetMap(origPacket, newPacket, passVetoes);
+            modifiedPackets.push_back(newPacket);
         }
-        sendDownstream(&modifiedPackets);
+        if (!modifiedPackets.empty()) {
+            sendDownstream(&modifiedPackets);
+        }
 
         for (auto it = allocatedPackets.begin(); it != allocatedPackets.end(); it++) {
             m_packetsPool.put(reinterpret_cast<uint32_t*>(*it));

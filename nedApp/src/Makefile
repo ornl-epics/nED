@@ -95,7 +95,7 @@ $(PROD_NAME)_SRCS  += CommDebug.cpp
 #$(PROD_NAME)_SRCS  += DataDiagPlugin.cpp
 #$(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 #$(PROD_NAME)_SRCS  += FlatFieldTable.cpp
-#$(PROD_NAME)_SRCS  += PvaNeutronData.cpp
+$(PROD_NAME)_SRCS  += PvaNeutrons.cpp
 #$(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
 #$(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
 #$(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
@@ -110,6 +110,7 @@ $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 #$(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
 #$(PROD_NAME)_SRCS  += CRocPvaPlugin.cpp
 #$(PROD_NAME)_SRCS  += EmptyPulsePlugin.cpp
+
 
 # Module handler plugins - in alphabetical order
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp
