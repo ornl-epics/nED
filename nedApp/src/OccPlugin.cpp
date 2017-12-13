@@ -494,8 +494,7 @@ void OccPlugin::processOccDataThread(epicsEvent *shutdown)
 
 uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
 {
-    int maxPktSize;
-    getIntegerParam(MaxPktSize, &maxPktSize);
+    int maxPktSize = getIntegerParam(MaxPktSize);
     bool first = true;
 
     DasPacketList oldDas;
