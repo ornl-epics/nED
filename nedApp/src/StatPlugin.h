@@ -27,9 +27,9 @@ class StatPlugin : public BasePlugin {
         StatPlugin(const char *portName, const char *parentPlugins, int blocking);
 
         /**
-         * Overloaded function to receive DAS 1.0 packets.
+         * Overloaded function to receive data packets.
          */
-        void recvDownstream(DasPacketList *packets);
+        void recvDownstream(DasDataPacketList *packets);
 
         /**
          * Overloaded function to receive command packets.

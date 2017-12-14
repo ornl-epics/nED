@@ -292,28 +292,6 @@ record(calc, "$(P)TotEventRate")
    field(SCAN,  "1 second")
 }
 
-record(ai, "$(P)NeutronPCharge")
-{
-    field(DESC, "Neutrons accumulated PCharge")
-    field(DTYP, "asynFloat64")
-    field(INP,  "@asyn($(PORT))NeutronPCharge")
-    field(EGU,  "Coulombs")
-    field(PREC, "6")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-    field(VAL,  "0.0")
-}
-record(ai, "$(P)RtdlPCharge")
-{
-    field(DESC, "Accelerator accumulated PCharge")
-    field(DTYP, "asynFloat64")
-    field(INP,  "@asyn($(PORT))RtdlPCharge")
-    field(EGU,  "Coulombs")
-    field(PREC, "6")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-    field(VAL,  "0.0")
-}
 record(bo, "$(P)Reset")
 {
    field(DESC,  "Reset internal counters")

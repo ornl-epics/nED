@@ -80,17 +80,17 @@ class DasDataPacket : public Packet {
             DATA_FMT_RESERVED       = 0,
             DATA_FMT_META           = 1,    //!< meta data (for choppers, beam monitors, ADC sampling etc.) in tof,pixel format
             DATA_FMT_PIXEL          = 2,    //!< neutron data in tof,pixel format
-            DATA_FMT_XY             = 3,    //!< X,Y format
-            DATA_FMT_XY_PHOTO_SUM   = 4,    //!< X,Y,Photo sum format
-            DATA_FMT_LPSD_RAW       = 16,    //!< LPSD raw format
-            DATA_FMT_LPSD_VERBOSE   = 17,    //!< LPSD verbose format
-            DATA_FMT_ACPC_RAW       = 18,   //!< ACPC raw format
-            DATA_FMT_ACPC_VERBOSE   = 19,   //!< ACPC verbose format
-            DATA_FMT_AROC_RAW       = 20,   //!< AROC raw format
-            DATA_FMT_BNL_RAW        = 21,   //!< BNL raw format
-            DATA_FMT_BNL_VERBOSE    = 22,   //!< BNL verbose format
-            DATA_FMT_CROC_RAW       = 23,   //!< CROC raw format
-            DATA_FMT_CROC_VERBOSE   = 24,   //!< CROC verbose format
+            DATA_FMT_LPSD_RAW       = 16,   //!< LPSD raw format
+            DATA_FMT_LPSD_VERBOSE   = 17,   //!< LPSD verbose format
+            DATA_FMT_ACPC_XY_PS     = 18,   //!< X,Y,Photo sum format
+            DATA_FMT_ACPC_RAW       = 19,   //!< ACPC raw format
+            DATA_FMT_ACPC_VERBOSE   = 20,   //!< ACPC verbose format
+            DATA_FMT_AROC_RAW       = 21,   //!< AROC raw format
+            DATA_FMT_BNL_XY         = 22,   //!< X,Y format
+            DATA_FMT_BNL_RAW        = 23,   //!< BNL raw format
+            DATA_FMT_BNL_VERBOSE    = 24,   //!< BNL verbose format
+            DATA_FMT_CROC_RAW       = 25,   //!< CROC raw format
+            DATA_FMT_CROC_VERBOSE   = 26,   //!< CROC verbose format
         } DataFormat;
 
         struct __attribute__ ((__packed__)) {

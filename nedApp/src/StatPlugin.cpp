@@ -7,6 +7,7 @@
  * @author Klemen Vodopivec
  */
 
+#include "Event.h"
 #include "StatPlugin.h"
 
 #include <climits>
@@ -56,58 +57,52 @@ StatPlugin::StatPlugin(const char *portName, const char *parentPlugins, int bloc
     createParam("RtdlPCharge",  asynParamFloat64, &RtdlPCharge, 0.0); // READ - Accumulated RTDL (accelerator) proton charge since last reset
     createParam("PulseType",    asynParamInt32, &PulseType, RtdlHeader::RTDL_FLAVOR_TARGET_1); // READ -Select pulse type to collect proton charge for
 
-    static std::list<int> msgs = {MsgOldDas, MsgDasCmd, MsgDasRtdl};
+    static std::list<int> msgs = {MsgDasData, MsgDasCmd, MsgDasRtdl};
     BasePlugin::connect(parentPlugins, msgs);
 }
 
-void StatPlugin::recvDownstream(DasPacketList *packets)
+void StatPlugin::recvDownstream(DasDataPacketList *packets)
 {
     m_receivedCount += packets->size();
 
     for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-        const DasPacket *packet = *it;
+        DasDataPacket *packet = *it;
+        m_dataBytes += packet->length;
+        m_receivedBytes += packet->length;
 
-        m_receivedBytes += packet->getLength();
-        if (packet->isResponse()) {
-            m_cmdCount++;
-            m_cmdBytes += packet->getLength();
-        } else if (packet->isNeutronData()) {
-            accumulatePCharge(m_neutronPulseTime, packet->getRtdlHeader(), m_neutronPCharge);
-            m_dataCount++;
-            m_dataBytes += packet->getLength();
-        } else if (packet->isMetaData()) {
+        if (packet->format == DasDataPacket::DATA_FMT_META) {
+            uint32_t nEvents = 0;
+            packet->getEvents<Event::Pixel>(nEvents);
+            m_metaBytes += nEvents * sizeof(Event::Pixel);
             m_metaCount++;
-            m_metaBytes += packet->getLength();
-        } else if (packet->isRtdl()) {
-            accumulatePCharge(m_rtdlPulseTime, packet->getRtdlHeader(), m_rtdlPCharge);
-            m_rtdlCount++;
-            m_rtdlBytes += packet->getLength();
-        } else if (packet->cmdinfo.is_command && packet->cmdinfo.command == DasPacket::CMD_TSYNC) {
-            m_tsyncCount++;
-            m_tsyncBytes += packet->getLength();
-        } else if (packet->isBad()) {
-            m_badCount++;
-            m_badBytes += packet->getLength();
+        } else {
+            uint32_t nEvents = 0;
+            uint32_t eventSize;
+            if (packet->format == DasDataPacket::DATA_FMT_PIXEL) {
+                packet->getEvents<Event::Pixel>(nEvents);
+                eventSize = sizeof(Event::Pixel);
+            } else if (packet->format == DasDataPacket::DATA_FMT_ACPC_XY_PS) {
+                packet->getEvents<Event::AcpcXyPs>(nEvents);
+                eventSize = sizeof(Event::AcpcXyPs);
+            } else if (packet->format == DasDataPacket::DATA_FMT_AROC_RAW) {
+                packet->getEvents<Event::ArocRaw>(nEvents);
+                eventSize = sizeof(Event::ArocRaw);
+            } else {
+                packet->getEvents<Event::Pixel>(nEvents);
+                eventSize = sizeof(Event::Pixel);
+            }
+            m_dataBytes += eventSize * nEvents;
+            m_dataCount++;
         }
     }
+
     setIntegerParam(TotCnt,   m_receivedCount % INT_MAX);
-    setIntegerParam(CmdCnt,   m_cmdCount % INT_MAX);
     setIntegerParam(DataCnt,  m_dataCount % INT_MAX);
     setIntegerParam(MetaCnt,  m_metaCount % INT_MAX);
-    setIntegerParam(RtdlCnt,  m_rtdlCount % INT_MAX);
-    setIntegerParam(TsyncCnt, m_tsyncCount % INT_MAX);
-    setIntegerParam(BadCnt,   m_badCount % INT_MAX);
 
     setIntegerParam(TotByte,  m_receivedBytes % INT_MAX);
-    setIntegerParam(CmdByte,  m_cmdBytes % INT_MAX);
     setIntegerParam(DataByte, m_dataBytes % INT_MAX);
     setIntegerParam(MetaByte, m_metaBytes % INT_MAX);
-    setIntegerParam(RtdlByte, m_rtdlBytes % INT_MAX);
-    setIntegerParam(TsyncByte,m_tsyncBytes % INT_MAX);
-    setIntegerParam(BadByte,  m_badBytes % INT_MAX);
-
-    setDoubleParam(NeutronPCharge, m_neutronPCharge);
-    setDoubleParam(RtdlPCharge, m_rtdlPCharge);
 
     callParamCallbacks();
 }
