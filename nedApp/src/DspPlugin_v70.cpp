@@ -13,52 +13,52 @@ void DspPlugin::createParams_v70() {
 //      BLXXX:Det:DspX:| sig nam|         '1' addr  size off default      | EPICS record description | (bi and mbbi description)
     createConfigParam("Meta0:Type",       '1', 0x0,   4,  0, 0); // Channel 0 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta0:Id",         '1', 0x0,   4,  4, 0); // Channel 0 id
-    createConfigParam("Meta0:Delay",      '1', 0x0,  24,  8, 0); // Channel 0 delay               (scale=100,unit=ns)
+    createConfigParam("Meta0:Delay",      '1', 0x0,  24,  8, 0); // Channel 0 delay               (scale:100,unit:ns)
     createConfigParam("Meta1:Type",       '1', 0x1,   4,  0, 0); // Channel 1 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta1:Id",         '1', 0x1,   4,  4, 0); // Channel 1 id
-    createConfigParam("Meta1:Delay",      '1', 0x1,  24,  8, 0); // Channel 1 delay               (scale=100,unit=ns)
+    createConfigParam("Meta1:Delay",      '1', 0x1,  24,  8, 0); // Channel 1 delay               (scale:100,unit:ns)
     createConfigParam("Meta2:Type",       '1', 0x2,   4,  0, 0); // Channel 2 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta2:Id",         '1', 0x2,   4,  4, 0); // Channel 2 id
-    createConfigParam("Meta2:Delay",      '1', 0x2,  24,  8, 0); // Channel 2 delay               (scale=100,unit=ns)
+    createConfigParam("Meta2:Delay",      '1', 0x2,  24,  8, 0); // Channel 2 delay               (scale:100,unit:ns)
     createConfigParam("Meta3:Type",       '1', 0x3,   4,  0, 0); // Channel 3 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta3:Id",         '1', 0x3,   4,  4, 0); // Channel 3 id
-    createConfigParam("Meta3:Delay",      '1', 0x3,  24,  8, 0); // Channel 3 delay               (scale=100,unit=ns)
+    createConfigParam("Meta3:Delay",      '1', 0x3,  24,  8, 0); // Channel 3 delay               (scale:100,unit:ns)
     createConfigParam("Meta4:Type",       '1', 0x4,   4,  0, 0); // Channel 4 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta4:Id",         '1', 0x4,   4,  4, 0); // Channel 4 id
-    createConfigParam("Meta4:Delay",      '1', 0x4,  24,  8, 0); // Channel 4 delay               (scale=100,unit=ns)
+    createConfigParam("Meta4:Delay",      '1', 0x4,  24,  8, 0); // Channel 4 delay               (scale:100,unit:ns)
     createConfigParam("Meta5:Type",       '1', 0x5,   4,  0, 0); // Channel 5 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta5:Id",         '1', 0x5,   4,  4, 0); // Channel 5 id
-    createConfigParam("Meta5:Delay",      '1', 0x5,  24,  8, 0); // Channel 5 delay               (scale=100,unit=ns)
+    createConfigParam("Meta5:Delay",      '1', 0x5,  24,  8, 0); // Channel 5 delay               (scale:100,unit:ns)
     createConfigParam("Meta6:Type",       '1', 0x6,   4,  0, 0); // Channel 6 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta6:Id",         '1', 0x6,   4,  4, 0); // Channel 6 id
-    createConfigParam("Meta6:Delay",      '1', 0x6,  24,  8, 0); // Channel 6 delay               (scale=100,unit=ns)
+    createConfigParam("Meta6:Delay",      '1', 0x6,  24,  8, 0); // Channel 6 delay               (scale:100,unit:ns)
     createConfigParam("Meta7:Type",       '1', 0x7,   4,  0, 0); // Channel 7 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta7:Id",         '1', 0x7,   4,  4, 0); // Channel 7 id
-    createConfigParam("Meta7:Delay",      '1', 0x7,  24,  8, 0); // Channel 7 delay               (scale=100,unit=ns)
+    createConfigParam("Meta7:Delay",      '1', 0x7,  24,  8, 0); // Channel 7 delay               (scale:100,unit:ns)
     createConfigParam("Meta8:Type",       '1', 0x8,   4,  0, 0); // Channel 8 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta8:Id",         '1', 0x8,   4,  4, 0); // Channel 8 id
-    createConfigParam("Meta8:Delay",      '1', 0x8,  24,  8, 0); // Channel 8 delay               (scale=100,unit=ns)
+    createConfigParam("Meta8:Delay",      '1', 0x8,  24,  8, 0); // Channel 8 delay               (scale:100,unit:ns)
     createConfigParam("Meta9:Type",       '1', 0x9,   4,  0, 0); // Channel 9 type                (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta9:Id",         '1', 0x9,   4,  4, 0); // Channel 9 id
-    createConfigParam("Meta9:Delay",      '1', 0x9,  24,  8, 0); // Channel 9 delay               (scale=100,unit=ns)
+    createConfigParam("Meta9:Delay",      '1', 0x9,  24,  8, 0); // Channel 9 delay               (scale:100,unit:ns)
     createConfigParam("Meta10:Type",      '1', 0xA,   4,  0, 0); // Channel 10 type               (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta10:Id",        '1', 0xA,   4,  4, 0); // Channel 10 id
-    createConfigParam("Meta10:Delay",     '1', 0xA,  24,  8, 0); // Channel 10 delay              (scale=100,unit=ns)
+    createConfigParam("Meta10:Delay",     '1', 0xA,  24,  8, 0); // Channel 10 delay              (scale:100,unit:ns)
     createConfigParam("Meta11:Type",      '1', 0xB,   4,  0, 0); // Channel 11 type               (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta11:Id",        '1', 0xB,   4,  4, 0); // Channel 11 id
-    createConfigParam("Meta11:Delay",     '1', 0xB,  24,  8, 0); // Channel 11 delay              (scale=100,unit=ns)
+    createConfigParam("Meta11:Delay",     '1', 0xB,  24,  8, 0); // Channel 11 delay              (scale:100,unit:ns)
     createConfigParam("Meta12:Type",      '1', 0xC,   4,  0, 0); // Channel 12 type               (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta12:Id",        '1', 0xC,   4,  4, 0); // Channel 12 id
-    createConfigParam("Meta12:Delay",     '1', 0xC,  24,  8, 0); // Channel 12 delay              (scale=100,unit=ns)
+    createConfigParam("Meta12:Delay",     '1', 0xC,  24,  8, 0); // Channel 12 delay              (scale:100,unit:ns)
     createConfigParam("Meta13:Type",      '1', 0xD,   4,  0, 0); // Channel 13 type               (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta13:Id",        '1', 0xD,   4,  4, 0); // Channel 13 id
-    createConfigParam("Meta13:Delay",     '1', 0xD,  24,  8, 0); // Channel 13 delay              (scale=100,unit=ns)
+    createConfigParam("Meta13:Delay",     '1', 0xD,  24,  8, 0); // Channel 13 delay              (scale:100,unit:ns)
     createConfigParam("Meta14:Type",      '1', 0xE,   4,  0, 0); // Channel 14 type               (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta14:Id",        '1', 0xE,   4,  4, 0); // Channel 14 id
-    createConfigParam("Meta14:Delay",     '1', 0xE,  24,  8, 0); // Channel 14 delay              (scale=100,unit=ns)
+    createConfigParam("Meta14:Delay",     '1', 0xE,  24,  8, 0); // Channel 14 delay              (scale:100,unit:ns)
     createConfigParam("Meta15:Type",      '1', 0xF,   4,  0, 0); // Channel 15 type               (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta15:Id",        '1', 0xF,   4,  4, 0); // Channel 15 id
-    createConfigParam("Meta15:Delay",     '1', 0xF,  24,  8, 0); // Channel 15 delay              (scale=100,unit=ns)
+    createConfigParam("Meta15:Delay",     '1', 0xF,  24,  8, 0); // Channel 15 delay              (scale:100,unit:ns)
     createConfigParam("Meta0:Frame",      '1', 0x10,  8,  0, 0); // Channel 0 frame adjust
     createConfigParam("Meta1:Frame",      '1', 0x10,  8,  8, 0); // Channel 1 frame adjust
     createConfigParam("Meta2:Frame",      '1', 0x10,  8, 16, 0); // Channel 2 frame adjust
