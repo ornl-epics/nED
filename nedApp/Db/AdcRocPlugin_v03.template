@@ -2,24 +2,3 @@ include "BasePlugin.include"
 include "BaseModulePlugin.include"
 include "AdcRocPlugin_v03.generated"
 include "GlobalConD.include"
-
-record(longin, "$(P)HwVer")
-{
-    field(HIGH, "1")
-    field(LOW,  "-1")
-}
-record(longin, "$(P)HwRev")
-{
-    field(HIGH, "2")
-    field(LOW,  "0")
-}
-record(longin, "$(P)FwVer")
-{
-    field(HIGH, "1")
-    field(LOW,  "-1")
-}
-record(longin, "$(P)FwRev")
-{
-    field(HIGH, "4")
-    field(LOW,  "2")
-}
