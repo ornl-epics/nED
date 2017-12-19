@@ -262,16 +262,6 @@ asynStatus OccPortDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
     } else if (pasynUser->reason == RxEn) {
-
-        if (value == 1) {
-            // RX could be switched off in the middle of the incoming packet.
-            // Second half of that packet would show up in the queue next time
-            // enabled. Calling occ_reset() to avoid it.
-            this->unlock();
-            reset();
-            this->lock();
-        }
-
         if ((ret = occ_enable_rx(m_occ, value > 0)) != 0) {
             LOG_ERROR("Unable to %s optical link - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
             setIntegerParam(LastErr, -ret);
@@ -474,7 +464,7 @@ void OccPortDriver::processOccDataThread(epicsEvent *shutdown)
 
         // Wait for data, use a timeout for data rate out calculation
         int ret = m_circularBuffer->wait(&data, &length, 1.0);
-        if (ret == -ETIME) {
+        if (ret == -ETIME || ret == -ECONNRESET) {
             continue;
         } else if (ret != 0) {
             handleRecvError(ret);

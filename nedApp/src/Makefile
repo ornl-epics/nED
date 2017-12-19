@@ -159,7 +159,6 @@ $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += EmptyPulsePlugin.cpp
-$(PROD_NAME)_SRCS  += HfirFakeRtdlPlugin.cpp
 
 #===========================
 
