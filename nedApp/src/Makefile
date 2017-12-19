@@ -97,6 +97,7 @@ $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v05.cpp
+$(PROD_NAME)_SRCS  += AdcRocPlugin_v06.cpp
 $(PROD_NAME)_SRCS  += BnlRocPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlRocPlugin_v00.cpp
 $(PROD_NAME)_SRCS  += BnlRocPlugin_v20.cpp
@@ -158,6 +159,7 @@ $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPvaPlugin.cpp
 $(PROD_NAME)_SRCS  += EmptyPulsePlugin.cpp
+$(PROD_NAME)_SRCS  += HfirFakeRtdlPlugin.cpp
 
 #===========================
 
