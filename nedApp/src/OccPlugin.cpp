@@ -19,13 +19,18 @@
 #include <math.h>
 #include <sstream>
 
-EPICS_REGISTER_PLUGIN(OccPlugin, 4, "Port name", string, "OCC connection string", string, "Local buffer size", int, "Source id", int);
+EPICS_REGISTER_PLUGIN(OccPlugin, 3, "Port name", string, "OCC connection string", string, "Local buffer size", int);
 
-OccPlugin::OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize, uint8_t sourceId)
+/**
+ * A global variable to assign unique sourceId to all packets coming from this device.
+ */
+static uint32_t g_sourceId = 0;
+
+OccPlugin::OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize)
     : BasePlugin(portName, 0, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
     , m_sendId(0)
     , m_recvId(0xFFFFFFFF)
-    , m_sourceId(sourceId)
+    , m_sourceId(g_sourceId++)
     , m_occ(NULL)
 {
     int status;
@@ -69,6 +74,7 @@ OccPlugin::OccPlugin(const char *portName, const char *devfile, uint32_t localBu
     createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
     createParam("MaxPktSize",       asynParamInt32,     &MaxPktSize, 4000);         // WRITE - Maximum size of DAS packet payload
+    createParam("OldPktsEn",        asynParamInt32,     &OldPktsEn, 0);             // WRITE - Enable support for old DAS 1.0 packets
 
     occ_interface_type occtype = OCC_INTERFACE_OPTICAL;
     if (strchr(devfile, ':') != 0)
@@ -249,16 +255,6 @@ asynStatus OccPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         }
     } else if (pasynUser->reason == RxEn) {
-
-        if (value == 1) {
-            // RX could be switched off in the middle of the incoming packet.
-            // Second half of that packet would show up in the queue next time
-            // enabled. Calling occ_reset() to avoid it.
-            this->unlock();
-            reset();
-            this->lock();
-        }
-
         if ((ret = occ_enable_rx(m_occ, value > 0)) != 0) {
             LOG_ERROR("Unable to %s optical link - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
             setIntegerParam(LastErr, -ret);
@@ -280,6 +276,16 @@ asynStatus OccPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
         // There's a thread to refresh OCC status, including error packets enabled
         m_statusEvent.signal();
+
+    } else if (pasynUser->reason == OldPktsEn) {
+        // Note that OCC required RX disabled during this operation. OCC library
+        // is enforcing it so we don't have to do it here.
+        if ((ret = occ_enable_old_packets(m_occ, value > 0)) != 0) {
+            LOG_ERROR("Unable to %s old packets - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
+            setIntegerParam(LastErr, -ret);
+            callParamCallbacks();
+            return asynError;
+        }
     }
     return asynPortDriver::writeInt32(pasynUser, value);
 }
@@ -463,7 +469,7 @@ void OccPlugin::processOccDataThread(epicsEvent *shutdown)
 
         // Wait for data, use a timeout for data rate out calculation
         int ret = m_circularBuffer->wait(&data, &length, 1.0);
-        if (ret == -ETIME) {
+        if (ret == -ETIME || ret == -ECONNRESET) {
             continue;
         } else if (ret != 0) {
             handleRecvError(ret);
@@ -495,6 +501,7 @@ void OccPlugin::processOccDataThread(epicsEvent *shutdown)
 uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
 {
     int maxPktSize = getIntegerParam(MaxPktSize);
+    bool forceOldPkts = getBooleanParam(OldPktsEn);
     bool first = true;
 
     DasPacketList oldDas;
@@ -514,18 +521,18 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
         uint32_t version = (*reinterpret_cast<uint32_t *>(ptr) >> 28);
 
         try {
-            if (version == 0) {
+            if (version == 0 || forceOldPkts) {
                 // Old DAS packet
                 DasPacket *packet = reinterpret_cast<DasPacket *>(ptr);
 
                 if (bytesLeft < sizeof(DasPacket)) {
                     std::ostringstream error;
-                    error << "Not enough data to describe old DAS packet header, needed " << bytesLeft << " got " << sizeof(DasPacket) << " bytes";
+                    error << "Not enough data to describe old DAS packet header, needed " << sizeof(DasPacket) << " got " << bytesLeft << " bytes";
                     throw std::range_error(error.str());
                 }
                 if (bytesLeft < packet->getLength()) {
                     std::ostringstream error;
-                    error << "Not enough data to describe old DAS packet, needed " << bytesLeft << " got " << packet->getLength() << " bytes";
+                    error << "Not enough data to describe old DAS packet, needed " << packet->getLength() << " got " << bytesLeft << " bytes";
                     throw std::range_error(error.str());
                 }
                 if (static_cast<uint32_t>(maxPktSize) < packet->getLength()) {
@@ -536,6 +543,9 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
 
                 oldDas.push_back(packet);
                 bytesProcessed = packet->getLength();
+                if (bytesProcessed == 0) {
+                    throw std::range_error("failed to parse old DAS packet");
+                }
 
             } else if (version == 1) {
                 // New SNS packet header
@@ -543,12 +553,12 @@ uint32_t OccPlugin::processOccData(uint8_t *ptr, uint32_t size)
 
                 if (bytesLeft < sizeof(Packet)) {
                     std::ostringstream error;
-                    error << "Not enough data to describe DAS packet header, needed " << bytesLeft << " got " << sizeof(Packet) << " bytes";
+                    error << "Not enough data to describe DAS packet header, needed " << sizeof(Packet) << " got " << bytesLeft << " bytes";
                     throw std::range_error(error.str());
                 }
                 if (bytesLeft < packet->length) {
                     std::ostringstream error;
-                    error << "Not enough data to describe DAS packet, needed " << bytesLeft << " got " << packet->length << " bytes";
+                    error << "Not enough data to describe DAS packet, needed " << packet->length << " got " << bytesLeft << " bytes";
                     throw std::range_error(error.str());
                 }
                 if (static_cast<uint32_t>(maxPktSize) < packet->length) {

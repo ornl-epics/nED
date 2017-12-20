@@ -66,7 +66,7 @@ class epicsShareFunc OccPlugin : public BasePlugin {
          *            as it is available.
          * @param[in] sourceId number gets added to some packets.
          */
-        OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize, uint8_t sourceId);
+        OccPlugin(const char *portName, const char *devfile, uint32_t localBufferSize);
 
         /**
          * Destructor
@@ -182,7 +182,6 @@ class epicsShareFunc OccPlugin : public BasePlugin {
         void dump(const char *data, uint32_t length);
 
     private:
-        #define FIRST_OCCPORTDRIVER_PARAM Status
         int Status;
         int Command;
         int LastErr;
@@ -221,7 +220,7 @@ class epicsShareFunc OccPlugin : public BasePlugin {
         int ErrPktEn;
         int ErrPktEnRb;
         int MaxPktSize;
-        #define LAST_OCCPORTDRIVER_PARAM MaxPktSize
+        int OldPktsEn;
 };
 
 #endif // OCCPORTDRIVER_H

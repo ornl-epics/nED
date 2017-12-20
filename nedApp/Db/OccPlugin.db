@@ -170,6 +170,19 @@ record(mbbi, "$(P)ConStatus")
     field(THST, "Laser fault")
     field(THSV, "MAJOR")
 }
+record(bo, "$(P)OldPktsEn")
+{
+    info(archive, "Monitor, 00:00:05, VAL")
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable old DAS 1.0 packets")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))OldPktsEn")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
 record(bo, "$(P)RxEn")
 {
     info(archive, "Monitor, 00:00:05, VAL")
