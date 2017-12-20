@@ -32,9 +32,9 @@ class Packet {
 
         struct __attribute__ ((__packed__)) {
             unsigned sequence:8;    //!< Packet sequence number, incremented by sender for each sent packet
-            PacketType type:8;      //!< Packet type
             bool priority:1;        //!< Flag to denote high priority handling, used by hardware to optimize interrupt handling
             unsigned __reserved1:11;
+            PacketType type:8;      //!< Packet type
             unsigned version:4;     //<! Packet version
         };
 
