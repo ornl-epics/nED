@@ -648,4 +648,25 @@ void RocPlugin::createParams_v59()
     createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
     createTempParam("TempPreampA",      0x1, 16, 0, CONV_SIGN_2COMP); // Preamp A temperature in degC    (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
     createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
+
+    // Pre-amp registers
+    createPreAmpCfgParam("PreampA:Dac",         0x0, 16,  0, 32768); // Pre-amp A DAC code
+    createPreAmpCfgParam("PreampB:Dac",         0x1, 16,  0, 32768); // Pre-amp B DAC code
+
+    createPreAmpTrigParam("PreampA:Tube1:En",   0x0,  1,  0, 0); // Pre-amp A tube 1 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube2:En",   0x0,  1,  1, 0); // Pre-amp A tube 2 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube3:En",   0x0,  1,  2, 0); // Pre-amp A tube 3 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube4:En",   0x0,  1,  3, 0); // Pre-amp A tube 4 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube5:En",   0x0,  1,  4, 0); // Pre-amp A tube 5 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube6:En",   0x0,  1,  5, 0); // Pre-amp A tube 6 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube7:En",   0x0,  1,  6, 0); // Pre-amp A tube 7 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampA:Tube8:En",   0x0,  1,  7, 0); // Pre-amp A tube 8 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube4:En",   0x0,  1,  8, 0); // Pre-amp B tube 1 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube3:En",   0x0,  1,  9, 0); // Pre-amp B tube 2 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube2:En",   0x0,  1, 10, 0); // Pre-amp B tube 3 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube1:En",   0x0,  1, 11, 0); // Pre-amp B tube 4 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube8:En",   0x0,  1, 12, 0); // Pre-amp B tube 5 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube7:En",   0x0,  1, 13, 0); // Pre-amp B tube 6 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube6:En",   0x0,  1, 14, 0); // Pre-amp B tube 7 enable (0=charge,1=discharge)
+    createPreAmpTrigParam("PreampB:Tube5:En",   0x0,  1, 15, 0); // Pre-amp B tube 8 enable (0=charge,1=discharge)
 }
