@@ -1,4 +1,4 @@
-/* PvaModulesList.h
+/* PvaModulesListPlugin.h
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -9,11 +9,11 @@
 
 #include "BaseModulePlugin.h"
 #include "Log.h"
-#include "PvaModulesList.h"
+#include "PvaModulesListPlugin.h"
 
-EPICS_REGISTER_PLUGIN(PvaModulesList, 2, "Port name", string, "PV name", string);
+EPICS_REGISTER_PLUGIN(PvaModulesListPlugin, 2, "Port name", string, "PV name", string);
 
-PvaModulesList::PvaModulesList(const char *portName, const char *pvName)
+PvaModulesListPlugin::PvaModulesListPlugin(const char *portName, const char *pvName)
 : BasePlugin(portName)
 {
     if (pvName == 0 || strlen(pvName) == 0) {
@@ -29,7 +29,7 @@ PvaModulesList::PvaModulesList(const char *portName, const char *pvName)
     createParam("Reload", asynParamInt32, &Reload);
 }
 
-asynStatus PvaModulesList::writeInt32(asynUser *pasynUser, epicsInt32 value)
+asynStatus PvaModulesListPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Reload) {
         std::list<std::string> modules;
@@ -39,15 +39,15 @@ asynStatus PvaModulesList::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
-PvaModulesList::Record::Record(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure)
+PvaModulesListPlugin::Record::Record(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure)
     : epics::pvDatabase::PVRecord(recordName, pvStructure)
 {
 }
 
 /**
- * Allocate and initialize PvaModulesList::Record.
+ * Allocate and initialize PvaModulesListPlugin::Record.
  */
-PvaModulesList::Record::shared_pointer PvaModulesList::Record::create(const std::string &recordName)
+PvaModulesListPlugin::Record::shared_pointer PvaModulesListPlugin::Record::create(const std::string &recordName)
 {
     using namespace epics::pvData;
 
@@ -61,7 +61,7 @@ PvaModulesList::Record::shared_pointer PvaModulesList::Record::create(const std:
             createStructure()
     );
 
-    Record::shared_pointer pvRecord(new PvaModulesList::Record(recordName, pvStructure));
+    Record::shared_pointer pvRecord(new PvaModulesListPlugin::Record(recordName, pvStructure));
     if (pvRecord && !pvRecord->init()) {
         pvRecord.reset();
     }
@@ -72,7 +72,7 @@ PvaModulesList::Record::shared_pointer PvaModulesList::Record::create(const std:
 /**
  * Attach all PV structures.
  */
-bool PvaModulesList::Record::init()
+bool PvaModulesListPlugin::Record::init()
 {
     initPVRecord();
 
@@ -86,7 +86,7 @@ bool PvaModulesList::Record::init()
 /**
  * Publish a single atomic update of the PV, take values from packet.
  */
-bool PvaModulesList::Record::update(const std::list<std::string> &modules)
+bool PvaModulesListPlugin::Record::update(const std::list<std::string> &modules)
 {
     bool updated = true;
 

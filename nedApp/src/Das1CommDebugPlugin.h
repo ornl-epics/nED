@@ -1,4 +1,4 @@
-/* Das1CommDebug.h
+/* Das1CommDebugPlugin.h
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -33,7 +33,7 @@
  * User can send any 8 bit OCC command. The plugin does not check command value
  * and thus allows extensibility through EPICS database.
  */
-class Das1CommDebug : public BasePlugin {
+class Das1CommDebugPlugin : public BasePlugin {
     private: // variables
         /**
          * Valid byte grouping modes.
@@ -58,14 +58,14 @@ class Das1CommDebug : public BasePlugin {
 
     public: // structures and defines
         /**
-         * Constructor for Das1CommDebug
+         * Constructor for Das1CommDebugPlugin
          *
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins list of plugins to connect to.
          */
-        Das1CommDebug(const char *portName, const char *parentPlugins);
+        Das1CommDebugPlugin(const char *portName, const char *parentPlugins);
 
         /**
          * Overloaded function to handle writing strings and byte arrays.

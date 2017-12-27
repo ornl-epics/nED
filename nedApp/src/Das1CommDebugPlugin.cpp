@@ -1,4 +1,4 @@
-/* Das1CommDebug.cpp
+/* Das1CommDebugPlugin.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -8,15 +8,15 @@
  */
 
 #include "BaseModulePlugin.h"
-#include "Das1CommDebug.h"
+#include "Das1CommDebugPlugin.h"
 #include "Common.h"
 #include "Log.h"
 
 #include <algorithm>
 
-EPICS_REGISTER_PLUGIN(Das1CommDebug, 2, "Port name", string, "Parent plugins", string);
+EPICS_REGISTER_PLUGIN(Das1CommDebugPlugin, 2, "Port name", string, "Parent plugins", string);
 
-Das1CommDebug::Das1CommDebug(const char *portName, const char *parentPlugins)
+Das1CommDebugPlugin::Das1CommDebugPlugin(const char *portName, const char *parentPlugins)
     : BasePlugin(portName, 0, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
 {
     createParam("ReqDest",      asynParamOctet, &ReqDest, 0x0); // WRITE - Module address to communicate with
@@ -65,7 +65,7 @@ Das1CommDebug::Das1CommDebug(const char *portName, const char *parentPlugins)
     generatePacket();
 }
 
-asynStatus Das1CommDebug::writeInt32(asynUser *pasynUser, epicsInt32 value)
+asynStatus Das1CommDebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == ReqSend) {
         if (value == 1)
@@ -124,7 +124,7 @@ asynStatus Das1CommDebug::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
-asynStatus Das1CommDebug::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+asynStatus Das1CommDebugPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
 {
     if (pasynUser->reason == ReqDest) {
         setStringParam(ReqDest, value);
@@ -135,7 +135,7 @@ asynStatus Das1CommDebug::writeOctet(asynUser *pasynUser, const char *value, siz
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);;
 }
 
-asynStatus Das1CommDebug::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
+asynStatus Das1CommDebugPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
 {
     if (pasynUser->reason == RspData) {
         int byteGrp = GROUP_2_BYTES_SWAPPED;
@@ -182,7 +182,7 @@ asynStatus Das1CommDebug::readOctet(asynUser *pasynUser, char *value, size_t nCh
     return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
 }
 
-void Das1CommDebug::generatePacket()
+void Das1CommDebugPlugin::generatePacket()
 {
     DasPacket *packet;
     int cmd, isDsp;
@@ -225,7 +225,7 @@ void Das1CommDebug::generatePacket()
     callParamCallbacks();
 }
 
-void Das1CommDebug::sendPacket()
+void Das1CommDebugPlugin::sendPacket()
 {
     DasPacket *packet = reinterpret_cast<DasPacket *>(m_rawPacket);
     BasePlugin::sendUpstream(packet);
@@ -247,7 +247,7 @@ void Das1CommDebug::sendPacket()
     callParamCallbacks();
 }
 
-void Das1CommDebug::recvDownstream(DasPacketList *packetList)
+void Das1CommDebugPlugin::recvDownstream(DasPacketList *packetList)
 {
     bool changePacket = false;
 
@@ -267,7 +267,7 @@ void Das1CommDebug::recvDownstream(DasPacketList *packetList)
     callParamCallbacks();
 }
 
-bool Das1CommDebug::parseCmd(const DasPacket *packet)
+bool Das1CommDebugPlugin::parseCmd(const DasPacket *packet)
 {
     int maxQueSize = 0;
     getIntegerParam(PktQueMaxSize, &maxQueSize);
@@ -289,7 +289,7 @@ bool Das1CommDebug::parseCmd(const DasPacket *packet)
     return true;
 }
 
-void Das1CommDebug::selectPacket(int index) {
+void Das1CommDebugPlugin::selectPacket(int index) {
     DasPacket *packet;
     struct timespec rspTimeStamp; // In POSIX time
 

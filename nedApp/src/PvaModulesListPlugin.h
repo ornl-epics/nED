@@ -1,4 +1,4 @@
-/* PvaModulesList.h
+/* PvaModulesListPlugin.h
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -20,12 +20,12 @@
 /**
  * PVAccess PV record.
  */
-class PvaModulesList : public BasePlugin {
+class PvaModulesListPlugin : public BasePlugin {
     public:
         /**
          * C'tor
          */
-        PvaModulesList(const char *portName, const char *pvName);
+        PvaModulesListPlugin(const char *portName, const char *pvName);
 
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
@@ -38,7 +38,7 @@ class PvaModulesList : public BasePlugin {
                 POINTER_DEFINITIONS(Record);
 
                 /**
-                 * Allocate and initialize PvaModulesList and store it as g_modulesListRecord.
+                 * Allocate and initialize PvaModulesListPlugin and store it as g_modulesListRecord.
                  */
                 static Record::shared_pointer create(const std::string &recordName);
 
@@ -62,7 +62,7 @@ class PvaModulesList : public BasePlugin {
                 bool init();
         };
 
-        PvaModulesList::Record::shared_pointer m_record;
+        PvaModulesListPlugin::Record::shared_pointer m_record;
 
     private: // asyn Parameters
         int Reload;

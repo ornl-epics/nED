@@ -1,4 +1,4 @@
-/* CommDebug.cpp
+/* CommDebugPlugin.cpp
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -8,16 +8,16 @@
  */
 
 #include "BaseModulePlugin.h"
-#include "CommDebug.h"
+#include "CommDebugPlugin.h"
 #include "Common.h"
 #include "Log.h"
 
 #include <algorithm>
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(CommDebug, 2, "Port name", string, "Parent plugins", string);
+EPICS_REGISTER_PLUGIN(CommDebugPlugin, 2, "Port name", string, "Parent plugins", string);
 
-CommDebug::CommDebug(const char *portName, const char *parentPlugins)
+CommDebugPlugin::CommDebugPlugin(const char *portName, const char *parentPlugins)
     : BasePlugin(portName, 0, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
 {
     m_packet = reinterpret_cast<DasCmdPacket *>(m_buffer);
@@ -107,7 +107,7 @@ CommDebug::CommDebug(const char *portName, const char *parentPlugins)
     memset(&m_emptyPacket, 0, sizeof(DasCmdPacket));
 }
 
-asynStatus CommDebug::writeInt32(asynUser *pasynUser, epicsInt32 value)
+asynStatus CommDebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     std::list<int> raws = { ReqRaw0, ReqRaw1, ReqRaw2, ReqRaw3, ReqRaw4, ReqRaw5, ReqRaw6, ReqRaw7 };
     std::list<int> reqPvs = { ReqVersion, ReqPriority, ReqType, ReqSequence, ReqLength, ReqCmdLen, ReqCmd, ReqVerifyId, ReqAck, ReqRsp, ReqCmdVer, ReqModule };
@@ -150,7 +150,7 @@ asynStatus CommDebug::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return ret;
 }
 
-asynStatus CommDebug::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+asynStatus CommDebugPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
 {
     if (pasynUser->reason == ReqModule) {
         setStringParam(ReqModule, value);
@@ -162,7 +162,7 @@ asynStatus CommDebug::writeOctet(asynUser *pasynUser, const char *value, size_t 
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);;
 }
 
-void CommDebug::generatePacket(bool fromRawPvs)
+void CommDebugPlugin::generatePacket(bool fromRawPvs)
 {
     if (fromRawPvs) {
         int param;
@@ -210,7 +210,7 @@ void CommDebug::generatePacket(bool fromRawPvs)
     }
 }
 
-void CommDebug::recvDownstream(DasCmdPacketList *packets)
+void CommDebugPlugin::recvDownstream(DasCmdPacketList *packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int filterCmd = getIntegerParam(FilterCmd);
@@ -248,7 +248,7 @@ void CommDebug::recvDownstream(DasCmdPacketList *packets)
     }
 }
 
-void CommDebug::recvDownstream(DasRtdlPacketList *packets)
+void CommDebugPlugin::recvDownstream(DasRtdlPacketList *packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
@@ -267,7 +267,7 @@ void CommDebug::recvDownstream(DasRtdlPacketList *packets)
     }
 }
 
-void CommDebug::recvDownstream(ErrorPacketList *packets)
+void CommDebugPlugin::recvDownstream(ErrorPacketList *packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
@@ -286,7 +286,7 @@ void CommDebug::recvDownstream(ErrorPacketList *packets)
     }
 }
 
-void CommDebug::recvUpstream(DasCmdPacketList *packets)
+void CommDebugPlugin::recvUpstream(DasCmdPacketList *packets)
 {
     bool sniffer = getBooleanParam(Sniffer);
     sendUpstream(packets);
@@ -313,7 +313,7 @@ void CommDebug::recvUpstream(DasCmdPacketList *packets)
     }
 }
 
-void CommDebug::savePacket(const Packet *packet, std::list<PacketDesc> &que, int maxQueSize)
+void CommDebugPlugin::savePacket(const Packet *packet, std::list<PacketDesc> &que, int maxQueSize)
 {
     if (maxQueSize < 1)
         maxQueSize = 1;
@@ -327,7 +327,7 @@ void CommDebug::savePacket(const Packet *packet, std::list<PacketDesc> &que, int
     que.push_front(pkt);
 }
 
-void CommDebug::showSentPacket(int index)
+void CommDebugPlugin::showSentPacket(int index)
 {
     if (!m_sendQue.empty()) {
         if (index < 0)
@@ -344,7 +344,7 @@ void CommDebug::showSentPacket(int index)
     }
 }
 
-void CommDebug::showSentPacket(DasCmdPacket *packet, int index)
+void CommDebugPlugin::showSentPacket(DasCmdPacket *packet, int index)
 {
     uint32_t *raw = reinterpret_cast<uint32_t *>(packet);
 
@@ -375,7 +375,7 @@ void CommDebug::showSentPacket(DasCmdPacket *packet, int index)
     callParamCallbacks();
 }
 
-void CommDebug::showRecvPacket(int index)
+void CommDebugPlugin::showRecvPacket(int index)
 {
     if (!m_recvQue.empty()) {
         if (index < 0)
@@ -392,7 +392,7 @@ void CommDebug::showRecvPacket(int index)
     }
 }
 
-void CommDebug::showRecvPacket(Packet *packet, int index)
+void CommDebugPlugin::showRecvPacket(Packet *packet, int index)
 {
     uint32_t *raw = reinterpret_cast<uint32_t *>(packet);
 

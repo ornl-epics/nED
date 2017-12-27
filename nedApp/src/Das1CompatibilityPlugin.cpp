@@ -1,4 +1,4 @@
-/* Das1Compatibility.cpp
+/* Das1CompatibilityPlugin.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -7,13 +7,13 @@
  * @author Klemen Vodopivec
  */
 
-#include "Das1Compatibility.h"
+#include "Das1CompatibilityPlugin.h"
 #include "Log.h"
 #include "Packet.h"
 
-EPICS_REGISTER_PLUGIN(Das1Compatibility, 2, "Port name", string, "Parent port name(s)", string);
+EPICS_REGISTER_PLUGIN(Das1CompatibilityPlugin, 2, "Port name", string, "Parent port name(s)", string);
 
-Das1Compatibility::Das1Compatibility(const char *portName, const char *parentPlugins)
+Das1CompatibilityPlugin::Das1CompatibilityPlugin(const char *portName, const char *parentPlugins)
     : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos)
 {
     createParam("DataFormat",   asynParamInt32, &DataFormat, DasDataPacket::DATA_FMT_PIXEL); // Default data format when not defined by DSP
@@ -22,28 +22,28 @@ Das1Compatibility::Das1Compatibility(const char *portName, const char *parentPlu
     BasePlugin::connect(parentPlugins, MsgOldDas);
 }
 
-void Das1Compatibility::recvDownstream(DasCmdPacketList *packets)
+void Das1CompatibilityPlugin::recvDownstream(DasCmdPacketList *packets)
 {
     unlock();
     sendDownstream(packets);
     lock();
 }
 
-void Das1Compatibility::recvDownstream(DasRtdlPacketList *packets)
+void Das1CompatibilityPlugin::recvDownstream(DasRtdlPacketList *packets)
 {
     unlock();
     sendDownstream(packets);
     lock();
 }
 
-void Das1Compatibility::recvDownstream(ErrorPacketList *packets)
+void Das1CompatibilityPlugin::recvDownstream(ErrorPacketList *packets)
 {
     unlock();
     sendDownstream(packets);
     lock();
 }
 
-void Das1Compatibility::recvDownstream(DasPacketList *packets)
+void Das1CompatibilityPlugin::recvDownstream(DasPacketList *packets)
 {
     DasCmdPacketList cmds;
     DasRtdlPacketList rtdls;
@@ -63,11 +63,7 @@ void Das1Compatibility::recvDownstream(DasPacketList *packets)
                 cmds.push_back(old2new_cmd(packet));
             }
         } else if (packet->isData()) {
-            if (packet->getRtdlHeader() == 0) {
-                LOG_ERROR("Skipping data packet without RTDL header");
-            } else {
-                datas.push_back(old2new_data(packet));
-            }
+            datas.push_back(old2new_data(packet));
         } else {
             // Discard other packets
         }
@@ -100,7 +96,7 @@ void Das1Compatibility::recvDownstream(DasPacketList *packets)
     }
 }
 
-void Das1Compatibility::recvUpstream(DasCmdPacketList *packets)
+void Das1CompatibilityPlugin::recvUpstream(DasCmdPacketList *packets)
 {
     DasPacketList das1Packets;
 
@@ -132,7 +128,7 @@ void Das1Compatibility::recvUpstream(DasCmdPacketList *packets)
     }
 }
 
-DasRtdlPacket *Das1Compatibility::old2new_rtdl(const DasPacket *packet)
+DasRtdlPacket *Das1CompatibilityPlugin::old2new_rtdl(const DasPacket *packet)
 {
     const uint32_t *frames = (packet->payload + sizeof(RtdlHeader)/sizeof(uint32_t));
     size_t nFrames = (packet->payload_length - sizeof(RtdlHeader))/sizeof(uint32_t);
@@ -143,7 +139,7 @@ DasRtdlPacket *Das1Compatibility::old2new_rtdl(const DasPacket *packet)
     return pkt;
 }
 
-DasCmdPacket *Das1Compatibility::old2new_cmd(const DasPacket *packet)
+DasCmdPacket *Das1CompatibilityPlugin::old2new_cmd(const DasPacket *packet)
 {
     if (packet->getCommandType() == DasPacket::CMD_DISCOVER) {
         uint32_t module_type = static_cast<uint32_t>(packet->cmdinfo.module_type);
@@ -165,7 +161,7 @@ DasCmdPacket *Das1Compatibility::old2new_cmd(const DasPacket *packet)
     }
 }
 
-DasDataPacket *Das1Compatibility::old2new_data(const DasPacket *packet)
+DasDataPacket *Das1CompatibilityPlugin::old2new_data(const DasPacket *packet)
 {
     const RtdlHeader *rtdl = packet->getRtdlHeader();
     assert(rtdl != 0);
@@ -182,7 +178,7 @@ DasDataPacket *Das1Compatibility::old2new_data(const DasPacket *packet)
     return pkt;
 }
 
-DasPacket *Das1Compatibility::new2old_cmd(const DasCmdPacket *packet, enum Das1PacketType mode)
+DasPacket *Das1CompatibilityPlugin::new2old_cmd(const DasCmdPacket *packet, enum Das1PacketType mode)
 {
     size_t payload_length = packet->cmd_length - packet->getHeaderLen();
     DasPacket::CommandType command = static_cast<DasPacket::CommandType>(packet->command);
@@ -197,7 +193,7 @@ DasPacket *Das1Compatibility::new2old_cmd(const DasCmdPacket *packet, enum Das1P
     }
 }
 
-uint8_t Das1Compatibility::mapSourceId(const DasPacket *packet)
+uint8_t Das1CompatibilityPlugin::mapSourceId(const DasPacket *packet)
 {
     uint8_t sourceId;
 

@@ -1,4 +1,4 @@
-/* CommDebug.h
+/* CommDebugPlugin.h
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -23,7 +23,7 @@
  * plugins destined for modules. This acts like a sniffer in both directions
  * and must be enabled specifically as it will override user populated fields.
  */
-class CommDebug : public BasePlugin {
+class CommDebugPlugin : public BasePlugin {
     private: // variables
         /**
          * Structure describing single received packet.
@@ -42,14 +42,14 @@ class CommDebug : public BasePlugin {
 
     public: // structures and defines
         /**
-         * Constructor for CommDebug
+         * Constructor for CommDebugPlugin
          *
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins list of plugins to connect to.
          */
-        CommDebug(const char *portName, const char *parentPlugins);
+        CommDebugPlugin(const char *portName, const char *parentPlugins);
 
         /**
          * Overloaded function to handle writing strings and byte arrays.

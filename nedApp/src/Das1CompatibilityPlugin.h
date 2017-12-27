@@ -1,4 +1,4 @@
-/* Das1Compatibility.h
+/* Das1CompatibilityPlugin.h
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -20,12 +20,12 @@
  * begin with upper 4 bits as zero and passes through other packets intact.
  * Upstream DasCmdPacket is converted to DAS 1.0 format.
  */
-class Das1Compatibility : public BasePlugin {
+class Das1CompatibilityPlugin : public BasePlugin {
     public:
         /**
          * Constructor
          */
-        Das1Compatibility(const char *portName, const char *parentPlugins);
+        Das1CompatibilityPlugin(const char *portName, const char *parentPlugins);
 
         /**
          * Pass-thru DAS 2.0 packets.
