@@ -95,6 +95,7 @@ $(PROD_NAME)_SRCS  += CommDebug.cpp
 #$(PROD_NAME)_SRCS  += DataDiagPlugin.cpp
 #$(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 #$(PROD_NAME)_SRCS  += FlatFieldTable.cpp
+$(PROD_NAME)_SRCS  += PvaModulesList.cpp
 $(PROD_NAME)_SRCS  += PvaNeutrons.cpp
 #$(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
 #$(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp

@@ -971,6 +971,11 @@ class BaseModulePlugin : public BasePlugin {
          */
         static std::string getModuleName(uint32_t hardwareId);
 
+        /**
+         * Return a list of all registered module names.
+         */
+        static void getModuleNames(std::list<std::string> &modules);
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.

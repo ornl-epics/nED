@@ -42,6 +42,7 @@ DB += CRocPosCalcPlugin.db
 DB += CRocPvaPlugin.db
 DB += EmptyPulsePlugin.db
 DB += Das1Compatibility.db
+DB += PvaModulesList.db
 
 DB += DspPlugin_v51.db
 DB += DspPlugin_v52.db

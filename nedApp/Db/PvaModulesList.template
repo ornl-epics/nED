@@ -1,0 +1,10 @@
+include "BasePlugin.include"
+
+record(longout, "$(P)Reload")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Reload")
+    field(PINI, "YES")
+    field(VAL,  "1")
+}

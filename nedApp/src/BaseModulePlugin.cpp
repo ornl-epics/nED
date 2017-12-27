@@ -43,7 +43,7 @@ const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitude
  * startup only and this global variable is read only afterwards => no need
  * for thread safety mechanisms.
  */
-static std::map<uint32_t, std::string> g_namesMap;
+std::map<uint32_t, std::string> g_namesMap;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugins,
                                    const char *hardwareId, DasCmdPacket::ModuleType hardwareType,
@@ -1280,6 +1280,14 @@ std::string BaseModulePlugin::getModuleName(uint32_t hardwareId)
     if (name != g_namesMap.end())
         return name->second;
     return "";
+}
+
+void BaseModulePlugin::getModuleNames(std::list<std::string> &modules)
+{
+    modules.clear();
+    for (auto it = g_namesMap.begin(); it != g_namesMap.end(); it++) {
+        modules.push_back(it->second);
+    }
 }
 
 float BaseModulePlugin::checkConnection()
