@@ -375,6 +375,50 @@ class BasePlugin : public asynPortDriver {
          * Convenience function to look by parameter name that only works for
          * for first asynPort address plugins.
          *
+         * @see asynPortDriver::getDoubleParam(int, int*)
+         */
+        asynStatus getDoubleParam(const std::string &name, double &value);
+        using asynPortDriver::getDoubleParam;
+
+        /**
+         * Convenient function, return -1 on error which can be ambigous.
+         */
+        double getDoubleParam(int index)
+        {
+            double val;
+            if (getDoubleParam(index, &val) == asynSuccess)
+                return val;
+            return -1;
+        }
+
+        /**
+         * Convenient function, return -1 on error which can be ambigous.
+         */
+        double getDoubleParam(const std::string &name)
+        {
+            double val;
+            if (getDoubleParam(name, val) == asynSuccess)
+                return val;
+            return -1;
+        }
+
+        /**
+         * Sets new value of an double in the parameter library.
+         *
+         * Convenience function to look by parameter name that only works for
+         * for first asynPort address plugins.
+         *
+         * @see asynPortDriver::setDoubleParam(int, int)
+         */
+        asynStatus setDoubleParam(const std::string &name, double value);
+        using asynPortDriver::setDoubleParam;
+
+        /**
+         * Returns the value for an integer from the parameter library.
+         *
+         * Convenience function to look by parameter name that only works for
+         * for first asynPort address plugins.
+         *
          * @see asynPortDriver::getIntegerParam(int, int*)
          */
         asynStatus getIntegerParam(const std::string &name, int &value);

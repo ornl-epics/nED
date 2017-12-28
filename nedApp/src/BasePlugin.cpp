@@ -475,6 +475,28 @@ bool BasePlugin::sendParam(const std::string &remotePort, const std::string &par
     return ret;
 }
 
+asynStatus BasePlugin::getDoubleParam(const std::string &name, double &value)
+{
+    int param;
+    asynStatus ret = asynPortDriver::findParam(name.c_str(), &param);
+    if (ret == asynSuccess) {
+        double val;
+        ret = getDoubleParam(param, &val);
+        if (ret == asynSuccess)
+            value = val;
+    }
+    return ret;
+}
+
+asynStatus BasePlugin::setDoubleParam(const std::string &name, double value)
+{
+    int param;
+    asynStatus ret = asynPortDriver::findParam(name.c_str(), &param);
+    if (ret == asynSuccess)
+        ret = setDoubleParam(param, value);
+    return ret;
+}
+
 asynStatus BasePlugin::getIntegerParam(const std::string &name, int &value)
 {
     int param;

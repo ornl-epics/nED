@@ -22,9 +22,8 @@ class StatPlugin : public BasePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins coma separated list of parent plugins
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          */
-        StatPlugin(const char *portName, const char *parentPlugins, int blocking);
+        StatPlugin(const char *portName, const char *parentPlugins);
 
         /**
          * Overloaded function to receive data packets.
@@ -42,61 +41,37 @@ class StatPlugin : public BasePlugin {
         void recvDownstream(DasRtdlPacketList *packets);
 
         /**
-         * Overloaded function
+         * Process error packets.
          */
-        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+        void recvDownstream(ErrorPacketList *packets);
 
     private: // function
 
         /**
-         * Calculate accumulated proton charge for selected source.
-         *
-         * @param[out] pcharge Variable to add current proton charge to
-         * @param[in] lastPulseTime Timestamp of last proton charge added, used to determine new pulse
-         * @param[in] rtdl header from packet
+         * Check to see if current timestamp is already in que, otherwise insert it.
          */
-        void accumulatePCharge(epicsTimeStamp &lastPulseTime, const RtdlHeader *rtdl, double &pcharge);
+        bool isTimestampUnique(uint32_t sec, uint32_t nsec, std::list<epicsTime> &que);
 
     private:
-        uint64_t m_receivedCount;
-        uint64_t m_receivedBytes;
-        uint64_t m_cmdCount;
-        uint64_t m_cmdBytes;
-        uint64_t m_dataCount;
-        uint64_t m_dataBytes;
-        uint64_t m_metaCount;
-        uint64_t m_metaBytes;
-        uint64_t m_rtdlCount;
-        uint64_t m_rtdlBytes;
-        uint64_t m_tsyncCount;
-        uint64_t m_tsyncBytes;
-        uint64_t m_badCount;
-        uint64_t m_badBytes;
-        double m_neutronPCharge;
-        double m_rtdlPCharge;
-        epicsTimeStamp m_neutronPulseTime;
-        epicsTimeStamp m_rtdlPulseTime;
-        RtdlHeader::PulseFlavor m_pulseType;
+        static const size_t MAX_TIME_QUE_SIZE = 5; //!< Max number of entries in each time-series que
+        std::list<epicsTime> m_rtdlTimes;    //!< Que of unique RTDL times
+        std::list<epicsTime> m_neutronTimes; //!< Que of unique neutron times
+        std::list<epicsTime> m_metaTimes;    //!< Que of unique meta data times
 
     private: // asyn parameters
-        int Reset;              //!< Reset counters
-        int CmdCnt;             //!< Number of command response packets
-        int DataCnt;            //!< Number of data packets
-        int MetaCnt;            //!< Number of data packets
-        int RtdlCnt;            //!< Number of RTDL packets
-        int TsyncCnt;           //!< Number of TSYNC packets
-        int BadCnt;             //!< Number of bad packets
-        int TotCnt;             //!< Total number of packets
-        int CmdByte;            //!< Bytes of command response packets
-        int DataByte;           //!< Bytes of data packets
-        int MetaByte;           //!< Bytes of data packets
-        int RtdlByte;           //!< Bytes of RTDL packets
-        int TsyncByte;          //!< Bytes of TSYNC packets
-        int BadByte;            //!< Bytes of bad packets
-        int TotByte;            //!< Total number of packets
-        int NeutronPCharge;     //!< Accumulated neutron proton charge since last reset
-        int RtdlPCharge;        //!< Accumulated RTDL (accelerator) proton charge since last reset
-        int PulseType;          //!< Select pulse type to collect proton charge for
+        int CmdPkts;
+        int CmdBytes;
+        int NeutronCnts;
+        int NeutronBytes;
+        int NeutronTimes;
+        int MetaCnts;
+        int MetaBytes;
+        int MetaTimes;
+        int ErrorPkts;
+        int RtdlPkts;
+        int RtdlBytes;
+        int RtdlTimes;
+        int TotBytes;
 };
 
 #endif // STAT_PLUGIN_H

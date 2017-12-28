@@ -142,6 +142,25 @@ class DasDataPacket : public Packet {
             count = (this->length - sizeof(DasDataPacket)) / sizeof(T);
             return reinterpret_cast<T *>(this->events);
         }
+
+        /**
+         * Return number of events in data packet.
+         *
+         * The size is calculated based on payload length and the
+         * DasDataPacket::format field. In case of DATA_FMT_RESERVED the event
+         * size used is 8 bytes.
+         *
+         * @return Number of events in data packet.
+         */
+        uint32_t getNumEvents();
+
+        /**
+         * Return size of every event in data packet.
+         *
+         * The size is determined based on DasDataPacket::format field.
+         * In case of DATA_FMT_RESERVED the event size used is 8 bytes.
+         */
+        uint32_t getEventsSize();
 };
 
 class DasRtdlPacket : public Packet {

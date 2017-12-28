@@ -10,160 +10,133 @@
 #include "Event.h"
 #include "StatPlugin.h"
 
+#include <algorithm>
 #include <climits>
 
-EPICS_REGISTER_PLUGIN(StatPlugin, 3, "Port name", string, "Parent ports", string, "Blocking", int);
+EPICS_REGISTER_PLUGIN(StatPlugin, 2, "Port name", string, "Parent ports", string);
 
-StatPlugin::StatPlugin(const char *portName, const char *parentPlugins, int blocking)
-    : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos, asynOctetMask | asynFloat64Mask, asynFloat64Mask)
-    , m_receivedCount(0)
-    , m_receivedBytes(0)
-    , m_cmdCount(0)
-    , m_cmdBytes(0)
-    , m_dataCount(0)
-    , m_dataBytes(0)
-    , m_metaCount(0)
-    , m_metaBytes(0)
-    , m_rtdlCount(0)
-    , m_rtdlBytes(0)
-    , m_tsyncCount(0)
-    , m_tsyncBytes(0)
-    , m_badCount(0)
-    , m_badBytes(0)
-    , m_neutronPCharge(0)
-    , m_rtdlPCharge(0)
-    , m_pulseType(RtdlHeader::RTDL_FLAVOR_TARGET_1)
+StatPlugin::StatPlugin(const char *portName, const char *parentPlugins)
+    : BasePlugin(portName, true, asynFloat64Mask, asynFloat64Mask)
 {
+    createParam("CmdPkts",      asynParamFloat64, &CmdPkts,      0.0); // READ - Number of command response packets
+    createParam("CmdBytes",     asynParamFloat64, &CmdBytes,     0.0); // READ - Command response packets bytes
+    createParam("NeutronCnts",  asynParamFloat64, &NeutronCnts,  0.0); // READ - Number of data packets
+    createParam("NeutronBytes", asynParamFloat64, &NeutronBytes, 0.0); // READ - Data packets bytes
+    createParam("NeutronTimes", asynParamFloat64, &NeutronTimes, 0.0); // READ - Unique neutron data timestamps
+    createParam("MetaCnts",     asynParamFloat64, &MetaCnts,     0.0); // READ - Number of metadata packets
+    createParam("MetaBytes",    asynParamFloat64, &MetaBytes,    0.0); // READ - Metadata packets bytes
+    createParam("MetaTimes",    asynParamFloat64, &MetaTimes,    0.0); // READ - Unique meta data timestamps
+    createParam("ErrorPkts",    asynParamFloat64, &ErrorPkts,    0.0); // READ - Number of bad packets
+    createParam("RtdlPkts",     asynParamFloat64, &RtdlPkts,     0.0); // READ - Number of RTDL packets
+    createParam("RtdlBytes",    asynParamFloat64, &RtdlBytes,    0.0); // READ - RTDL packets bytes
+    createParam("RtdlTimes",    asynParamFloat64, &RtdlTimes,    0.0); // READ - Unique RTDL timestamps
+    createParam("TotBytes",     asynParamFloat64, &TotBytes,     0.0); // READ - Total number of bytes received
 
-    createParam("Reset",        asynParamInt32, &Reset,     0); // WRITE - Reset counters
-
-    createParam("CmdCnt",       asynParamInt32, &CmdCnt,    0); // READ - Number of command response packets
-    createParam("DataCnt",      asynParamInt32, &DataCnt,   0); // READ - Number of data packets
-    createParam("MetaCnt",      asynParamInt32, &MetaCnt,   0); // READ - Number of metadata packets
-    createParam("RtdlCnt",      asynParamInt32, &RtdlCnt,   0); // READ - Number of RTDL packets
-    createParam("TsyncCnt",     asynParamInt32, &TsyncCnt,  0); // READ - Number of TSYNC packets
-    createParam("BadCnt",       asynParamInt32, &BadCnt,    0); // READ - Number of bad packets
-    createParam("TotCnt",       asynParamInt32, &TotCnt,    0); // READ - Total number of packets
-
-    createParam("CmdByte",      asynParamInt32, &CmdByte,   0); // READ - Bytes of command response packets
-    createParam("DataByte",     asynParamInt32, &DataByte,  0); // READ - Bytes of data packets
-    createParam("MetaByte",     asynParamInt32, &MetaByte,  0); // READ - Bytes of metadata packets
-    createParam("RtdlByte",     asynParamInt32, &RtdlByte,  0); // READ - Bytes of RTDL packets
-    createParam("TsyncByte",    asynParamInt32, &TsyncByte, 0); // READ - Bytes of TSYNCpackets
-    createParam("BadByte",      asynParamInt32, &BadByte,   0); // READ - Bytes of bad packets
-    createParam("TotByte",      asynParamInt32, &TotByte,   0); // READ - Total number of bytes received
-
-    createParam("NeutronPCharge", asynParamFloat64, &NeutronPCharge, 0.0); // READ - Accumulated neutron proton charge since last reset
-    createParam("RtdlPCharge",  asynParamFloat64, &RtdlPCharge, 0.0); // READ - Accumulated RTDL (accelerator) proton charge since last reset
-    createParam("PulseType",    asynParamInt32, &PulseType, RtdlHeader::RTDL_FLAVOR_TARGET_1); // READ -Select pulse type to collect proton charge for
-
-    static std::list<int> msgs = {MsgDasData, MsgDasCmd, MsgDasRtdl};
+    static std::list<int> msgs = {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError};
     BasePlugin::connect(parentPlugins, msgs);
 }
 
 void StatPlugin::recvDownstream(DasDataPacketList *packets)
 {
-    m_receivedCount += packets->size();
+    uint64_t neutronCnts  = getDoubleParam(NeutronCnts);
+    uint64_t neutronBytes = getDoubleParam(NeutronBytes);
+    uint64_t neutronTimes = getDoubleParam(NeutronTimes);
+    uint64_t metaCnts     = getDoubleParam(MetaCnts);
+    uint64_t metaBytes    = getDoubleParam(MetaBytes);
+    uint64_t metaTimes    = getDoubleParam(MetaTimes);
+    uint64_t totBytes     = getDoubleParam(TotBytes);
 
     for (auto it = packets->cbegin(); it != packets->cend(); it++) {
         DasDataPacket *packet = *it;
-        m_dataBytes += packet->length;
-        m_receivedBytes += packet->length;
+        uint32_t nEvents = packet->getNumEvents();
+        totBytes += packet->length;
 
         if (packet->format == DasDataPacket::DATA_FMT_META) {
-            uint32_t nEvents = 0;
-            packet->getEvents<Event::Pixel>(nEvents);
-            m_metaBytes += nEvents * sizeof(Event::Pixel);
-            m_metaCount++;
+            metaBytes += nEvents * packet->getEventsSize();
+            metaCnts += nEvents;
+            if (isTimestampUnique((*it)->timestamp_sec, (*it)->timestamp_nsec, m_metaTimes))
+                metaTimes += 1;
+
         } else {
-            uint32_t nEvents = 0;
-            uint32_t eventSize;
-            if (packet->format == DasDataPacket::DATA_FMT_PIXEL) {
-                packet->getEvents<Event::Pixel>(nEvents);
-                eventSize = sizeof(Event::Pixel);
-            } else if (packet->format == DasDataPacket::DATA_FMT_ACPC_XY_PS) {
-                packet->getEvents<Event::AcpcXyPs>(nEvents);
-                eventSize = sizeof(Event::AcpcXyPs);
-            } else if (packet->format == DasDataPacket::DATA_FMT_AROC_RAW) {
-                packet->getEvents<Event::ArocRaw>(nEvents);
-                eventSize = sizeof(Event::ArocRaw);
-            } else {
-                packet->getEvents<Event::Pixel>(nEvents);
-                eventSize = sizeof(Event::Pixel);
-            }
-            m_dataBytes += eventSize * nEvents;
-            m_dataCount++;
+            neutronBytes += nEvents * packet->getEventsSize();
+            neutronCnts += nEvents;
+            if (isTimestampUnique((*it)->timestamp_sec, (*it)->timestamp_nsec, m_neutronTimes))
+                neutronTimes += 1;
         }
     }
 
-    setIntegerParam(TotCnt,   m_receivedCount % INT_MAX);
-    setIntegerParam(DataCnt,  m_dataCount % INT_MAX);
-    setIntegerParam(MetaCnt,  m_metaCount % INT_MAX);
-
-    setIntegerParam(TotByte,  m_receivedBytes % INT_MAX);
-    setIntegerParam(DataByte, m_dataBytes % INT_MAX);
-    setIntegerParam(MetaByte, m_metaBytes % INT_MAX);
-
+    setDoubleParam(NeutronCnts,     neutronCnts % LLONG_MAX);
+    setDoubleParam(NeutronBytes,    neutronBytes % LLONG_MAX);
+    setDoubleParam(NeutronTimes,    neutronTimes % LLONG_MAX);
+    setDoubleParam(MetaCnts,        metaCnts % LLONG_MAX);
+    setDoubleParam(MetaBytes,       metaBytes % LLONG_MAX);
+    setDoubleParam(MetaTimes,       metaTimes % LLONG_MAX);
+    setDoubleParam(TotBytes,        totBytes % LLONG_MAX);
     callParamCallbacks();
 }
 
 void StatPlugin::recvDownstream(DasCmdPacketList *packets)
 {
-    m_receivedCount += packets->size();
-    m_cmdCount += packets->size();
+    uint64_t cmdPkts  = getDoubleParam(CmdPkts) + packets->size();
+    uint64_t cmdBytes = getDoubleParam(CmdBytes);
+    uint64_t totBytes = getDoubleParam(TotBytes);
+
     for (auto it = packets->begin(); it != packets->end(); it++) {
-        m_receivedBytes += (*it)->length;
-        m_cmdBytes += (*it)->length;
+        cmdBytes += (*it)->length;
+        totBytes += (*it)->length;
     }
-    setIntegerParam(TotCnt,   m_receivedCount % INT_MAX);
-    setIntegerParam(CmdCnt,   m_cmdCount % INT_MAX);
-    setIntegerParam(TotByte,  m_receivedBytes % INT_MAX);
-    setIntegerParam(CmdByte,  m_cmdBytes % INT_MAX);
+
+    setDoubleParam(CmdPkts,         cmdPkts % LLONG_MAX);
+    setDoubleParam(CmdBytes,        cmdBytes % LLONG_MAX);
+    setDoubleParam(TotBytes,        totBytes % LLONG_MAX);
     callParamCallbacks();
 }
 
 void StatPlugin::recvDownstream(DasRtdlPacketList *packets)
 {
-    m_receivedCount += packets->size();
-    m_rtdlCount += packets->size();
+    uint64_t rtdlTimes  = getDoubleParam(RtdlTimes);
+    uint64_t rtdlBytes  = getDoubleParam(RtdlBytes);
+    uint64_t rtdlPkts   = getDoubleParam(RtdlPkts) + packets->size();
+    uint64_t totBytes   = getDoubleParam(TotBytes);
+
     for (auto it = packets->begin(); it != packets->end(); it++) {
-        m_receivedBytes += (*it)->length;
-        m_rtdlBytes += (*it)->length;
+        rtdlBytes += (*it)->length;
+        totBytes += (*it)->length;
+        if (isTimestampUnique((*it)->timestamp_sec, (*it)->timestamp_nsec, m_rtdlTimes))
+            rtdlTimes += 1;
     }
-    setIntegerParam(TotCnt,   m_receivedCount % INT_MAX);
-    setIntegerParam(TotByte,  m_receivedBytes % INT_MAX);
-    setIntegerParam(RtdlCnt,  m_rtdlCount % INT_MAX);
-    setIntegerParam(RtdlByte, m_rtdlBytes % INT_MAX);
+
+    setDoubleParam(RtdlTimes,       rtdlTimes % LLONG_MAX);
+    setDoubleParam(RtdlBytes,       rtdlBytes % LLONG_MAX);
+    setDoubleParam(RtdlPkts,        rtdlPkts % LLONG_MAX);
+    setDoubleParam(TotBytes,        totBytes % LLONG_MAX);
     callParamCallbacks();
 }
 
-asynStatus StatPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+void StatPlugin::recvDownstream(ErrorPacketList *packets)
 {
-    if (pasynUser->reason == Reset) {
-        m_receivedCount = m_receivedBytes = 0;
-        m_cmdCount      = m_cmdBytes      = 0;
-        m_dataCount     = m_dataBytes     = 0;
-        m_metaCount     = m_metaBytes     = 0;
-        m_rtdlCount     = m_rtdlBytes     = 0;
-        m_tsyncCount    = m_tsyncBytes    = 0;
-        m_badCount      = m_badBytes      = 0;
-        m_neutronPCharge = 0;
-        m_rtdlPCharge    = 0;
-        return asynSuccess;
-    } else if (pasynUser->reason == PulseType) {
-        m_pulseType = (RtdlHeader::PulseFlavor)value;
-        return asynSuccess;
+    uint64_t errorPkts  = getDoubleParam(ErrorPkts) + packets->size();
+    uint64_t totBytes   = getDoubleParam(TotBytes);
+
+    for (auto it = packets->begin(); it != packets->end(); it++) {
+        totBytes += (*it)->length;
     }
-    return BasePlugin::writeInt32(pasynUser, value);
+
+    setDoubleParam(ErrorPkts,       errorPkts % LLONG_MAX);
+    setDoubleParam(TotBytes,        totBytes % LLONG_MAX);
+    callParamCallbacks();
 }
 
-void StatPlugin::accumulatePCharge(epicsTimeStamp &lastPulseTime, const RtdlHeader *rtdl, double &pcharge)
+bool StatPlugin::isTimestampUnique(uint32_t sec, uint32_t nsec, std::list<epicsTime> &que)
 {
-    if (rtdl && rtdl->pulse.flavor == m_pulseType) {
-        epicsTimeStamp time = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
-        if (epicsTimeNotEqual(&time, &lastPulseTime)) {
-            lastPulseTime = time;
-            pcharge += 0.00000000001 * rtdl->pulse.charge;
-        }
+    epicsTimeStamp timestamp = { sec, nsec };
+    epicsTime t(timestamp);
+
+    bool found = (std::find(que.begin(), que.end(), t) != que.end());
+    if (!found) {
+        while (que.size() > MAX_TIME_QUE_SIZE)
+            que.pop_back();
+    que.push_front(t);
     }
+    return !found;
 }

@@ -8,6 +8,7 @@
  */
 
 #include "Common.h"
+#include "Event.h"
 #include "Packet.h"
 
 #include <string.h>
@@ -102,4 +103,34 @@ void DasDataPacket::init(DataFormat format, uint32_t time_sec, uint32_t time_nse
     this->timestamp_sec = time_sec;
     this->timestamp_nsec = time_nsec;
     memcpy(this->events, data, count*4);
+}
+
+uint32_t DasDataPacket::getNumEvents()
+{
+    uint32_t payloadLen = this->length - sizeof(DasDataPacket);
+    uint32_t eventSize = getEventsSize();
+    if (eventSize == 0)
+        return 0;
+    return payloadLen / eventSize;
+}
+
+uint32_t DasDataPacket::getEventsSize()
+{
+    switch (this->format) {
+        case DATA_FMT_RESERVED:     return sizeof(Event::Pixel);
+        case DATA_FMT_META:         return sizeof(Event::Pixel);
+        case DATA_FMT_PIXEL:        return sizeof(Event::Pixel);
+        case DATA_FMT_LPSD_RAW:     return 0; // TODO
+        case DATA_FMT_LPSD_VERBOSE: return 0; // TODO
+        case DATA_FMT_ACPC_XY_PS:   return 0; // TODO
+        case DATA_FMT_ACPC_RAW:     return 0; // TODO
+        case DATA_FMT_ACPC_VERBOSE: return 0; // TODO
+        case DATA_FMT_AROC_RAW:     return 0; // TODO
+        case DATA_FMT_BNL_XY:       return 0; // TODO
+        case DATA_FMT_BNL_RAW:      return 0; // TODO
+        case DATA_FMT_BNL_VERBOSE:  return 0; // TODO
+        case DATA_FMT_CROC_RAW:     return 0; // TODO
+        case DATA_FMT_CROC_VERBOSE: return 0; // TODO
+        default:                    return 0;
+    }
 }
