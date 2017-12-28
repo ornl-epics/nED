@@ -1,52 +1,18 @@
-#record(bo, "$(P)Enable")
-#{
-#    field(ASG,  "BEAMLINE")
-#    field(DTYP, "asynInt32")
-#    field(OUT,  "@asyn($(PORT))Enable")
-#    field(ZNAM, "No")
-#    field(ONAM, "Yes")
-#}
-record(longin, "$(P)ProcCount")
+# Records common to all plugins
+
+# Every plugin must implement Status PV with these values:
+# * 0 ... error condition (MAJOR alarm gets set)
+# * 1 ... ready
+# * 2 ... warning contition (MINOR alarm gets set)
+record(longin, "$(P)Status")
 {
-    field(DESC, "Number of processed pkts")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))ProcCount")
-    field(VAL,  "0")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(HIGH, "2")
+    field(HSV,  "MINOR")
 }
-record(longin, "$(P)RxCount")
+
+# Every plugin must implement StatusText PV.
+record(stringin, "$(P)StatusText")
 {
-    field(DESC, "Number of received pkts")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))RxCount")
-    field(VAL,  "0")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-}
-record(longin, "$(P)TxCount")
-{
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))TxCount")
-    field(VAL,  "0")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-}
-record(mbbo, "$(P)DataMode")
-{
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Detectors data mode")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))DataMode")
-    field(VAL,  "0")
-    field(PINI, "YES")
-    field(ZRVL, "0")
-    field(ZRST, "normal")
-    field(ONVL, "1")
-    field(ONST, "raw")
-    field(TWVL, "2")
-    field(TWST, "extended")
-    field(THVL, "3")
-    field(THST, "verbose")
 }

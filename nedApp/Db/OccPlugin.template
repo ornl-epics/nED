@@ -1,3 +1,5 @@
+include "BasePlugin.include"
+
 record(mbbi, "$(P)PortStatus")
 {
     info(archive, "Monitor, 00:00:10, VAL")
@@ -7,7 +9,7 @@ record(mbbi, "$(P)PortStatus")
     field(FLNK, "$(P)PortStatusFanout")
     field(INP,  "@asyn($(PORT))Status")
     field(ZRVL, "0")
-    field(ZRST, "OK")
+    field(ZRST, "Ready")
     field(ONVL, "2")
     field(ONST, "Copy buffer full")
     field(ONSV, "MAJOR")
@@ -621,20 +623,39 @@ record(calc, "$(P)CntErrOther")
     field(VAL,  "-1")
     field(PINI, "YES")
 }
-record(calc, "$(P)Status")
+record(calc, "$(P)StatusCalc")
 {
-    field(DESC, "Determine global OCC status")
     field(INPA, "$(P)PortStatus.SEVR NPP")
     field(INPB, "$(P)ConStatus.SEVR NPP")
     field(INPC, "$(P)FpgaTemp.SEVR NPP")
     field(INPD, "$(P)RxEn NPP")
     field(INPE, "$(P)RxEnRb NPP")
-    field(LOW,  "0")
-    field(LSV,  "MAJOR")
-    field(HIGH, "2")
-    field(HSV,  "MINOR")
     field(CALC, "(A+B+C)=0&&D=E")
+}
+record(longin, "$(P)Status")
+{
+    field(DESC, "Global OCC status")
+    field(INP,  "$(P)StatusCalc PP NMS")
     field(PINI, "YES")
+    field(FLNK, "$(P)StatusText")
+}
+record(scalcout, "$(P)StatusTextCalc")
+{
+    field(INPA, "$(P)PortStatus NPP")
+    field(INPB, "$(P)ConStatus NPP")
+    field(INPC, "$(P)FpgaTemp.SEVR NPP")
+    field(INPD, "$(P)RxEnRb NPP")
+    field(INPE, "$(P)Status NPP MSS")
+    field(INAA, "$(P)PortStatus NPP")
+    field(INBB, "$(P)ConStatus NPP")
+    field(CC,   "Over temperature")
+    field(INDD, "$(P)RxEnRb NPP")
+    field(CALC, "D#1?DD:C#0?CC:B#0?BB:AA")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(DESC, "Global OCC status text")
+    field(INP,  "$(P)StatusTextCalc.SVAL PP MSS")
 }
 record(longout, "$(P)MaxPktSize")
 {
