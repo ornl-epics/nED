@@ -1,4 +1,4 @@
-/* PvaNeutrons.h
+/* PvaNeutronsPlugin.h
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -21,8 +21,16 @@
 /**
  * Gather and present statistical information of the incoming data
  */
-class PvaNeutrons : public BasePlugin {
+class PvaNeutronsPlugin : public BasePlugin {
     public: // functions
+
+        enum {
+            STATUS_READY        = 0,
+            STATUS_BAD_CONFIG   = 1,
+            STATUS_INIT_ERROR   = 2,
+            STATUS_SEND_ERROR   = 3,
+        };
+
         /**
          * Constructor
          *
@@ -30,7 +38,7 @@ class PvaNeutrons : public BasePlugin {
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] pvName name of a PVA record used to export RTDL data
          */
-        PvaNeutrons(const char *portName, const char *parentPlugins, const char *pvName);
+        PvaNeutronsPlugin(const char *portName, const char *parentPlugins, const char *pvName);
 
         /**
          * Process downstream data packets
@@ -78,6 +86,8 @@ class PvaNeutrons : public BasePlugin {
         PvaRecord::shared_pointer m_record;
 
     private: // asyn parameters
+        int Status; // See PvaNeutronsPlugin::STATUS_*
+        int PvaName; // PV name
 };
 
 #endif // PVA_NEUTRONS_H

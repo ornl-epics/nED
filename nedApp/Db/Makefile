@@ -43,6 +43,7 @@ DB += CRocPvaPlugin.db
 DB += EmptyPulsePlugin.db
 DB += Das1CompatibilityPlugin.db
 DB += PvaModulesListPlugin.db
+DB += PvaNeutronsPlugin.db
 
 DB += DspPlugin_v51.db
 DB += DspPlugin_v52.db

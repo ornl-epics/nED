@@ -109,6 +109,7 @@ class RtdlPlugin : public BasePlugin {
         int RingPeriod;
         int ErrorsFutureTime;
         int ErrorsPastTime;
+        int PvaName;
 };
 
 #endif // RTDL_PLUGIN_H

@@ -1,4 +1,4 @@
-/* PvaNeutrons.cpp
+/* PvaNeutronsPlugin.cpp
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -9,51 +9,76 @@
 
 #include "Event.h"
 #include "Log.h"
-#include "PvaNeutrons.h"
+#include "PvaNeutronsPlugin.h"
 
+#include <alarm.h>
 #include <pv/sharedVector.h>
 
 #include <climits>
 
-EPICS_REGISTER_PLUGIN(PvaNeutrons, 3, "Port name", string, "Parent plugins", string, "PVA record name", string);
+EPICS_REGISTER_PLUGIN(PvaNeutronsPlugin, 3, "Port name", string, "Parent plugins", string, "PVA record name", string);
 
-PvaNeutrons::PvaNeutrons(const char *portName, const char *parentPlugins, const char *pvName)
+PvaNeutronsPlugin::PvaNeutronsPlugin(const char *portName, const char *parentPlugins, const char *pvName)
     : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos, asynOctetMask, asynOctetMask)
 {
+    int status = STATUS_READY;
+
     if (pvName == 0 || strlen(pvName) == 0) {
         LOG_ERROR("Missing PVA record name");
+        status = STATUS_BAD_CONFIG;
+        pvName = "";
     } else {
         m_record = PvaRecord::create(pvName);
-        if (!m_record)
+        if (!m_record) {
             LOG_ERROR("Failed to create PVA record '%s'", pvName);
-        else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_record) == false)
+            status = STATUS_INIT_ERROR;
+        } else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_record) == false) {
             LOG_ERROR("Failed to register PVA record '%s'", pvName);
+            status = STATUS_INIT_ERROR;
+        }
     }
+
+    createParam("PvaName",      asynParamOctet, &PvaName, pvName);
+    createParam("Status",       asynParamInt32, &Status, status); // READ - Plugin status
+    if (status != STATUS_READY) {
+        setParamAlarmStatus(PvaName, epicsAlarmUDF);
+        setParamAlarmSeverity(PvaName, epicsSevMajor);
+    }
+    callParamCallbacks();
 
     BasePlugin::connect(parentPlugins, MsgDasData);
 }
 
-void PvaNeutrons::recvDownstream(DasDataPacketList *packets)
+void PvaNeutronsPlugin::recvDownstream(DasDataPacketList *packets)
 {
+    int status = epicsAlarmNone;
+    int severity = epicsSevNone;
     if (m_record) {
         for (auto it = packets->cbegin(); it != packets->cend(); it++) {
             if ((*it)->format == DasDataPacket::DATA_FMT_PIXEL) {
                 if (m_record->update(*it) == false) {
                     LOG_ERROR("Failed to send PVA update");
+                    status = epicsAlarmComm;
+                    severity = epicsSevMinor;
+                    break;
                 }
             }
         }
     }
+    setIntegerParam(Status, status == epicsAlarmNone ? 0 : 3);
+    setParamAlarmStatus(PvaName, status);
+    setParamAlarmSeverity(PvaName, severity);
+    callParamCallbacks();
 }
 
 /* *** PvaRecord implementation follows *** */
 
-PvaNeutrons::PvaRecord::PvaRecord(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure)
+PvaNeutronsPlugin::PvaRecord::PvaRecord(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure)
     : epics::pvDatabase::PVRecord(recordName, pvStructure)
     , m_sequence(0)
 {}
 
-PvaNeutrons::PvaRecord::shared_pointer PvaNeutrons::PvaRecord::create(const std::string &recordName)
+PvaNeutronsPlugin::PvaRecord::shared_pointer PvaNeutronsPlugin::PvaRecord::create(const std::string &recordName)
 {
     using namespace epics::pvData;
 
@@ -79,7 +104,7 @@ PvaNeutrons::PvaRecord::shared_pointer PvaNeutrons::PvaRecord::create(const std:
     return pvRecord;
 }
 
-bool PvaNeutrons::PvaRecord::init()
+bool PvaNeutronsPlugin::PvaRecord::init()
 {
     initPVRecord();
 
@@ -105,7 +130,7 @@ bool PvaNeutrons::PvaRecord::init()
     return true;
 }
 
-bool PvaNeutrons::PvaRecord::update(DasDataPacket *packet)
+bool PvaNeutronsPlugin::PvaRecord::update(DasDataPacket *packet)
 {
     bool posted = true;
 

@@ -282,3 +282,10 @@ record(longin, "$(P)ErrorsPastTime")
     field(HIGH, "1")
     field(HSV,  "MINOR")
 }
+record(stringin, "$(P)PvaName")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))PvaName")
+    field(PINI, "YES")
+    field(SCAN, "Passive")
+}

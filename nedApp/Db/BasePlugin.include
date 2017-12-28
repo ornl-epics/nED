@@ -10,9 +10,11 @@ record(longin, "$(P)Status")
     field(LSV,  "MAJOR")
     field(HIGH, "2")
     field(HSV,  "MINOR")
+    field(VAL,  "1")
 }
 
 # Every plugin must implement StatusText PV.
 record(stringin, "$(P)StatusText")
 {
+    field(VAL,  "")
 }

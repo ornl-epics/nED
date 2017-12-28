@@ -10,6 +10,7 @@
 #include "Log.h"
 #include "RtdlPlugin.h"
 
+#include <alarm.h>
 #include <pv/sharedVector.h>
 
 #include <climits>
@@ -37,20 +38,33 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     createParam("RingPeriod",       asynParamInt32, &RingPeriod);   // READ - Ring revolution period
     createParam("ErrorsFutureTime", asynParamInt32, &ErrorsFutureTime, -1); // READ - Number of errors when time jumps in the future
     createParam("ErrorsPastTime",   asynParamInt32, &ErrorsPastTime, 0);    // READ - Number of errors when time jumps in the past
+    createParam("PvaName",          asynParamOctet, &PvaName, pvName);
 
     if (pvName && strlen(pvName) > 0) {
         m_record = PvaRecord::create(pvName);
-        if (!m_record)
+        if (!m_record) {
             LOG_ERROR("Failed to create PVA record '%s'", pvName);
-        else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_record) == false)
+            setParamAlarmStatus(PvaName, epicsAlarmUDF);
+            setParamAlarmSeverity(PvaName, epicsSevMinor);
+        } else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_record) == false) {
             LOG_ERROR("Failed to register PVA record '%s'", pvName);
+            setParamAlarmStatus(PvaName, epicsAlarmUDF);
+            setParamAlarmSeverity(PvaName, epicsSevMinor);
+            m_record.reset();
+        }
     }
+    callParamCallbacks();
 
     BasePlugin::connect(parentPlugins, MsgDasRtdl);
 }
 
 void RtdlPlugin::recvDownstream(DasRtdlPacketList *packets)
 {
+    if (m_record) {
+        setParamAlarmStatus(PvaName, epicsAlarmNone);
+        setParamAlarmSeverity(PvaName, epicsSevNone);
+    }
+
     for (auto it = packets->cbegin(); it != packets->cend(); it++) {
         const DasRtdlPacket *packet = *it;
 
@@ -109,6 +123,8 @@ void RtdlPlugin::recvDownstream(DasRtdlPacketList *packets)
 
         if (m_record && m_record->update(*it) == false) {
             LOG_ERROR("Failed to send PVA update");
+            setParamAlarmStatus(PvaName, epicsAlarmComm);
+            setParamAlarmSeverity(PvaName, epicsSevMinor);
         }
     }
 
