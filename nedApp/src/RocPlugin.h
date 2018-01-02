@@ -38,6 +38,8 @@
  * * ROC hw=5.2 fw=5.5 as v55 (via v54 plugin)
  * * ROC hw=5.2 fw=5.6 as v56
  * * ROC hw=5.2 fw=5.6 as v57
+ * * ROC hw=5.2 fw=5.8 as v58
+ * * ROC hw=5.2 fw=5.8 as v59
  *
  * In general firmware versions differ in status or configuration
  * parameters they provide. Those are available in individual files
@@ -280,6 +282,11 @@ class RocPlugin : public BaseModulePlugin {
          * Create and register all ROC v5.8 parameters.
          */
         void createParams_v58();
+
+        /**
+         * Create and register all ROC v5.9 parameters.
+         */
+        void createParams_v59();
 
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring
