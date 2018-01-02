@@ -1,4 +1,4 @@
-/* DiscoverPlugin.cpp
+/* ModulesPlugin.cpp
  *
  * Copyright (c) 2014 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -13,7 +13,7 @@
 //#include "ArocPlugin.h"
 //#include "BnlRocPlugin.h"
 //#include "CRocPlugin.h"
-#include "DiscoverPlugin.h"
+#include "ModulesPlugin.h"
 #include "DspPlugin.h"
 //#include "DspWPlugin.h"
 #include "FemPlugin.h"
@@ -24,41 +24,62 @@
 #include <cstring>
 #include <sstream>
 
-EPICS_REGISTER_PLUGIN(DiscoverPlugin, 2, "Port name", string, "Parent plugins", string);
+EPICS_REGISTER_PLUGIN(ModulesPlugin, 4, "Port name", string, "Parent plugins", string, "PVA name", string, "DB path", string);
 
-DiscoverPlugin::DiscoverPlugin(const char *portName, const char *parentPlugins)
+ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, const char *pvName, const char *dbPath)
     : BasePlugin(portName, 1, asynOctetMask, asynOctetMask)
+    , m_outCfg(false)
     , m_disableTimer(true)
+    , m_dbPath(dbPath)
 {
-    createParam("Trigger",      asynParamInt32, &Trigger);      // WRITE - Trigger discovery of modules
-    createParam("Format",       asynParamInt32, &Format);       // READ - Modules found formatted in ASCII table
-    createParam("Discovered",   asynParamInt32, &Discovered);   // READ - Modules found formatted in ASCII table
-    createParam("Verified",     asynParamInt32, &Verified);     // READ - Modules found formatted in ASCII table
-    createParam("Output",       asynParamOctet, &Output, "Not initialized");    // READ - Modules found formatted in ASCII table
-    createParam("OptBcast",     asynParamInt32, &OptBcast, 1);  // WRITE - Send optical broadcast packet as part of discovery
-    createParam("LvdsBcast",    asynParamInt32, &LvdsBcast, 1); // WRITE - Send LVDS broadcast packet as part of discovery
-    createParam("LvdsSingle",   asynParamInt32, &LvdsSingle, 1);// WRITE - Send LVDS single word packet as part of discovery
-    callParamCallbacks();
+    // Allocate and initialize text buffers
+    m_bufferTxt = (char *)malloc(BUFFER_SIZE);
+    if (m_bufferTxt == 0) {
+        LOG_ERROR("Failed to allocate text buffer");
+        assert(m_bufferTxt != 0);
+    }
+    m_bufferCfg = (char *)malloc(BUFFER_SIZE);
+    if (m_bufferCfg == 0) {
+        LOG_ERROR("Failed to allocate config buffer");
+        assert(m_bufferCfg != 0);
+    }
+    readDbFile();
+
+    createParam("Discover",     asynParamInt32, &Discover);         // WRITE - Trigger discovery of modules
+    createParam("FileOp",       asynParamInt32, &FileOp);           // WRITE - Trigger loading/saving the file of modules
+    createParam("RefreshPvaList",asynParamInt32,&RefreshPvaList);   // WRITE - Refresh modules list in PVA record
+    createParam("Discovered",   asynParamInt32, &Discovered, 0);    // READ - Modules found formatted in ASCII table
+    createParam("Verified",     asynParamInt32, &Verified, 0);      // READ - Modules found formatted in ASCII table
+    createParam("TxtDisplay",   asynParamOctet, &TxtDisplay);       // READ - Text in human readable format
+    createParam("CfgDisplay",   asynParamOctet, &CfgDisplay, m_bufferCfg); // READ - Text in substitution format
+    createParam("CfgStatus",    asynParamInt32, &CfgStatus, 0);     // READ - Status of the displayed text
+
+    if (pvName == 0 || strlen(pvName) == 0) {
+        LOG_ERROR("Missing PVA record name");
+    } else {
+        m_record = Record::create(pvName);
+        if (!m_record)
+            LOG_ERROR("Failed to create PVA record '%s'", pvName);
+        else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_record) == false)
+            LOG_ERROR("Failed to register PVA record '%s'", pvName);
+    }
 
     // Check parent plugins exist, force saving connect information
     connect(parentPlugins, MsgDasCmd);
     disconnect();
+
+    callParamCallbacks();
 }
 
-asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+asynStatus ModulesPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    if (pasynUser->reason == Trigger) {
-        bool optBcast = true;
-        bool lvdsBcast = true;
-        bool lvdsSingle = true;
-
-        getBooleanParam(OptBcast, optBcast);
-        getBooleanParam(LvdsBcast, lvdsBcast);
-        getBooleanParam(LvdsSingle, lvdsSingle);
-
+    if (pasynUser->reason == Discover) {
         setIntegerParam(Discovered, 0);
         setIntegerParam(Verified, 0);
+        setStringParam(CfgDisplay, "");
         callParamCallbacks();
+
+        m_outCfg = (value == 1);
 
         // Stay connected to parent plugins for 10 seconds after discover has
         // been issued. Usually responses come back in under a second.
@@ -72,11 +93,49 @@ asynStatus DiscoverPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         m_discovered.clear();
         reqDiscover();
         return asynSuccess;
+    } else if (pasynUser->reason == FileOp) {
+        if (value == 0) {
+            if (!readDbFile())
+                return asynError;
+            setStringParam(CfgDisplay, m_bufferCfg);
+            setIntegerParam(CfgStatus, 0);
+            callParamCallbacks();
+            return asynSuccess;
+        } else if (value == 1) {
+            if (getIntegerParam(CfgStatus) != 0) {
+                if (!writeDbFile())
+                    return asynError;
+                setIntegerParam(CfgStatus, 0);
+                callParamCallbacks();
+                LOG_INFO("Wrote new detector configuration to file: %s", m_dbPath.c_str());
+            }
+            return asynSuccess;
+        } else {
+            return asynError;
+        }
+    } else if (pasynUser->reason == RefreshPvaList) {
+        std::list<std::string> modules;
+        BaseModulePlugin::getModuleNames(modules);
+        return m_record->update(modules) ? asynSuccess : asynError;
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
-void DiscoverPlugin::recvDownstream(DasCmdPacketList *packets)
+asynStatus ModulesPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+{
+    if (pasynUser->reason == CfgDisplay) {
+        if (nChars >= BUFFER_SIZE)
+            nChars = BUFFER_SIZE - 1;
+        *nActual = nChars;
+        strncpy(m_bufferCfg, value, nChars);
+        setIntegerParam(CfgStatus, 1);
+        callParamCallbacks();
+        return asynSuccess;
+    }
+    return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
+}
+
+void ModulesPlugin::recvDownstream(DasCmdPacketList *packets)
 {
     int nDiscovered;
     int nVerified;
@@ -145,11 +204,29 @@ void DiscoverPlugin::recvDownstream(DasCmdPacketList *packets)
     // packet parsing to avoid double accounting in case more than one same packet is received.
     nDiscovered = 0;
     nVerified = 0;
+    bool updateText = false;
     for (auto it=m_discovered.begin(); it!=m_discovered.end(); it++) {
-        if (it->second.type != 0)
+        if (it->second.type != 0) {
             nDiscovered++;
-        if (it->second.version.fw_version != 0 || it->second.version.fw_revision !=0)
+            updateText = true;
+        }
+        if (it->second.version.fw_version != 0 || it->second.version.fw_revision !=0) {
             nVerified++;
+            updateText = true;
+        }
+    }
+
+    if (updateText) {
+        if (m_outCfg) {
+            if (formatSubstitution(m_bufferCfg, BUFFER_SIZE) > 0) {
+                setStringParam(CfgDisplay, m_bufferCfg);
+                setIntegerParam(CfgStatus, 2);
+            }
+        } else {
+            if (formatTxt(m_bufferTxt, BUFFER_SIZE) > 0) {
+                setStringParam(TxtDisplay, m_bufferTxt);
+            }
+        }
     }
 
     setIntegerParam(Discovered, nDiscovered);
@@ -157,7 +234,7 @@ void DiscoverPlugin::recvDownstream(DasCmdPacketList *packets)
     callParamCallbacks();
 }
 
-uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
+uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
 {
     int ret;
     size_t length = size;
@@ -241,7 +318,7 @@ uint32_t DiscoverPlugin::formatOutput(char *buffer, uint32_t size)
     return (size - length);
 }
 
-uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
+uint32_t ModulesPlugin::formatSubstitution(char *buffer, uint32_t size)
 {
     int ret;
     size_t length = size;
@@ -312,35 +389,14 @@ uint32_t DiscoverPlugin::formatSubstitution(char *buffer, uint32_t size)
     return (size - length);
 }
 
-asynStatus DiscoverPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
+void ModulesPlugin::report(FILE *fp, int details)
 {
-    if (pasynUser->reason == Output) {
-        int format = 0;
-        getIntegerParam(Format, &format);
-
-        if (format == 0)
-            *nActual = formatOutput(value, nChars);
-        else
-            *nActual = formatSubstitution(value, nChars);
-        if (eomReason) *eomReason |= ASYN_EOM_EOS;
-        return asynSuccess;
-    }
-    return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
-}
-
-void DiscoverPlugin::report(FILE *fp, int details)
-{
-    size_t size = 100000; // Should be enough for about 1000 modules
-    char *buffer = (char *)malloc(size);
-    if (buffer) {
-        uint32_t length = formatOutput(buffer, size);
-        fwrite(buffer, 1, length, fp);
-        free(buffer);
-    }
+    uint32_t length = formatTxt(m_bufferTxt, BUFFER_SIZE);
+    fwrite(m_bufferTxt, 1, length, fp);
     return BasePlugin::report(fp, details);
 }
 
-void DiscoverPlugin::reqDiscover(uint32_t moduleId)
+void ModulesPlugin::reqDiscover(uint32_t moduleId)
 {
     DasCmdPacket *packet = DasCmdPacket::create(moduleId, DasCmdPacket::CMD_DISCOVER);
     if (!packet) {
@@ -351,7 +407,7 @@ void DiscoverPlugin::reqDiscover(uint32_t moduleId)
     delete packet;
 }
 
-void DiscoverPlugin::reqVersion(uint32_t moduleId)
+void ModulesPlugin::reqVersion(uint32_t moduleId)
 {
     DasCmdPacket *packet = DasCmdPacket::create(moduleId, DasCmdPacket::CMD_READ_VERSION);
     if (!packet) {
@@ -360,4 +416,102 @@ void DiscoverPlugin::reqVersion(uint32_t moduleId)
     }
     sendUpstream(packet);
     delete packet;
+}
+
+bool ModulesPlugin::readDbFile()
+{
+    FILE *fp = fopen(m_dbPath.c_str(), "r");
+    if (!fp) {
+        LOG_ERROR("Failed to open file for reading: %s", m_dbPath.c_str());
+        return false;
+    }
+    size_t len = fread(m_bufferCfg, 1, BUFFER_SIZE, fp);
+    fclose(fp);
+    m_bufferCfg[len+1] = 0;
+    return true;
+}
+
+bool ModulesPlugin::writeDbFile()
+{
+    FILE *fp = fopen(m_dbPath.c_str(), "w");
+    if (!fp) {
+        LOG_ERROR("Failed to open file for writing: %s", m_dbPath.c_str());
+        return false;
+    }
+    if (fwrite(m_bufferCfg, 1, strlen(m_bufferCfg), fp) != strlen(m_bufferCfg)) {
+        LOG_ERROR("Failed to write detectors configuration to file: %s", m_dbPath.c_str());
+        fclose(fp);
+        return false;
+    }
+    fclose(fp);
+    return true;
+}
+
+ModulesPlugin::Record::Record(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure)
+    : epics::pvDatabase::PVRecord(recordName, pvStructure)
+{
+}
+
+/**
+ * Allocate and initialize ModulesPlugin::Record.
+ */
+ModulesPlugin::Record::shared_pointer ModulesPlugin::Record::create(const std::string &recordName)
+{
+    using namespace epics::pvData;
+
+    StandardFieldPtr standardField = getStandardField();
+    FieldCreatePtr fieldCreate     = getFieldCreate();
+    PVDataCreatePtr pvDataCreate   = getPVDataCreate();
+
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(
+        fieldCreate->createFieldBuilder()->
+            add("modules", standardField->scalarArray(epics::pvData::pvString, ""))->
+            createStructure()
+    );
+
+    Record::shared_pointer pvRecord(new ModulesPlugin::Record(recordName, pvStructure));
+    if (pvRecord && !pvRecord->init()) {
+        pvRecord.reset();
+    }
+
+    return pvRecord;
+}
+
+/**
+ * Attach all PV structures.
+ */
+bool ModulesPlugin::Record::init()
+{
+    initPVRecord();
+
+    pvModules = getPVStructure()->getSubField<epics::pvData::PVStringArray>("modules.value");
+    if (pvModules.get() == NULL)
+        return false;
+
+    return true;
+}
+
+/**
+ * Publish a single atomic update of the PV, take values from packet.
+ */
+bool ModulesPlugin::Record::update(const std::list<std::string> &modules)
+{
+    bool updated = true;
+
+    epics::pvData::PVStringArray::svector names;
+    for (auto it = modules.begin(); it != modules.end(); it++) {
+        names.push_back(*it);
+    }
+
+    lock();
+    try {
+        beginGroupPut();
+        pvModules->replace(epics::pvData::freeze(names));
+        endGroupPut();
+    } catch (...) {
+        updated = false;
+    }
+    unlock();
+
+    return updated;
 }

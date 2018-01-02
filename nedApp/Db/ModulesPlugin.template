@@ -1,0 +1,126 @@
+include "BasePlugin.include"
+
+record(longout, "$(P)RefreshPvaList")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))InitPvaList")
+    field(PINI, "YES")
+}
+record(waveform, "$(P)TxtDisplay")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))TxtDisplay")
+    field(FTVL, "CHAR")
+    field(NELM, "100000")
+    field(SCAN, "I/O Intr")
+}
+record(waveform, "$(P)CfgDisplay")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT))CfgDisplay")
+    field(FTVL, "CHAR")
+    field(NELM, "100000")
+    info(asyn:READBACK, "1")
+}
+record(mbbi, "$(P)CfgStatus")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CfgStatus")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "saved")
+    field(ONVL, "1")
+    field(ONST, "modified")
+    field(ONSV, "MAJOR")
+    field(TWVL, "2")
+    field(TWST, "discovered")
+    field(TWSV, "MINOR")
+}
+record(bo, "$(P)FileOp")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))FileOp")
+    field(ZNAM, "load")
+    field(ONAM, "save")
+}
+record(longout, "$(P)Discover")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Discover")
+}
+record(longin, "$(P)Discovered")
+{
+    field(DESC, "Number of discovered detectors")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Discovered")
+}
+record(longin, "$(P)Verified")
+{
+    field(DESC, "Number of verified detectors")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Verified")
+}
+
+# Compatibility PVs to keep old OPI happy
+record(waveform, "$(P)Output")
+{
+    field(ASG,  "BEAMLINE")
+    field(INP,  "$(P)TxtDisplay CPP")
+    field(FTVL, "CHAR")
+    field(NELM, "100000")
+}
+record(longout, "$(P)Trigger")
+{
+    field(ASG,  "BEAMLINE")
+    field(FLNK, "$(P)TriggerFlnk")
+}
+record(calcout, "$(P)TriggerFlnk")
+{
+    field(ASG,  "BEAMLINE")
+    field(CALC, "0")
+    field(OUT,  "$(P)Discover PP")
+}
+record(bo, "$(P)Format")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "No-op")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "Human")
+    field(ONAM, "Substitution")
+}
+record(bo, "$(P)OptBcast")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "No-op")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)LvdsBcast")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "No-op")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)LvdsSingle")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "No-op")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
