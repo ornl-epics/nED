@@ -148,6 +148,11 @@ class AdcRocPlugin : public BaseModulePlugin {
          * Create and register all ADCROC v0.5 parameters to be exposed to EPICS.
          */
         void createParams_v05();
+
+        /**
+         * Create and register all ADCROC v0.6 parameters to be exposed to EPICS.
+         */
+        void createParams_v06();
 };
 
 #endif // ADC_ROC_PLUGIN_H
