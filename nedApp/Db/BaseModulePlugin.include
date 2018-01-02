@@ -205,22 +205,33 @@ record(calc, "$(P)HealthStatusCalc")
     field(PINI, "YES") # For Supported link
     field(FLNK, "$(P)StatusCalc")
 }
-record(calc, "$(P)StatusCalc")
+record(calcout, "$(P)StatusCalc")
 {
     field(INPA, "$(P)Enable NPP")
     field(INPB, "$(P)HealthStatusCalc.SEVR PP")
     field(INPC, "$(P)AcquiringCheck.SEVR PP")
     field(CALC, "A=0||(B+C)=0")
     field(PINI, "YES") # For Supported link
-    field(FLNK, "$(P)Status")
+    field(OUT,  "$(P)Status PP")
+    field(FLNK, "$(P)StatusTextCalc")
 }
-record(bi, "$(P)Status")
+record(scalcout, "$(P)StatusTextCalc")
 {
-    info(archive, "Monitor, 00:00:10, VAL")
-    field(ZNAM, "Not OK")
-    field(ONAM, "OK")
-    field(ZSV,  "MAJOR")
-    field(INP,  "$(P)StatusCalc")
+    field(INPA, "$(P)Enable NPP")
+    field(AA,   "disabled")
+    field(INPB, "$(P)HealthStatusCalc.SEVR PP MSS")
+    field(BB,   "error")
+    field(INPC, "$(P)AcquiringCheck.SEVR PP MSS")
+    field(CC,   "acquire mismatch")
+    field(DD,   "ready")
+    field(CALC, "A=0?AA:B#0?BB:C#0?CC:DD")
+    field(PINI, "YES") # For Supported link
+    field(OUT,  "$(P)StatusText PP")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(DESC, "Module status text")
+    field(INP,  "$(P)StatusTextCalc.SVAL PP MSS")
 }
 record(stringin, "$(P)HwDate")
 {
