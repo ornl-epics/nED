@@ -8,17 +8,17 @@
  */
 
 #include "AcpcPlugin.h"
-//#include "AcpcFemPlugin.h"
-//#include "AdcRocPlugin.h"
-//#include "ArocPlugin.h"
-//#include "BnlRocPlugin.h"
-//#include "CRocPlugin.h"
+#include "AcpcFemPlugin.h"
+#include "AdcRocPlugin.h"
+#include "ArocPlugin.h"
+#include "BnlRocPlugin.h"
+#include "CRocPlugin.h"
 #include "ModulesPlugin.h"
 #include "DspPlugin.h"
-//#include "DspWPlugin.h"
+#include "DspWPlugin.h"
 #include "FemPlugin.h"
 #include "Log.h"
-//#include "RocPlugin.h"
+#include "RocPlugin.h"
 
 #include <algorithm>
 #include <cstring>
@@ -162,7 +162,6 @@ void ModulesPlugin::recvDownstream(DasCmdPacketList *packets)
                 case DasCmdPacket::MOD_TYPE_ACPC:
                     AcpcPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
-                /*
                 case DasCmdPacket::MOD_TYPE_ACPCFEM:
                     AcpcFemPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
@@ -178,21 +177,18 @@ void ModulesPlugin::recvDownstream(DasCmdPacketList *packets)
                 case DasCmdPacket::MOD_TYPE_CROC:
                     CRocPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
-                    */
                 case DasCmdPacket::MOD_TYPE_DSP:
                     DspPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_FEM:
                     FemPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
-                    /*
                 case DasCmdPacket::MOD_TYPE_ROC:
                     RocPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_DSPW:
                     DspWPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
                     break;
-                */
                 default:
                     break;
                 }
