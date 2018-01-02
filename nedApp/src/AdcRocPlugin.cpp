@@ -91,7 +91,7 @@ bool AdcRocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin:
 {
     const RspReadVersion *response;
     if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->length);
+        response = reinterpret_cast<const RspReadVersion*>(packet->payload);
     } else {
         return false;
     }
