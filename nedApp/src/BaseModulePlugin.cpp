@@ -1271,3 +1271,11 @@ std::string BaseModulePlugin::getModuleName(uint32_t hardwareId)
         return name->second;
     return "";
 }
+
+void BaseModulePlugin::getModuleNames(std::list<std::string> &modules)
+{
+    modules.clear();
+    for (auto it = g_namesMap.begin(); it != g_namesMap.end(); it++) {
+        modules.push_back(it->second);
+    }
+}

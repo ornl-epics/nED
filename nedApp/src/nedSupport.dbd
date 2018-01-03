@@ -36,6 +36,7 @@ registrar("StatPluginRegister")
 registrar("TimingPluginRegister")
 registrar("TofCorrectPluginRegister")
 registrar("EmptyPulsePluginRegister")
+registrar("ModulesPluginRegister")
 
 # Detector support plugins (alphabetically)
 registrar("AcpcFemPluginRegister")
