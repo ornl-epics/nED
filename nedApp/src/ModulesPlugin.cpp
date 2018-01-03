@@ -128,6 +128,7 @@ asynStatus ModulesPlugin::writeOctet(asynUser *pasynUser, const char *value, siz
             nChars = BUFFER_SIZE - 1;
         *nActual = nChars;
         strncpy(m_bufferCfg, value, nChars);
+        setStringParam(CfgDisplay, m_bufferCfg);
         setIntegerParam(CfgStatus, 1);
         callParamCallbacks();
         return asynSuccess;
