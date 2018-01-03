@@ -74,12 +74,12 @@ ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, co
 asynStatus ModulesPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Discover) {
+        m_outCfg = (value == 1);
+
         setIntegerParam(Discovered, 0);
         setIntegerParam(Verified, 0);
-        setStringParam(CfgDisplay, "");
+        setStringParam(m_outCfg ? CfgDisplay : TxtDisplay, "");
         callParamCallbacks();
-
-        m_outCfg = (value == 1);
 
         // Stay connected to parent plugins for 10 seconds after discover has
         // been issued. Usually responses come back in under a second.
