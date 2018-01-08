@@ -106,6 +106,8 @@ def parse_src_file(path, mode):
       'config_ch': re.compile("createChanConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
       'config_meta': re.compile("createMetaConfigParam\s*\(\s*\"([^\"]+)\",[^,]*,\s*(\S+)\s*[,\)].*"),
       'temp':    re.compile("createTempParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'preampcfg': re.compile("createPreAmpCfgParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'preamptrig':re.compile("createPreAmpTrigParam\s*\(\s*\"([^\"]+)\"\s*,"),
     }
 
     if path not in vars_cache:
