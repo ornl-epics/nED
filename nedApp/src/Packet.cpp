@@ -16,7 +16,6 @@
 
 DasRtdlPacket *DasRtdlPacket::create(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
 {
-    assert(nFrames == 26);
     DasRtdlPacket *packet = reinterpret_cast<DasRtdlPacket*>(malloc(sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t)));
     if (packet) {
         packet->length = sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t);
