@@ -124,9 +124,12 @@ void DspPlugin::createParams_v70() {
     createCounterParam("Lvds6:Good",      0xA, 32,  0); // LVDS 6 Number of good packets
     createCounterParam("Lvds6:Lost",      0xB, 32,  0); // LVDS 6 Number of lost packets
     createCounterParam("MetaEvents",      0xC, 32,  0); // Number of meta events
-    createCounterParam("BucketGood",      0xD, 32,  0); // Number of good bucket events
-    createCounterParam("BucketLost",      0xE, 32,  0); // Number of lost bucket events
-    createCounterParam("OptPackets",      0xF, 32,  0); // Number of output optical packets
+    createCounterParam("BucketA:GoodEvents", 0xD, 32,  0); // GoodABucketEvents (unit:max 15M)
+    createCounterParam("BucketA:LostEvents", 0xE, 32,  0); // LostABucketEvents 
+    createCounterParam("BucketB:GoodEvents", 0xF, 32,  0); // GoodBBucketEvents (unit:max 15M)
+    createCounterParam("BucketB:LostEvents", 0x10,32,  0); // LostBBucketEvents 
+    createCounterParam("TotalOpticalPackets", 0x11, 32,  0); // TotalOpticalPackets 
+
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
     createStatusParam("Lvds1:Status",      0x0,  32,  0); // Lvds1Status
@@ -135,14 +138,14 @@ void DspPlugin::createParams_v70() {
     createStatusParam("Lvds4:Status",      0x3,  32,  0); // Lvds4Status
     createStatusParam("Lvds5:Status",      0x4,  32,  0); // Lvds5Status
     createStatusParam("Lvds6:Status",      0x5,  32,  0); // Lvds6Status
-    createStatusParam("EmptyBuckets",      0x6,   4,  0); // Number of empty buckets
-    createStatusParam("Aux:Buckets",       0x6,   1,  4); // Number of buckets used for AUX
-    createStatusParam("Lvds1:Buckets",     0x6,   1,  5); // Number of buckets used for LVDS 1
-    createStatusParam("Lvds1:Buckets",     0x6,   1,  6); // Number of buckets used for LVDS 2
-    createStatusParam("Lvds1:Buckets",     0x6,   1,  7); // Number of buckets used for LVDS 3
-    createStatusParam("Lvds1:Buckets",     0x6,   1,  8); // Number of buckets used for LVDS 4
-    createStatusParam("Lvds1:Buckets",     0x6,   1,  9); // Number of buckets used for LVDS 5
-    createStatusParam("Lvds1:Buckets",     0x6,   1, 10); // Number of buckets used for LVDS 6
-    createStatusParam("Meta:Buckets",      0x6,   1, 11); // Number of buckets used for meta
-    createStatusParam("UnusedStatus",      0xF,  32,  0); // Unused15
+    createStatusParam("BucketA:Occupancy", 0x6,   4,  0); // NumberOfEmptyA-Buckets (unit:/12)
+    createStatusParam("BucketB:Occupancy", 0x6,   4,  4); // NumberOfEmptyB-Buckets (unit:/8)
+    createStatusParam("BucketsInActive1",  0x6,   1,  8); // BucketsInLvds1Active
+    createStatusParam("BucketsInActive2",  0x6,   1,  9); // BucketsInLvds2Active
+    createStatusParam("BucketsInActive3",  0x6,   1, 10); // BucketsInLvds3Active
+    createStatusParam("BucketsInActive4",  0x6,   1, 11); // BucketsInLvds4Active
+    createStatusParam("BucketsInActive5",  0x6,   1, 12); // BucketsInLvds5Active
+    createStatusParam("BucketsInActive6",  0x6,   1, 13); // BucketsInLvds6Active
+    createStatusParam("BucketsInActive7",  0x6,   1, 14); // BucketsInMetaActive
+    createStatusParam("UnusedStatus",      0xB,  32,  0); // Unused15
 }
