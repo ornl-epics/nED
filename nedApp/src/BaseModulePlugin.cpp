@@ -1037,7 +1037,7 @@ void BaseModulePlugin::unpackRegParams(const char *group, const uint32_t *payloa
             }
         }
 
-        if (m_wordSize) {
+        if (m_wordSize == 2) {
             shift += (offset % 2 == 0 ? 0 : 16);
             offset /= 2;
         }
