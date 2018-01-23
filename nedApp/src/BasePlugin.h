@@ -351,7 +351,16 @@ class BasePlugin : public asynPortDriver {
         /**
          * Convenient function, return false on error which can be ambigous.
          */
-        #define getBooleanParam(param) (getIntegerParam(param) > 0)
+        bool getBooleanParam(int index) {
+            return (getIntegerParam(index) > 0);
+        }
+
+        /**
+         * Convenient function, return false on error which can be ambigous.
+         */
+        bool getBooleanParam(const std::string &name) {
+            return (getIntegerParam(name) > 0);
+        }
 
         /**
          * Send int32 parameter to another plugin.
