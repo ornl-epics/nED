@@ -15,32 +15,27 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-#define NUM_DUMPPLUGIN_PARAMS ((int)(&LAST_DUMPPLUGIN_PARAM - &FIRST_DUMPPLUGIN_PARAM + 1))
+EPICS_REGISTER_PLUGIN(DumpPlugin, 2, "Port name", string, "Parent plugins", string);
 
-EPICS_REGISTER_PLUGIN(DumpPlugin, 3, "Port name", string, "Dispatcher port name", string, "Blocking", int);
-
-DumpPlugin::DumpPlugin(const char *portName, const char *dispatcherPortName, int blocking)
-    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_DUMPPLUGIN_PARAMS, 1, asynOctetMask, asynOctetMask)
-    , m_fd(-1)
-    , m_fdIsPipe(false)
-    , m_rtdlEn(true)
-    , m_neutronEn(true)
-    , m_metadataEn(true)
-    , m_cmdEn(true)
-    , m_unknwnEn(true)
+DumpPlugin::DumpPlugin(const char *portName, const char *parentPlugins)
+    : BasePlugin(portName, 1, asynOctetMask, asynOctetMask)
 {
+    createParam("Enable",           asynParamInt32, &Enable, 0);         // WRITE - Enable saving data - master switch
     createParam("FilePath",         asynParamOctet, &FilePath);          // WRITE - Path to file where to save all received data
-    createParam("BadPktsEn",        asynParamInt32, &BadPktsEn, 1);      // WRITE - Switch for bad packets
-    createParam("RtdlPktsEn",       asynParamInt32, &RtdlPktsEn, 1);     // WRITE - Switch for RTDL packets
-    createParam("NeutronPktsEn",    asynParamInt32, &NeutronPktsEn, 1);  // WRITE - Switch for neutron packets
-    createParam("MetadataPktsEn",   asynParamInt32, &MetadataPktsEn, 1); // WRITE - Switch for metadata packets
-    createParam("CmdPktsEn",        asynParamInt32, &CmdPktsEn, 1);      // WRITE - Switch for command packets
-    createParam("UnknwnPktsEn",     asynParamInt32, &UnknwnPktsEn, 1);   // WRITE - Switch for unrecognized packets
+    createParam("ErrorPktsEn",      asynParamInt32, &ErrorPktsEn, 1);    // WRITE - Enable saving error packets
+    createParam("RtdlPktsEn",       asynParamInt32, &RtdlPktsEn, 1);     // WRITE - Enable saving DAS RTDL packets
+    createParam("DataPktsEn",       asynParamInt32, &DataPktsEn, 1);     // WRITE - Enable saving DAS data packets
+    createParam("CmdPktsEn",        asynParamInt32, &CmdPktsEn, 1);      // WRITE - Enable saving DAS command packets
     createParam("SavedCount",       asynParamInt32, &SavedCount, 0);     // READ - Num saved packets to file
     createParam("NotSavedCount",    asynParamInt32, &NotSavedCount, 0);  // READ - Num not saved packets due error
-    createParam("CorruptOffset",    asynParamInt32, &CorruptOffset, 0);  // READ - Corrupted data absolute offset in file
     createParam("Overwrite",        asynParamInt32, &Overwrite, 0);      // WRITE - Overwrite existing file
+    createParam("DataType",         asynParamInt32, &DataType, 0);       // WRITE - Data type packets to save
     callParamCallbacks();
+
+    // Let connect the first time, helps diagnose start-up problems
+//    static std::list<int> msgs {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError};
+    connect(parentPlugins, {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError});
+    disconnect();
 }
 
 DumpPlugin::~DumpPlugin()
@@ -48,148 +43,130 @@ DumpPlugin::~DumpPlugin()
     closeFile();
 }
 
-void DumpPlugin::processData(const DasPacketList * const packetList)
+void DumpPlugin::recvDownstream(DasDataPacketList *packets)
 {
-    int nReceived = 0, nProcessed = 0, nSaved = 0, nNotSaved = 0, corruptOffset = 0;
-    getIntegerParam(RxCount,        &nReceived);
-    getIntegerParam(ProcCount,      &nProcessed);
-    getIntegerParam(SavedCount,     &nSaved);
-    getIntegerParam(NotSavedCount,  &nNotSaved);
-    getIntegerParam(CorruptOffset,  &corruptOffset);
+    if (getBooleanParam(DataPktsEn)) {
+        int saved = 0;
+        int failed = 0;
+        int dataType = getIntegerParam(DataType);
 
-    nReceived += packetList->size();
-
-    if (m_fd == -1) {
-        // Plugin is enabled but file was not opened - either not specified or error
-        nNotSaved += packetList->size();
-    } else {
-        for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-            const DasPacket *packet = *it;
-
-            // Skip filtered-out packets
-            if (packet->isBad()) {
-                if (m_badEn == false) continue;
-            } else if (packet->isRtdl()) {
-                if (m_rtdlEn == false) continue;
-            } else if (packet->isCommand()) {
-                if (m_cmdEn == false) continue;
-            } else if (packet->isNeutronData()) {
-                if (m_neutronEn == false) continue;
-            } else if (packet->isMetaData()) {
-                if (m_metadataEn == false) continue;
-            } else {
-                if (m_unknwnEn == false) continue;
-            }
-
-            nProcessed++;
-
-            // m_fd is non-blocking, might fail when system buffers are full
-            ssize_t ret = write(m_fd, packet, packet->getLength());
-            if (ret == static_cast<ssize_t>(packet->getLength())) {
-                nSaved++;
-            } else {
-                nNotSaved++;
-                if (ret == -1) {
-                    LOG_WARN("Failed to save packet to file: %s", strerror(errno));
-                } else if (m_fdIsPipe) {
-                    // Nothing we can do about it
-                    char path[1024];
-                    getStringParam(FilePath, sizeof(path), path);
-                    LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->getLength(), path);
-                    if (corruptOffset == 0) {
-                        corruptOffset = lseek(m_fd, 0, SEEK_CUR) - ret;
-                    }
-                } else if (lseek(m_fd, -1 * ret, SEEK_CUR) != 0) {
-                    // Too bad but lseek() failed - very unlikely
-                    off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
-                    char path[1024];
-                    getStringParam(FilePath, sizeof(path), path);
-                    LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->getLength(), path, offset);
-                    if (corruptOffset == 0) {
-                        corruptOffset = offset;
-                    }
-                } else {
-                    LOG_WARN("Failed to save packet to file");
-                }
+        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+            if (dataType == 0 || (*it)->format == dataType) {
+                if (writeToFile(*it))
+                    saved++;
+                else
+                    failed++;
             }
         }
-    }
 
-    setIntegerParam(RxCount,        nReceived);
-    setIntegerParam(ProcCount,      nProcessed);
-    setIntegerParam(SavedCount,     nSaved);
-    setIntegerParam(NotSavedCount,  nNotSaved);
-    setIntegerParam(CorruptOffset,  corruptOffset);
-    callParamCallbacks();
+        addIntegerParam(SavedCount, saved);
+        addIntegerParam(NotSavedCount, failed);
+        callParamCallbacks();
+    }
+}
+
+void DumpPlugin::recvDownstream(DasRtdlPacketList *packets)
+{
+    if (getBooleanParam(RtdlPktsEn)) {
+        int saved = 0;
+        int total = packets->size();
+
+        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+            if (writeToFile(*it))
+                saved++;
+        }
+
+        setIntegerParam(SavedCount, getIntegerParam(SavedCount) + saved);
+        setIntegerParam(NotSavedCount, getIntegerParam(NotSavedCount) + (total - saved));
+        callParamCallbacks();
+    }
+}
+
+void DumpPlugin::recvDownstream(DasCmdPacketList *packets)
+{
+    if (getBooleanParam(CmdPktsEn)) {
+        int saved = 0;
+        int total = packets->size();
+
+        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+            if (writeToFile(*it))
+                saved++;
+        }
+
+        setIntegerParam(SavedCount, getIntegerParam(SavedCount) + saved);
+        setIntegerParam(NotSavedCount, getIntegerParam(NotSavedCount) + (total - saved));
+        callParamCallbacks();
+    }
+}
+
+void DumpPlugin::recvDownstream(ErrorPacketList *packets)
+{
+    if (getBooleanParam(ErrorPktsEn)) {
+        int saved = 0;
+        int total = packets->size();
+
+        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+            if (writeToFile(*it))
+                saved++;
+        }
+
+        setIntegerParam(SavedCount, getIntegerParam(SavedCount) + saved);
+        setIntegerParam(NotSavedCount, getIntegerParam(NotSavedCount) + (total - saved));
+        callParamCallbacks();
+    }
+}
+
+bool DumpPlugin::writeToFile(const Packet *packet)
+{
+    if (m_fd == -1)
+        return false;
+
+    // m_fd is non-blocking, might fail when system buffers are full
+    ssize_t ret = write(m_fd, packet, packet->length);
+    if (ret == static_cast<ssize_t>(packet->length))
+        return true;
+
+    if (ret == -1) {
+        LOG_WARN("Failed to save packet to file: %s", strerror(errno));
+    } else if (m_fdIsPipe) {
+        // Nothing we can do about it
+        char path[1024];
+        getStringParam(FilePath, sizeof(path), path);
+        LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->length, path);
+    } else if (lseek(m_fd, -1 * ret, SEEK_CUR) != 0) {
+        // Too bad but lseek() failed - very unlikely
+        off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
+        char path[1024];
+        getStringParam(FilePath, sizeof(path), path);
+        LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->length, path, offset);
+    } else {
+        LOG_WARN("Failed to save packet to file");
+    }
+    return false;
 }
 
 asynStatus DumpPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Enable) {
-        // Prevent reporting false positives by disabling plugin early.
-        // Disabling plugin might temporarily release a lock and let some
-        // packets come through.
-        if (BasePlugin::writeInt32(pasynUser, value) != asynSuccess)
-            return asynError;
-
-        closeFile();
-
-        if (value > 0) {
+        if (value == 0) {
+            closeFile();
+            disconnect();
+        } else {
             char path[1024];
 
             setIntegerParam(SavedCount, 0);
             setIntegerParam(NotSavedCount, 0);
-            setIntegerParam(CorruptOffset, 0);
             callParamCallbacks();
 
             if (getStringParam(FilePath, sizeof(path), path) == asynSuccess) {
-                int overwrite = 0;
-                getIntegerParam(Overwrite, &overwrite);
-                // Ignore errors on opening file, there's NotSavedCount
-                // that will increment
-                (void)openFile(path, overwrite != 0);
+                if (!openFile(path, getBooleanParam(Overwrite)))
+                    return asynError;
+                connect();
             }
         }
         return asynSuccess;
-    } else if (pasynUser->reason == BadPktsEn) {
-        m_badEn = (value > 0);
-    } else if (pasynUser->reason == RtdlPktsEn) {
-        m_rtdlEn = (value > 0);
-    } else if (pasynUser->reason == NeutronPktsEn) {
-        m_neutronEn = (value > 0);
-    } else if (pasynUser->reason == MetadataPktsEn) {
-        m_metadataEn = (value > 0);
-    } else if (pasynUser->reason == CmdPktsEn) {
-        m_cmdEn = (value > 0);
-    } else if (pasynUser->reason == UnknwnPktsEn) {
-        m_unknwnEn = (value > 0);
     }
     return BasePlugin::writeInt32(pasynUser, value);
-}
-
-asynStatus DumpPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
-{
-    if (pasynUser->reason == FilePath) {
-        int enabled = 0;
-        *nActual = nChars;
-        // If plugin is enabled, switch file now, otherwise postpone until enabled
-        if (getIntegerParam(Enable, &enabled) == asynSuccess && enabled == 1) {
-            closeFile();
-
-            setIntegerParam(SavedCount, 0);
-            setIntegerParam(NotSavedCount, 0);
-            setIntegerParam(CorruptOffset, 0);
-            callParamCallbacks();
-
-            int overwrite = 0;
-            getIntegerParam(Overwrite, &overwrite);
-
-            // Ignore errors on opening file, there's NotSavedCount
-            // that will increment
-            (void)openFile(std::string(value, nChars), overwrite != 0);
-        }
-    }
-    return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
 bool DumpPlugin::openFile(const std::string &path, bool overwrite)

@@ -32,8 +32,7 @@ StatPlugin::StatPlugin(const char *portName, const char *parentPlugins)
     createParam("RtdlTimes",    asynParamFloat64, &RtdlTimes,    0.0); // READ - Unique RTDL timestamps
     createParam("TotBytes",     asynParamFloat64, &TotBytes,     0.0); // READ - Total number of bytes received
 
-    static std::list<int> msgs = {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError};
-    BasePlugin::connect(parentPlugins, msgs);
+    BasePlugin::connect(parentPlugins, {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError});
 }
 
 void StatPlugin::recvDownstream(DasDataPacketList *packets)
