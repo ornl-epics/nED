@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Det1 nED overview</name>
+  <width>900</width>
+  <actions>
+  </actions>
+  <widget type="group" version="2.0.0">
+    <name>Data Stats</name>
+    <width>349</width>
+    <height>217</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>Neutron rate:</text>
+      <x>6</x>
+      <y>66</y>
+      <width>133</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_1</name>
+      <text>Meta data rate:</text>
+      <x>6</x>
+      <y>96</y>
+      <width>133</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_2</name>
+      <text>RTDL freq:</text>
+      <x>6</x>
+      <y>6</y>
+      <width>133</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_2</name>
+      <text>Acquisition freq:</text>
+      <x>6</x>
+      <y>36</y>
+      <width>133</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <pv_name>$(P)stat:RtdlTimesRate</pv_name>
+      <x>150</x>
+      <y>6</y>
+      <width>127</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_1</name>
+      <text>Commands rate:</text>
+      <x>6</x>
+      <y>126</y>
+      <width>133</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_3</name>
+      <pv_name>$(P)stat:CmdPktsRate</pv_name>
+      <x>150</x>
+      <y>126</y>
+      <width>163</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_3</name>
+      <pv_name>$(P)stat:TotBytesRate</pv_name>
+      <x>150</x>
+      <y>156</y>
+      <width>163</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_1</name>
+      <text>Total throughput:</text>
+      <x>6</x>
+      <y>156</y>
+      <width>133</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions execute_as_one="true">
+        <action type="write_pv">
+          <pv_name>loc://active_tab(0)</pv_name>
+          <value>3</value>
+          <description>RTDL tab</description>
+        </action>
+      </actions>
+      <text>...</text>
+      <x>281</x>
+      <y>6</y>
+      <width>32</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_1</name>
+      <pv_name>$(P)stat:NeutronTimesRate</pv_name>
+      <x>150</x>
+      <y>36</y>
+      <width>163</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_2</name>
+      <pv_name>$(P)stat:NeutronCntsRate</pv_name>
+      <x>150</x>
+      <y>66</y>
+      <width>163</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_3</name>
+      <pv_name>$(P)stat:MetaCntsRate</pv_name>
+      <x>150</x>
+      <y>96</y>
+      <width>163</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Detectors Channels</name>
+    <y>217</y>
+    <width>349</width>
+    <height>97</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>OCC1 status:</text>
+      <x>6</x>
+      <y>6</y>
+      <width>103</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <pv_name>$(P)occ1:StatusText</pv_name>
+      <x>150</x>
+      <y>6</y>
+      <width>127</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions execute_as_one="true">
+        <action type="write_pv">
+          <pv_name>loc://active_tab(0)</pv_name>
+          <value>2</value>
+          <description>OCC1 tab</description>
+        </action>
+      </actions>
+      <text>...</text>
+      <x>282</x>
+      <y>6</y>
+      <width>32</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Data Processing</name>
+    <y>314</y>
+    <width>349</width>
+    <height>133</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions>
+        <action type="open_display">
+          <file>OccPlugin.opi</file>
+          <macros>
+            <P>$(P)occ1:</P>
+          </macros>
+          <target>replace</target>
+        </action>
+      </actions>
+      <text>...</text>
+      <x>282</x>
+      <y>6</y>
+      <width>32</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+      <tooltip>$(actions)</tooltip>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>Pixel mapping:</text>
+      <x>6</x>
+      <y>6</y>
+      <width>145</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <x>150</x>
+      <y>6</y>
+      <width>127</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions>
+        <action type="open_display">
+          <file>OccPlugin.opi</file>
+          <macros>
+            <P>$(P)occ1:</P>
+          </macros>
+          <target>replace</target>
+        </action>
+      </actions>
+      <text>...</text>
+      <x>282</x>
+      <y>36</y>
+      <width>32</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+      <tooltip>$(actions)</tooltip>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>Position calc:</text>
+      <x>6</x>
+      <y>36</y>
+      <width>145</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <x>150</x>
+      <y>36</y>
+      <width>127</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions>
+        <action type="open_display">
+          <file>OccPlugin.opi</file>
+          <macros>
+            <P>$(P)occ1:</P>
+          </macros>
+          <target>replace</target>
+        </action>
+      </actions>
+      <text>...</text>
+      <x>282</x>
+      <y>66</y>
+      <width>32</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+      <tooltip>$(actions)</tooltip>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>Flat field correction:</text>
+      <x>6</x>
+      <y>66</y>
+      <width>145</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <x>150</x>
+      <y>66</y>
+      <width>127</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Export Channels</name>
+    <y>447</y>
+    <width>349</width>
+    <height>127</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions>
+        <action type="open_display">
+          <file>OccPlugin.opi</file>
+          <macros>
+            <P>$(P)occ1:</P>
+          </macros>
+          <target>replace</target>
+        </action>
+      </actions>
+      <text>...</text>
+      <x>282</x>
+      <y>6</y>
+      <width>32</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+      <tooltip>$(actions)</tooltip>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>ADARA export status:</text>
+      <x>6</x>
+      <y>6</y>
+      <width>145</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <x>150</x>
+      <y>6</y>
+      <width>127</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>PVA neutrons:</text>
+      <x>6</x>
+      <y>36</y>
+      <width>145</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <pv_name>$(P)pva:PvaName</pv_name>
+      <x>150</x>
+      <y>36</y>
+      <width>164</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>PVA RTDL:</text>
+      <x>6</x>
+      <y>66</y>
+      <width>145</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <pv_name>$(P)rtdl:PvaName</pv_name>
+      <x>150</x>
+      <y>66</y>
+      <width>164</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+    </widget>
+  </widget>
+</display>
