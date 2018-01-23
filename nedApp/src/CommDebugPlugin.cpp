@@ -83,6 +83,10 @@ CommDebugPlugin::CommDebugPlugin(const char *portName, const char *parentPlugins
     createParam("RspRtdlTofOff",asynParamInt32, &RspRtdlTofOff);    // READ - RTDL applied TOF offset
     createParam("RspRtdlFrOff", asynParamInt32, &RspRtdlFrOff);     // READ - RTDL applied frame offset
     createParam("RspRtdlOffEn", asynParamInt32, &RspRtdlOffEn);     // READ - RTDL TOF enabled flag
+    createParam("RspDataSourceId",asynParamInt32, &RspDataSourceId);// READ - Data source id field
+    createParam("RspDataFormat",asynParamInt32, &RspDataFormat);    // READ - Data format
+    createParam("RspDataTime",  asynParamOctet, &RspDataTime);      // READ - Data time, seconds converter to time string in ETC
+    createParam("RspDataTimeNsec",asynParamInt32, &RspDataTimeNsec);// READ - Data time, nano-seconds
 
     createParam("ReqSend",      asynParamInt32, &ReqSend);          // WRITE - Send cached packet
     createParam("SendQueIndex", asynParamInt32, &SendQueIndex, 0);  // Currently selected sent packet
@@ -100,8 +104,7 @@ CommDebugPlugin::CommDebugPlugin(const char *portName, const char *parentPlugins
 
     callParamCallbacks();
 
-    std::list<int> types = { MsgDasCmd, MsgDasRtdl, MsgError };
-    BasePlugin::connect(parentPlugins, types);
+    BasePlugin::connect(parentPlugins, { MsgDasCmd, MsgDasRtdl, MsgDasData, MsgError });
 
     generatePacket(false);
     memset(&m_emptyPacket, 0, sizeof(DasCmdPacket));
@@ -242,6 +245,25 @@ void CommDebugPlugin::recvDownstream(DasCmdPacketList *packets)
             } else {
                 savePacket(packet, m_recvQue, recvQueMaxSize);
             }
+        }
+        if (!packets->empty())
+            showRecvPacket(0);
+    }
+}
+
+void CommDebugPlugin::recvDownstream(DasDataPacketList *packets)
+{
+    int filterType = getIntegerParam(FilterPktType);
+    int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
+    bool sniffer = getBooleanParam(Sniffer);
+
+    this->unlock();
+    sendDownstream(packets, false);
+    this->lock();
+
+    if (sniffer && (filterType == 0 || filterType == Packet::TYPE_DAS_DATA)) {
+        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+            savePacket(*it, m_recvQue, recvQueMaxSize);
         }
         if (!packets->empty())
             showRecvPacket(0);
@@ -443,6 +465,20 @@ void CommDebugPlugin::showRecvPacket(Packet *packet, int index)
             setIntegerParam(RspRtdlTofOff,  rtdlPacket->correction.tof_fixed_offset * 100);
             setIntegerParam(RspRtdlFrOff,   rtdlPacket->correction.frame_offset);
             setIntegerParam(RspRtdlOffEn,   rtdlPacket->correction.tof_full_offset);
+
+        } else if (packet->type == Packet::TYPE_DAS_DATA) {
+            DasDataPacket *dataPacket = reinterpret_cast<DasDataPacket *>(packet);
+            epicsTimeStamp ts = { dataPacket->timestamp_sec, dataPacket->timestamp_nsec };
+            epicsTime t(ts);
+            char timeStr[64], nsecStr[16];
+            t.strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S.");
+            snprintf(nsecStr, sizeof(nsecStr), "%09u", dataPacket->timestamp_nsec);
+            strncat(timeStr, nsecStr, sizeof(timeStr));
+
+            setIntegerParam(RspDataSourceId,dataPacket->source);
+            setIntegerParam(RspDataFormat,  dataPacket->format);
+            setStringParam (RspDataTime,    timeStr);
+            setIntegerParam(RspDataTimeNsec,dataPacket->timestamp_nsec);
         }
     }
 

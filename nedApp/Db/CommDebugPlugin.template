@@ -76,10 +76,12 @@ record(mbbo, "$(P)FilterPktType")
     field(ZRST, "All")
     field(ONVL, "1")
     field(ONST, "Error packets")
-    field(TWVL, "6")
-    field(TWST, "RTDL packets")
-    field(THVL, "8")
-    field(THST, "DAS commands")
+    field(TWVL, "8")
+    field(TWST, "DAS commands")
+    field(THVL, "6")
+    field(THST, "RTDL packets")
+    field(FRVL, "7")
+    field(FRST, "Data packets")
     field(VAL,  "3")
     field(PINI, "YES")
 }
@@ -699,6 +701,70 @@ record(longin, "$(P)RspRtdlOffEn")
     field(DESC, "RTDL TOF enabled flag")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))RspRtdlOffEn")
+    field(SCAN, "I/O Intr")
+}
+
+####################################################
+### Data response PVs                            ###
+####################################################
+
+record(longin, "$(P)RspDataSourceId")
+{
+    field(DESC, "Data packet source")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspDataSourceId")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(P)RspDataFormat")
+{
+    field(DESC, "Data number of format")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspDataFormat")
+    field(SCAN, "I/O Intr")
+    field(ZRVL, "0")
+    field(ZRST, "All")
+    field(ONVL, "1")
+    field(ONST, "Meta data")
+    field(TWVL, "2")
+    field(TWST, "Pixel")
+    field(THVL, "16")
+    field(THST, "LPSD raw")
+    field(FRVL, "17")
+    field(FRST, "LPSD verbose")
+    field(FVVL, "18")
+    field(FVST, "ACPC XY PS")
+    field(SXVL, "19")
+    field(SXST, "ACPC raw")
+    field(SVVL, "20")
+    field(SVST, "ACPC verbose")
+    field(EIVL, "21")
+    field(EIST, "AROC raw")
+    field(NIVL, "22")
+    field(NIST, "BNL XY")
+    field(TEVL, "23")
+    field(TEST, "BNL raw")
+    field(ELVL, "24")
+    field(ELST, "BNL verbose")
+    field(TVVL, "25")
+    field(TVST, "CROC raw")
+    field(TTVL, "26")
+    field(TTST, "CROC verbose")
+}
+
+record(stringin, "$(P)RspDataTime")
+{
+    field(DESC, "Data time")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))RspDataTime")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)RspDataTimeNsec")
+{
+    field(DESC, "Data time nanoseconds")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspDataTimeNsec")
     field(SCAN, "I/O Intr")
 }
 

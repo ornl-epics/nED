@@ -10,7 +10,7 @@
   <background_color>
     <color name="Background" red="255" green="255" blue="255" />
   </background_color>
-  <boy_version>5.1.0.201712060148</boy_version>
+  <boy_version>5.1.0.201801151722</boy_version>
   <foreground_color>
     <color red="192" green="192" blue="192" />
   </foreground_color>
@@ -46,7 +46,7 @@
     <enabled>true</enabled>
     <fc>false</fc>
     <font>
-      <opifont.name fontName="Sans" height="10" style="1" pixels="false">Default Bold</opifont.name>
+      <opifont.name fontName="Noto Sans" height="9" style="1" pixels="false">Default Bold</opifont.name>
     </font>
     <foreground_color>
       <color red="192" green="192" blue="192" />
@@ -86,7 +86,7 @@
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -131,7 +131,7 @@
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -184,7 +184,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -229,7 +229,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -284,7 +284,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -326,7 +326,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -367,7 +367,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -408,7 +408,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -449,7 +449,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -490,7 +490,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -531,7 +531,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -572,7 +572,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -617,7 +617,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -670,7 +670,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -711,7 +711,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -752,7 +752,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -797,7 +797,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -861,7 +861,7 @@ $(pv_value)</tooltip>
       </fg_gradient_color>
       <fill_level>0.0</fill_level>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -919,7 +919,7 @@ $(pv_value)</tooltip>
       </fg_gradient_color>
       <fill_level>0.0</fill_level>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -966,7 +966,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1007,7 +1007,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1048,7 +1048,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1093,7 +1093,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1146,7 +1146,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1191,7 +1191,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1244,7 +1244,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1289,7 +1289,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1342,7 +1342,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1387,7 +1387,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1442,7 +1442,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1484,7 +1484,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1525,7 +1525,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1570,7 +1570,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1634,7 +1634,7 @@ $(pv_value)</tooltip>
       </fg_gradient_color>
       <fill_level>0.0</fill_level>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1681,7 +1681,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1722,7 +1722,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1767,7 +1767,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1820,7 +1820,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1873,7 +1873,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -1934,7 +1934,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -1987,7 +1987,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2048,7 +2048,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -2101,7 +2101,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2162,7 +2162,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -2215,7 +2215,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2280,7 +2280,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2333,7 +2333,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -2378,7 +2378,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2431,7 +2431,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -2476,7 +2476,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2529,7 +2529,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -2574,7 +2574,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2627,7 +2627,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -2672,7 +2672,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2733,7 +2733,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -2786,7 +2786,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2847,7 +2847,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -2900,7 +2900,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -2961,7 +2961,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3014,7 +3014,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -3075,7 +3075,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3134,7 +3134,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -3185,7 +3185,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3229,7 +3229,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -3289,7 +3289,7 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <fc>false</fc>
     <font>
-      <opifont.name fontName="Sans" height="10" style="1" pixels="false">Default Bold</opifont.name>
+      <opifont.name fontName="Noto Sans" height="9" style="1" pixels="false">Default Bold</opifont.name>
     </font>
     <foreground_color>
       <color red="192" green="192" blue="192" />
@@ -3319,7 +3319,7 @@ $(pv_value)</tooltip>
     <transparent>false</transparent>
     <visible>true</visible>
     <widget_type>Grouping Container</widget_type>
-    <width>1750</width>
+    <width>2212</width>
     <wuid>-15b61633:15fc0bc91d5:-7643</wuid>
     <x>699</x>
     <y>0</y>
@@ -3336,7 +3336,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3380,7 +3380,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>false</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -3429,7 +3429,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3473,7 +3473,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -3525,7 +3525,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -3567,7 +3567,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3608,7 +3608,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3649,7 +3649,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3690,7 +3690,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3731,7 +3731,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3772,7 +3772,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3813,7 +3813,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3857,7 +3857,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -3906,7 +3906,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3947,7 +3947,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -3988,7 +3988,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4032,7 +4032,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4084,7 +4084,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4136,7 +4136,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4185,7 +4185,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4226,7 +4226,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4267,7 +4267,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4318,7 +4318,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4374,7 +4374,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4425,7 +4425,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4481,7 +4481,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4532,7 +4532,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4588,7 +4588,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4639,7 +4639,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4698,7 +4698,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4747,7 +4747,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4795,7 +4795,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -4846,7 +4846,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4913,7 +4913,7 @@ $(pv_value)</tooltip>
       </fg_gradient_color>
       <fill_level>0.0</fill_level>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -4967,7 +4967,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5015,7 +5015,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5066,7 +5066,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5122,7 +5122,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5174,7 +5174,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5231,7 +5231,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5283,7 +5283,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5340,7 +5340,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5392,7 +5392,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5449,7 +5449,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5501,7 +5501,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5561,7 +5561,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5610,7 +5610,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5654,7 +5654,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5703,7 +5703,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5747,7 +5747,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5803,7 +5803,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5854,7 +5854,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -5910,7 +5910,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -5961,7 +5961,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6017,7 +6017,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6068,7 +6068,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6124,7 +6124,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6175,7 +6175,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6231,7 +6231,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6282,7 +6282,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6338,7 +6338,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6386,7 +6386,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6430,7 +6430,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6489,7 +6489,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6548,7 +6548,7 @@ $(pv_value)</tooltip>
       </fg_gradient_color>
       <fill_level>0.0</fill_level>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6609,7 +6609,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6667,7 +6667,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6733,7 +6733,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6799,7 +6799,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -6862,7 +6862,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6917,7 +6917,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -6972,7 +6972,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7027,7 +7027,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7082,7 +7082,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7140,7 +7140,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -7206,7 +7206,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -7272,7 +7272,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -7328,7 +7328,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7383,7 +7383,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7441,7 +7441,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -7504,7 +7504,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7545,7 +7545,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7602,7 +7602,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -7664,7 +7664,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7722,7 +7722,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -7785,7 +7785,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7843,7 +7843,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -7906,7 +7906,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -7958,7 +7958,7 @@ $(pv_value)</tooltip>
       </fg_gradient_color>
       <fill_level>0.0</fill_level>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8022,7 +8022,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8085,7 +8085,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -8140,7 +8140,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -8198,7 +8198,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8254,7 +8254,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -8320,7 +8320,7 @@ $(pv_value)</tooltip>
       </fg_gradient_color>
       <fill_level>0.0</fill_level>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8383,7 +8383,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8446,7 +8446,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -8504,7 +8504,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8560,7 +8560,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -8615,7 +8615,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -8669,7 +8669,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -8726,7 +8726,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8791,7 +8791,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8853,7 +8853,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -8910,7 +8910,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -8972,7 +8972,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -9029,7 +9029,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9091,7 +9091,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -9145,7 +9145,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -9202,7 +9202,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9264,7 +9264,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="8" style="0" pixels="false">Fine Print</opifont.name>
+        <opifont.name fontName="Noto Sans" height="7" style="0" pixels="false">Fine Print</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -9321,7 +9321,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9393,7 +9393,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9445,7 +9445,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="255" />
@@ -9473,6 +9473,1139 @@ $(pv_value)</tooltip>
       <x>582</x>
       <y>26</y>
     </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color red="255" green="255" blue="255" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label_52</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text>Time</text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>479</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a4f</wuid>
+      <x>1678</x>
+      <y>221</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <alarm_pulsing>false</alarm_pulsing>
+      <auto_size>false</auto_size>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255" />
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <format_type>0</format_type>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Text Input_32</name>
+      <precision>0</precision>
+      <precision_from_pv>true</precision_from_pv>
+      <pv_name>$(P)RspRtdlTime</pv_name>
+      <pv_value />
+      <rotation_angle>0.0</rotation_angle>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_units>true</show_units>
+      <text></text>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Text Update</widget_type>
+      <width>479</width>
+      <wrap_words>false</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a4e</wuid>
+      <x>1678</x>
+      <y>246</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color red="255" green="255" blue="255" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label_53</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;16</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text>Time (nanoseconds)</text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>479</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a4d</wuid>
+      <x>1678</x>
+      <y>281</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <alarm_pulsing>false</alarm_pulsing>
+      <auto_size>false</auto_size>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255" />
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <format_type>1</format_type>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Text Input_33</name>
+      <precision>0</precision>
+      <precision_from_pv>true</precision_from_pv>
+      <pv_name>$(P)RspRtdlTimeNsec</pv_name>
+      <pv_value />
+      <rotation_angle>0.0</rotation_angle>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;16</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_units>true</show_units>
+      <text></text>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Text Update</widget_type>
+      <width>479</width>
+      <wrap_words>false</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a4c</wuid>
+      <x>1678</x>
+      <y>306</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color red="255" green="255" blue="255" />
+      </background_color>
+      <border_color>
+        <color red="0" green="128" blue="255" />
+      </border_color>
+      <border_style>0</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>0</horizontal_alignment>
+      <name>Label_44</name>
+      <rules />
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text>Data packet fields</text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>235</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a49</wuid>
+      <x>1800</x>
+      <y>108</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <alarm_pulsing>false</alarm_pulsing>
+      <alpha>255</alpha>
+      <anti_alias>true</anti_alias>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="Button_Background" red="210" green="210" blue="210" />
+      </background_color>
+      <bg_gradient_color>
+        <color red="255" green="255" blue="255" />
+      </bg_gradient_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <fg_gradient_color>
+        <color red="255" green="255" blue="255" />
+      </fg_gradient_color>
+      <fill_level>0.0</fill_level>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="255" green="0" blue="0" />
+      </foreground_color>
+      <gradient>false</gradient>
+      <height>26</height>
+      <horizontal_fill>true</horizontal_fill>
+      <line_color>
+        <color red="128" green="0" blue="255" />
+      </line_color>
+      <line_style>0</line_style>
+      <line_width>0</line_width>
+      <name>Rectangle</name>
+      <pv_name></pv_name>
+      <pv_value />
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;8</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <visible>true</visible>
+      <widget_type>Rectangle</widget_type>
+      <width>120</width>
+      <wuid>5125c4d7:1612422f751:-7a48</wuid>
+      <x>1678</x>
+      <y>186</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <alarm_pulsing>false</alarm_pulsing>
+      <auto_size>false</auto_size>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255" />
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <format_type>0</format_type>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Text Input_1</name>
+      <precision>0</precision>
+      <precision_from_pv>true</precision_from_pv>
+      <pv_name>$(P)RspDataSourceId</pv_name>
+      <pv_value />
+      <rotation_angle>0.0</rotation_angle>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;8</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>368</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_units>true</show_units>
+      <text></text>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Text Update</widget_type>
+      <width>123</width>
+      <wrap_words>false</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a47</wuid>
+      <x>2034</x>
+      <y>186</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color red="255" green="255" blue="255" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;8</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>368</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text>Source id</text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>123</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a46</wuid>
+      <x>2034</x>
+      <y>161</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color name="Header_Background" red="77" green="77" blue="77" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label_1</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;8</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text></text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>120</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a45</wuid>
+      <x>1678</x>
+      <y>161</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.MenuButton" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <actions_from_pv>false</actions_from_pv>
+      <alarm_pulsing>false</alarm_pulsing>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="Write_Background" red="128" green="255" blue="255" />
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <label></label>
+      <name>Menu Button</name>
+      <pv_name>$(P)RspDataFormat</pv_name>
+      <pv_value />
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;8</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>131</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_down_arrow>false</show_down_arrow>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <visible>true</visible>
+      <widget_type>Menu Button</widget_type>
+      <width>120</width>
+      <wuid>5125c4d7:1612422f751:-7a44</wuid>
+      <x>1797</x>
+      <y>186</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color red="255" green="255" blue="255" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label_2</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;8</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>131</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text>Data format</text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>120</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7a43</wuid>
+      <x>1797</x>
+      <y>161</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color name="Header_Background" red="77" green="77" blue="77" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label_88</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;8</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>250</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text></text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>119</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7961</wuid>
+      <x>1916</x>
+      <y>161</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Rectangle" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <alarm_pulsing>false</alarm_pulsing>
+      <alpha>255</alpha>
+      <anti_alias>true</anti_alias>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="Button_Background" red="210" green="210" blue="210" />
+      </background_color>
+      <bg_gradient_color>
+        <color red="255" green="255" blue="255" />
+      </bg_gradient_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <fg_gradient_color>
+        <color red="255" green="255" blue="255" />
+      </fg_gradient_color>
+      <fill_level>0.0</fill_level>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="255" green="0" blue="0" />
+      </foreground_color>
+      <gradient>false</gradient>
+      <height>26</height>
+      <horizontal_fill>true</horizontal_fill>
+      <line_color>
+        <color red="128" green="0" blue="255" />
+      </line_color>
+      <line_style>0</line_style>
+      <line_width>0</line_width>
+      <name>Rectangle</name>
+      <pv_name></pv_name>
+      <pv_value />
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;8</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>250</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <visible>true</visible>
+      <widget_type>Rectangle</widget_type>
+      <width>119</width>
+      <wuid>5125c4d7:1612422f751:-7959</wuid>
+      <x>1916</x>
+      <y>186</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <alarm_pulsing>false</alarm_pulsing>
+      <auto_size>false</auto_size>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255" />
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <format_type>3</format_type>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Text Input_2</name>
+      <precision>0</precision>
+      <precision_from_pv>true</precision_from_pv>
+      <pv_name>$(P)RspRaw7</pv_name>
+      <pv_value />
+      <rotation_angle>0.0</rotation_angle>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;28</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_units>true</show_units>
+      <text></text>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Text Update</widget_type>
+      <width>479</width>
+      <wrap_words>false</wrap_words>
+      <wuid>5125c4d7:1612422f751:-789e</wuid>
+      <x>1678</x>
+      <y>486</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color red="255" green="255" blue="255" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;24</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text>Payload 1</text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>479</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-789d</wuid>
+      <x>1678</x>
+      <y>401</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color red="255" green="255" blue="255" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label_1</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;20</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text>Payload 0</text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>479</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-789c</wuid>
+      <x>1678</x>
+      <y>341</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <alarm_pulsing>false</alarm_pulsing>
+      <auto_size>false</auto_size>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255" />
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <format_type>3</format_type>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Text Input_1</name>
+      <precision>0</precision>
+      <precision_from_pv>true</precision_from_pv>
+      <pv_name>$(P)RspRaw5</pv_name>
+      <pv_value />
+      <rotation_angle>0.0</rotation_angle>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;20</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_units>true</show_units>
+      <text></text>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Text Update</widget_type>
+      <width>479</width>
+      <wrap_words>false</wrap_words>
+      <wuid>5125c4d7:1612422f751:-789b</wuid>
+      <x>1678</x>
+      <y>366</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.Label" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <auto_size>false</auto_size>
+      <background_color>
+        <color red="255" green="255" blue="255" />
+      </background_color>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Label_2</name>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;28</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_scrollbar>false</show_scrollbar>
+      <text>Payload 2</text>
+      <tooltip></tooltip>
+      <transparent>true</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Label</widget_type>
+      <width>479</width>
+      <wrap_words>true</wrap_words>
+      <wuid>5125c4d7:1612422f751:-789a</wuid>
+      <x>1678</x>
+      <y>461</y>
+    </widget>
+    <widget typeId="org.csstudio.opibuilder.widgets.TextUpdate" version="1.0.0">
+      <actions hook="false" hook_all="false" />
+      <alarm_pulsing>false</alarm_pulsing>
+      <auto_size>false</auto_size>
+      <backcolor_alarm_sensitive>false</backcolor_alarm_sensitive>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255" />
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color name="Text" red="0" green="0" blue="0" />
+      </border_color>
+      <border_style>1</border_style>
+      <border_width>1</border_width>
+      <enabled>true</enabled>
+      <font>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
+      </font>
+      <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
+      <foreground_color>
+        <color red="0" green="0" blue="0" />
+      </foreground_color>
+      <format_type>3</format_type>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <name>Text Input_2</name>
+      <precision>0</precision>
+      <precision_from_pv>true</precision_from_pv>
+      <pv_name>$(P)RspRaw6</pv_name>
+      <pv_value />
+      <rotation_angle>0.0</rotation_angle>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <value>pv0==7&amp;&amp;pv1&gt;24</value>
+          </exp>
+          <pv trig="true">$(P)RspType.RVAL</pv>
+          <pv trig="true">$(P)RspLength</pv>
+        </rule>
+        <rule name="Position" prop_id="x" out_exp="true">
+          <exp bool_exp="true">
+            <value>12</value>
+          </exp>
+          <pv trig="true">loc://init(1)</pv>
+        </rule>
+      </rules>
+      <scale_options>
+        <width_scalable>true</width_scalable>
+        <height_scalable>true</height_scalable>
+        <keep_wh_ratio>false</keep_wh_ratio>
+      </scale_options>
+      <scripts />
+      <show_units>true</show_units>
+      <text></text>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <transparent>false</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <visible>true</visible>
+      <widget_type>Text Update</widget_type>
+      <width>479</width>
+      <wrap_words>false</wrap_words>
+      <wuid>5125c4d7:1612422f751:-7899</wuid>
+      <x>1678</x>
+      <y>426</y>
+    </widget>
   </widget>
   <widget typeId="org.csstudio.opibuilder.widgets.groupingContainer" version="1.0.0">
     <actions hook="false" hook_all="false" />
@@ -9487,7 +10620,7 @@ $(pv_value)</tooltip>
     <enabled>true</enabled>
     <fc>false</fc>
     <font>
-      <opifont.name fontName="Sans" height="10" style="1" pixels="false">Default Bold</opifont.name>
+      <opifont.name fontName="Noto Sans" height="9" style="1" pixels="false">Default Bold</opifont.name>
     </font>
     <foreground_color>
       <color red="192" green="192" blue="192" />
@@ -9544,7 +10677,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9587,7 +10720,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -9628,7 +10761,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -9673,7 +10806,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9745,7 +10878,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9799,7 +10932,7 @@ $(pv_value)</tooltip>
       <confirm_message></confirm_message>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9879,7 +11012,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>
@@ -9923,7 +11056,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <foreground_color>
         <color red="0" green="0" blue="0" />
@@ -9966,7 +11099,7 @@ $(pv_value)</tooltip>
       <border_width>1</border_width>
       <enabled>true</enabled>
       <font>
-        <opifont.name fontName="Sans" height="10" style="0" pixels="false">Default</opifont.name>
+        <opifont.name fontName="Noto Sans" height="9" style="0" pixels="false">Default</opifont.name>
       </font>
       <forecolor_alarm_sensitive>false</forecolor_alarm_sensitive>
       <foreground_color>

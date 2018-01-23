@@ -62,6 +62,11 @@ class CommDebugPlugin : public BasePlugin {
         virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
+         * Receive and process data packets.
+         */
+         void recvDownstream(DasDataPacketList *packets);
+
+        /**
          * Receive and process command packets.
          */
         void recvDownstream(DasCmdPacketList *packets);
@@ -220,6 +225,12 @@ class CommDebugPlugin : public BasePlugin {
         int RspRtdlTofOff;  //!< RTDL applied TOF offset
         int RspRtdlFrOff;   //!< RTDL applied frame offset
         int RspRtdlOffEn;   //!< RTDL TOF enabled flag
+
+        // Data packet PVs
+        int RspDataSourceId;//!< Data source id field
+        int RspDataFormat;  //!< Data format
+        int RspDataTime;    //!< Data time, seconds converter to time string in ETC
+        int RspDataTimeNsec;//!< Data time, nano-seconds
 
         int SendQueIndex;   //!< Currently display sent packet index
         int SendQueSize;    //!< Number of elements in send buffer
