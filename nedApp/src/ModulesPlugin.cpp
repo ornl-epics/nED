@@ -323,6 +323,7 @@ uint32_t ModulesPlugin::formatSubstitution(char *buffer, uint32_t size)
 
     std::vector<std::string> lines;
     std::map<std::string, uint32_t> ids;
+    memset(buffer, 0, size);
 
     for (std::map<uint32_t, ModuleDesc>::iterator it = m_discovered.begin(); it != m_discovered.end(); it++, i++) {
         std::string moduleId(BaseModulePlugin::addr2ip(it->first));
