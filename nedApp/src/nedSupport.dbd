@@ -12,6 +12,7 @@ include "sCalcoutRecord.dbd"
 registrar(iocshSystemCommand)
 
 # Non-detector plugins (alphabetically)
+registrar("registerTcpClientPlugin")
 registrar("registerOccPlugin")
 registrar("registerDas1CompatibilityPlugin")
 registrar("registerDas1CommDebugPlugin")

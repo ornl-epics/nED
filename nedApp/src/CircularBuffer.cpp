@@ -60,8 +60,10 @@ CircularBuffer::~CircularBuffer()
 
 void CircularBuffer::clear()
 {
+    m_lock.lock();
     m_consumer = m_producer = 0;
     m_error = 0;
+    m_lock.unlock();
 }
 
 uint32_t CircularBuffer::push(void *data, uint32_t len)

@@ -33,18 +33,26 @@ void Thread::start()
 
 void Thread::stop()
 {
-    bool running = false;
-
     m_mutex.lock();
-    running = m_running;
+    bool running = m_running;
     m_mutex.unlock();
-
+        
     if (running == true) {
         m_pause.signal();
-        m_paused.wait();
 
-        // Clear the event in case client exited not because of it
+        do {
+            m_paused.wait(0.5);
+            
+            m_mutex.lock();
+            running = m_running;
+            m_mutex.unlock();
+        } while (running == true);
+
+        // Clear our event in case thread exited on its own and didn't process signal
         m_pause.tryWait();
+    } else {
+        // Did the thread exit on its own?
+        m_paused.tryWait();
     }
 }
 

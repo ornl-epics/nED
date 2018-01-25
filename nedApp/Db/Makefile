@@ -12,6 +12,7 @@ include $(TOP)/configure/CONFIG
 # databases, templates, substitutions like this
 DB += nEDCommon.db
 DB += OccPlugin.db
+DB += TcpClientPlugin.db
 DB += ModulesPlugin.db
 DB += ROCHV.db
 DB += ROCHVSumBL16b.db

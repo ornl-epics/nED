@@ -1,0 +1,108 @@
+record(bo, "$(P)OldPktsEn")
+{
+    info(archive, "Monitor, 00:00:05, VAL")
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable old DAS 1.0 packets")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))OldPktsEn")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)BufUsed")
+{
+    field(DESC, "Local buffer used space")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))BufUsed")
+    field(FLNK, "$(P)BufUsedMb")
+    field(SCAN, "1 second")
+    field(VAL,  "0")
+    field(EGU,  "B")
+}
+record(calc, "$(P)BufUsedMb")
+{
+    field(DESC, "Local buffer used space")
+    field(INPA, "$(P)BufUsed NPP")
+    field(CALC, "A/(1024*1024)")
+    field(SCAN, "Passive")
+    field(EGU,  "MiB")
+}
+record(longin, "$(P)BufSize")
+{
+    field(DESC, "Local buffer total size")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))BufSize")
+    field(FLNK, "$(P)BufSizeMb")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(EGU,  "B")
+}
+record(calc, "$(P)BufSizeMb")
+{
+    field(DESC, "Local buffer used space")
+    field(INPA, "$(P)BufSize NPP")
+    field(CALC, "A/(1024*1024)")
+    field(SCAN, "Passive")
+    field(EGU,  "MiB")
+}
+record(longin, "$(P)CopyRate")
+{
+    field(DESC, "Copy to buffer data rate")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CopyRate")
+    field(FLNK, "$(P)CopyRateScaled")
+    field(SCAN, "1 second")
+    field(VAL,  "0")
+    field(EGU,  "B/s")
+}
+record(scalcout, "$(P)CopyRateScaled")
+{
+    field(DESC, "Copy to buffer data rate self-scale")
+    field(INPA, "$(P)CopyRate NPP")
+    field(AA,   "B/s")
+    field(BB,   "kB/s")
+    field(CC,   "MB/s")
+    field(CALC, "A>1e6?A/1e6:A>1e3?A/1e3:A")
+    field(OCAL, "A>1e6?CC:A>1e3?BB:AA")
+    field(OOPT, "On Change")
+    field(OUT,  "$(P)CopyRateScaled.EGU NPP")
+    field(DOPT, "Use OCAL")
+    field(PREC, "2")
+    field(EGU,  "B/s")
+}
+record(longin, "$(P)ProcRate")
+{
+    field(DESC, "Process data rate")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ProcRate")
+    field(FLNK, "$(P)ProcRateScaled")
+    field(SCAN, "1 second")
+    field(VAL,  "0")
+    field(EGU,  "B/s")
+}
+record(scalcout, "$(P)ProcRateScaled")
+{
+    field(DESC, "Process data rate self-scale")
+    field(INPA, "$(P)ProcRate NPP")
+    field(AA,   "B/s")
+    field(BB,   "kB/s")
+    field(CC,   "MB/s")
+    field(CALC, "A>1e6?A/1e6:A>1e3?A/1e3:A")
+    field(OCAL, "A>1e6?CC:A>1e3?BB:AA")
+    field(OOPT, "On Change")
+    field(OUT,  "$(P)ProcRateScaled.EGU NPP")
+    field(DOPT, "Use OCAL")
+    field(PREC, "2")
+    field(EGU,  "B/s")
+}
+record(longout, "$(P)MaxPktSize")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Maximum packet size")
+    field(PINI, "YES")
+    field(VAL,  "4000")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MaxPktSize")
+}
