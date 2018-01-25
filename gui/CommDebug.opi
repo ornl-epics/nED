@@ -9555,7 +9555,7 @@ $(pv_value)</tooltip>
       <name>Text Input_32</name>
       <precision>0</precision>
       <precision_from_pv>true</precision_from_pv>
-      <pv_name>$(P)RspRtdlTime</pv_name>
+      <pv_name>$(P)RspDataTime</pv_name>
       <pv_value />
       <rotation_angle>0.0</rotation_angle>
       <rules>
@@ -9675,7 +9675,7 @@ $(pv_value)</tooltip>
       <name>Text Input_33</name>
       <precision>0</precision>
       <precision_from_pv>true</precision_from_pv>
-      <pv_name>$(P)RspRtdlTimeNsec</pv_name>
+      <pv_name>$(P)RspDataTimeNsec</pv_name>
       <pv_value />
       <rotation_angle>0.0</rotation_angle>
       <rules>
