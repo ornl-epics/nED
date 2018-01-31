@@ -89,8 +89,8 @@ class RtdlPlugin : public BasePlugin {
                 PvaRecord(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure);
         };
 
-        epicsTime m_lastRtdlTime;  //!< Time from last processed RTDL packet
         PvaRecord::shared_pointer m_record;
+        std::list<epicsTime> m_timesCache;  //!< List of last N timestamps
 
     private: // asyn parameters
         int Timestamp;

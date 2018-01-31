@@ -76,26 +76,28 @@ void RtdlPlugin::recvDownstream(const DasRtdlPacketList &packets)
         char rtdlTimeStr[64];
         epicsTimeToStrftime(rtdlTimeStr, sizeof(rtdlTimeStr), TIMESTAMP_FORMAT, &t);
 
-        // Account for any errors
         epicsTime rtdlTime = t;
-        if (rtdlTime < m_lastRtdlTime) {
-            // RTDL time going backwards?
-            // Occasionally a glitch has been observed where the time jumps
-            // way in the future, but then no other packets would get processed.
-            // So let's pretend the future one was bogus and this is a good one.
-            addIntegerParam(ErrorsPastTime, 1);
-        } else if (rtdlTime == m_lastRtdlTime) {
-            // Silently drop duplicate RTDLs - hopefully the packet content is
-            // the same as previous one with same timestamp.
-            continue;
-        } else {
-            // RTDL packets are guaranteed 60Hz => when time is more than 16.6ms
-            // in the future, we may have skipped one or more packets.
-            if ((rtdlTime - 0.017) > m_lastRtdlTime) {
-                addIntegerParam(ErrorsFutureTime, 1);
+
+        // Keep the cache sane, at 60Hz nominal update rate 10 samples should be plenty
+        // New entries are pushed to the front, so remove entries from the end to
+        // make space for new ones.
+        while (m_timesCache.size() >= 10) {
+            m_timesCache.pop_back();
+        }
+
+        // Now check for cached timestamp
+        bool found = false;
+        for (auto it = m_timesCache.begin(); it != m_timesCache.end(); it++) {
+            if (*it == rtdlTime) {
+                found = true;
+                break;
             }
         }
-        m_lastRtdlTime = rtdlTime;
+
+        // Skip RTDL that was already posted
+        if (found == true) {
+            continue;
+        }
 
         // Usually frame 4 follows RTLD header, but let's make it generic
         uint32_t ringPeriod = 0;
