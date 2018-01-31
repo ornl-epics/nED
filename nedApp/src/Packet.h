@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <stdint.h>
+#include <stdexcept>
 #include <cstddef>
 
 /**
@@ -28,27 +29,94 @@ class Packet {
             TYPE_DAS_DATA   = 0x7,
             TYPE_DAS_CMD    = 0x8,
             TYPE_ACC_TIME   = 0x10,
-        } PacketType;
+        } Type;
+        
+        using ParseError = std::runtime_error;
 
         struct __attribute__ ((__packed__)) {
             unsigned sequence:8;    //!< Packet sequence number, incremented by sender for each sent packet
             bool priority:1;        //!< Flag to denote high priority handling, used by hardware to optimize interrupt handling
             unsigned __reserved1:11;
-            PacketType type:8;      //!< Packet type
+            Type type:8;            //!< Packet type
             unsigned version:4;     //<! Packet version
         };
 
         uint32_t length;            //!< Total number of bytes for this packet
 
     public: /* Functions */
+    
+        /**
+         * Default constructor.
+         */
+        Packet(uint8_t version, Type type, uint32_t length);
+        
+        /**
+         * Copy constructorm, makes byte-by-byte copy of original.
+         */
+        Packet(const Packet *orig);
 
         /**
-         * Allocate and initialize a new packet.
-         *
-         * @param[in] size in bytes
-         * @return Returns a newly created packet or 0 on error.
+         * Cast raw pointer to Packet pointer.
+         * 
+         * @return Casted valid packet, throws otherwise
          */
-        static Packet *create(size_t size);
+        static const Packet *cast(const uint8_t *data, size_t size) throw(ParseError);
+
+        /**
+         * Decode and return packet version as defined in header.
+         * 
+         * @return packet version.
+         */
+        uint8_t getVersion() const {
+            return version;
+        }
+        uint8_t getVersion() {
+            return version;
+        }
+        
+        /**
+         * Decode and return packet type as defined in header.
+         * 
+         * @return packet type.
+         */
+        Type getType() const {
+            return type;
+        }
+        Type getType() {
+            return type;
+        }
+        
+        /**
+         * Return packet length in bytes.
+         * 
+         */
+        uint32_t getLength() const {
+            return length;
+        }
+        uint32_t getLength() {
+            return length;
+        }
+        
+        /**
+         * Return packet sequence number as set by the sender.
+         * 
+         * Number 0 means either value rolled over or sender does not support
+         * setting sequence number.
+         */
+        uint8_t getSequenceId() const {
+            return sequence;
+        }
+        uint8_t getSequenceId() {
+            return sequence;
+        }
+
+        /**
+         * Set new sequence id of the packet.
+         */
+        void setSequenceId(uint8_t sequence_) {
+            sequence = sequence_;
+        }
+       
 };
 
 /**
@@ -110,21 +178,27 @@ class DasDataPacket : public Packet {
 
     public: /* Functions */
         /**
-         * Allocates a new data packet for selected payload size.
-         *
-         * Packet is zeroed out before returned except for the length field.
-         *
-         * @param[in] format of events
-         * @param[in] time_sec seconds part of timestamp
-         * @param[in] time_nsec nan seconds part of timestamp
-         * @param[in] data pointer to data
-         * @param[in] count size of data in 4-byte units
-         * @return Returns a newly created packet or 0 on error.
+         * Use buffer as storage for new command packet,DasData populate fields.
+         * 
+         * @param buffer to be used to stora new packet
+         * @param size of buffer
+         * @param format of data
+         * @param time_sec Seconds field
+         * @param time_nsec Nano-second field
+         * @param data to be copied to new packet
+         * @param count Number of bytes in data to be copied
+         * @return Returns a newly created packet or nullptr on error.
          */
-        static DasDataPacket *create(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count);
+        static DasDataPacket *init(uint8_t *buffer, size_t size, DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count);
 
         /**
          * Initialize packet fields.
+         *
+         * @param format of data
+         * @param time_sec Seconds field
+         * @param time_nsec Nano-second field
+         * @param data to be copied to new packet
+         * @param count Number of bytes in data to be copied
          */
         void init(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count);
 
@@ -237,20 +311,24 @@ class DasRtdlPacket : public Packet {
 
     public: /* Functions */
         /**
-         * Allocates a new RTDL packet for selected payload size.
-         *
-         * Packet is zeroed out before returned except for the length field.
-         *
-         * @param[in] size payload size only
-         * @return Returns a newly created packet or 0 on error.
+         * Use buffer as storage for new command packet, populate fields.
+         * 
+         * @param buffer to be used to stora new packet
+         * @param size of buffer
+         * @param frames RTDL frames data
+         * @param nFrames Number of RTDL frames
+         * @return Returns a newly created packet or nullptr on error.
          */
-        static DasRtdlPacket *create(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
+        static DasRtdlPacket *init(uint8_t *buffer, size_t size, const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
 
         /**
-         * Initialize packet fields.
+         * Populate fields.
+         * 
+         * @param frames RTDL frames data
+         * @param nFrames Number of RTDL frames
+         * @return Returns a newly created packet or nullptr on error.
          */
         void init(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
-
 };
 
 class DasCmdPacket : public Packet {
@@ -341,19 +419,14 @@ class DasCmdPacket : public Packet {
 
     public: /* Functions */
         /**
-         * Allocates a new command packet for selected payload size.
-         *
-         * Packet is zeroed out before returned except for the length field.
-         *
-         * @param[in] size payload size only
-         * @return Returns a newly created packet or 0 on error.
+         * Use buffer as storage for new command packet, populate fields.
          */
-        static DasCmdPacket *create(uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, const uint32_t *payload=0, size_t payloadSize=0);
+        static DasCmdPacket *init(uint8_t *data, size_t size, uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, const uint32_t *payload_=nullptr, size_t payloadSize=0);
 
         /**
-         * Initialize packet fields.
+         * Populate fields.
          */
-        void init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize);
+        void init(uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, const uint32_t *payload_=nullptr, size_t payloadSize=0);
 
         /**
          * Return length of inner header in bytes.
@@ -364,6 +437,27 @@ class DasCmdPacket : public Packet {
          * Return number of bytes of command payload.
          */
         uint32_t getPayloadLength() const;
+        
+        /**
+         * Return command type.
+         */
+        CommandType getCommand() const {
+            return command;
+        }
+        
+        /**
+         * Return remote module id.
+         */
+        uint32_t getModuleId() const {
+            return module_id;
+        }
+        
+        /**
+         * Return command payload.
+         */
+        const uint32_t *getCommandPayload() const {
+            return payload;
+        }
 };
 
 #endif // PACKET_H

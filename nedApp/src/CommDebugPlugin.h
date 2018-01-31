@@ -33,9 +33,9 @@ class CommDebugPlugin : public BasePlugin {
             uint32_t length;
         };
 
-        uint32_t m_buffer[8];   //!< Cached packet data to be sent out
-        DasCmdPacket *m_packet;
-        DasCmdPacket m_emptyPacket;
+        uint32_t m_buffer[8] = { 0 };           //!< Cached packet data to be sent out
+        const uint8_t m_zeroes[1024] = { 0 };   //!< Buffer with all zeroes
+        DasCmdPacket *m_packet = nullptr;
         std::list<PacketDesc> m_recvQue;
         std::list<PacketDesc> m_sendQue;
         epicsTime m_liveTimeout;        //!< How long to receive packets after manually send it (not in sniffer mode)

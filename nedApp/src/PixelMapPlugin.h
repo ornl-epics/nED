@@ -134,11 +134,9 @@ class PixelMapPlugin : public BasePlugin {
         ImportError importPixelMapFile(const char *filepath);
 
     private:
-        DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins
-
         std::vector<uint32_t> m_map; //!< Pixel mapping, index is raw pixel id, value is translated pixel id
 
-        ObjectPool<uint32_t> m_packetsPool; //!< Pool of packets to be used for modified data
+        ObjectPool<DasDataPacket> m_packetsPool; //!< Pool of packets to be used for modified data
 
     private: // asyn parameters
         int FilePath;       //!< Absolute path to pixel map file

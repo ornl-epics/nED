@@ -11,6 +11,7 @@
 #define DASPACKET_HPP
 
 #include "RtdlHeader.h"
+#include "Packet.h"
 
 #include <stdint.h>
 
@@ -229,16 +230,16 @@ struct DasPacket
 
         uint32_t payload[0];                    //!< 4-byte aligned payload data, support empty packets
 
-        static DasPacket *create(uint32_t payloadLength, const uint8_t *payload=0);
-
     public: // functions
         /**
-         * Create DasPacket OCC command (for DSPs)
+         * Initialize DasPacket as optical command (for DSPs)
          *
          * When sending commands to DSP, the packet format is very simple.
          * The OCC header defines common fields and the payload is the actual
          * little-endian data in units of 4 bytes.
          *
+         * @param[in] buffer Pre-allocated buffer to put new packet contents in
+         * @param[in] size of the pre-allocated buffer
          * @param[in] source address of the sender
          * @param[in] destination address
          * @param[in] command type for new packet
@@ -246,10 +247,20 @@ struct DasPacket
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createOcc(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload = 0);
+        static DasPacket *initOptical(uint8_t *buffer, size_t size, uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload = 0);
+        
+        /**
+         * Initialize DasPacket as OCC command based on DasCmdPacket
+         * 
+         * @param buffer Pre-allocated buffer to put new packet contents in
+         * @param size of the pre-allocated buffer
+         * @param orig Packet to copy from.
+         * @return Newly constructed DasPacket
+         */
+        static DasPacket *initOptical(uint8_t *buffer, size_t size, const DasCmdPacket *orig);
 
         /**
-         * Create DasPacket LVDS command (non DSPs)
+         * Initialize DasPacket as LVDS command (non DSPs)
          *
          * Other modules are connected to DSP thru LVDS link. The DSP simply
          * passes thru the data it receives, so the software must format
@@ -267,6 +278,8 @@ struct DasPacket
          * of protocol flags and packing it into OCC packet. The result
          * is the packet about twice the size of the original payload.
          *
+         * @param[in] buffer Pre-allocated buffer to put new packet contents in
+         * @param[in] size of the pre-allocated buffer
          * @param[in] source address of the sender
          * @param[in] destination address
          * @param[in] command type for new packet
@@ -274,15 +287,18 @@ struct DasPacket
          * @param[in] payload_length Size of the packet payload in bytes.
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
-        static DasPacket *createLvds(uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload = 0);
+        static DasPacket *initLvds(uint8_t *buffer, size_t size, uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload = 0);
 
         /**
-         * Allocate memory for new packet.
-         *
-         * @param[in] size Total size of the packet in bytes, gets rounded to next 4 byte boundary if not already.
-         * @return allocated un-initialized packet or 0 on error.
+         * Create DasPacket LVDS command based on DasCmdPacket
+         * 
+         * @param buffer Pre-allocated buffer to put new packet contents in
+         * @param size of the pre-allocated buffer
+         * @param orig Packet to copy from.
+         * @param single word commands were used by some old modules.
+         * @return Newly constructed DasPacket
          */
-        static DasPacket *alloc(uint32_t size);
+        static DasPacket *initLvds(uint8_t *buffer, size_t size, const DasCmdPacket *orig, bool single=false);
 
         /**
          * Get minimum length of a packet in bytes.
@@ -491,6 +507,20 @@ struct DasPacket
          * Return data format as defined in packet header.
          */
         DataFormat getDataFormat() const;
+        
+        /**
+         * Cast raw pointer to DasPacket pointer.
+         * 
+         * @return Casted valid packet, throws otherwise
+         */
+        static const DasPacket *cast(const uint8_t *data, size_t size) throw(std::runtime_error);
+        
+        /**
+         * Convert DasPacket to new packet format.
+         * 
+         * @return Converted packet or nullptr.
+         */
+        Packet *convert(uint8_t *data, size_t size) const;
 
     private:
         static uint32_t MinLength;    //!< Minumum total length of any DAS packet, at least the header must be present

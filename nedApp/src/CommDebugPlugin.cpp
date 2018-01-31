@@ -107,7 +107,6 @@ CommDebugPlugin::CommDebugPlugin(const char *portName, const char *parentPlugins
     BasePlugin::connect(parentPlugins, { MsgDasCmd, MsgDasRtdl, MsgDasData, MsgError });
 
     generatePacket(false);
-    memset(&m_emptyPacket, 0, sizeof(DasCmdPacket));
 }
 
 asynStatus CommDebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -123,14 +122,14 @@ asynStatus CommDebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         generatePacket(false);
         BasePlugin::sendUpstream(m_packet);
         showSentPacket(m_packet);
-        showRecvPacket(&m_emptyPacket);
+        showRecvPacket(reinterpret_cast<const Packet *>(m_zeroes));
         m_liveTimeout = epicsTime::getCurrent() + 0.5; // Allow .5 seconds for responses to arrive
         return asynSuccess;
     } else if (pasynUser->reason == ResetQues) {
         m_recvQue.clear();
         m_sendQue.clear();
-        showSentPacket(&m_emptyPacket);
-        showRecvPacket(&m_emptyPacket);
+        showRecvPacket(reinterpret_cast<const Packet *>(m_zeroes));
+        showRecvPacket(reinterpret_cast<const Packet *>(m_zeroes));
         return asynSuccess;
     } else if (pasynUser->reason == SendQueIndex) {
         showSentPacket(value);
@@ -203,7 +202,7 @@ void CommDebugPlugin::generatePacket(bool fromRawPvs)
         getStringParam(ReqModule,   sizeof(moduleId), moduleId);
         int module = BaseModulePlugin::ip2addr(std::string(moduleId, sizeof(moduleId)));
         DasCmdPacket::CommandType command = static_cast<const DasCmdPacket::CommandType>(cmd & 0xFF);
-        m_packet->init(module, command, ack, rsp, verifyId, payload, payloadLen);
+        DasCmdPacket::init(reinterpret_cast<uint8_t *>(m_buffer), sizeof(m_buffer), module, command, ack, rsp, verifyId, payload, payloadLen);
 
         int param;
         getIntegerParam(ReqVersion, &param);    m_packet->version = param;

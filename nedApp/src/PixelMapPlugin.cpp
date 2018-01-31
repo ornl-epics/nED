@@ -78,7 +78,7 @@ void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
                 continue;
             }
 
-            DasDataPacket *newPacket = reinterpret_cast<DasDataPacket *>(m_packetsPool.get(origPacket->length));
+            DasDataPacket *newPacket = m_packetsPool.get(origPacket->length);
             if (!newPacket) {
                 LOG_ERROR("Failed to allocate output packet");
                 continue;
@@ -93,7 +93,7 @@ void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
         }
 
         for (auto it = allocatedPackets.begin(); it != allocatedPackets.end(); it++) {
-            m_packetsPool.put(reinterpret_cast<uint32_t*>(*it));
+            m_packetsPool.put(*it);
         }
     }
 

@@ -190,18 +190,18 @@ void Das1CommDebugPlugin::generatePacket()
     getIntegerParam(ReqCmd,     &cmd);
     getIntegerParam(ReqIsDsp,   &isDsp);
     getStringParam(ReqDest,     sizeof(destIp), destIp);
+    std::array<uint8_t, 1024> buffer;
 
     int dest = BaseModulePlugin::ip2addr(std::string(destIp, sizeof(destIp)));
     DasPacket::CommandType command = static_cast<const DasPacket::CommandType>(cmd & 0xFF);
     if (isDsp == 1)
-        packet = DasPacket::createOcc(DasPacket::HWID_SELF, dest, command, 0, 0);
+        packet = DasPacket::initOptical(buffer.data(), buffer.size(), DasPacket::HWID_SELF, dest, command, 0, 0);
     else
-        packet = DasPacket::createLvds(DasPacket::HWID_SELF, dest, command, 0, 0);
+        packet = DasPacket::initLvds(   buffer.data(), buffer.size(), DasPacket::HWID_SELF, dest, command, 0, 0);
 
     memset(m_rawPacket, 0, sizeof(m_rawPacket));
     if (packet) {
         memcpy(m_rawPacket, packet, std::min((size_t)packet->getLength(), sizeof(m_rawPacket)));
-        delete packet;
     }
 
     setIntegerParam(RawPkt0,  m_rawPacket[0]);

@@ -13,20 +13,56 @@
 
 #include <string.h>
 #include <assert.h>
+#include <sstream>
 
-DasRtdlPacket *DasRtdlPacket::create(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
+Packet::Packet(uint8_t version_, Type type_, uint32_t length_)
+: sequence(0)
+, priority(false)
+, type(type_)
+, version(version_)
+, length(length_ < sizeof(Packet) ? sizeof(Packet) : length_)
+{}
+
+Packet::Packet(const Packet *orig)
 {
-    DasRtdlPacket *packet = reinterpret_cast<DasRtdlPacket*>(malloc(sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t)));
-    if (packet) {
-        packet->length = sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t);
+    memcpy(this, orig, orig->length);
+}
+
+const Packet *Packet::cast(const uint8_t *data, size_t size) throw(ParseError)
+{
+    if (size < sizeof(Packet)) {
+        std::ostringstream error;
+        error << "Not enough data to describe packet header, needed " << sizeof(Packet) << " have " << size << " bytes";
+        throw ParseError(error.str());
+    }
+
+    const Packet *packet = reinterpret_cast<const Packet *>(data);
+
+    if (packet->length == ALIGN_UP(packet->length, 4)) {
+        throw ParseError("Invalid packet length");
+    }
+
+    if (packet->length > 0xFFFFFF) {
+        throw ParseError("Packet length out of range");
+    }
+
+    return packet;
+}
+
+DasRtdlPacket *DasRtdlPacket::init(uint8_t *buffer, size_t size, const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
+{
+    DasRtdlPacket *packet = nullptr;
+    uint32_t length = sizeof(DasRtdlPacket) + (nFrames * sizeof(uint32_t));
+    if (size >= length) {
+        packet = reinterpret_cast<DasRtdlPacket *>(buffer);
         packet->init(hdr, frames, nFrames);
     }
+    
     return packet;
 }
 
 void DasRtdlPacket::init(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
 {
-    assert(this->length >= (sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t)));
     memset(this, 0, (sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t)));
 
     this->version = 0x1;
@@ -40,24 +76,24 @@ void DasRtdlPacket::init(const RtdlHeader *hdr, const uint32_t *frames, size_t n
     memcpy(this->frames, frames, nFrames*sizeof(uint32_t));
 }
 
-DasCmdPacket *DasCmdPacket::create(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload, size_t payloadSize)
+DasCmdPacket *DasCmdPacket::init(uint8_t *buffer, size_t size, uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize)
 {
-    assert(payloadSize < 1024*1024);
-    DasCmdPacket *packet = reinterpret_cast<DasCmdPacket*>(malloc(sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4)));
-    if (packet) {
-        packet->init(moduleId, cmd, ack, rsp, ch, payload, payloadSize);
+    DasCmdPacket *packet = nullptr;
+    uint32_t packetLength = sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4);
+    if (size > packetLength) {
+        packet = reinterpret_cast<DasCmdPacket *>(buffer);
+        packet->init(moduleId, cmd, ack, rsp, ch, payload_, payloadSize);
     }
     return packet;
 }
 
 void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize)
 {
-    uint32_t packetLength = sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4);
-    memset(this, 0, packetLength);
+    memset(this, 0, sizeof(DasCmdPacket));
 
     this->version = 0x1;
     this->type = TYPE_DAS_CMD;
-    this->length = packetLength;
+    this->length = sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4);
 
     this->module_id = moduleId;
     if (ch > 0)
@@ -80,10 +116,12 @@ uint32_t DasCmdPacket::getPayloadLength() const
     return this->cmd_length - 6;
 }
 
-DasDataPacket *DasDataPacket::create(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count)
+DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count)
 {
-    DasDataPacket *packet = reinterpret_cast<DasDataPacket*>(malloc(sizeof(DasDataPacket) + count*4));
-    if (packet) {
+    DasDataPacket *packet = nullptr;
+    uint32_t packetLength = sizeof(DasDataPacket) + count*4;
+    if (size >= packetLength) {
+        packet = reinterpret_cast<DasDataPacket *>(buffer);
         packet->init(format, time_sec, time_nsec, data, count);
     }
     return packet;
@@ -91,12 +129,11 @@ DasDataPacket *DasDataPacket::create(DataFormat format, uint32_t time_sec, uint3
 
 void DasDataPacket::init(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count)
 {
-    uint32_t packetLength = sizeof(DasDataPacket) + count*4;
-    memset(this, 0, packetLength);
+    memset(this, 0, sizeof(DasDataPacket));
 
     this->version = 0x1;
     this->type = TYPE_DAS_DATA;
-    this->length = packetLength;
+    this->length = sizeof(DasDataPacket) + count*4;
 
     this->format = format;
     this->timestamp_sec = time_sec;

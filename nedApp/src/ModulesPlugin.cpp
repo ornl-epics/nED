@@ -396,24 +396,24 @@ void ModulesPlugin::report(FILE *fp, int details)
 
 void ModulesPlugin::reqDiscover(uint32_t moduleId)
 {
-    DasCmdPacket *packet = DasCmdPacket::create(moduleId, DasCmdPacket::CMD_DISCOVER);
+    std::array<uint8_t, 1024> buffer;
+    DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), moduleId, DasCmdPacket::CMD_DISCOVER);
     if (!packet) {
         LOG_ERROR("Failed to allocate DISCOVER packet");
         return;
     }
     sendUpstream(packet);
-    delete packet;
 }
 
 void ModulesPlugin::reqVersion(uint32_t moduleId)
 {
-    DasCmdPacket *packet = DasCmdPacket::create(moduleId, DasCmdPacket::CMD_READ_VERSION);
+    std::array<uint8_t, 1024> buffer;
+    DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), moduleId, DasCmdPacket::CMD_READ_VERSION);
     if (!packet) {
         LOG_ERROR("Failed to allocate READ_VERSION packet");
         return;
     }
     sendUpstream(packet);
-    delete packet;
 }
 
 bool ModulesPlugin::readDbFile()
