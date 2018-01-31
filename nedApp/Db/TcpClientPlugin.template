@@ -37,10 +37,8 @@ record(bo, "$(P)Disconnect")
 record(stringout, "$(P)RemoteHost")
 {
     info(autosaveFields, "VAL")
-    info(asyn:READBACK, "1")
     field(DTYP, "asynOctetWrite")
     field(OUT,  "@asyn($(PORT))RemoteHost")
-    field(SCAN, "I/O intr")
     field(PINI, "YES")
 }
 record(longout, "$(P)RemotePort")

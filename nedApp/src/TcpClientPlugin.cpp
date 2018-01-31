@@ -11,7 +11,7 @@
 #include "Log.h"
 #include "TcpClientPlugin.h"
 
-#include <alarm.h> // EPICS alarm
+#include <alarm.h> // EPICS alarm and severity enumerations
 #include <cstring> // strerror
 #include <osiSock.h>
 #include <poll.h>
@@ -50,6 +50,13 @@ TcpClientPlugin::TcpClientPlugin(const char *portName, uint32_t bufferSize)
     } else {
         m_processThread->start();
     }
+}
+
+TcpClientPlugin::~TcpClientPlugin()
+{
+    if (m_copyThread) m_copyThread->stop();
+    if (m_processThread) m_processThread->stop();
+    if (m_circularBuffer) delete m_circularBuffer;
 }
 
 int TcpClientPlugin::connect(const std::string &host, uint16_t port, std::string &error)
@@ -197,9 +204,9 @@ void TcpClientPlugin::copyDataThread(epicsEvent *shutdown)
             ret = ::read(sock, buffer.data(), buffer.capacity());
             if (ret > 0) {
                 m_circularBuffer->push(buffer.data(), ret);
-            } else if (ret == -1) {
+            } else {
                 this->lock();
-                disconnect("receive error");
+                disconnect(ret == -1 ? "receive error" : "server closed connection");
                 this->unlock();
             }
         }
