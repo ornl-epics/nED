@@ -12,24 +12,19 @@
 #include "Log.h"
 
 #include <cstring> // strerror
+#include <list>
+#include <map>
 #include <math.h>
 #include <sstream>
 
-/**
- * A global variable to assign unique sourceId to all packets coming from this device.
- */
-static uint32_t g_sourceId = 0;
-
 BasePortPlugin::BasePortPlugin(const char *pluginName, int blocking, int interfaceMask, int interruptMask,
-                       int queueSize, int asynFlags, int priority, int stackSize)
+                               int queueSize, int asynFlags, int priority, int stackSize)
     : BasePlugin(pluginName, blocking, interfaceMask, interruptMask, queueSize, asynFlags, priority, stackSize)
-    , m_sourceId(g_sourceId++)
 {
     createParam("BufUsed",          asynParamInt32,     &BufUsed);                  // READ - Virtual buffer used space
     createParam("BufSize",          asynParamInt32,     &BufSize);                  // READ - Virtual buffer size
-    createParam("CopyRate",         asynParamInt32,     &CopyRate);                 // READ - Copy to internal buffer throughput in B/s
+    createParam("CopyRate",         asynParamInt32,     &CopyRate);                 // READ - Copy throughput in B/s
     createParam("ProcRate",         asynParamInt32,     &ProcRate);                 // READ - Data processing throughput in B/s
-    createParam("MaxPktSize",       asynParamInt32,     &MaxPktSize, 4000);         // WRITE - Maximum size of DAS packet payload
     createParam("OldPktsEn",        asynParamInt32,     &OldPktsEn, 0);             // WRITE - Enable support for old DAS 1.0 packets
     callParamCallbacks();
 
@@ -74,24 +69,67 @@ asynStatus BasePortPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
 
 void BasePortPlugin::recvUpstream(const DasCmdPacketList &packets)
 {
-    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-        const DasCmdPacket *packet = *it;
-        //packet->sequence = (++m_sendId % 255);
-        int len = ALIGN_UP(packet->length, 4);
-        if (!send(reinterpret_cast<const uint8_t*>(packet), len)) {
-            LOG_ERROR("Failed to send packet");
-            break;
+    bool forceOldPkts = getBooleanParam(OldPktsEn);
+    
+    // Need to send packets one at a time - OCC limitation
+    for (const auto& p: packets) {
+        if (forceOldPkts) {
+            DasPacket *packet;
+            if ((p->getLength() + sizeof(DasPacket)) > m_sendBuffer.size()) {
+                LOG_ERROR("Packet to big to send, skipping");
+                continue;
+            }
+            
+            // Send packet to DSP
+            packet = DasPacket::initOptical(m_sendBuffer.data(), m_sendBuffer.size(), p);
+            if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
+                LOG_ERROR("Failed to send packet");
+                break;
+            }
+            
+            // ... but also to everybody else since we don't know DSP id
+            packet = DasPacket::initLvds(m_sendBuffer.data(), m_sendBuffer.size(), p);
+            if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
+                LOG_ERROR("Failed to send packet");
+                break;
+            }
+            
+            // Support for some old hardware that doesn't respond to broadcast LVDS commands
+            if (p->getCommand() == DasCmdPacket::CMD_DISCOVER && p->getModuleId() == DasCmdPacket::BROADCAST_ID) {
+                packet = DasPacket::initLvds(m_sendBuffer.data(), m_sendBuffer.size(), p, true);
+                if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
+                    LOG_ERROR("Failed to send packet");
+                    break;
+                }
+            }
+    
+        } else {
+            if (p->getLength() > m_sendBuffer.size()) {
+                LOG_ERROR("Packet to big to send, skipping");
+                continue;
+            }
+
+            Packet *packet = new (m_sendBuffer.data()) Packet(p);
+            packet->setSequenceId(++m_sendId % 255);
+            
+            if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
+                LOG_ERROR("Failed to send packet");
+                break;
+            }
         }
     }
-
 }
 
 void BasePortPlugin::recvUpstream(const DasPacketList &packets)
 {
-    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-        const DasPacket *packet = *it;
-        int len = ALIGN_UP(packet->getLength(), 4);
-        if (!send(reinterpret_cast<const uint8_t*>(packet), len)) {
+    if (getBooleanParam(OldPktsEn) == false) {
+        LOG_ERROR("Failed to send packet, DAS 1.0 packets disabled");
+        return;
+    }
+    
+    // Need to send packets one at a time - OCC limitation
+    for (const auto& packet: packets) {
+        if (!send(reinterpret_cast<const uint8_t *>(packet), packet->getLength())) {
             LOG_ERROR("Failed to send packet");
             break;
         }
@@ -147,107 +185,75 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
 
 uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
 {
-    int maxPktSize = getIntegerParam(MaxPktSize);
     bool forceOldPkts = getBooleanParam(OldPktsEn);
-    bool first = true;
 
     DasPacketList oldDas;
     DasDataPacketList dasData;
     DasCmdPacketList dasCmd;
     DasRtdlPacketList dasRtdl;
     ErrorPacketList errors;
+    std::list<std::shared_ptr<uint8_t>> fromPool; //!< Packets to be returned back to pool
 
     const uint8_t *end = ptr + size;
     while (ptr < end) {
         uint32_t bytesLeft = (end - ptr);
-        uint32_t bytesProcessed = 0;
 
         // We don't know what we're receiving. It could be old DAS packet or
         // a new DAS header. They differ in the most significant 4 bits of the
         // first 32 bits received.
-        uint32_t version = (*reinterpret_cast<const uint32_t *>(ptr) >> 28);
+        auto version = reinterpret_cast<const Packet *>(ptr)->getVersion();
+        
+        const Packet *packet = nullptr;
+        
+        if (version == 0 || forceOldPkts) {
+            // Old DAS packet
+            const DasPacket *das1Packet = DasPacket::cast(ptr, bytesLeft);
+            ptr += das1Packet->getLength();
+            oldDas.push_back(das1Packet);
 
-        try {
-            if (version == 0 || forceOldPkts) {
-                // Old DAS packet
-                const DasPacket *packet = reinterpret_cast<const DasPacket *>(ptr);
-
-                if (bytesLeft < sizeof(DasPacket)) {
-                    std::ostringstream error;
-                    error << "Not enough data to describe old DAS packet header, needed " << sizeof(DasPacket) << " got " << bytesLeft << " bytes";
-                    throw std::range_error(error.str());
-                }
-                if (bytesLeft < packet->getLength()) {
-                    std::ostringstream error;
-                    error << "Not enough data to describe old DAS packet, needed " << packet->getLength() << " got " << bytesLeft << " bytes";
-                    throw std::range_error(error.str());
-                }
-                if (static_cast<uint32_t>(maxPktSize) < packet->getLength()) {
-                    std::ostringstream error;
-                    error << "Old DAS packet of " << packet->getLength() << " bytes exceeds " << maxPktSize << " bytes threshold";
-                    throw std::range_error(error.str());
-                }
-
-                oldDas.push_back(packet);
-                bytesProcessed = packet->getLength();
-                if (bytesProcessed == 0) {
-                    throw std::range_error("failed to parse old DAS packet");
-                }
-
-            } else if (version == 1) {
-                // New SNS packet header
-                const Packet *packet = reinterpret_cast<const Packet *>(ptr);
-
-                if (bytesLeft < sizeof(Packet)) {
-                    std::ostringstream error;
-                    error << "Not enough data to describe DAS packet header, needed " << sizeof(Packet) << " got " << bytesLeft << " bytes";
-                    throw std::range_error(error.str());
-                }
-                if (bytesLeft < packet->length) {
-                    std::ostringstream error;
-                    error << "Not enough data to describe DAS packet, needed " << packet->length << " got " << bytesLeft << " bytes";
-                    throw std::range_error(error.str());
-                }
-                if (static_cast<uint32_t>(maxPktSize) < packet->length) {
-                    std::ostringstream error;
-                    error << "DAS packet of " << packet->length << " bytes exceeds " << maxPktSize << " bytes threshold";
-                    throw std::range_error(error.str());
-                }
-
-                if (m_recvId != 0xFFFFFFFF && packet->sequence != ((m_recvId+1) % 255)) {
-                    LOG_ERROR("Expecting packet with sequence number %u, got %u", (m_recvId+1)%255, packet->sequence);
-                }
-                m_recvId = packet->sequence;
-
-                if (packet->type == Packet::TYPE_DAS_DATA) {
-                    //reinterpret_cast<DasDataPacket *>(packet)->source = m_sourceId;
-                    dasData.push_back(reinterpret_cast<const DasDataPacket *>(packet));
-                } else if (packet->type == Packet::TYPE_DAS_RTDL) {
-                    //reinterpret_cast<DasRtdlPacket *>(packet)->source = m_sourceId;
-                    dasRtdl.push_back(reinterpret_cast<const DasRtdlPacket *>(packet));
-                } else if (packet->type == Packet::TYPE_DAS_CMD) {
-                    dasCmd.push_back(reinterpret_cast<const DasCmdPacket *>(packet));
-                } else if (packet->type == Packet::TYPE_ERROR) {
-                    //reinterpret_cast<ErrorPacket *>(packet)->source = m_sourceId;
-                    dasRtdl.push_back(reinterpret_cast<const DasRtdlPacket *>(packet));
-                }
-
-                bytesProcessed = packet->length;
-
-            } else {
-                throw std::runtime_error("Unsupported packet received");
+            // Convert to packet format used internally
+            size_t bufsize = 2 * das1Packet->getLength(); // just an estimate how much space we need
+            auto buffer = m_packetsPool.getPtr(bufsize);
+            if (buffer) {
+                fromPool.push_back(buffer);
+                packet = das1Packet->convert(buffer.get(), bufsize);
             }
-        } catch (std::exception &e) {
-            if (first)
-                throw;
-            else
-                break;
+            // Will add new-style packet to list below
+
+        } else if (version == 1) {
+            packet = Packet::cast(ptr, bytesLeft);
+            
+            if (m_recvId != 0xFFFFFFFF && packet->getSequenceId() != ((m_recvId+1) % 255)) {
+                LOG_ERROR("Expecting packet with sequence number %u, got %u", (m_recvId+1)%255, packet->getSequenceId());
+            }
+            m_recvId = packet->getSequenceId();
+            ptr += packet->getLength();
+            
+        } else {
+            throw std::runtime_error("Unsupported packet received");
         }
 
-        ptr += bytesProcessed;
-        first = false;
+        if (packet != nullptr) {
+            // Put packet in the corresponding list
+            switch (packet->getType()) {
+            case Packet::TYPE_DAS_DATA:
+                dasData.push_back(reinterpret_cast<const DasDataPacket *>(packet));
+                break;
+            case Packet::TYPE_DAS_RTDL:
+                dasRtdl.push_back(reinterpret_cast<const DasRtdlPacket *>(packet));
+                break;
+            case Packet::TYPE_DAS_CMD:
+                dasCmd.push_back(reinterpret_cast<const DasCmdPacket *>(packet));
+                break;
+            case Packet::TYPE_ERROR:
+                dasRtdl.push_back(reinterpret_cast<const DasRtdlPacket *>(packet));
+                break;
+            default:
+                break;
+            }
+        }
     }
-
+    
     // Publish all packets in parallel ..
     std::vector< std::shared_ptr<PluginMessage> > messages;
     if (!oldDas.empty())
@@ -262,9 +268,9 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
         messages.push_back(sendDownstream(errors, false));
 
     // .. and wait for all of them to get released
-    for (auto it = messages.begin(); it != messages.end(); it++) {
-        if (!!(*it)) {
-            (*it)->waitAllReleased();
+    for (const auto& m: messages) {
+        if (!!m) {
+            m->waitAllReleased();
         }
     }
 

@@ -98,9 +98,10 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
     protected:
         std::unique_ptr<Thread> m_processThread;        //!< Thread processing data from buffer
     private:
-        uint8_t m_sourceId;                             //!< Source id number gets added to some packets
         unsigned m_sendId = 0;                          //!< Output packets sequence number
         unsigned m_recvId = 0;                          //!< Last received packet sequence number
+        std::array<uint8_t, 4096> m_sendBuffer;         //!< Buffer used for sending 
+        ObjectPool<uint8_t> m_packetsPool{true};        //!< Packets pool management, used for converting DAS 1.0 -> DAS 2.0 packets
 
         /**
          * Process data from buffer and dispatch it to the registered plugins.
@@ -122,7 +123,6 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         int BufSize;
         int CopyRate;
         int ProcRate;
-        int MaxPktSize;
         int OldPktsEn;
 };
 

@@ -97,12 +97,3 @@ record(scalcout, "$(P)ProcRateScaled")
     field(PREC, "2")
     field(EGU,  "B/s")
 }
-record(longout, "$(P)MaxPktSize")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "Maximum packet size")
-    field(PINI, "YES")
-    field(VAL,  "4000")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))MaxPktSize")
-}
