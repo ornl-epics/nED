@@ -106,7 +106,7 @@ class ModulesPlugin : public BasePlugin {
         /**
          * Process incoming command packets.
          */
-        void recvDownstream(DasCmdPacketList *packetList);
+        void recvDownstream(const DasCmdPacketList &packetList);
 
         /**
          * Overloaded method to handle reading the output string.

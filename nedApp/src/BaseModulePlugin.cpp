@@ -271,10 +271,10 @@ void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t c
     delete packet;
 }
 
-void BaseModulePlugin::recvDownstream(DasCmdPacketList *packetList)
+void BaseModulePlugin::recvDownstream(const DasCmdPacketList &packetList)
 {
-    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
-        DasCmdPacket *packet = *it;
+    for (auto it = packetList.cbegin(); it != packetList.cend(); it++) {
+        const DasCmdPacket *packet = *it;
 
         // Silently skip packets we're not interested in
         if (!packet->response || packet->module_id != m_hardwareId)

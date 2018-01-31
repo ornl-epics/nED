@@ -213,7 +213,7 @@ void CommDebugPlugin::generatePacket(bool fromRawPvs)
     }
 }
 
-void CommDebugPlugin::recvDownstream(DasCmdPacketList *packets)
+void CommDebugPlugin::recvDownstream(const DasCmdPacketList &packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int filterCmd = getIntegerParam(FilterCmd);
@@ -233,7 +233,7 @@ void CommDebugPlugin::recvDownstream(DasCmdPacketList *packets)
     }
 
     if (filterType == 0 || filterType == Packet::TYPE_DAS_CMD) {
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.begin(); it != packets.cend(); it++) {
             const DasCmdPacket *packet = *it;
 
             if (sniffer) {
@@ -246,12 +246,12 @@ void CommDebugPlugin::recvDownstream(DasCmdPacketList *packets)
                 savePacket(packet, m_recvQue, recvQueMaxSize);
             }
         }
-        if (!packets->empty())
+        if (!packets.empty())
             showRecvPacket(0);
     }
 }
 
-void CommDebugPlugin::recvDownstream(DasDataPacketList *packets)
+void CommDebugPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
@@ -262,15 +262,15 @@ void CommDebugPlugin::recvDownstream(DasDataPacketList *packets)
     this->lock();
 
     if (sniffer && (filterType == 0 || filterType == Packet::TYPE_DAS_DATA)) {
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             savePacket(*it, m_recvQue, recvQueMaxSize);
         }
-        if (!packets->empty())
+        if (!packets.empty())
             showRecvPacket(0);
     }
 }
 
-void CommDebugPlugin::recvDownstream(DasRtdlPacketList *packets)
+void CommDebugPlugin::recvDownstream(const DasRtdlPacketList &packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
@@ -281,15 +281,15 @@ void CommDebugPlugin::recvDownstream(DasRtdlPacketList *packets)
     this->lock();
 
     if (sniffer && (filterType == 0 || filterType == Packet::TYPE_DAS_RTDL)) {
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             savePacket(*it, m_recvQue, recvQueMaxSize);
         }
-        if (!packets->empty())
+        if (!packets.empty())
             showRecvPacket(0);
     }
 }
 
-void CommDebugPlugin::recvDownstream(ErrorPacketList *packets)
+void CommDebugPlugin::recvDownstream(const ErrorPacketList &packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
@@ -300,20 +300,20 @@ void CommDebugPlugin::recvDownstream(ErrorPacketList *packets)
     this->lock();
 
     if (sniffer && (filterType == 0 || filterType == Packet::TYPE_ERROR)) {
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             savePacket(*it, m_recvQue, recvQueMaxSize);
         }
-        if (!packets->empty())
+        if (!packets.empty())
             showRecvPacket(0);
     }
 }
 
-void CommDebugPlugin::recvUpstream(DasCmdPacketList *packets)
+void CommDebugPlugin::recvUpstream(const DasCmdPacketList &packets)
 {
     bool sniffer = getBooleanParam(Sniffer);
     sendUpstream(packets);
 
-    if (sniffer && !packets->empty()) {
+    if (sniffer && !packets.empty()) {
         int filterCmd;
         char moduleStr[20];
         uint32_t moduleId;
@@ -322,8 +322,8 @@ void CommDebugPlugin::recvUpstream(DasCmdPacketList *packets)
         getStringParam(FilterModule,   sizeof(moduleStr), moduleStr);
         moduleId = BaseModulePlugin::ip2addr(moduleStr);
 
-        for (auto it = packets->begin(); it != packets->end(); it++) {
-            DasCmdPacket *packet = *it;
+        for (auto it = packets.begin(); it != packets.end(); it++) {
+            const DasCmdPacket *packet = *it;
 
             if ((moduleId == 0 || moduleId == packet->module_id) &&
                 (filterCmd == 0 || filterCmd == packet->command)) {
@@ -366,9 +366,9 @@ void CommDebugPlugin::showSentPacket(int index)
     }
 }
 
-void CommDebugPlugin::showSentPacket(DasCmdPacket *packet, int index)
+void CommDebugPlugin::showSentPacket(const DasCmdPacket *packet, int index)
 {
-    uint32_t *raw = reinterpret_cast<uint32_t *>(packet);
+    const uint32_t *raw = reinterpret_cast<const uint32_t *>(packet);
 
     setIntegerParam(ReqVersion,   packet->version);
     setIntegerParam(ReqPriority,  packet->priority);
@@ -414,9 +414,9 @@ void CommDebugPlugin::showRecvPacket(int index)
     }
 }
 
-void CommDebugPlugin::showRecvPacket(Packet *packet, int index)
+void CommDebugPlugin::showRecvPacket(const Packet *packet, int index)
 {
-    uint32_t *raw = reinterpret_cast<uint32_t *>(packet);
+    const uint32_t *raw = reinterpret_cast<const uint32_t *>(packet);
 
     setIntegerParam(RspVersion,     packet->version);
     setIntegerParam(RspPriority,    packet->priority);
@@ -426,7 +426,7 @@ void CommDebugPlugin::showRecvPacket(Packet *packet, int index)
 
     if (packet->version != 0) {
         if (packet->type == Packet::TYPE_DAS_CMD) {
-            DasCmdPacket *cmdPacket = reinterpret_cast<DasCmdPacket *>(packet);
+            const DasCmdPacket *cmdPacket = reinterpret_cast<const DasCmdPacket *>(packet);
             setIntegerParam(RspCmdLen,      cmdPacket->cmd_length);
             setIntegerParam(RspCmd,         cmdPacket->command);
             setIntegerParam(RspCmdVerifyId, cmdPacket->cmd_sequence);
@@ -436,12 +436,12 @@ void CommDebugPlugin::showRecvPacket(Packet *packet, int index)
             setStringParam(RspCmdModule,    BaseModulePlugin::addr2ip(cmdPacket->module_id));
 
         } else if (packet->type == Packet::TYPE_ERROR) {
-            ErrorPacket *errPacket = reinterpret_cast<ErrorPacket *>(packet);
+            const ErrorPacket *errPacket = reinterpret_cast<const ErrorPacket *>(packet);
             setIntegerParam(RspErrCode,     errPacket->code);
             setIntegerParam(RspErrSourceId, errPacket->source);
 
         } else if (packet->type == Packet::TYPE_DAS_RTDL) {
-            DasRtdlPacket *rtdlPacket = reinterpret_cast<DasRtdlPacket *>(packet);
+            const DasRtdlPacket *rtdlPacket = reinterpret_cast<const DasRtdlPacket *>(packet);
             epicsTimeStamp ts = { rtdlPacket->timestamp_sec, rtdlPacket->timestamp_nsec };
             epicsTime t(ts);
             char timeStr[64], nsecStr[16];
@@ -467,7 +467,7 @@ void CommDebugPlugin::showRecvPacket(Packet *packet, int index)
             setIntegerParam(RspRtdlOffEn,   rtdlPacket->correction.tof_full_offset);
 
         } else if (packet->type == Packet::TYPE_DAS_DATA) {
-            DasDataPacket *dataPacket = reinterpret_cast<DasDataPacket *>(packet);
+            const DasDataPacket *dataPacket = reinterpret_cast<const DasDataPacket *>(packet);
             epicsTimeStamp ts = { dataPacket->timestamp_sec, dataPacket->timestamp_nsec };
             epicsTime t(ts);
             char timeStr[64], nsecStr[16];

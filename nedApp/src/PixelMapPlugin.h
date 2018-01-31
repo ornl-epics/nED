@@ -107,7 +107,7 @@ class PixelMapPlugin : public BasePlugin {
         /**
          * Overloaded function to receive data packets.
          */
-        void recvDownstream(DasDataPacketList *packets);
+        void recvDownstream(const DasDataPacketList &packets);
 
     private: // functions
         /**

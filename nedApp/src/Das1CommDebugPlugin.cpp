@@ -247,11 +247,11 @@ void Das1CommDebugPlugin::sendPacket()
     callParamCallbacks();
 }
 
-void Das1CommDebugPlugin::recvDownstream(DasPacketList *packetList)
+void Das1CommDebugPlugin::recvDownstream(const DasPacketList &packetList)
 {
     bool changePacket = false;
 
-    for (auto it = packetList->cbegin(); it != packetList->cend(); it++) {
+    for (auto it = packetList.cbegin(); it != packetList.cend(); it++) {
         const DasPacket *packet = *it;
 
         if (parseCmd(packet)) {

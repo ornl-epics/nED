@@ -136,12 +136,12 @@ asynStatus ModulesPlugin::writeOctet(asynUser *pasynUser, const char *value, siz
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
-void ModulesPlugin::recvDownstream(DasCmdPacketList *packets)
+void ModulesPlugin::recvDownstream(const DasCmdPacketList &packets)
 {
     int nDiscovered;
     int nVerified;
 
-    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
         const DasCmdPacket *packet = *it;
 
         // Silently skip packets we're not interested in

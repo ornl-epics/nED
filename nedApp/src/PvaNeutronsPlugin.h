@@ -43,7 +43,7 @@ class PvaNeutronsPlugin : public BasePlugin {
         /**
          * Process downstream data packets
          */
-        void recvDownstream(DasDataPacketList *packets);
+        void recvDownstream(const DasDataPacketList &packets);
 
     private:
 
@@ -67,7 +67,7 @@ class PvaNeutronsPlugin : public BasePlugin {
                 /**
                  * Publish a single atomic update of the PV, take values from packet.
                  */
-                bool update(DasDataPacket *packet);
+                bool update(const DasDataPacket *packet);
 
             private:
                 uint32_t m_sequence;

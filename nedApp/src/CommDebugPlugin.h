@@ -64,27 +64,27 @@ class CommDebugPlugin : public BasePlugin {
         /**
          * Receive and process data packets.
          */
-         void recvDownstream(DasDataPacketList *packets);
+         void recvDownstream(const DasDataPacketList &packets);
 
         /**
          * Receive and process command packets.
          */
-        void recvDownstream(DasCmdPacketList *packets);
+        void recvDownstream(const DasCmdPacketList &packets);
 
         /**
          * Receive and process RTDL packets.
          */
-        void recvDownstream(DasRtdlPacketList *packets);
+        void recvDownstream(const DasRtdlPacketList &packets);
 
         /**
          * Receive and process error packets.
          */
-        void recvDownstream(ErrorPacketList *packets);
+        void recvDownstream(const ErrorPacketList &packets);
 
         /**
          * Receive packets from plugins to modules.
          */
-        void recvUpstream(DasCmdPacketList *packets);
+        void recvUpstream(const DasCmdPacketList &packets);
 
     private:
         /**
@@ -130,7 +130,7 @@ class CommDebugPlugin : public BasePlugin {
          * @param[in] packet to be used.
          * @param[in] index to be displayed
          */
-        void showSentPacket(DasCmdPacket *packet, int index=0);
+        void showSentPacket(const DasCmdPacket *packet, int index=0);
 
         /**
          * Show packet from receive queue in position defined by index.
@@ -148,7 +148,7 @@ class CommDebugPlugin : public BasePlugin {
          * @param[in] packet to be used.
          * @param[in] index to be displayed
          */
-        void showRecvPacket(Packet *packet, int index=0);
+        void showRecvPacket(const Packet *packet, int index=0);
 
     protected:
         int ReqSend;        //!< Send cached packet

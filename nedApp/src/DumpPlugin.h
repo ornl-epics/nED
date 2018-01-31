@@ -64,22 +64,22 @@ class DumpPlugin : public BasePlugin {
         /**
          * Process DAS data incoming packets.
          */
-        void recvDownstream(DasDataPacketList *packets);
+        void recvDownstream(const DasDataPacketList &packets);
 
         /**
          * Process DAS RTDL incoming packets.
          */
-        void recvDownstream(DasRtdlPacketList *packets);
+        void recvDownstream(const DasRtdlPacketList &packets);
 
         /**
          * Process DAS command incoming packets.
          */
-        void recvDownstream(DasCmdPacketList *packets);
+        void recvDownstream(const DasCmdPacketList &packets);
 
         /**
          * Process error incoming packets.
          */
-        void recvDownstream(ErrorPacketList *packets);
+        void recvDownstream(const ErrorPacketList &packets);
 
     private: // functions
         /**

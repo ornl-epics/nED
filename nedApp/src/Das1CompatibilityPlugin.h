@@ -30,19 +30,19 @@ class Das1CompatibilityPlugin : public BasePlugin {
         /**
          * Pass-thru DAS 2.0 packets.
          */
-        void recvDownstream(DasCmdPacketList *packets);
-        void recvDownstream(DasRtdlPacketList *packets);
-        void recvDownstream(ErrorPacketList *packets);
+        void recvDownstream(const DasCmdPacketList &packets);
+        void recvDownstream(const DasRtdlPacketList &packets);
+        void recvDownstream(const ErrorPacketList &packets);
 
         /**
          * Intercept DAS 1.0 packets and convert them.
          */
-        void recvDownstream(DasPacketList *packets);
+        void recvDownstream(const DasPacketList &packets);
 
         /**
          * Convert DAS 2.0 packets to DAS 1.0 before sending them to parents.
          */
-        void recvUpstream(DasCmdPacketList *packets);
+        void recvUpstream(const DasCmdPacketList &packets);
 
     private:
         /**

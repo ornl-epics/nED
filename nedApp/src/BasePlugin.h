@@ -25,11 +25,11 @@
 
 class Timer;
 
-typedef std::vector<DasPacket*> DasPacketList;
-typedef std::vector<DasCmdPacket*> DasCmdPacketList;
-typedef std::vector<DasRtdlPacket*> DasRtdlPacketList;
-typedef std::vector<DasDataPacket*> DasDataPacketList;
-typedef std::vector<ErrorPacket*> ErrorPacketList;
+typedef std::vector<const DasPacket*> DasPacketList;
+typedef std::vector<const DasCmdPacket*> DasCmdPacketList;
+typedef std::vector<const DasRtdlPacket*> DasRtdlPacketList;
+typedef std::vector<const DasDataPacket*> DasDataPacketList;
+typedef std::vector<const ErrorPacket*> ErrorPacketList;
 
 /**
  * Registers plugin with EPICS system.
@@ -201,22 +201,22 @@ class BasePlugin : public asynPortDriver {
         /**
          * A worker function to process DasPacket messages from parent plugins.
          */
-        virtual void recvDownstream(DasPacketList *packets) {};
+        virtual void recvDownstream(const DasPacketList &packets) {};
 
         /**
          * A worker function to process DasDataPacket messages from parent plugins.
          */
-        virtual void recvDownstream(DasDataPacketList *packets) {};
+        virtual void recvDownstream(const DasDataPacketList &packets) {};
 
         /**
          * A worker function to process DasCmdPacket messages from parent plugins.
          */
-        virtual void recvDownstream(DasCmdPacketList *packets) {};
+        virtual void recvDownstream(const DasCmdPacketList &packets) {};
 
         /**
          * A worker function to process DasRtdlPacket messages from parent plugins.
          */
-        virtual void recvDownstream(DasRtdlPacketList *packets) {};
+        virtual void recvDownstream(const DasRtdlPacketList &packets) {};
 
         /**
          * Send PluginMessage to any connected child plugins.
@@ -239,27 +239,27 @@ class BasePlugin : public asynPortDriver {
         /**
          * Send DasPackets to any connected child plugins.
          */
-        std::shared_ptr<PluginMessage> sendDownstream(DasPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(const DasPacketList &packets, bool wait=true);
 
         /**
          * Send DasDataPackets to any connected child plugins.
          */
-        std::shared_ptr<PluginMessage> sendDownstream(DasDataPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(const DasDataPacketList &packets, bool wait=true);
 
         /**
          * Send DasCmdPackets to any connected child plugins.
          */
-        std::shared_ptr<PluginMessage> sendDownstream(DasCmdPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(const DasCmdPacketList &packets, bool wait=true);
 
         /**
          * Send DasRtdlPackets to any connected child plugins.
          */
-        std::shared_ptr<PluginMessage> sendDownstream(DasRtdlPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(const DasRtdlPacketList &packets, bool wait=true);
 
         /**
          * Send ErrorPackets to any connected child plugins.
          */
-        std::shared_ptr<PluginMessage> sendDownstream(ErrorPacketList *packets, bool wait=true);
+        std::shared_ptr<PluginMessage> sendDownstream(const ErrorPacketList &packets, bool wait=true);
 
         /**
          * A callback function called upon receiving message from child plugin.
@@ -272,12 +272,12 @@ class BasePlugin : public asynPortDriver {
         /**
          * Receive DasPacket list from children plugins.
          */
-        virtual void recvUpstream(DasPacketList *packets) {};
+        virtual void recvUpstream(const DasPacketList &packets) {};
 
         /**
          * Receive DasCmdPacket list from children plugins.
          */
-        virtual void recvUpstream(DasCmdPacketList *packets) {};
+        virtual void recvUpstream(const DasCmdPacketList &packets) {};
 
         /**
          * Send message to parent plugins.
@@ -294,28 +294,28 @@ class BasePlugin : public asynPortDriver {
          *
          * Waits until receiver processes the packet.
          */
-        virtual void sendUpstream(DasPacketList *packet);
+        virtual void sendUpstream(const DasPacketList &packet);
 
         /**
          * Send single DasPacket to parent plugins.
          *
          * Waits until receiver processes the packet.
          */
-        virtual void sendUpstream(DasPacket *packet);
+        virtual void sendUpstream(const DasPacket *packet);
 
         /**
          * Send single DasCmdPacketList to parent plugins.
          *
          * Waits until receiver processes the packet.
          */
-        virtual void sendUpstream(DasCmdPacketList *packet);
+        virtual void sendUpstream(const DasCmdPacketList &packet);
 
         /**
          * Send single DasCmdPacket to parent plugins.
          *
          * Waits until receiver processes the packet.
          */
-        virtual void sendUpstream(DasCmdPacket *packet);
+        virtual void sendUpstream(const DasCmdPacket *packet);
 
         /**
          * Return the name of the asyn parameter.

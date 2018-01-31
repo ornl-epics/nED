@@ -12,7 +12,10 @@
 
 #include "BasePlugin.h"
 #include "BaseCircularBuffer.h"
+#include "ObjectPool.h"
 #include "Thread.h"
+
+#include <vector>
 
 /**
  * A port plugin connect directly to the source hardware device in order to exchange packets.
@@ -70,17 +73,17 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
          * @raise std::runtime_error when non-supported packet was received
          * @return Number of bytes not processed.
          */
-        virtual uint32_t processData(uint8_t *ptr, uint32_t size);
+        virtual uint32_t processData(const uint8_t *ptr, uint32_t size);
 
         /**
-         * Send MsgDasCmd packets to OCC.
+         * Send command packets to OCC.
          */
-        virtual void recvUpstream(DasCmdPacketList *packets);
+        virtual void recvUpstream(const DasCmdPacketList &packets);
 
         /**
-         * Send MsgOldDas packets to OCC.
+         * Send command packets to OCC.
          */
-        virtual void recvUpstream(DasPacketList *packets);
+        virtual void recvUpstream(const DasPacketList &packets);
 
         /**
          * Send data to device - derived class should re-implement this.

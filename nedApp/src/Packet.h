@@ -136,7 +136,7 @@ class DasDataPacket : public Packet {
          * requested event format.
          */
         template<typename T>
-        T *getEvents(uint32_t &count)
+        T *getEvents(uint32_t &count) const
         {
             assert(sizeof(T) % 4 == 0);
             count = (this->length - sizeof(DasDataPacket)) / sizeof(T);
@@ -152,7 +152,7 @@ class DasDataPacket : public Packet {
          *
          * @return Number of events in data packet.
          */
-        uint32_t getNumEvents();
+        uint32_t getNumEvents() const;
 
         /**
          * Return size of every event in data packet.
@@ -160,7 +160,7 @@ class DasDataPacket : public Packet {
          * The size is determined based on DasDataPacket::format field.
          * In case of DATA_FMT_RESERVED the event size used is 8 bytes.
          */
-        uint32_t getEventsSize();
+        uint32_t getEventsSize() const;
 };
 
 class DasRtdlPacket : public Packet {

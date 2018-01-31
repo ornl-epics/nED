@@ -259,7 +259,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @param[in] packets List of packets received in this batch.
          */
-        virtual void recvDownstream(DasCmdPacketList *packets);
+        virtual void recvDownstream(const DasCmdPacketList &packets);
 
         /**
          * Check response packets before handling their content.

@@ -9,7 +9,7 @@
 
 #include "PluginMessage.h"
 
-PluginMessage::PluginMessage(void *msg)
+PluginMessage::PluginMessage(const void *msg)
     : m_refcount(0)
     , m_msg(msg)
 {}

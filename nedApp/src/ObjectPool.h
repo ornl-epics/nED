@@ -7,6 +7,9 @@
  * @author Klemen Vodopivec
  */
 
+#ifndef OBJECT_POOL_H
+#define OBJECT_POOL_H
+
 #include <cantProceed.h>
 #include <epicsMutex.h>
 
@@ -172,3 +175,5 @@ class ObjectPool {
         epicsMutex m_mutex;
         bool m_recycleSmaller;
 };
+
+#endif // OBJECT_POOL_H

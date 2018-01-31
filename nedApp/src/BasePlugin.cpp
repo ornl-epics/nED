@@ -237,13 +237,13 @@ void BasePlugin::recvDownstream(int type, PluginMessage *msg)
 {
     if (msg) {
         if (type == MsgOldDas) {
-            recvDownstream( msg->get<DasPacketList>() );
+            recvDownstream( *msg->get<const DasPacketList>() );
         } else if (type == MsgDasCmd) {
-            recvDownstream( msg->get<DasCmdPacketList>() );
+            recvDownstream( *msg->get<const DasCmdPacketList>() );
         } else if (type == MsgDasRtdl) {
-            recvDownstream( msg->get<DasRtdlPacketList>() );
+            recvDownstream( *msg->get<const DasRtdlPacketList>() );
         } else if (type == MsgDasData) {
-            recvDownstream( msg->get<DasDataPacketList>() );
+            recvDownstream( *msg->get<const DasDataPacketList>() );
         } else if (type == MsgParamExch) {
 
         } else {
@@ -264,38 +264,38 @@ void BasePlugin::sendDownstream(int type, std::shared_ptr<PluginMessage> &msg, b
     }
 }
 
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const DasPacketList &packets, bool wait)
 {
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
     sendDownstream(MsgOldDas, msg, wait);
     return msg;
 }
 
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasDataPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const DasDataPacketList &packets, bool wait)
 {
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
     sendDownstream(MsgDasData, msg, wait);
     return msg;
 }
 
 
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasCmdPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const DasCmdPacketList &packets, bool wait)
 {
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
     sendDownstream(MsgDasCmd, msg, wait);
     return msg;
 }
 
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(DasRtdlPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const DasRtdlPacketList &packets, bool wait)
 {
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
     sendDownstream(MsgDasRtdl, msg, wait);
     return msg;
 }
 
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(ErrorPacketList *packets, bool wait)
+std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const ErrorPacketList &packets, bool wait)
 {
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(packets));
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
     sendDownstream(MsgError, msg, wait);
     return msg;
 }
@@ -314,9 +314,9 @@ asynStatus BasePlugin::writeGenericPointer(asynUser *pasynUser, void *ptr)
 void BasePlugin::recvUpstream(int type, PluginMessage *msg)
 {
     if (type == MsgOldDas) {
-        recvUpstream( msg->get<DasPacketList>() );
+        recvUpstream( *msg->get<const DasPacketList>() );
     } else if (type == MsgDasCmd) {
-        recvUpstream( msg->get<DasCmdPacketList>() );
+        recvUpstream( *msg->get<const DasCmdPacketList>() );
     } else {
         LOG_ERROR("Skipping sending unsupported message upstream");
     }
@@ -339,9 +339,9 @@ void BasePlugin::sendUpstream(int type, std::shared_ptr<PluginMessage> &msg)
     }
 }
 
-void BasePlugin::sendUpstream(DasCmdPacketList *packet)
+void BasePlugin::sendUpstream(const DasCmdPacketList &packets)
 {
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(packet));
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
     if (msg) {
         msg->claim();
         sendUpstream(MsgDasCmd, msg);
@@ -350,16 +350,16 @@ void BasePlugin::sendUpstream(DasCmdPacketList *packet)
     }
 }
 
-void BasePlugin::sendUpstream(DasCmdPacket *packet)
+void BasePlugin::sendUpstream(const DasCmdPacket *packet)
 {
     DasCmdPacketList l;
     l.push_back(packet);
-    sendUpstream(&l);
+    sendUpstream(l);
 }
 
-void BasePlugin::sendUpstream(DasPacketList *packet)
+void BasePlugin::sendUpstream(const DasPacketList &packets)
 {
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(packet));
+    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
     if (msg) {
         msg->claim();
         sendUpstream(MsgOldDas, msg);
@@ -368,11 +368,11 @@ void BasePlugin::sendUpstream(DasPacketList *packet)
     }
 }
 
-void BasePlugin::sendUpstream(DasPacket *packet)
+void BasePlugin::sendUpstream(const DasPacket *packet)
 {
     DasPacketList l;
     l.push_back(packet);
-    sendUpstream(&l);
+    sendUpstream(l);
 }
 
 std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &callback, double delay)

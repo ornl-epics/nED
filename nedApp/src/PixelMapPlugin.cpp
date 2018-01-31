@@ -52,7 +52,7 @@ asynStatus PixelMapPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
-void PixelMapPlugin::recvDownstream(DasDataPacketList *packets)
+void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     bool mapEn = getBooleanParam(MapEn);
     bool passVetoes = getBooleanParam(VetoMode);
@@ -68,10 +68,10 @@ void PixelMapPlugin::recvDownstream(DasDataPacketList *packets)
         sendDownstream(packets);
     } else {
         DasDataPacketList modifiedPackets;
-        DasDataPacketList allocatedPackets;
+        std::vector<DasDataPacket *> allocatedPackets;
 
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-            DasDataPacket *origPacket = *it;
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
+            const DasDataPacket *origPacket = *it;
 
             if (origPacket->format != DasDataPacket::DATA_FMT_PIXEL) {
                 modifiedPackets.push_back(origPacket);
@@ -89,7 +89,7 @@ void PixelMapPlugin::recvDownstream(DasDataPacketList *packets)
             modifiedPackets.push_back(newPacket);
         }
         if (!modifiedPackets.empty()) {
-            sendDownstream(&modifiedPackets);
+            sendDownstream(modifiedPackets);
         }
 
         for (auto it = allocatedPackets.begin(); it != allocatedPackets.end(); it++) {

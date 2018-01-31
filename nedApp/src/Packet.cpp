@@ -104,7 +104,7 @@ void DasDataPacket::init(DataFormat format, uint32_t time_sec, uint32_t time_nse
     memcpy(this->events, data, count*4);
 }
 
-uint32_t DasDataPacket::getNumEvents()
+uint32_t DasDataPacket::getNumEvents() const
 {
     uint32_t payloadLen = this->length - sizeof(DasDataPacket);
     uint32_t eventSize = getEventsSize();
@@ -113,7 +113,7 @@ uint32_t DasDataPacket::getNumEvents()
     return payloadLen / eventSize;
 }
 
-uint32_t DasDataPacket::getEventsSize()
+uint32_t DasDataPacket::getEventsSize() const
 {
     switch (this->format) {
         case DATA_FMT_RESERVED:     return sizeof(Event::Pixel);

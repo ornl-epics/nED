@@ -27,7 +27,7 @@ class PluginMessage
         /**
          * Constructor initializes internal structures.
          */
-        PluginMessage(void *msg);
+        PluginMessage(const void *msg);
 
         /**
          * Destructor, asserts when refcount != 0.
@@ -80,7 +80,7 @@ class PluginMessage
         unsigned long m_refcount;
         mutable epicsMutex m_lock;
         mutable epicsEvent m_event;
-        void *m_msg;
+        const void *m_msg;
 };
 
 #endif // PLUGIN_MESSAGE_H

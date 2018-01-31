@@ -72,11 +72,11 @@ asynStatus BasePortPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
     return asynPortDriver::readInt32(pasynUser, value);
 }
 
-void BasePortPlugin::recvUpstream(DasCmdPacketList *packets)
+void BasePortPlugin::recvUpstream(const DasCmdPacketList &packets)
 {
-    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-        DasCmdPacket *packet = *it;
-        packet->sequence = (++m_sendId % 255);
+    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
+        const DasCmdPacket *packet = *it;
+        //packet->sequence = (++m_sendId % 255);
         int len = ALIGN_UP(packet->length, 4);
         if (!send(reinterpret_cast<const uint8_t*>(packet), len)) {
             LOG_ERROR("Failed to send packet");
@@ -86,10 +86,10 @@ void BasePortPlugin::recvUpstream(DasCmdPacketList *packets)
 
 }
 
-void BasePortPlugin::recvUpstream(DasPacketList *packets)
+void BasePortPlugin::recvUpstream(const DasPacketList &packets)
 {
-    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-        DasPacket *packet = *it;
+    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
+        const DasPacket *packet = *it;
         int len = ALIGN_UP(packet->getLength(), 4);
         if (!send(reinterpret_cast<const uint8_t*>(packet), len)) {
             LOG_ERROR("Failed to send packet");
@@ -145,7 +145,7 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
     LOG_INFO("Process thread exited");
 }
 
-uint32_t BasePortPlugin::processData(uint8_t *ptr, uint32_t size)
+uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
 {
     int maxPktSize = getIntegerParam(MaxPktSize);
     bool forceOldPkts = getBooleanParam(OldPktsEn);
@@ -157,7 +157,7 @@ uint32_t BasePortPlugin::processData(uint8_t *ptr, uint32_t size)
     DasRtdlPacketList dasRtdl;
     ErrorPacketList errors;
 
-    uint8_t *end = ptr + size;
+    const uint8_t *end = ptr + size;
     while (ptr < end) {
         uint32_t bytesLeft = (end - ptr);
         uint32_t bytesProcessed = 0;
@@ -165,12 +165,12 @@ uint32_t BasePortPlugin::processData(uint8_t *ptr, uint32_t size)
         // We don't know what we're receiving. It could be old DAS packet or
         // a new DAS header. They differ in the most significant 4 bits of the
         // first 32 bits received.
-        uint32_t version = (*reinterpret_cast<uint32_t *>(ptr) >> 28);
+        uint32_t version = (*reinterpret_cast<const uint32_t *>(ptr) >> 28);
 
         try {
             if (version == 0 || forceOldPkts) {
                 // Old DAS packet
-                DasPacket *packet = reinterpret_cast<DasPacket *>(ptr);
+                const DasPacket *packet = reinterpret_cast<const DasPacket *>(ptr);
 
                 if (bytesLeft < sizeof(DasPacket)) {
                     std::ostringstream error;
@@ -196,7 +196,7 @@ uint32_t BasePortPlugin::processData(uint8_t *ptr, uint32_t size)
 
             } else if (version == 1) {
                 // New SNS packet header
-                Packet *packet = reinterpret_cast<Packet *>(ptr);
+                const Packet *packet = reinterpret_cast<const Packet *>(ptr);
 
                 if (bytesLeft < sizeof(Packet)) {
                     std::ostringstream error;
@@ -220,16 +220,16 @@ uint32_t BasePortPlugin::processData(uint8_t *ptr, uint32_t size)
                 m_recvId = packet->sequence;
 
                 if (packet->type == Packet::TYPE_DAS_DATA) {
-                    reinterpret_cast<DasDataPacket *>(packet)->source = m_sourceId;
-                    dasData.push_back(reinterpret_cast<DasDataPacket *>(packet));
+                    //reinterpret_cast<DasDataPacket *>(packet)->source = m_sourceId;
+                    dasData.push_back(reinterpret_cast<const DasDataPacket *>(packet));
                 } else if (packet->type == Packet::TYPE_DAS_RTDL) {
-                    reinterpret_cast<DasRtdlPacket *>(packet)->source = m_sourceId;
-                    dasRtdl.push_back(reinterpret_cast<DasRtdlPacket *>(packet));
+                    //reinterpret_cast<DasRtdlPacket *>(packet)->source = m_sourceId;
+                    dasRtdl.push_back(reinterpret_cast<const DasRtdlPacket *>(packet));
                 } else if (packet->type == Packet::TYPE_DAS_CMD) {
-                    dasCmd.push_back(reinterpret_cast<DasCmdPacket *>(packet));
+                    dasCmd.push_back(reinterpret_cast<const DasCmdPacket *>(packet));
                 } else if (packet->type == Packet::TYPE_ERROR) {
-                    reinterpret_cast<ErrorPacket *>(packet)->source = m_sourceId;
-                    dasRtdl.push_back(reinterpret_cast<DasRtdlPacket *>(packet));
+                    //reinterpret_cast<ErrorPacket *>(packet)->source = m_sourceId;
+                    dasRtdl.push_back(reinterpret_cast<const DasRtdlPacket *>(packet));
                 }
 
                 bytesProcessed = packet->length;
@@ -251,15 +251,15 @@ uint32_t BasePortPlugin::processData(uint8_t *ptr, uint32_t size)
     // Publish all packets in parallel ..
     std::vector< std::shared_ptr<PluginMessage> > messages;
     if (!oldDas.empty())
-        messages.push_back(sendDownstream(&oldDas, false));
+        messages.push_back(sendDownstream(oldDas, false));
     if (!dasCmd.empty())
-        messages.push_back(sendDownstream(&dasCmd, false));
+        messages.push_back(sendDownstream(dasCmd, false));
     if (!dasData.empty())
-        messages.push_back(sendDownstream(&dasData, false));
+        messages.push_back(sendDownstream(dasData, false));
     if (!dasRtdl.empty())
-        messages.push_back(sendDownstream(&dasRtdl, false));
+        messages.push_back(sendDownstream(dasRtdl, false));
     if (!errors.empty())
-        messages.push_back(sendDownstream(&errors, false));
+        messages.push_back(sendDownstream(errors, false));
 
     // .. and wait for all of them to get released
     for (auto it = messages.begin(); it != messages.end(); it++) {

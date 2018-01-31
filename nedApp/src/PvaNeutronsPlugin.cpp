@@ -49,12 +49,12 @@ PvaNeutronsPlugin::PvaNeutronsPlugin(const char *portName, const char *parentPlu
     BasePlugin::connect(parentPlugins, MsgDasData);
 }
 
-void PvaNeutronsPlugin::recvDownstream(DasDataPacketList *packets)
+void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     int status = epicsAlarmNone;
     int severity = epicsSevNone;
     if (m_record) {
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             if ((*it)->format == DasDataPacket::DATA_FMT_PIXEL) {
                 if (m_record->update(*it) == false) {
                     LOG_ERROR("Failed to send PVA update");
@@ -130,7 +130,7 @@ bool PvaNeutronsPlugin::PvaRecord::init()
     return true;
 }
 
-bool PvaNeutronsPlugin::PvaRecord::update(DasDataPacket *packet)
+bool PvaNeutronsPlugin::PvaRecord::update(const DasDataPacket *packet)
 {
     bool posted = true;
 
@@ -147,7 +147,7 @@ bool PvaNeutronsPlugin::PvaRecord::update(DasDataPacket *packet)
     );
 
     uint32_t nEvents = 0;
-    Event::Pixel *events = packet->getEvents<Event::Pixel>(nEvents);
+    const Event::Pixel *events = packet->getEvents<const Event::Pixel>(nEvents);
 
     // Pre-allocate svector to minimize gradual memory allocations
     epics::pvData::PVUIntArray::svector tofs(nEvents);

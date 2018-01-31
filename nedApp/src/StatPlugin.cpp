@@ -35,7 +35,7 @@ StatPlugin::StatPlugin(const char *portName, const char *parentPlugins)
     BasePlugin::connect(parentPlugins, {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError});
 }
 
-void StatPlugin::recvDownstream(DasDataPacketList *packets)
+void StatPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     uint64_t neutronCnts  = getDoubleParam(NeutronCnts);
     uint64_t neutronBytes = getDoubleParam(NeutronBytes);
@@ -45,8 +45,8 @@ void StatPlugin::recvDownstream(DasDataPacketList *packets)
     uint64_t metaTimes    = getDoubleParam(MetaTimes);
     uint64_t totBytes     = getDoubleParam(TotBytes);
 
-    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
-        DasDataPacket *packet = *it;
+    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
+        const DasDataPacket *packet = *it;
         uint32_t nEvents = packet->getNumEvents();
         totBytes += packet->length;
 
@@ -74,13 +74,13 @@ void StatPlugin::recvDownstream(DasDataPacketList *packets)
     callParamCallbacks();
 }
 
-void StatPlugin::recvDownstream(DasCmdPacketList *packets)
+void StatPlugin::recvDownstream(const DasCmdPacketList &packets)
 {
-    uint64_t cmdPkts  = getDoubleParam(CmdPkts) + packets->size();
+    uint64_t cmdPkts  = getDoubleParam(CmdPkts) + packets.size();
     uint64_t cmdBytes = getDoubleParam(CmdBytes);
     uint64_t totBytes = getDoubleParam(TotBytes);
 
-    for (auto it = packets->begin(); it != packets->end(); it++) {
+    for (auto it = packets.begin(); it != packets.end(); it++) {
         cmdBytes += (*it)->length;
         totBytes += (*it)->length;
     }
@@ -91,14 +91,14 @@ void StatPlugin::recvDownstream(DasCmdPacketList *packets)
     callParamCallbacks();
 }
 
-void StatPlugin::recvDownstream(DasRtdlPacketList *packets)
+void StatPlugin::recvDownstream(const DasRtdlPacketList &packets)
 {
     uint64_t rtdlTimes  = getDoubleParam(RtdlTimes);
     uint64_t rtdlBytes  = getDoubleParam(RtdlBytes);
-    uint64_t rtdlPkts   = getDoubleParam(RtdlPkts) + packets->size();
+    uint64_t rtdlPkts   = getDoubleParam(RtdlPkts) + packets.size();
     uint64_t totBytes   = getDoubleParam(TotBytes);
 
-    for (auto it = packets->begin(); it != packets->end(); it++) {
+    for (auto it = packets.begin(); it != packets.end(); it++) {
         rtdlBytes += (*it)->length;
         totBytes += (*it)->length;
         if (isTimestampUnique((*it)->timestamp_sec, (*it)->timestamp_nsec, m_rtdlTimes))
@@ -112,12 +112,12 @@ void StatPlugin::recvDownstream(DasRtdlPacketList *packets)
     callParamCallbacks();
 }
 
-void StatPlugin::recvDownstream(ErrorPacketList *packets)
+void StatPlugin::recvDownstream(const ErrorPacketList &packets)
 {
-    uint64_t errorPkts  = getDoubleParam(ErrorPkts) + packets->size();
+    uint64_t errorPkts  = getDoubleParam(ErrorPkts) + packets.size();
     uint64_t totBytes   = getDoubleParam(TotBytes);
 
-    for (auto it = packets->begin(); it != packets->end(); it++) {
+    for (auto it = packets.begin(); it != packets.end(); it++) {
         totBytes += (*it)->length;
     }
 

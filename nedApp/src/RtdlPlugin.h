@@ -37,7 +37,7 @@ class RtdlPlugin : public BasePlugin {
         /**
          * Process downstream RTDL packets
          */
-        void recvDownstream(DasRtdlPacketList *packets);
+        void recvDownstream(const DasRtdlPacketList &packets);
 
     private:
 
@@ -61,7 +61,7 @@ class RtdlPlugin : public BasePlugin {
                 /**
                  * Publish a single atomic update of the PV, take values from packet.
                  */
-                bool update(DasRtdlPacket *packet);
+                bool update(const DasRtdlPacket *packet);
 
             private:
                 uint32_t m_sequence;

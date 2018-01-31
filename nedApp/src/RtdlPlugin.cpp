@@ -58,14 +58,14 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     BasePlugin::connect(parentPlugins, MsgDasRtdl);
 }
 
-void RtdlPlugin::recvDownstream(DasRtdlPacketList *packets)
+void RtdlPlugin::recvDownstream(const DasRtdlPacketList &packets)
 {
     if (m_record) {
         setParamAlarmStatus(PvaName, epicsAlarmNone);
         setParamAlarmSeverity(PvaName, epicsSevNone);
     }
 
-    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
         const DasRtdlPacket *packet = *it;
 
         epicsTimeStamp t;
@@ -248,7 +248,7 @@ bool RtdlPlugin::PvaRecord::init()
     return true;
 }
 
-bool RtdlPlugin::PvaRecord::update(DasRtdlPacket *packet)
+bool RtdlPlugin::PvaRecord::update(const DasRtdlPacket *packet)
 {
     bool posted = true;
 

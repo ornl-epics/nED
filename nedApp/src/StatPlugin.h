@@ -28,22 +28,22 @@ class StatPlugin : public BasePlugin {
         /**
          * Overloaded function to receive data packets.
          */
-        void recvDownstream(DasDataPacketList *packets);
+        void recvDownstream(const DasDataPacketList &packets);
 
         /**
          * Overloaded function to receive command packets.
          */
-        void recvDownstream(DasCmdPacketList *packets);
+        void recvDownstream(const DasCmdPacketList &packets);
 
         /**
          * Overloaded function to receive RTDL packets.
          */
-        void recvDownstream(DasRtdlPacketList *packets);
+        void recvDownstream(const DasRtdlPacketList &packets);
 
         /**
          * Process error packets.
          */
-        void recvDownstream(ErrorPacketList *packets);
+        void recvDownstream(const ErrorPacketList &packets);
 
     private: // function
 

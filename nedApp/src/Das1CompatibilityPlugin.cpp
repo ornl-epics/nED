@@ -22,34 +22,34 @@ Das1CompatibilityPlugin::Das1CompatibilityPlugin(const char *portName, const cha
     BasePlugin::connect(parentPlugins, MsgOldDas);
 }
 
-void Das1CompatibilityPlugin::recvDownstream(DasCmdPacketList *packets)
+void Das1CompatibilityPlugin::recvDownstream(const DasCmdPacketList &packets)
 {
     unlock();
     sendDownstream(packets);
     lock();
 }
 
-void Das1CompatibilityPlugin::recvDownstream(DasRtdlPacketList *packets)
+void Das1CompatibilityPlugin::recvDownstream(const DasRtdlPacketList &packets)
 {
     unlock();
     sendDownstream(packets);
     lock();
 }
 
-void Das1CompatibilityPlugin::recvDownstream(ErrorPacketList *packets)
+void Das1CompatibilityPlugin::recvDownstream(const ErrorPacketList &packets)
 {
     unlock();
     sendDownstream(packets);
     lock();
 }
 
-void Das1CompatibilityPlugin::recvDownstream(DasPacketList *packets)
+void Das1CompatibilityPlugin::recvDownstream(const DasPacketList &packets)
 {
     DasCmdPacketList cmds;
     DasRtdlPacketList rtdls;
     DasDataPacketList datas;
 
-    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
         const DasPacket *packet = *it;
         if (packet->isRtdl()) {
             // Eliminate data flavor of RTDL packets - they're the same
@@ -72,11 +72,11 @@ void Das1CompatibilityPlugin::recvDownstream(DasPacketList *packets)
     this->unlock();
     std::vector< std::shared_ptr<PluginMessage> > messages;
     if (!rtdls.empty())
-        messages.push_back(BasePlugin::sendDownstream(&rtdls, false));
+        messages.push_back(BasePlugin::sendDownstream(rtdls, false));
     if (!cmds.empty())
-        messages.push_back(BasePlugin::sendDownstream(&cmds, false));
+        messages.push_back(BasePlugin::sendDownstream(cmds, false));
     if (!datas.empty())
-        messages.push_back(BasePlugin::sendDownstream(&datas, false));
+        messages.push_back(BasePlugin::sendDownstream(datas, false));
 
     for (auto it = messages.begin(); it != messages.end(); it++) {
         if (!!(*it)) {
@@ -86,21 +86,21 @@ void Das1CompatibilityPlugin::recvDownstream(DasPacketList *packets)
     this->lock();
 
     for (auto it = rtdls.begin(); it != rtdls.end(); it++) {
-        free(*it);
+        free(const_cast<DasRtdlPacket*>(*it));
     }
     for (auto it = cmds.begin(); it != cmds.end(); it++) {
-        free(*it);
+        free(const_cast<DasCmdPacket*>(*it));
     }
     for (auto it = datas.begin(); it != datas.end(); it++) {
-        free(*it);
+        free(const_cast<DasDataPacket*>(*it));
     }
 }
 
-void Das1CompatibilityPlugin::recvUpstream(DasCmdPacketList *packets)
+void Das1CompatibilityPlugin::recvUpstream(const DasCmdPacketList &packets)
 {
     DasPacketList das1Packets;
 
-    for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
         DasPacket *packet;
 
         // Since we don't know whether target is DSP or other module, we send
@@ -121,7 +121,7 @@ void Das1CompatibilityPlugin::recvUpstream(DasCmdPacketList *packets)
                 das1Packets.push_back(packet);
         }
     }
-    sendUpstream(&das1Packets);
+    sendUpstream(das1Packets);
 
     for (auto it = das1Packets.begin(); it != das1Packets.end(); it++) {
         delete *it;

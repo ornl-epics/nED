@@ -43,14 +43,14 @@ DumpPlugin::~DumpPlugin()
     closeFile();
 }
 
-void DumpPlugin::recvDownstream(DasDataPacketList *packets)
+void DumpPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     if (getBooleanParam(DataPktsEn)) {
         int saved = 0;
         int failed = 0;
         int dataType = getIntegerParam(DataType);
 
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             if (dataType == 0 || (*it)->format == dataType) {
                 if (writeToFile(*it))
                     saved++;
@@ -65,13 +65,13 @@ void DumpPlugin::recvDownstream(DasDataPacketList *packets)
     }
 }
 
-void DumpPlugin::recvDownstream(DasRtdlPacketList *packets)
+void DumpPlugin::recvDownstream(const DasRtdlPacketList &packets)
 {
     if (getBooleanParam(RtdlPktsEn)) {
         int saved = 0;
-        int total = packets->size();
+        int total = packets.size();
 
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             if (writeToFile(*it))
                 saved++;
         }
@@ -82,13 +82,13 @@ void DumpPlugin::recvDownstream(DasRtdlPacketList *packets)
     }
 }
 
-void DumpPlugin::recvDownstream(DasCmdPacketList *packets)
+void DumpPlugin::recvDownstream(const DasCmdPacketList &packets)
 {
     if (getBooleanParam(CmdPktsEn)) {
         int saved = 0;
-        int total = packets->size();
+        int total = packets.size();
 
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             if (writeToFile(*it))
                 saved++;
         }
@@ -99,13 +99,13 @@ void DumpPlugin::recvDownstream(DasCmdPacketList *packets)
     }
 }
 
-void DumpPlugin::recvDownstream(ErrorPacketList *packets)
+void DumpPlugin::recvDownstream(const ErrorPacketList &packets)
 {
     if (getBooleanParam(ErrorPktsEn)) {
         int saved = 0;
-        int total = packets->size();
+        int total = packets.size();
 
-        for (auto it = packets->cbegin(); it != packets->cend(); it++) {
+        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             if (writeToFile(*it))
                 saved++;
         }

@@ -85,7 +85,7 @@ class Das1CommDebugPlugin : public BasePlugin {
         /**
          * Overloaded function to process incoming OCC packets.
          */
-        void recvDownstream(DasPacketList *packetList);
+        void recvDownstream(const DasPacketList &packetList);
 
     private:
         /**
