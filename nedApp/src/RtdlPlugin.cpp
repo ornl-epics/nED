@@ -23,20 +23,17 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos, asynOctetMask, asynOctetMask)
 {
     createParam("Timestamp",        asynParamOctet, &Timestamp);    // READ - Timestamp string of last RTDL
-    createParam("BadPulse",         asynParamInt32, &BadPulse);     // READ - Bad pulse indicator (0=bad pulse, 1=good pulse)
     createParam("PulseFlavor",      asynParamInt32, &PulseFlavor);  // READ - Pulse flavor
     createParam("PulseCharge",      asynParamInt32, &PulseCharge);  // READ - Pulse charge
-    createParam("BadVetoFrame",     asynParamInt32, &BadVetoFrame); // READ - Bad veto frame
-    createParam("BadCycleFrame",    asynParamInt32, &BadCycleFrame);// READ - Bad cycle frame
-    createParam("Tstat",            asynParamInt32, &Tstat);        // READ - TSTAT
-    createParam("PrevCycleVeto",    asynParamInt32, &PrevCycleVeto);// READ - Previous pulse veto
+    createParam("TimingStatus",     asynParamInt32, &TimingStatus); // READ - Timing status
+    createParam("LastCycleVeto",    asynParamInt32, &LastCycleVeto);// READ - Last pulse veto
     createParam("Cycle",            asynParamInt32, &Cycle);        // READ - Cycle frame
     createParam("TsyncPeriod",      asynParamInt32, &TsyncPeriod);  // READ - Number of ns between reference pulses
     createParam("TofFullOffset",    asynParamInt32, &TofFullOffset);// READ - TOF full offset
     createParam("FrameOffset",      asynParamInt32, &FrameOffset);  // READ - Frame offset
     createParam("TofFixOffset",     asynParamInt32, &TofFixOffset); // READ - TOF fixed offset
     createParam("RingPeriod",       asynParamInt32, &RingPeriod);   // READ - Ring revolution period
-    createParam("ErrorsFutureTime", asynParamInt32, &ErrorsFutureTime, -1); // READ - Number of errors when time jumps in the future
+    createParam("ErrorsFutureTime", asynParamInt32, &ErrorsFutureTime, 0);  // READ - Number of errors when time jumps in the future
     createParam("ErrorsPastTime",   asynParamInt32, &ErrorsPastTime, 0);    // READ - Number of errors when time jumps in the past
     createParam("PvaName",          asynParamOctet, &PvaName, pvName);
 
@@ -55,78 +52,88 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     }
     callParamCallbacks();
 
-    BasePlugin::connect(parentPlugins, MsgDasRtdl);
+    BasePlugin::connect(parentPlugins, { MsgDasRtdl, MsgOldDas });
+}
+
+void RtdlPlugin::recvDownstream(const DasPacketList &packets)
+{
+    for (const DasPacket *packet: packets) {
+        if (packet->isRtdl()) {
+            update(packet->getTimeStamp(), *packet->getRtdlHeader(), packet->getRtdlFrames());
+        }
+    }
 }
 
 void RtdlPlugin::recvDownstream(const DasRtdlPacketList &packets)
 {
-    if (m_record) {
-        setParamAlarmStatus(PvaName, epicsAlarmNone);
-        setParamAlarmSeverity(PvaName, epicsSevNone);
+    for (const DasRtdlPacket *packet: packets) {
+        update(packet->getTimeStamp(), packet->getRtdlHeader(), packet->getRtdlFrames());
+    }
+}
+
+void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<DasRtdlPacket::RtdlFrame> &frames)
+{
+    // Now check in cache of already processed timestams
+    epicsTime rtdlTime = timestamp;
+    for (auto it = m_timesCache.begin(); it != m_timesCache.end(); it++) {
+        if (*it == rtdlTime) {
+            // Skip update for RTDL that was already posted
+            return;
+        }
     }
 
-    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-        const DasRtdlPacket *packet = *it;
+    // Do some time verification - allow .5 second offset from local clock - just a sanity check, nothing will break because of it
+    epicsTime now{ epicsTime::getCurrent() };
+    const double threshold = 0.5;
+    double diff = now - rtdlTime;
+    if (diff > threshold) {
+        addIntegerParam(ErrorsFutureTime, 1);
+    } else if (diff < (-1 * threshold)) {
+        addIntegerParam(ErrorsPastTime, 1);
+    }
 
-        epicsTimeStamp t;
-        t.secPastEpoch = packet->timestamp_sec;
-        t.nsec         = packet->timestamp_nsec;
+    m_timesCache.push_front(rtdlTime);
 
-        // Format time
-        char rtdlTimeStr[64];
-        epicsTimeToStrftime(rtdlTimeStr, sizeof(rtdlTimeStr), TIMESTAMP_FORMAT, &t);
+    // Keep the cache sane, at 60Hz nominal update rate 10 samples should be plenty
+    // New entries are pushed to the front, so remove entries from the end to
+    // make space for new ones.
+    while (m_timesCache.size() >= 10) {
+        m_timesCache.pop_back();
+    }
 
-        epicsTime rtdlTime = t;
-
-        // Keep the cache sane, at 60Hz nominal update rate 10 samples should be plenty
-        // New entries are pushed to the front, so remove entries from the end to
-        // make space for new ones.
-        while (m_timesCache.size() >= 10) {
-            m_timesCache.pop_back();
+    // Ring period not part of RtdlHeader, must decode from RTDL frame 4
+    uint32_t ringPeriod = 0;
+    for (const auto& frame: frames) {
+        if (frame.id == 4) {
+            ringPeriod = frame.data;
+            break;
         }
+    }
 
-        // Now check for cached timestamp
-        bool found = false;
-        for (auto it = m_timesCache.begin(); it != m_timesCache.end(); it++) {
-            if (*it == rtdlTime) {
-                found = true;
-                break;
-            }
-        }
+    // Format time
+    char rtdlTimeStr[64];
+    epicsTimeToStrftime(rtdlTimeStr, sizeof(rtdlTimeStr), TIMESTAMP_FORMAT, &timestamp);
 
-        // Skip RTDL that was already posted
-        if (found == true) {
-            continue;
-        }
-
-        // Usually frame 4 follows RTLD header, but let's make it generic
-        uint32_t ringPeriod = 0;
-        for (uint32_t i=0; i<packet->num_frames; i++) {
-             if ((packet->frames[i]>>24) == 4) {
-                 ringPeriod = packet->frames[i] & 0xFFFFFF;
-                 break;
-             }
-         }
-
-        setStringParam(Timestamp,           rtdlTimeStr);
-        setIntegerParam(BadPulse,           packet->pulse.bad);
-        setIntegerParam(PulseFlavor,        packet->pulse.flavor);
-        setIntegerParam(PulseCharge,        packet->pulse.charge * 10e-12);
-        setIntegerParam(BadVetoFrame,       packet->pulse.bad_veto_frame);
-        setIntegerParam(BadCycleFrame,      packet->pulse.bad_cycle_frame);
-        setIntegerParam(Tstat,              packet->pulse.tstat);
-        setIntegerParam(PrevCycleVeto,      packet->pulse.last_cycle_veto);
-        setIntegerParam(Cycle,              packet->pulse.cycle);
-        setIntegerParam(TsyncPeriod,        packet->correction.tsync_period * 100);
-        setIntegerParam(TofFullOffset,      packet->correction.tof_full_offset);
-        setIntegerParam(FrameOffset,        packet->correction.frame_offset);
-        setIntegerParam(TofFixOffset,       packet->correction.tof_fixed_offset * 100);
-        setIntegerParam(RingPeriod,         ringPeriod);
-
-        if (m_record && m_record->update(*it) == false) {
+    setStringParam(Timestamp,           rtdlTimeStr);
+    setIntegerParam(PulseFlavor,        rtdl.pulse.flavor);
+    setIntegerParam(PulseCharge,        rtdl.pulse.charge * 10e-12);
+    setIntegerParam(TimingStatus,       rtdl.timing_status);
+    setIntegerParam(LastCycleVeto,      rtdl.last_cycle_veto);
+    setIntegerParam(Cycle,              rtdl.cycle);
+    setIntegerParam(TsyncPeriod,        rtdl.tsync_period * 100);
+    setIntegerParam(TofFullOffset,      rtdl.tof_full_offset);
+    setIntegerParam(FrameOffset,        rtdl.frame_offset);
+    setIntegerParam(TofFixOffset,       rtdl.tof_fixed_offset * 100);
+    setIntegerParam(RingPeriod,         ringPeriod);
+    
+    if (m_record) {
+        if (m_record->update(timestamp, rtdl, frames) == false) {
             LOG_ERROR("Failed to send PVA update");
             setParamAlarmStatus(PvaName, epicsAlarmComm);
             setParamAlarmSeverity(PvaName, epicsSevMinor);
+        } else {
+            setParamAlarmStatus(PvaName, epicsAlarmNone);
+            setParamAlarmSeverity(PvaName, epicsSevNone);
         }
     }
 
@@ -152,11 +159,8 @@ RtdlPlugin::PvaRecord::shared_pointer RtdlPlugin::PvaRecord::create(const std::s
         fieldCreate->createFieldBuilder()->
             add("timeStamp",      standardField->timeStamp())->
             add("proton_charge",  standardField->scalar(pvDouble, "display"))->
-            add("bad_pulse",      standardField->scalar(pvBoolean, ""))->
             add("pulse_flavor",   standardField->enumerated(""))->
-            add("bad_veto_frame", standardField->scalar(pvBoolean, ""))->
-            add("bad_cycle_frame",standardField->scalar(pvBoolean, ""))->
-            add("tstat",          standardField->scalar(pvUByte, ""))->
+            add("timing_status",  standardField->scalar(pvUByte, ""))->
             add("last_cycle_veto",standardField->scalar(pvUShort, ""))->
             add("cycle",          standardField->scalar(pvUShort, ""))->
             add("tsync_period",   standardField->scalar(pvUInt, "display"))->
@@ -189,10 +193,6 @@ bool RtdlPlugin::PvaRecord::init()
     if (!pvProtonChargeDisplay.attach(getPVStructure()->getSubField("proton_charge.display")))
         return false;
 
-    pvBadPulse = getPVStructure()->getSubField<epics::pvData::PVBoolean>("bad_pulse.value");
-    if (pvBadPulse.get() == NULL)
-        return false;
-
     if (!pvPulseFlavor.attach(getPVStructure()->getSubField("pulse_flavor.value")))
         return false;
     std::vector<std::string> flavors = {
@@ -201,16 +201,8 @@ bool RtdlPlugin::PvaRecord::init()
     };
     pvPulseFlavor.setChoices(flavors);
 
-    pvBadVetoFrame = getPVStructure()->getSubField<epics::pvData::PVBoolean>("bad_veto_frame.value");
-    if (pvBadVetoFrame.get() == NULL)
-        return false;
-
-    pvBadCycleFrame = getPVStructure()->getSubField<epics::pvData::PVBoolean>("bad_cycle_frame.value");
-    if (pvBadCycleFrame.get() == NULL)
-        return false;
-
-    pvTstat = getPVStructure()->getSubField<epics::pvData::PVUByte>("tstat.value");
-    if (pvTstat.get() == NULL)
+    pvTimingStatus = getPVStructure()->getSubField<epics::pvData::PVUByte>("timing_status.value");
+    if (pvTimingStatus.get() == NULL)
         return false;
 
     pvLastCycleVeto = getPVStructure()->getSubField<epics::pvData::PVUShort>("last_cycle_veto.value");
@@ -250,7 +242,7 @@ bool RtdlPlugin::PvaRecord::init()
     return true;
 }
 
-bool RtdlPlugin::PvaRecord::update(const DasRtdlPacket *packet)
+bool RtdlPlugin::PvaRecord::update(const epicsTimeStamp &timestamp_, const RtdlHeader &rtdl, const std::vector<DasRtdlPacket::RtdlFrame> &frames_)
 {
     bool posted = true;
 
@@ -259,14 +251,14 @@ bool RtdlPlugin::PvaRecord::update(const DasRtdlPacket *packet)
     // In worst case client will skip one packet on rollover and then recover
     // the sequence.
     epics::pvData::TimeStamp timestamp(
-        epics::pvData::posixEpochAtEpicsEpoch + packet->timestamp_sec,
-        packet->timestamp_nsec,
+        epics::pvData::posixEpochAtEpicsEpoch + timestamp_.secPastEpoch,
+        timestamp_.nsec,
         m_sequence++ % 0x7FFFFFFF
     );
 
-    epics::pvData::PVUIntArray::svector frames(packet->num_frames);
-    for (uint32_t i = 0; i < packet->num_frames; i++) {
-        frames[i] = packet->frames[i];
+    epics::pvData::PVUIntArray::svector frames(frames_.size());
+    for (size_t i = 0; i < frames_.size(); i++) {
+        frames[i] = frames_[i].raw;
     }
 
     epics::pvData::Display display;
@@ -276,18 +268,15 @@ bool RtdlPlugin::PvaRecord::update(const DasRtdlPacket *packet)
         beginGroupPut();
 
         pvTimeStamp.set(timestamp);
-        pvProtonCharge->put(packet->pulse.charge * 10e-12);
-        pvBadPulse->put(packet->pulse.bad);
-        pvPulseFlavor.setIndex(packet->pulse.flavor);
-        pvBadVetoFrame->put(packet->pulse.bad_veto_frame);
-        pvBadCycleFrame->put(packet->pulse.bad_cycle_frame);
-        pvTstat->put(packet->pulse.tstat);
-        pvLastCycleVeto->put(packet->pulse.last_cycle_veto);
-        pvCycle->put(packet->pulse.cycle);
-        pvTsyncPeriod->put(packet->correction.tsync_period * 100);
-        pvTofOffset->put(packet->correction.tof_fixed_offset * 100);
-        pvFrameOffset->put(packet->correction.frame_offset * 100);
-        pvOffsetEnabled->put(packet->correction.tof_full_offset);
+        pvProtonCharge->put(rtdl.pulse.charge * 10e-12);
+        pvPulseFlavor.setIndex(rtdl.pulse.flavor);
+        pvTimingStatus->put(rtdl.timing_status);
+        pvLastCycleVeto->put(rtdl.last_cycle_veto);
+        pvCycle->put(rtdl.cycle);
+        pvTsyncPeriod->put(rtdl.tsync_period * 100);
+        pvTofOffset->put(rtdl.tof_fixed_offset * 100);
+        pvFrameOffset->put(rtdl.frame_offset * 100);
+        pvOffsetEnabled->put(rtdl.tof_full_offset);
         pvFrames->replace(epics::pvData::freeze(frames));
 
         display.setUnits("C");

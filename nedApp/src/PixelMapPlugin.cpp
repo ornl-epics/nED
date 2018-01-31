@@ -73,12 +73,12 @@ void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
         for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             const DasDataPacket *origPacket = *it;
 
-            if (origPacket->format != DasDataPacket::DATA_FMT_PIXEL) {
+            if (origPacket->getEventsFormat() != DasDataPacket::EVENT_FMT_PIXEL) {
                 modifiedPackets.push_back(origPacket);
                 continue;
             }
 
-            DasDataPacket *newPacket = m_packetsPool.get(origPacket->length);
+            DasDataPacket *newPacket = m_packetsPool.get(origPacket->getLength());
             if (!newPacket) {
                 LOG_ERROR("Failed to allocate output packet");
                 continue;
@@ -105,13 +105,12 @@ void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
 PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasDataPacket *srcPacket, DasDataPacket *destPacket, bool passVetos)
 {
     PixelMapErrors errors;
-    const Event::Pixel *srcEvent= reinterpret_cast<const Event::Pixel *>(srcPacket->events);
-    Event::Pixel *destEvent = reinterpret_cast<Event::Pixel *>(destPacket->events);
-    uint32_t nEvents = (srcPacket->length - sizeof(DasDataPacket)) / sizeof(Event::Pixel);
-    uint32_t nDestEvents = 0;
+    const Event::Pixel *srcEvent = srcPacket->getEvents<Event::Pixel>();
+    Event::Pixel *destEvent = destPacket->getEvents<Event::Pixel>();
+    uint32_t nEvents = srcPacket->getNumEvents();
 
-    destPacket->init(DasDataPacket::DATA_FMT_PIXEL, srcPacket->timestamp_sec, srcPacket->timestamp_nsec, 0, 0);
-    destPacket->mapped = true;
+    destPacket->init(DasDataPacket::EVENT_FMT_PIXEL, srcPacket->getTimeStamp(), nEvents);
+    destPacket->setEventsMapped(true);
 
     // The below code was optimized for speed and is not as elegant as could be
     // otherwise. Bitfield, condition rearranging were both tried with worse results.
@@ -123,14 +122,12 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasDataPacket *sr
             destEvent->tof = srcEvent->tof;
             destEvent->pixelid = m_map[srcEvent->pixelid];
             destEvent++;
-            nDestEvents++;
         } else if ((srcEvent->pixelid & 0x70000000) != 0) {
             // This must be some fast-metadata events put into neutron packet
             // Let them through as is
             destEvent->tof = srcEvent->tof;
             destEvent->pixelid = srcEvent->pixelid;
             destEvent++;
-            nDestEvents++;
         } else if (passVetos == true) {
             destEvent->tof = srcEvent->tof;
             destEvent->pixelid = srcEvent->pixelid;
@@ -143,13 +140,10 @@ PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasDataPacket *sr
             }
 
             destEvent++;
-            nDestEvents++;
         }
 
         srcEvent++;
     }
-
-    destPacket->length += nDestEvents * sizeof(Event::Pixel);
 
     return errors;
 }

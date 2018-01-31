@@ -67,22 +67,7 @@ CommDebugPlugin::CommDebugPlugin(const char *portName, const char *parentPlugins
     createParam("RspCmdRsp",    asynParamInt32, &RspCmdRsp);        // READ - Command is response flag
     createParam("RspCmdVer",    asynParamInt32, &RspCmdVer);        // READ - Command packet version
     createParam("RspCmdModule", asynParamOctet, &RspCmdModule);     // READ - Module address to communicate with
-    createParam("RspRtdlSourceId",asynParamInt32, &RspRtdlSourceId);// READ - RTDL source id field
     createParam("RspRtdlFrames",asynParamInt32, &RspRtdlFrames);    // READ - RTDL number of frames
-    createParam("RspRtdlTime",  asynParamOctet, &RspRtdlTime);      // READ - RTDL time, seconds converter to time string in ETC
-    createParam("RspRtdlTimeNsec",asynParamInt32, &RspRtdlTimeNsec);// READ - RTDL time, nano-seconds
-    createParam("RspRtdlPcharge",asynParamInt32,&RspRtdlPcharge);   // READ - RTDL pulse proton charge
-    createParam("RspRtdlFlavor",asynParamInt32, &RspRtdlFlavor);    // READ - RTDL pulse flavors
-    createParam("RspRtdlBad",   asynParamInt32, &RspRtdlBad);       // READ - RTDL bad pulse flag
-    createParam("RspRtdlCycle", asynParamInt32, &RspRtdlCycle);     // READ - RTDL pulse cycle number (0-599)
-    createParam("RspRtdlVeto",  asynParamInt32, &RspRtdlVeto);      // READ - RTDL last pulse veto
-    createParam("RspRtdlTstat", asynParamInt32, &RspRtdlTstat);     // READ - RTDL tstat
-    createParam("RspRtdlBadFr", asynParamInt32, &RspRtdlBadFr);     // READ - RTDL bad cycle frame
-    createParam("RspRtdlBadVeto",asynParamInt32,&RspRtdlBadVeto);   // READ - RTDL bad last cycle veto frame
-    createParam("RspRtdlTsync", asynParamInt32, &RspRtdlTsync);     // READ - RTDL applied TSYNC
-    createParam("RspRtdlTofOff",asynParamInt32, &RspRtdlTofOff);    // READ - RTDL applied TOF offset
-    createParam("RspRtdlFrOff", asynParamInt32, &RspRtdlFrOff);     // READ - RTDL applied frame offset
-    createParam("RspRtdlOffEn", asynParamInt32, &RspRtdlOffEn);     // READ - RTDL TOF enabled flag
     createParam("RspDataSourceId",asynParamInt32, &RspDataSourceId);// READ - Data source id field
     createParam("RspDataFormat",asynParamInt32, &RspDataFormat);    // READ - Data format
     createParam("RspDataTime",  asynParamOctet, &RspDataTime);      // READ - Data time, seconds converter to time string in ETC
@@ -179,36 +164,28 @@ void CommDebugPlugin::generatePacket(bool fromRawPvs)
         getIntegerParam(ReqRaw7, &param);   m_buffer[7] = param;
 
     } else {
-        int cmd;
-        char moduleId[20];
-        bool ack;
-        bool rsp;
-        int verifyId;
-        uint32_t payload[0];
-        int payloadLen=0;
-        getIntegerParam(ReqCmd,         &cmd);
-        getIntegerParam(ReqVerifyId,    &verifyId);
-        getIntegerParam(ReqCmdLen,      &payloadLen);
-        getBooleanParam(ReqAck,         ack);
-        getBooleanParam(ReqRsp,         rsp);
-        payloadLen -= DasCmdPacket::getHeaderLen();
-        payloadLen = std::max(0, std::min(16, payloadLen));
+        int bufferLen = sizeof(m_buffer) - sizeof(DasCmdPacket);
+        int payloadLen = getIntegerParam(ReqCmdLen)-6;
+        payloadLen = std::max(0, std::min(bufferLen, payloadLen));
 
-        if (payloadLen >=  4) { int param; getIntegerParam(ReqRaw4, &param); payload[0] = param; }
-        if (payloadLen >=  8) { int param; getIntegerParam(ReqRaw5, &param); payload[1] = param; }
-        if (payloadLen >= 12) { int param; getIntegerParam(ReqRaw6, &param); payload[2] = param; }
-        if (payloadLen >= 16) { int param; getIntegerParam(ReqRaw7, &param); payload[3] = param; }
+        if (payloadLen >=  4) { int param; getIntegerParam(ReqRaw4, &param); m_buffer[0] = param; }
+        if (payloadLen >=  8) { int param; getIntegerParam(ReqRaw5, &param); m_buffer[1] = param; }
+        if (payloadLen >= 12) { int param; getIntegerParam(ReqRaw6, &param); m_buffer[2] = param; }
+        if (payloadLen >= 16) { int param; getIntegerParam(ReqRaw7, &param); m_buffer[3] = param; }
 
-        getStringParam(ReqModule,   sizeof(moduleId), moduleId);
-        int module = BaseModulePlugin::ip2addr(std::string(moduleId, sizeof(moduleId)));
-        DasCmdPacket::CommandType command = static_cast<const DasCmdPacket::CommandType>(cmd & 0xFF);
-        DasCmdPacket::init(reinterpret_cast<uint8_t *>(m_buffer), sizeof(m_buffer), module, command, ack, rsp, verifyId, payload, payloadLen);
+        DasCmdPacket::init(reinterpret_cast<uint8_t *>(m_buffer),
+                           sizeof(m_buffer),
+                           BaseModulePlugin::ip2addr(getStringParam(ReqModule)),
+                           static_cast<const DasCmdPacket::CommandType>(getIntegerParam(ReqCmd) & 0xFF),
+                           getBooleanParam(ReqAck),
+                           getBooleanParam(ReqRsp),
+                           getIntegerParam(ReqVerifyId) & 0x1FF,
+                           payloadLen,
+                           m_buffer);
 
-        int param;
-        getIntegerParam(ReqVersion, &param);    m_packet->version = param;
-        getIntegerParam(ReqPriority, &param);   m_packet->priority = (param > 0);
-        getIntegerParam(ReqSequence, &param);   m_packet->sequence = param;
-        getIntegerParam(ReqLength, &param);     m_packet->length = std::min(64, std::max(0, param));
+        m_packet->setPriority(getBooleanParam(ReqPriority));
+        m_packet->setVersion(getIntegerParam(ReqVersion) & 0xF);
+        m_packet->setSequenceId(getIntegerParam(ReqSequence) & 0xFF);
     }
 }
 
@@ -236,8 +213,8 @@ void CommDebugPlugin::recvDownstream(const DasCmdPacketList &packets)
             const DasCmdPacket *packet = *it;
 
             if (sniffer) {
-                if ((moduleId == 0 || moduleId == packet->module_id) &&
-                    (filterCmd == 0 || filterCmd == packet->command)) {
+                if ((moduleId == 0 || moduleId == packet->getModuleId()) &&
+                    (filterCmd == 0 || filterCmd == packet->getCommand())) {
 
                     savePacket(packet, m_recvQue, recvQueMaxSize);
                 }
@@ -314,18 +291,16 @@ void CommDebugPlugin::recvUpstream(const DasCmdPacketList &packets)
 
     if (sniffer && !packets.empty()) {
         int filterCmd;
-        char moduleStr[20];
         uint32_t moduleId;
 
         getIntegerParam(FilterCmd, &filterCmd);
-        getStringParam(FilterModule,   sizeof(moduleStr), moduleStr);
-        moduleId = BaseModulePlugin::ip2addr(moduleStr);
+        moduleId = BaseModulePlugin::ip2addr(getStringParam(FilterModule));
 
         for (auto it = packets.begin(); it != packets.end(); it++) {
             const DasCmdPacket *packet = *it;
 
-            if ((moduleId == 0 || moduleId == packet->module_id) &&
-                (filterCmd == 0 || filterCmd == packet->command)) {
+            if ((moduleId == 0 || moduleId == packet->getModuleId()) &&
+                (filterCmd == 0 || filterCmd == packet->getCommand())) {
 
                 savePacket(packet, m_sendQue, getIntegerParam(SendQueMaxSize));
             }
@@ -341,7 +316,7 @@ void CommDebugPlugin::savePacket(const Packet *packet, std::list<PacketDesc> &qu
 
     // Cache the payload to read it through readOctet()
     PacketDesc pkt;
-    pkt.length = std::min(packet->length, static_cast<uint32_t>(sizeof(pkt.data)));
+    pkt.length = std::min(packet->getLength(), static_cast<uint32_t>(sizeof(pkt.data)));
     memcpy(pkt.data, packet, pkt.length);
     while ((int)que.size() >= maxQueSize)
         que.pop_back();
@@ -369,27 +344,27 @@ void CommDebugPlugin::showSentPacket(const DasCmdPacket *packet, int index)
 {
     const uint32_t *raw = reinterpret_cast<const uint32_t *>(packet);
 
-    setIntegerParam(ReqVersion,   packet->version);
-    setIntegerParam(ReqPriority,  packet->priority);
-    setIntegerParam(ReqType,      packet->type);
-    setIntegerParam(ReqSequence,  packet->sequence);
-    setIntegerParam(ReqLength,    packet->length);
-    setIntegerParam(ReqCmdLen,    packet->cmd_length);
-    setIntegerParam(ReqCmd,       packet->command);
-    setIntegerParam(ReqVerifyId,  packet->cmd_sequence);
-    setIntegerParam(ReqAck,       packet->acknowledge);
-    setIntegerParam(ReqRsp,       packet->response);
-    setIntegerParam(ReqCmdVer,    packet->lvds_version);
-    setStringParam(ReqModule,     BaseModulePlugin::addr2ip(packet->module_id));
+    setIntegerParam(ReqVersion,   packet->getVersion());
+    setIntegerParam(ReqPriority,  packet->isPriority());
+    setIntegerParam(ReqType,      packet->getType());
+    setIntegerParam(ReqSequence,  packet->getSequenceId());
+    setIntegerParam(ReqLength,    packet->getLength());
+    setIntegerParam(ReqCmdLen,    packet->getCmdPayloadLength());
+    setIntegerParam(ReqCmd,       packet->getCommand());
+    setIntegerParam(ReqVerifyId,  packet->getCmdId());
+    setIntegerParam(ReqAck,       packet->isAcknowledge());
+    setIntegerParam(ReqRsp,       packet->isResponse());
+    setIntegerParam(ReqCmdVer,    packet->getLvdsVer());
+    setStringParam(ReqModule,     packet->getModuleIdStr());
 
-    if (packet->length >=  0) setIntegerParam(ReqRaw0, raw[0]);
-    if (packet->length >=  4) setIntegerParam(ReqRaw1, raw[1]);
-    if (packet->length >=  8) setIntegerParam(ReqRaw2, raw[2]);
-    if (packet->length >= 12) setIntegerParam(ReqRaw3, raw[3]);
-    if (packet->length >= 16) setIntegerParam(ReqRaw4, raw[4]);
-    if (packet->length >= 20) setIntegerParam(ReqRaw5, raw[5]);
-    if (packet->length >= 24) setIntegerParam(ReqRaw6, raw[6]);
-    if (packet->length >= 28) setIntegerParam(ReqRaw7, raw[7]);
+    if (packet->getLength() >=  0) setIntegerParam(ReqRaw0, raw[0]);
+    if (packet->getLength() >=  4) setIntegerParam(ReqRaw1, raw[1]);
+    if (packet->getLength() >=  8) setIntegerParam(ReqRaw2, raw[2]);
+    if (packet->getLength() >= 12) setIntegerParam(ReqRaw3, raw[3]);
+    if (packet->getLength() >= 16) setIntegerParam(ReqRaw4, raw[4]);
+    if (packet->getLength() >= 20) setIntegerParam(ReqRaw5, raw[5]);
+    if (packet->getLength() >= 24) setIntegerParam(ReqRaw6, raw[6]);
+    if (packet->getLength() >= 28) setIntegerParam(ReqRaw7, raw[7]);
 
     setIntegerParam(SendQueIndex, index);
     setIntegerParam(SendQueSize, m_sendQue.size());
@@ -417,78 +392,55 @@ void CommDebugPlugin::showRecvPacket(const Packet *packet, int index)
 {
     const uint32_t *raw = reinterpret_cast<const uint32_t *>(packet);
 
-    setIntegerParam(RspVersion,     packet->version);
-    setIntegerParam(RspPriority,    packet->priority);
-    setIntegerParam(RspType,        packet->type);
-    setIntegerParam(RspSequence,    packet->sequence);
-    setIntegerParam(RspLength,      packet->length);
+    setIntegerParam(RspVersion,     packet->getVersion());
+    setIntegerParam(RspPriority,    packet->isPriority());
+    setIntegerParam(RspType,        packet->getType());
+    setIntegerParam(RspSequence,    packet->getSequenceId());
+    setIntegerParam(RspLength,      packet->getLength());
 
-    if (packet->version != 0) {
-        if (packet->type == Packet::TYPE_DAS_CMD) {
-            const DasCmdPacket *cmdPacket = reinterpret_cast<const DasCmdPacket *>(packet);
-            setIntegerParam(RspCmdLen,      cmdPacket->cmd_length);
-            setIntegerParam(RspCmd,         cmdPacket->command);
-            setIntegerParam(RspCmdVerifyId, cmdPacket->cmd_sequence);
-            setIntegerParam(RspCmdAck,      cmdPacket->acknowledge);
-            setIntegerParam(RspCmdRsp,      cmdPacket->response);
-            setIntegerParam(RspCmdVer,      cmdPacket->lvds_version);
-            setStringParam(RspCmdModule,    BaseModulePlugin::addr2ip(cmdPacket->module_id));
+    if (packet->getVersion() != 0) {
+        if (packet->getType() == Packet::TYPE_DAS_CMD) {
+            auto *cmdPacket = DasCmdPacket::cast(packet);
+            setIntegerParam(RspCmdLen,      cmdPacket->getCmdPayloadLength());
+            setIntegerParam(RspCmd,         cmdPacket->getCommand());
+            setIntegerParam(RspCmdVerifyId, cmdPacket->getCmdId());
+            setIntegerParam(RspCmdAck,      cmdPacket->isAcknowledge());
+            setIntegerParam(RspCmdRsp,      cmdPacket->isResponse());
+            setIntegerParam(RspCmdVer,      cmdPacket->getLvdsVer());
+            setStringParam(RspCmdModule,    cmdPacket->getModuleIdStr());
 
-        } else if (packet->type == Packet::TYPE_ERROR) {
-            const ErrorPacket *errPacket = reinterpret_cast<const ErrorPacket *>(packet);
+        } else if (packet->getType() == Packet::TYPE_ERROR) {
+            auto *errPacket = ErrorPacket::cast(packet);
             setIntegerParam(RspErrCode,     errPacket->code);
-            setIntegerParam(RspErrSourceId, errPacket->source);
+            //setIntegerParam(RspErrSourceId, errPacket->source);
 
-        } else if (packet->type == Packet::TYPE_DAS_RTDL) {
-            const DasRtdlPacket *rtdlPacket = reinterpret_cast<const DasRtdlPacket *>(packet);
-            epicsTimeStamp ts = { rtdlPacket->timestamp_sec, rtdlPacket->timestamp_nsec };
-            epicsTime t(ts);
+        } else if (packet->getType() == Packet::TYPE_DAS_RTDL) {
+            auto *rtdlPacket = DasRtdlPacket::cast(packet);
+            setIntegerParam(RspRtdlFrames,  rtdlPacket->getNumRtdlFrames());
+
+        } else if (packet->getType() == Packet::TYPE_DAS_DATA) {
+            auto *dataPacket = DasDataPacket::cast(packet);
+            epicsTimeStamp timestamp = dataPacket->getTimeStamp();
+            epicsTime t(timestamp);
             char timeStr[64], nsecStr[16];
             t.strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S.");
-            snprintf(nsecStr, sizeof(nsecStr), "%09u", rtdlPacket->timestamp_nsec);
+            snprintf(nsecStr, sizeof(nsecStr), "%09u", timestamp.nsec);
             strncat(timeStr, nsecStr, sizeof(timeStr));
 
-            setIntegerParam(RspRtdlSourceId,rtdlPacket->source);
-            setIntegerParam(RspRtdlFrames,  rtdlPacket->num_frames);
-            setStringParam (RspRtdlTime,    timeStr);
-            setIntegerParam(RspRtdlTimeNsec,rtdlPacket->timestamp_nsec);
-            setIntegerParam(RspRtdlPcharge, rtdlPacket->pulse.charge);
-            setIntegerParam(RspRtdlFlavor,  rtdlPacket->pulse.flavor);
-            setIntegerParam(RspRtdlBad,     rtdlPacket->pulse.bad);
-            setIntegerParam(RspRtdlCycle,   rtdlPacket->pulse.cycle);
-            setIntegerParam(RspRtdlVeto,    rtdlPacket->pulse.last_cycle_veto);
-            setIntegerParam(RspRtdlTstat,   rtdlPacket->pulse.tstat);
-            setIntegerParam(RspRtdlBadFr,   rtdlPacket->pulse.bad_cycle_frame);
-            setIntegerParam(RspRtdlBadVeto, rtdlPacket->pulse.bad_veto_frame);
-            setIntegerParam(RspRtdlTsync,   rtdlPacket->correction.tsync_period * 100);
-            setIntegerParam(RspRtdlTofOff,  rtdlPacket->correction.tof_fixed_offset * 100);
-            setIntegerParam(RspRtdlFrOff,   rtdlPacket->correction.frame_offset);
-            setIntegerParam(RspRtdlOffEn,   rtdlPacket->correction.tof_full_offset);
-
-        } else if (packet->type == Packet::TYPE_DAS_DATA) {
-            const DasDataPacket *dataPacket = reinterpret_cast<const DasDataPacket *>(packet);
-            epicsTimeStamp ts = { dataPacket->timestamp_sec, dataPacket->timestamp_nsec };
-            epicsTime t(ts);
-            char timeStr[64], nsecStr[16];
-            t.strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S.");
-            snprintf(nsecStr, sizeof(nsecStr), "%09u", dataPacket->timestamp_nsec);
-            strncat(timeStr, nsecStr, sizeof(timeStr));
-
-            setIntegerParam(RspDataSourceId,dataPacket->source);
-            setIntegerParam(RspDataFormat,  dataPacket->format);
+            setIntegerParam(RspDataFormat,  dataPacket->getEventsFormat());
             setStringParam (RspDataTime,    timeStr);
-            setIntegerParam(RspDataTimeNsec,dataPacket->timestamp_nsec);
+            setIntegerParam(RspDataTimeNsec,timestamp.nsec);
         }
     }
 
-    if (packet->length >=  0) setIntegerParam(RspRaw0, raw[0]);
-    if (packet->length >=  4) setIntegerParam(RspRaw1, raw[1]);
-    if (packet->length >=  8) setIntegerParam(RspRaw2, raw[2]);
-    if (packet->length >= 12) setIntegerParam(RspRaw3, raw[3]);
-    if (packet->length >= 16) setIntegerParam(RspRaw4, raw[4]);
-    if (packet->length >= 20) setIntegerParam(RspRaw5, raw[5]);
-    if (packet->length >= 24) setIntegerParam(RspRaw6, raw[6]);
-    if (packet->length >= 28) setIntegerParam(RspRaw7, raw[7]);
+    if (packet->getLength() >=  0) setIntegerParam(RspRaw0, raw[0]);
+    if (packet->getLength() >=  4) setIntegerParam(RspRaw1, raw[1]);
+    if (packet->getLength() >=  8) setIntegerParam(RspRaw2, raw[2]);
+    if (packet->getLength() >= 12) setIntegerParam(RspRaw3, raw[3]);
+    if (packet->getLength() >= 16) setIntegerParam(RspRaw4, raw[4]);
+    if (packet->getLength() >= 20) setIntegerParam(RspRaw5, raw[5]);
+    if (packet->getLength() >= 24) setIntegerParam(RspRaw6, raw[6]);
+    if (packet->getLength() >= 28) setIntegerParam(RspRaw7, raw[7]);
 
     setIntegerParam(RecvQueIndex, index);
     setIntegerParam(RecvQueSize, m_recvQue.size());

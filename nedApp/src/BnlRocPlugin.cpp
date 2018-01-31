@@ -64,8 +64,8 @@ BnlRocPlugin::BnlRocPlugin(const char *portName, const char *parentPlugins, cons
 bool BnlRocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
     const RspReadVersion *response;
-    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+    if (packet->getCmdPayloadLength() == sizeof(RspReadVersion)) {
+        response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
     } else {
         return false;
     }

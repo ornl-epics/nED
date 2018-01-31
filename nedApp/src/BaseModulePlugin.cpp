@@ -258,15 +258,11 @@ DasCmdPacket::CommandType BaseModulePlugin::handleRequest(DasCmdPacket::CommandT
 void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t channel, uint32_t *payload, uint32_t length)
 {
     std::array<uint8_t, 1024> buffer;
-    DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, false, false, channel, payload, length);
+    DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, false, false, channel, length, payload);
     if (!packet) {
         LOG_ERROR("Failed to create and send packet");
         return;
     }
-
-    // Hopefully this is a temporary hack until either DSP7 implements
-    // DasCmdPacket->LVDS convertion or all ROCs switch to new format
-    packet->__reserved2 = m_wordSize;
 
     BasePlugin::sendUpstream(packet);
 }
@@ -277,7 +273,7 @@ void BaseModulePlugin::recvDownstream(const DasCmdPacketList &packetList)
         const DasCmdPacket *packet = *it;
 
         // Silently skip packets we're not interested in
-        if (!packet->response || packet->module_id != m_hardwareId)
+        if (!packet->isResponse() || packet->getModuleId() != m_hardwareId)
             continue;
 
         (void)processResponse(packet);
@@ -292,19 +288,19 @@ bool BaseModulePlugin::processResponse(const DasCmdPacket *packet)
             return true;
     }
 
-    if (m_waitingResponse != packet->command) {
-        LOG_WARN("Ignoring unexpected response %s (0x%02X)", cmd2str(packet->command), packet->command);
+    if (m_waitingResponse != packet->getCommand()) {
+        LOG_WARN("Ignoring unexpected response %s (0x%02X)", cmd2str(packet->getCommand()), packet->getCommand());
         return false;
     }
     m_waitingResponse = static_cast<DasCmdPacket::CommandType>(0);
 
     m_connStaleTime = epicsTime::getCurrent() + CONN_CLOSE_TIMEOUT;
     if (!cancelTimeoutCallback()) {
-        LOG_WARN("Received %s response after timeout", cmd2str(packet->command));
+        LOG_WARN("Received %s response after timeout", cmd2str(packet->getCommand()));
         return false;
     }
 
-    LOG_INFO("Received %s %s", cmd2str(packet->command), (packet->acknowledge ? "ACK" : "NACK"));
+    LOG_INFO("Received %s %s", cmd2str(packet->getCommand()), (packet->isAcknowledge() ? "ACK" : "NACK"));
 
     bool ack = handleResponse(packet);
 
@@ -325,7 +321,7 @@ bool BaseModulePlugin::processResponse(const DasCmdPacket *packet)
     } else {
         bool processed = true;
 
-        switch (packet->command) {
+        switch (packet->getCommand()) {
         case DasCmdPacket::CMD_READ_CONFIG:
             m_waitingResponse = reqReadConfig(m_expectedChannel);
             break;
@@ -414,7 +410,7 @@ bool BaseModulePlugin::handleResponse(const DasCmdPacket *packet)
 
     getIntegerParam(Verified, &verified);
 
-    switch (packet->command) {
+    switch (packet->getCommand()) {
     case DasCmdPacket::CMD_RESET:
         return rspReset(packet);
     case DasCmdPacket::CMD_RESET_LVDS:
@@ -436,14 +432,14 @@ bool BaseModulePlugin::handleResponse(const DasCmdPacket *packet)
         setIntegerParam(Verified, verified);
         return ack;
     case DasCmdPacket::CMD_READ_CONFIG:
-        if (! ((m_expectedChannel == 0 && packet->cmd_sequence == 0) || m_expectedChannel != packet->cmd_sequence) ) {
-            LOG_ERROR("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmd_sequence);
+        if (! ((m_expectedChannel == 0 && packet->getCmdId() == 0) || m_expectedChannel != packet->getCmdId()) ) {
+            LOG_ERROR("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, packet->getCmdId());
             return false;
         }
         return rspReadConfig(packet, m_expectedChannel);
     case DasCmdPacket::CMD_READ_STATUS:
-        if (! ((m_expectedChannel == 0 && packet->cmd_sequence == 0) || m_expectedChannel != packet->cmd_sequence) ) {
-            LOG_ERROR("Expecting read status response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmd_sequence);
+        if (! ((m_expectedChannel == 0 && packet->getCmdId() == 0) || m_expectedChannel != packet->getCmdId()) ) {
+            LOG_ERROR("Expecting read status response for channel %d, got for channel %d\n", m_expectedChannel, packet->getCmdId());
             return false;
         }
         return rspReadStatus(packet, m_expectedChannel);
@@ -467,8 +463,8 @@ bool BaseModulePlugin::handleResponse(const DasCmdPacket *packet)
     case DasCmdPacket::CMD_WRITE_CONFIG_D:
     case DasCmdPacket::CMD_WRITE_CONFIG_E:
     case DasCmdPacket::CMD_WRITE_CONFIG_F:
-        if (! ((m_expectedChannel == 0 && packet->cmd_sequence == 0) || m_expectedChannel != packet->cmd_sequence) ) {
-            LOG_ERROR("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, packet->cmd_sequence);
+        if (! ((m_expectedChannel == 0 && packet->getCmdId() == 0) || m_expectedChannel != packet->getCmdId()) ) {
+            LOG_ERROR("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, packet->getCmdId());
             return false;
         }
         return rspWriteConfig(packet, m_expectedChannel);
@@ -481,7 +477,7 @@ bool BaseModulePlugin::handleResponse(const DasCmdPacket *packet)
     case DasCmdPacket::CMD_READ_TEMPERATURE:
         return rspReadTemperature(packet);
     default:
-        LOG_WARN("Unhandled %s response (0x%02X)", cmd2str(packet->command), packet->command);
+        LOG_WARN("Unhandled %s response (0x%02X)", cmd2str(packet->getCommand()), packet->getCommand());
         return false;
     }
 }
@@ -494,7 +490,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqReset()
 
 bool BaseModulePlugin::rspReset(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 DasCmdPacket::CommandType BaseModulePlugin::reqResetLvds()
@@ -505,7 +501,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqResetLvds()
 
 bool BaseModulePlugin::rspResetLvds(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 DasCmdPacket::CommandType BaseModulePlugin::reqTcReset()
@@ -516,7 +512,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqTcReset()
 
 bool BaseModulePlugin::rspTcReset(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 DasCmdPacket::CommandType BaseModulePlugin::reqTcResetLvds()
@@ -527,7 +523,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqTcResetLvds()
 
 bool BaseModulePlugin::rspTcResetLvds(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 DasCmdPacket::CommandType BaseModulePlugin::reqDiscover()
@@ -538,8 +534,8 @@ DasCmdPacket::CommandType BaseModulePlugin::reqDiscover()
 
 bool BaseModulePlugin::rspDiscover(const DasCmdPacket *packet)
 {
-    if (packet->getPayloadLength() >= sizeof(uint32_t))
-        return (m_hardwareType == static_cast<DasCmdPacket::ModuleType>(packet->payload[0]));
+    if (packet->getCmdPayloadLength() >= 1)
+        return (m_hardwareType == static_cast<DasCmdPacket::ModuleType>(packet->getCmdPayload()[0]));
     return false;
 }
 
@@ -594,20 +590,20 @@ bool BaseModulePlugin::rspReadStatus(const DasCmdPacket *packet, uint8_t channel
 {
     uint32_t section = SECTION_ID(0x0, channel);
     uint32_t expectLength = ALIGN_UP(m_params["STATUS"].sizes[section]*m_wordSize, 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
+    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
     if (payloadLength != expectLength) {
         if (channel == 0)
             LOG_ERROR("Received wrong READ_STATUS response based on length; "
-                      "received %u, expected %u", payloadLength, expectLength);
+                      "received %u, expected %u", packet->getCmdPayloadLength(), m_params["STATUS"].sizes[section]*m_wordSize);
         else
             LOG_ERROR("Received wrong channel %u READ_STATUS response based on length; "
-                      "received %u, expected %u", channel, payloadLength, expectLength);
+                      "received %u, expected %u", channel, packet->getCmdPayloadLength(), m_params["STATUS"].sizes[section]*m_wordSize);
         setParamsAlarm("STATUS", epicsAlarmRead);
         return false;
     }
 
     setParamsAlarm("STATUS", epicsAlarmNone);
-    unpackRegParams("STATUS", packet->payload, payloadLength, channel);
+    unpackRegParams("STATUS", packet->getCmdPayload(), payloadLength, channel);
     return true;
 }
 
@@ -630,22 +626,23 @@ DasCmdPacket::CommandType BaseModulePlugin::reqResetStatusCounters()
 
 bool BaseModulePlugin::rspResetStatusCounters(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 bool BaseModulePlugin::rspReadStatusCounters(const DasCmdPacket *packet)
 {
     uint32_t expectLength = ALIGN_UP(m_params["COUNTERS"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
+    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
     if (payloadLength != expectLength) {
-        LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; "
-                  "received %u, expected %u", payloadLength, expectLength);
+        LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; received %u, expected %u",
+                  packet->getCmdPayloadLength(),
+                  m_params["COUNTERS"].sizes[0]*m_wordSize);
         setParamsAlarm("COUNTERS", epicsAlarmRead);
         return false;
     }
 
     setParamsAlarm("COUNTERS", epicsAlarmNone);
-    unpackRegParams("COUNTERS", packet->payload, payloadLength);
+    unpackRegParams("COUNTERS", packet->getCmdPayload(), payloadLength);
     return true;
 }
 
@@ -671,20 +668,23 @@ bool BaseModulePlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel
     // Response contains registers for all sections for a selected channel or global configuration
     uint32_t section_f = SECTION_ID(0xF, channel);
     uint32_t expectLength = ALIGN_UP(m_wordSize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]), 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
+    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
 
     if (payloadLength != expectLength) {
         if (channel == 0)
             LOG_ERROR("Received wrong READ_CONFIG response based on length; received %uB, expected %uB",
-                      payloadLength, expectLength);
+                      packet->getCmdPayloadLength(),
+                      m_wordSize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]));
         else
             LOG_ERROR("Received wrong channel %u READ_CONFIG response based on length; received %uB, expected %uB",
-                      channel, payloadLength, expectLength);
+                      channel,
+                      packet->getCmdPayloadLength(),
+                      m_wordSize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]));
         setParamsAlarm("CONFIG", epicsAlarmRead);
         return false;
     }
     setParamsAlarm("CONFIG", epicsAlarmNone);
-    unpackRegParams("CONFIG", packet->payload, payloadLength, channel);
+    unpackRegParams("CONFIG", packet->getCmdPayload(), payloadLength, channel);
     return true;
 }
 
@@ -724,9 +724,9 @@ DasCmdPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t section, uint
 
 bool BaseModulePlugin::rspWriteConfig(const DasCmdPacket *packet, uint8_t channel)
 {
-    int alarm = (packet->acknowledge ? epicsAlarmNone : epicsAlarmWrite);
+    int alarm = (packet->isAcknowledge() ? epicsAlarmNone : epicsAlarmWrite);
     setParamsAlarm("CONFIG", alarm);
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 DasCmdPacket::CommandType BaseModulePlugin::reqStart()
@@ -737,7 +737,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqStart()
 
 bool BaseModulePlugin::rspStart(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 DasCmdPacket::CommandType BaseModulePlugin::reqStop()
@@ -748,7 +748,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqStop()
 
 bool BaseModulePlugin::rspStop(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 DasCmdPacket::CommandType BaseModulePlugin::reqUpgrade(const char *data, uint32_t size)
@@ -764,14 +764,15 @@ DasCmdPacket::CommandType BaseModulePlugin::reqUpgrade(const char *data, uint32_
 bool BaseModulePlugin::rspUpgrade(const DasCmdPacket *packet)
 {
     uint32_t expectLength = ALIGN_UP(m_params["UPGRADE"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
+    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
     if (payloadLength != expectLength) {
-        LOG_ERROR("Received wrong READ_UPGRADE response based on length; "
-                  "received %u, expected %u", payloadLength, expectLength);
+        LOG_ERROR("Received wrong READ_UPGRADE response based on length; received %u, expected %u",
+                  packet->getCmdPayloadLength(),
+                  m_params["UPGRADE"].sizes[0]*m_wordSize);
         return false;
     }
 
-    unpackRegParams("UPGRADE", packet->payload, payloadLength);
+    unpackRegParams("UPGRADE", packet->getCmdPayload(), payloadLength);
     return true;
 }
 
@@ -789,16 +790,17 @@ DasCmdPacket::CommandType BaseModulePlugin::reqReadTemperature()
 bool BaseModulePlugin::rspReadTemperature(const DasCmdPacket *packet)
 {
     uint32_t expectLength = ALIGN_UP(m_params["TEMPERATURE"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getPayloadLength(), 4);
+    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
     if (payloadLength != expectLength) {
-        LOG_ERROR("Received wrong READ_TEMP response based on length; "
-                  "received %u, expected %u", payloadLength, expectLength);
+        LOG_ERROR("Received wrong READ_TEMP response based on length; received %u, expected %u",
+                  packet->getCmdPayloadLength(),
+                  m_params["TEMPERATURE"].sizes[0]*m_wordSize);
         setParamsAlarm("TEMPERATURE", epicsAlarmNone);
         return false;
     }
 
     setParamsAlarm("TEMPERATURE", epicsAlarmNone);
-    unpackRegParams("TEMPERATURE", packet->payload, payloadLength);
+    unpackRegParams("TEMPERATURE", packet->getCmdPayload(), payloadLength);
     return true;
 }
 

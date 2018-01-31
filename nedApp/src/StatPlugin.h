@@ -50,7 +50,7 @@ class StatPlugin : public BasePlugin {
         /**
          * Check to see if current timestamp is already in que, otherwise insert it.
          */
-        bool isTimestampUnique(uint32_t sec, uint32_t nsec, std::list<epicsTime> &que);
+        bool isTimestampUnique(const epicsTimeStamp &timestamp, std::list<epicsTime> &que);
 
     private:
         static const size_t MAX_TIME_QUE_SIZE = 5; //!< Max number of entries in each time-series que

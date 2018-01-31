@@ -106,8 +106,8 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
 
 bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+    if (packet->getCmdPayloadLength() == sizeof(RspReadVersion)) {
+        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
         version.hw_version  = response->hardware.version;
         version.hw_revision = response->hardware.revision;
         version.hw_year     = HEX_BYTE_TO_DEC(response->hardware.year) + 2000;
@@ -120,8 +120,8 @@ bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
         version.fw_day      = HEX_BYTE_TO_DEC(response->firmware.day);
     
         return true;
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion7)) {
-        const RspReadVersion7 *response = reinterpret_cast<const RspReadVersion7*>(packet->payload);
+    } else if (packet->getCmdPayloadLength() == sizeof(RspReadVersion7)) {
+        const RspReadVersion7 *response = reinterpret_cast<const RspReadVersion7*>(packet->getCmdPayload());
         version.hw_version  = response->hw_version;
         version.hw_revision = response->hw_revision;
         version.hw_year     = 0;

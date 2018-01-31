@@ -55,13 +55,11 @@ void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
     int severity = epicsSevNone;
     if (m_record) {
         for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-            if ((*it)->format == DasDataPacket::DATA_FMT_PIXEL) {
-                if (m_record->update(*it) == false) {
-                    LOG_ERROR("Failed to send PVA update");
-                    status = epicsAlarmComm;
-                    severity = epicsSevMinor;
-                    break;
-                }
+            if (m_record->update(*it) == false) {
+                LOG_ERROR("Failed to send PVA update");
+                status = epicsAlarmComm;
+                severity = epicsSevMinor;
+                break;
             }
         }
     }
@@ -132,47 +130,49 @@ bool PvaNeutronsPlugin::PvaRecord::init()
 
 bool PvaNeutronsPlugin::PvaRecord::update(const DasDataPacket *packet)
 {
-    bool posted = true;
+    bool posted = false;
 
-    assert(packet->format == DasDataPacket::DATA_FMT_PIXEL);
+    if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_PIXEL) {
+        epicsTimeStamp ts = packet->getTimeStamp();
 
-    // 31 bit sequence number is good for around 9 months.
-    // (based on 5mio events/s, IRQ coallescing = 40, max OCC packet size = 3600B)
-    // In worst case client will skip one packet on rollover and then recover
-    // the sequence.
-    epics::pvData::TimeStamp timestamp(
-        epics::pvData::posixEpochAtEpicsEpoch + packet->timestamp_sec,
-        packet->timestamp_nsec,
-        m_sequence++ % 0x7FFFFFFF
-    );
+        // 31 bit sequence number is good for around 9 months.
+        // (based on 5mio events/s, IRQ coallescing = 40, max OCC packet size = 3600B)
+        // In worst case client will skip one packet on rollover and then recover
+        // the sequence.
+        epics::pvData::TimeStamp timestamp(
+            epics::pvData::posixEpochAtEpicsEpoch + ts.secPastEpoch,
+            ts.nsec,
+            m_sequence++ % 0x7FFFFFFF
+        );
 
-    uint32_t nEvents = 0;
-    const Event::Pixel *events = packet->getEvents<const Event::Pixel>(nEvents);
+        uint32_t nEvents = packet->getNumEvents();
+        const Event::Pixel *events = packet->getEvents<Event::Pixel>();
 
-    // Pre-allocate svector to minimize gradual memory allocations
-    epics::pvData::PVUIntArray::svector tofs(nEvents);
-    epics::pvData::PVUIntArray::svector pixels(nEvents);
-    for (uint32_t i = 0; i < nEvents; i++) {
-        tofs[i]   = events[i].tof;
-        pixels[i] = events[i].pixelid;
-        events++;
+        // Pre-allocate svector to minimize gradual memory allocations
+        epics::pvData::PVUIntArray::svector tofs(nEvents);
+        epics::pvData::PVUIntArray::svector pixels(nEvents);
+        for (uint32_t i = 0; i < nEvents; i++) {
+            tofs[i]   = events[i].tof;
+            pixels[i] = events[i].pixelid;
+            events++;
+        }
+
+        lock();
+        try {
+            beginGroupPut();
+
+            pvTimeStamp.set(timestamp);
+            pvLogical->put(packet->getEventsMapped());
+            pvNumEvents->put(nEvents);
+            pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
+            pvPixel->replace(epics::pvData::freeze(pixels));
+
+            endGroupPut();
+            posted = true;
+        } catch (...) {
+        }
+        unlock();
     }
-
-    lock();
-    try {
-        beginGroupPut();
-
-        pvTimeStamp.set(timestamp);
-        pvLogical->put(packet->mapped);
-        pvNumEvents->put(nEvents);
-        pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
-        pvPixel->replace(epics::pvData::freeze(pixels));
-
-        endGroupPut();
-    } catch (...) {
-        posted = false;
-    }
-    unlock();
 
     return posted;
 }

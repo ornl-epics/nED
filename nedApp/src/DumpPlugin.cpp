@@ -51,7 +51,7 @@ void DumpPlugin::recvDownstream(const DasDataPacketList &packets)
         int dataType = getIntegerParam(DataType);
 
         for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-            if (dataType == 0 || (*it)->format == dataType) {
+            if (dataType == 0 || (*it)->getEventsFormat() == dataType) {
                 if (writeToFile(*it))
                     saved++;
                 else
@@ -122,8 +122,8 @@ bool DumpPlugin::writeToFile(const Packet *packet)
         return false;
 
     // m_fd is non-blocking, might fail when system buffers are full
-    ssize_t ret = write(m_fd, packet, packet->length);
-    if (ret == static_cast<ssize_t>(packet->length))
+    ssize_t ret = write(m_fd, packet, packet->getLength());
+    if (ret == static_cast<ssize_t>(packet->getLength()))
         return true;
 
     if (ret == -1) {
@@ -132,13 +132,13 @@ bool DumpPlugin::writeToFile(const Packet *packet)
         // Nothing we can do about it
         char path[1024];
         getStringParam(FilePath, sizeof(path), path);
-        LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->length, path);
+        LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->getLength(), path);
     } else if (lseek(m_fd, -1 * ret, SEEK_CUR) != 0) {
         // Too bad but lseek() failed - very unlikely
         off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
         char path[1024];
         getStringParam(FilePath, sizeof(path), path);
-        LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->length, path, offset);
+        LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->getLength(), path, offset);
     } else {
         LOG_WARN("Failed to save packet to file");
     }

@@ -13,9 +13,11 @@
 #include "RtdlHeader.h"
 
 #include <cassert>
+#include <epicsTime.h>
 #include <stdint.h>
 #include <stdexcept>
 #include <cstddef>
+#include <vector>
 
 /**
  * The packet structure describes any given packet exchanged between plugins.
@@ -30,8 +32,10 @@ class Packet {
             TYPE_DAS_CMD    = 0x8,
             TYPE_ACC_TIME   = 0x10,
         } Type;
-        
+
         using ParseError = std::runtime_error;
+
+    protected:
 
         struct __attribute__ ((__packed__)) {
             unsigned sequence:8;    //!< Packet sequence number, incremented by sender for each sent packet
@@ -44,27 +48,27 @@ class Packet {
         uint32_t length;            //!< Total number of bytes for this packet
 
     public: /* Functions */
-    
+
         /**
          * Default constructor.
          */
         Packet(uint8_t version, Type type, uint32_t length);
-        
+
         /**
-         * Copy constructorm, makes byte-by-byte copy of original.
+         * Copy constructor, makes byte-by-byte copy of original.
          */
         Packet(const Packet *orig);
 
         /**
          * Cast raw pointer to Packet pointer.
-         * 
+         *
          * @return Casted valid packet, throws otherwise
          */
         static const Packet *cast(const uint8_t *data, size_t size) throw(ParseError);
 
         /**
          * Decode and return packet version as defined in header.
-         * 
+         *
          * @return packet version.
          */
         uint8_t getVersion() const {
@@ -73,10 +77,17 @@ class Packet {
         uint8_t getVersion() {
             return version;
         }
-        
+
+        /**
+         * Set packet version.
+         */
+        void setVersion(uint8_t ver) {
+            version = ver & 0xF;
+        }
+
         /**
          * Decode and return packet type as defined in header.
-         * 
+         *
          * @return packet type.
          */
         Type getType() const {
@@ -85,10 +96,10 @@ class Packet {
         Type getType() {
             return type;
         }
-        
+
         /**
          * Return packet length in bytes.
-         * 
+         *
          */
         uint32_t getLength() const {
             return length;
@@ -96,10 +107,10 @@ class Packet {
         uint32_t getLength() {
             return length;
         }
-        
+
         /**
          * Return packet sequence number as set by the sender.
-         * 
+         *
          * Number 0 means either value rolled over or sender does not support
          * setting sequence number.
          */
@@ -116,7 +127,23 @@ class Packet {
         void setSequenceId(uint8_t sequence_) {
             sequence = sequence_;
         }
-       
+
+        /**
+         * Is this a priority packet?
+         */
+        bool isPriority() const {
+            return priority;
+        }
+        bool isPriority() {
+            return priority;
+        }
+
+        /**
+         * Set priority flag to this packet.
+         */
+        void setPriority(bool enable) {
+            priority = enable;
+        }
 };
 
 /**
@@ -132,40 +159,60 @@ class ErrorPacket : public Packet {
         } ErrorCode;
 
         struct __attribute__ ((__packed__)) {
-            uint8_t source;         //!< Unique source id number
-            ErrorCode code:4;       //!< Pulse flavor of the next cycle
-            unsigned __err_rsv1:20;
+            unsigned __err_rsv1:8;
+            ErrorCode code:4;       //!< Type of error detected
+            unsigned __err_rsv2:20;
         };
         uint32_t frame_count;       //!< Number of frame errors
         uint32_t length_count;      //!< Number of length errors
         uint32_t crc_count;         //!< Number of CRC errors
         uint32_t orig[0];           //!< Recovered data, dynamic length defined by packet length field
+
+        /**
+         * Up-cast Packet to ErrorPacket if packet type allows so.
+         */
+        static const ErrorPacket *cast(const Packet *packet) {
+            if (packet->getType() == Packet::TYPE_ERROR) {
+                return reinterpret_cast<const ErrorPacket *>(packet);
+            } else {
+                throw Packet::ParseError("Can't upcast to ErrorPacket");
+            }
+        }
+        /**
+         * Up-cast Packet to ErrorPacket if packet type allows so.
+         */
+        static ErrorPacket *cast(Packet *packet) {
+            if (packet->getType() == Packet::TYPE_ERROR) {
+                return reinterpret_cast<ErrorPacket *>(packet);
+            } else {
+                throw Packet::ParseError("Can't upcast to ErrorPacket");
+            }
+        }
 };
 
 class DasDataPacket : public Packet {
     public: /* Variables */
         typedef enum {
-            DATA_FMT_RESERVED       = 0,
-            DATA_FMT_META           = 1,    //!< meta data (for choppers, beam monitors, ADC sampling etc.) in tof,pixel format
-            DATA_FMT_PIXEL          = 2,    //!< neutron data in tof,pixel format
-            DATA_FMT_LPSD_RAW       = 16,   //!< LPSD raw format
-            DATA_FMT_LPSD_VERBOSE   = 17,   //!< LPSD verbose format
-            DATA_FMT_ACPC_XY_PS     = 18,   //!< X,Y,Photo sum format
-            DATA_FMT_ACPC_RAW       = 19,   //!< ACPC raw format
-            DATA_FMT_ACPC_VERBOSE   = 20,   //!< ACPC verbose format
-            DATA_FMT_AROC_RAW       = 21,   //!< AROC raw format
-            DATA_FMT_BNL_XY         = 22,   //!< X,Y format
-            DATA_FMT_BNL_RAW        = 23,   //!< BNL raw format
-            DATA_FMT_BNL_VERBOSE    = 24,   //!< BNL verbose format
-            DATA_FMT_CROC_RAW       = 25,   //!< CROC raw format
-            DATA_FMT_CROC_VERBOSE   = 26,   //!< CROC verbose format
-        } DataFormat;
+            EVENT_FMT_RESERVED       = 0,
+            EVENT_FMT_META           = 1,    //!< meta data (for choppers, beam monitors, ADC sampling etc.) in tof,pixel format
+            EVENT_FMT_PIXEL          = 2,    //!< neutron data in tof,pixel format
+            EVENT_FMT_LPSD_RAW       = 16,   //!< LPSD raw format
+            EVENT_FMT_LPSD_VERBOSE   = 17,   //!< LPSD verbose format
+            EVENT_FMT_ACPC_XY_PS     = 18,   //!< X,Y,Photo sum format
+            EVENT_FMT_ACPC_RAW       = 19,   //!< ACPC raw format
+            EVENT_FMT_ACPC_VERBOSE   = 20,   //!< ACPC verbose format
+            EVENT_FMT_AROC_RAW       = 21,   //!< AROC raw format
+            EVENT_FMT_BNL_XY         = 22,   //!< X,Y format
+            EVENT_FMT_BNL_RAW        = 23,   //!< BNL raw format
+            EVENT_FMT_BNL_VERBOSE    = 24,   //!< BNL verbose format
+            EVENT_FMT_CROC_RAW       = 25,   //!< CROC raw format
+            EVENT_FMT_CROC_VERBOSE   = 26,   //!< CROC verbose format
+        } EventFormat;
 
+    protected:
         struct __attribute__ ((__packed__)) {
-            uint8_t source;                 //!< Unique source id number
-            unsigned subpacket:4;           //!< Subpacket count
-            unsigned __data_rsv1:4;
-            DataFormat format:8;            //!< Data format
+            uint16_t num_events;            //!< Number of events
+            EventFormat event_format:8;     //!< Data format
             bool mapped:1;                  //!< Flag whether events are mapped to logical ids
             bool corrected:1;               //!< Flag whether geometrical correction has been applied
             unsigned __data_rsv2:6;
@@ -177,30 +224,58 @@ class DasDataPacket : public Packet {
         uint32_t events[0];                 //!< Placeholder for dynamic buffer of events
 
     public: /* Functions */
+
         /**
          * Use buffer as storage for new command packet,DasData populate fields.
-         * 
+         *
+         * Uses default values. If data is defined, it's copied to current
+         * packet. Otherwise just the count is applied.
+         *
          * @param buffer to be used to stora new packet
          * @param size of buffer
          * @param format of data
          * @param time_sec Seconds field
          * @param time_nsec Nano-second field
-         * @param data to be copied to new packet
          * @param count Number of bytes in data to be copied
+         * @param data to be copied to new packet
          * @return Returns a newly created packet or nullptr on error.
          */
-        static DasDataPacket *init(uint8_t *buffer, size_t size, DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count);
+        static DasDataPacket *init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count=0, const uint32_t *data=nullptr);
 
         /**
          * Initialize packet fields.
          *
+         * Uses default values. If data is defined, it's copied to current
+         * packet. Otherwise just the count is applied.
+         *
          * @param format of data
          * @param time_sec Seconds field
          * @param time_nsec Nano-second field
-         * @param data to be copied to new packet
          * @param count Number of bytes in data to be copied
+         * @param data to be copied to new packet
          */
-        void init(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count);
+        void init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count=0, const uint32_t *data=nullptr);
+
+        /**
+         * Up-cast Packet to DasDataPacket if packet type allows so.
+         */
+        static const DasDataPacket *cast(const Packet *packet) {
+            if (packet->getType() == Packet::TYPE_ERROR) {
+                return reinterpret_cast<const DasDataPacket *>(packet);
+            } else {
+                throw Packet::ParseError("Can't upcast to DasDataPacket");
+            }
+        }
+        /**
+         * Up-cast Packet to DasDataPacket if packet type allows so.
+         */
+        static DasDataPacket *cast(Packet *packet) {
+            if (packet->getType() == Packet::TYPE_ERROR) {
+                return reinterpret_cast<DasDataPacket *>(packet);
+            } else {
+                throw Packet::ParseError("Can't upcast to DasDataPacket");
+            }
+        }
 
         /**
          * Templated function to cast generic packet events to the format of callers' preference.
@@ -210,10 +285,13 @@ class DasDataPacket : public Packet {
          * requested event format.
          */
         template<typename T>
-        T *getEvents(uint32_t &count) const
+        const T *getEvents() const
         {
-            assert(sizeof(T) % 4 == 0);
-            count = (this->length - sizeof(DasDataPacket)) / sizeof(T);
+            return reinterpret_cast<const T *>(this->events);
+        }
+        template<typename T>
+        T *getEvents()
+        {
             return reinterpret_cast<T *>(this->events);
         }
 
@@ -226,109 +304,144 @@ class DasDataPacket : public Packet {
          *
          * @return Number of events in data packet.
          */
-        uint32_t getNumEvents() const;
+        uint32_t getNumEvents() const
+        {
+            return num_events;
+        }
 
         /**
          * Return size of every event in data packet.
          *
          * The size is determined based on DasDataPacket::format field.
          * In case of DATA_FMT_RESERVED the event size used is 8 bytes.
+         * For unknown event format the returned value is 1.
          */
         uint32_t getEventsSize() const;
+
+        /**
+         * Return type of events in this data packet.
+         */
+        EventFormat getEventsFormat() const
+        {
+            return event_format;
+        }
+
+        /**
+         * Get acquisition frame start time (EPICS epoch timestamp)
+         */
+        epicsTimeStamp getTimeStamp() const {
+            return { this->timestamp_sec, this->timestamp_nsec };
+        }
+
+        /**
+         * Have all events in packet been mapped?
+         * @return true/false
+         */
+        bool getEventsMapped() const {
+            return mapped;
+        }
+
+        /**
+         * Set or clear mapped flag.
+         * @param m true/false
+         */
+        void setEventsMapped(bool m) {
+            mapped = m;
+        }
 };
 
 class DasRtdlPacket : public Packet {
-    public: /* Variables */
-        /**
-         * Pulse flavor as described in Chapter 1.3.4 of
-         * SNS Timing Master Functional System description
-         * document.
-         */
-        typedef enum {
-            RTDL_FLAVOR_NO_BEAM         = 0,    //!< No Beam
-            RTDL_FLAVOR_TARGET_1        = 1,    //!< Normal Beam (Target 1)
-            RTDL_FLAVOR_TARGET_2        = 2,    //!< Normal Beam (Target 2)
-            RTDL_FLAVOR_DIAG_10US       = 3,    //!< 10 uSecond Diagnostic Pulse (not used)
-            RTDL_FLAVOR_DIAG_50US       = 4,    //!< 50 uSecond Diagnostic Pulse
-            RTDL_FLAVOR_DIAG_100US      = 5,    //!< 100 uSecond Diagnostic Pulse
-            RTDL_FLAVOR_PHYSICS_1       = 6,    //!< Special Physics Pulse 1
-            RTDL_FLAVOR_PHYSICS_2       = 7,    //!< Special Physics Pulse 2
-        } PulseFlavor;
+    public:
+        typedef struct __attribute__ ((__packed__)) {
+            union __attribute__ ((__packed__)) {
+                struct __attribute__ ((__packed__)) {
+                    uint8_t id;                     //!< RTDL frame identifier
+                    unsigned data:24;               //!< RTDL frame data
+                };
+                uint32_t raw;                       //!< Non decoded RTDL frame
+            };
+        } RtdlFrame;
 
-        /**
-         * Previous cycle veto status as described in Chapter 5.1.8 of
-         * SNS Timing Master Functional System description
-         * document.
-         */
-        typedef enum {
-            RTDL_VETO_NO_BEAM           = (1 << 0), //!< No beam was delivered on the previous pulse.
-            RTDL_VETO_NOT_TARGET_1      = (1 << 1), //!< Beam was delivered to target 2 (not to target 1)
-            RTDL_VETO_NOT_TARGET_2      = (1 << 2), //!< Beam was delivered to target 1 (not to target 2)
-            RTDL_VETO_DIAGNOSTIC_PULSE  = (1 << 3), //!< Beam was a “reduced intensity” diagnostic pulse
-            RTDL_VETO_PHYSICS_PULSE_1   = (1 << 4), //!< Beam was one of the special physics study pulses
-            RTDL_VETO_PHYSICS_PULSE_2   = (1 << 5), //!< Beam was one of the special physics study pulses (the other type)
-            RTDL_VETO_MPS_AUTO_RESET    = (1 << 6), //!< Beam was interrupted by an “Auto Reset” MPS trip (fast protect)
-            RTDL_VETO_MPS_FAULT         = (1 << 7), //!< Beam was interrupted or not delivered because of a “Latched” MPS trip
-            RTDL_VETO_EVENT_LINK_ERROR  = (1 << 8), //!< Timing system detected corruption on the event link
-            RTDL_VETO_RING_RF_SYNCH     = (1 << 9), //!< Timing system has lost synch with the Ring RF signal
-            RTDL_VETO_RING_RF_FREQ      = (1 << 10), //!< Measured ring RF frequency is outside acceptable range
-            RTDL_VETO_60_HZ_ERROR       = (1 << 11), //!< 60 Hz line phase error is out of tolerance
-        } CycleVeto;
+    protected: /* Variables */
 
         struct __attribute__ ((__packed__)) {
-            uint8_t source;                 //!< Unique source id number
-            uint8_t num_frames;             //!< Number of RTDL frames included
-            uint16_t __rtdl_rsv1;
+            uint8_t num_frames;             //!< Number of 4 byte RTDL frames in this packet
+            unsigned __reserved2:24;
         };
 
-        uint32_t timestamp_sec;             //!< Accelerator time (seconds) of event 39
-        uint32_t timestamp_nsec;            //!< Accelerator time (nano-seconds) of event 39
-
-        struct __attribute__ ((__packed__)) {
-            unsigned charge:24;         //!< Pulse charge in 10 pC unit
-            PulseFlavor flavor:6;       //!< Pulse flavor of the next cycle
-            unsigned bad:1;             //!< Bad pulse flavor frame
-            unsigned unused31:1;        //!< not used
-
-            unsigned cycle:10;          //!< Cycle number
-            unsigned last_cycle_veto:12;//!< Last cycle veto
-            unsigned tstat:8;           //!< TSTAT
-            unsigned bad_cycle_frame:1; //!< Bad cycle frame
-            unsigned bad_veto_frame:1;  //!< Bad last cycle veto frame
-        } pulse;
-
-        struct __attribute__ ((__packed__)) {
-            uint32_t tsync_period;      //!< Time between two TSYNCs, in 100ns units
-            struct __attribute__ ((__packed__)) {
-                unsigned tof_fixed_offset:24; //!< TOF fixed offset, in 100ns units
-                unsigned frame_offset:4;    //!< RTDL frame offset
-                unsigned unused28:3;        //!< "000"
-                unsigned tof_full_offset:1; //!< TOF full offset enabled
-            };
-        } correction;
-
-        uint32_t frames[0];                 //!< Placeholder for dynamic buffer of RTDL frame data
+        RtdlFrame frames[0];                //!< Placeholder for dynamic buffer of RTDL frame data
 
     public: /* Functions */
         /**
-         * Use buffer as storage for new command packet, populate fields.
-         * 
+         * Use buffer as storage for new RTDL packet, populate fields.
+         *
          * @param buffer to be used to stora new packet
          * @param size of buffer
          * @param frames RTDL frames data
-         * @param nFrames Number of RTDL frames
          * @return Returns a newly created packet or nullptr on error.
          */
-        static DasRtdlPacket *init(uint8_t *buffer, size_t size, const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
+        static DasRtdlPacket *init(uint8_t *buffer, size_t size, const std::vector<RtdlFrame> &frames);
 
         /**
          * Populate fields.
-         * 
+         *
          * @param frames RTDL frames data
-         * @param nFrames Number of RTDL frames
          * @return Returns a newly created packet or nullptr on error.
          */
-        void init(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames);
+        void init(const std::vector<RtdlFrame> &frames);
+
+        /**
+         * Up-cast Packet to DasRtdlPacket if packet type allows so.
+         */
+        static const DasRtdlPacket *cast(const Packet *packet) {
+            if (packet->getType() == Packet::TYPE_ERROR) {
+                return reinterpret_cast<const DasRtdlPacket *>(packet);
+            } else {
+                throw Packet::ParseError("Can't upcast to DasRtdlPacket");
+            }
+        }
+        /**
+         * Up-cast Packet to DasRtdlPacket if packet type allows so.
+         */
+        static DasRtdlPacket *cast(Packet *packet) {
+            if (packet->getType() == Packet::TYPE_ERROR) {
+                return reinterpret_cast<DasRtdlPacket *>(packet);
+            } else {
+                throw Packet::ParseError("Can't upcast to DasRtdlPacket");
+            }
+        }
+
+        /**
+         * Get acquisition frame start time (EPICS epoch timestamp)
+         *
+         * Returns epicsTimeStamp{0,0} when timestamp can't be decoded due to missing RTDL frames.
+         */
+        epicsTimeStamp getTimeStamp() const;
+
+        /**
+         * Decode most relevant RTLD data.
+         *
+         * If RTDLs frames are missing, some of the fields will be 0.
+         * RtdlHeader format is used by legacy firmware as well as ADARA
+         * software.
+         *
+         * @return Populated structure.
+         */
+        RtdlHeader getRtdlHeader() const;
+
+        /**
+         * Return number of RTDL frames included in this packet.
+         */
+        uint8_t getNumRtdlFrames() const {
+            return num_frames;
+        }
+
+        /**
+         * Return RTDL frames from the packet in no particular order.
+         */
+        std::vector<RtdlFrame> getRtdlFrames() const {
+            return std::vector<RtdlFrame>(frames, frames + num_frames);
+        }
 };
 
 class DasCmdPacket : public Packet {
@@ -402,61 +515,116 @@ class DasCmdPacket : public Packet {
             CMD_PREAMP_TEST_TRIGGER     = 0x93, //!< Send a single pre-amp pulse request
         } CommandType;
 
+    protected:
+
         struct {
-            unsigned cmd_length:12;     //!< Command payload length
+            unsigned cmd_length:12;     //!< Command payload length in bytes, must be multiple of 2
             unsigned __reserved2:4;
             CommandType command:8;      //!< Type of command
-            unsigned cmd_sequence:5;    //!< Command sequence id
+            unsigned cmd_id:5;          //!< Command/response verification id
             bool acknowledge:1;         //!< Flag whether command was succesful, only valid in response
             bool response:1;            //!< Flags this command packet as response
             unsigned lvds_version:1;    //!< LVDS protocol version,
-                                        //!< hardware uses this flag ti distinguish protocol in responses
-                                        //!< but doesn't use it from optical side, software will reuse
-                                        //!< to distinguish DSP and other modules
+                                        //!< hardware uses this flag to distinguish protocol in responses
+                                        //!< but doesn't use it from optical side.
         };
         uint32_t module_id;             //!< Destination address
-        uint32_t payload[0];            //!< Dynamic sized command payload
+        uint32_t payload[0];            //!< Dynamic sized command payload, storage must be multiple of 4 bytes but actual payload can be multiple of 2
 
     public: /* Functions */
         /**
          * Use buffer as storage for new command packet, populate fields.
          */
-        static DasCmdPacket *init(uint8_t *data, size_t size, uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, const uint32_t *payload_=nullptr, size_t payloadSize=0);
+        static DasCmdPacket *init(uint8_t *data, size_t size, uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, size_t payloadSize=0, const uint32_t *payload_=nullptr);
 
         /**
          * Populate fields.
+         *
+         * Uses default values. If payload is defined, it's copied to current
+         * packet. Otherwise just the payloadSize is applied.
          */
-        void init(uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, const uint32_t *payload_=nullptr, size_t payloadSize=0);
+        void init(uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, size_t payloadSize=0, const uint32_t *payload_=nullptr);
 
         /**
-         * Return length of inner header in bytes.
+         * Up-cast Packet to DasCmdPacket if packet type allows so.
          */
-        static uint32_t getHeaderLen() { return 6; }
+        static const DasCmdPacket *cast(const Packet *packet) {
+            if (packet->getType() == Packet::TYPE_ERROR) {
+                return reinterpret_cast<const DasCmdPacket *>(packet);
+            } else {
+                throw Packet::ParseError("Can't upcast to DasCmdPacket");
+            }
+        }
+        /**
+         * Up-cast Packet to DasCmdPacket if packet type allows so.
+         */
+        static DasCmdPacket *cast(Packet *packet) {
+            if (packet->getType() == Packet::TYPE_ERROR) {
+                return reinterpret_cast<DasCmdPacket *>(packet);
+            } else {
+                throw Packet::ParseError("Can't upcast to DasCmdPacket");
+            }
+        }
 
         /**
          * Return number of bytes of command payload.
          */
-        uint32_t getPayloadLength() const;
-        
+        uint32_t getCmdPayloadLength() const;
+
         /**
          * Return command type.
          */
         CommandType getCommand() const {
             return command;
         }
-        
+
         /**
          * Return remote module id.
          */
         uint32_t getModuleId() const {
             return module_id;
         }
-        
+
+        /**
+         * Return remote module id as IP string.
+         */
+        std::string getModuleIdStr() const;
+
         /**
          * Return command payload.
+         *
+         * The last 2 bytes might be padded with 0x0 depending
+         * on the actual payload length.
          */
-        const uint32_t *getCommandPayload() const {
+        const uint32_t *getCmdPayload() const {
             return payload;
+        }
+
+        /**
+         * Is this a command response packet?
+         */
+        bool isResponse() const {
+            return response;
+        }
+
+        /**
+         * Is this acknowledged command response packet?
+         */
+        bool isAcknowledge() const {
+            return acknowledge;
+        }
+
+        /**
+         * Return command/response verification id.
+         */
+        bool getCmdId() const {
+            return cmd_id;
+        }
+        /**
+         * Get LVDS protocol version.
+         */
+        bool getLvdsVer() const {
+            return lvds_version;
         }
 };
 

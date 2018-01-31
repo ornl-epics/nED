@@ -59,8 +59,8 @@ bool CRocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::V
     };
 
     const RspReadVersion *response;
-    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+    if (packet->getCmdPayloadLength() == sizeof(RspReadVersion)) {
+        response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
     } else {
         return false;
     }

@@ -49,45 +49,115 @@ const Packet *Packet::cast(const uint8_t *data, size_t size) throw(ParseError)
     return packet;
 }
 
-DasRtdlPacket *DasRtdlPacket::init(uint8_t *buffer, size_t size, const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
+/* ******************************* */
+/* *** DasRtdlPacket functions *** */
+/* ******************************* */
+
+DasRtdlPacket *DasRtdlPacket::init(uint8_t *buffer, size_t size, const std::vector<RtdlFrame> &frames)
 {
     DasRtdlPacket *packet = nullptr;
-    uint32_t length = sizeof(DasRtdlPacket) + (nFrames * sizeof(uint32_t));
+    uint32_t length = sizeof(DasRtdlPacket) + (frames.size() * sizeof(RtdlFrame));
     if (size >= length) {
         packet = reinterpret_cast<DasRtdlPacket *>(buffer);
-        packet->init(hdr, frames, nFrames);
+        packet->init(frames);
     }
     
     return packet;
 }
 
-void DasRtdlPacket::init(const RtdlHeader *hdr, const uint32_t *frames, size_t nFrames)
+void DasRtdlPacket::init(const std::vector<RtdlFrame> &frames)
 {
-    memset(this, 0, (sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t)));
+    memset(this, 0, (sizeof(DasRtdlPacket) + frames.size()*sizeof(RtdlFrame)));
 
     this->version = 0x1;
     this->type = TYPE_DAS_RTDL;
-    this->length = sizeof(DasRtdlPacket) + nFrames*sizeof(uint32_t);
+    this->length = sizeof(DasRtdlPacket) + frames.size()*sizeof(RtdlFrame);
 
-    this->num_frames = nFrames;
-
-    // Use memcpy for performance reasons
-    memcpy(&this->timestamp_sec, hdr, sizeof(RtdlHeader));
-    memcpy(this->frames, frames, nFrames*sizeof(uint32_t));
+    this->num_frames = frames.size();
+    for (size_t i = 0; i < frames.size(); i++) {
+        this->frames[i].raw = frames[i].raw;
+    }
 }
 
-DasCmdPacket *DasCmdPacket::init(uint8_t *buffer, size_t size, uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize)
+epicsTimeStamp DasRtdlPacket::getTimeStamp() const
+{
+    uint32_t secPastEpoch = 0;
+    uint32_t nsec = 0;
+    unsigned check = 0;
+    
+    for (uint32_t i = 0; i < this->num_frames; i++) {
+        switch (this->frames[i].id) {
+        case 1:
+            secPastEpoch |= (this->frames[i].data << 8);
+            check += 1;
+            break;
+        case 2:
+            secPastEpoch |= (this->frames[i].data & 0xFF);
+            nsec |= ((this->frames[i].data >> 16) & 0xFF);
+            check += 2;
+            break;
+        case 3:
+            nsec |= (this->frames[i].data << 8);
+            check += 4;
+            break;
+        default:
+            break;
+        }
+    }
+    if (check != 7) {
+        secPastEpoch = nsec = 0;
+    }
+    return { secPastEpoch, nsec };
+}
+
+RtdlHeader DasRtdlPacket::getRtdlHeader() const
+{
+    RtdlHeader hdr{0};
+
+    epicsTimeStamp timestamp = getTimeStamp();
+    hdr.timestamp_sec = timestamp.secPastEpoch;
+    hdr.timestamp_nsec = timestamp.nsec;
+    
+    for (const auto& frame: getRtdlFrames()) {
+        switch (frame.id) {
+        case 2:
+            hdr.timing_status = (frame.data >> 8) & 0xFF;
+            break;
+        case 17:
+            hdr.pulse.flavor = static_cast<RtdlHeader::PulseFlavor>(frame.data & 0x3F);
+            break;
+        case 24:
+            hdr.last_cycle_veto = (frame.data & 0xFFF);
+            break;
+        case 25:
+            hdr.cycle = (frame.data & 0x3FF);
+            break;
+        case 35:
+            hdr.pulse.charge = (frame.data & 0xFFFFFF);
+            break;
+        default:
+            break;
+        } 
+    }
+    return hdr;
+}
+
+/* ******************************* */
+/* *** DasCmdPacket functions  *** */
+/* ******************************* */
+
+DasCmdPacket *DasCmdPacket::init(uint8_t *buffer, size_t size, uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, size_t payloadSize, const uint32_t *payload_)
 {
     DasCmdPacket *packet = nullptr;
     uint32_t packetLength = sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4);
     if (size > packetLength) {
         packet = reinterpret_cast<DasCmdPacket *>(buffer);
-        packet->init(moduleId, cmd, ack, rsp, ch, payload_, payloadSize);
+        packet->init(moduleId, cmd, ack, rsp, ch, payloadSize, payload_);
     }
     return packet;
 }
 
-void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, const uint32_t *payload_, size_t payloadSize)
+void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, size_t payloadSize, const uint32_t *payload_)
 {
     memset(this, 0, sizeof(DasCmdPacket));
 
@@ -97,16 +167,18 @@ void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, 
 
     this->module_id = moduleId;
     if (ch > 0)
-        this->cmd_sequence = ch;
+        this->cmd_id = ch;
     this->acknowledge = ack;
     this->response = rsp;
     this->command = cmd;
     this->cmd_length = payloadSize + 6; // command length is considered payload + 32 bit address + 16 bit command description
     this->lvds_version = 1;
-    memcpy(this->payload, payload_, payloadSize);
+    if (payload_ != nullptr) {
+        memcpy(this->payload, payload_, payloadSize);
+    }
 }
 
-uint32_t DasCmdPacket::getPayloadLength() const
+uint32_t DasCmdPacket::getCmdPayloadLength() const
 {
     if (this->cmd_length < (sizeof(DasCmdPacket) - 6))
         return 0;
@@ -116,57 +188,62 @@ uint32_t DasCmdPacket::getPayloadLength() const
     return this->cmd_length - 6;
 }
 
-DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count)
+std::string DasCmdPacket::getModuleIdStr() const
+{
+    char buf[16] = "";
+    snprintf(buf, sizeof(buf)-1, "%d.%d.%d.%d", (module_id >> 24) & 0xFF, (module_id >> 16) & 0xFF, (module_id >> 8) & 0xFF, module_id & 0xFF);
+    buf[sizeof(buf)-1] = '\0';
+    return std::string(buf);
+}
+
+/* ******************************* */
+/* *** DasDataPacket functions *** */
+/* ******************************* */
+
+DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const uint32_t *data)
 {
     DasDataPacket *packet = nullptr;
     uint32_t packetLength = sizeof(DasDataPacket) + count*4;
     if (size >= packetLength) {
         packet = reinterpret_cast<DasDataPacket *>(buffer);
-        packet->init(format, time_sec, time_nsec, data, count);
+        packet->init(format, timestamp, count, data);
     }
     return packet;
 }
 
-void DasDataPacket::init(DataFormat format, uint32_t time_sec, uint32_t time_nsec, const uint32_t *data, uint32_t count)
+void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const uint32_t *data)
 {
     memset(this, 0, sizeof(DasDataPacket));
 
     this->version = 0x1;
     this->type = TYPE_DAS_DATA;
-    this->length = sizeof(DasDataPacket) + count*4;
+    this->length = sizeof(DasDataPacket) + count*getEventsSize();
 
-    this->format = format;
-    this->timestamp_sec = time_sec;
-    this->timestamp_nsec = time_nsec;
-    memcpy(this->events, data, count*4);
-}
-
-uint32_t DasDataPacket::getNumEvents() const
-{
-    uint32_t payloadLen = this->length - sizeof(DasDataPacket);
-    uint32_t eventSize = getEventsSize();
-    if (eventSize == 0)
-        return 0;
-    return payloadLen / eventSize;
+    this->event_format = format;
+    this->timestamp_sec = timestamp.secPastEpoch;
+    this->timestamp_nsec = timestamp.nsec;
+    if (data != nullptr) {
+        memcpy(this->events, data, count*getEventsSize());
+    }
 }
 
 uint32_t DasDataPacket::getEventsSize() const
 {
-    switch (this->format) {
-        case DATA_FMT_RESERVED:     return sizeof(Event::Pixel);
-        case DATA_FMT_META:         return sizeof(Event::Pixel);
-        case DATA_FMT_PIXEL:        return sizeof(Event::Pixel);
-        case DATA_FMT_LPSD_RAW:     return 0; // TODO
-        case DATA_FMT_LPSD_VERBOSE: return 0; // TODO
-        case DATA_FMT_ACPC_XY_PS:   return 0; // TODO
-        case DATA_FMT_ACPC_RAW:     return 0; // TODO
-        case DATA_FMT_ACPC_VERBOSE: return 0; // TODO
-        case DATA_FMT_AROC_RAW:     return 0; // TODO
-        case DATA_FMT_BNL_XY:       return 0; // TODO
-        case DATA_FMT_BNL_RAW:      return 0; // TODO
-        case DATA_FMT_BNL_VERBOSE:  return 0; // TODO
-        case DATA_FMT_CROC_RAW:     return 0; // TODO
-        case DATA_FMT_CROC_VERBOSE: return 0; // TODO
-        default:                    return 0;
+    switch (this->event_format) {
+        case EVENT_FMT_RESERVED:     return sizeof(Event::Pixel);
+        case EVENT_FMT_META:         return sizeof(Event::Pixel);
+        case EVENT_FMT_PIXEL:        return sizeof(Event::Pixel);
+        case EVENT_FMT_LPSD_RAW:     return 1; // TODO
+        case EVENT_FMT_LPSD_VERBOSE: return 1; // TODO
+        case EVENT_FMT_ACPC_XY_PS:   return 1; // TODO
+        case EVENT_FMT_ACPC_RAW:     return 1; // TODO
+        case EVENT_FMT_ACPC_VERBOSE: return 1; // TODO
+        case EVENT_FMT_AROC_RAW:     return 1; // TODO
+        case EVENT_FMT_BNL_XY:       return 1; // TODO
+        case EVENT_FMT_BNL_RAW:      return 1; // TODO
+        case EVENT_FMT_BNL_VERBOSE:  return 1; // TODO
+        case EVENT_FMT_CROC_RAW:     return 1; // TODO
+        case EVENT_FMT_CROC_VERBOSE: return 1; // TODO
+        default:                     return 1;
     }
 }

@@ -145,50 +145,50 @@ void ModulesPlugin::recvDownstream(const DasCmdPacketList &packets)
         const DasCmdPacket *packet = *it;
 
         // Silently skip packets we're not interested in
-        if (!packet->response)
+        if (!packet->isResponse())
             continue;
 
-        if (packet->command == DasCmdPacket::CMD_DISCOVER) {
+        if (packet->getCommand() == DasCmdPacket::CMD_DISCOVER) {
             DasCmdPacket::ModuleType module_type = static_cast<DasCmdPacket::ModuleType>(0);
-            if (packet->length >= (sizeof(DasCmdPacket)+sizeof(uint32_t)))
-                module_type = static_cast<DasCmdPacket::ModuleType>(packet->payload[0]);
-            m_discovered[packet->module_id].type = module_type;
-            reqVersion(packet->module_id);
+            if (packet->getLength() >= (sizeof(DasCmdPacket)+sizeof(uint32_t)))
+                module_type = static_cast<DasCmdPacket::ModuleType>(packet->getCmdPayload()[0]);
+            m_discovered[packet->getModuleId()].type = module_type;
+            reqVersion(packet->getModuleId());
 
-        } else if (packet->command == DasCmdPacket::CMD_READ_VERSION) {
+        } else if (packet->getCommand() == DasCmdPacket::CMD_READ_VERSION) {
             // We need to know module type as version response format differs between modules.
             // This is the main reason why reading version is not done in parallel with discovery.
-            if (m_discovered.find(packet->module_id) != m_discovered.end()) {
-                switch (m_discovered[packet->module_id].type) {
+            if (m_discovered.find(packet->getModuleId()) != m_discovered.end()) {
+                switch (m_discovered[packet->getModuleId()].type) {
                 case DasCmdPacket::MOD_TYPE_ACPC:
-                    AcpcPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    AcpcPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_ACPCFEM:
-                    AcpcFemPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    AcpcFemPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_ADCROC:
-                    AdcRocPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    AdcRocPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_AROC:
-                    ArocPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    ArocPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_BNLROC:
-                    BnlRocPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    BnlRocPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_CROC:
-                    CRocPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    CRocPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_DSP:
-                    DspPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    DspPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_FEM:
-                    FemPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    FemPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_ROC:
-                    RocPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    RocPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 case DasCmdPacket::MOD_TYPE_DSPW:
-                    DspWPlugin::parseVersionRsp(packet, m_discovered[packet->module_id].version);
+                    DspWPlugin::parseVersionRsp(packet, m_discovered[packet->getModuleId()].version);
                     break;
                 default:
                     break;

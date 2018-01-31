@@ -62,10 +62,10 @@ bool AcpcFemPlugin::checkVersion(const BaseModulePlugin::Version &version)
 
 bool AcpcFemPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    if (packet->getPayloadLength() != sizeof(RspReadVersion))
+    if (packet->getCmdPayloadLength() != sizeof(RspReadVersion))
         return false;
 
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;
     version.hw_year     = HEX_BYTE_TO_DEC(response->hw_year) + 2000;

@@ -57,10 +57,10 @@ ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const ch
 
 bool ArocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    if (packet->getPayloadLength() != sizeof(RspReadVersion))
+    if (packet->getCmdPayloadLength() != sizeof(RspReadVersion))
         return false;
 
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion *>(packet->payload);
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion *>(packet->getCmdPayload());
 
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;

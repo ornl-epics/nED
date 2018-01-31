@@ -144,10 +144,9 @@ DasCmdPacket::CommandType FemPlugin::reqStop()
 
 bool FemPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
-    uint32_t payloadLength = packet->cmd_length - packet->getHeaderLen();
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
 
-    if (payloadLength != sizeof(RspReadVersion)) {
+    if (packet->getCmdPayloadLength() != sizeof(RspReadVersion)) {
         return false;
     }
 
@@ -316,8 +315,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
             setStringParam(UpgradeErrorStr, "empty response");
             ret = false;
             break;
-        } else if (packet->command != DasCmdPacket::CMD_UPGRADE) {
-            if (packet->command == DasCmdPacket::CMD_WRITE_CONFIG && m_remoteUpgrade.expectedWrCfg > 0) {
+        } else if (packet->getCommand() != DasCmdPacket::CMD_UPGRADE) {
+            if (packet->getCommand() == DasCmdPacket::CMD_WRITE_CONFIG && m_remoteUpgrade.expectedWrCfg > 0) {
                 // Eat write config responses from enabling/disabling remote upgrade
                 m_remoteUpgrade.expectedWrCfg--;
                 ret = true;

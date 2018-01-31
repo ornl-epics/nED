@@ -63,10 +63,10 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *parentPlugins, const ch
 
 bool AcpcPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
-    if ((packet->length - sizeof(DasCmdPacket)) != sizeof(RspReadVersion))
+    if ((packet->getLength() - sizeof(DasCmdPacket)) != sizeof(RspReadVersion))
         return false;
 
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
 
     version.hw_version  = response->hw_version;
     version.hw_revision = response->hw_revision;

@@ -48,18 +48,18 @@ void StatPlugin::recvDownstream(const DasDataPacketList &packets)
     for (auto it = packets.cbegin(); it != packets.cend(); it++) {
         const DasDataPacket *packet = *it;
         uint32_t nEvents = packet->getNumEvents();
-        totBytes += packet->length;
+        totBytes += packet->getLength();
 
-        if (packet->format == DasDataPacket::DATA_FMT_META) {
+        if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_META) {
             metaBytes += nEvents * packet->getEventsSize();
             metaCnts += nEvents;
-            if (isTimestampUnique((*it)->timestamp_sec, (*it)->timestamp_nsec, m_metaTimes))
+            if (isTimestampUnique(packet->getTimeStamp(), m_metaTimes))
                 metaTimes += 1;
 
         } else {
             neutronBytes += nEvents * packet->getEventsSize();
             neutronCnts += nEvents;
-            if (isTimestampUnique((*it)->timestamp_sec, (*it)->timestamp_nsec, m_neutronTimes))
+            if (isTimestampUnique(packet->getTimeStamp(), m_neutronTimes))
                 neutronTimes += 1;
         }
     }
@@ -81,8 +81,8 @@ void StatPlugin::recvDownstream(const DasCmdPacketList &packets)
     uint64_t totBytes = getDoubleParam(TotBytes);
 
     for (auto it = packets.begin(); it != packets.end(); it++) {
-        cmdBytes += (*it)->length;
-        totBytes += (*it)->length;
+        cmdBytes += (*it)->getLength();
+        totBytes += (*it)->getLength();
     }
 
     setDoubleParam(CmdPkts,         cmdPkts % LLONG_MAX);
@@ -99,9 +99,9 @@ void StatPlugin::recvDownstream(const DasRtdlPacketList &packets)
     uint64_t totBytes   = getDoubleParam(TotBytes);
 
     for (auto it = packets.begin(); it != packets.end(); it++) {
-        rtdlBytes += (*it)->length;
-        totBytes += (*it)->length;
-        if (isTimestampUnique((*it)->timestamp_sec, (*it)->timestamp_nsec, m_rtdlTimes))
+        rtdlBytes += (*it)->getLength();
+        totBytes += (*it)->getLength();
+        if (isTimestampUnique((*it)->getTimeStamp(), m_rtdlTimes))
             rtdlTimes += 1;
     }
 
@@ -118,7 +118,7 @@ void StatPlugin::recvDownstream(const ErrorPacketList &packets)
     uint64_t totBytes   = getDoubleParam(TotBytes);
 
     for (auto it = packets.begin(); it != packets.end(); it++) {
-        totBytes += (*it)->length;
+        totBytes += (*it)->getLength();
     }
 
     setDoubleParam(ErrorPkts,       errorPkts % LLONG_MAX);
@@ -126,16 +126,15 @@ void StatPlugin::recvDownstream(const ErrorPacketList &packets)
     callParamCallbacks();
 }
 
-bool StatPlugin::isTimestampUnique(uint32_t sec, uint32_t nsec, std::list<epicsTime> &que)
+bool StatPlugin::isTimestampUnique(const epicsTimeStamp &timestamp, std::list<epicsTime> &que)
 {
-    epicsTimeStamp timestamp = { sec, nsec };
     epicsTime t(timestamp);
 
     bool found = (std::find(que.begin(), que.end(), t) != que.end());
     if (!found) {
         while (que.size() > MAX_TIME_QUE_SIZE)
             que.pop_back();
-    que.push_front(t);
+        que.push_front(t);
     }
     return !found;
 }

@@ -153,7 +153,7 @@ DasCmdPacket::CommandType RocPlugin::handleRequest(DasCmdPacket::CommandType com
 
 bool RocPlugin::handleResponse(const DasCmdPacket *packet)
 {
-    switch (packet->command) {
+    switch (packet->getCommand()) {
     case DasCmdPacket::CMD_PREAMP_TEST_CONFIG:
         return rspConfigPreAmp(packet);
     case DasCmdPacket::CMD_PREAMP_TEST_TRIGGER:
@@ -215,8 +215,8 @@ bool RocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
 {
     memset(&version, 0, sizeof(BaseModulePlugin::Version));
 
-    if (packet->getPayloadLength() == sizeof(RspReadVersionGE)) {
-        const RspReadVersionGE *response = reinterpret_cast<const RspReadVersionGE*>(packet->payload);;
+    if (packet->getCmdPayloadLength() == sizeof(RspReadVersionGE)) {
+        const RspReadVersionGE *response = reinterpret_cast<const RspReadVersionGE*>(packet->getCmdPayload());
 
         version.hw_version  = response->hw_version;
         version.hw_revision = response->hw_revision;
@@ -225,10 +225,10 @@ bool RocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
 
         return true;
 
-    } else if (packet->getPayloadLength() == sizeof(RspReadVersion) ||
-               packet->getPayloadLength() == sizeof(RspReadVersion_v54)) {
+    } else if (packet->getCmdPayloadLength() == sizeof(RspReadVersion) ||
+               packet->getCmdPayloadLength() == sizeof(RspReadVersion_v54)) {
 
-        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
 
         version.hw_version  = response->hw_version;
         version.hw_revision = response->hw_revision;
@@ -250,15 +250,20 @@ bool RocPlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel)
     uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
     if (m_version == "v54") {
 
-        if (packet->length > sizeof(buffer)) {
+        if (packet->getLength() > sizeof(buffer)) {
             LOG_ERROR("Received v5.4 READ_CONFIG response bigger than expected");
             return asynError;
         }
 
         // Packet in shared queue must not be modified. So we make a copy.
-        memcpy(buffer, packet, packet->length);
-        packet = reinterpret_cast<const DasCmdPacket *>(buffer);
-        const_cast<DasCmdPacket *>(packet)->cmd_length -= 4; // This is the only reason we're doing all the buffering
+        packet = DasCmdPacket::init(buffer, sizeof(buffer),
+                                    packet->getModuleId(),
+                                    packet->getCommand(),
+                                    packet->isAcknowledge(),
+                                    packet->isResponse(),
+                                    /* channel= */0,
+                                    packet->getCmdPayloadLength()-4, // This is the only reason we're doing all the buffering
+                                    packet->getCmdPayload());
     }
 
     return BaseModulePlugin::rspReadConfig(packet, channel);
@@ -300,7 +305,7 @@ void RocPlugin::reqHvCmd(const char *data, uint32_t length)
 
 bool RocPlugin::rspHvCmd(const DasCmdPacket *packet)
 {
-    const uint32_t *payload = packet->payload;
+    const uint32_t *payload = packet->getCmdPayload();
     epicsTimeStamp now;
     double diff;
 
@@ -357,12 +362,12 @@ DasCmdPacket::CommandType RocPlugin::reqTriggerPreAmp()
 
 bool RocPlugin::rspConfigPreAmp(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 bool RocPlugin::rspTriggerPreAmp(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 void RocPlugin::createPreAmpCfgParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)

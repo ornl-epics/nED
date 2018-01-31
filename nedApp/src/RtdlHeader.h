@@ -68,8 +68,8 @@ struct RtdlHeader {
         struct {
             unsigned charge:24;         //!< Pulse charge in 10 pC unit
             enum PulseFlavor flavor:6;  //!< Pulse flavor of the next cycle
-            unsigned bad:1;             //!< Bad pulse flavor frame
-            unsigned unused31:1;        //!< not used
+            unsigned bad_charge_frame:1;//!< Bad pulse charge delivered
+            unsigned bad_flavor_frame:1;//!< Bad pulse flavor frame
         } pulse;
 #endif
     };
@@ -79,8 +79,8 @@ struct RtdlHeader {
         struct {
             unsigned cycle:10;          //!< Cycle number
             unsigned last_cycle_veto:12;//!< Last cycle veto
-            unsigned tstat:8;           //!< TSTAT
-            unsigned bad_cycle_frame:1; //!< Bad cycle frame
+            unsigned timing_status:8;   //!< Timing master status
+            unsigned bad_cycle_frame:1; //!< Bad cycle number
             unsigned bad_veto_frame:1;  //!< Bad last cycle veto frame
         };
 #endif

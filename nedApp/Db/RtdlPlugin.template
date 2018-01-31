@@ -78,18 +78,18 @@ record(bi, "$(P)BadCycleFrame")
     field(ONAM, "Yes")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)Tstat")
+record(longin, "$(P)TimingStatus")
 {
     field(DESC, "TSTAT")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Tstat")
+    field(INP,  "@asyn($(PORT))TimingStatus")
     field(SCAN, "I/O Intr")
 }
-record(longin, "$(P)PrevCycleVeto")
+record(longin, "$(P)LastCycleVeto")
 {
     field(DESC, "Last cycle veto bitfield")
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))PrevCycleVeto")
+    field(INP,  "@asyn($(PORT))LastCycleVeto")
     field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)Cycle")

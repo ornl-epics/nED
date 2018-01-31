@@ -77,7 +77,7 @@ DasCmdPacket::CommandType AdcRocPlugin::handleRequest(DasCmdPacket::CommandType 
 
 bool AdcRocPlugin::handleResponse(const DasCmdPacket *packet)
 {
-    switch (packet->command) {
+    switch (packet->getCommand()) {
     case DasCmdPacket::CMD_PM_PULSE_RQST_ON:
         return rspTriggerPulseMagnet(packet);
     case DasCmdPacket::CMD_PM_PULSE_RQST_OFF:
@@ -90,8 +90,8 @@ bool AdcRocPlugin::handleResponse(const DasCmdPacket *packet)
 bool AdcRocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
 {
     const RspReadVersion *response;
-    if (packet->getPayloadLength() == sizeof(RspReadVersion)) {
-        response = reinterpret_cast<const RspReadVersion*>(packet->payload);
+    if (packet->getCmdPayloadLength() == sizeof(RspReadVersion)) {
+        response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
     } else {
         return false;
     }
@@ -123,12 +123,12 @@ DasCmdPacket::CommandType AdcRocPlugin::reqClearPulseMagnet()
 
 bool AdcRocPlugin::rspTriggerPulseMagnet(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 bool AdcRocPlugin::rspClearPulseMagnet(const DasCmdPacket *packet)
 {
-    return packet->acknowledge;
+    return packet->isAcknowledge();
 }
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two

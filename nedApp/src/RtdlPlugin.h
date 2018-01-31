@@ -37,9 +37,16 @@ class RtdlPlugin : public BasePlugin {
         /**
          * Process downstream RTDL packets
          */
+        void recvDownstream(const DasPacketList &packets);
+
+        /**
+         * Process downstream RTDL packets
+         */
         void recvDownstream(const DasRtdlPacketList &packets);
 
     private:
+
+        void update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<DasRtdlPacket::RtdlFrame> &frames);
 
         /**
          * PVAccess PV record.
@@ -61,18 +68,15 @@ class RtdlPlugin : public BasePlugin {
                 /**
                  * Publish a single atomic update of the PV, take values from packet.
                  */
-                bool update(const DasRtdlPacket *packet);
+                bool update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<DasRtdlPacket::RtdlFrame> &frames);
 
             private:
                 uint32_t m_sequence;
                 epics::pvData::PVTimeStamp      pvTimeStamp;
                 epics::pvData::PVDoublePtr      pvProtonCharge; //!< Pulse proton charge in Coulombs
                 epics::pvData::PVDisplay        pvProtonChargeDisplay;
-                epics::pvData::PVBooleanPtr     pvBadPulse;
                 epics::pvData::PVEnumerated     pvPulseFlavor;
-                epics::pvData::PVBooleanPtr     pvBadVetoFrame;
-                epics::pvData::PVBooleanPtr     pvBadCycleFrame;
-                epics::pvData::PVUBytePtr       pvTstat;
+                epics::pvData::PVUBytePtr       pvTimingStatus;
                 epics::pvData::PVUShortPtr      pvLastCycleVeto;
                 epics::pvData::PVUShortPtr      pvCycle;
                 epics::pvData::PVUIntPtr        pvTsyncPeriod;
@@ -94,13 +98,10 @@ class RtdlPlugin : public BasePlugin {
 
     private: // asyn parameters
         int Timestamp;
-        int BadPulse;
         int PulseFlavor;
         int PulseCharge;
-        int BadVetoFrame;
-        int BadCycleFrame;
-        int Tstat;
-        int PrevCycleVeto;
+        int TimingStatus;
+        int LastCycleVeto;
         int Cycle;
         int TsyncPeriod;
         int TofFullOffset;

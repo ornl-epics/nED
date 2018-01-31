@@ -62,8 +62,8 @@ DasPacket *DasPacket::initOptical(uint8_t *buffer, size_t size, const DasCmdPack
                        orig->getModuleId(),
                        static_cast<DasPacket::CommandType>(orig->getCommand()),
                        orig->getSequenceId(),
-                       orig->getPayloadLength(),
-                       orig->getCommandPayload());
+                       orig->getCmdPayloadLength(),
+                       orig->getCmdPayload());
 }
 
 DasPacket *DasPacket::initLvds(uint8_t *buffer, size_t size, uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload)
@@ -76,7 +76,7 @@ DasPacket *DasPacket::initLvds(uint8_t *buffer, size_t size, uint32_t source, ui
     real_payload_length *= 2; // 32 bits are devided into two dwords
     real_payload_length += (destination != HWID_BROADCAST_SW ? 2*sizeof(uint32_t) : 0); // First 2 dwords of the payload represent LVDS address for non-global commands
 
-    if (size > (sizeof(DasPacket) + ALIGN_UP(real_payload_length, 4))) {
+    if (size >= (sizeof(DasPacket) + ALIGN_UP(real_payload_length, 4))) {
 
         CommandInfo cmdinfo;
         memset(&cmdinfo, 0, sizeof(cmdinfo));
@@ -152,8 +152,8 @@ DasPacket *DasPacket::initLvds(uint8_t *buffer, size_t size, const DasCmdPacket 
                     (single ? HWID_BROADCAST_SW : orig->getModuleId()),
                     static_cast<DasPacket::CommandType>(orig->getCommand()),
                     orig->getSequenceId(),
-                    orig->getPayloadLength(),
-                    orig->getCommandPayload());
+                    orig->getCmdPayloadLength(),
+                    orig->getCmdPayload());
 }
 
 bool DasPacket::isValid() const
@@ -420,14 +420,38 @@ const DasPacket *DasPacket::cast(const uint8_t *data, size_t size) throw(std::ru
     return packet;
 }
 
+epicsTimeStamp DasPacket::getTimeStamp() const
+{
+    epicsTimeStamp timestamp{0, 0};
+    if (isRtdl()) {
+        const RtdlHeader *rtdl = getRtdlHeader();
+        if (rtdl) {
+            timestamp.secPastEpoch = rtdl->timestamp_sec;
+            timestamp.nsec = rtdl->timestamp_nsec;
+        }
+    }
+    return timestamp;
+}
+
+std::vector<DasRtdlPacket::RtdlFrame> DasPacket::getRtdlFrames() const
+{
+    std::vector<DasRtdlPacket::RtdlFrame> frames;
+    if (isRtdl()) {
+        const uint32_t *f = getPayload() + sizeof(RtdlHeader)/sizeof(uint32_t);
+        uint32_t nFrames = (getPayloadLength() - sizeof(RtdlHeader)) / sizeof(uint32_t);
+        for (uint32_t i = 0; i < nFrames; i++) {
+            DasRtdlPacket::RtdlFrame frame{ static_cast<uint8_t>((f[i] >> 24) & 0xFF), f[i] & 0xFFFFFF };
+            frames.push_back(frame);
+        }
+    }
+    return frames;
+}
 
 Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
 {
     if (isRtdl()) {
-        const uint32_t *frames = (payload + sizeof(RtdlHeader)/sizeof(uint32_t));
-        size_t nFrames = (payload_length - sizeof(RtdlHeader))/sizeof(uint32_t);
-
-        return DasRtdlPacket::init(buffer, size, getRtdlHeader(), frames, nFrames);
+        // Too time consuming, we don't need it for now.
+        return nullptr;
 
     } else if (isCommand()) {
         if (getCommandType() == DasPacket::CMD_DISCOVER) {
@@ -439,8 +463,8 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
                                       true,
                                       cmdinfo.is_response,
                                       0,
-                                      &module_type,
-                                      sizeof(module_type));
+                                      sizeof(module_type),
+                                      &module_type);
         } else {
             return DasCmdPacket::init(buffer,
                                       size,
@@ -449,23 +473,21 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
                                       (cmdinfo.command != DasPacket::RSP_NACK),
                                       cmdinfo.is_response,
                                       (cmdinfo.is_channel ? cmdinfo.channel + 1 : 0),
-                                      getPayload(),
-                                      getPayloadLength());
+                                      getPayloadLength(),
+                                      getPayload());
         }
         
     } else if (isData() && datainfo.data_format != DATA_FMT_LEGACY) {
-        uint32_t timestamp_sec = 0;
-        uint32_t timestamp_nsec = 0;
+        epicsTimeStamp timestamp{0, 0};
         const RtdlHeader *rtdl = getRtdlHeader();
         if (rtdl) {
-            timestamp_sec = rtdl->timestamp_sec;
-            timestamp_nsec = rtdl->timestamp_nsec;
+            timestamp = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
         }
         uint32_t count = 0;
         const uint32_t *data = getData(&count);
 
-        DasDataPacket::DataFormat format = static_cast<DasDataPacket::DataFormat>(datainfo.data_format);
-        return DasDataPacket::init(buffer, size, format, timestamp_sec, timestamp_nsec, data, count);
+        DasDataPacket::EventFormat format = static_cast<DasDataPacket::EventFormat>(datainfo.data_format);
+        return DasDataPacket::init(buffer, size, format, timestamp, count, data);
     }
                                     
     return nullptr;

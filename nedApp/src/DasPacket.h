@@ -509,6 +509,18 @@ struct DasPacket
         DataFormat getDataFormat() const;
         
         /**
+         * Get acquisition frame start time (EPICS epoch timestamp)
+         * 
+         * Returns epicsTimeStamp{0,0} when timestamp can't be decoded.
+         */
+        epicsTimeStamp getTimeStamp() const;
+        
+        /**
+         * Return RTDL frames from the packet in no particular order or empty vector when non RTDL packet.
+         */
+        std::vector<DasRtdlPacket::RtdlFrame> getRtdlFrames() const;
+        
+        /**
          * Cast raw pointer to DasPacket pointer.
          * 
          * @return Casted valid packet, throws otherwise

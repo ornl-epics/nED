@@ -70,7 +70,7 @@ asynStatus BasePortPlugin::readInt32(asynUser *pasynUser, epicsInt32 *value)
 void BasePortPlugin::recvUpstream(const DasCmdPacketList &packets)
 {
     bool forceOldPkts = getBooleanParam(OldPktsEn);
-    
+
     // Need to send packets one at a time - OCC limitation
     for (const auto& p: packets) {
         if (forceOldPkts) {
@@ -79,21 +79,21 @@ void BasePortPlugin::recvUpstream(const DasCmdPacketList &packets)
                 LOG_ERROR("Packet to big to send, skipping");
                 continue;
             }
-            
+
             // Send packet to DSP
             packet = DasPacket::initOptical(m_sendBuffer.data(), m_sendBuffer.size(), p);
             if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
                 LOG_ERROR("Failed to send packet");
                 break;
             }
-            
+
             // ... but also to everybody else since we don't know DSP id
             packet = DasPacket::initLvds(m_sendBuffer.data(), m_sendBuffer.size(), p);
             if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
                 LOG_ERROR("Failed to send packet");
                 break;
             }
-            
+
             // Support for some old hardware that doesn't respond to broadcast LVDS commands
             if (p->getCommand() == DasCmdPacket::CMD_DISCOVER && p->getModuleId() == DasCmdPacket::BROADCAST_ID) {
                 packet = DasPacket::initLvds(m_sendBuffer.data(), m_sendBuffer.size(), p, true);
@@ -102,19 +102,26 @@ void BasePortPlugin::recvUpstream(const DasCmdPacketList &packets)
                     break;
                 }
             }
-    
+
         } else {
             if (p->getLength() > m_sendBuffer.size()) {
                 LOG_ERROR("Packet to big to send, skipping");
                 continue;
             }
 
-            Packet *packet = new (m_sendBuffer.data()) Packet(p);
-            packet->setSequenceId(++m_sendId % 255);
-            
-            if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
-                LOG_ERROR("Failed to send packet");
-                break;
+            if (p->getSequenceId() != 0) {
+                if (!send(reinterpret_cast<const uint8_t *>(p), p->getLength())) {
+                    LOG_ERROR("Failed to send packet");
+                    break;
+                }
+            } else {
+                Packet *packet = new (m_sendBuffer.data()) Packet(p);
+                packet->setSequenceId(++m_sendId % 255);
+
+                if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
+                    LOG_ERROR("Failed to send packet");
+                    break;
+                }
             }
         }
     }
@@ -126,7 +133,7 @@ void BasePortPlugin::recvUpstream(const DasPacketList &packets)
         LOG_ERROR("Failed to send packet, DAS 1.0 packets disabled");
         return;
     }
-    
+
     // Need to send packets one at a time - OCC limitation
     for (const auto& packet: packets) {
         if (!send(reinterpret_cast<const uint8_t *>(packet), packet->getLength())) {
@@ -141,7 +148,7 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
     assert(m_circularBuffer != nullptr);
 
     uint32_t retryCounter = 0;
-    
+
     LOG_INFO("Process thread started");
 
     while (shutdown->tryWait() == false) {
@@ -179,7 +186,7 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
             break;
         }
     }
-    
+
     LOG_INFO("Process thread exited");
 }
 
@@ -202,9 +209,9 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
         // a new DAS header. They differ in the most significant 4 bits of the
         // first 32 bits received.
         auto version = reinterpret_cast<const Packet *>(ptr)->getVersion();
-        
+
         const Packet *packet = nullptr;
-        
+
         if (version == 0 || forceOldPkts) {
             // Old DAS packet
             const DasPacket *das1Packet = DasPacket::cast(ptr, bytesLeft);
@@ -222,13 +229,13 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
 
         } else if (version == 1) {
             packet = Packet::cast(ptr, bytesLeft);
-            
+
             if (m_recvId != 0xFFFFFFFF && packet->getSequenceId() != ((m_recvId+1) % 255)) {
                 LOG_ERROR("Expecting packet with sequence number %u, got %u", (m_recvId+1)%255, packet->getSequenceId());
             }
             m_recvId = packet->getSequenceId();
             ptr += packet->getLength();
-            
+
         } else {
             throw std::runtime_error("Unsupported packet received");
         }
@@ -253,7 +260,7 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
             }
         }
     }
-    
+
     // Publish all packets in parallel ..
     std::vector< std::shared_ptr<PluginMessage> > messages;
     if (!oldDas.empty())
