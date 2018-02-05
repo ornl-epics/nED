@@ -262,7 +262,7 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
     }
 
     // Publish all packets in parallel ..
-    std::vector< std::shared_ptr<PluginMessage> > messages;
+    std::vector< std::unique_ptr<PluginMessage> > messages;
     if (!oldDas.empty())
         messages.push_back(sendDownstream(oldDas, false));
     if (!dasCmd.empty())
@@ -276,7 +276,7 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
 
     // .. and wait for all of them to get released
     for (const auto& m: messages) {
-        if (!!m) {
+        if (m) {
             m->waitAllReleased();
         }
     }

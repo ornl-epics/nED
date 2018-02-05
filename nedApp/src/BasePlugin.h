@@ -228,38 +228,64 @@ class BasePlugin : public asynPortDriver {
          * Plugin must be unlocked when sending messages.
          *
          * When in wait mode, the function will return only after all subscribed
-         * plugins have received and processed the message.
+         * plugins have received and processed the message. No PluginMessage is
+         * returned in that case.
          *
          * @param[in] type of message to be sent
          * @param[in] msg to be sent
          * @param[in] wait for plugins to process message before returning
          */
-        void sendDownstream(int type, std::shared_ptr<PluginMessage> &msg, bool wait=true);
+        std::unique_ptr<PluginMessage> sendDownstream(int type, const void *data, bool wait=true);
 
         /**
          * Send DasPackets to any connected child plugins.
+         * 
+         * @see sendDownstream(int, const void *, bool)
          */
-        std::shared_ptr<PluginMessage> sendDownstream(const DasPacketList &packets, bool wait=true);
+        std::unique_ptr<PluginMessage> sendDownstream(const DasPacketList &packets, bool wait=true)
+        {
+            return sendDownstream(MsgOldDas, &packets, wait);
+        }
 
         /**
          * Send DasDataPackets to any connected child plugins.
+         * 
+         * @see sendDownstream(int, const void *, bool)
          */
-        std::shared_ptr<PluginMessage> sendDownstream(const DasDataPacketList &packets, bool wait=true);
+        std::unique_ptr<PluginMessage> sendDownstream(const DasDataPacketList &packets, bool wait=true)
+        {
+            return sendDownstream(MsgDasData, &packets, wait);
+        }
 
         /**
          * Send DasCmdPackets to any connected child plugins.
+         * 
+         * @see sendDownstream(int, const void *, bool)
          */
-        std::shared_ptr<PluginMessage> sendDownstream(const DasCmdPacketList &packets, bool wait=true);
+        std::unique_ptr<PluginMessage> sendDownstream(const DasCmdPacketList &packets, bool wait=true)
+        {
+            return sendDownstream(MsgDasCmd, &packets, wait);
+        }
 
         /**
          * Send DasRtdlPackets to any connected child plugins.
+         * 
+         * @see sendDownstream(int, const void *, bool)
          */
-        std::shared_ptr<PluginMessage> sendDownstream(const DasRtdlPacketList &packets, bool wait=true);
+        std::unique_ptr<PluginMessage> sendDownstream(const DasRtdlPacketList &packets, bool wait=true)
+        {
+            return sendDownstream(MsgDasRtdl, &packets, wait);
+        }
 
         /**
          * Send ErrorPackets to any connected child plugins.
+         * 
+         * @see sendDownstream(int, const void *, bool)
          */
-        std::shared_ptr<PluginMessage> sendDownstream(const ErrorPacketList &packets, bool wait=true);
+        std::unique_ptr<PluginMessage> sendDownstream(const ErrorPacketList &packets, bool wait=true)
+        {
+            return sendDownstream(MsgError, &packets, wait);
+        }
 
         /**
          * A callback function called upon receiving message from child plugin.
@@ -271,51 +297,75 @@ class BasePlugin : public asynPortDriver {
 
         /**
          * Receive DasPacket list from children plugins.
+         * 
+         * @see recvUpstream(int, PluginMessage *)
          */
         virtual void recvUpstream(const DasPacketList &packets) {};
 
         /**
          * Receive DasCmdPacket list from children plugins.
+         * 
+         * @see recvUpstream(int, PluginMessage *)
          */
         virtual void recvUpstream(const DasCmdPacketList &packets) {};
 
         /**
          * Send message to parent plugins.
          *
-         * Function find connected parent plugins and sends message only if
+         * Function finds connected parent plugins and sends message only if
          * message type is also subscribed to.
-         * Function returns immediately and doesn't wait for receiver to process
-         * packets.
+         * Waits for all receivers to process the data before returning
+         * the handle.
          */
-        virtual void sendUpstream(int type, std::shared_ptr<PluginMessage> &msg);
-
+        void sendUpstream(int type, const void *data);
+        
         /**
-         * Send DasPacketList to parent plugins.
+         * Send DasPackets to parent plugins.
          *
          * Waits until receiver processes the packet.
+         * 
+         * @see sendUpstream(int, const void *)
          */
-        virtual void sendUpstream(const DasPacketList &packet);
+        virtual void sendUpstream(const DasPacketList &packets)
+        {
+            sendUpstream(MsgOldDas, &packets);
+        }
+
+        /**
+         * Send DasCmdPackets to parent plugins.
+         *
+         * Waits until receiver processes the packet.
+         * 
+         * @see sendUpstream(int, const void *)
+         */
+        virtual void sendUpstream(const DasCmdPacketList &packets)
+        {
+            sendUpstream(MsgDasCmd, &packets);
+        }
 
         /**
          * Send single DasPacket to parent plugins.
          *
          * Waits until receiver processes the packet.
+         * 
+         * @see sendUpstream(int, const void *)
          */
-        virtual void sendUpstream(const DasPacket *packet);
-
-        /**
-         * Send single DasCmdPacketList to parent plugins.
-         *
-         * Waits until receiver processes the packet.
-         */
-        virtual void sendUpstream(const DasCmdPacketList &packet);
+        void sendUpstream(const DasPacket *packet)
+        {
+            sendUpstream(DasPacketList{packet});
+        }
 
         /**
          * Send single DasCmdPacket to parent plugins.
          *
          * Waits until receiver processes the packet.
+         * 
+         * @see sendUpstream(int, const void *)
          */
-        virtual void sendUpstream(const DasCmdPacket *packet);
+        void sendUpstream(const DasCmdPacket *packet)
+        {
+            sendUpstream(DasCmdPacketList{packet});
+        }
 
         /**
          * Return the name of the asyn parameter.

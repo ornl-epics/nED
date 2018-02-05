@@ -252,51 +252,19 @@ void BasePlugin::recvDownstream(int type, PluginMessage *msg)
     }
 }
 
-void BasePlugin::sendDownstream(int type, std::shared_ptr<PluginMessage> &msg, bool wait)
+std::unique_ptr<PluginMessage> BasePlugin::sendDownstream(int type, const void *data, bool wait)
 {
+    std::unique_ptr<PluginMessage> msg(new PluginMessage(data));
     if (msg) {
         msg->claim();
         void *ptr = reinterpret_cast<void *>(msg.get());
         doCallbacksGenericPointer(ptr, type, 0);
         msg->release();
-        if (wait)
+        if (wait) {
             msg->waitAllReleased();
+            msg.reset();
+        }
     }
-}
-
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const DasPacketList &packets, bool wait)
-{
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
-    sendDownstream(MsgOldDas, msg, wait);
-    return msg;
-}
-
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const DasDataPacketList &packets, bool wait)
-{
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
-    sendDownstream(MsgDasData, msg, wait);
-    return msg;
-}
-
-
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const DasCmdPacketList &packets, bool wait)
-{
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
-    sendDownstream(MsgDasCmd, msg, wait);
-    return msg;
-}
-
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const DasRtdlPacketList &packets, bool wait)
-{
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
-    sendDownstream(MsgDasRtdl, msg, wait);
-    return msg;
-}
-
-std::shared_ptr<PluginMessage> BasePlugin::sendDownstream(const ErrorPacketList &packets, bool wait)
-{
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
-    sendDownstream(MsgError, msg, wait);
     return msg;
 }
 
@@ -322,57 +290,29 @@ void BasePlugin::recvUpstream(int type, PluginMessage *msg)
     }
 }
 
-void BasePlugin::sendUpstream(int type, std::shared_ptr<PluginMessage> &msg)
+void BasePlugin::sendUpstream(int type, const void *data)
 {
-    for (auto it=m_connectedPorts.begin(); it!=m_connectedPorts.end(); it++) {
-        if (it->pasynuser->reason == type) {
-            asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
-            if (!interface) {
-                LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, it->pluginName.c_str());
-                continue;
+    std::unique_ptr<PluginMessage> msg(new PluginMessage(data));
+    if (msg) {
+        msg->claim();
+
+        for (auto it=m_connectedPorts.begin(); it!=m_connectedPorts.end(); it++) {
+            if (it->pasynuser->reason == type) {
+                asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
+                if (!interface) {
+                    LOG_ERROR("Can't find %s interface on array port %s", asynGenericPointerType, it->pluginName.c_str());
+                    continue;
+                }
+
+                asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
+                void *ptr = reinterpret_cast<void *>(msg.get());
+                asynGenericPointerInterface->write(interface->drvPvt, it->pasynuser, ptr);
             }
-
-            asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
-            void *ptr = reinterpret_cast<void *>(msg.get());
-            asynGenericPointerInterface->write(interface->drvPvt, it->pasynuser, ptr);
         }
-    }
-}
 
-void BasePlugin::sendUpstream(const DasCmdPacketList &packets)
-{
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
-    if (msg) {
-        msg->claim();
-        sendUpstream(MsgDasCmd, msg);
         msg->release();
         msg->waitAllReleased();
     }
-}
-
-void BasePlugin::sendUpstream(const DasCmdPacket *packet)
-{
-    DasCmdPacketList l;
-    l.push_back(packet);
-    sendUpstream(l);
-}
-
-void BasePlugin::sendUpstream(const DasPacketList &packets)
-{
-    std::shared_ptr<PluginMessage> msg(new PluginMessage(&packets));
-    if (msg) {
-        msg->claim();
-        sendUpstream(MsgOldDas, msg);
-        msg->release();
-        msg->waitAllReleased();
-    }
-}
-
-void BasePlugin::sendUpstream(const DasPacket *packet)
-{
-    DasPacketList l;
-    l.push_back(packet);
-    sendUpstream(l);
 }
 
 std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &callback, double delay)
