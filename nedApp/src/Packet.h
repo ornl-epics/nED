@@ -260,7 +260,7 @@ class DasDataPacket : public Packet {
          * Up-cast Packet to DasDataPacket if packet type allows so.
          */
         static const DasDataPacket *cast(const Packet *packet) {
-            if (packet->getType() == Packet::TYPE_ERROR) {
+            if (packet->getType() == Packet::TYPE_DAS_DATA) {
                 return reinterpret_cast<const DasDataPacket *>(packet);
             } else {
                 throw Packet::ParseError("Can't upcast to DasDataPacket");
@@ -270,7 +270,7 @@ class DasDataPacket : public Packet {
          * Up-cast Packet to DasDataPacket if packet type allows so.
          */
         static DasDataPacket *cast(Packet *packet) {
-            if (packet->getType() == Packet::TYPE_ERROR) {
+            if (packet->getType() == Packet::TYPE_DAS_DATA) {
                 return reinterpret_cast<DasDataPacket *>(packet);
             } else {
                 throw Packet::ParseError("Can't upcast to DasDataPacket");
@@ -394,7 +394,7 @@ class DasRtdlPacket : public Packet {
          * Up-cast Packet to DasRtdlPacket if packet type allows so.
          */
         static const DasRtdlPacket *cast(const Packet *packet) {
-            if (packet->getType() == Packet::TYPE_ERROR) {
+            if (packet->getType() == Packet::TYPE_DAS_RTDL) {
                 return reinterpret_cast<const DasRtdlPacket *>(packet);
             } else {
                 throw Packet::ParseError("Can't upcast to DasRtdlPacket");
@@ -404,7 +404,7 @@ class DasRtdlPacket : public Packet {
          * Up-cast Packet to DasRtdlPacket if packet type allows so.
          */
         static DasRtdlPacket *cast(Packet *packet) {
-            if (packet->getType() == Packet::TYPE_ERROR) {
+            if (packet->getType() == Packet::TYPE_DAS_RTDL) {
                 return reinterpret_cast<DasRtdlPacket *>(packet);
             } else {
                 throw Packet::ParseError("Can't upcast to DasRtdlPacket");
@@ -549,7 +549,7 @@ class DasCmdPacket : public Packet {
          * Up-cast Packet to DasCmdPacket if packet type allows so.
          */
         static const DasCmdPacket *cast(const Packet *packet) {
-            if (packet->getType() == Packet::TYPE_ERROR) {
+            if (packet->getType() == Packet::TYPE_DAS_CMD) {
                 return reinterpret_cast<const DasCmdPacket *>(packet);
             } else {
                 throw Packet::ParseError("Can't upcast to DasCmdPacket");
@@ -559,7 +559,7 @@ class DasCmdPacket : public Packet {
          * Up-cast Packet to DasCmdPacket if packet type allows so.
          */
         static DasCmdPacket *cast(Packet *packet) {
-            if (packet->getType() == Packet::TYPE_ERROR) {
+            if (packet->getType() == Packet::TYPE_DAS_CMD) {
                 return reinterpret_cast<DasCmdPacket *>(packet);
             } else {
                 throw Packet::ParseError("Can't upcast to DasCmdPacket");
