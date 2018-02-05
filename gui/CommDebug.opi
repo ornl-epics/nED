@@ -10,7 +10,7 @@
   <background_color>
     <color name="Background" red="255" green="255" blue="255" />
   </background_color>
-  <boy_version>5.1.0.201801151722</boy_version>
+  <boy_version>5.1.0.201802011733</boy_version>
   <foreground_color>
     <color red="192" green="192" blue="192" />
   </foreground_color>
@@ -9343,7 +9343,7 @@ $(pv_value)</tooltip>
       <rules>
         <rule name="Disabled" prop_id="enabled" out_exp="true">
           <exp bool_exp="true">
-            <value>pv0==1&amp;&amp;pv1==3</value>
+            <value>pv0==1&amp;&amp;pv1==2</value>
           </exp>
           <pv trig="true">$(P)Sniffer</pv>
           <pv trig="true">$(P)FilterPktType</pv>
