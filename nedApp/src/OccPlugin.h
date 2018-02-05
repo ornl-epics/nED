@@ -7,12 +7,10 @@
  * @author Klemen Vodopivec
  */
 
-#ifndef OCCPORTDRIVER_H
-#define OCCPORTDRIVER_H
+#ifndef OCC_PLUGIN_H
+#define OCC_PLUGIN_H
 
-#include "BasePlugin.h"
-#include "BaseCircularBuffer.h"
-#include "Thread.h"
+#include "BasePortPlugin.h"
 
 #include <occlib.h>
 
@@ -30,7 +28,7 @@
  * Another thread is created to periodically poll OCC status with two user
  * configurable intervals (basic vs extended status).
  */
-class epicsShareFunc OccPlugin : public BasePlugin {
+class epicsShareFunc OccPlugin : public BasePortPlugin {
     private:
         /**
          * Valid statuses of the OccPlugin and the OCC infrastructure.
@@ -45,14 +43,6 @@ class epicsShareFunc OccPlugin : public BasePlugin {
             STAT_OCC_ERROR      = 12,   //!< OCC error, check logs
             STAT_OCC_STALL      = 13,   //!< OCC DMA stalled
             STAT_OCC_FIFO_FULL  = 14,   //!< OCC FIFO overrun
-        };
-
-        /**
-         * Recognized command values through Command parameter.
-         */
-        enum Command {
-            CMD_NONE            = 0,    //!< No action
-            CMD_RESET           = 1,    //!< Reset OCC device and internal state
         };
 
     public:
@@ -75,16 +65,10 @@ class epicsShareFunc OccPlugin : public BasePlugin {
 
     private:
         int m_version;
-        int m_test;
-        unsigned m_sendId;          //!< Output packets sequence number
-        unsigned m_recvId;          //!< Last received packet sequence number
-        uint8_t m_sourceId;         //!< Source id number gets added to some packets
 
-        struct occ_handle *m_occ;
+        struct occ_handle *m_occ = nullptr;
         occ_status_t m_occStatusCache;
-        BaseCircularBuffer *m_circularBuffer;
-        Thread *m_occBufferReadThread;
-        Thread *m_occStatusRefreshThread;
+        std::unique_ptr<Thread> m_occStatusRefreshThread;
         epicsEvent m_statusEvent;
         static const int DEFAULT_BASIC_STATUS_INTERVAL;
         static const int DEFAULT_EXTENDED_STATUS_INTERVAL;
@@ -95,19 +79,9 @@ class epicsShareFunc OccPlugin : public BasePlugin {
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
-         * Overloaded method to read asyn int32 parameters
+         * Send data to OCC.
          */
-        asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
-
-        /**
-         * Send MsgDasCmd packets to OCC.
-         */
-        void recvUpstream(DasCmdPacketList *packets);
-
-        /**
-         * Send MsgOldDas packets to OCC.
-         */
-        void recvUpstream(DasPacketList *packets);
+        bool send(const uint8_t *data, size_t len);
 
         /**
          * Report an error detected in receive data thread
@@ -120,36 +94,6 @@ class epicsShareFunc OccPlugin : public BasePlugin {
          * This function must not be called during global lock.
          */
         void reset();
-
-        /**
-         * Process all available data from buffer.
-         *
-         * This is the worker function called from the thread. It parses through the
-         * buffer until no more packets can be extracted. Each packet is verified to
-         * be valid or exception is thrown. Received packets are put in lists and sent
-         * to all subscribed plugins. Function returns number of bytes left in
-         * the buffer.
-         * To allow to debug incoming data, function tries to eat as much data as
-         * possible and return the number of bytes processed. It only throws when
-         * it can't process even a single packet from the beginning of the buffer.
-         *
-         * @param[in] ptr to buffer to be processed
-         * @param[in] size of data to be processed
-         * @raise std::range_error when supported packet verifcation failed
-         * @raise std::runtime_error when non-supported packet was received
-         * @return Number of bytes not processed.
-         */
-        uint32_t processOccData(uint8_t *ptr, uint32_t size);
-
-        /**
-         * Process data from OCC buffer and dispatch it to the registered plugins.
-         *
-         * Monitor OCC buffer for new data. When it's available, transform it into
-         * list of packets and send the list to the registered plugins. Wait for all
-         * plugins to complete processing it and than advance OCC buffer consumer
-         * index for the amount of bytes processed. Start monitoring again.
-         */
-        void processOccDataThread(epicsEvent *shutdown);
 
         /**
          * Thread refreshing OCC status periodically.
@@ -173,17 +117,9 @@ class epicsShareFunc OccPlugin : public BasePlugin {
          */
         void refreshOccStatus(bool basic_status);
 
-        /**
-         * Dump raw data to log in hex format
-         *
-         * @param[in] data to be dumped
-         * @param[in] length of data in bytes
-         */
-        void dump(const char *data, uint32_t length);
-
     private:
         int Status;
-        int Command;
+        int Reset;
         int LastErr;
         int HwType;
         int HwVer;
@@ -210,17 +146,11 @@ class epicsShareFunc OccPlugin : public BasePlugin {
         int ExtStatInt;
         int DmaUsed;
         int DmaSize;
-        int BufUsed;
-        int BufSize;
         int RecvRate;
-        int CopyRate;
-        int ProcRate;
         int RxEn;
         int RxEnRb;
         int ErrPktEn;
         int ErrPktEnRb;
-        int MaxPktSize;
-        int OldPktsEn;
 };
 
-#endif // OCCPORTDRIVER_H
+#endif // OCC_PLUGIN_H

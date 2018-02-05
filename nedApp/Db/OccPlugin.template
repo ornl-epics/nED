@@ -1,4 +1,5 @@
 include "BasePlugin.include"
+include "BasePortPlugin.include"
 
 record(mbbi, "$(P)PortStatus")
 {
@@ -48,7 +49,7 @@ record(calcout, "$(P)AutoResetCalc")
     field(INPA, "$(P)AutoReset NPP")
     field(INPB, "$(P)PortStatus.SEVR NPP")
     field(CALC, "A=1&&B#0&&B#4")
-    field(OUT,  "$(P)Command PP")
+    field(OUT,  "$(P)Reset PP")
     field(OOPT, "When Non-zero")
     field(ODLY, "0.1")
     field(OCAL, "1")
@@ -69,16 +70,14 @@ record(calcout, "$(P)RxDisableOnErr")
     field(OCAL, "0")
     field(DOPT, "Use OCAL")
 }
-record(mbbo, "$(P)Command")
+record(bo, "$(P)Reset")
 {
     field(ASG,  "BEAMLINE")
-    field(DESC, "Issue OccPortDriver command")
+    field(DESC, "Reset OCC and buffers")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))Command")
-    field(ZRVL, "0")
-    field(ZRST, "None")
-    field(ONVL, "1")
-    field(ONST, "Reset")
+    field(OUT,  "@asyn($(PORT))Reset")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
 }
 record(mbbi, "$(P)LastErr")
 {
@@ -171,19 +170,6 @@ record(mbbi, "$(P)ConStatus")
     field(THVL, "3")
     field(THST, "Laser fault")
     field(THSV, "MAJOR")
-}
-record(bo, "$(P)OldPktsEn")
-{
-    info(archive, "Monitor, 00:00:05, VAL")
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Enable old DAS 1.0 packets")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))OldPktsEn")
-    field(ZNAM, "disable")
-    field(ONAM, "enable")
-    field(VAL,  "0")
-    field(PINI, "YES")
 }
 record(bo, "$(P)RxEn")
 {
@@ -452,42 +438,6 @@ record(calc, "$(P)DmaSizeMb")
     field(SCAN, "Passive")
     field(EGU,  "MiB")
 }
-record(longin, "$(P)BufUsed")
-{
-    field(DESC, "Local buffer used space")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BufUsed")
-    field(FLNK, "$(P)BufUsedMb")
-    field(SCAN, "1 second")
-    field(VAL,  "0")
-    field(EGU,  "B")
-}
-record(calc, "$(P)BufUsedMb")
-{
-    field(DESC, "Local buffer used space")
-    field(INPA, "$(P)BufUsed NPP")
-    field(CALC, "A/(1024*1024)")
-    field(SCAN, "Passive")
-    field(EGU,  "MiB")
-}
-record(longin, "$(P)BufSize")
-{
-    field(DESC, "Local buffer total size")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BufSize")
-    field(FLNK, "$(P)BufSizeMb")
-    field(SCAN, "Passive")
-    field(PINI, "YES")
-    field(EGU,  "B")
-}
-record(calc, "$(P)BufSizeMb")
-{
-    field(DESC, "Local buffer used space")
-    field(INPA, "$(P)BufSize NPP")
-    field(CALC, "A/(1024*1024)")
-    field(SCAN, "Passive")
-    field(EGU,  "MiB")
-}
 record(longout, "$(P)StatusInt")
 {
     info(autosaveFields, "VAL")
@@ -527,56 +477,6 @@ record(scalcout, "$(P)RecvRateScaled")
     field(OCAL, "A>1e6?CC:A>1e3?BB:AA")
     field(OOPT, "On Change")
     field(OUT,  "$(P)RecvRateScaled.EGU NPP")
-    field(DOPT, "Use OCAL")
-    field(PREC, "2")
-    field(EGU,  "B/s")
-}
-record(longin, "$(P)CopyRate")
-{
-    field(DESC, "Copy to buffer data rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))CopyRate")
-    field(FLNK, "$(P)CopyRateScaled")
-    field(SCAN, "1 second")
-    field(VAL,  "0")
-    field(EGU,  "B/s")
-}
-record(scalcout, "$(P)CopyRateScaled")
-{
-    field(DESC, "Copy to buffer data rate self-scale")
-    field(INPA, "$(P)CopyRate NPP")
-    field(AA,   "B/s")
-    field(BB,   "kB/s")
-    field(CC,   "MB/s")
-    field(CALC, "A>1e6?A/1e6:A>1e3?A/1e3:A")
-    field(OCAL, "A>1e6?CC:A>1e3?BB:AA")
-    field(OOPT, "On Change")
-    field(OUT,  "$(P)CopyRateScaled.EGU NPP")
-    field(DOPT, "Use OCAL")
-    field(PREC, "2")
-    field(EGU,  "B/s")
-}
-record(longin, "$(P)ProcRate")
-{
-    field(DESC, "Process data rate")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))ProcRate")
-    field(FLNK, "$(P)ProcRateScaled")
-    field(SCAN, "1 second")
-    field(VAL,  "0")
-    field(EGU,  "B/s")
-}
-record(scalcout, "$(P)ProcRateScaled")
-{
-    field(DESC, "Process data rate self-scale")
-    field(INPA, "$(P)ProcRate NPP")
-    field(AA,   "B/s")
-    field(BB,   "kB/s")
-    field(CC,   "MB/s")
-    field(CALC, "A>1e6?A/1e6:A>1e3?A/1e3:A")
-    field(OCAL, "A>1e6?CC:A>1e3?BB:AA")
-    field(OOPT, "On Change")
-    field(OUT,  "$(P)ProcRateScaled.EGU NPP")
     field(DOPT, "Use OCAL")
     field(PREC, "2")
     field(EGU,  "B/s")
@@ -656,13 +556,4 @@ record(stringin, "$(P)StatusText")
 {
     field(DESC, "Global OCC status text")
     field(INP,  "$(P)StatusTextCalc.SVAL PP MSS")
-}
-record(longout, "$(P)MaxPktSize")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "Maximum packet size")
-    field(PINI, "YES")
-    field(VAL,  "4000")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))MaxPktSize")
 }

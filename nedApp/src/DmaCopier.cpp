@@ -32,7 +32,7 @@ void DmaCopier::copyWorker(epicsEvent *shutdown)
 
 
         status = occ_data_wait(m_occ, &data, &len, THREAD_INTERVAL*1000);
-        if (status == -ETIME || (len == 0 && status == 0))
+        if (status == -ETIME || status == -ECONNRESET || (len == 0 && status == 0))
             continue;
         if (status != 0) {
             wakeUpConsumer(status);
