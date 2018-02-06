@@ -244,6 +244,8 @@ void BasePlugin::recvDownstream(int type, PluginMessage *msg)
             recvDownstream( *msg->get<const RtdlPacketList>() );
         } else if (type == MsgDasData) {
             recvDownstream( *msg->get<const DasDataPacketList>() );
+        } else if (type == MsgError) {
+            recvDownstream( *msg->get<const ErrorPacketList>() );
         } else if (type == MsgParamExch) {
 
         } else {

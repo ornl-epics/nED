@@ -219,6 +219,11 @@ class BasePlugin : public asynPortDriver {
         virtual void recvDownstream(const RtdlPacketList &packets) {};
 
         /**
+         * A worker function to process ErrorPacket messages from parent plugins.
+         */
+        virtual void recvDownstream(const ErrorPacketList &packets) {};
+
+        /**
          * Send PluginMessage to any connected child plugins.
          *
          * PluginMessage must be unique and not previously used. Use with care

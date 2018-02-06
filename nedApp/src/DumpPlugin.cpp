@@ -26,15 +26,16 @@ DumpPlugin::DumpPlugin(const char *portName, const char *parentPlugins)
     createParam("RtdlPktsEn",       asynParamInt32, &RtdlPktsEn, 1);     // WRITE - Enable saving DAS RTDL packets
     createParam("DataPktsEn",       asynParamInt32, &DataPktsEn, 1);     // WRITE - Enable saving DAS data packets
     createParam("CmdPktsEn",        asynParamInt32, &CmdPktsEn, 1);      // WRITE - Enable saving DAS command packets
+    createParam("OldPktsEn",        asynParamInt32, &OldPktsEn, 0);      // WRITE - Enable saving DAS command packets
     createParam("SavedCount",       asynParamInt32, &SavedCount, 0);     // READ - Num saved packets to file
     createParam("NotSavedCount",    asynParamInt32, &NotSavedCount, 0);  // READ - Num not saved packets due error
     createParam("Overwrite",        asynParamInt32, &Overwrite, 0);      // WRITE - Overwrite existing file
     createParam("DataType",         asynParamInt32, &DataType, 0);       // WRITE - Data type packets to save
+    createParam("CmdType",          asynParamInt32, &CmdType, 0);        // WRITE - Command type packets to save
     callParamCallbacks();
 
     // Let connect the first time, helps diagnose start-up problems
-//    static std::list<int> msgs {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError};
-    connect(parentPlugins, {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError});
+    connect(parentPlugins, {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError, MsgOldDas});
     disconnect();
 }
 
@@ -50,9 +51,9 @@ void DumpPlugin::recvDownstream(const DasDataPacketList &packets)
         int failed = 0;
         int dataType = getIntegerParam(DataType);
 
-        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-            if (dataType == 0 || (*it)->getEventsFormat() == dataType) {
-                if (writeToFile(*it))
+        for (const auto& packet: packets) {
+            if (dataType == 0 || packet->getEventsFormat() == dataType) {
+                if (writeToFile(packet, packet->getLength()))
                     saved++;
                 else
                     failed++;
@@ -71,8 +72,8 @@ void DumpPlugin::recvDownstream(const RtdlPacketList &packets)
         int saved = 0;
         int total = packets.size();
 
-        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-            if (writeToFile(*it))
+        for (const auto& packet: packets) {
+            if (writeToFile(packet, packet->getLength()))
                 saved++;
         }
 
@@ -87,10 +88,13 @@ void DumpPlugin::recvDownstream(const DasCmdPacketList &packets)
     if (getBooleanParam(CmdPktsEn)) {
         int saved = 0;
         int total = packets.size();
+        int cmdType = getIntegerParam(CmdType);
 
-        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-            if (writeToFile(*it))
-                saved++;
+        for (const auto& packet: packets) {
+            if (cmdType == 0 || packet->getCommand() == cmdType) {
+                if (writeToFile(packet, packet->getLength()))
+                    saved++;
+            }
         }
 
         setIntegerParam(SavedCount, getIntegerParam(SavedCount) + saved);
@@ -105,8 +109,8 @@ void DumpPlugin::recvDownstream(const ErrorPacketList &packets)
         int saved = 0;
         int total = packets.size();
 
-        for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-            if (writeToFile(*it))
+        for (const auto& packet: packets) {
+            if (writeToFile(packet, packet->getLength()))
                 saved++;
         }
 
@@ -116,14 +120,31 @@ void DumpPlugin::recvDownstream(const ErrorPacketList &packets)
     }
 }
 
-bool DumpPlugin::writeToFile(const Packet *packet)
+void DumpPlugin::recvDownstream(const DasPacketList &packets)
+{
+    if (getBooleanParam(OldPktsEn)) {
+        int saved = 0;
+        int total = packets.size();
+
+        for (const auto& packet: packets) {
+            if (writeToFile(packet, packet->getLength()))
+                saved++;
+        }
+
+        setIntegerParam(SavedCount, getIntegerParam(SavedCount) + saved);
+        setIntegerParam(NotSavedCount, getIntegerParam(NotSavedCount) + (total - saved));
+        callParamCallbacks();
+    }
+}
+
+bool DumpPlugin::writeToFile(const void *data, uint32_t len)
 {
     if (m_fd == -1)
         return false;
 
     // m_fd is non-blocking, might fail when system buffers are full
-    ssize_t ret = write(m_fd, packet, packet->getLength());
-    if (ret == static_cast<ssize_t>(packet->getLength()))
+    ssize_t ret = write(m_fd, data, len);
+    if (ret == static_cast<ssize_t>(len))
         return true;
 
     if (ret == -1) {
@@ -132,13 +153,13 @@ bool DumpPlugin::writeToFile(const Packet *packet)
         // Nothing we can do about it
         char path[1024];
         getStringParam(FilePath, sizeof(path), path);
-        LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, packet->getLength(), path);
+        LOG_ERROR("Wrote %zd/%d bytes to pipe %s - reader will be confused", ret, len, path);
     } else if (lseek(m_fd, -1 * ret, SEEK_CUR) != 0) {
         // Too bad but lseek() failed - very unlikely
         off_t offset = lseek(m_fd, 0, SEEK_CUR) - ret;
         char path[1024];
         getStringParam(FilePath, sizeof(path), path);
-        LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, packet->getLength(), path, offset);
+        LOG_ERROR("Wrote %zd/%d bytes to %s at offset %lu", ret, len, path, offset);
     } else {
         LOG_WARN("Failed to save packet to file");
     }

@@ -64,22 +64,27 @@ class DumpPlugin : public BasePlugin {
         /**
          * Process DAS data incoming packets.
          */
-        void recvDownstream(const DasDataPacketList &packets);
+        void recvDownstream(const DasDataPacketList &packets) override;
 
         /**
          * Process DAS RTDL incoming packets.
          */
-        void recvDownstream(const RtdlPacketList &packets);
+        void recvDownstream(const RtdlPacketList &packets) override;
 
         /**
          * Process DAS command incoming packets.
          */
-        void recvDownstream(const DasCmdPacketList &packets);
+        void recvDownstream(const DasCmdPacketList &packets) override;
 
         /**
          * Process error incoming packets.
          */
-        void recvDownstream(const ErrorPacketList &packets);
+        void recvDownstream(const ErrorPacketList &packets) override;
+
+        /**
+         * Process old DAS incoming packets.
+         */
+        void recvDownstream(const DasPacketList &packets) override;
 
     private: // functions
         /**
@@ -106,7 +111,7 @@ class DumpPlugin : public BasePlugin {
          *
          * @return true if all data written, false otherwise.
          */
-        bool writeToFile(const Packet *packet);
+        bool writeToFile(const void *data, uint32_t len);
 
     private: // asyn parameters
         int Enable;         //!< Enable saving packets - master switch
@@ -115,10 +120,12 @@ class DumpPlugin : public BasePlugin {
         int RtdlPktsEn;     //!< Enable saving DAS RTDL packets
         int DataPktsEn;     //!< Enable saving DAS data packets
         int CmdPktsEn;      //!< Enable saving DAS command packets
+        int OldPktsEn;      //!< Enable saving old DAS packets
         int SavedCount;     //!< Num saved packets to file
         int NotSavedCount;  //!< Num not saved packets due error
         int Overwrite;      //!< Overwrite existing file
         int DataType;       //!< Select data type packets to save
+        int CmdType;        //!< Select command type packets to save
 };
 
 #endif // DUMP_PLUGIN_H
