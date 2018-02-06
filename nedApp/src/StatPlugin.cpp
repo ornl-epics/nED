@@ -91,7 +91,7 @@ void StatPlugin::recvDownstream(const DasCmdPacketList &packets)
     callParamCallbacks();
 }
 
-void StatPlugin::recvDownstream(const DasRtdlPacketList &packets)
+void StatPlugin::recvDownstream(const RtdlPacketList &packets)
 {
     uint64_t rtdlTimes  = getDoubleParam(RtdlTimes);
     uint64_t rtdlBytes  = getDoubleParam(RtdlBytes);

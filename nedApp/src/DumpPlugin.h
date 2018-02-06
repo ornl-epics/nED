@@ -69,7 +69,7 @@ class DumpPlugin : public BasePlugin {
         /**
          * Process DAS RTDL incoming packets.
          */
-        void recvDownstream(const DasRtdlPacketList &packets);
+        void recvDownstream(const RtdlPacketList &packets);
 
         /**
          * Process DAS command incoming packets.

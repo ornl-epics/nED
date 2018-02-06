@@ -246,7 +246,7 @@ void CommDebugPlugin::recvDownstream(const DasDataPacketList &packets)
     }
 }
 
-void CommDebugPlugin::recvDownstream(const DasRtdlPacketList &packets)
+void CommDebugPlugin::recvDownstream(const RtdlPacketList &packets)
 {
     int filterType = getIntegerParam(FilterPktType);
     int recvQueMaxSize = getIntegerParam(RecvQueMaxSize);
@@ -256,7 +256,7 @@ void CommDebugPlugin::recvDownstream(const DasRtdlPacketList &packets)
     sendDownstream(packets, false);
     this->lock();
 
-    if (sniffer && (filterType == 0 || filterType == Packet::TYPE_DAS_RTDL)) {
+    if (sniffer && (filterType == 0 || filterType == Packet::TYPE_RTDL)) {
         for (auto it = packets.cbegin(); it != packets.cend(); it++) {
             savePacket(*it, m_recvQue, recvQueMaxSize);
         }
@@ -414,8 +414,8 @@ void CommDebugPlugin::showRecvPacket(const Packet *packet, int index)
             setIntegerParam(RspErrCode,     errPacket->code);
             //setIntegerParam(RspErrSourceId, errPacket->source);
 
-        } else if (packet->getType() == Packet::TYPE_DAS_RTDL) {
-            auto *rtdlPacket = DasRtdlPacket::cast(packet);
+        } else if (packet->getType() == Packet::TYPE_RTDL) {
+            auto *rtdlPacket = RtdlPacket::cast(packet);
             setIntegerParam(RspRtdlFrames,  rtdlPacket->getNumRtdlFrames());
 
         } else if (packet->getType() == Packet::TYPE_DAS_DATA) {

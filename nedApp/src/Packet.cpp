@@ -50,28 +50,28 @@ const Packet *Packet::cast(const uint8_t *data, size_t size) throw(ParseError)
 }
 
 /* ******************************* */
-/* *** DasRtdlPacket functions *** */
+/* *** RtdlPacket functions *** */
 /* ******************************* */
 
-DasRtdlPacket *DasRtdlPacket::init(uint8_t *buffer, size_t size, const std::vector<RtdlFrame> &frames)
+RtdlPacket *RtdlPacket::init(uint8_t *buffer, size_t size, const std::vector<RtdlFrame> &frames)
 {
-    DasRtdlPacket *packet = nullptr;
-    uint32_t length = sizeof(DasRtdlPacket) + (frames.size() * sizeof(RtdlFrame));
+    RtdlPacket *packet = nullptr;
+    uint32_t length = sizeof(RtdlPacket) + (frames.size() * sizeof(RtdlFrame));
     if (size >= length) {
-        packet = reinterpret_cast<DasRtdlPacket *>(buffer);
+        packet = reinterpret_cast<RtdlPacket *>(buffer);
         packet->init(frames);
     }
     
     return packet;
 }
 
-void DasRtdlPacket::init(const std::vector<RtdlFrame> &frames)
+void RtdlPacket::init(const std::vector<RtdlFrame> &frames)
 {
-    memset(this, 0, (sizeof(DasRtdlPacket) + frames.size()*sizeof(RtdlFrame)));
+    memset(this, 0, (sizeof(RtdlPacket) + frames.size()*sizeof(RtdlFrame)));
 
     this->version = 0x1;
-    this->type = TYPE_DAS_RTDL;
-    this->length = sizeof(DasRtdlPacket) + frames.size()*sizeof(RtdlFrame);
+    this->type = TYPE_RTDL;
+    this->length = sizeof(RtdlPacket) + frames.size()*sizeof(RtdlFrame);
 
     this->num_frames = frames.size();
     for (size_t i = 0; i < frames.size(); i++) {
@@ -79,7 +79,7 @@ void DasRtdlPacket::init(const std::vector<RtdlFrame> &frames)
     }
 }
 
-epicsTimeStamp DasRtdlPacket::getTimeStamp() const
+epicsTimeStamp RtdlPacket::getTimeStamp() const
 {
     uint32_t secPastEpoch = 0;
     uint32_t nsec = 0;
@@ -92,8 +92,8 @@ epicsTimeStamp DasRtdlPacket::getTimeStamp() const
             check += 1;
             break;
         case 2:
-            secPastEpoch |= (this->frames[i].data & 0xFF);
-            nsec |= ((this->frames[i].data >> 16) & 0xFF);
+            secPastEpoch |= ((this->frames[i].data >> 16) & 0xFF);
+            nsec |= (this->frames[i].data & 0xFF);
             check += 2;
             break;
         case 3:
@@ -110,7 +110,7 @@ epicsTimeStamp DasRtdlPacket::getTimeStamp() const
     return { secPastEpoch, nsec };
 }
 
-RtdlHeader DasRtdlPacket::getRtdlHeader() const
+RtdlHeader RtdlPacket::getRtdlHeader() const
 {
     RtdlHeader hdr{0};
 

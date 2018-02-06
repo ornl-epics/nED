@@ -52,7 +52,7 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     }
     callParamCallbacks();
 
-    BasePlugin::connect(parentPlugins, { MsgDasRtdl, MsgOldDas });
+    BasePlugin::connect(parentPlugins, { MsgDasRtdl });
 }
 
 void RtdlPlugin::recvDownstream(const DasPacketList &packets)
@@ -64,14 +64,14 @@ void RtdlPlugin::recvDownstream(const DasPacketList &packets)
     }
 }
 
-void RtdlPlugin::recvDownstream(const DasRtdlPacketList &packets)
+void RtdlPlugin::recvDownstream(const RtdlPacketList &packets)
 {
-    for (const DasRtdlPacket *packet: packets) {
+    for (const RtdlPacket *packet: packets) {
         update(packet->getTimeStamp(), packet->getRtdlHeader(), packet->getRtdlFrames());
     }
 }
 
-void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<DasRtdlPacket::RtdlFrame> &frames)
+void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<RtdlPacket::RtdlFrame> &frames)
 {
     // Now check in cache of already processed timestams
     epicsTime rtdlTime = timestamp;
@@ -242,7 +242,7 @@ bool RtdlPlugin::PvaRecord::init()
     return true;
 }
 
-bool RtdlPlugin::PvaRecord::update(const epicsTimeStamp &timestamp_, const RtdlHeader &rtdl, const std::vector<DasRtdlPacket::RtdlFrame> &frames_)
+bool RtdlPlugin::PvaRecord::update(const epicsTimeStamp &timestamp_, const RtdlHeader &rtdl, const std::vector<RtdlPacket::RtdlFrame> &frames_)
 {
     bool posted = true;
 

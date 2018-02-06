@@ -38,7 +38,7 @@ class StatPlugin : public BasePlugin {
         /**
          * Overloaded function to receive RTDL packets.
          */
-        void recvDownstream(const DasRtdlPacketList &packets);
+        void recvDownstream(const RtdlPacketList &packets);
 
         /**
          * Process error packets.

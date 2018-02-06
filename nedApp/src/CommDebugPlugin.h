@@ -74,7 +74,7 @@ class CommDebugPlugin : public BasePlugin {
         /**
          * Receive and process RTDL packets.
          */
-        void recvDownstream(const DasRtdlPacketList &packets);
+        void recvDownstream(const RtdlPacketList &packets);
 
         /**
          * Receive and process error packets.

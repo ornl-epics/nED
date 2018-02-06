@@ -27,10 +27,11 @@ class Packet {
         typedef enum {
             TYPE_LEGACY     = 0x0,
             TYPE_ERROR      = 0x1,
-            TYPE_DAS_RTDL   = 0x6,
+            TYPE_RTDL       = 0x6,
             TYPE_DAS_DATA   = 0x7,
             TYPE_DAS_CMD    = 0x8,
             TYPE_ACC_TIME   = 0x10,
+            TYPE_OLD_RTDL   = 0xFF, // Software only, hopefully such packet doesn't get defined
         } Type;
 
         using ParseError = std::runtime_error;
@@ -350,17 +351,22 @@ class DasDataPacket : public Packet {
         }
 };
 
-class DasRtdlPacket : public Packet {
+class RtdlPacket : public Packet {
     public:
-        typedef struct __attribute__ ((__packed__)) {
+        struct __attribute__ ((__packed__)) RtdlFrame {
             union __attribute__ ((__packed__)) {
                 struct __attribute__ ((__packed__)) {
-                    uint8_t id;                     //!< RTDL frame identifier
                     unsigned data:24;               //!< RTDL frame data
+                    uint8_t id;                     //!< RTDL frame identifier
                 };
                 uint32_t raw;                       //!< Non decoded RTDL frame
             };
-        } RtdlFrame;
+            RtdlFrame(uint32_t raw_)
+            : raw(raw_) {}
+            RtdlFrame(uint8_t id_, uint32_t data_)
+            : data(data_ & 0xFFFFFF)
+            , id(id_) {}
+        };
 
     protected: /* Variables */
 
@@ -380,7 +386,7 @@ class DasRtdlPacket : public Packet {
          * @param frames RTDL frames data
          * @return Returns a newly created packet or nullptr on error.
          */
-        static DasRtdlPacket *init(uint8_t *buffer, size_t size, const std::vector<RtdlFrame> &frames);
+        static RtdlPacket *init(uint8_t *buffer, size_t size, const std::vector<RtdlFrame> &frames);
 
         /**
          * Populate fields.
@@ -391,23 +397,23 @@ class DasRtdlPacket : public Packet {
         void init(const std::vector<RtdlFrame> &frames);
 
         /**
-         * Up-cast Packet to DasRtdlPacket if packet type allows so.
+         * Up-cast Packet to RtdlPacket if packet type allows so.
          */
-        static const DasRtdlPacket *cast(const Packet *packet) {
-            if (packet->getType() == Packet::TYPE_DAS_RTDL) {
-                return reinterpret_cast<const DasRtdlPacket *>(packet);
+        static const RtdlPacket *cast(const Packet *packet) {
+            if (packet->getType() == Packet::TYPE_RTDL) {
+                return reinterpret_cast<const RtdlPacket *>(packet);
             } else {
-                throw Packet::ParseError("Can't upcast to DasRtdlPacket");
+                throw Packet::ParseError("Can't upcast to RtdlPacket");
             }
         }
         /**
-         * Up-cast Packet to DasRtdlPacket if packet type allows so.
+         * Up-cast Packet to RtdlPacket if packet type allows so.
          */
-        static DasRtdlPacket *cast(Packet *packet) {
-            if (packet->getType() == Packet::TYPE_DAS_RTDL) {
-                return reinterpret_cast<DasRtdlPacket *>(packet);
+        static RtdlPacket *cast(Packet *packet) {
+            if (packet->getType() == Packet::TYPE_RTDL) {
+                return reinterpret_cast<RtdlPacket *>(packet);
             } else {
-                throw Packet::ParseError("Can't upcast to DasRtdlPacket");
+                throw Packet::ParseError("Can't upcast to RtdlPacket");
             }
         }
 

@@ -433,14 +433,14 @@ epicsTimeStamp DasPacket::getTimeStamp() const
     return timestamp;
 }
 
-std::vector<DasRtdlPacket::RtdlFrame> DasPacket::getRtdlFrames() const
+std::vector<RtdlPacket::RtdlFrame> DasPacket::getRtdlFrames() const
 {
-    std::vector<DasRtdlPacket::RtdlFrame> frames;
+    std::vector<RtdlPacket::RtdlFrame> frames;
     if (isRtdl()) {
         const uint32_t *f = getPayload() + sizeof(RtdlHeader)/sizeof(uint32_t);
         uint32_t nFrames = (getPayloadLength() - sizeof(RtdlHeader)) / sizeof(uint32_t);
         for (uint32_t i = 0; i < nFrames; i++) {
-            DasRtdlPacket::RtdlFrame frame{ static_cast<uint8_t>((f[i] >> 24) & 0xFF), f[i] & 0xFFFFFF };
+            RtdlPacket::RtdlFrame frame(f[i]);
             frames.push_back(frame);
         }
     }
@@ -450,10 +450,31 @@ std::vector<DasRtdlPacket::RtdlFrame> DasPacket::getRtdlFrames() const
 Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
 {
     if (isRtdl()) {
-        // Too time consuming, we don't need it for now.
-        return nullptr;
+        // Kill data flavor (duplicate) of RTDL packets sent by DSP for daisy-chaining purposes
+        if (!isCommand())
+            return nullptr;
+            
+        auto frames = getRtdlFrames();
+        auto t = getTimeStamp();
+        auto hdr = getRtdlHeader();
+        // Remove frames 1-3
+        for (auto it = frames.begin(); it != frames.end(); ) {
+            if (it->id >= 1 && it->id <= 3) {
+                it = frames.erase(it);
+            } else {
+                it++;
+            }
+        }
+        frames.insert(frames.begin(), RtdlPacket::RtdlFrame{3, (t.nsec >> 8) & 0xFFFFFF});
+        frames.insert(frames.begin(), RtdlPacket::RtdlFrame{2, (t.secPastEpoch & 0xFF) << 16 | (hdr->timing_status << 8) | (t.nsec & 0xFF)});
+        frames.insert(frames.begin(), RtdlPacket::RtdlFrame{1, (t.secPastEpoch >> 8) & 0xFFFFFF});
+        return RtdlPacket::init(buffer, size, frames);
 
     } else if (isCommand()) {
+        // Kill TSYNC commands, we don't need them in new system
+        if (getCommandType() == DasPacket::CMD_TSYNC)
+            return nullptr;
+        
         if (getCommandType() == DasPacket::CMD_DISCOVER) {
             uint32_t module_type = static_cast<uint32_t>(cmdinfo.module_type);
             return DasCmdPacket::init(buffer,

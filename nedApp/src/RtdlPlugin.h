@@ -36,17 +36,20 @@ class RtdlPlugin : public BasePlugin {
 
         /**
          * Process downstream RTDL packets
+         *
+         * Not subscribed to DasPackets any more, makes this function obsolete.
+         * But there's a reasonable chance we'll need it back so don't remove just yet.
          */
         void recvDownstream(const DasPacketList &packets);
 
         /**
          * Process downstream RTDL packets
          */
-        void recvDownstream(const DasRtdlPacketList &packets);
+        void recvDownstream(const RtdlPacketList &packets);
 
     private:
 
-        void update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<DasRtdlPacket::RtdlFrame> &frames);
+        void update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<RtdlPacket::RtdlFrame> &frames);
 
         /**
          * PVAccess PV record.
@@ -68,7 +71,7 @@ class RtdlPlugin : public BasePlugin {
                 /**
                  * Publish a single atomic update of the PV, take values from packet.
                  */
-                bool update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<DasRtdlPacket::RtdlFrame> &frames);
+                bool update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<RtdlPacket::RtdlFrame> &frames);
 
             private:
                 uint32_t m_sequence;

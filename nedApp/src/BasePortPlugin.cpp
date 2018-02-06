@@ -197,7 +197,7 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
     DasPacketList oldDas;
     DasDataPacketList dasData;
     DasCmdPacketList dasCmd;
-    DasRtdlPacketList dasRtdl;
+    RtdlPacketList rtdls;
     ErrorPacketList errors;
     std::list<std::shared_ptr<uint8_t>> fromPool; //!< Packets to be returned back to pool
 
@@ -246,14 +246,14 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
             case Packet::TYPE_DAS_DATA:
                 dasData.push_back(reinterpret_cast<const DasDataPacket *>(packet));
                 break;
-            case Packet::TYPE_DAS_RTDL:
-                dasRtdl.push_back(reinterpret_cast<const DasRtdlPacket *>(packet));
+            case Packet::TYPE_RTDL:
+                rtdls.push_back(reinterpret_cast<const RtdlPacket *>(packet));
                 break;
             case Packet::TYPE_DAS_CMD:
                 dasCmd.push_back(reinterpret_cast<const DasCmdPacket *>(packet));
                 break;
             case Packet::TYPE_ERROR:
-                dasRtdl.push_back(reinterpret_cast<const DasRtdlPacket *>(packet));
+                errors.push_back(reinterpret_cast<const ErrorPacket *>(packet));
                 break;
             default:
                 break;
@@ -269,8 +269,8 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
         messages.push_back(sendDownstream(dasCmd, false));
     if (!dasData.empty())
         messages.push_back(sendDownstream(dasData, false));
-    if (!dasRtdl.empty())
-        messages.push_back(sendDownstream(dasRtdl, false));
+    if (!rtdls.empty())
+        messages.push_back(sendDownstream(rtdls, false));
     if (!errors.empty())
         messages.push_back(sendDownstream(errors, false));
 

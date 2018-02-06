@@ -241,7 +241,7 @@ void BasePlugin::recvDownstream(int type, PluginMessage *msg)
         } else if (type == MsgDasCmd) {
             recvDownstream( *msg->get<const DasCmdPacketList>() );
         } else if (type == MsgDasRtdl) {
-            recvDownstream( *msg->get<const DasRtdlPacketList>() );
+            recvDownstream( *msg->get<const RtdlPacketList>() );
         } else if (type == MsgDasData) {
             recvDownstream( *msg->get<const DasDataPacketList>() );
         } else if (type == MsgParamExch) {

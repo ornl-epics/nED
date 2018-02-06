@@ -518,7 +518,7 @@ struct DasPacket
         /**
          * Return RTDL frames from the packet in no particular order or empty vector when non RTDL packet.
          */
-        std::vector<DasRtdlPacket::RtdlFrame> getRtdlFrames() const;
+        std::vector<RtdlPacket::RtdlFrame> getRtdlFrames() const;
         
         /**
          * Cast raw pointer to DasPacket pointer.

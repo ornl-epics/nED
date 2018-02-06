@@ -65,7 +65,7 @@ void DumpPlugin::recvDownstream(const DasDataPacketList &packets)
     }
 }
 
-void DumpPlugin::recvDownstream(const DasRtdlPacketList &packets)
+void DumpPlugin::recvDownstream(const RtdlPacketList &packets)
 {
     if (getBooleanParam(RtdlPktsEn)) {
         int saved = 0;
