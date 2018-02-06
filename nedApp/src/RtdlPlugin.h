@@ -36,9 +36,6 @@ class RtdlPlugin : public BasePlugin {
 
         /**
          * Process downstream RTDL packets
-         *
-         * Not subscribed to DasPackets any more, makes this function obsolete.
-         * But there's a reasonable chance we'll need it back so don't remove just yet.
          */
         void recvDownstream(const DasPacketList &packets);
 
@@ -48,6 +45,8 @@ class RtdlPlugin : public BasePlugin {
         void recvDownstream(const RtdlPacketList &packets);
 
     private:
+        epicsTime m_lastOldPktTime;     //!< Time of last old style RTDL packet
+        bool m_oldPackets = false;      //!< Toggle between processing new and old RTDL packets, but not both
 
         void update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<RtdlPacket::RtdlFrame> &frames);
 

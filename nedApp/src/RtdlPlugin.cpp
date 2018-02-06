@@ -52,7 +52,7 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     }
     callParamCallbacks();
 
-    BasePlugin::connect(parentPlugins, { MsgDasRtdl });
+    BasePlugin::connect(parentPlugins, { MsgDasRtdl, MsgOldDas });
 }
 
 void RtdlPlugin::recvDownstream(const DasPacketList &packets)
@@ -60,12 +60,24 @@ void RtdlPlugin::recvDownstream(const DasPacketList &packets)
     for (const DasPacket *packet: packets) {
         if (packet->isRtdl()) {
             update(packet->getTimeStamp(), *packet->getRtdlHeader(), packet->getRtdlFrames());
+            m_lastOldPktTime = epicsTime::getCurrent();
+            m_oldPackets = true;
         }
     }
 }
 
 void RtdlPlugin::recvDownstream(const RtdlPacketList &packets)
 {
+    if (m_oldPackets) {
+        if ((epicsTime::getCurrent() - m_lastOldPktTime) < 1.0) {
+            // Old style RTDL packets are coming in, they provide more
+            // information in terms of acquisition frame, so let's use
+            // those instead.
+            // But for up to 1 second at startup we could do both.
+            return;
+        }
+        m_oldPackets = false;
+    }
     for (const RtdlPacket *packet: packets) {
         update(packet->getTimeStamp(), packet->getRtdlHeader(), packet->getRtdlFrames());
     }
