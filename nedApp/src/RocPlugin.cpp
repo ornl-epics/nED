@@ -259,6 +259,7 @@ bool RocPlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel)
         packet = DasCmdPacket::init(buffer, sizeof(buffer),
                                     packet->getModuleId(),
                                     packet->getCommand(),
+                                    0,
                                     packet->isAcknowledge(),
                                     packet->isResponse(),
                                     /* channel= */0,

@@ -177,6 +177,7 @@ void CommDebugPlugin::generatePacket(bool fromRawPvs)
                            sizeof(m_buffer),
                            BaseModulePlugin::ip2addr(getStringParam(ReqModule)),
                            static_cast<const DasCmdPacket::CommandType>(getIntegerParam(ReqCmd) & 0xFF),
+                           getBooleanParam(ReqVersion),
                            getBooleanParam(ReqAck),
                            getBooleanParam(ReqRsp),
                            getIntegerParam(ReqVerifyId) & 0x1FF,
@@ -354,7 +355,7 @@ void CommDebugPlugin::showSentPacket(const DasCmdPacket *packet, int index)
     setIntegerParam(ReqVerifyId,  packet->getCmdId());
     setIntegerParam(ReqAck,       packet->isAcknowledge());
     setIntegerParam(ReqRsp,       packet->isResponse());
-    setIntegerParam(ReqCmdVer,    packet->getLvdsVer());
+    setIntegerParam(ReqCmdVer,    packet->getCmdVer());
     setStringParam(ReqModule,     packet->getModuleIdStr());
 
     if (packet->getLength() >=  0) setIntegerParam(ReqRaw0, raw[0]);
@@ -406,7 +407,7 @@ void CommDebugPlugin::showRecvPacket(const Packet *packet, int index)
             setIntegerParam(RspCmdVerifyId, cmdPacket->getCmdId());
             setIntegerParam(RspCmdAck,      cmdPacket->isAcknowledge());
             setIntegerParam(RspCmdRsp,      cmdPacket->isResponse());
-            setIntegerParam(RspCmdVer,      cmdPacket->getLvdsVer());
+            setIntegerParam(RspCmdVer,      cmdPacket->getCmdVer());
             setStringParam(RspCmdModule,    cmdPacket->getModuleIdStr());
 
         } else if (packet->getType() == Packet::TYPE_ERROR) {

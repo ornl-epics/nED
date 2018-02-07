@@ -530,7 +530,7 @@ class DasCmdPacket : public Packet {
             unsigned cmd_id:5;          //!< Command/response verification id
             bool acknowledge:1;         //!< Flag whether command was succesful, only valid in response
             bool response:1;            //!< Flags this command packet as response
-            unsigned lvds_version:1;    //!< LVDS protocol version,
+            unsigned cmd_version:1;     //!< LVDS protocol version,
                                         //!< hardware uses this flag to distinguish protocol in responses
                                         //!< but doesn't use it from optical side.
         };
@@ -541,7 +541,7 @@ class DasCmdPacket : public Packet {
         /**
          * Use buffer as storage for new command packet, populate fields.
          */
-        static DasCmdPacket *init(uint8_t *data, size_t size, uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, size_t payloadSize=0, const uint32_t *payload_=nullptr);
+        static DasCmdPacket *init(uint8_t *data, size_t size, uint32_t moduleId, CommandType cmd, uint8_t cmd_ver, bool ack=false, bool rsp=false, uint8_t ch=0, size_t payloadSize=0, const uint32_t *payload_=nullptr);
 
         /**
          * Populate fields.
@@ -549,7 +549,7 @@ class DasCmdPacket : public Packet {
          * Uses default values. If payload is defined, it's copied to current
          * packet. Otherwise just the payloadSize is applied.
          */
-        void init(uint32_t moduleId, CommandType cmd, bool ack=false, bool rsp=false, uint8_t ch=0, size_t payloadSize=0, const uint32_t *payload_=nullptr);
+        void init(uint32_t moduleId, CommandType cmd, uint8_t cmd_ver, bool ack=false, bool rsp=false, uint8_t ch=0, size_t payloadSize=0, const uint32_t *payload_=nullptr);
 
         /**
          * Up-cast Packet to DasCmdPacket if packet type allows so.
@@ -626,11 +626,12 @@ class DasCmdPacket : public Packet {
         bool getCmdId() const {
             return cmd_id;
         }
+
         /**
          * Get LVDS protocol version.
          */
-        bool getLvdsVer() const {
-            return lvds_version;
+        uint8_t getCmdVer() const {
+            return cmd_version;
         }
 };
 

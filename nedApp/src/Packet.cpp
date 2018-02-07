@@ -146,18 +146,18 @@ RtdlHeader RtdlPacket::getRtdlHeader() const
 /* *** DasCmdPacket functions  *** */
 /* ******************************* */
 
-DasCmdPacket *DasCmdPacket::init(uint8_t *buffer, size_t size, uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, size_t payloadSize, const uint32_t *payload_)
+DasCmdPacket *DasCmdPacket::init(uint8_t *buffer, size_t size, uint32_t moduleId, CommandType cmd, uint8_t cmd_ver, bool ack, bool rsp, uint8_t ch, size_t payloadSize, const uint32_t *payload_)
 {
     DasCmdPacket *packet = nullptr;
     uint32_t packetLength = sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4);
     if (size > packetLength) {
         packet = reinterpret_cast<DasCmdPacket *>(buffer);
-        packet->init(moduleId, cmd, ack, rsp, ch, payloadSize, payload_);
+        packet->init(moduleId, cmd, cmd_ver, ack, rsp, ch, payloadSize, payload_);
     }
     return packet;
 }
 
-void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, uint8_t ch, size_t payloadSize, const uint32_t *payload_)
+void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, uint8_t cmd_ver, bool ack, bool rsp, uint8_t ch, size_t payloadSize, const uint32_t *payload_)
 {
     memset(this, 0, sizeof(DasCmdPacket));
 
@@ -172,7 +172,7 @@ void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, bool ack, bool rsp, 
     this->response = rsp;
     this->command = cmd;
     this->cmd_length = payloadSize + 6; // command length is considered payload + 32 bit address + 16 bit command description
-    this->lvds_version = 1;
+    this->cmd_version = (cmd_ver > 1);
     if (payload_ != nullptr) {
         memcpy(this->payload, payload_, payloadSize);
     }

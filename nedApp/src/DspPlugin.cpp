@@ -94,6 +94,7 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
         createParams_v70();
         setIntegerParam(Supported, 1);
         setExpectedVersion(7, 0);
+        setCmdVersion(1);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported DSP version '%s'", version);

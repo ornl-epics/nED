@@ -258,7 +258,7 @@ DasCmdPacket::CommandType BaseModulePlugin::handleRequest(DasCmdPacket::CommandT
 void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t channel, uint32_t *payload, uint32_t length)
 {
     std::array<uint8_t, 1024> buffer;
-    DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, false, false, channel, length, payload);
+    DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, m_cmdVer, false, false, channel, length, payload);
     if (!packet) {
         LOG_ERROR("Failed to create and send packet");
         return;
