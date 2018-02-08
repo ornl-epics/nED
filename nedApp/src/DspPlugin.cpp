@@ -90,10 +90,10 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
         createParams_v67();
         setIntegerParam(Supported, 1);
         setExpectedVersion(6, 7);
-    } else if (m_version == "v70") {
-        createParams_v70();
+    } else if (m_version == "v71") {
+        createParams_v71();
         setIntegerParam(Supported, 1);
-        setExpectedVersion(7, 0);
+        setExpectedVersion(7, 1);
         setCmdVersion(1);
     } else {
         setIntegerParam(Supported, 0);
