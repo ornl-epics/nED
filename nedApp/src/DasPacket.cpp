@@ -466,7 +466,7 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
             }
         }
         frames.insert(frames.begin(), RtdlPacket::RtdlFrame{3, (t.nsec >> 8) & 0xFFFFFF});
-        frames.insert(frames.begin(), RtdlPacket::RtdlFrame{2, (t.secPastEpoch & 0xFF) << 16 | (hdr->timing_status << 8) | (t.nsec & 0xFF)});
+        frames.insert(frames.begin(), RtdlPacket::RtdlFrame{2, (t.secPastEpoch & 0xFF) | (hdr->timing_status << 8) | (t.nsec & 0xFF) << 16});
         frames.insert(frames.begin(), RtdlPacket::RtdlFrame{1, (t.secPastEpoch >> 8) & 0xFFFFFF});
         return RtdlPacket::init(buffer, size, frames);
 

@@ -38,7 +38,7 @@ const Packet *Packet::cast(const uint8_t *data, size_t size) throw(ParseError)
 
     const Packet *packet = reinterpret_cast<const Packet *>(data);
 
-    if (packet->length == ALIGN_UP(packet->length, 4)) {
+    if (packet->length != ALIGN_UP(packet->length, 4)) {
         throw ParseError("Invalid packet length");
     }
 
@@ -92,8 +92,8 @@ epicsTimeStamp RtdlPacket::getTimeStamp() const
             check += 1;
             break;
         case 2:
-            secPastEpoch |= ((this->frames[i].data >> 16) & 0xFF);
-            nsec |= (this->frames[i].data & 0xFF);
+            secPastEpoch |= (this->frames[i].data & 0xFF);
+            nsec |= ((this->frames[i].data >> 16) & 0xFF);
             check += 2;
             break;
         case 3:

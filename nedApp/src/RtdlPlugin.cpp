@@ -97,7 +97,7 @@ void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl,
     // Do some time verification - allow .5 second offset from local clock - just a sanity check, nothing will break because of it
     epicsTime now{ epicsTime::getCurrent() };
     const double threshold = 0.5;
-    double diff = now - rtdlTime;
+    double diff = rtdlTime - now;
     if (diff > threshold) {
         addIntegerParam(ErrorsFutureTime, 1);
     } else if (diff < (-1 * threshold)) {
