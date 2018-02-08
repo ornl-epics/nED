@@ -247,6 +247,15 @@ asynStatus OccPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         // There's a thread to refresh OCC status, including error packets enabled
         m_statusEvent.signal();
 
+    } else if (pasynUser->reason == OldPktsEn) {
+        // Note that OCC required RX disabled during this operation. OCC library
+        // is enforcing it so we don't have to do it here.
+        if ((ret = occ_enable_old_packets(m_occ, value > 0)) != 0) {
+            LOG_ERROR("Unable to %s old packets - %s(%d)", (value > 0 ? "enable" : "disable"), strerror(-ret), ret);
+            setIntegerParam(LastErr, -ret);
+            callParamCallbacks();
+            return asynError;
+        }
     }
     return asynPortDriver::writeInt32(pasynUser, value);
 }

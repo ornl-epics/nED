@@ -118,7 +118,7 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
          */
         void dump(const char *data, uint32_t len);
 
-    private:
+    protected:
         int BufUsed;
         int BufSize;
         int CopyRate;
