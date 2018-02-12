@@ -1,4 +1,4 @@
-/* DspPlugin_v70.cpp
+/* DspPlugin_v71.cpp
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -83,7 +83,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Lvds5:En",         '1', 0x15,  1, 12, 0); // LVDS channel 5 enable flag  (0=enable,1=disable)
     createConfigParam("Lvds6:En",         '1', 0x15,  1, 13, 0); // LVDS channel 6 enable flag  (0=enable,1=disable)
     createConfigParam("Meta:En",          '1', 0x15,  1, 14, 0); // Enable Meta channels         (0=enable,1=disable)
-    createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x03F2); // BucketTimeout      (scale:0.0024094117,unit:ms)
+    createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x033E); // BucketTimeout      (scale:0.0024094117,unit:ms)
     createConfigParam("OdbTestAsync",     '1', 0x15,  1, 29, 0); // ODBTestPulseAsync (0=synchronous,1=asynchronous)
     createConfigParam("LVDSDataRate",     '1', 0x15,  1, 30, 0); // Downstream LVDS Data Rate (0=30.36MHz,1=21.25MHz)
     createConfigParam("TimeSource",       '1', 0x15,  1, 31, 0); // RTDL and Ev39 source select (1=internal,0=acc timing)
@@ -95,7 +95,9 @@ void DspPlugin::createParams_v71() {
     createConfigParam("OdbTestDelay1",    '1', 0x18, 16, 16, 0); // ODBTestPulseDelay1          (scale:2.409,unit:us)
     createConfigParam("OdbTestFrDelay0",  '1', 0x19,  8,  0, 0); // ODBTestPulseFrameDelay0          (unit:frames)
     createConfigParam("OdbTestFrDelay1",  '1', 0x19,  8,  8, 0); // ODBTestPulseFrameDelay1          (unit:frames)
-    createConfigParam("OdbTestPeriod",    '1', 0x19, 16, 16, 0x0CF8); // ODBTestPulsePeriod     (scale:0.0094117,unit:us)
+    createConfigParam("OdbTestPeriod",    '1', 0x19, 16, 16, 0x01A9); // ODBTestPulsePeriod     (scale:0.0094117,unit:us)
+    createConfigParam("TsyncTSMetaType",  '1', 0x1A,  8,  0, 0); // TsyncTimestampMetaType
+    createConfigParam("TsyncTSMetaId",    '1', 0x1A,  8,  0, 0); // TsyncTimestampMetaId
     createConfigParam("UnusedConfig",     '1', 0x1F, 32,  0, 0); // Config31
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
@@ -127,7 +129,7 @@ void DspPlugin::createParams_v71() {
     createStatusParam("Lvds5:Status",      0x4,  32,  0); // Lvds5Status
     createStatusParam("Lvds6:Status",      0x5,  32,  0); // Lvds6Status
     createStatusParam("BucketA:Occupancy", 0x6,   4,  0); // NumberOfEmptyA-Buckets (unit:/12)
-    createStatusParam("BucketB:Occupancy", 0x6,   4,  4); // NumberOfEmptyB-Buckets (unit:/8)
+    createStatusParam("BucketB:Occupancy", 0x6,   4,  4); // NumberOfEmptyB-Buckets (unit:/12)
     createStatusParam("BucketsInActive1",  0x6,   1,  8); // BucketsInLvds1Active
     createStatusParam("BucketsInActive2",  0x6,   1,  9); // BucketsInLvds2Active
     createStatusParam("BucketsInActive3",  0x6,   1, 10); // BucketsInLvds3Active
