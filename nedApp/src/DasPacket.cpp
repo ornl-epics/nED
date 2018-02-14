@@ -507,7 +507,8 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
             timestamp = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
         }
         uint32_t bytes = 0;
-        const uint32_t *data = sizeof(uint32_t)*getData(&bytes);
+        const uint32_t *data = getData(&bytes);
+        bytes *= sizeof(uint32_t);
 
         DasDataPacket::EventFormat format = static_cast<DasDataPacket::EventFormat>(datainfo.data_format);
         uint32_t count = bytes/DasDataPacket::getEventsSize(format);
