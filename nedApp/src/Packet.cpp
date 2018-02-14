@@ -203,7 +203,7 @@ std::string DasCmdPacket::getModuleIdStr() const
 DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const uint32_t *data)
 {
     DasDataPacket *packet = nullptr;
-    uint32_t packetLength = sizeof(DasDataPacket) + count*4;
+    uint32_t packetLength = sizeof(DasDataPacket) + count*getEventsSize(format);
     if (size >= packetLength) {
         packet = reinterpret_cast<DasDataPacket *>(buffer);
         packet->init(format, timestamp, count, data);
@@ -227,23 +227,23 @@ void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, ui
     }
 }
 
-uint32_t DasDataPacket::getEventsSize() const
+uint32_t DasDataPacket::getEventsSize(DasDataPacket::EventFormat format)
 {
-    switch (this->event_format) {
+    switch (format) {
         case EVENT_FMT_RESERVED:     return sizeof(Event::Pixel);
         case EVENT_FMT_META:         return sizeof(Event::Pixel);
         case EVENT_FMT_PIXEL:        return sizeof(Event::Pixel);
-        case EVENT_FMT_LPSD_RAW:     return 1; // TODO
-        case EVENT_FMT_LPSD_VERBOSE: return 1; // TODO
-        case EVENT_FMT_ACPC_XY_PS:   return 1; // TODO
-        case EVENT_FMT_ACPC_RAW:     return 1; // TODO
-        case EVENT_FMT_ACPC_VERBOSE: return 1; // TODO
-        case EVENT_FMT_AROC_RAW:     return 1; // TODO
-        case EVENT_FMT_BNL_XY:       return 1; // TODO
-        case EVENT_FMT_BNL_RAW:      return 1; // TODO
-        case EVENT_FMT_BNL_VERBOSE:  return 1; // TODO
-        case EVENT_FMT_CROC_RAW:     return 1; // TODO
-        case EVENT_FMT_CROC_VERBOSE: return 1; // TODO
-        default:                     return 1;
+        case EVENT_FMT_LPSD_RAW:     return 4; // TODO
+        case EVENT_FMT_LPSD_VERBOSE: return 4; // TODO
+        case EVENT_FMT_ACPC_XY_PS:   return 4; // TODO
+        case EVENT_FMT_ACPC_RAW:     return 4; // TODO
+        case EVENT_FMT_ACPC_VERBOSE: return 4; // TODO
+        case EVENT_FMT_AROC_RAW:     return 4; // TODO
+        case EVENT_FMT_BNL_XY:       return 4; // TODO
+        case EVENT_FMT_BNL_RAW:      return 4; // TODO
+        case EVENT_FMT_BNL_VERBOSE:  return 4; // TODO
+        case EVENT_FMT_CROC_RAW:     return 4; // TODO
+        case EVENT_FMT_CROC_VERBOSE: return 4; // TODO
+        default:                     return 4;
     }
 }

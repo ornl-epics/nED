@@ -506,10 +506,11 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
         if (rtdl) {
             timestamp = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
         }
-        uint32_t count = 0;
-        const uint32_t *data = getData(&count);
+        uint32_t bytes = 0;
+        const uint32_t *data = sizeof(uint32_t)*getData(&bytes);
 
         DasDataPacket::EventFormat format = static_cast<DasDataPacket::EventFormat>(datainfo.data_format);
+        uint32_t count = bytes/DasDataPacket::getEventsSize(format);
         return DasDataPacket::init(buffer, size, format, timestamp, count, data);
     }
                                     

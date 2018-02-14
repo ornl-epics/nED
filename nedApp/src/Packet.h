@@ -313,11 +313,20 @@ class DasDataPacket : public Packet {
         /**
          * Return size of every event in data packet.
          *
-         * The size is determined based on DasDataPacket::format field.
+         * The size is determined based on DasDataPacket::event_format field.
+         */
+        uint32_t getEventsSize() const
+        {
+            return getEventsSize(this->event_format);
+        }
+
+        /**
+         * Return events size based on format.
+         *
          * In case of DATA_FMT_RESERVED the event size used is 8 bytes.
          * For unknown event format the returned value is 1.
          */
-        uint32_t getEventsSize() const;
+        static uint32_t getEventsSize(DasDataPacket::EventFormat format);
 
         /**
          * Return type of events in this data packet.
