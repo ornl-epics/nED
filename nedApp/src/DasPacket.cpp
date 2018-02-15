@@ -409,7 +409,14 @@ const DasPacket *DasPacket::cast(const uint8_t *data, size_t size) throw(std::ru
 
     const DasPacket *packet = reinterpret_cast<const DasPacket *>(data);
 
-    if (packet->payload_length != ALIGN_UP(packet->payload_length, 4)) {
+    uint32_t packetLen = sizeof(DasPacket) + packet->payload_length;
+    if (size < packetLen) {
+        std::ostringstream error;
+        error << "Not enough data to describe packet, needed " << packetLen << " have " << size << " bytes";
+        throw std::runtime_error(error.str());
+    }
+
+    if (ALIGN_UP(packet->payload_length, 4) % 4 != 0) {
         throw std::runtime_error("Invalid packet length");
     }
 

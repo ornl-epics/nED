@@ -200,6 +200,7 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
     RtdlPacketList rtdls;
     ErrorPacketList errors;
     std::list<std::shared_ptr<uint8_t>> fromPool; //!< Packets to be returned back to pool
+    uint32_t nPackets = 0; // Used for throwing an exception on first packet
 
     const uint8_t *end = ptr + size;
     while (ptr < end) {
@@ -212,32 +213,41 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
 
         const Packet *packet = nullptr;
 
-        if (version == 0 || forceOldPkts) {
-            // Old DAS packet
-            const DasPacket *das1Packet = DasPacket::cast(ptr, bytesLeft);
-            ptr += das1Packet->getLength();
-            oldDas.push_back(das1Packet);
+        try {
+            if (version == 0 || forceOldPkts) {
+                // Old DAS packet
+                const DasPacket *das1Packet = DasPacket::cast(ptr, bytesLeft);
+                ptr += das1Packet->getLength();
+                oldDas.push_back(das1Packet);
 
-            // Convert to packet format used internally
-            size_t bufsize = 2 * das1Packet->getLength(); // just an estimate how much space we need
-            auto buffer = m_packetsPool.getPtr(bufsize);
-            if (buffer) {
-                fromPool.push_back(buffer);
-                packet = das1Packet->convert(buffer.get(), bufsize);
+                // Convert to packet format used internally
+                size_t bufsize = 2 * das1Packet->getLength(); // just an estimate how much space we need
+                auto buffer = m_packetsPool.getPtr(bufsize);
+                if (buffer) {
+                    fromPool.push_back(buffer);
+                    packet = das1Packet->convert(buffer.get(), bufsize);
+                } else {
+                    throw std::runtime_error("Failed to allocate packet from pool");
+                }
+                // Will add new-style packet to list below
+
+            } else if (version == 1) {
+                packet = Packet::cast(ptr, bytesLeft);
+
+                if (m_recvId != 0xFFFFFFFF && packet->getSequenceId() != ((m_recvId+1) % 255) && packet->getSequenceId() != 0) {
+                    LOG_ERROR("Expecting packet with sequence number %u, got %u", (m_recvId+1)%255, packet->getSequenceId());
+                }
+                m_recvId = packet->getSequenceId();
+                ptr += packet->getLength();
+
+            } else {
+                throw std::runtime_error("Unsupported packet received");
             }
-            // Will add new-style packet to list below
-
-        } else if (version == 1) {
-            packet = Packet::cast(ptr, bytesLeft);
-
-            if (m_recvId != 0xFFFFFFFF && packet->getSequenceId() != ((m_recvId+1) % 255)) {
-                LOG_ERROR("Expecting packet with sequence number %u, got %u", (m_recvId+1)%255, packet->getSequenceId());
-            }
-            m_recvId = packet->getSequenceId();
-            ptr += packet->getLength();
-
-        } else {
-            throw std::runtime_error("Unsupported packet received");
+            nPackets++;
+        } catch (...) {
+            if (nPackets == 0)
+                throw;
+            break;
         }
 
         if (packet != nullptr) {

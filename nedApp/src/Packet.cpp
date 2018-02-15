@@ -38,8 +38,14 @@ const Packet *Packet::cast(const uint8_t *data, size_t size) throw(ParseError)
 
     const Packet *packet = reinterpret_cast<const Packet *>(data);
 
-    if (packet->length != ALIGN_UP(packet->length, 4)) {
-        throw ParseError("Invalid packet length");
+    if (size < packet->length) {
+        std::ostringstream error;
+        error << "Not enough data to describe packet, needed " << packet->length << " have " << size << " bytes";
+        throw std::runtime_error(error.str());
+    }
+
+    if (ALIGN_UP(packet->length, 4) % 4 != 0) {
+        throw std::runtime_error("Invalid packet length");
     }
 
     if (packet->length > 0xFFFFFF) {
@@ -220,6 +226,7 @@ void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, ui
     this->length = sizeof(DasDataPacket) + count*getEventsSize();
 
     this->event_format = format;
+    this->num_events = count;
     this->timestamp_sec = timestamp.secPastEpoch;
     this->timestamp_nsec = timestamp.nsec;
     if (data != nullptr) {
