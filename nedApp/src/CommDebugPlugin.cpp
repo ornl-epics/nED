@@ -114,7 +114,7 @@ asynStatus CommDebugPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         m_recvQue.clear();
         m_sendQue.clear();
         showRecvPacket(reinterpret_cast<const Packet *>(m_zeroes));
-        showRecvPacket(reinterpret_cast<const Packet *>(m_zeroes));
+        showSentPacket(reinterpret_cast<const DasCmdPacket *>(m_zeroes));
         return asynSuccess;
     } else if (pasynUser->reason == SendQueIndex) {
         showSentPacket(value);
@@ -199,7 +199,7 @@ void CommDebugPlugin::recvDownstream(const DasCmdPacketList &packets)
     bool sniffer = getBooleanParam(Sniffer);
 
     this->unlock();
-    sendDownstream(packets, false);
+    sendDownstream(packets);
     this->lock();
 
     if (!sniffer) {
@@ -350,7 +350,7 @@ void CommDebugPlugin::showSentPacket(const DasCmdPacket *packet, int index)
     setIntegerParam(ReqType,      packet->getType());
     setIntegerParam(ReqSequence,  packet->getSequenceId());
     setIntegerParam(ReqLength,    packet->getLength());
-    setIntegerParam(ReqCmdLen,    packet->getCmdPayloadLength());
+    setIntegerParam(ReqCmdLen,    packet->getCmdLength());
     setIntegerParam(ReqCmd,       packet->getCommand());
     setIntegerParam(ReqVerifyId,  packet->getCmdId());
     setIntegerParam(ReqAck,       packet->isAcknowledge());

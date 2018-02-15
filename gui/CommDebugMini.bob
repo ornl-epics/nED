@@ -1387,9 +1387,9 @@
       <rules>
         <rule name="Maximum" prop_id="maximum" out_exp="true">
           <exp bool_exp="true">
-            <expression>pv0</expression>
+            <expression>pv0-1</expression>
           </exp>
-          <pv_name>$(P)RecvQueLim</pv_name>
+          <pv_name>$(P)RecvQueSize</pv_name>
         </rule>
         <rule name="Disabled" prop_id="enabled" out_exp="true">
           <exp bool_exp="true">
@@ -1398,6 +1398,7 @@
           <pv_name>$(P)RecvQueSize</pv_name>
         </rule>
       </rules>
+      <bar_length>1.0</bar_length>
     </widget>
     <widget type="label" version="2.0.0">
       <name>Label_35</name>

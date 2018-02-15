@@ -3249,7 +3249,7 @@ $(pv_value)</tooltip>
           <exp bool_exp="true">
             <value>pv0</value>
           </exp>
-          <pv trig="true">$(P)SendQueLim</pv>
+          <pv trig="true">$(P)SendQueSize</pv>
         </rule>
         <rule name="Disabled" prop_id="enabled" out_exp="true">
           <exp bool_exp="true">
@@ -6450,7 +6450,7 @@ $(pv_value)</tooltip>
           <exp bool_exp="true">
             <value>pv0</value>
           </exp>
-          <pv trig="true">$(P)RecvQueLim</pv>
+          <pv trig="true">$(P)RecvQueSize</pv>
         </rule>
         <rule name="Disabled" prop_id="enabled" out_exp="true">
           <exp bool_exp="true">

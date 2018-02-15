@@ -340,6 +340,14 @@
       <vertical_alignment>1</vertical_alignment>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
     </widget>
     <widget type="textentry" version="3.0.0">
@@ -355,6 +363,14 @@
       </background_color>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_alarm_sensitive>false</border_alarm_sensitive>
       <border_width>1</border_width>
     </widget>
@@ -369,6 +385,14 @@
       <vertical_alignment>1</vertical_alignment>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
     </widget>
     <widget type="textentry" version="3.0.0">
@@ -384,6 +408,14 @@
       </background_color>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_alarm_sensitive>false</border_alarm_sensitive>
       <border_width>1</border_width>
     </widget>
@@ -398,6 +430,14 @@
       <vertical_alignment>1</vertical_alignment>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
     </widget>
     <widget type="textentry" version="3.0.0">
@@ -413,6 +453,14 @@
       </background_color>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_alarm_sensitive>false</border_alarm_sensitive>
       <border_width>1</border_width>
     </widget>
@@ -431,6 +479,14 @@
       <vertical_alignment>1</vertical_alignment>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
     </widget>
     <widget type="textentry" version="3.0.0">
@@ -446,6 +502,14 @@
       </background_color>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_alarm_sensitive>false</border_alarm_sensitive>
       <border_width>1</border_width>
     </widget>
@@ -460,6 +524,14 @@
         <color name="Write_Background" red="128" green="255" blue="255">
         </color>
       </background_color>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_alarm_sensitive>false</border_alarm_sensitive>
     </widget>
     <widget type="label" version="2.0.0">
@@ -473,6 +545,14 @@
       <vertical_alignment>1</vertical_alignment>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
     </widget>
     <widget type="label" version="2.0.0">
@@ -486,6 +566,14 @@
       <vertical_alignment>1</vertical_alignment>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
     </widget>
     <widget type="textentry" version="3.0.0">
@@ -501,6 +589,14 @@
       </background_color>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_alarm_sensitive>false</border_alarm_sensitive>
       <border_width>1</border_width>
     </widget>
@@ -519,6 +615,14 @@
       <vertical_alignment>1</vertical_alignment>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
     </widget>
     <widget type="label" version="2.0.0">
@@ -532,6 +636,15 @@
       <vertical_alignment>1</vertical_alignment>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;2&amp;&amp;pv1&gt;12</expression>
+          </exp>
+          <pv_name>$(P)ReqCmdLen</pv_name>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
     </widget>
     <widget type="textentry" version="3.0.0">
@@ -547,6 +660,15 @@
       </background_color>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;2&amp;&amp;pv1&gt;12</expression>
+          </exp>
+          <pv_name>$(P)ReqCmdLen</pv_name>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_alarm_sensitive>false</border_alarm_sensitive>
       <border_width>1</border_width>
     </widget>
@@ -803,78 +925,6 @@
       <text>&lt;=&gt;</text>
       <x>488</x>
       <y>127</y>
-      <width>33</width>
-      <height>26</height>
-      <horizontal_alignment>1</horizontal_alignment>
-      <vertical_alignment>1</vertical_alignment>
-      <actions>
-      </actions>
-      <border_color>
-        <color red="0" green="128" blue="255">
-        </color>
-      </border_color>
-    </widget>
-    <widget type="textentry" version="3.0.0">
-      <name>Text Input_13</name>
-      <pv_name>$(P)ReqRaw2</pv_name>
-      <x>520</x>
-      <y>187</y>
-      <width>121</width>
-      <height>26</height>
-      <background_color>
-        <color name="WritePV_Background" red="128" green="255" blue="255">
-        </color>
-      </background_color>
-      <format>4</format>
-      <actions>
-      </actions>
-      <border_alarm_sensitive>false</border_alarm_sensitive>
-      <border_color>
-        <color red="0" green="128" blue="255">
-        </color>
-      </border_color>
-    </widget>
-    <widget type="label" version="2.0.0">
-      <name>Label_26</name>
-      <text>&lt;=&gt;</text>
-      <x>488</x>
-      <y>187</y>
-      <width>33</width>
-      <height>26</height>
-      <horizontal_alignment>1</horizontal_alignment>
-      <vertical_alignment>1</vertical_alignment>
-      <actions>
-      </actions>
-      <border_color>
-        <color red="0" green="128" blue="255">
-        </color>
-      </border_color>
-    </widget>
-    <widget type="textentry" version="3.0.0">
-      <name>Text Input_13</name>
-      <pv_name>$(P)ReqRaw3</pv_name>
-      <x>520</x>
-      <y>247</y>
-      <width>121</width>
-      <height>26</height>
-      <background_color>
-        <color name="WritePV_Background" red="128" green="255" blue="255">
-        </color>
-      </background_color>
-      <format>4</format>
-      <actions>
-      </actions>
-      <border_alarm_sensitive>false</border_alarm_sensitive>
-      <border_color>
-        <color red="0" green="128" blue="255">
-        </color>
-      </border_color>
-    </widget>
-    <widget type="label" version="2.0.0">
-      <name>Label_26</name>
-      <text>&lt;=&gt;</text>
-      <x>488</x>
-      <y>247</y>
       <width>33</width>
       <height>26</height>
       <horizontal_alignment>1</horizontal_alignment>
@@ -1156,19 +1206,20 @@
       <actions>
       </actions>
       <rules>
-        <rule name="Maximum" prop_id="maximum" out_exp="true">
-          <exp bool_exp="true">
-            <expression>pv0</expression>
-          </exp>
-          <pv_name>$(P)SendQueLim</pv_name>
-        </rule>
         <rule name="Disabled" prop_id="enabled" out_exp="true">
           <exp bool_exp="true">
             <expression>pv0&gt;1</expression>
           </exp>
           <pv_name>$(P)SendQueSize</pv_name>
         </rule>
+        <rule name="Maximum" prop_id="maximum" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0-1</expression>
+          </exp>
+          <pv_name>$(P)SendQueSize</pv_name>
+        </rule>
       </rules>
+      <bar_length>1.0</bar_length>
     </widget>
     <widget type="textupdate" version="2.0.0">
       <name>Rectangle</name>
@@ -1210,7 +1261,121 @@
       </background_color>
       <actions>
       </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="True">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
       <border_width>1</border_width>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Input_16</name>
+      <pv_name>$(P)ReqRaw3</pv_name>
+      <x>521</x>
+      <y>247</y>
+      <width>121</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>4</format>
+      <actions>
+      </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <expression>pv0&gt;2&amp;&amp;pv1&gt;12</expression>
+          </exp>
+          <pv_name>$(P)ReqCmdLen</pv_name>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_27</name>
+      <text>&lt;=&gt;</text>
+      <x>487</x>
+      <y>247</y>
+      <width>33</width>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <expression>pv0&gt;2&amp;&amp;pv1&gt;12</expression>
+          </exp>
+          <pv_name>$(P)ReqCmdLen</pv_name>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Input_17</name>
+      <pv_name>$(P)ReqRaw2</pv_name>
+      <x>521</x>
+      <y>187</y>
+      <width>121</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>4</format>
+      <actions>
+      </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <expression>pv1&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_28</name>
+      <text>&lt;=&gt;</text>
+      <x>487</x>
+      <y>188</y>
+      <width>33</width>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <rules>
+        <rule name="Visible" prop_id="visible" out_exp="true">
+          <exp bool_exp="true">
+            <expression>pv0&gt;8</expression>
+          </exp>
+          <pv_name>$(P)ReqLength</pv_name>
+        </rule>
+      </rules>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
     </widget>
   </widget>
   <widget type="group" version="2.0.0">
@@ -2596,9 +2761,9 @@
       <rules>
         <rule name="Maximum" prop_id="maximum" out_exp="true">
           <exp bool_exp="true">
-            <expression>pv0</expression>
+            <expression>pv0-1</expression>
           </exp>
-          <pv_name>$(P)RecvQueLim</pv_name>
+          <pv_name>$(P)RecvQueSize</pv_name>
         </rule>
         <rule name="Disabled" prop_id="enabled" out_exp="true">
           <exp bool_exp="true">
@@ -2607,6 +2772,7 @@
           <pv_name>$(P)RecvQueSize</pv_name>
         </rule>
       </rules>
+      <bar_length>1.0</bar_length>
     </widget>
     <widget type="label" version="2.0.0">
       <name>Label_35</name>
@@ -3938,25 +4104,6 @@ $(pv_value)</tooltip>
       <border_alarm_sensitive>false</border_alarm_sensitive>
       <border_width>1</border_width>
     </widget>
-    <widget type="action_button" version="3.0.0">
-      <name>Action Button_1</name>
-      <actions>
-        <action type="write_pv">
-          <pv_name>loc://settings(0)</pv_name>
-          <value>1</value>
-          <description>Write PV</description>
-        </action>
-      </actions>
-      <text>Settings</text>
-      <x>510</x>
-      <width>65</width>
-      <height>27</height>
-      <background_color>
-        <color name="Background" red="255" green="255" blue="255">
-        </color>
-      </background_color>
-      <tooltip>$(actions)</tooltip>
-    </widget>
     <widget type="textupdate" version="2.0.0">
       <name>Rectangle</name>
       <x>251</x>
@@ -3977,6 +4124,23 @@ $(pv_value)</tooltip>
           <pv_name>$(P)RspType.RVAL</pv_name>
         </rule>
       </rules>
+    </widget>
+    <widget type="bool_button" version="2.0.0">
+      <name>Action Button_1</name>
+      <pv_name>loc://settings(0)</pv_name>
+      <x>510</x>
+      <width>65</width>
+      <height>27</height>
+      <off_label>Settings</off_label>
+      <on_label>Settings</on_label>
+      <show_led>false</show_led>
+      <background_color>
+        <color name="Background" red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <tooltip>Write PV</tooltip>
     </widget>
   </widget>
   <widget type="group" version="2.0.0">

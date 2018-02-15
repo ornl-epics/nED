@@ -82,7 +82,7 @@ record(mbbo, "$(P)FilterPktType")
     field(THST, "RTDL packets")
     field(FRVL, "7")
     field(FRST, "Data packets")
-    field(VAL,  "3")
+    field(VAL,  "2")
     field(PINI, "YES")
 }
 record(longout, "$(P)FilterCmd")

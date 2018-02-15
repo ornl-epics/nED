@@ -582,6 +582,13 @@ class DasCmdPacket : public Packet {
         }
 
         /**
+         * Return command length in bytes.
+         */
+        uint32_t getCmdLength() const {
+            return cmd_length;
+        }
+
+        /**
          * Return number of bytes of command payload.
          */
         uint32_t getCmdPayloadLength() const;
