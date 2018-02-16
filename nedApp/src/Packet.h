@@ -62,6 +62,11 @@ class Packet {
 
         /**
          * Cast raw pointer to Packet pointer.
+         * 
+         * The function tries to interpret raw data as a valid Packet,
+         * performing several checks including but not limited to:
+         * - checking minimum/maximum packet size requirements
+         * - checking enough memory is allocated for a packet
          *
          * @return Casted valid packet, throws otherwise
          */
@@ -194,20 +199,21 @@ class ErrorPacket : public Packet {
 class DasDataPacket : public Packet {
     public: /* Variables */
         typedef enum {
-            EVENT_FMT_RESERVED       = 0,
+            EVENT_FMT_INVALID        = 0,
             EVENT_FMT_META           = 1,    //!< meta data (for choppers, beam monitors, ADC sampling etc.) in tof,pixel format
             EVENT_FMT_PIXEL          = 2,    //!< neutron data in tof,pixel format
-            EVENT_FMT_LPSD_RAW       = 16,   //!< LPSD raw format
-            EVENT_FMT_LPSD_VERBOSE   = 17,   //!< LPSD verbose format
-            EVENT_FMT_ACPC_XY_PS     = 18,   //!< X,Y,Photo sum format
-            EVENT_FMT_ACPC_RAW       = 19,   //!< ACPC raw format
-            EVENT_FMT_ACPC_VERBOSE   = 20,   //!< ACPC verbose format
-            EVENT_FMT_AROC_RAW       = 21,   //!< AROC raw format
-            EVENT_FMT_BNL_XY         = 22,   //!< X,Y format
-            EVENT_FMT_BNL_RAW        = 23,   //!< BNL raw format
-            EVENT_FMT_BNL_VERBOSE    = 24,   //!< BNL verbose format
-            EVENT_FMT_CROC_RAW       = 25,   //!< CROC raw format
-            EVENT_FMT_CROC_VERBOSE   = 26,   //!< CROC verbose format
+            EVENT_FMT_LPSD_RAW       = 3,    //!< LPSD raw format
+            EVENT_FMT_LPSD_VERBOSE   = 4,    //!< LPSD verbose format
+            EVENT_FMT_ACPC_XY_PS     = 5,    //!< ACPC XY photosum format (XY Q17.15, PS Q8.24)
+            EVENT_FMT_ACPC_RAW       = 6,    //!< ACPC raw format
+            EVENT_FMT_ACPC_VERBOSE   = 7,    //!< ACPC verbose format
+            EVENT_FMT_AROC_RAW       = 8,    //!< AROC raw format
+            EVENT_FMT_BNL_XY         = 9,    //!< BNL XY format (Q21.11)
+            EVENT_FMT_BNL_RAW        = 10,   //!< BNL raw format
+            EVENT_FMT_BNL_VERBOSE    = 11,   //!< BNL verbose format
+            EVENT_FMT_CROC_XY        = 12,   //!< CROC XY format (TODO: Qm.n)
+            EVENT_FMT_CROC_RAW       = 13,   //!< CROC raw format
+            EVENT_FMT_CROC_VERBOSE   = 14,   //!< CROC verbose format
         } EventFormat;
 
     protected:

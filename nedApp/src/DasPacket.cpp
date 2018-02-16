@@ -399,6 +399,23 @@ DasPacket::DataFormat DasPacket::getDataFormat() const
     return (isData() ? datainfo.data_format : DATA_FMT_LEGACY);
 }
 
+DasDataPacket::EventFormat DasPacket::getEventsFormat() const
+{
+    switch (getDataFormat()) {
+    case DATA_FMT_META:             return DasDataPacket::EVENT_FMT_META;
+    case DATA_FMT_PIXEL:            return DasDataPacket::EVENT_FMT_PIXEL;
+    case DATA_FMT_LPSD_RAW:         return DasDataPacket::EVENT_FMT_LPSD_RAW;
+    case DATA_FMT_LPSD_VERBOSE:     return DasDataPacket::EVENT_FMT_LPSD_VERBOSE;
+    case DATA_FMT_AROC_RAW:         return DasDataPacket::EVENT_FMT_AROC_RAW;
+    case DATA_FMT_BNL_RAW:          return DasDataPacket::EVENT_FMT_BNL_RAW;
+    case DATA_FMT_BNL_VERBOSE:      return DasDataPacket::EVENT_FMT_BNL_VERBOSE;
+    case DATA_FMT_CROC_RAW:         return DasDataPacket::EVENT_FMT_CROC_RAW;
+    case DATA_FMT_CROC_VERBOSE:     return DasDataPacket::EVENT_FMT_CROC_VERBOSE; 
+    case DATA_FMT_ACPC_VERBOSE:     return DasDataPacket::EVENT_FMT_ACPC_VERBOSE;
+    default:                        return DasDataPacket::EVENT_FMT_INVALID;
+    }
+}
+
 const DasPacket *DasPacket::cast(const uint8_t *data, size_t size) throw(std::runtime_error)
 {
     if (size < sizeof(DasPacket)) {
@@ -454,7 +471,7 @@ std::vector<RtdlPacket::RtdlFrame> DasPacket::getRtdlFrames() const
     return frames;
 }
 
-Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
+Packet *DasPacket::convert(uint8_t *buffer, size_t size, DasDataPacket::EventFormat eventFormat) const
 {
     if (isRtdl()) {
         // Kill data flavor (duplicate) of RTDL packets sent by DSP for daisy-chaining purposes
@@ -507,19 +524,24 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size) const
                                       getPayload());
         }
         
-    } else if (isData() && datainfo.data_format != DATA_FMT_LEGACY) {
-        epicsTimeStamp timestamp{0, 0};
-        const RtdlHeader *rtdl = getRtdlHeader();
-        if (rtdl) {
-            timestamp = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
+    } else if (isData()) {
+        DasDataPacket::EventFormat format = getEventsFormat();
+        if (format == DasDataPacket::EVENT_FMT_INVALID) {
+            format = eventFormat;
         }
-        uint32_t bytes = 0;
-        const uint32_t *data = getData(&bytes);
-        bytes *= sizeof(uint32_t);
+        if (format != DasDataPacket::EVENT_FMT_INVALID) {
+            epicsTimeStamp timestamp{0, 0};
+            const RtdlHeader *rtdl = getRtdlHeader();
+            if (rtdl) {
+                timestamp = { rtdl->timestamp_sec, rtdl->timestamp_nsec };
+            }
+            uint32_t bytes = 0;
+            const uint32_t *data = getData(&bytes);
+            bytes *= sizeof(uint32_t);
 
-        DasDataPacket::EventFormat format = static_cast<DasDataPacket::EventFormat>(datainfo.data_format);
-        uint32_t count = bytes/DasDataPacket::getEventsSize(format);
-        return DasDataPacket::init(buffer, size, format, timestamp, count, data);
+            uint32_t count = bytes/DasDataPacket::getEventsSize(format);
+            return DasDataPacket::init(buffer, size, format, timestamp, count, data);
+        }
     }
                                     
     return nullptr;

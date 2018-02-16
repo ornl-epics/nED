@@ -237,7 +237,7 @@ void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, ui
 uint32_t DasDataPacket::getEventsSize(DasDataPacket::EventFormat format)
 {
     switch (format) {
-        case EVENT_FMT_RESERVED:     return sizeof(Event::Pixel);
+        case EVENT_FMT_INVALID:      return 1;
         case EVENT_FMT_META:         return sizeof(Event::Pixel);
         case EVENT_FMT_PIXEL:        return sizeof(Event::Pixel);
         case EVENT_FMT_LPSD_RAW:     return 4; // TODO

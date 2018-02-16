@@ -509,6 +509,11 @@ struct DasPacket
         DataFormat getDataFormat() const;
         
         /**
+         * Return data format mapped to EventFormat type.
+         */
+        DasDataPacket::EventFormat getEventsFormat() const;
+        
+        /**
          * Get acquisition frame start time (EPICS epoch timestamp)
          * 
          * Returns epicsTimeStamp{0,0} when timestamp can't be decoded.
@@ -532,7 +537,7 @@ struct DasPacket
          * 
          * @return Converted packet or nullptr.
          */
-        Packet *convert(uint8_t *data, size_t size) const;
+        Packet *convert(uint8_t *data, size_t size, DasDataPacket::EventFormat eventFormat) const;
 
     private:
         static uint32_t MinLength;    //!< Minumum total length of any DAS packet, at least the header must be present

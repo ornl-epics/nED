@@ -124,6 +124,7 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         int CopyRate;
         int ProcRate;
         int OldPktsEn;
+        int EventsFmt;
 };
 
 #endif // BASE_PORT_PLUGIN_H

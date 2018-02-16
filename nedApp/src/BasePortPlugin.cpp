@@ -26,6 +26,7 @@ BasePortPlugin::BasePortPlugin(const char *pluginName, int blocking, int interfa
     createParam("CopyRate",         asynParamInt32,     &CopyRate);                 // READ - Copy throughput in B/s
     createParam("ProcRate",         asynParamInt32,     &ProcRate);                 // READ - Data processing throughput in B/s
     createParam("OldPktsEn",        asynParamInt32,     &OldPktsEn, 0);             // WRITE - Enable support for old DAS 1.0 packets
+    createParam("EventsFmt",        asynParamInt32,     &EventsFmt, 0);             // WRITE - Data type when not defined in packet (DAS 1.0 only)
     callParamCallbacks();
 
     m_processThread = std::unique_ptr<Thread>(new Thread(
@@ -193,6 +194,7 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
 uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
 {
     bool forceOldPkts = getBooleanParam(OldPktsEn);
+    auto dataFormat = static_cast<DasDataPacket::EventFormat>(getIntegerParam(EventsFmt));
 
     DasPacketList oldDas;
     DasDataPacketList dasData;
@@ -225,7 +227,7 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
                 auto buffer = m_packetsPool.getPtr(bufsize);
                 if (buffer) {
                     fromPool.push_back(buffer);
-                    packet = das1Packet->convert(buffer.get(), bufsize);
+                    packet = das1Packet->convert(buffer.get(), bufsize, dataFormat);
                 } else {
                     throw std::runtime_error("Failed to allocate packet from pool");
                 }
