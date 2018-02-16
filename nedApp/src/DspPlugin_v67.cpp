@@ -344,7 +344,7 @@ void DspPlugin::createParams_v67() {
 
     createConfigParam("TestPatPktSize", 'F', 0x2,  4,  0, 0); // TP optic sub-packet size
     createConfigParam("TestPatAlt1Rate",'F', 0x2, 12,  4, 0); // TP ch7 fake LVDS rate
-    createConfigParam("RateMeterInt",   'F', 0x2,  2, 16, 0); // Rate meter counting interval (0=0.001 sec,1=0.01 sec,2=0.1 sec,3=1.0 sec)
+    createConfigParam("RateMeterInt",   'F', 0x2,  2, 16, 0); // Rate meter counting interval (0=0.001 sec,1=0.01 sec,2=0.1 sec,3=0.01667 sec)
     createConfigParam("TestPatAlt2ChEn",'F', 0x2,  2, 18, 0); // LVDS fake channel select     (0=none,1=ch1-ch3,2=ch4-ch6,3=ch1-ch6)
     createConfigParam("TestPatAlt2Rate",'F', 0x2, 12, 20, 0); // Fake onboard ch1-ch6 rate
 
@@ -436,21 +436,21 @@ void DspPlugin::createParams_v67() {
     createCounterParam("SCntrs:76",       0x26, 16,  0); // x0176
     createCounterParam("SCntrs:77",       0x26, 16, 16); // x0177
 
-    createCounterParam("Lvds1:Rate",      0x27, 24,  0); // LVDS Ch1 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds2:Rate",      0x28, 24,  0); // LVDS Ch2 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds3:Rate",      0x29, 24,  0); // LVDS Ch3 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds4:Rate",      0x2A, 24,  0); // LVDS Ch4 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds5:Rate",      0x2B, 24,  0); // LVDS Ch5 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds6:Rate",      0x2C, 24,  0); // LVDS Ch6 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds7:Rate",      0x2D, 24,  0); // LVDS Ch7 rate            (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds1:ParserRate",0x2E, 24,  0); // LVDS Ch1 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds2:ParserRate",0x2F, 24,  0); // LVDS Ch2 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds3:ParserRate",0x30, 24,  0); // LVDS Ch3 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds4:ParserRate",0x31, 24,  0); // LVDS Ch4 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds5:ParserRate",0x32, 24,  0); // LVDS Ch5 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("Lvds6:ParserRate",0x33, 24,  0); // LVDS Ch6 parser rate     (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("NeutronsRate",    0x34, 24,  0); // Neutrons event rate      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
-    createCounterParam("MetadataRate",    0x35, 24,  0); // Metadata event rate      (calc:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds1:Rate",      0x27, 24,  0); // LVDS Ch1 rate            (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds2:Rate",      0x28, 24,  0); // LVDS Ch2 rate            (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds3:Rate",      0x29, 24,  0); // LVDS Ch3 rate            (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds4:Rate",      0x2A, 24,  0); // LVDS Ch4 rate            (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds5:Rate",      0x2B, 24,  0); // LVDS Ch5 rate            (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds6:Rate",      0x2C, 24,  0); // LVDS Ch6 rate            (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds7:Rate",      0x2D, 24,  0); // LVDS Ch7 rate            (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds1:ParserRate",0x2E, 24,  0); // LVDS Ch1 parser rate     (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds2:ParserRate",0x2F, 24,  0); // LVDS Ch2 parser rate     (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds3:ParserRate",0x30, 24,  0); // LVDS Ch3 parser rate     (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds4:ParserRate",0x31, 24,  0); // LVDS Ch4 parser rate     (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds5:ParserRate",0x32, 24,  0); // LVDS Ch5 parser rate     (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("Lvds6:ParserRate",0x33, 24,  0); // LVDS Ch6 parser rate     (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("NeutronsRate",    0x34, 24,  0); // Neutrons event rate      (calc:B=3?A*60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
+    createCounterParam("MetadataRate",    0x35, 24,  0); // Metadata event rate      (calc:B=3?A/60:A*10^(3-B), calclink:RateMeterInt, unit:event/s, prec:2)
     createCounterParam("OptA:Rate",       0x36, 24,  0); // Optic A payload rate     (calc:2*A*10^(3-B), calclink:RateMeterInt, unit:byte/s, prec:2)
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
