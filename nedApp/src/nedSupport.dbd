@@ -13,6 +13,7 @@ registrar(iocshSystemCommand)
 
 # Non-detector plugins (alphabetically)
 registrar("registerTcpClientPlugin")
+registrar("registerFileReplayPlugin")
 registrar("registerOccPlugin")
 registrar("registerDas1CommDebugPlugin")
 registrar("registerModulesPlugin")

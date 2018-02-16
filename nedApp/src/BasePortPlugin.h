@@ -27,8 +27,6 @@
  */
 class epicsShareFunc BasePortPlugin : public BasePlugin {
     public:
-        BaseCircularBuffer *m_circularBuffer = nullptr; //!< Derived class must provide circular buffer
-
         /**
          * Constructor
          *
@@ -97,6 +95,8 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
 
     protected:
         std::unique_ptr<Thread> m_processThread;        //!< Thread processing data from buffer
+        BaseCircularBuffer *m_circularBuffer = nullptr; //!< Derived class must provide circular buffer
+
     private:
         unsigned m_sendId = 0;                          //!< Output packets sequence number
         unsigned m_recvId = 0;                          //!< Last received packet sequence number

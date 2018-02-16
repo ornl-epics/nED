@@ -13,6 +13,7 @@ include $(TOP)/configure/CONFIG
 DB += nEDCommon.db
 DB += OccPlugin.db
 DB += TcpClientPlugin.db
+DB += FileReplayPlugin.db
 DB += ModulesPlugin.db
 DB += ROCHV.db
 DB += ROCHVSumBL16b.db
