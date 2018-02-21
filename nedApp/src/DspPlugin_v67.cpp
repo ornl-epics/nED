@@ -354,7 +354,10 @@ void DspPlugin::createParams_v67() {
     createConfigParam("GCtrlReg3Dbg5",  'F', 0x3,  8,  8, 0); // TBD
     createConfigParam("GCtrlReg3Dbg6",  'F', 0x3, 16, 16, 0); // TBD
 
-    createConfigParam("GCtrlReg4Dbg",   'F', 0x4, 32,  0, 0); // TBD
+    createConfigParam("DelayCnt",       'F', 0x4, 16,  0, 0); // TBD
+    createConfigParam("MaxCntSel",      'F', 0x4,  4, 16, 0); // TBD
+    createConfigParam("ClkBitSel",      'F', 0x4,  4, 20, 0); // TBD
+    createConfigParam("GCtrlReg4Dbg",   'F', 0x4,  8, 24, 0); // TBD
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createCounterParam("PktLenErrCnt",     0x0, 16,  0); // TBD
