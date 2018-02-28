@@ -138,7 +138,7 @@ bool AdaraPlugin::sendEvents(SourceSequence *seq, const DasPacket::Event *events
     outpacket[2] = seq->rtdl.timestamp_sec;
     outpacket[3] = seq->rtdl.timestamp_nsec;
     outpacket[4] = seq->sourceId;
-    outpacket[5] = ((int)endOfPulse << 31) | ((seq->pulseSeq & 0x7FF) << 16) | ((seq->totalSeq++) & 0xFFFF);
+    outpacket[5] = ((int)endOfPulse << 31) | (((seq->pulseSeq++) & 0x7FF) << 16) | ((seq->totalSeq++) & 0xFFFF);
     outpacket[6] = (dataFlags << 27) | seq->rtdl.charge;
     outpacket[7] = seq->rtdl.general_info;
     outpacket[8] = seq->rtdl.tsync_period;
