@@ -138,6 +138,7 @@
         <color red="240" green="240" blue="240">
         </color>
       </background_color>
+      <tooltip>$(actions)</tooltip>
     </widget>
     <widget type="textupdate" version="2.0.0">
       <name>Text Update_1</name>
@@ -232,6 +233,7 @@
         <color red="240" green="240" blue="240">
         </color>
       </background_color>
+      <tooltip>$(actions)</tooltip>
     </widget>
   </widget>
   <widget type="group" version="2.0.0">
@@ -293,28 +295,6 @@
       <actions>
       </actions>
     </widget>
-    <widget type="action_button" version="3.0.0">
-      <name>Action Button</name>
-      <actions>
-        <action type="open_display">
-          <file>OccPlugin.opi</file>
-          <macros>
-            <P>$(P)occ1:</P>
-          </macros>
-          <target>replace</target>
-        </action>
-      </actions>
-      <text>...</text>
-      <x>282</x>
-      <y>36</y>
-      <width>32</width>
-      <height>26</height>
-      <background_color>
-        <color red="240" green="240" blue="240">
-        </color>
-      </background_color>
-      <tooltip>$(actions)</tooltip>
-    </widget>
     <widget type="label" version="2.0.0">
       <name>Label</name>
       <text>Position calc:</text>
@@ -328,6 +308,7 @@
     </widget>
     <widget type="textupdate" version="2.0.0">
       <name>Text Update</name>
+      <pv_name>$(P)bnlpos:StatusText</pv_name>
       <x>150</x>
       <y>36</y>
       <width>127</width>
@@ -380,6 +361,26 @@
       <wrap_words>false</wrap_words>
       <actions>
       </actions>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button_1</name>
+      <actions execute_as_one="true">
+        <action type="write_pv">
+          <pv_name>loc://active_tab(0)</pv_name>
+          <value>7</value>
+          <description>BNL PosCalc tab</description>
+        </action>
+      </actions>
+      <text>...</text>
+      <x>282</x>
+      <y>36</y>
+      <width>32</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+      <tooltip>$(actions)</tooltip>
     </widget>
   </widget>
   <widget type="group" version="2.0.0">

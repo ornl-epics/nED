@@ -11,12 +11,7 @@
 #define PVA_NEUTRONS_H
 
 #include "BasePlugin.h"
-
-#include <pv/pvDatabase.h>
-#include <pv/pvTimeStamp.h>
-#include <pv/standardPVField.h>
-
-#include <memory>
+#include <pv/sharedVector.h>
 
 /**
  * Gather and present statistical information of the incoming data
@@ -46,48 +41,44 @@ class PvaNeutronsPlugin : public BasePlugin {
         void recvDownstream(const DasDataPacketList &packets);
 
     private:
+        class PvaRecordAcpc;
+        class PvaRecordAroc;
+        class PvaRecordBnl;
+        class PvaRecordCroc;
+        class PvaRecordLpsd;
+        class PvaRecordPixel;
 
-        /**
-         * PVAccess PV record.
-         */
-        class PvaRecord : public epics::pvDatabase::PVRecord {
-            public:
-                POINTER_DEFINITIONS(PvaRecord);
+        std::tr1::shared_ptr<PvaRecordAcpc>  m_acpcRecord;
+        std::tr1::shared_ptr<PvaRecordAroc>  m_arocRecord;
+        std::tr1::shared_ptr<PvaRecordBnl>   m_bnlRecord;
+        std::tr1::shared_ptr<PvaRecordCroc>  m_crocRecord;
+        std::tr1::shared_ptr<PvaRecordLpsd>  m_lpsdRecord;
+        std::tr1::shared_ptr<PvaRecordPixel> m_pixelRecord;
+        std::tr1::shared_ptr<PvaRecordPixel> m_metaRecord;
 
-                /**
-                 * Allocate and initialize PvaRecord.
-                 */
-                static PvaRecord::shared_pointer create(const std::string &recordName);
-
-                /**
-                 * Attach all PV structures.
-                 */
-                bool init();
-
-                /**
-                 * Publish a single atomic update of the PV, take values from packet.
-                 */
-                bool update(const DasDataPacket *packet);
-
-            private:
-                uint32_t m_sequence;
-                epics::pvData::PVTimeStamp      pvTimeStamp;    //!< Time stamp common to all events
-                epics::pvData::PVBooleanPtr     pvLogical;      //!< Flags whether pixels are mapped to logical ids
-                epics::pvData::PVUIntPtr        pvNumEvents;    //!< Number of events in tof,pixelid arrays
-                epics::pvData::PVUIntArrayPtr   pvTimeOfFlight; //!< Time offset relative to time stamp
-                epics::pvData::PVUIntArrayPtr   pvPixel;        //!< Pixel ID
-
-                /**
-                 * C'tor.
-                 */
-                PvaRecord(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure);
-        };
-
-        PvaRecord::shared_pointer m_record;
-
-    private: // asyn parameters
-        int Status; // See PvaNeutronsPlugin::STATUS_*
-        int PvaName; // PV name
+        // asyn parameters
+        int Status;             // See PvaNeutronsPlugin::STATUS_*
+        int AcpcPvaName;        // PV name for ACPC diagnostic data
+        int AcpcNumEvents;      // Number of events sent on ACPC channel
+        int AcpcEnable;         // Enable ACPC channel
+        int ArocPvaName;        // PV name for AROC diagnostic data
+        int ArocNumEvents;      // Number of events sent on AROC channel
+        int ArocEnable;         // Enable AROC channel
+        int BnlPvaName;         // PV name for BNL diagnostic data
+        int BnlNumEvents;       // Number of events sent on BNL channel
+        int BnlEnable;          // Enable BNL channel
+        int CrocPvaName;        // PV name for CROC diagnostic data
+        int CrocNumEvents;      // Number of events sent on CROC channel
+        int CrocEnable;         // Enable CROC channel
+        int LpsdPvaName;        // PV name for LPSD diagnostic data
+        int LpsdNumEvents;      // Number of events sent on LPSD channel
+        int LpsdEnable;         // Enable LPSD channel
+        int PixelPvaName;       // PV name for neutrons
+        int PixelNumEvents;     // Number of events sent on Neutrons channel
+        int PixelEnable;        // Enable Neutrons channel
+        int MetaPvaName;        // PV name for meta
+        int MetaNumEvents;      // Number of events sent on meta channel
+        int MetaEnable;         // Enable meta channel
 };
 
 #endif // PVA_NEUTRONS_H

@@ -208,12 +208,18 @@ class DasDataPacket : public Packet {
             EVENT_FMT_ACPC_RAW       = 6,    //!< ACPC raw format
             EVENT_FMT_ACPC_VERBOSE   = 7,    //!< ACPC verbose format
             EVENT_FMT_AROC_RAW       = 8,    //!< AROC raw format
-            EVENT_FMT_BNL_XY         = 9,    //!< BNL XY format (Q21.11)
+            EVENT_FMT_BNL_XY         = 9,    //!< BNL XY format (Q5.11)
             EVENT_FMT_BNL_RAW        = 10,   //!< BNL raw format
             EVENT_FMT_BNL_VERBOSE    = 11,   //!< BNL verbose format
             EVENT_FMT_CROC_XY        = 12,   //!< CROC XY format (TODO: Qm.n)
             EVENT_FMT_CROC_RAW       = 13,   //!< CROC raw format
             EVENT_FMT_CROC_VERBOSE   = 14,   //!< CROC verbose format
+            // These are software internal only, ids can change if needed
+            EVENT_FMT_PIXEL_MAPPED   = 100,  //!< neutron data in tof,pixel format, pixels were previously mapped
+            EVENT_FMT_LPSD_DIAG      = 101,  //!< LPSD verbose mode + mapped pixel field
+            EVENT_FMT_ACPC_DIAG      = 102,  //!< ACPC verbose mode + flat-field corrected x,y and mapped pixel
+            EVENT_FMT_BNL_DIAG       = 103,  //!< BNL verbose mode + flat-field corrected x,y and mapped pixel
+            EVENT_FMT_CROC_DIAG      = 104,  //!< CROC verbose mode + mapped pixel
         } EventFormat;
 
     protected:
