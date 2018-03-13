@@ -289,3 +289,15 @@ record(stringin, "$(P)PvaName")
     field(PINI, "YES")
     field(SCAN, "Passive")
 }
+record(longout, "$(P)CacheSize")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Size of RTDL cache")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CacheSize")
+    field(PINI, "YES")
+    field(VAL,  "10")
+    field(HIGH, "20")
+    field(HSV,  "MINOR")
+}

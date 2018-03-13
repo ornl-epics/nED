@@ -36,6 +36,7 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     createParam("ErrorsFutureTime", asynParamInt32, &ErrorsFutureTime, 0);  // READ - Number of errors when time jumps in the future
     createParam("ErrorsPastTime",   asynParamInt32, &ErrorsPastTime, 0);    // READ - Number of errors when time jumps in the past
     createParam("PvaName",          asynParamOctet, &PvaName, pvName);
+    createParam("CacheSize",        asynParamInt32, &CacheSize, 10);// WRITE - Number of RTDLs to cache
 
     if (pvName && strlen(pvName) > 0) {
         m_record = PvaRecord::create(pvName);
@@ -52,40 +53,19 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     }
     callParamCallbacks();
 
-    BasePlugin::connect(parentPlugins, { MsgDasRtdl, MsgOldDas });
-}
-
-void RtdlPlugin::recvDownstream(const DasPacketList &packets)
-{
-    for (const DasPacket *packet: packets) {
-        if (packet->isRtdl()) {
-            update(packet->getTimeStamp(), *packet->getRtdlHeader(), packet->getRtdlFrames());
-            m_lastOldPktTime = epicsTime::getCurrent();
-            m_oldPackets = true;
-        }
-    }
+    BasePlugin::connect(parentPlugins, { MsgDasRtdl });
 }
 
 void RtdlPlugin::recvDownstream(const RtdlPacketList &packets)
 {
-    if (m_oldPackets) {
-        if ((epicsTime::getCurrent() - m_lastOldPktTime) < 1.0) {
-            // Old style RTDL packets are coming in, they provide more
-            // information in terms of acquisition frame, so let's use
-            // those instead.
-            // But for up to 1 second at startup we could do both.
-            return;
-        }
-        m_oldPackets = false;
-    }
-    for (const RtdlPacket *packet: packets) {
+    for (const auto &packet: packets) {
         update(packet->getTimeStamp(), packet->getRtdlHeader(), packet->getRtdlFrames());
     }
 }
 
 void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<RtdlPacket::RtdlFrame> &frames)
 {
-    // Now check in cache of already processed timestams
+    // Now check with cache of already processed timestams
     epicsTime rtdlTime = timestamp;
     for (auto it = m_timesCache.begin(); it != m_timesCache.end(); it++) {
         if (*it == rtdlTime) {
@@ -94,7 +74,8 @@ void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl,
         }
     }
 
-    // Do some time verification - allow .5 second offset from local clock - just a sanity check, nothing will break because of it
+    // Do some time verification - allow .5 second offset from local clock -
+    // just a sanity check, nothing will break because of it
     epicsTime now{ epicsTime::getCurrent() };
     const double threshold = 0.5;
     double diff = rtdlTime - now;
@@ -109,7 +90,8 @@ void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl,
     // Keep the cache sane, at 60Hz nominal update rate 10 samples should be plenty
     // New entries are pushed to the front, so remove entries from the end to
     // make space for new ones.
-    while (m_timesCache.size() >= 10) {
+    size_t cacheSize = getIntegerParam(CacheSize);
+    while (m_timesCache.size() >= cacheSize) {
         m_timesCache.pop_back();
     }
 
@@ -137,7 +119,7 @@ void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl,
     setIntegerParam(FrameOffset,        rtdl.frame_offset);
     setIntegerParam(TofFixOffset,       rtdl.tof_fixed_offset * 100);
     setIntegerParam(RingPeriod,         ringPeriod);
-    
+
     if (m_record) {
         if (m_record->update(timestamp, rtdl, frames) == false) {
             LOG_ERROR("Failed to send PVA update");

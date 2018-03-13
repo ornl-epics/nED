@@ -2,221 +2,305 @@ include "BasePlugin.include"
 
 record(ai, "$(P)CmdPkts")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))CmdPkts")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))CmdPkts")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)CmdPktsRate")
 {
-   field(INPA,  "$(P)CmdPkts NPP")
-   field(INPB,  "$(P)CmdPkts PP")
-   field(CALC,  "B-A")
-   field(EGU,   "pkt/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)CmdPkts NPP")
+    field(INPB,  "$(P)CmdPkts PP")
+    field(CALC,  "B-A")
+    field(EGU,   "pkt/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)CmdBytes")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))CmdBytes")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))CmdBytes")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)CmdBytesRate")
 {
-   field(INPA,  "$(P)CmdBytes NPP")
-   field(INPB,  "$(P)CmdBytes PP")
-   field(CALC,  "B-A")
-   field(EGU,   "B/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)CmdBytes NPP")
+    field(INPB,  "$(P)CmdBytes PP")
+    field(CALC,  "B-A")
+    field(EGU,   "B/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)NeutronCnts")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))NeutronCnts")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))NeutronCnts")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)NeutronCntsRate")
 {
-   field(INPA,  "$(P)NeutronCnts NPP")
-   field(INPB,  "$(P)NeutronCnts PP")
-   field(CALC,  "B-A")
-   field(EGU,   "cnt/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)NeutronCnts NPP")
+    field(INPB,  "$(P)NeutronCnts PP")
+    field(CALC,  "B-A")
+    field(EGU,   "cnt/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)NeutronBytes")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))NeutronBytes")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))NeutronBytes")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)NeutronBytesRate")
 {
-   field(INPA,  "$(P)NeutronBytes NPP")
-   field(INPB,  "$(P)NeutronBytes PP")
-   field(CALC,  "B-A")
-   field(EGU,   "B/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)NeutronBytes NPP")
+    field(INPB,  "$(P)NeutronBytes PP")
+    field(CALC,  "B-A")
+    field(EGU,   "B/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)NeutronTimes")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))NeutronTimes")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))NeutronTimes")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)NeutronTimesRate")
 {
-   field(INPA,  "$(P)NeutronTimes NPP")
-   field(INPB,  "$(P)NeutronTimes PP")
-   field(CALC,  "B-A")
-   field(EGU,   "Hz")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)NeutronTimes NPP")
+    field(INPB,  "$(P)NeutronTimes PP")
+    field(CALC,  "B-A")
+    field(EGU,   "Hz")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)MetaCnts")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))MetaCnts")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))MetaCnts")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)MetaCntsRate")
 {
-   field(INPA,  "$(P)MetaCnts NPP")
-   field(INPB,  "$(P)MetaCnts PP")
-   field(CALC,  "B-A")
-   field(EGU,   "cnt/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)MetaCnts NPP")
+    field(INPB,  "$(P)MetaCnts PP")
+    field(CALC,  "B-A")
+    field(EGU,   "cnt/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)MetaBytes")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))MetaBytes")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))MetaBytes")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)MetaBytesRate")
 {
-   field(INPA,  "$(P)MetaBytes NPP")
-   field(INPB,  "$(P)MetaBytes PP")
-   field(CALC,  "B-A")
-   field(EGU,   "B/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)MetaBytes NPP")
+    field(INPB,  "$(P)MetaBytes PP")
+    field(CALC,  "B-A")
+    field(EGU,   "B/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)MetaTimes")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))MetaTimes")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))MetaTimes")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)MetaTimesRate")
 {
-   field(INPA,  "$(P)MetaTimes NPP")
-   field(INPB,  "$(P)MetaTimes PP")
-   field(CALC,  "B-A")
-   field(EGU,   "Hz")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)MetaTimes NPP")
+    field(INPB,  "$(P)MetaTimes PP")
+    field(CALC,  "B-A")
+    field(EGU,   "Hz")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)RtdlPkts")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))RtdlPkts")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))RtdlPkts")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)RtdlPktsRate")
 {
-   field(INPA,  "$(P)RtdlPkts NPP")
-   field(INPB,  "$(P)RtdlPkts PP")
-   field(CALC,  "B-A")
-   field(EGU,   "pkt/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)RtdlPkts NPP")
+    field(INPB,  "$(P)RtdlPkts PP")
+    field(CALC,  "B-A")
+    field(EGU,   "pkt/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)RtdlBytes")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))RtdlBytes")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))RtdlBytes")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)RtdlBytesRate")
 {
-   field(INPA,  "$(P)RtdlBytes NPP")
-   field(INPB,  "$(P)RtdlBytes PP")
-   field(CALC,  "B-A")
-   field(EGU,   "B/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)RtdlBytes NPP")
+    field(INPB,  "$(P)RtdlBytes PP")
+    field(CALC,  "B-A")
+    field(EGU,   "B/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)RtdlTimes")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))RtdlTimes")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))RtdlTimes")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)RtdlTimesRate")
 {
-   field(INPA,  "$(P)RtdlTimes NPP")
-   field(INPB,  "$(P)RtdlTimes PP")
-   field(CALC,  "B-A")
-   field(EGU,   "Hz")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)RtdlTimes NPP")
+    field(INPB,  "$(P)RtdlTimes PP")
+    field(CALC,  "B-A")
+    field(EGU,   "Hz")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)ErrorPkts")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))ErrorPkts")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))ErrorPkts")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)ErrorPktsRate")
 {
-   field(INPA,  "$(P)ErrorPkts NPP")
-   field(INPB,  "$(P)ErrorPkts PP")
-   field(CALC,  "B-A")
-   field(EGU,   "pkt/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)ErrorPkts NPP")
+    field(INPB,  "$(P)ErrorPkts PP")
+    field(CALC,  "B-A")
+    field(EGU,   "pkt/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
 }
 
 record(ai, "$(P)TotBytes")
 {
-   field(DTYP,  "asynFloat64")
-   field(INP,   "@asyn($(PORT))TotBytes")
-   field(VAL,   "0")
-   field(SCAN,  "Passive")
+    field(DTYP,  "asynFloat64")
+    field(INP,   "@asyn($(PORT))TotBytes")
+    field(VAL,   "0")
+    field(SCAN,  "Passive")
 }
 record(calc, "$(P)TotBytesRate")
 {
-   field(INPA,  "$(P)TotBytes NPP")
-   field(INPB,  "$(P)TotBytes PP")
-   field(CALC,  "B-A")
-   field(EGU,   "B/s")
-   field(VAL,   "0")
-   field(SCAN,  "1 second")
+    field(INPA,  "$(P)TotBytes NPP")
+    field(INPB,  "$(P)TotBytes PP")
+    field(CALC,  "B-A")
+    field(EGU,   "B/s")
+    field(VAL,   "0")
+    field(SCAN,  "1 second")
+}
+record(longout, "$(P)RtdlCacheSize")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Size of RTDL data cache")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))RtdlCacheSize")
+    field(PINI, "YES")
+    field(VAL,  "10")
+    field(HIGH, "30")
+    field(HSV,  "MINOR")
+}
+
+### Next records deal with accumulating proton charge
+### from either RTDL or acquisition frames.
+record(ai, "$(P)PChargeRtdl")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Instantaneous RTDL proton charge")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))PChargeRtdl")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "C")
+    field(FLNK, "$(P)AccumPChargeRtdl")
+}
+record(calc, "$(P)AccumPChargeRtdl")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)PChargeRtdl NPP")
+    field(INPB, "$(P)AccumPChargeRtdl NPP")
+    # C is a one-shot reset field, VAL becomes 0 whenever C=1
+    field(INPC, "0")
+    field(CALC, "C=0?A+B:0;C:=0")
+    field(EGU,  "C")
+    field(FLNK, "$(P)AccumPCharge")
+}
+record(ai, "$(P)PChargeData")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Instantaneous acq frame proton charge")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))PChargeData")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "C")
+    field(FLNK, "$(P)AccumPChargeData")
+}
+record(calc, "$(P)AccumPChargeData")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)PChargeData NPP")
+    field(INPB, "$(P)AccumPChargeData NPP")
+    # C is a one-shot reset field, VAL becomes 0 whenever C=1
+    field(INPC, "0")
+    field(CALC, "C=0?A+B:0;C:=0")
+    field(EGU,  "C")
+    field(FLNK, "$(P)AccumPCharge")
+}
+record(bo, "$(P)PChargeSel")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select proton charge source")
+    field(ZNAM, "acquisition frame")
+    field(ONAM, "RTDL")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(OUT,  "$(P)AccumPCharge.SELN")
+}
+record(sel, "$(P)AccumPCharge")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)AccumPChargeData NPP")
+    field(INPB, "$(P)AccumPChargeRtdl NPP")
+    field(EGU,  "C")
+    field(SELM, "Specified")
+}
+record(dfanout, "$(P)ResetPCharge")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset accumulated pcharge")
+    field(OUTA, "$(P)AccumPChargeData.C PP")
+    field(OUTB, "$(P)AccumPChargeRtdl.C PP")
+    field(VAL,  "1")
 }

@@ -67,7 +67,7 @@ RtdlPacket *RtdlPacket::init(uint8_t *buffer, size_t size, const std::vector<Rtd
         packet = reinterpret_cast<RtdlPacket *>(buffer);
         packet->init(frames);
     }
-    
+
     return packet;
 }
 
@@ -90,7 +90,7 @@ epicsTimeStamp RtdlPacket::getTimeStamp() const
     uint32_t secPastEpoch = 0;
     uint32_t nsec = 0;
     unsigned check = 0;
-    
+
     for (uint32_t i = 0; i < this->num_frames; i++) {
         switch (this->frames[i].id) {
         case 1:
@@ -123,7 +123,7 @@ RtdlHeader RtdlPacket::getRtdlHeader() const
     epicsTimeStamp timestamp = getTimeStamp();
     hdr.timestamp_sec = timestamp.secPastEpoch;
     hdr.timestamp_nsec = timestamp.nsec;
-    
+
     for (const auto& frame: getRtdlFrames()) {
         switch (frame.id) {
         case 2:
@@ -143,9 +143,18 @@ RtdlHeader RtdlPacket::getRtdlHeader() const
             break;
         default:
             break;
-        } 
+        }
     }
     return hdr;
+}
+
+double RtdlPacket::getProtonCharge() const
+{
+    for (const auto& frame: getRtdlFrames()) {
+        if (frame.id == 35)
+            return (frame.data & 0xFFFFFF) * 10e-12;
+    }
+    return -1.0;
 }
 
 /* ******************************* */
@@ -247,8 +256,8 @@ uint32_t DasDataPacket::getEventsSize(DasDataPacket::EventFormat format)
         case EVENT_FMT_ACPC_VERBOSE: return 4; // TODO
         case EVENT_FMT_AROC_RAW:     return 4; // TODO
         case EVENT_FMT_BNL_XY:       return 4; // TODO
-        case EVENT_FMT_BNL_RAW:      return 4; // TODO
-        case EVENT_FMT_BNL_VERBOSE:  return 4; // TODO
+        case EVENT_FMT_BNL_RAW:      return sizeof(Event::BNL::Raw);
+        case EVENT_FMT_BNL_VERBOSE:  return sizeof(Event::BNL::Verbose);
         case EVENT_FMT_CROC_RAW:     return 4; // TODO
         case EVENT_FMT_CROC_VERBOSE: return 4; // TODO
         default:                     return 4;

@@ -62,7 +62,7 @@ class Packet {
 
         /**
          * Cast raw pointer to Packet pointer.
-         * 
+         *
          * The function tries to interpret raw data as a valid Packet,
          * performing several checks including but not limited to:
          * - checking minimum/maximum packet size requirements
@@ -469,6 +469,11 @@ class RtdlPacket : public Packet {
         std::vector<RtdlFrame> getRtdlFrames() const {
             return std::vector<RtdlFrame>(frames, frames + num_frames);
         }
+
+        /**
+         * Return proton charge in C, or -1.0 if not included in the packet.
+         */
+        double getProtonCharge() const;
 };
 
 class DasCmdPacket : public Packet {

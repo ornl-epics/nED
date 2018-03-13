@@ -37,17 +37,9 @@ class RtdlPlugin : public BasePlugin {
         /**
          * Process downstream RTDL packets
          */
-        void recvDownstream(const DasPacketList &packets);
-
-        /**
-         * Process downstream RTDL packets
-         */
         void recvDownstream(const RtdlPacketList &packets);
 
     private:
-        epicsTime m_lastOldPktTime;     //!< Time of last old style RTDL packet
-        bool m_oldPackets = false;      //!< Toggle between processing new and old RTDL packets, but not both
-
         void update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl, const std::vector<RtdlPacket::RtdlFrame> &frames);
 
         /**
@@ -113,6 +105,7 @@ class RtdlPlugin : public BasePlugin {
         int ErrorsFutureTime;
         int ErrorsPastTime;
         int PvaName;
+        int CacheSize;
 };
 
 #endif // RTDL_PLUGIN_H

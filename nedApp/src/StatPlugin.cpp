@@ -8,6 +8,7 @@
  */
 
 #include "Event.h"
+#include "Log.h"
 #include "StatPlugin.h"
 
 #include <algorithm>
@@ -31,6 +32,9 @@ StatPlugin::StatPlugin(const char *portName, const char *parentPlugins)
     createParam("RtdlBytes",    asynParamFloat64, &RtdlBytes,    0.0); // READ - RTDL packets bytes
     createParam("RtdlTimes",    asynParamFloat64, &RtdlTimes,    0.0); // READ - Unique RTDL timestamps
     createParam("TotBytes",     asynParamFloat64, &TotBytes,     0.0); // READ - Total number of bytes received
+    createParam("PChargeRtdl",  asynParamFloat64, &PChargeRtdl,  0.0); // READ - Proton charge updated with every RTDL
+    createParam("PChargeData",  asynParamFloat64, &PChargeData,  0.0); // READ - Proton charge updated with every acquisition frame
+    createParam("RtdlCacheSize",asynParamInt32,   &RtdlCacheSize, 10); // WRITE - Number of RTDL data to be cached
 
     BasePlugin::connect(parentPlugins, {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError});
 }
@@ -45,8 +49,7 @@ void StatPlugin::recvDownstream(const DasDataPacketList &packets)
     uint64_t metaTimes    = getDoubleParam(MetaTimes);
     uint64_t totBytes     = getDoubleParam(TotBytes);
 
-    for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-        const DasDataPacket *packet = *it;
+    for (const auto &packet: packets) {
         uint32_t nEvents = packet->getNumEvents();
         totBytes += packet->getLength();
 
@@ -61,6 +64,14 @@ void StatPlugin::recvDownstream(const DasDataPacketList &packets)
             neutronCnts += nEvents;
             if (isTimestampUnique(packet->getTimeStamp(), m_neutronTimes))
                 neutronTimes += 1;
+        }
+
+        double pcharge = getDataProtonCharge(packet->getTimeStamp());
+        if (pcharge >= 0.0) {
+            setDoubleParam(PChargeData, pcharge);
+            // We need to do callbacks now in case multiple frames
+            // packets are being processed.
+            callParamCallbacks();
         }
     }
 
@@ -98,11 +109,21 @@ void StatPlugin::recvDownstream(const RtdlPacketList &packets)
     uint64_t rtdlPkts   = getDoubleParam(RtdlPkts) + packets.size();
     uint64_t totBytes   = getDoubleParam(TotBytes);
 
-    for (auto it = packets.begin(); it != packets.end(); it++) {
-        rtdlBytes += (*it)->getLength();
-        totBytes += (*it)->getLength();
-        if (isTimestampUnique((*it)->getTimeStamp(), m_rtdlTimes))
+    for (const auto &packet: packets) {
+        rtdlBytes += packet->getLength();
+        totBytes += packet->getLength();
+        if (cacheRtdl(packet) == true) {
             rtdlTimes += 1;
+        }
+
+        double pcharge = getDataProtonCharge(packet->getTimeStamp());
+        if (pcharge >= 0.0) {
+            setDoubleParam(PChargeData, pcharge);
+            // We need to do callbacks now in case multiple frames
+            // packets are being processed.
+            callParamCallbacks();
+        }
+
     }
 
     setDoubleParam(RtdlTimes,       rtdlTimes % LLONG_MAX);
@@ -117,8 +138,8 @@ void StatPlugin::recvDownstream(const ErrorPacketList &packets)
     uint64_t errorPkts  = getDoubleParam(ErrorPkts) + packets.size();
     uint64_t totBytes   = getDoubleParam(TotBytes);
 
-    for (auto it = packets.begin(); it != packets.end(); it++) {
-        totBytes += (*it)->getLength();
+    for (const auto &packet: packets) {
+        totBytes += packet->getLength();
     }
 
     setDoubleParam(ErrorPkts,       errorPkts % LLONG_MAX);
@@ -128,13 +149,52 @@ void StatPlugin::recvDownstream(const ErrorPacketList &packets)
 
 bool StatPlugin::isTimestampUnique(const epicsTimeStamp &timestamp, std::list<epicsTime> &que)
 {
+    size_t cacheSize = getIntegerParam(RtdlCacheSize);
     epicsTime t(timestamp);
 
     bool found = (std::find(que.begin(), que.end(), t) != que.end());
     if (!found) {
-        while (que.size() > MAX_TIME_QUE_SIZE)
+        while (que.size() >= cacheSize)
             que.pop_back();
         que.push_front(t);
     }
     return !found;
+}
+
+bool StatPlugin::cacheRtdl(const RtdlPacket *packet)
+{
+    size_t cacheSize = getIntegerParam(RtdlCacheSize);
+    epicsTime t(packet->getTimeStamp());
+
+    for (auto it = m_dataPcharge.begin(); it != m_dataPcharge.end(); it++) {
+        if (std::get<0>(*it) == t) {
+            // Add proton charge to the previous RTDL if still in queue
+            if (++it != m_dataPcharge.end()) {
+                std::get<1>(*it) = std::max(0.0, packet->getProtonCharge());
+            } else {
+                LOG_ERROR("RTDL cached proton charge queue too small");
+            }
+            return false;
+        }
+    }
+
+    m_dataPcharge.push_front(std::make_tuple(t, -1.0, false));
+    while (m_dataPcharge.size() >= cacheSize)
+        m_dataPcharge.pop_back();
+    return true;
+}
+
+double StatPlugin::getDataProtonCharge(const epicsTimeStamp &timestamp)
+{
+    epicsTime t(timestamp);
+    for (auto it = m_dataPcharge.begin(); it != m_dataPcharge.end(); it++) {
+        if (std::get<0>(*it) == t) {
+            if (std::get<1>(*it) < 0.0 || std::get<2>(*it) == true)
+                return -1.0;
+            std::get<2>(*it) = true;
+            return std::get<1>(*it);
+        }
+    }
+    LOG_WARN("No RTDL information cached for %u.%09u", timestamp.secPastEpoch, timestamp.nsec);
+    return -1.0;
 }
