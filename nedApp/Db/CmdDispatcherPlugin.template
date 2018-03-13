@@ -1,7 +1,0 @@
-include "BasePlugin.include"
-
-record(bo, "$(P)Enable")
-{
-   field(VAL,  "1")
-   field(PINI, "YES")
-}

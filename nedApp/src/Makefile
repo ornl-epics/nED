@@ -82,13 +82,10 @@ $(PROD_NAME)_SRCS  += DasPacket.cpp
 $(PROD_NAME)_SRCS  += Packet.cpp
 $(PROD_NAME)_SRCS  += Event.cpp
 $(PROD_NAME)_SRCS  += PluginMessage.cpp
-#$(PROD_NAME)_SRCS  += DasPacketList.cpp
 $(PROD_NAME)_SRCS  += BasePlugin.cpp
 #$(PROD_NAME)_SRCS  += BaseSocketPlugin.cpp
 #$(PROD_NAME)_SRCS  += ProxyPlugin.cpp
 #$(PROD_NAME)_SRCS  += AdaraPlugin.cpp
-#$(PROD_NAME)_SRCS  += BaseDispatcherPlugin.cpp
-#$(PROD_NAME)_SRCS  += CmdDispatcher.cpp
 $(PROD_NAME)_SRCS  += BaseModulePlugin.cpp
 $(PROD_NAME)_SRCS  += ModulesPlugin.cpp
 $(PROD_NAME)_SRCS  += DumpPlugin.cpp
@@ -96,23 +93,14 @@ $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += Das1CommDebugPlugin.cpp
 $(PROD_NAME)_SRCS  += CommDebugPlugin.cpp
-#$(PROD_NAME)_SRCS  += DataDiagPlugin.cpp
 #$(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
 #$(PROD_NAME)_SRCS  += FlatFieldTable.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronsPlugin.cpp
-#$(PROD_NAME)_SRCS  += BasePvaPlugin.cpp
-#$(PROD_NAME)_SRCS  += AcpcPvaPlugin.cpp
-#$(PROD_NAME)_SRCS  += RocPvaPlugin.cpp
-#$(PROD_NAME)_SRCS  += BnlRocPvaPlugin.cpp
-#$(PROD_NAME)_SRCS  += PvaMetaData.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
-#$(PROD_NAME)_SRCS  += TimingPlugin.cpp
 #$(PROD_NAME)_SRCS  += TofCorrectPlugin.cpp
 #$(PROD_NAME)_SRCS  += BnlFlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
 #$(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
-#$(PROD_NAME)_SRCS  += CRocPvaPlugin.cpp
-#$(PROD_NAME)_SRCS  += EmptyPulsePlugin.cpp
 
 
 # Module handler plugins - in alphabetical order
