@@ -80,6 +80,7 @@ $(PROD_NAME)_SRCS  += FileCircularBuffer.cpp
 $(PROD_NAME)_SRCS  += DmaCopier.cpp
 $(PROD_NAME)_SRCS  += DasPacket.cpp
 $(PROD_NAME)_SRCS  += Packet.cpp
+$(PROD_NAME)_SRCS  += Event.cpp
 $(PROD_NAME)_SRCS  += PluginMessage.cpp
 #$(PROD_NAME)_SRCS  += DasPacketList.cpp
 $(PROD_NAME)_SRCS  += BasePlugin.cpp

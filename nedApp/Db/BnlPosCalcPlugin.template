@@ -1,14 +1,14 @@
 include "BasePlugin.include"
 
-record(bo, "$(P)Enable")
+# Every plugin must implement StatusText PV.
+# It's Plugins' responsibility to link/process this PV as well as any further
+# processing required.
+
+record(calcout, "$(P)StatusCalc")
 {
-    info(archive, "Monitor, 00:01:00, VAL")
-    info(autosaveFields, "VAL")
-    field(PINI, "YES")
-}
-record(calc, "$(P)StatusCalc")
-{
-    field(DESC, "BNL FF plugin status")
+    field(ASG, "BEAMLINE")
+    field(DESC, "BNL position calc status")
+    field(SCAN, "1 second")
     field(INPA, "$(P)ErrMem.SEVR NPP")
     field(INPB, "$(P)CntTotalEvents NPP")
     field(INPC, "10000")
@@ -16,16 +16,40 @@ record(calc, "$(P)StatusCalc")
     field(INPE, "$(P)RateLowChargeVetos.SEVR NPP")
     field(INPF, "$(P)RateOverflowVetos.SEVR NPP")
     field(INPG, "$(P)RateMultiEventVetos.SEVR NPP")
-    field(CALC, "A=0&&(B<C||(D+E+F+G)=0)")
-    field(FLNK, "$(P)Status")
+    field(INPH, "$(P)BadConfig NPP")
+    field(CALC, "A#0||H#0?0:(B<C||(D+E+F+G)=0)?1:2")
+    field(OUT,  "$(P)Status")
+    field(FLNK, "$(P)StatusTextCalc")
 }
-record(bi, "$(P)Status")
+record(scalcout, "$(P)StatusTextCalc")
 {
-    info(archive, "Monitor, 00:10:00, VAL")
-    field(ZNAM, "Not OK")
-    field(ONAM, "OK")
-    field(ZSV,  "MAJOR")
-    field(INP,  "$(P)StatusCalc")
+    field(ASG, "BEAMLINE")
+    field(DESC, "BNL position calc status")
+    field(SCAN, "1 second")
+    field(INPA, "$(P)ErrMem.SEVR NPP")
+    field(INPB, "$(P)CntTotalEvents NPP")
+    field(INPC, "10000")
+    field(INPD, "$(P)RateEdgeVetos.SEVR NPP")
+    field(INPE, "$(P)RateLowChargeVetos.SEVR NPP")
+    field(INPF, "$(P)RateOverflowVetos.SEVR NPP")
+    field(INPG, "$(P)RateMultiEventVetos.SEVR NPP")
+    field(INPH, "$(P)BadConfig NPP")
+    field(AA,   "Memory alloc error")
+    field(BB,   "Bad params")
+    field(CC,   "OK")
+    field(DD,   "Vetoes exceed limit")
+    field(CALC, "A#0||H#0?0:(B<C||(D+E+F+G)=0)?1:2")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(HIGH, "2")
+    field(HSV,  "MINOR")
+    field(DOPT, "Use OCAL")
+    field(OCAL, "A#0?AA:H#0?BB:(B<C||(D+E+F+G)=0)?CC:DD")
+    field(OUT,  "$(P)StatusText PP")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(INP,  "$(P)StatusTextCalc.POSV NPP MSS")
 }
 record(bi, "$(P)ErrMem")
 {
@@ -38,7 +62,6 @@ record(bi, "$(P)ErrMem")
     field(ZNAM, "Allocated")
     field(ONAM, "Not allocated")
     field(OSV,  "MAJOR")
-    field(FLNK, "$(P)StatusCalc")
 }
 record(longout, "$(P)XyFractWidth")
 {
@@ -101,6 +124,15 @@ record(longin, "$(P)CntMultiEventVetos")
     field(DESC, "Number of multi-event vetoes")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))CntMultiEventVetos")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)BadConfig")
+{
+    field(DESC, "Flags bad params config error")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))BadConfig")
     field(SCAN, "I/O Intr")
     field(VAL,  "0")
     field(PINI, "YES")
@@ -277,13 +309,6 @@ record(longout, "$(P)XCentroidScale")
     field(OUT,  "@asyn($(PORT))XCentroidScale")
     field(VAL,  "100")
     field(PINI, "YES")
-}
-record(stringout, "$(P)PvaName")
-{
-    info(autosaveFields, "VAL")
-    field(ASG,  "BEAMLINE")
-    field(DTYP, "asynOctetWrite")
-    field(OUT,  "@asyn($(PORT))PvaName")
 }
 record(longout, "$(P)YCentroidScale")
 {

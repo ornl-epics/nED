@@ -10,9 +10,10 @@
 #ifndef BNL_POS_CALC_PLUGIN_H
 #define BNL_POS_CALC_PLUGIN_H
 
-#include "BaseDispatcherPlugin.h"
+#include "BasePlugin.h"
 #include "BnlDataPacket.h"
-#include "PvaCalcVerifyData.h"
+#include "Event.h"
+#include "ObjectPool.h"
 
 #include <limits>
 
@@ -33,7 +34,7 @@
  * the same way as in raw mode. It will push firmware calculated and
  * software calculated X,Y positions to PVA channel.
  */
-class BnlPosCalcPlugin : public BaseDispatcherPlugin {
+class BnlPosCalcPlugin : public BasePlugin {
     private: // definitions
 
         /**
@@ -45,6 +46,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
             CALC_EDGE,              //!< Error code, event to close to the edge
             CALC_LOW_CHARGE,        //!< Error code, event charge below threshold
             CALC_MULTI_EVENT,       //!< Error code, multiple events detected
+            CALC_BAD_CONFIG,        //!< Error code, bad or missing configuration
         } calc_return_t;
 
         /**
@@ -60,6 +62,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
                 int32_t nEdge;          //!< Number of events on the edge - vetoed
                 int32_t nLowCharge;     //!< Number of events with low charge - vetoed
                 int32_t nMultiEvent;    //!< Number of multiple events - vetoed
+                int32_t nBadConfig;     //!< Number of bad configuration events
 
                 Stats()
                     : nTotal(0)
@@ -68,6 +71,7 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
                     , nEdge(0)
                     , nLowCharge(0)
                     , nMultiEvent(0)
+                    , nBadConfig(0)
                 {}
 
                 Stats &operator+=(const Stats &rhs)
@@ -78,44 +82,48 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
                     nEdge += rhs.nEdge;
                     nLowCharge += rhs.nLowCharge;
                     nMultiEvent += rhs.nMultiEvent;
+                    nBadConfig += rhs.nBadConfig;
                     if (nTotal > std::numeric_limits<int32_t>::max()) {
-                        nTotal = nGood = nOverflow = nEdge = nLowCharge = nMultiEvent = 0;
+                        nTotal = nGood = nOverflow = nEdge = nLowCharge = nMultiEvent = nBadConfig = 0;
                     }
                     return *this;
                 }
         };
 
+        /**
+         * Structure holding all calculation params
+         */
+        struct CalcParams {
+            float xyDivider;                  //!< Calculated Qm.n -> unsigned converter
+            double correctionScale;           //!< Correction parameter
+            double correctionResolution;      //!< Correction parameter
+            double boundaryLowX;              //!< Calculated X low boundary
+            double boundaryHighX;             //!< Calculated X high boundary
+            double boundaryLowY;              //!< Calculated Y low boundary
+            double boundaryHighY;             //!< Calculated Y high boundary
+            int nCalcValues;                  //!< Number of values used in calculation
+            bool lowChargeVetoEn;             //!< Toggle low charge rejection
+            bool overflowVetoEn;              //!< Toggle overflow rejection
+            bool edgeVetoEn;                  //!< Toggle edge rejection
+            bool multiEventVetoEn;            //!< Toggle multi-event rejection
+            int centroidMin;                  //!< Used by X,Y calculation for vetoing certain events
+            double xCentroidScale;            //!< Used by X,Y calculation
+            double yCentroidScale;            //!< Used by X,Y calculation
+            int xScales[20];                  //!< X calculation parameter
+            int yScales[17];                  //!< Y calculation parameter
+            int xOffsets[20];                 //!< X calculation parameter
+            int yOffsets[17];                 //!< Y calculation parameter
+            int xMinThresholds[20];           //!< X thresholds after calculation
+            int yMinThresholds[17];           //!< Y thresholds after calculation
+            int xMinThresholdsUnscaled[20];   //!< Unscaled X thresholds calculation
+            int yMinThresholdsUnscaled[17];   //!< Unscaled Y thresholds calculation
+        };
+
 
     private: // variables
-
-        uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
-        uint32_t m_bufferSize;      //!< Size of buffer
-        DasPacketList m_packetList; //!< Local list of packets that plugin populates and sends to connected plugins
-
-        float m_xyDivider;          //!< Calculated Qm.n -> unsigned converter
-        double m_correctionScale;   //!< Correction parameter
-        double m_correctionResolution;  //!< Correction parameter
-        double m_boundaryLowX;      //!< Calculated X low boundary
-        double m_boundaryHighX;     //!< Calculated X high boundary
-        double m_boundaryLowY;      //!< Calculated Y low boundary
-        double m_boundaryHighY;     //!< Calculated Y high boundary
-        int m_nCalcValues;          //!< Number of values used in calculation
-        bool m_lowChargeVetoEn;     //!< Toggle low charge rejection
-        bool m_overflowVetoEn;      //!< Toggle overflow rejection
-        bool m_edgeVetoEn;          //!< Toggle edge rejection
-        bool m_multiEventVetoEn;    //!< Toggle multi-event rejection
-        int m_centroidMin;          //!< Used by X,Y calculation for vetoing certain events
-        double m_xCentroidScale;    //!< Used by X,Y calculation
-        double m_yCentroidScale;    //!< Used by X,Y calculation
-        int m_xScales[20];          //!< X calculation parameter
-        int m_yScales[17];          //!< Y calculation parameter
-        int m_xOffsets[20];         //!< X calculation parameter
-        int m_yOffsets[17];         //!< Y calculation parameter
-        int m_xMinThresholds[20];   //!< X thresholds after calculation
-        int m_yMinThresholds[17];   //!< Y thresholds after calculation
+        CalcParams m_calcParams;    //!< Container for all calculation parameters
         Stats m_stats;              //!< Event counters
-
-        PvaCalcVerifyData::shared_pointer m_pva;    //!< PVA channel for position calculated data verification
+        ObjectPool<DasDataPacket> m_packetsPool{true};  //!< Pool of allocated data packets to store modified data
 
     public: // structures and defines
 
@@ -125,33 +133,21 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
          * Constructor will create and populate PVs with default values.
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] bufSize size of the internal buffer for copying packets
+         * @param[in] parentPlugins Name of the dispatcher asyn port to connect to.
          */
-        BnlPosCalcPlugin(const char *portName, const char *dispatcherPortName, int bufSize=0);
+        BnlPosCalcPlugin(const char *portName, const char *parentPlugins);
 
     private:
 
         /**
          * Handle writing integer values.
          */
-        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
         /**
-         * Register to asyn string writes.
+         * Overloaded function to process incoming data packets.
          */
-        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
-
-        /**
-         * Overloaded function to process incoming OCC packets.
-         *
-         * Function receives all packets and invokes processPacket*()
-         * functions on neutron data packets. All other packets are not
-         * processed. Processed and non-processed packets are then sent to
-         * subscribed plugins.
-         * Function updates statistical PVs.
-         */
-        void processDataUnlocked(const DasPacketList * const packetList);
+        void recvDownstream(const DasDataPacketList &packets) override;
 
         /**
          * Process single neutron data packet in BNL ROC raw output format.
@@ -169,9 +165,9 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
          * @param[in] srcPacket Original packet to be processed
          * @param[out] destPacket output packet with all events processed.
          * @param[in] extendedMode Data is in extended mode.
-         * @return event counters structure
+         * @return Packet from pool containing calculated events and stats structure.
          */
-        Stats processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool extendedMode);
+        std::pair<DasDataPacket *, Stats> processPacket(const DasDataPacket *srcPacket, const CalcParams &calcParams);
 
         /**
          * Calculate X,Y position from raw samples.
@@ -213,35 +209,32 @@ class BnlPosCalcPlugin : public BaseDispatcherPlugin {
          * Values greater than 7 don't bring further improvements.
          *
          * @param[in] raw event data
+         * @param[in] calcParams params used in calculation
          * @param[out] x calculated position
          * @param[out] y calculated position
          * @return calculation status
          */
-        calc_return_t calculatePosition(const BnlDataPacket::RawEvent *event, double *x, double *y);
+        calc_return_t calculatePosition(const Event::BNL::Raw *event, const CalcParams &calcParams, double *x, double *y);
 
     protected:
-        #define FIRST_BNLPOSCALCPLUGIN_PARAM ErrMem
-        int ErrMem;         //!< Error allocating buffer
-        int XyFractWidth;   //!< Number of fraction bits in X,Y Qm.n format
-        int LowChargeVetoEn;//!< Switch for toggle low charge rejection
-        int OverflowVetoEn; //!< Switch for toggle overflow rejection
-        int EdgeVetoEn;     //!< Switch for toggle edge rejection
-        int MultiEventVetoEn;  //!< Switch for toggle multi-event rejection
-        int CntTotalEvents; //!< Number of total events
-        int CntGoodEvents;  //!< Number of calculated events
-        int CntEdgeVetos;   //!< Number of vetoed events due to close to edge
-        int CntLowChargeVetos; //!< Number of vetoed events due to low charge
-        int CntOverflowVetos;  //!< Number of vetoed events due to overflow flag
-        int CntMultiEventVetos;//!< Number of vetoed events due to multiple peaks
-        int CntSplit;       //!< Total number of splited incoming packet lists
-        int ResetCnt;       //!< Reset counters
-        int CalcEn;         //!< Toggle position calculation
-        int NumCalcValues;  //!< Number of values to use in calculation
-        int CentroidMin;    //!< Centroid minimum parameter for X,Y calculation
-        int XCentroidScale; //!< Centroid X scale factor
-        int YCentroidScale; //!< Centroid Y scale factor
-        int PvaName;        //!< Name of PVA channel for position calculation data
-        #define LAST_BNLPOSCALCPLUGIN_PARAM PvaName
+        int ErrMem;             //!< Error allocating buffer
+        int LowChargeVetoEn;    //!< Switch for toggle low charge rejection
+        int OverflowVetoEn;     //!< Switch for toggle overflow rejection
+        int EdgeVetoEn;         //!< Switch for toggle edge rejection
+        int MultiEventVetoEn;   //!< Switch for toggle multi-event rejection
+        int CntTotalEvents;     //!< Number of total events
+        int CntGoodEvents;      //!< Number of calculated events
+        int CntEdgeVetos;       //!< Number of vetoed events due to close to edge
+        int CntLowChargeVetos;  //!< Number of vetoed events due to low charge
+        int CntOverflowVetos;   //!< Number of vetoed events due to overflow flag
+        int CntMultiEventVetos; //!< Number of vetoed events due to multiple peaks
+        int BadConfig;          //!< Something is wrong with configuration parameters
+        int ResetCnt;           //!< Reset counters
+        int CalcEn;             //!< Toggle position calculation
+        int NumCalcValues;      //!< Number of values to use in calculation
+        int CentroidMin;        //!< Centroid minimum parameter for X,Y calculation
+        int XCentroidScale;     //!< Centroid X scale factor
+        int YCentroidScale;     //!< Centroid Y scale factor
         int XScales[20];
         int YScales[17];
         int XOffsets[20];
