@@ -30,7 +30,7 @@ class epicsShareFunc TcpClientPlugin : public BasePortPlugin {
          *            as it is available.
          */
         TcpClientPlugin(const char *portName, uint32_t localBufferSize);
-        
+
         ~TcpClientPlugin();
 
     private:

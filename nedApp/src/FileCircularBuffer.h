@@ -28,18 +28,18 @@ class FileCircularBuffer : public BaseCircularBuffer {
     public:
         /**
          * Opens a new file, closing any previous file descriptor.
-         * 
+         *
          * @param path File path to be opened
          * @param error Error string on failure
          * @return true when file was opened, false otherwise.
          */
         bool open(const std::string &path, std::string &error);
-        
+
         /**
          * Closes currently opened file descriptor if any.
          */
         void close();
-       
+
         /**
          * Overloaded functionality resets file descriptor to beginning of file.
          */
@@ -47,22 +47,22 @@ class FileCircularBuffer : public BaseCircularBuffer {
         {
             reset();
         }
-        
+
         /**
          * Allows wait() function to proceed.
          */
         void start();
-        
+
         /**
          * Stops wait() function to return any data - will always timeout.
          */
         void stop();
-        
+
         /**
          * Resets file descriptor to beginning of file.
          */
         void reset();
-        
+
         /**
          * Return true if currently reading the file.
          */
@@ -70,7 +70,7 @@ class FileCircularBuffer : public BaseCircularBuffer {
         {
             return m_reading;
         }
-        
+
         /**
          * Switches between old and new packet type.
          */
@@ -78,7 +78,7 @@ class FileCircularBuffer : public BaseCircularBuffer {
         {
             m_oldPackets = enable;
         }
-        
+
         /**
          * Set maximum number of packets each time wait() function is called.
          */
@@ -86,12 +86,12 @@ class FileCircularBuffer : public BaseCircularBuffer {
         {
             m_maxPackets = count;
         }
-        
+
         /**
          * Set replay speed, 1 for actual time, greater than 1 for faster, less than 1 for slower.
          */
         void setSpeed(float speed);
-        
+
         /**
          * Waits for some data obeying the timestamps from packets.
          */
@@ -128,12 +128,12 @@ class FileCircularBuffer : public BaseCircularBuffer {
     private:
         /**
          * Tries to read one single packet and put it in buffer.
-         * 
+         *
          * The maxTime defines the maximum time the packet must obey.
          * If time from packet is later than the maxTime, packet is
          * put back to file to be read next time. If time is lower, the
          * maxTime argument is modified with the actual packet time.
-         * 
+         *
          * When successful, the function will put one complete packet into
          * the m_buffer and adjust the m_offset for the length of the packet.
          * If it fails, it may write partial data to m_buffer but the m_offset

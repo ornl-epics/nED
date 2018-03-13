@@ -100,7 +100,7 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
     private:
         unsigned m_sendId = 0;                          //!< Output packets sequence number
         unsigned m_recvId = 0;                          //!< Last received packet sequence number
-        std::array<uint8_t, 4096> m_sendBuffer;         //!< Buffer used for sending 
+        std::array<uint8_t, 4096> m_sendBuffer;         //!< Buffer used for sending
         ObjectPool<uint8_t> m_packetsPool{true};        //!< Packets pool management, used for converting DAS 1.0 -> DAS 2.0 packets
 
         /**

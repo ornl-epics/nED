@@ -21,7 +21,7 @@ bool FileCircularBuffer::open(const std::string &path, std::string &error)
 {
     if (m_fd != -1)
         ::close(m_fd);
-    
+
     m_fd = ::open(path.c_str(), O_LARGEFILE);
     if (m_fd == -1) {
         error = strerror(errno);
@@ -69,12 +69,12 @@ void FileCircularBuffer::setSpeed(float speed)
     m_timeDiff = std::numeric_limits<double>::min();
     m_startTime = epicsTime::getCurrent();
 }
-        
+
 int FileCircularBuffer::wait(void **data, uint32_t *len, double timeout)
 {
     epicsTime start{epicsTime::getCurrent()};
     uint32_t count = m_maxPackets;
-    
+
     while ((epicsTime::getCurrent() - start) < timeout) {
 
         if (m_fd != -1) {
@@ -86,7 +86,7 @@ int FileCircularBuffer::wait(void **data, uint32_t *len, double timeout)
                 scaledDiff *= m_speed;
                 maxTimeStamp = m_startTime - m_timeDiff + scaledDiff;
             }
-            
+
             while (m_reading && --count > 0) {
                 epicsTime maxTime{maxTimeStamp};
                 if (readPacket(maxTime) == false) {
@@ -108,7 +108,7 @@ int FileCircularBuffer::wait(void **data, uint32_t *len, double timeout)
                 return 0;
             }
         }
-        
+
         epicsThreadSleep(0.01);
     }
 
@@ -148,7 +148,7 @@ bool readHeader(int fd, uint8_t *buffer, uint32_t len, uint32_t &hdrLen, uint32_
     if (fd == -1) {
         throw std::runtime_error("Failed not opened");
     }
-    
+
     if (len < sizeof(T))
         return false;
 
@@ -176,9 +176,9 @@ bool FileCircularBuffer::readPacket(epicsTime &maxTime)
 {
     if (m_fd == -1)
         return false;
-        
+
     off_t fdOffset = ::lseek(m_fd, 0, SEEK_CUR);
-    
+
     uint32_t hdrLen, payloadLen;
     uint8_t *buffer = m_buffer.data() + m_offset;
     uint32_t bufLen = m_buffer.size() - m_offset;
@@ -196,7 +196,7 @@ bool FileCircularBuffer::readPacket(epicsTime &maxTime)
         close();
         return false;
     }
-    
+
     int ret = ::read(m_fd, buffer + hdrLen, payloadLen);
     if (ret == -1) {
         close();
@@ -206,7 +206,7 @@ bool FileCircularBuffer::readPacket(epicsTime &maxTime)
         ::lseek(m_fd, fdOffset, SEEK_SET);
         return false;
     }
-    
+
     epicsTime packetTime;
     if (m_oldPackets) {
         packetTime = getPacketTimeStamp(reinterpret_cast<DasPacket *>(buffer));
@@ -218,7 +218,7 @@ bool FileCircularBuffer::readPacket(epicsTime &maxTime)
         return false;
     }
     maxTime = packetTime;
-    
+
     m_offset += hdrLen + payloadLen;
     return true;
 }

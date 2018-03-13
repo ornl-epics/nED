@@ -248,10 +248,10 @@ struct DasPacket
          * @param[in] payload Payload to be copied into the DasPacket buffer, must match payloadLength. If 0, nothing will be copied.
          */
         static DasPacket *initOptical(uint8_t *buffer, size_t size, uint32_t source, uint32_t destination, CommandType command, uint8_t channel, uint32_t payload_length, const uint32_t *payload = 0);
-        
+
         /**
          * Initialize DasPacket as OCC command based on DasCmdPacket
-         * 
+         *
          * @param buffer Pre-allocated buffer to put new packet contents in
          * @param size of the pre-allocated buffer
          * @param orig Packet to copy from.
@@ -291,7 +291,7 @@ struct DasPacket
 
         /**
          * Create DasPacket LVDS command based on DasCmdPacket
-         * 
+         *
          * @param buffer Pre-allocated buffer to put new packet contents in
          * @param size of the pre-allocated buffer
          * @param orig Packet to copy from.
@@ -507,34 +507,34 @@ struct DasPacket
          * Return data format as defined in packet header.
          */
         DataFormat getDataFormat() const;
-        
+
         /**
          * Return data format mapped to EventFormat type.
          */
         DasDataPacket::EventFormat getEventsFormat() const;
-        
+
         /**
          * Get acquisition frame start time (EPICS epoch timestamp)
-         * 
+         *
          * Returns epicsTimeStamp{0,0} when timestamp can't be decoded.
          */
         epicsTimeStamp getTimeStamp() const;
-        
+
         /**
          * Return RTDL frames from the packet in no particular order or empty vector when non RTDL packet.
          */
         std::vector<RtdlPacket::RtdlFrame> getRtdlFrames() const;
-        
+
         /**
          * Cast raw pointer to DasPacket pointer.
-         * 
+         *
          * @return Casted valid packet, throws otherwise
          */
         static const DasPacket *cast(const uint8_t *data, size_t size) throw(std::runtime_error);
-        
+
         /**
          * Convert DasPacket to new packet format.
-         * 
+         *
          * @return Converted packet or nullptr.
          */
         Packet *convert(uint8_t *data, size_t size, DasDataPacket::EventFormat eventFormat) const;

@@ -119,7 +119,7 @@ bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
         version.fw_year     = HEX_BYTE_TO_DEC(response->firmware.year) + 2000;
         version.fw_month    = HEX_BYTE_TO_DEC(response->firmware.month);
         version.fw_day      = HEX_BYTE_TO_DEC(response->firmware.day);
-    
+
         return true;
     } else if (packet->getCmdPayloadLength() == sizeof(RspReadVersion7)) {
         const RspReadVersion7 *response = reinterpret_cast<const RspReadVersion7*>(packet->getCmdPayload());
@@ -133,7 +133,7 @@ bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
         version.fw_year     = HEX_BYTE_TO_DEC(response->year);
         version.fw_month    = HEX_BYTE_TO_DEC(response->month);
         version.fw_day      = HEX_BYTE_TO_DEC(response->day);
-    
+
         return true;
     }
     return false;

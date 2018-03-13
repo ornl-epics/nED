@@ -124,7 +124,7 @@ void AdcRocPlugin::createParams_v03()
     createCounterParam("Ch7:RateADCEvents",   0x3B, 16,  0);  // ADC6 events ratemeter
     createCounterParam("Ch8:RateADCEvents",   0x3C, 16,  0);  // ADC7 events ratemeter
     createCounterParam("CntOutRate",          0x3D, 16,  0);  // Board total events ratemeter
-    
+
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:DIG:PositionIdx",  '1', 0x0, 32, 0, 0x50000000);  // Chan1 Digital position index
     createConfigParam("Ch2:DIG:PositionIdx",  '1', 0x2, 32, 0, 0x50010000);  // Chan2 Digital position index

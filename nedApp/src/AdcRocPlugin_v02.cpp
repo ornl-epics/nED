@@ -60,7 +60,7 @@ void AdcRocPlugin::createParams_v02()
     createStatusParam("Acquiring",            0x5,  1,  2);   // Acquiring data                    (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("Configured",           0x5,  1,  1);   // Module configured                 (0=not configured [alarm],1=configured, archive:monitor)
     createStatusParam("Discovered",           0x5,  1,  0);   // Module discovered                 (0=not discovered,1=discovered, archive:monitor)
-    
+
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:DIG:PositionIdx",  '1', 0x0, 32, 0, 0x50000000);  // Chan1 Digital position index
     createConfigParam("Ch2:DIG:PositionIdx",  '1', 0x2, 32, 0, 0x50010000);  // Chan2 Digital position index

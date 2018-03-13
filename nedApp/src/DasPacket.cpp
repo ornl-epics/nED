@@ -37,7 +37,7 @@ DasPacket *DasPacket::initOptical(uint8_t *buffer, size_t size, uint32_t source,
 {
     DasPacket *packet = nullptr;
     CommandInfo cmdinfo;
-    
+
     if (size > (sizeof(DasPacket) + ALIGN_UP(payload_length, 4))) {
         memset(&cmdinfo, 0, sizeof(cmdinfo));
 
@@ -410,7 +410,7 @@ DasDataPacket::EventFormat DasPacket::getEventsFormat() const
     case DATA_FMT_BNL_RAW:          return DasDataPacket::EVENT_FMT_BNL_RAW;
     case DATA_FMT_BNL_VERBOSE:      return DasDataPacket::EVENT_FMT_BNL_VERBOSE;
     case DATA_FMT_CROC_RAW:         return DasDataPacket::EVENT_FMT_CROC_RAW;
-    case DATA_FMT_CROC_VERBOSE:     return DasDataPacket::EVENT_FMT_CROC_VERBOSE; 
+    case DATA_FMT_CROC_VERBOSE:     return DasDataPacket::EVENT_FMT_CROC_VERBOSE;
     case DATA_FMT_ACPC_VERBOSE:     return DasDataPacket::EVENT_FMT_ACPC_VERBOSE;
     default:                        return DasDataPacket::EVENT_FMT_INVALID;
     }
@@ -477,7 +477,7 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size, DasDataPacket::EventFor
         // Kill data flavor (duplicate) of RTDL packets sent by DSP for daisy-chaining purposes
         if (!isCommand())
             return nullptr;
-            
+
         auto frames = getRtdlFrames();
         auto t = getTimeStamp();
         auto hdr = getRtdlHeader();
@@ -498,7 +498,7 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size, DasDataPacket::EventFor
         // Kill TSYNC commands, we don't need them in new system
         if (getCommandType() == DasPacket::CMD_TSYNC)
             return nullptr;
-        
+
         if (getCommandType() == DasPacket::CMD_DISCOVER) {
             uint32_t module_type = static_cast<uint32_t>(cmdinfo.module_type);
             return DasCmdPacket::init(buffer,
@@ -523,7 +523,7 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size, DasDataPacket::EventFor
                                       getPayloadLength(),
                                       getPayload());
         }
-        
+
     } else if (isData()) {
         DasDataPacket::EventFormat format = getEventsFormat();
         if (format == DasDataPacket::EVENT_FMT_INVALID) {
@@ -543,6 +543,6 @@ Packet *DasPacket::convert(uint8_t *buffer, size_t size, DasDataPacket::EventFor
             return DasDataPacket::init(buffer, size, format, timestamp, count, data);
         }
     }
-                                    
+
     return nullptr;
 }

@@ -28,7 +28,7 @@ class epicsShareFunc FileReplayPlugin : public BasePortPlugin {
          * @param[in] portName Name of the asyn port to which plugins can connect
          */
         FileReplayPlugin(const char *portName);
-        
+
         ~FileReplayPlugin();
 
     private:

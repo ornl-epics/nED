@@ -100,7 +100,7 @@ bool TcpClientPlugin::connect()
             LOG_WARN("Already connected");
             return true;
         }
-        
+
         m_circularBuffer->clear();
 
         std::string error;
@@ -186,7 +186,7 @@ void TcpClientPlugin::copyDataThread(epicsEvent *shutdown)
 {
     std::vector<uint8_t> buffer;
     buffer.reserve(10 * 1024);
-    
+
     LOG_INFO("Copy thread started");
 
     while (shutdown->tryWait() == false) {

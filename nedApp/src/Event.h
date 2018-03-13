@@ -269,7 +269,7 @@ namespace Event {
             Diag& operator=(const Raw &raw);
         };
     };
-    
+
     /**
      * ACPC event formats.
      */

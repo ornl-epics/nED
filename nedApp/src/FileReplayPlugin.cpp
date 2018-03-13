@@ -14,8 +14,6 @@
 #include <alarm.h> // EPICS alarm and severity enumerations
 #include <cstring> // strerror
 
-class FileCircularBuffer;
-
 EPICS_REGISTER_PLUGIN(FileReplayPlugin, 1, "Port name", string);
 
 FileReplayPlugin::FileReplayPlugin(const char *portName)

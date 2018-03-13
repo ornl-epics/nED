@@ -90,7 +90,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("TofFixOffset",     '1', 0x16, 24,  0, 0); // TSYNC delay only
     createConfigParam("FrameOffset",      '1', 0x16,  8, 24, 0); // FrameOffset
     createConfigParam("EventLength",      '1', 0x17, 24,  0, 4); // EventLength                 (unit:bytes)
-    createConfigParam("DataFormat",       '1', 0x17,  8, 24, 2); // DataFormat           
+    createConfigParam("DataFormat",       '1', 0x17,  8, 24, 2); // DataFormat
     createConfigParam("OdbTestDelay0",    '1', 0x18, 16,  0, 0); // ODBTestPulseDelay0          (scale:2.409,unit:us)
     createConfigParam("OdbTestDelay1",    '1', 0x18, 16, 16, 0); // ODBTestPulseDelay1          (scale:2.409,unit:us)
     createConfigParam("OdbTestFrDelay0",  '1', 0x19,  8,  0, 0); // ODBTestPulseFrameDelay0          (unit:frames)
@@ -115,10 +115,10 @@ void DspPlugin::createParams_v71() {
     createCounterParam("Lvds6:Lost",      0xB, 32,  0); // LVDS 6 Number of lost packets
     createCounterParam("MetaEvents",      0xC, 32,  0); // Number of meta events
     createCounterParam("BucketA:GoodEvents", 0xD, 32,  0); // GoodABucketEvents (unit:max 15M)
-    createCounterParam("BucketA:LostEvents", 0xE, 32,  0); // LostABucketEvents 
+    createCounterParam("BucketA:LostEvents", 0xE, 32,  0); // LostABucketEvents
     createCounterParam("BucketB:GoodEvents", 0xF, 32,  0); // GoodBBucketEvents (unit:max 15M)
-    createCounterParam("BucketB:LostEvents", 0x10,32,  0); // LostBBucketEvents 
-    createCounterParam("TotalOpticalPackets", 0x11, 32,  0); // TotalOpticalPackets 
+    createCounterParam("BucketB:LostEvents", 0x10,32,  0); // LostBBucketEvents
+    createCounterParam("TotalOpticalPackets", 0x11, 32,  0); // TotalOpticalPackets
 
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)

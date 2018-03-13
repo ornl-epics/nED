@@ -36,13 +36,13 @@ void Thread::stop()
     m_mutex.lock();
     bool running = m_running;
     m_mutex.unlock();
-        
+
     if (running == true) {
         m_pause.signal();
 
         do {
             m_paused.wait(0.5);
-            
+
             m_mutex.lock();
             running = m_running;
             m_mutex.unlock();

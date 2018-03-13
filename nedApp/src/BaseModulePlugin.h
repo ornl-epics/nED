@@ -846,14 +846,14 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] hw_revision Hardware revision number
          */
         virtual void setExpectedVersion(uint8_t fw_version, uint8_t fw_revision, uint8_t hw_version=0, uint8_t hw_revision=0);
-        
+
         /**
          * Changes the LVDS command protocol format that this module is using.
-         * 
+         *
          * New LVDS protocol standardizes responses. It makes ACK/NACK responses
          * use a bit-flag and changes DISCOVER response to put module type
          * in the payload.
-         * 
+         *
          * @param version For now only values 0 & 1 are supported.
          */
         void setCmdVersion(uint8_t version)

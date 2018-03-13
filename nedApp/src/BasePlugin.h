@@ -244,7 +244,7 @@ class BasePlugin : public asynPortDriver {
 
         /**
          * Send DasPackets to any connected child plugins.
-         * 
+         *
          * @see sendDownstream(int, const void *, bool)
          */
         std::unique_ptr<PluginMessage> sendDownstream(const DasPacketList &packets, bool wait=true)
@@ -254,7 +254,7 @@ class BasePlugin : public asynPortDriver {
 
         /**
          * Send DasDataPackets to any connected child plugins.
-         * 
+         *
          * @see sendDownstream(int, const void *, bool)
          */
         std::unique_ptr<PluginMessage> sendDownstream(const DasDataPacketList &packets, bool wait=true)
@@ -264,7 +264,7 @@ class BasePlugin : public asynPortDriver {
 
         /**
          * Send DasCmdPackets to any connected child plugins.
-         * 
+         *
          * @see sendDownstream(int, const void *, bool)
          */
         std::unique_ptr<PluginMessage> sendDownstream(const DasCmdPacketList &packets, bool wait=true)
@@ -274,7 +274,7 @@ class BasePlugin : public asynPortDriver {
 
         /**
          * Send RtdlPackets to any connected child plugins.
-         * 
+         *
          * @see sendDownstream(int, const void *, bool)
          */
         std::unique_ptr<PluginMessage> sendDownstream(const RtdlPacketList &packets, bool wait=true)
@@ -284,7 +284,7 @@ class BasePlugin : public asynPortDriver {
 
         /**
          * Send ErrorPackets to any connected child plugins.
-         * 
+         *
          * @see sendDownstream(int, const void *, bool)
          */
         std::unique_ptr<PluginMessage> sendDownstream(const ErrorPacketList &packets, bool wait=true)
@@ -302,14 +302,14 @@ class BasePlugin : public asynPortDriver {
 
         /**
          * Receive DasPacket list from children plugins.
-         * 
+         *
          * @see recvUpstream(int, PluginMessage *)
          */
         virtual void recvUpstream(const DasPacketList &packets) {};
 
         /**
          * Receive DasCmdPacket list from children plugins.
-         * 
+         *
          * @see recvUpstream(int, PluginMessage *)
          */
         virtual void recvUpstream(const DasCmdPacketList &packets) {};
@@ -323,12 +323,12 @@ class BasePlugin : public asynPortDriver {
          * the handle.
          */
         void sendUpstream(int type, const void *data);
-        
+
         /**
          * Send DasPackets to parent plugins.
          *
          * Waits until receiver processes the packet.
-         * 
+         *
          * @see sendUpstream(int, const void *)
          */
         virtual void sendUpstream(const DasPacketList &packets)
@@ -340,7 +340,7 @@ class BasePlugin : public asynPortDriver {
          * Send DasCmdPackets to parent plugins.
          *
          * Waits until receiver processes the packet.
-         * 
+         *
          * @see sendUpstream(int, const void *)
          */
         virtual void sendUpstream(const DasCmdPacketList &packets)
@@ -352,7 +352,7 @@ class BasePlugin : public asynPortDriver {
          * Send single DasPacket to parent plugins.
          *
          * Waits until receiver processes the packet.
-         * 
+         *
          * @see sendUpstream(int, const void *)
          */
         void sendUpstream(const DasPacket *packet)
@@ -364,7 +364,7 @@ class BasePlugin : public asynPortDriver {
          * Send single DasCmdPacket to parent plugins.
          *
          * Waits until receiver processes the packet.
-         * 
+         *
          * @see sendUpstream(int, const void *)
          */
         void sendUpstream(const DasCmdPacket *packet)

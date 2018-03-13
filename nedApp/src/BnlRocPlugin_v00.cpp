@@ -42,7 +42,7 @@ void BnlRocPlugin::createParams_v00()
     createStatusParam("CntOverflow",          0x2,  1,  5);   // Got data word count overflow
     createStatusParam("DataOverflow",         0x2,  1,  4);   // Got data overflow
     createStatusParam("ParserStatus",         0x2,  4,  3);   // Parser Status
-    
+
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",         '1',  0x0,  32,  0,   0);  // Position Index
     createConfigParam("MainThreshold",       '1',  0x2,  16,  0,   0);  // DAC Value for Main Threshold
