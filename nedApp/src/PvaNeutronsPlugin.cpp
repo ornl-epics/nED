@@ -98,6 +98,10 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
             if (!pvRecord->pvTimeStamp.attach(pvRecord->getPVStructure()->getSubField("timeStamp")))
                 return PvaRecordPixel::shared_pointer();
 
+            pvRecord->pvLogical = pvRecord->getPVStructure()->getSubField<epics::pvData::PVBoolean>("logical.value");
+            if (pvRecord->pvLogical.get() == NULL)
+                return PvaRecordPixel::shared_pointer();
+
             pvRecord->pvNumEvents = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUInt>("num_events.value");
             if (pvRecord->pvNumEvents.get() == NULL)
                 return PvaRecordPixel::shared_pointer();
@@ -2092,12 +2096,12 @@ PvaNeutronsPlugin::PvaNeutronsPlugin(const char *portName, const char *parentPlu
         createParam("CrocNumEvents", asynParamInt32, &CrocNumEvents, 0);
         createParam("CrocEnable", asynParamInt32, &CrocEnable, 0);
         m_crocRecord = PvaRecordCroc::create(prefix + "CROC");
-        if (!m_bnlRecord) {
+        if (!m_crocRecord) {
             LOG_ERROR("Failed to create CROC PVA record '%sCROC'", pvPrefix);
             setParamAlarmStatus(CrocPvaName, epicsAlarmUDF);
             setParamAlarmSeverity(CrocPvaName, epicsSevMajor);
             status = STATUS_INIT_ERROR;
-        } else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_bnlRecord) == false) {
+        } else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_crocRecord) == false) {
             LOG_ERROR("Failed to register CROC PVA record '%sCROC'", pvPrefix);
             setParamAlarmStatus(CrocPvaName, epicsAlarmUDF);
             setParamAlarmSeverity(CrocPvaName, epicsSevMajor);
@@ -2109,7 +2113,7 @@ PvaNeutronsPlugin::PvaNeutronsPlugin(const char *portName, const char *parentPlu
         createParam("AcpcNumEvents", asynParamInt32, &AcpcNumEvents, 0);
         createParam("AcpcEnable", asynParamInt32, &AcpcEnable, 0);
         m_acpcRecord = PvaRecordAcpc::create(prefix + "ACPC");
-        if (!m_bnlRecord) {
+        if (!m_acpcRecord) {
             LOG_ERROR("Failed to create ACPC PVA record '%sACPC'", pvPrefix);
             setParamAlarmStatus(AcpcPvaName, epicsAlarmUDF);
             setParamAlarmSeverity(AcpcPvaName, epicsSevMajor);
@@ -2126,7 +2130,7 @@ PvaNeutronsPlugin::PvaNeutronsPlugin(const char *portName, const char *parentPlu
         createParam("ArocNumEvents", asynParamInt32, &ArocNumEvents, 0);
         createParam("ArocEnable", asynParamInt32, &ArocEnable, 0);
         m_arocRecord = PvaRecordAroc::create(prefix + "AROC");
-        if (!m_bnlRecord) {
+        if (!m_arocRecord) {
             LOG_ERROR("Failed to create AROC PVA record '%sAROC'", pvPrefix);
             setParamAlarmStatus(ArocPvaName, epicsAlarmUDF);
             setParamAlarmSeverity(ArocPvaName, epicsSevMajor);

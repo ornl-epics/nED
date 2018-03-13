@@ -209,3 +209,31 @@ record(bo, "$(P)BnlEnable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
 }
+
+# CROC diagnostic channel
+record(stringin, "$(P)CrocPvaName")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "CROC diagnostic PVA channel")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))CrocPvaName")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)CrocNumEvents")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of events in CROC ch")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CrocNumEvents")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)CrocEnable")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable CROC diagnostic channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CrocEnable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
