@@ -14,7 +14,7 @@ include $(TOP)/configure/CONFIG
 # The C/C++ bitfield ordering in structs is platform AND compiler dependant
 #
 USR_CXXFLAGS += -DBITFIELD_LSB_FIRST
-USR_CXXFLAGS += -std=c++0x
+USR_CXXFLAGS += -std=c++11
 
 #USR_CXXFLAGS += -fopenmp
 #USR_LDFLAGS  += -fopenmp
@@ -83,7 +83,7 @@ $(PROD_NAME)_SRCS  += Packet.cpp
 $(PROD_NAME)_SRCS  += Event.cpp
 $(PROD_NAME)_SRCS  += PluginMessage.cpp
 $(PROD_NAME)_SRCS  += BasePlugin.cpp
-#$(PROD_NAME)_SRCS  += BaseSocketPlugin.cpp
+$(PROD_NAME)_SRCS  += BaseSocketPlugin.cpp
 #$(PROD_NAME)_SRCS  += ProxyPlugin.cpp
 #$(PROD_NAME)_SRCS  += AdaraPlugin.cpp
 $(PROD_NAME)_SRCS  += BaseModulePlugin.cpp
@@ -93,8 +93,8 @@ $(PROD_NAME)_SRCS  += StatPlugin.cpp
 $(PROD_NAME)_SRCS  += RtdlPlugin.cpp
 $(PROD_NAME)_SRCS  += Das1CommDebugPlugin.cpp
 $(PROD_NAME)_SRCS  += CommDebugPlugin.cpp
-#$(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
-#$(PROD_NAME)_SRCS  += FlatFieldTable.cpp
+$(PROD_NAME)_SRCS  += FlatFieldPlugin.cpp
+$(PROD_NAME)_SRCS  += FlatFieldTable.cpp
 $(PROD_NAME)_SRCS  += PvaNeutronsPlugin.cpp
 $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 #$(PROD_NAME)_SRCS  += TofCorrectPlugin.cpp

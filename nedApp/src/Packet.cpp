@@ -215,7 +215,7 @@ std::string DasCmdPacket::getModuleIdStr() const
 /* *** DasDataPacket functions *** */
 /* ******************************* */
 
-DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const uint32_t *data)
+DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const void *data)
 {
     DasDataPacket *packet = nullptr;
     uint32_t packetLength = sizeof(DasDataPacket) + count*getEventsSize(format);
@@ -226,7 +226,7 @@ DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat for
     return packet;
 }
 
-void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const uint32_t *data)
+void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const void *data)
 {
     memset(this, 0, sizeof(DasDataPacket));
 

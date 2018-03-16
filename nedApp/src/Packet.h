@@ -253,7 +253,7 @@ class DasDataPacket : public Packet {
          * @param data to be copied to new packet
          * @return Returns a newly created packet or nullptr on error.
          */
-        static DasDataPacket *init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count=0, const uint32_t *data=nullptr);
+        static DasDataPacket *init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count=0, const void *data=nullptr);
 
         /**
          * Initialize packet fields.
@@ -267,7 +267,19 @@ class DasDataPacket : public Packet {
          * @param count Number of bytes in data to be copied
          * @param data to be copied to new packet
          */
-        void init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count=0, const uint32_t *data=nullptr);
+        void init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count=0, const void *data=nullptr);
+
+        /**
+         * Calculate size in bytes of the new packet based on events.
+         * 
+         * @param format of the events to be put in packet
+         * @param count of events to be put in packet
+         * @return calculated packet size
+         */
+        static uint32_t getLength(EventFormat format, uint32_t count)
+        {
+            return sizeof(DasDataPacket) + (count * DasDataPacket::getEventsSize(format));
+        }
 
         /**
          * Up-cast Packet to DasDataPacket if packet type allows so.

@@ -18,8 +18,8 @@ namespace BNL {
         memcpy(this, &raw, sizeof(Raw));
         x = 0;
         y = 0;
-        corrected_x = 0.0;
-        corrected_y = 0.0;
+        corrected_x = -1.0;
+        corrected_y = -1.0;
         position = raw.position;
         mapped_pixelid = 0;
 
@@ -27,5 +27,18 @@ namespace BNL {
     }
 
 }; // namespace BNL
+
+namespace ACPC {
+    Diag& Diag::operator=(const Normal &normal) {
+        memcpy(this, &normal, sizeof(Normal));
+        corrected_x = -1.0;
+        corrected_y = -1.0;
+        pixelid = 0;
+        mapped_pixelid = 0;
+
+        return *this;
+    }
+
+}; // namespace ACPC
 
 }; // namespace Event

@@ -10,12 +10,12 @@
 #ifndef FLAT_FIELD_PLUGIN_H
 #define FLAT_FIELD_PLUGIN_H
 
-#include "BaseDispatcherPlugin.h"
-#include "FlatFieldTable.h"
+#include "BasePlugin.h"
+#include "ObjectPool.h"
 
-#include <limits>
 #include <map>
-#include <sstream>
+
+class FlatFieldTable;
 
 /**
  * FlatFieldPlugin applies flat-field correction to pre-calculated X,Y events.
@@ -60,7 +60,7 @@
  *   elimination, it only converts X,Y event into TOF,pixel id format that many
  *   other plugins understand.
  */
-class FlatFieldPlugin : public BaseDispatcherPlugin {
+class FlatFieldPlugin : public BasePlugin {
     private: // structures & typedefs
 
         /**
@@ -105,37 +105,30 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * It's easier to parallelize and more effiecient than passing arguments
          * by reference.
          */
-        class EventCounters {
+        class Counters : public std::map<VetoType, uint32_t> {
             public:
-                int32_t nTotal;         //!< Total number of events in packet
-                int32_t nGood;          //!< Number of good events in packet
-                int32_t nPosition;      //!< Number of bad position - vetoed
-                int32_t nRange;         //!< Number of bad X,Y range - vetoed
-                int32_t nPosCfg;        //!< Number of position overlap - vetoed
-                int32_t nPhotosum;      //!< Number of photosum discriminated - vetoed
-
-                EventCounters()
+                Counters()
                 {
                     reset();
                 }
 
-                EventCounters &operator+=(const EventCounters &rhs)
+                Counters &operator+=(const Counters &rhs)
                 {
-                    nTotal += rhs.nTotal;
-                    nGood += rhs.nGood;
-                    nPosition += rhs.nPosition;
-                    nRange += rhs.nRange;
-                    nPosCfg += rhs.nPosCfg;
-                    nPhotosum += rhs.nPhotosum;
-                    if (nTotal > std::numeric_limits<int32_t>::max()) {
-                        nTotal = nGood = nPosition = nRange = nPosCfg = nPhotosum = 0;
-                    }
+                    at(VETO_NO)             += rhs.at(VETO_NO);
+                    at(VETO_POSITION)       += rhs.at(VETO_POSITION);
+                    at(VETO_RANGE)          += rhs.at(VETO_RANGE);
+                    at(VETO_POSITION_CFG)   += rhs.at(VETO_POSITION_CFG);
+                    at(VETO_PHOTOSUM)       += rhs.at(VETO_PHOTOSUM);
                     return *this;
                 }
 
                 void reset()
                 {
-                    nTotal = nGood = nPosition = nRange = nPosCfg = nPhotosum = 0;
+                    at(VETO_NO)             = 0;
+                    at(VETO_POSITION)       = 0;
+                    at(VETO_RANGE)          = 0;
+                    at(VETO_POSITION_CFG)   = 0;
+                    at(VETO_PHOTOSUM)       = 0;
                 }
         };
 
@@ -154,11 +147,6 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * @param[in] bufSize Transformation buffer size.
          */
         FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importFilePath, int bufSize);
-
-        /**
-         * Destructor deinitializes members.
-         */
-        ~FlatFieldPlugin();
 
         /**
          * Handle writing plugin integer parameters from PV.
@@ -183,7 +171,7 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         /**
          * Overloaded function to process incoming OCC packets.
          */
-        void processDataUnlocked(const DasPacketList * const packetList);
+        void recvDownstream(const DasDataPacketList &packets);
 
         /**
          * Reports all import errors when asynReport() is called.
@@ -192,33 +180,43 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
 
     private:
         /**
-         * Process single packet, potentially thread-safe.
-         *
-         * Events from srcPacket are processed one by one and good events are
-         * copied to destPacket. The three input parameters define the
-         * processing done on each event.
-         *
-         * Events from srcPacket are expected to be in format compatible with
-         * ACPC normal data. Raw X and Y are in Qn.m where m is defined through
-         * XyFractWidth EPICS parameter. Raw values are transformed into
-         * real X,Y double values and then scaled to match correction table
-         * sizes. The integral part of such calculated values is used as an
-         * index into all correction tables. Flat field correction and
-         * photosum elimination is done using these.
-         *
-         * When convert mode is specified, double X,Y values must be down
-         * scaled to fit into the requested number of bits (usually 8 or 9, max 10).
-         * After scaling, the value is rounded to closest integer value.
-         *
-         * @param[in] srcPacket Original packet to be processed
-         * @param[out] destPacket output packet with all events processed.
-         * @param[in] xyDivider used to convert Qm.n unsigned -> double
-         * @param[in] correct Toggle applying flat field correction
-         * @param[in] photosum Toggle checking photosum
-         * @param[in] convert Convert from native normal to common normal event
-         * @param[out] counters tell how many events were good or rejected and why
+         * Apply flat-field correction to all BNL events.
+         * 
+         * New packet is allocated to contain same number of events as defined
+         * by nEvents parameter. Source events array is copied to newly
+         * allocated packet. For each event a flat-field correction is
+         * calculated and added to event. Any errors are accounted for in
+         * counters structure returned along the new packet.
+         * 
+         * This function is not thread safe as it uses class member variables
+         * as correction parameters.
+         * 
+         * @param timestamp to be put in the newly allocated packet
+         * @param srcEvents to be corrected
+         * @param nEvents of events
+         * @return Newly allocated packet (or null on alloc error) and the counters.
          */
-        void processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool correct, bool photosum, bool convert, EventCounters &counters);
+        std::pair<DasDataPacket *, Counters> processEvents(const epicsTimeStamp &timestamp, const Event::BNL::Diag *srcEvents, uint32_t nEvents);
+
+        /**
+         * Apply photo-sum rejection and flat-field correction to all ACPC events.
+         * 
+         * New packet is allocated to contain same number of events as defined
+         * by nEvents parameter. Source events array is copied to newly
+         * allocated packet. For each event a flat-field correction is
+         * calculated and added to event. Photo sum thresholds are checked and
+         * outlier events are vetoed. Any errors are accounted for in
+         * counters structure returned along the new packet.
+         * 
+         * This function is not thread safe as it uses class member variables
+         * as correction parameters.
+         * 
+         * @param timestamp to be put in the newly allocated packet
+         * @param srcEvents to be corrected
+         * @param nEvents of events
+         * @return Newly allocated packet (or null on alloc error) and the counters.
+         */
+        std::pair<DasDataPacket *, Counters> processEvents(const epicsTimeStamp &timestamp, const Event::ACPC::Normal *srcEvents, uint32_t nEvents);
 
         /**
          * Apply flat field correction on X,Y event
@@ -285,15 +283,11 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
          * Position is sparse when no files have been loaded for that position
          * and user hasn't enabled it.
          *
-         * @param[in] psEn toggles printing photosum table information
-         * @param[in] corrEn toggles printing flat field correction table information
          * @return printable text
          */
-        std::string generatePositionsReport(bool psEn, bool corrEn);
+        std::string generatePositionsReport();
 
     private: // variables
-        uint8_t *m_buffer;          //!< Buffer used to copy OCC data into, modify it and send it on to plugins
-        uint32_t m_bufferSize;      //!< Size of buffer
         uint32_t m_tableSizeX;      //!< X dimension size of all tables
         uint32_t m_tableSizeY;      //!< Y dimension size of all tables
         std::map<uint32_t, PositionTables> m_tables; //!< Map of lookup tables/number of detectors is usually small so hashing should be somewhat equally fast as vector, index is pixel_offset
@@ -308,23 +302,17 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         uint32_t m_xMaskOut;        //!< Mask to be applied to X when converting to pixel id format
         uint32_t m_yMaskOut;        //!< Mask to be applied to Y when converting to pixel id format
         double m_psScale;           //!< Scaling factor to convert unsigned UQm.n 32 bit value into double
-        EventCounters m_evCounters; //!< Global event counters
+        Counters m_counters;        //!< Global event counters
+        ObjectPool<DasDataPacket> m_packetsPool{true};  //!< Pool of allocated data packets to store modified data
 
-    protected:
-        #define FIRST_FLATFIELDPLUGIN_PARAM ImportReport
         int ImportReport;   //!< Generate textual file import report
         int ImportStatus;   //!< Import status
         int ImportDir;      //!< Absolute path to pixel map file
-        int BufferSize;     //!< Size of allocated buffer, 0 means alocation error
-        int PsEn;           //!< Switch to toggle photosum elimination
-        int CorrEn;         //!< Switch to toggle applying flat field correction
-        int ConvEn;         //!< Switch to toggle converting data to pixel id format
         int CntGoodEvents;  //!< Number of calculated events
         int CntPosVetos;    //!< Number of bad position vetos
         int CntRangeVetos;  //!< Number of bad X,Y range vetos
         int CntPosCfgVetos; //!< Number of position config vetos
         int CntPsVetos;     //!< Number of photosum discriminated events
-        int CntSplit;       //!< Total number of splited incoming packet lists
         int ResetCnt;       //!< Reset counters
         int PsFractWidth;   //!< Photo sum is in UQm.n format, n is fraction width
         int XyFractWidth;   //!< X,Y is in UQm.n format, n is fraction width
@@ -334,7 +322,6 @@ class FlatFieldPlugin : public BaseDispatcherPlugin {
         int YMaxOut;        //!< Maximum Y values when converted to pixel id format
         int TablesSizeX;    //!< All tables size X
         int TablesSizeY;    //!< All tables size Y
-        #define LAST_FLATFIELDPLUGIN_PARAM TablesSizeY
 
         std::map<uint32_t, int> PosEnable;
         std::map<uint32_t, int> PosId;
