@@ -292,6 +292,7 @@ class DasDataPacket : public Packet {
         {
             return sizeof(DasDataPacket) + (count * DasDataPacket::getEventsSize(format));
         }
+        using Packet::getLength;
 
         /**
          * Up-cast Packet to DasDataPacket if packet type allows so.
@@ -463,6 +464,7 @@ class RtdlPacket : public Packet {
         {
             return sizeof(RtdlPacket) + (count * sizeof(RtdlFrame));
         }
+        using Packet::getLength;
 
         /**
          * Up-cast Packet to RtdlPacket if packet type allows so.
