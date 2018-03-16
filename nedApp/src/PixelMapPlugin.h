@@ -136,7 +136,7 @@ class PixelMapPlugin : public BasePlugin {
     private:
         std::vector<uint32_t> m_map; //!< Pixel mapping, index is raw pixel id, value is translated pixel id
 
-        ObjectPool<DasDataPacket> m_packetsPool; //!< Pool of packets to be used for modified data
+        ObjectPool<DasDataPacket> m_packetsPool{false}; //!< Pool of packets to be used for modified data
 
     private: // asyn parameters
         int FilePath;       //!< Absolute path to pixel map file

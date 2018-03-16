@@ -23,7 +23,6 @@ EPICS_REGISTER_PLUGIN(PixelMapPlugin, 3, "Port name", string, "Parent plugins", 
 
 PixelMapPlugin::PixelMapPlugin(const char *portName, const char *parentPlugins, const char *pixelMapFile)
     : BasePlugin(portName, 0, asynOctetMask, asynOctetMask)
-    , m_packetsPool(false)
 {
     ImportError err = importPixelMapFile(pixelMapFile);
 
