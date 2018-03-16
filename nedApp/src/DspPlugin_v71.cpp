@@ -59,14 +59,14 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Meta113:Delay",    '1', 0x11, 32,  0, 0); // Channel 13 delay              (scale:100,unit:ns)
     createConfigParam("Meta114:Delay",    '1', 0x12, 32,  0, 0); // Channel 14 delay              (scale:100,unit:ns)
     createConfigParam("Meta115:Delay",    '1', 0x13, 32,  0, 0); // Channel 15 delay              (scale:100,unit:ns)
-    createConfigParam("Meta0:Mode",       '1', 0x14,  2,  0, 0); // Channel 0 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("Meta1:Mode",       '1', 0x14,  2,  2, 0); // Channel 1 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("Meta2:Mode",       '1', 0x14,  2,  4, 0); // Channel 2 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("Meta3:Mode",       '1', 0x14,  2,  6, 0); // Channel 3 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("Meta4:Mode",       '1', 0x14,  2,  8, 0); // Channel 4 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("Meta5:Mode",       '1', 0x14,  2, 10, 0); // Channel 5 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("Meta6:Mode",       '1', 0x14,  2, 12, 0); // Channel 6 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("Meta7:Mode",       '1', 0x14,  2, 14, 0); // Channel 7 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
+    createConfigParam("Meta0:Mode",       '1', 0x14,  2,  0, 0); // Channel 0 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
+    createConfigParam("Meta1:Mode",       '1', 0x14,  2,  2, 0); // Channel 1 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
+    createConfigParam("Meta2:Mode",       '1', 0x14,  2,  4, 0); // Channel 2 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
+    createConfigParam("Meta3:Mode",       '1', 0x14,  2,  6, 0); // Channel 3 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
+    createConfigParam("Meta4:Mode",       '1', 0x14,  2,  8, 0); // Channel 4 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
+    createConfigParam("Meta5:Mode",       '1', 0x14,  2, 10, 0); // Channel 5 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
+    createConfigParam("Meta6:Mode",       '1', 0x14,  2, 12, 0); // Channel 6 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
+    createConfigParam("Meta7:Mode",       '1', 0x14,  2, 14, 0); // Channel 7 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
     createConfigParam("Meta8:Mode",       '1', 0x14,  2, 16, 0); // Channel 8 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
     createConfigParam("Meta9:Mode",       '1', 0x14,  2, 18, 0); // Channel 9 mode              (0=disabled,1=rising edge,2=falling edge,3=both)
     createConfigParam("Meta10:Mode",      '1', 0x14,  2, 20, 0); // Channel 10 mode             (0=disabled,1=rising edge,2=falling edge,3=both)
@@ -87,8 +87,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("OdbTestAsync",     '1', 0x15,  1, 29, 0); // ODBTestPulseAsync (0=synchronous,1=asynchronous)
     createConfigParam("LVDSDataRate",     '1', 0x15,  1, 30, 0); // Downstream LVDS Data Rate (0=30.36MHz,1=21.25MHz)
     createConfigParam("TimeSource",       '1', 0x15,  1, 31, 0); // RTDL and Ev39 source select (1=internal,0=acc timing)
-    createConfigParam("TofFixOffset",     '1', 0x16, 24,  0, 0); // TSYNC delay only
-    createConfigParam("FrameOffset",      '1', 0x16,  8, 24, 0); // FrameOffset
+    createConfigParam("DspTOFOffset",     '1', 0x16, 32,  0, 0); // DSP TOF Offset
     createConfigParam("EventLength",      '1', 0x17, 24,  0, 4); // EventLength                 (unit:bytes)
     createConfigParam("DataFormat",       '1', 0x17,  8, 24, 2); // DataFormat
     createConfigParam("OdbTestDelay0",    '1', 0x18, 16,  0, 0); // ODBTestPulseDelay0          (scale:2.409,unit:us)
@@ -96,8 +95,10 @@ void DspPlugin::createParams_v71() {
     createConfigParam("OdbTestFrDelay0",  '1', 0x19,  8,  0, 0); // ODBTestPulseFrameDelay0          (unit:frames)
     createConfigParam("OdbTestFrDelay1",  '1', 0x19,  8,  8, 0); // ODBTestPulseFrameDelay1          (unit:frames)
     createConfigParam("OdbTestPeriod",    '1', 0x19, 16, 16, 0x01A9); // ODBTestPulsePeriod     (scale:0.0094117,unit:us)
-    createConfigParam("TsyncTSMetaType",  '1', 0x1A,  8,  0, 0); // TsyncTimestampMetaType
-    createConfigParam("TsyncTSMetaId",    '1', 0x1A,  8,  0, 0); // TsyncTimestampMetaId
+    createConfigParam("ClockCorrUpd",     '1', 0x1A, 30,  0, 0); // ClockCorrectionUpdate
+    createConfigParam("ClockCorrCtrl",    '1', 0x1A,  2, 30, 0); // ClockCorrectionCtrl (0=disable,1=disable,2=stall,3=advance)
+    createConfigParam("TclkClkSource",    '1', 0x1B,  2,  0, 0); // TclkClockSource (0=none,1=external,2=internal,3=else)
+    createConfigParam("DspClkSel",        '1', 0x1B,  1,  2, 0); // DspClockSelect (0=internal,1=external)
     createConfigParam("UnusedConfig",     '1', 0x1F, 32,  0, 0); // Config31
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
@@ -121,13 +122,113 @@ void DspPlugin::createParams_v71() {
     createCounterParam("TotalOpticalPackets", 0x11, 32,  0); // TotalOpticalPackets
 
 
-//      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
-    createStatusParam("Lvds1:Status",      0x0,  32,  0); // Lvds1Status
-    createStatusParam("Lvds2:Status",      0x1,  32,  0); // Lvds2Status
-    createStatusParam("Lvds3:Status",      0x2,  32,  0); // Lvds3Status
-    createStatusParam("Lvds4:Status",      0x3,  32,  0); // Lvds4Status
-    createStatusParam("Lvds5:Status",      0x4,  32,  0); // Lvds5Status
-    createStatusParam("Lvds6:Status",      0x5,  32,  0); // Lvds6Status
+//      BLXXX:Det:DspX:| sig nam|          addr size off  | EPICS record description | (bi and mbbi description)
+    createStatusParam("Lvds1:ParityError", 0x0,   1,  0); // Lvds1ParityError
+    createStatusParam("Lvds1:EventBlock",  0x0,   1,  1); // Lvds1EventBlock
+    createStatusParam("Lvds1:EventShort",  0x0,   1,  2); // Lvds1EventShort
+    createStatusParam("Lvds1:EventSecSt",  0x0,   1,  3); // Lvds1SecondStart
+    createStatusParam("Lvds1:ExtFifoAF",   0x0,   1,  4); // Lvds1ExternalFifoAF
+    createStatusParam("Lvds1:ExtFifoFF",   0x0,   1,  5); // Lvds1ExternalFifoFF
+    createStatusParam("Lvds1:ExtFifoNotEF",0x0,   1,  6); // Lvds1ExternalFifoDataPresent
+    createStatusParam("Lvds1:ChannelAF",   0x0,   1,  7); // Lvds1ChannelFifoAF
+    createStatusParam("Lvds1:ChannelNotEF",0x0,   1,  8); // Lvds1ChannelDataPresent
+    createStatusParam("Lvds1:CommandNotEF",0x0,   1,  9); // Lvds1CommandPresent
+    createStatusParam("Lvds1:CommandAF",   0x0,   1, 10); // Lvds1CommandFifoAF
+    createStatusParam("Lvds1:CommandWREN", 0x0,   1, 11); // Lvds1CommandFifoWREN
+    createStatusParam("Lvds1:DataAF",      0x0,   1, 12); // Lvds1DataFifoAF
+    createStatusParam("Lvds1:DataNotEF",   0x0,   1, 13); // Lvds1DataPresent
+    createStatusParam("Lvds1:Owerflow",    0x0,   1, 14); // Lvds1Owerflow
+    createStatusParam("Lvds1:BadPacket",   0x0,   1, 15); // Lvds1BadPacket
+
+    createStatusParam("Lvds2:ParityError", 0x0,   1, 16); // Lvds2ParityError
+    createStatusParam("Lvds2:EventBlock",  0x0,   1, 17); // Lvds2EventBlock
+    createStatusParam("Lvds2:EventShort",  0x0,   1, 18); // Lvds2EventShort
+    createStatusParam("Lvds2:EventSecSt",  0x0,   1, 19); // Lvds2SecondStart
+    createStatusParam("Lvds2:ExtFifoAF",   0x0,   1, 20); // Lvds2ExternalFifoAF
+    createStatusParam("Lvds2:ExtFifoFF",   0x0,   1, 21); // Lvds2ExternalFifoFF
+    createStatusParam("Lvds2:ExtFifoNotEF",0x0,   1, 22); // Lvds2ExternalFifoDataPresent
+    createStatusParam("Lvds2:ChannelAF",   0x0,   1, 23); // Lvds2ChannelFifoAF
+    createStatusParam("Lvds2:ChannelNotEF",0x0,   1, 24); // Lvds2ChannelDataPresent
+    createStatusParam("Lvds2:CommandNotEF",0x0,   1, 25); // Lvds2CommandPresent
+    createStatusParam("Lvds2:CommandAF",   0x0,   1, 26); // Lvds2CommandFifoAF
+    createStatusParam("Lvds2:CommandWREN", 0x0,   1, 27); // Lvds2CommandFifoWREN
+    createStatusParam("Lvds2:DataAF",      0x0,   1, 28); // Lvds2DataFifoAF
+    createStatusParam("Lvds2:DataNotEF",   0x0,   1, 29); // Lvds2DataPresent
+    createStatusParam("Lvds2:Owerflow",    0x0,   1, 30); // Lvds2Owerflow
+    createStatusParam("Lvds2:BadPacket",   0x0,   1, 31); // Lvds2BadPacket
+
+    createStatusParam("Lvds3:ParityError", 0x1,   1,  0); // Lvds3ParityError
+    createStatusParam("Lvds3:EventBlock",  0x1,   1,  1); // Lvds3EventBlock
+    createStatusParam("Lvds3:EventShort",  0x1,   1,  2); // Lvds3EventShort
+    createStatusParam("Lvds3:EventSecSt",  0x1,   1,  3); // Lvds3SecondStart
+    createStatusParam("Lvds3:ExtFifoAF",   0x1,   1,  4); // Lvds3ExternalFifoAF
+    createStatusParam("Lvds3:ExtFifoFF",   0x1,   1,  5); // Lvds3ExternalFifoFF
+    createStatusParam("Lvds3:ExtFifoNotEF",0x1,   1,  6); // Lvds3ExternalFifoDataPresent
+    createStatusParam("Lvds3:ChannelAF",   0x1,   1,  7); // Lvds3ChannelFifoAF
+    createStatusParam("Lvds3:ChannelNotEF",0x1,   1,  8); // Lvds3ChannelDataPresent
+    createStatusParam("Lvds3:CommandNotEF",0x1,   1,  9); // Lvds3CommandPresent
+    createStatusParam("Lvds3:CommandAF",   0x1,   1, 10); // Lvds3CommandFifoAF
+    createStatusParam("Lvds3:CommandWREN", 0x1,   1, 11); // Lvds3CommandFifoWREN
+    createStatusParam("Lvds3:DataAF",      0x1,   1, 12); // Lvds3DataFifoAF
+    createStatusParam("Lvds3:DataNotEF",   0x1,   1, 13); // Lvds3DataPresent
+    createStatusParam("Lvds3:Owerflow",    0x1,   1, 14); // Lvds3Owerflow
+    createStatusParam("Lvds3:BadPacket",   0x1,   1, 15); // Lvds3BadPacket
+
+    createStatusParam("Lvds4:ParityError", 0x1,   1, 16); // Lvds4ParityError
+    createStatusParam("Lvds4:EventBlock",  0x1,   1, 17); // Lvds4EventBlock
+    createStatusParam("Lvds4:EventShort",  0x1,   1, 18); // Lvds4EventShort
+    createStatusParam("Lvds4:EventSecSt",  0x1,   1, 19); // Lvds4SecondStart
+    createStatusParam("Lvds4:ExtFifoAF",   0x1,   1, 20); // Lvds4ExternalFifoAF
+    createStatusParam("Lvds4:ExtFifoFF",   0x1,   1, 21); // Lvds4ExternalFifoFF
+    createStatusParam("Lvds4:ExtFifoNotEF",0x1,   1, 22); // Lvds4ExternalFifoDataPresent
+    createStatusParam("Lvds4:ChannelAF",   0x1,   1, 23); // Lvds4ChannelFifoAF
+    createStatusParam("Lvds4:ChannelNotEF",0x1,   1, 24); // Lvds4ChannelDataPresent
+    createStatusParam("Lvds4:CommandNotEF",0x1,   1, 25); // Lvds4CommandPresent
+    createStatusParam("Lvds4:CommandAF",   0x1,   1, 26); // Lvds4CommandFifoAF
+    createStatusParam("Lvds4:CommandWREN", 0x1,   1, 27); // Lvds4CommandFifoWREN
+    createStatusParam("Lvds4:DataAF",      0x1,   1, 28); // Lvds4DataFifoAF
+    createStatusParam("Lvds4:DataNotEF",   0x1,   1, 29); // Lvds4DataPresent
+    createStatusParam("Lvds4:Owerflow",    0x1,   1, 30); // Lvds4Owerflow
+    createStatusParam("Lvds4:BadPacket",   0x1,   1, 31); // Lvds4BadPacket
+
+    createStatusParam("Lvds5:ParityError", 0x2,   1,  0); // Lvds5ParityError
+    createStatusParam("Lvds5:EventBlock",  0x2,   1,  1); // Lvds5EventBlock
+    createStatusParam("Lvds5:EventShort",  0x2,   1,  2); // Lvds5EventShort
+    createStatusParam("Lvds5:EventSecSt",  0x2,   1,  3); // Lvds5SecondStart
+    createStatusParam("Lvds5:ExtFifoAF",   0x2,   1,  4); // Lvds5ExternalFifoAF
+    createStatusParam("Lvds5:ExtFifoFF",   0x2,   1,  5); // Lvds5ExternalFifoFF
+    createStatusParam("Lvds5:ExtFifoNotEF",0x2,   1,  6); // Lvds5ExternalFifoDataPresent
+    createStatusParam("Lvds5:ChannelAF",   0x2,   1,  7); // Lvds5ChannelFifoAF
+    createStatusParam("Lvds5:ChannelNotEF",0x2,   1,  8); // Lvds5ChannelDataPresent
+    createStatusParam("Lvds5:CommandNotEF",0x2,   1,  9); // Lvds5CommandPresent
+    createStatusParam("Lvds5:CommandAF",   0x2,   1, 10); // Lvds5CommandFifoAF
+    createStatusParam("Lvds5:CommandWREN", 0x2,   1, 11); // Lvds5CommandFifoWREN
+    createStatusParam("Lvds5:DataAF",      0x2,   1, 12); // Lvds5DataFifoAF
+    createStatusParam("Lvds5:DataNotEF",   0x2,   1, 13); // Lvds5DataPresent
+    createStatusParam("Lvds5:Owerflow",    0x2,   1, 14); // Lvds5Owerflow
+    createStatusParam("Lvds5:BadPacket",   0x2,   1, 15); // Lvds5BadPacket
+
+    createStatusParam("Lvds6:ParityError", 0x2,   1, 16); // Lvds6ParityError
+    createStatusParam("Lvds6:EventBlock",  0x2,   1, 17); // Lvds6EventBlock
+    createStatusParam("Lvds6:EventShort",  0x2,   1, 18); // Lvds6EventShort
+    createStatusParam("Lvds6:EventSecSt",  0x2,   1, 19); // Lvds6SecondStart
+    createStatusParam("Lvds6:ExtFifoAF",   0x2,   1, 20); // Lvds6ExternalFifoAF
+    createStatusParam("Lvds6:ExtFifoFF",   0x2,   1, 21); // Lvds6ExternalFifoFF
+    createStatusParam("Lvds6:ExtFifoNotEF",0x2,   1, 22); // Lvds6ExternalFifoDataPresent
+    createStatusParam("Lvds6:ChannelAF",   0x2,   1, 23); // Lvds6ChannelFifoAF
+    createStatusParam("Lvds6:ChannelNotEF",0x2,   1, 24); // Lvds6ChannelDataPresent
+    createStatusParam("Lvds6:CommandNotEF",0x2,   1, 25); // Lvds6CommandPresent
+    createStatusParam("Lvds6:CommandAF",   0x2,   1, 26); // Lvds6CommandFifoAF
+    createStatusParam("Lvds6:CommandWREN", 0x2,   1, 27); // Lvds6CommandFifoWREN
+    createStatusParam("Lvds6:DataAF",      0x2,   1, 28); // Lvds6DataFifoAF
+    createStatusParam("Lvds6:DataNotEF",   0x2,   1, 29); // Lvds6DataPresent
+    createStatusParam("Lvds6:Owerflow",    0x2,   1, 30); // Lvds6Owerflow
+    createStatusParam("Lvds6:BadPacket",   0x2,   1, 31); // Lvds6BadPacket
+
+    createStatusParam("TsyncCountsRF",     0x3,  32,  0); // TsyncCountRF
+    createStatusParam("TsyncCountsInt",    0x4,  32,  0); // TsyncCountInt
+    createStatusParam("TsyncCountsGPS",    0x5,  32,  0); // TsyncCountGPS
+
     createStatusParam("BucketA:Occupancy", 0x6,   4,  0); // NumberOfEmptyA-Buckets (unit:/12)
     createStatusParam("BucketB:Occupancy", 0x6,   4,  4); // NumberOfEmptyB-Buckets (unit:/12)
     createStatusParam("BucketsInActive1",  0x6,   1,  8); // BucketsInLvds1Active

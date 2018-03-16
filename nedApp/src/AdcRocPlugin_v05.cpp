@@ -155,13 +155,13 @@ void AdcRocPlugin::createParams_v05()
     createConfigParam("PmTsyncDelay",         'C', 0x8, 24, 0, 0);   // Pulsed Magnet Tsync Delay
     createConfigParam("PmRatePeriod",         'C', 0xA, 16, 0, 1000);  // Pulsed Magnet Rate Period
     createConfigParam("Ch1:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan1 Digital mode
-    createConfigParam("Ch2:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan2 Digital mode
-    createConfigParam("Ch3:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan3 Digital mode
-    createConfigParam("Ch4:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan4 Digital mode
-    createConfigParam("Ch5:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan5 Digital mode
-    createConfigParam("Ch6:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan6 Digital mode
-    createConfigParam("Ch7:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan7 Digital mode
-    createConfigParam("Ch8:DIG:Mode",         'C', 0xB,  2, 0, 0);   // Chan8 Digital mode
+    createConfigParam("Ch2:DIG:Mode",         'C', 0xB,  2, 2, 0);   // Chan2 Digital mode
+    createConfigParam("Ch3:DIG:Mode",         'C', 0xB,  2, 4, 0);   // Chan3 Digital mode
+    createConfigParam("Ch4:DIG:Mode",         'C', 0xB,  2, 6, 0);   // Chan4 Digital mode
+    createConfigParam("Ch5:DIG:Mode",         'C', 0xB,  2, 8, 0);   // Chan5 Digital mode
+    createConfigParam("Ch6:DIG:Mode",         'C', 0xB,  2,10, 0);   // Chan6 Digital mode
+    createConfigParam("Ch7:DIG:Mode",         'C', 0xB,  2,12, 0);   // Chan7 Digital mode
+    createConfigParam("Ch8:DIG:Mode",         'C', 0xB,  2,14, 0);   // Chan8 Digital mode
 
     createConfigParam("AdcOversampling",      'D', 0x0, 3, 0, 0);     // ADC Oversampling
     createConfigParam("MPAlwaysReady",        'D', 0x0, 1, 3, 0);     // MP Always Ready
