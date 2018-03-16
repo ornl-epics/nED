@@ -85,6 +85,17 @@ void RtdlPacket::init(const std::vector<RtdlFrame> &frames)
     }
 }
 
+bool RtdlPacket::checkIntegrity() const
+{
+    if (this->length < sizeof(RtdlPacket))
+        return false;
+    if (this->length < RtdlPacket::getLength(num_frames))
+        return false;
+    if (getTimeStamp().nsec > 1000000000)
+        return false;
+    return true;
+}
+
 epicsTimeStamp RtdlPacket::getTimeStamp() const
 {
     uint32_t secPastEpoch = 0;
@@ -193,6 +204,15 @@ void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, uint8_t cmd_ver, boo
     }
 }
 
+bool DasCmdPacket::checkIntegrity() const
+{
+    if (this->length < sizeof(DasCmdPacket))
+        return false;
+    if (this->length < (sizeof(DasCmdPacket) + cmd_length))
+        return false;
+    return true;
+}
+
 uint32_t DasCmdPacket::getCmdPayloadLength() const
 {
     if (this->cmd_length < (sizeof(DasCmdPacket) - 6))
@@ -241,6 +261,17 @@ void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, ui
     if (data != nullptr) {
         memcpy(this->events, data, count*getEventsSize());
     }
+}
+
+bool DasDataPacket::checkIntegrity() const
+{
+    if (this->length < sizeof(DasDataPacket))
+        return false;
+    if (this->length < DasDataPacket::getLength(event_format, num_events))
+        return false;
+    if (this->getTimeStamp().nsec > 1000000000)
+        return false;
+    return true;
 }
 
 uint32_t DasDataPacket::getEventsSize(DasDataPacket::EventFormat format)
