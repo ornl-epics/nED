@@ -225,7 +225,7 @@ void DspPlugin::createParams_v71() {
     createStatusParam("Lvds6:Owerflow",    0x2,   1, 30); // Lvds6Owerflow
     createStatusParam("Lvds6:BadPacket",   0x2,   1, 31); // Lvds6BadPacket
 
-    createStatusParam("TsyncCountsRF",     0x3,  20,  0); // TsyncCountRF
+    createStatusParam("TsyncCountsRF",     0x3,  32,  0); // TsyncCountRF
     createStatusParam("TsyncCountsInt",    0x4,  32,  0); // TsyncCountInt
     createStatusParam("TsyncCountsGPS",    0x5,  32,  0); // TsyncCountGPS
 
