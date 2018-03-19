@@ -37,7 +37,7 @@ epicsTimerNotify::expireStatus Timer::expire(const epicsTime & currentTime)
     if (delay > 0) {
         return expireStatus(restart, delay);
     } else {
-        m_active = false;
+        cancel();
         return expireStatus(noRestart);
     }
 }
@@ -45,6 +45,7 @@ epicsTimerNotify::expireStatus Timer::expire(const epicsTime & currentTime)
 bool Timer::cancel()
 {
     if (m_active) {
+        m_callback = std::function<float()>();
         m_active = false;
         return true;
     }
