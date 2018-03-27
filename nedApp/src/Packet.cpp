@@ -208,7 +208,7 @@ bool DasCmdPacket::checkIntegrity() const
 {
     if (this->length < sizeof(DasCmdPacket))
         return false;
-    if (this->length < (sizeof(DasCmdPacket) + cmd_length))
+    if (this->length < (sizeof(DasCmdPacket) - 6 + cmd_length))
         return false;
     return true;
 }
