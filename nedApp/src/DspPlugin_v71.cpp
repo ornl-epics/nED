@@ -99,7 +99,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("ClockCorrCtrl",    '1', 0x1A,  2, 30, 0); // ClockCorrectionCtrl (0=disable,1=disable,2=stall,3=advance)
     createConfigParam("TclkClkSource",    '1', 0x1B,  2,  0, 0); // TclkClockSource (0=none,1=external,2=internal,3=else)
     createConfigParam("DspClkSel",        '1', 0x1B,  1,  2, 0); // DspClockSelect (0=internal,1=external)
-    createConfigParam("ChopperRate",      '1', 0x1B,  7,  4, 60); // ChoppFrameRate                (unit:Hz)
+    createConfigParam("ChopperRate",      '1', 0x1B,  8,  4, 60); // ChopperFrameRate                (unit:Hz)
     createConfigParam("UnusedConfig",     '1', 0x1F, 32,  0, 0); // Config31
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
