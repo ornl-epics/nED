@@ -256,13 +256,31 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
             // Put packet in the corresponding list
             switch (packet->getType()) {
             case Packet::TYPE_DAS_DATA:
-                dasData.push_back(reinterpret_cast<const DasDataPacket *>(packet));
+                {
+                    auto dataPacket = reinterpret_cast<const DasDataPacket *>(packet);
+                    if (dataPacket->checkIntegrity())
+                        dasData.push_back(dataPacket);
+                    else
+                        LOG_WARN("Discarding DAS data packet, integrity check failed");
+                }
                 break;
             case Packet::TYPE_RTDL:
-                rtdls.push_back(reinterpret_cast<const RtdlPacket *>(packet));
+                {
+                    auto rtdlPacket = reinterpret_cast<const RtdlPacket *>(packet);
+                    if (rtdlPacket->checkIntegrity())
+                        rtdls.push_back(rtdlPacket);
+                    else
+                        LOG_WARN("Discarding RTDL packet, integrity check failed");
+                }
                 break;
             case Packet::TYPE_DAS_CMD:
-                dasCmd.push_back(reinterpret_cast<const DasCmdPacket *>(packet));
+                {
+                    auto cmdPacket = reinterpret_cast<const DasCmdPacket *>(packet);
+                    if (cmdPacket->checkIntegrity())
+                        dasCmd.push_back(cmdPacket);
+                    else
+                        LOG_WARN("Discarding DAS command packet, integrity check failed");
+                }
                 break;
             case Packet::TYPE_ERROR:
                 errors.push_back(reinterpret_cast<const ErrorPacket *>(packet));

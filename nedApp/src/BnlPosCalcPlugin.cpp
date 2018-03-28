@@ -184,9 +184,8 @@ std::pair<DasDataPacket *, BnlPosCalcPlugin::Stats> BnlPosCalcPlugin::processPac
     uint32_t nEvents = srcPacket->getNumEvents();
 
     if (srcPacket->getEventsFormat() != DasDataPacket::EVENT_FMT_BNL_RAW) {
-        return std::pair<DasDataPacket *, BnlPosCalcPlugin::Stats>(const_cast<DasDataPacket *>(srcPacket), stats);
+        return std::make_pair(const_cast<DasDataPacket *>(srcPacket), stats);
     }
-
     uint32_t newPacketLen = sizeof(DasDataPacket) + nEvents*sizeof(Event::BNL::Diag);
     DasDataPacket *packet = m_packetsPool.get(newPacketLen);
     if (packet) {
@@ -229,7 +228,7 @@ std::pair<DasDataPacket *, BnlPosCalcPlugin::Stats> BnlPosCalcPlugin::processPac
         }
     }
 
-    return std::pair<DasDataPacket *, BnlPosCalcPlugin::Stats>(packet, stats);
+    return std::make_pair(packet, stats);
 }
 
 BnlPosCalcPlugin::calc_return_t BnlPosCalcPlugin::calculatePosition(const Event::BNL::Raw *event, const BnlPosCalcPlugin::CalcParams &calcParams, double *x, double *y)

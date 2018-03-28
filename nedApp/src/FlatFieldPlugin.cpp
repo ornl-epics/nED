@@ -9,7 +9,9 @@
 
 #include "Bits.h"
 #include "Common.h"
+#include "Event.h"
 #include "FlatFieldPlugin.h"
+#include "FlatFieldTable.h"
 #include "likely.h"
 #include "Log.h"
 
@@ -20,9 +22,7 @@
 #include <fstream>
 #include <limits>
 #include <string>
-
-#define MAX_POSITIONS 100
-#define NUM_FLATFIELDPLUGIN_PARAMS ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1)) + (MAX_POSITIONS * 6)
+#include <sstream>
 
 #if defined(WIN32) || defined(_WIN32)
 #   define PATH_SEPARATOR '\\'
@@ -30,37 +30,21 @@
 #   define PATH_SEPARATOR '/'
 #endif
 
-EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Dispatcher port name", string, "Positions", string, "Buffer size", int);
+EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Parent plugins", string, "Positions", string, "Buffer size", int);
 
-FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *positions, int bufSize)
-    : BaseDispatcherPlugin(portName, dispatcherPortName, 1, NUM_FLATFIELDPLUGIN_PARAMS, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
+FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins, const char *positions, int bufSize)
+    : BasePlugin(portName, 1, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
     , m_tableSizeX(0)
     , m_tableSizeY(0)
 {
-    if (bufSize > 0) {
-        m_bufferSize = bufSize;
-    } else {
-        m_bufferSize = 4*1024*1024;
-        LOG_ERROR("Invalid buffer size requested, setting default %u bytes", m_bufferSize);
-    }
-    m_buffer = reinterpret_cast<uint8_t *>(malloc(m_bufferSize));
-    if (m_buffer == 0) {
-        LOG_ERROR("Failed to allocate transformation buffer");
-    }
-
     createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
     createParam("ImportStatus", asynParamInt32, &ImportStatus, IMPORT_STATUS_NONE); // Import status
     createParam("ImportDir",    asynParamOctet, &ImportDir);            // Path to correction tables directory
-    createParam("BufferSize",   asynParamInt32, &BufferSize, (int)m_bufferSize); // Allocated buffer size
-    createParam("PsEn",         asynParamInt32, &PsEn, 0);              // Switch to toggle photosum elimination
-    createParam("CorrEn",       asynParamInt32, &CorrEn, 0);            // Switch to toggle applying flat field correction
-    createParam("ConvEn",       asynParamInt32, &ConvEn, 0);            // Switch to toggle converting data to pixel id format
     createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);     // Number of calculated events
     createParam("CntPosVetos",  asynParamInt32, &CntPosVetos, 0);       // Number of bad position vetos
     createParam("CntRangeVetos",asynParamInt32, &CntRangeVetos, 0);     // Number of bad X,Y range vetos
     createParam("CntPosCfgVetos",asynParamInt32, &CntPosCfgVetos, 0);   // Number of position configuration vetos
     createParam("CntPsVetos",   asynParamInt32, &CntPsVetos, 0);        // Number of photosum discriminated events
-    createParam("CntSplit",     asynParamInt32, &CntSplit,  0);         // Number of packet train splits
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);             // Reset counters
     // Next two params are in UQm.n format, n is fraction bits, http://en.wikipedia.org/wiki/Q_%28number_format%29
     createParam("XyFractWidth", asynParamInt32, &XyFractWidth, 24);     // WRITE - Number of fraction bits in X,Y data
@@ -72,8 +56,6 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     createParam("TablesSizeX",  asynParamInt32, &TablesSizeX, (int)m_tableSizeX); // READ - All tables X size
     createParam("TablesSizeY",  asynParamInt32, &TablesSizeY, (int)m_tableSizeY); // READ - All tables Y size
 
-    int nParams = ((int)(&LAST_FLATFIELDPLUGIN_PARAM - &FIRST_FLATFIELDPLUGIN_PARAM + 1));
-
     std::vector<std::string> positions_ = Common::split(positions, ',');
     for (auto it=positions_.begin(); it!=positions_.end(); it++) {
         int position_id = stoi(*it);
@@ -81,11 +63,6 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
 
         int param;
         char name[16];
-
-        if ((nParams + 4) > NUM_FLATFIELDPLUGIN_PARAMS) {
-            LOG_ERROR("Parameter table size not big enough, skipping some positions");
-            break;
-        }
 
         snprintf(name, sizeof(name), "Pos%u:Enable", position_id);
         createParam(name, asynParamInt32, &param, 0);
@@ -113,28 +90,21 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *dispatcherPor
     }
 
     callParamCallbacks();
-}
 
-FlatFieldPlugin::~FlatFieldPlugin()
-{
-    if (m_buffer != 0)
-        free(m_buffer);
+    BasePlugin::connect(parentPlugins, MsgDasData);
 }
 
 asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == ResetCnt) {
         if (value > 0) {
-            setIntegerParam(RxCount, 0);
-            setIntegerParam(ProcCount, 0);
             setIntegerParam(CntGoodEvents, 0);
             setIntegerParam(CntPosVetos, 0);
             setIntegerParam(CntRangeVetos, 0);
             setIntegerParam(CntPosCfgVetos, 0);
             setIntegerParam(CntPsVetos, 0);
-            setIntegerParam(CntSplit, 0);
             callParamCallbacks();
-            m_evCounters.reset();
+            m_counters.reset();
         }
         return asynSuccess;
     } else if (pasynUser->reason == XyFractWidth) {
@@ -146,41 +116,11 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason ==  XMaxOut || pasynUser->reason == YMaxOut) {
         if (value < 1 || value >= 1024)
             return asynError;
-    } else if (pasynUser->reason == CorrEn) {
-        // Check that we have both flat-field correction tables for all positions
-        if (value != 0) {
-            for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
-                if (it->second.nTables == 0 || it->second.enabled == false) continue;
-                if (it->second.corrX == 0 || it->second.corrY == 0) {
-                    LOG_ERROR("Disabling position %u due to lack of flat field correction tables", it->second.position_id);
-                    setIntegerParam(PosEnable[it->second.position_id], 0);
-                }
-            }
-            callParamCallbacks();
-        }
-    } else if (pasynUser->reason == PsEn) {
-        if (value != 0) {
-            for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
-                if (it->second.nTables == 0 || it->second.enabled == false) continue;
-                if (it->second.psLowX == 0 || it->second.psUpX == 0) {
-                    LOG_ERROR("Disabling position %u due to lack of photo sum tables", it->second.position_id);
-                    setIntegerParam(PosEnable[it->second.position_id], 0);
-                }
-            }
-            callParamCallbacks();
-        }
     } else {
         for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
             if (pasynUser->reason == PosEnable[it->second.position_id]) {
                 asynStatus ret = asynSuccess;
-                int psEn, corrEn;
-                getIntegerParam(PsEn, &psEn);
-                getIntegerParam(CorrEn, &corrEn);
-                if (value == 1 && psEn == 1 && (it->second.psLowX == 0 || it->second.psUpX == 0)) {
-                    LOG_ERROR("Failed to enable position %u, missing photo sum tables", it->second.position_id);
-                    value = 0;
-                    ret = asynError;
-                } else if (value == 1 && corrEn == 1 && (it->second.corrX == 0 || it->second.corrY == 0)) {
+                if (value == 1 && (it->second.corrX == 0 || it->second.corrY == 0)) {
                     LOG_ERROR("Failed to enable position %u, missing correction tables", it->second.position_id);
                     value = 0;
                     ret = asynError;
@@ -193,7 +133,7 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             }
         }
     }
-    return BaseDispatcherPlugin::writeInt32(pasynUser, value);
+    return BasePlugin::writeInt32(pasynUser, value);
 }
 
 asynStatus FlatFieldPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
@@ -202,7 +142,8 @@ asynStatus FlatFieldPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 value
         if (value <= 0.0)
             return asynError;
     }
-    return BaseDispatcherPlugin::writeFloat64(pasynUser, value);
+
+    return BasePlugin::writeFloat64(pasynUser, value);
 }
 
 asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason)
@@ -250,41 +191,21 @@ asynStatus FlatFieldPlugin::writeOctet(asynUser *pasynUser, const char *value, s
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
-void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList)
+void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
 {
-    int nReceived = 0;
-    int nProcessed = 0;
-    int nSplits = 0;
-    DasPacketList newPacketList;
-    bool psEn = false;
-    bool corrEn = false;
-    bool convEn = false;
     double xMaxIn, yMaxIn;
     int xMaxOut, yMaxOut;
-    bool passthru = false;
 
     // Parametrise calculating algorithms based on detector.
     int xyFractWidth = 0;
     int psFractWidth = 0;
 
-    if (m_buffer == 0) {
-        LOG_ERROR("Flat field correction disabled, no memory");
-        return;
-    }
-
-    this->lock();
-    getIntegerParam(RxCount,        &nReceived);
-    getIntegerParam(ProcCount,      &nProcessed);
-    getIntegerParam(CntSplit,       &nSplits);
     getIntegerParam(XyFractWidth,   &xyFractWidth);
     getIntegerParam(PsFractWidth,   &psFractWidth);
     getDoubleParam(XMaxIn,          &xMaxIn);
     getDoubleParam(YMaxIn,          &yMaxIn);
     getIntegerParam(XMaxOut,        &xMaxOut);
     getIntegerParam(YMaxOut,        &yMaxOut);
-    getBooleanParam(PsEn,           &psEn);
-    getBooleanParam(ConvEn,         &convEn);
-    getBooleanParam(CorrEn,         &corrEn);
 
     // This is a trick to avoid locking access to member variables. Since
     // plugin design ensures a single instance of processDataUnlocked()
@@ -297,170 +218,130 @@ void FlatFieldPlugin::processDataUnlocked(const DasPacketList * const packetList
     m_yScaleOut = 1.0 *                                yMaxOut / (m_tableSizeY - 1);
     m_xMaskOut = (Bits::roundUpPower2(xMaxOut) - 1) * Bits::roundUpPower2(yMaxOut);
     m_yMaskOut = (Bits::roundUpPower2(yMaxOut) - 1);
-    this->unlock();
 
-    if (psEn == false && corrEn == false && convEn == false)
-        passthru = true;
+    DasDataPacketList outPackets;
+    std::vector<DasDataPacket *> pooledPackets;
 
-    // Optimize passthru mode
-    if (passthru == true) {
-        sendToPlugins(packetList);
-    } else {
-        // Break single loop into two parts to have single point of sending data
-        for (auto it = packetList->cbegin(); it != packetList->cend(); ) {
-            uint32_t bufferOffset = 0;
-            DasPacketList newPacketList;
-            newPacketList.reserve();
+    for (const auto &packet: packets) {
+        epicsTimeStamp timestamp = packet->getTimeStamp();
+        uint32_t nEvents = packet->getNumEvents();
 
-            for (; it != packetList->cend(); it++) {
-                const DasPacket *packet = *it;
+        std::pair<DasDataPacket*, Counters> res;
+        if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
+            res = processEvents(timestamp, packet->getEvents<Event::BNL::Diag>(), nEvents);
+        } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
+            res = processEvents(timestamp, packet->getEvents<Event::ACPC::Diag>(), nEvents);
+        } else {
+            res = std::make_pair(const_cast<DasDataPacket*>(packet), Counters());
+        }
 
-                // If running out of space, send this batch
-                uint32_t remain = m_bufferSize - bufferOffset;
-                if (remain < packet->getLength()) {
-                    nSplits++;
-                    break;
-                }
-
-                // Reuse the original packet if nothing to map
-                if (packet->isNeutronData() == false) {
-                    newPacketList.push_back(packet);
-                    continue;
-                }
-
-                nProcessed++;
-
-                // Reserve part of buffer for this packet, it may shrink from original but never grow
-                DasPacket *newPacket = reinterpret_cast<DasPacket *>(m_buffer + bufferOffset);
-                newPacketList.push_back(newPacket);
-                bufferOffset += packet->getLength();
-
-                // Process the packet
-                EventCounters counters;
-                processPacket(packet, newPacket, corrEn, psEn, convEn, counters);
-                m_evCounters += counters;
-            }
-
-            sendToPlugins(&newPacketList);
-            newPacketList.release();
-            newPacketList.waitAllReleased();
+        if (res.first == packet) {
+            // Probably not in right data format for this plugin
+            outPackets.push_back(res.first);
+        } else if (res.first != nullptr) {
+            // We got a newly allocated packet with modified events in it
+            outPackets.push_back(res.first);
+            pooledPackets.push_back(res.first);
+            m_counters += res.second;
+        } else {
+            // Can't allocate packet
+            LOG_ERROR("Failed to allocate packet from pool");
         }
     }
 
-    nReceived += packetList->size();
+    // Send to subscribed plugins and wait they complete processing
+    sendDownstream(outPackets);
 
-    this->lock();
-    setIntegerParam(RxCount,    nReceived   % std::numeric_limits<int32_t>::max());
-    setIntegerParam(ProcCount,  nProcessed  % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntSplit,   nSplits     % std::numeric_limits<int32_t>::max());
-    setIntegerParam(CntGoodEvents,  m_evCounters.nGood);
-    setIntegerParam(CntPosVetos,    m_evCounters.nPosition);
-    setIntegerParam(CntRangeVetos,  m_evCounters.nRange);
-    setIntegerParam(CntPosCfgVetos, m_evCounters.nPosCfg);
-    setIntegerParam(CntPsVetos,     m_evCounters.nPhotosum);
+    // Return allocated packets back to pool
+    for (auto &packet: pooledPackets) {
+        m_packetsPool.put(packet);
+    }
+
+    setIntegerParam(CntGoodEvents,  m_counters[VETO_NO]           % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntPosVetos,    m_counters[VETO_POSITION]     % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntRangeVetos,  m_counters[VETO_RANGE]        % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntPosCfgVetos, m_counters[VETO_POSITION_CFG] % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntPsVetos,     m_counters[VETO_PHOTOSUM]     % std::numeric_limits<int32_t>::max());
     callParamCallbacks();
-    this->unlock();
 }
 
-void FlatFieldPlugin::processPacket(const DasPacket *srcPacket, DasPacket *destPacket, bool correct, bool photosum, bool convert, EventCounters &counters)
-{
-    uint32_t nVetoes[5] = {}; // Array of vetoes - needs to match number of VetoType entries
+// Only implement processEvents() for known input events.
+// This could be solved with constexpr from std=c++17
 
-    // This structure represents an event from 2D detectors. It
-    // matches AcpcDataPacket::NormalEvent and BnlDataPacket::NormalEvent.
-    struct Event {
-        uint32_t tof;
-        uint32_t position;
-        uint32_t x;
-        uint32_t y;
-        uint32_t photosum_x;
-        uint32_t photosum_y;
-    };
+std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEvents(const epicsTimeStamp &timestamp, const Event::BNL::Diag *srcEvents, uint32_t nEvents) {
+    Counters counters;
+    DasDataPacket *packet = m_packetsPool.get(DasDataPacket::getLength(DasDataPacket::EVENT_FMT_BNL_DIAG, nEvents));
+    if (packet != nullptr) {
+        packet->init(DasDataPacket::EVENT_FMT_BNL_DIAG, timestamp, nEvents, srcEvents);
+        Event::BNL::Diag *events = packet->getEvents<Event::BNL::Diag>();
 
-    // destPacket is guaranteed to be at least the size of srcPacket
-    (void)srcPacket->copyHeader(destPacket, srcPacket->getLength());
+        while (nEvents-- > 0) {
+            // events were already (efficiently) copied by packet->init()
+            // Only populate the changes.
 
-    uint32_t nEvents;
-    const Event *srcEvent= reinterpret_cast<const Event *>(srcPacket->getData(&nEvents));
-    nEvents /= (sizeof(Event) / sizeof(uint32_t));
+            events->corrected_x = srcEvents->x * m_xScaleIn;
+            events->corrected_y = srcEvents->y * m_yScaleIn;
 
-    uint32_t nDestEvents;
-    uint32_t *newPayload = reinterpret_cast<uint32_t *>(destPacket->getData(&nDestEvents));
-    nDestEvents = 0;
+            VetoType veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
 
-    while (nEvents-- > 0) {
-        double x = srcEvent->x * m_xScaleIn;
-        double y = srcEvent->y * m_yScaleIn;
-        double photosum_x = srcEvent->photosum_x * m_psScale;
-        uint32_t position = srcEvent->position;
+            events->pixelid = srcEvents->position;
+            events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
+            events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
 
-        // Check photo sum first
-        if (photosum == true) {
-            VetoType veto = checkPhotoSumLimits(x, y, photosum_x, position);
             if (veto != VETO_NO) {
-                nVetoes[veto]++;
-                srcEvent++;
-                continue;
-            }
-        }
-
-        // Apply flat field correction
-        if (correct == true) {
-            VetoType veto = correctPosition(x, y, position);
-            if (veto != VETO_NO) {
-                nVetoes[veto]++;
-                srcEvent++;
-                continue;
-            }
-        }
-
-        // Not a veto, check what output format should we do
-        if (convert == true) {
-            // Detect an overlap between configured position index and local pixel id
-            uint32_t pixelMask = m_xMaskOut | m_yMaskOut;
-            if (position & pixelMask) {
-                nVetoes[VETO_POSITION_CFG]++;
-                srcEvent++;
-                continue;
+                counters[veto]++;
+                events->pixelid |= Event::PIXEL_VETO_MASK;
+            } else {
+                counters[VETO_NO]++;
             }
 
-            DasPacket::Event *destEvent = reinterpret_cast<DasPacket::Event *>(newPayload);
-
-            destEvent->tof = srcEvent->tof & 0xFFFFFFF;
-            destEvent->pixelid = position;
-            destEvent->pixelid |= ((uint32_t)round(x * m_xScaleOut) & m_xMaskOut);
-            destEvent->pixelid |= ((uint32_t)round(y * m_yScaleOut) & m_yMaskOut);
-
-            newPayload += sizeof(DasPacket::Event) / sizeof(uint32_t);
-            destPacket->payload_length += sizeof(DasPacket::Event);
-        } else {
-            Event *destEvent = reinterpret_cast<Event *>(newPayload);
-
-            destEvent->tof = srcEvent->tof & 0xFFFFFFF;
-            destEvent->position = position & 0xFF;
-            destEvent->x = x / m_xScaleIn;
-            destEvent->y = y / m_yScaleIn;
-            destEvent->photosum_x = srcEvent->photosum_x;
-            destEvent->photosum_y = srcEvent->photosum_y;
-
-            newPayload += sizeof(Event) / sizeof(uint32_t);
-            destPacket->payload_length += sizeof(Event);
+            srcEvents++;
+            events++;
         }
-
-        nVetoes[VETO_NO]++;
-        srcEvent++;
     }
+    return std::make_pair(packet, counters);
+}
 
-    counters.nGood     = nVetoes[VETO_NO];
-    counters.nPosition = nVetoes[VETO_POSITION];
-    counters.nRange    = nVetoes[VETO_RANGE];
-    counters.nPosCfg   = nVetoes[VETO_POSITION_CFG];
-    counters.nPhotosum = nVetoes[VETO_PHOTOSUM];
+std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEvents(const epicsTimeStamp &timestamp, const Event::ACPC::Normal *srcEvents, uint32_t nEvents) {
+    Counters counters;
+    DasDataPacket *packet = m_packetsPool.get(DasDataPacket::getLength(DasDataPacket::EVENT_FMT_ACPC_DIAG, nEvents));
+    if (packet != nullptr) {
+        packet->init(DasDataPacket::EVENT_FMT_ACPC_DIAG, timestamp, nEvents);
+        Event::ACPC::Diag *events = packet->getEvents<Event::ACPC::Diag>();
 
-    counters.nTotal = counters.nGood;
-    for (size_t i=0; i<sizeof(nVetoes)/sizeof(uint32_t); i++) {
-        counters.nTotal += nVetoes[i];
+        while (nEvents-- > 0) {
+            // Changing format requires event-by-event copy
+            *events = *srcEvents;
+            events->pixelid = srcEvents->position;
+
+            // Check photo sum first
+            VetoType veto1 = checkPhotoSumLimits(srcEvents->x, srcEvents->y, srcEvents->photo_sum_x, srcEvents->position);
+            if (veto1 != VETO_NO) {
+                counters[veto1]++;
+                events->pixelid |= Event::PIXEL_VETO_MASK;
+            }
+
+            // Apply flat-field correction
+            events->corrected_x = srcEvents->x * m_xScaleIn;
+            events->corrected_y = srcEvents->y * m_yScaleIn;
+            VetoType veto2 = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
+            if (veto2 != VETO_NO) {
+                counters[veto1]++;
+                events->pixelid |= Event::PIXEL_VETO_MASK;
+            }
+
+            if (veto1 == VETO_NO && veto2 == VETO_NO)
+                counters[VETO_NO]++;
+
+            // Calculate pixelid
+            events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
+            events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
+
+            srcEvents++;
+            events++;
+        }
     }
+    return std::make_pair(packet, counters);
 }
 
 FlatFieldPlugin::VetoType FlatFieldPlugin::correctPosition(double &x, double &y, uint32_t position)
@@ -514,18 +395,13 @@ float FlatFieldPlugin::importFilesCb(const std::string &path)
 {
     // Importing takes quite some time, don't starve other plugins in the mean time.
     // So let's unsubscribe temporarily from receiving any data
-    int enabled;
-    getIntegerParam(Enable, &enabled);
+    bool enabled = this->isConnected();
     if (enabled) {
-        this->unlock();
-        enableCallbacks(false);
-        this->lock();
+        this->disconnect();
     }
     importFiles(path);
     if (enabled) {
-        this->unlock();
-        enableCallbacks(true);
-        this->lock();
+        this->connect();
     }
     m_importTimer.reset();
     return 0.0;
@@ -697,7 +573,7 @@ void FlatFieldPlugin::importFiles(const std::string &path_)
     callParamCallbacks();
 }
 
-std::string FlatFieldPlugin::generatePositionsReport(bool psEn, bool corrEn)
+std::string FlatFieldPlugin::generatePositionsReport()
 {
     std::ostringstream report;
     for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
@@ -706,25 +582,17 @@ std::string FlatFieldPlugin::generatePositionsReport(bool psEn, bool corrEn)
             continue;
 
         report << "Position " << it->second.position_id << (it->second.enabled == false ? " NOT " : " ") << "enabled:" << std::endl;
-        if (psEn) {
-            report << " * upper X photosum table " << (it->second.psUpX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
-            report << " * lower X photosum table " << (it->second.psLowX.get() != 0 ? "loaded" : "MISSING") << std::endl;
-        }
-        if (corrEn) {
-            report << " * X correction table " << (it->second.corrX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
-            report << " * Y correction table " << (it->second.corrY.get()  != 0 ? "loaded" : "MISSING") << std::endl;
-        }
+        report << " * upper X photosum table " << (it->second.psUpX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
+        report << " * lower X photosum table " << (it->second.psLowX.get() != 0 ? "loaded" : "MISSING") << std::endl;
+        report << " * X correction table " << (it->second.corrX.get()  != 0 ? "loaded" : "MISSING") << std::endl;
+        report << " * Y correction table " << (it->second.corrY.get()  != 0 ? "loaded" : "MISSING") << std::endl;
     }
     return report.str();
 }
 
 void FlatFieldPlugin::report(FILE *fp, int details)
 {
-    bool psEn, corrEn;
-    getBooleanParam(PsEn, &psEn);
-    getBooleanParam(CorrEn, &corrEn);
-
-    std::string positionsReport = generatePositionsReport(psEn, corrEn);
+    std::string positionsReport = generatePositionsReport();
     fwrite(positionsReport.c_str(), 1, positionsReport.length(), fp);
     fwrite(m_importReport.c_str(), 1, m_importReport.length(), fp);
     return BasePlugin::report(fp, details);

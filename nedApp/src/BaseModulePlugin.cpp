@@ -905,6 +905,7 @@ float BaseModulePlugin::noResponseCleanup(DasCmdPacket::CommandType command)
         setIntegerParam(CmdRsp, LAST_CMD_TIMEOUT);
         callParamCallbacks();
     }
+    m_timeoutTimer.reset();
     return 0;
 }
 

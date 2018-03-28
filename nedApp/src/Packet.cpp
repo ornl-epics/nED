@@ -85,6 +85,17 @@ void RtdlPacket::init(const std::vector<RtdlFrame> &frames)
     }
 }
 
+bool RtdlPacket::checkIntegrity() const
+{
+    if (this->length < sizeof(RtdlPacket))
+        return false;
+    if (this->length < RtdlPacket::getLength(num_frames))
+        return false;
+    if (getTimeStamp().nsec > 1000000000)
+        return false;
+    return true;
+}
+
 epicsTimeStamp RtdlPacket::getTimeStamp() const
 {
     uint32_t secPastEpoch = 0;
@@ -193,6 +204,15 @@ void DasCmdPacket::init(uint32_t moduleId, CommandType cmd, uint8_t cmd_ver, boo
     }
 }
 
+bool DasCmdPacket::checkIntegrity() const
+{
+    if (this->length < sizeof(DasCmdPacket))
+        return false;
+    if (this->length < (sizeof(DasCmdPacket) - 6 + cmd_length))
+        return false;
+    return true;
+}
+
 uint32_t DasCmdPacket::getCmdPayloadLength() const
 {
     if (this->cmd_length < (sizeof(DasCmdPacket) - 6))
@@ -215,7 +235,7 @@ std::string DasCmdPacket::getModuleIdStr() const
 /* *** DasDataPacket functions *** */
 /* ******************************* */
 
-DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const uint32_t *data)
+DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const void *data)
 {
     DasDataPacket *packet = nullptr;
     uint32_t packetLength = sizeof(DasDataPacket) + count*getEventsSize(format);
@@ -226,7 +246,7 @@ DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat for
     return packet;
 }
 
-void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const uint32_t *data)
+void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const void *data)
 {
     memset(this, 0, sizeof(DasDataPacket));
 
@@ -241,6 +261,17 @@ void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, ui
     if (data != nullptr) {
         memcpy(this->events, data, count*getEventsSize());
     }
+}
+
+bool DasDataPacket::checkIntegrity() const
+{
+    if (this->length < sizeof(DasDataPacket))
+        return false;
+    if (this->length < DasDataPacket::getLength(event_format, num_events))
+        return false;
+    if (this->getTimeStamp().nsec > 1000000000)
+        return false;
+    return true;
 }
 
 uint32_t DasDataPacket::getEventsSize(DasDataPacket::EventFormat format)

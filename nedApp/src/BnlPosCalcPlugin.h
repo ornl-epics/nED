@@ -11,7 +11,6 @@
 #define BNL_POS_CALC_PLUGIN_H
 
 #include "BasePlugin.h"
-#include "BnlDataPacket.h"
 #include "Event.h"
 #include "ObjectPool.h"
 

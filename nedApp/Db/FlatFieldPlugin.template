@@ -1,30 +1,9 @@
 include "BasePlugin.include"
 
-# Upgrade DataMode record
-record(mbbo, "$(P)DataMode")
-{
-    field(FLNK, "$(P)DataModeCalc")
-}
-record(calcout, "$(P)DataModeCalc")
-{
-    field(INPA, "$(P)DataMode NPP")
-    field(CALC, "A=0") # Select between pass-thru and flatten
-    field(OUT,  "$(P)FfMode PP")
-}
-
-record(bo, "$(P)Enable")
-{
-    info(archive, "Monitor, 00:10:00")
-    info(autosaveFields, "VAL")
-    field(ZSV,  "MAJOR")
-    field(PINI, "YES")
-    field(FLNK, "$(P)StatusCalc")
-}
 record(calc, "$(P)StatusCalc")
 {
     field(INPA, "$(P)Enable.SEVR")
-    field(INPB, "$(P)BufferSize.SEVR")
-    field(CALC, "(A+B)=0")
+    field(CALC, "(A)=0")
     field(FLNK, "$(P)Status")
 }
 record(bi, "$(P)Status")
@@ -68,47 +47,6 @@ record(waveform, "$(P)ImportDir")
     field(FTVL, "CHAR")
     field(NELM, "1024")
     field(PINI, "YES")
-}
-record(longin, "$(P)BufferSize")
-{
-    field(DESC, "Size of the transformation buffer")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BufferSize")
-    field(PINI, "YES")
-    field(LSV,  "MAJOR")
-    field(LOW,  "0")
-    field(EGU,  "bytes")
-    field(FLNK, "$(P)StatusCalc")
-}
-record(bo, "$(P)PsEn")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "Photosum elimination switch")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))PsEn")
-    field(PINI, "YES")
-    field(ZNAM, "disabled")
-    field(ONAM, "enabled")
-}
-record(bo, "$(P)CorrEn")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "Flat field correction switch")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))CorrEn")
-    field(PINI, "YES")
-    field(ZNAM, "disabled")
-    field(ONAM, "enabled")
-}
-record(bo, "$(P)ConvEn")
-{
-    info(autosaveFields, "VAL")
-    field(DESC, "Convert to pixel id switch")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))ConvEn")
-    field(PINI, "YES")
-    field(ZNAM, "disabled")
-    field(ONAM, "enabled")
 }
 
 record(longin, "$(P)CntGoodEvents")
@@ -180,15 +118,6 @@ record(longin, "$(P)CntPsVetos")
     field(DESC, "Number of photosum discriminated ev")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))CntPsVetos")
-    field(SCAN, "I/O Intr")
-    field(VAL,  "0")
-    field(PINI, "YES")
-}
-record(longin, "$(P)CntSplit")
-{
-    field(DESC, "Number of splits occurred")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))CntSplit")
     field(SCAN, "I/O Intr")
     field(VAL,  "0")
     field(PINI, "YES")
