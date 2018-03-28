@@ -75,7 +75,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Meta13:Mode",      '1', 0x14,  2, 26, 0); // Channel 13 mode             (0=disabled,1=rising edge,2=falling edge,3=both)
     createConfigParam("Meta14:Mode",      '1', 0x14,  2, 28, 0); // Channel 14 mode             (0=disabled,1=rising edge,2=falling edge,3=both)
     createConfigParam("Meta15:Mode",      '1', 0x14,  2, 30, 0); // Channel 15 mode             (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("FrameRate",        '1', 0x15,  8,  0,60); // AcqFrameRate                (unit:Hz)
+    createConfigParam("FrameRate",        '1', 0x15,  8,  0, 60); // AcqFrameRate                (unit:Hz)
     createConfigParam("Lvds1:En",         '1', 0x15,  1,  8, 0); // LVDS channel 1 enable flag  (0=enable,1=disable)
     createConfigParam("Lvds2:En",         '1', 0x15,  1,  9, 0); // LVDS channel 2 enable flag  (0=enable,1=disable)
     createConfigParam("Lvds3:En",         '1', 0x15,  1, 10, 0); // LVDS channel 3 enable flag  (0=enable,1=disable)
@@ -99,6 +99,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("ClockCorrCtrl",    '1', 0x1A,  2, 30, 0); // ClockCorrectionCtrl (0=disable,1=disable,2=stall,3=advance)
     createConfigParam("TclkClkSource",    '1', 0x1B,  2,  0, 0); // TclkClockSource (0=none,1=external,2=internal,3=else)
     createConfigParam("DspClkSel",        '1', 0x1B,  1,  2, 0); // DspClockSelect (0=internal,1=external)
+    createConfigParam("ChopperRate",      '1', 0x1B,  7,  4, 60); // ChoppFrameRate                (unit:Hz)
     createConfigParam("UnusedConfig",     '1', 0x1F, 32,  0, 0); // Config31
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
@@ -249,5 +250,10 @@ void DspPlugin::createParams_v71() {
     createStatusParam("ODBTXFault",        0x6,   1, 23); // ODB SFP TX Fault
     createStatusParam("ODBRXLoss",         0x6,   1, 24); // ODB SFP RX Loss
     createStatusParam("ODBUnplugged",      0x6,   1, 25); // ODB SFP Unplugged
+    createStatusParam("NoTsync",           0x7,   1,  0); // No TSYNC
+    createStatusParam("NoRtdlXmit",        0x7,   1,  1); // No RTDL XMIT
+    createStatusParam("NoRtdlValid",       0x7,   1,  2); // No RTDL VALID
+    createStatusParam("RtdlCrcErrors",     0x7,   4,  4); // RTDL Time/Cycle CRC Errors
+    createStatusParam("RtdlUpdated",       0x7,   4,  8); // RTDL Time/Cycle Updated
     createStatusParam("UnusedStatus",      0xB,  32,  0); // Unused15
 }
