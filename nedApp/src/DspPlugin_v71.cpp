@@ -87,7 +87,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("OdbTestAsync",     '1', 0x15,  1, 29, 0); // ODB Test Pulse Async (0=synchronous,1=asynchronous)
     createConfigParam("LVDSDataRate",     '1', 0x15,  1, 30, 0); // Downstream LVDS Data Rate (0=30.36MHz,1=21.25MHz)
     createConfigParam("TimeSource",       '1', 0x15,  1, 31, 0); // RTDL and Ev39 source select (1=internal,0=acc timing)
-    createConfigParam("LegacyTsyncDly",   '1', 0x16, 32,  0, 0); // Legacy Tsync Delay             (unit:x100ns)
+    createConfigParam("LegacyTsyncDly1",  '1', 0x16, 32,  0, 0); // Legacy Tsync Delay1            (unit:x100ns)
     createConfigParam("LegacyEvLength",   '1', 0x17, 24,  0, 4); // Legacy Event Length            (unit:bytes)
     createConfigParam("LegacyDataFormat", '1', 0x17,  8, 24, 2); // Legacy Data Format
     createConfigParam("OdbTestDelay0",    '1', 0x18, 16,  0, 0); // ODB Test Pulse Delay0          (unit:x2.41us)
@@ -106,6 +106,8 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Lvds4TsyncSel",    '1', 0x1B,  1, 15, 0); // LVDS4 Tsync Select     (0=new format,1=legacy)
     createConfigParam("Lvds5TsyncSel",    '1', 0x1B,  1, 16, 0); // LVDS5 Tsync Select     (0=new format,1=legacy)
     createConfigParam("Lvds6TsyncSel",    '1', 0x1B,  1, 17, 0); // LVDS6 Tsync Select     (0=new format,1=legacy)
+    createConfigParam("ODBOutSel",        '1', 0x1B,  2, 18, 0); // ODB Output Select    
+    createConfigParam("LegacyTsyncDly2",  '1', 0x16, 32,  0, 0); // Legacy Tsync Delay2            (unit:x100ns)  
     createConfigParam("UnusedConfig",     '1', 0x1F, 32,  0, 0); // Config31
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
