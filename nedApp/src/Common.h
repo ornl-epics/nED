@@ -15,6 +15,7 @@
 
 #define ALIGN_UP(number, boundary)      (((number) + (boundary) - 1) & ~((boundary) - 1))
 #define HEX_BYTE_TO_DEC(a)              ((((a)&0xFF)/16)*10 + ((a)&0xFF)%16)
+#define HEX_SHORT_TO_DEC(a)             (HEX_BYTE_TO_DEC((a)&0xFF) + 100*HEX_BYTE_TO_DEC((a)>>8))
 
 namespace Common {
 

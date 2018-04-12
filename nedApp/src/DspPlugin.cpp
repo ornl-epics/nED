@@ -130,7 +130,7 @@ bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
         version.hw_day      = 0;
         version.fw_version  = response->fw_version;
         version.fw_revision = response->fw_revision;
-        version.fw_year     = HEX_BYTE_TO_DEC(response->year);
+        version.fw_year     = HEX_SHORT_TO_DEC(response->year);
         version.fw_month    = HEX_BYTE_TO_DEC(response->month);
         version.fw_day      = HEX_BYTE_TO_DEC(response->day);
 
