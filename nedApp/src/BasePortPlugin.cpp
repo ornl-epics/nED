@@ -165,6 +165,8 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
             LOG_ERROR("Unable to read data from buffer, processing thread stopped - %s(%d)\n", strerror(-ret), ret);
             break;
         }
+        m_lastData = data;
+        m_lastDataLen = length;
 
         try {
             uint32_t left = processData(reinterpret_cast<uint8_t*>(data), length);
@@ -181,9 +183,7 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
             // Still doesn't have enough data, abort thread
             LOG_ERROR("Aborting processing thread: %s", e.what());
             dump(reinterpret_cast<const char *>(data), length);
-            LOG_ERROR("dumped");
             handleRecvError(-ERANGE);
-            LOG_ERROR("handled error");
             break;
         }
     }
@@ -339,5 +339,20 @@ void BasePortPlugin::dump(const char *data, uint32_t len)
     }
     if (len > maxlen) {
         LOG_DEBUG("... truncated to %u bytes", maxlen);
+    }
+}
+
+void BasePortPlugin::report(FILE *fp, int details)
+{
+    BasePlugin::report(fp, details);
+    if (details & 0xF0 && m_lastData != nullptr) {
+        fprintf(fp, "Last data received (%u bytes):\n    ", m_lastDataLen);
+        for (uint32_t i = 0; i < m_lastDataLen/4; i++) {
+            if ((i % 4) == 0 && i > 0) {
+                fprintf(fp, "\n    ");
+            }
+            fprintf(fp, "0x%08X ", *(uint32_t *)((const char *)m_lastData + i*4));
+        }
+        fprintf(fp, "\n");
     }
 }

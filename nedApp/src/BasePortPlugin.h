@@ -54,6 +54,13 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
 
         /**
+         * Overloaded method invoked by iocsh asynReport()
+         *
+         * After calling parent class report(), it reports the last data received.
+         */
+        void report(FILE *fp, int details);
+
+        /**
          * Process all available data from buffer.
          *
          * This is the worker function called from the thread. It parses through the
@@ -102,6 +109,8 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         unsigned m_recvId = 0;                          //!< Last received packet sequence number
         std::array<uint8_t, 4096> m_sendBuffer;         //!< Buffer used for sending
         ObjectPool<uint8_t> m_packetsPool{true};        //!< Packets pool management, used for converting DAS 1.0 -> DAS 2.0 packets
+        const void *m_lastData{nullptr};                //!< Last data received
+        uint32_t m_lastDataLen{0};                      //!< Length of last data received
 
         /**
          * Process data from buffer and dispatch it to the registered plugins.
