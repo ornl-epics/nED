@@ -100,14 +100,14 @@ void DspPlugin::createParams_v71() {
     createConfigParam("TclkClkSource",    '1', 0x1B,  2,  0, 0); // Tclk Clock Source (0=none,1=external,2=internal,3=else)
     createConfigParam("DspClkSel",        '1', 0x1B,  1,  2, 0); // Dsp Clock Select (0=internal,1=external)
     createConfigParam("ChopperRate",      '1', 0x1B,  8,  4, 60); // Chopper Frame Rate                (unit:Hz)
-    createConfigParam("Lvds1TsyncSel",    '1', 0x1B,  1, 12, 0); // LVDS1 Tsync Select     (0=new format,1=legacy)
-    createConfigParam("Lvds2TsyncSel",    '1', 0x1B,  1, 13, 0); // LVDS2 Tsync Select     (0=new format,1=legacy)
-    createConfigParam("Lvds3TsyncSel",    '1', 0x1B,  1, 14, 0); // LVDS3 Tsync Select     (0=new format,1=legacy)
-    createConfigParam("Lvds4TsyncSel",    '1', 0x1B,  1, 15, 0); // LVDS4 Tsync Select     (0=new format,1=legacy)
-    createConfigParam("Lvds5TsyncSel",    '1', 0x1B,  1, 16, 0); // LVDS5 Tsync Select     (0=new format,1=legacy)
-    createConfigParam("Lvds6TsyncSel",    '1', 0x1B,  1, 17, 0); // LVDS6 Tsync Select     (0=new format,1=legacy)
+    createConfigParam("Lvds1TsyncSel",    '1', 0x1B,  1, 12, 0); // LVDS1 Tsync Select     (0=new format,1=legacy1)
+    createConfigParam("Lvds2TsyncSel",    '1', 0x1B,  1, 13, 0); // LVDS2 Tsync Select     (0=new format,1=legacy1)
+    createConfigParam("Lvds3TsyncSel",    '1', 0x1B,  1, 14, 0); // LVDS3 Tsync Select     (0=new format,1=legacy1)
+    createConfigParam("Lvds4TsyncSel",    '1', 0x1B,  1, 15, 0); // LVDS4 Tsync Select     (0=new format,1=legacy1)
+    createConfigParam("Lvds5TsyncSel",    '1', 0x1B,  1, 16, 0); // LVDS5 Tsync Select     (0=new format,1=legacy2)
+    createConfigParam("Lvds6TsyncSel",    '1', 0x1B,  1, 17, 0); // LVDS6 Tsync Select     (0=new format,1=legacy2)
     createConfigParam("ODBOutSel",        '1', 0x1B,  2, 18, 0); // ODB Output Select    
-    createConfigParam("LegacyTsyncDly2",  '1', 0x16, 32,  0, 0); // Legacy Tsync Delay2            (unit:x100ns)  
+    createConfigParam("LegacyTsyncDly2",  '1', 0x1C, 32,  0, 0); // Legacy Tsync Delay2            (unit:x100ns)  
     createConfigParam("UnusedConfig",     '1', 0x1F, 32,  0, 0); // Config31
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
@@ -263,5 +263,6 @@ void DspPlugin::createParams_v71() {
     createStatusParam("NoRtdlValid",       0x7,   1,  2); // No RTDL VALID
     createStatusParam("RtdlCrcErrors",     0x7,   4,  4); // RTDL Time/Cycle CRC Errors
     createStatusParam("RtdlUpdated",       0x7,   4,  8); // RTDL Time/Cycle Updated
+    createStatusParam("CommandSpacing",    0x8,  32,  0); // Command Spacing
     createStatusParam("UnusedStatus",      0xB,  32,  0); // Unused15
 }
