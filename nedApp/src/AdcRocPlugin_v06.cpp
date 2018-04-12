@@ -205,8 +205,8 @@ void AdcRocPlugin::createParams_v06()
     createConfigParam("TestPatternDebug",     'F', 0x1,  3, 12, 0);   // Engineering Use only
     createConfigParam("TestPatternId",        'F', 0x1, 12, 0,  0);   // Test pattern id
     createConfigParam("TestPatternRate",      'F', 0x2, 16, 0,  0);   // Test pattern rate (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
-    createConfigParam("TsyncDelayFrames",     'F', 0x3,  5, 0,  0);   // TSYNC delay in frames
-    createConfigParam("TsyncFrame",           'F', 0x4, 10, 0,  0);   // Default frame number
-    createConfigParam("Protocol",             'F', 0x5,  1,15,  0);   // Extended event format (0=legacy,1=new)
-    createConfigParam("EventFormat",          'F', 0x5,  8, 0,  0);   // Event format identifier
+    createConfigParam("FrameNumbIncr",        'F', 0x3, 10, 0,  0);   // Frame number increment
+    createConfigParam("Protocol",             'F', 0x4,  1,15,  0);   // Extended event format (0=legacy,1=new)
+    createConfigParam("DataFormat",           'F', 0x4,  8, 0,  0);   // Data format identifier
+    createConfigParam("UnusedConfig",         'F', 0x5, 16,  0, 0); // Config5
 }
