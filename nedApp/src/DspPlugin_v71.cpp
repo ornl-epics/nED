@@ -263,6 +263,6 @@ void DspPlugin::createParams_v71() {
     createStatusParam("NoRtdlValid",       0x7,   1,  2); // No RTDL VALID
     createStatusParam("RtdlCrcErrors",     0x7,   4,  4); // RTDL Time/Cycle CRC Errors
     createStatusParam("RtdlUpdated",       0x7,   4,  8); // RTDL Time/Cycle Updated
-    createStatusParam("CommandSpacing",    0x8,  32,  0); // Command Spacing
+    createStatusParam("CommandSpacing",    0x8,  32,  0); // Command Spacing (scale:0.0094117,unit:us)
     createStatusParam("UnusedStatus",      0xB,  32,  0); // Unused15
 }
