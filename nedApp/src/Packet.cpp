@@ -248,18 +248,19 @@ DasDataPacket *DasDataPacket::init(uint8_t *buffer, size_t size, EventFormat for
 
 void DasDataPacket::init(EventFormat format, const epicsTimeStamp &timestamp, uint32_t count, const void *data)
 {
+    uint32_t dataBytes = count*getEventsSize(format);
     memset(this, 0, sizeof(DasDataPacket));
 
     this->version = 0x1;
     this->type = TYPE_DAS_DATA;
-    this->length = sizeof(DasDataPacket) + count*getEventsSize();
+    this->length = sizeof(DasDataPacket) + dataBytes;
 
     this->event_format = format;
     this->num_events = count;
     this->timestamp_sec = timestamp.secPastEpoch;
     this->timestamp_nsec = timestamp.nsec;
     if (data != nullptr) {
-        memcpy(this->events, data, count*getEventsSize());
+        memcpy(this->events, data, dataBytes);
     }
 }
 
