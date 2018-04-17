@@ -273,6 +273,9 @@ void DspPlugin::createParams_v71() {
     createStatusParam("ODBTXFault",        0x6,   1, 23); // ODB SFP TX Fault
     createStatusParam("ODBRXLoss",         0x6,   1, 24); // ODB SFP RX Loss
     createStatusParam("ODBUnplugged",      0x6,   1, 25); // ODB SFP Unplugged
+    createStatusParam("Configured",        0x6,   1, 26); // DSP Configured
+    createStatusParam("Acquiring",         0x6,   1, 27); // DSP Acquiring
+    createStatusParam("HWReady",           0x6,   1, 28); // DSP Hardware Ready
     createStatusParam("NoTsync",           0x7,   1,  0); // No TSYNC
     createStatusParam("NoRtdlXmit",        0x7,   1,  1); // No RTDL XMIT
     createStatusParam("NoRtdlValid",       0x7,   1,  2); // No RTDL VALID
