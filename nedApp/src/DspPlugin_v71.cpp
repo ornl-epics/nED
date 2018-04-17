@@ -88,17 +88,16 @@ void DspPlugin::createParams_v71() {
     createConfigParam("LVDSDataRate",     '1', 0x15,  1, 30, 0); // Downstream LVDS Data Rate (0=30.36MHz,1=21.25MHz)
     createConfigParam("TimeSource",       '1', 0x15,  1, 31, 0); // RTDL and Ev39 source select (1=internal,0=acc timing)
     createConfigParam("LegacyTsyncDly1",  '1', 0x16, 32,  0, 0); // Legacy Tsync Delay1            (unit:x100ns)
-    createConfigParam("LegacyEvLength",   '1', 0x17, 24,  0, 4); // Legacy Event Length            (unit:bytes)
-    createConfigParam("LegacyDataFormat", '1', 0x17,  8, 24, 2); // Legacy Data Format
-    createConfigParam("OdbTestDelay0",    '1', 0x18, 16,  0, 0); // ODB Test Pulse Delay0          (unit:x2.41us)
-    createConfigParam("OdbTestDelay1",    '1', 0x18, 16, 16, 0); // ODB Test Pulse Delay1          (unit:x2.41us)
-    createConfigParam("OdbTestFrDelay0",  '1', 0x19,  8,  0, 0); // ODB Test Pulse Frame Delay0    (unit:frames)
-    createConfigParam("OdbTestFrDelay1",  '1', 0x19,  8,  8, 0); // ODB Test Pulse Frame Delay1    (unit:frames)
-    createConfigParam("OdbTestPeriod",    '1', 0x19, 16, 16, 0x01A9); // ODB Test Pulse Period     (unit:x9.41ns)
+    createConfigParam("LegacyTsyncDly2",  '1', 0x17, 32,  0, 0); // Legacy Tsync Delay2            (unit:x100ns)
+    createConfigParam("OdbTestDelay",     '1', 0x18, 16,  0, 0); // ODB Test Pulse Delay           (unit:x2.41us)
+    createConfigParam("OdbTestFrDelay",   '1', 0x18,  8, 16, 0); // ODB Test Pulse Frame Delay     (unit:frames)
+    createConfigParam("LegacyEvLength",   '1', 0x19, 24,  0, 4); // Legacy Event Length            (unit:bytes)
+    createConfigParam("LegacyDataFormat", '1', 0x19,  8, 24, 2); // Legacy Data Format
     createConfigParam("ClockCorrUpd",     '1', 0x1A, 30,  0, 0); // DSP 40MHz Clock Corr Update
     createConfigParam("ClockCorrCtrl",    '1', 0x1A,  2, 30, 0); // DSP 40MHz Clock Corr Ctrl (0=disable,1=disable,2=stall,3=advance)
     createConfigParam("TclkClkSource",    '1', 0x1B,  2,  0, 0); // Tclk Clock Source (0=none,1=external,2=internal,3=else)
     createConfigParam("DspClkSel",        '1', 0x1B,  1,  2, 0); // Dsp Clock Select (0=internal,1=external)
+    createConfigParam("ChopperEquip",     '1', 0x1B,  1,  3, 0); // Chopper Equipment Select (0=AST,1=SKF)
     createConfigParam("ChopperRate",      '1', 0x1B,  8,  4, 60); // Chopper Frame Rate                (unit:Hz)
     createConfigParam("Lvds1TsyncSel",    '1', 0x1B,  1, 12, 0); // LVDS1 Tsync Select     (0=new format,1=legacy1)
     createConfigParam("Lvds2TsyncSel",    '1', 0x1B,  1, 13, 0); // LVDS2 Tsync Select     (0=new format,1=legacy1)
@@ -106,9 +105,25 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Lvds4TsyncSel",    '1', 0x1B,  1, 15, 0); // LVDS4 Tsync Select     (0=new format,1=legacy1)
     createConfigParam("Lvds5TsyncSel",    '1', 0x1B,  1, 16, 0); // LVDS5 Tsync Select     (0=new format,1=legacy2)
     createConfigParam("Lvds6TsyncSel",    '1', 0x1B,  1, 17, 0); // LVDS6 Tsync Select     (0=new format,1=legacy2)
-    createConfigParam("ODBOutSel",        '1', 0x1B,  2, 18, 0); // ODB Output Select    
-    createConfigParam("LegacyTsyncDly2",  '1', 0x1C, 32,  0, 0); // Legacy Tsync Delay2            (unit:x100ns)  
-    createConfigParam("UnusedConfig",     '1', 0x1F, 32,  0, 0); // Config31
+    createConfigParam("ODBOutSel",        '1', 0x1B,  2, 18, 0); // ODB Output Select      (0=run,1=test1,2=test2,3=test3)
+    createConfigParam("TrigDelay0",       '1', 0x1C, 32,  0, 0); // Trigger Delays0     
+    createConfigParam("TrigDelya1",       '1', 0x1D, 32,  0, 0); // Trigger Delays1   
+    createConfigParam("TrigFreqSel0",     '1', 0x1E,  4,  0, 0); // Trigger Frequency Select0  
+    createConfigParam("TrigFreqSel1",     '1', 0x1E,  4,  4, 0); // Trigger Frequency Select1
+    createConfigParam("TrigFreqSel2",     '1', 0x1E,  4,  8, 0); // Trigger Frequency Select2
+    createConfigParam("TrigFreqSel3",     '1', 0x1E,  4, 12, 0); // Trigger Frequency Select3
+    createConfigParam("TrigFreqSel4",     '1', 0x1E,  4, 16, 0); // Trigger Frequency Select4
+    createConfigParam("TrigFreqSel5",     '1', 0x1E,  4, 20, 0); // Trigger Frequency Select5
+    createConfigParam("TrigFreqSel6",     '1', 0x1E,  4, 24, 0); // Trigger Frequency Select6
+    createConfigParam("TrigFreqSel7",     '1', 0x1E,  4, 28, 0); // Trigger Frequency Select7  
+    createConfigParam("TrigWidthSel0",    '1', 0x1F,  4,  0, 0); // Trigger Width Select0  
+    createConfigParam("TrigWidthSel1",    '1', 0x1F,  4,  4, 0); // Trigger Width Select1
+    createConfigParam("TrigWidthSel2",    '1', 0x1F,  4,  8, 0); // Trigger Width Select2
+    createConfigParam("TrigWidthSel3",    '1', 0x1F,  4, 12, 0); // Trigger Width Select3
+    createConfigParam("TrigWidthSel4",    '1', 0x1F,  4, 16, 0); // Trigger Width Select4
+    createConfigParam("TrigWidthSel5",    '1', 0x1F,  4, 20, 0); // Trigger Width Select5
+    createConfigParam("TrigWidthSel6",    '1', 0x1F,  4, 24, 0); // Trigger Width Select6
+    createConfigParam("TrigWidthSel7",    '1', 0x1F,  4, 28, 0); // Trigger Width Select7       
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
     createCounterParam("Lvds1:Good",      0x0, 32,  0); // LVDS 1 Number of good packets
@@ -264,5 +279,37 @@ void DspPlugin::createParams_v71() {
     createStatusParam("RtdlCrcErrors",     0x7,   4,  4); // RTDL Time/Cycle CRC Errors
     createStatusParam("RtdlUpdated",       0x7,   4,  8); // RTDL Time/Cycle Updated
     createStatusParam("CommandSpacing",    0x8,  32,  0); // Command Spacing (scale:0.0094117,unit:us)
+    createStatusParam("MetaChOwerflow0",   0x9,   1,  0); // Meta Channel Owerflow0
+    createStatusParam("MetaChActivity0",   0x9,   1,  1); // Meta Channel Activity0
+    createStatusParam("MetaChOwerflow1",   0x9,   1,  2); // Meta Channel Owerflow1
+    createStatusParam("MetaChActivity1",   0x9,   1,  3); // Meta Channel Activity1
+    createStatusParam("MetaChOwerflow2",   0x9,   1,  4); // Meta Channel Owerflow2
+    createStatusParam("MetaChActivity2",   0x9,   1,  5); // Meta Channel Activity2
+    createStatusParam("MetaChOwerflow3",   0x9,   1,  6); // Meta Channel Owerflow3
+    createStatusParam("MetaChActivity3",   0x9,   1,  7); // Meta Channel Activity3
+    createStatusParam("MetaChOwerflow4",   0x9,   1,  8); // Meta Channel Owerflow4
+    createStatusParam("MetaChActivity4",   0x9,   1,  9); // Meta Channel Activity4
+    createStatusParam("MetaChOwerflow5",   0x9,   1, 10); // Meta Channel Owerflow5
+    createStatusParam("MetaChActivity5",   0x9,   1, 11); // Meta Channel Activity5
+    createStatusParam("MetaChOwerflow6",   0x9,   1, 12); // Meta Channel Owerflow6
+    createStatusParam("MetaChActivity6",   0x9,   1, 13); // Meta Channel Activity6
+    createStatusParam("MetaChOwerflow7",   0x9,   1, 14); // Meta Channel Owerflow7
+    createStatusParam("MetaChActivity7",   0x9,   1, 15); // Meta Channel Activity7
+    createStatusParam("MetaChEvLost8",     0x9,   1, 16); // Meta Channel Events Lost8
+    createStatusParam("MetaChActivity8",   0x9,   1, 17); // Meta Channel Activity8
+    createStatusParam("MetaChEvLost9",     0x9,   1, 18); // Meta Channel Events Lost9
+    createStatusParam("MetaChActivity9",   0x9,   1, 19); // Meta Channel Activity9
+    createStatusParam("MetaChEvLost10",    0x9,   1, 20); // Meta Channel Events Lost10
+    createStatusParam("MetaChActivity10",  0x9,   1, 21); // Meta Channel Activity10
+    createStatusParam("MetaChEvLost11",    0x9,   1, 22); // Meta Channel Events Lost11
+    createStatusParam("MetaChActivity11",  0x9,   1, 23); // Meta Channel Activity11
+    createStatusParam("MetaChEvLost12",    0x9,   1, 24); // Meta Channel Events Lost12
+    createStatusParam("MetaChActivity12",  0x9,   1, 25); // Meta Channel Activity12
+    createStatusParam("MetaChEvLost13",    0x9,   1, 26); // Meta Channel Events Lost13
+    createStatusParam("MetaChActivity13",  0x9,   1, 27); // Meta Channel Activity13
+    createStatusParam("MetaChEvLost14",    0x9,   1, 28); // Meta Channel Events Lost14
+    createStatusParam("MetaChActivity14",  0x9,   1, 29); // Meta Channel Activity14
+    createStatusParam("MetaChEvLost15",    0x9,   1, 30); // Meta Channel Events Lost15
+    createStatusParam("MetaChActivity15",  0x9,   1, 31); // Meta Channel Activity15
     createStatusParam("UnusedStatus",      0xB,  32,  0); // Unused15
 }
