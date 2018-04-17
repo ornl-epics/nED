@@ -78,6 +78,7 @@ asynStatus ModulesPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
         setIntegerParam(Discovered, 0);
         setIntegerParam(Verified, 0);
+        setIntegerParam(CfgStatus, 1);
         setStringParam(m_outCfg ? CfgDisplay : TxtDisplay, "");
         callParamCallbacks();
 
