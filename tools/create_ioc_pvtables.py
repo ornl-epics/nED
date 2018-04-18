@@ -98,14 +98,14 @@ def parse_src_file(path, mode):
     ignore = [ "upgrade", "version" ]
 
     types = {
-      'version': re.compile("createVersionParam\s*\(\s*\"([^\"]+)\"\s*,"),
-      'upgrade': re.compile("createUpgradeParam\s*\(\s*\"([^\"]+)\"\s*,"),
-      'status':  re.compile("createStatusParam\s*\(\s*\"([^\"]+)\"\s*,"),
-      'counter': re.compile("createCounterParam\s*\(\s*\"([^\"]+)\"\s*,"),
-      'config':  re.compile("createConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
-      'config_ch': re.compile("createChanConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
-      'config_meta': re.compile("createMetaConfigParam\s*\(\s*\"([^\"]+)\",[^,]*,\s*(\S+)\s*[,\)].*"),
-      'temp':    re.compile("createTempParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'version': re.compile("^[ \t]*createVersionParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'upgrade': re.compile("^[ \t]*createUpgradeParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'status':  re.compile("^[ \t]*createStatusParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'counter': re.compile("^[ \t]*createCounterParam\s*\(\s*\"([^\"]+)\"\s*,"),
+      'config':  re.compile("^[ \t]*createConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
+      'config_ch': re.compile("^[ \t]*createChanConfigParam\s*\(\s*\"([^\"]+)\"[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,[^,]*,\s*(\S+)\s*[,\)].*"),
+      'config_meta': re.compile("^[ \t]*createMetaConfigParam\s*\(\s*\"([^\"]+)\",[^,]*,\s*(\S+)\s*[,\)].*"),
+      'temp':    re.compile("^[ \t]*createTempParam\s*\(\s*\"([^\"]+)\"\s*,"),
     }
 
     if path not in vars_cache:
