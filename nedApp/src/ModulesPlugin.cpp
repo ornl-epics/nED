@@ -268,7 +268,7 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
             case DasCmdPacket::MOD_TYPE_HROC:      type = "hroc";      break;
             case DasCmdPacket::MOD_TYPE_IROC:      type = "iroc";      break;
             case DasCmdPacket::MOD_TYPE_ROC:       type = "roc";       break;
-            case DasCmdPacket::MOD_TYPE_ADCROC:    type = "adcrod";    break;
+            case DasCmdPacket::MOD_TYPE_ADCROC:    type = "adcroc";    break;
             case DasCmdPacket::MOD_TYPE_SANSROC:   type = "sansroc";   break;
             default:                            type = "unknown";
         }
