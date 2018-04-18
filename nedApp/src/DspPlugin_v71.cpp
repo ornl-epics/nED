@@ -86,7 +86,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x033E); // Bucket Timeout      (scale:0.0024094117,unit:ms)
     createConfigParam("OdbTestAsync",     '1', 0x15,  1, 29, 0); // ODB Test Pulse Async (0=synchronous,1=asynchronous)
     createConfigParam("LVDSDataRate",     '1', 0x15,  1, 30, 0); // Downstream LVDS Data Rate (0=30.36MHz,1=21.25MHz)
-    createConfigParam("TimeSource",       '1', 0x15,  1, 31, 0); // RTDL and Ev39 source select (1=internal,0=acc timing)
+    createConfigParam("TimeSource",       '1', 0x15,  1, 31, 0); // RTDL and EL source select (1=internal,0=acc timing)
     createConfigParam("LegacyTsyncDly1",  '1', 0x16, 32,  0, 0); // Legacy Tsync Delay1            (unit:x100ns)
     createConfigParam("LegacyTsyncDly2",  '1', 0x17, 32,  0, 0); // Legacy Tsync Delay2            (unit:x100ns)
     createConfigParam("OdbTestDelay",     '1', 0x18, 16,  0, 0); // ODB Test Pulse Delay           (unit:x2.41us)
