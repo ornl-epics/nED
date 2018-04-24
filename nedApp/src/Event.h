@@ -14,7 +14,20 @@
 
 namespace Event {
 
-    static const uint32_t PIXEL_VETO_MASK = 0x80000000;
+    static const uint32_t PIXEL_VETO_MASK           = 0x80000000;
+    static const uint32_t PIXEL_STATE_VETO_MASK     = 0x81000000;
+    static const uint32_t PIXEL_TYPE_MASK           = 0xF0000000;
+
+    enum class PixelType {
+        NEUTRON      = 0x0,
+        UNUSED1      = 0x1,
+        UNUSED2      = 0x2,
+        UNUSED3      = 0x3,
+        BEAM_MONITOR = 0x4,
+        SIGNAL       = 0x5,
+        ADC          = 0x6,
+        CHOPPER      = 0x7,
+    };
 
     /**
      * Structure representing single TOF,pixel event
@@ -23,6 +36,8 @@ namespace Event {
         uint32_t tof;
         uint32_t pixelid;
     };
+    
+    PixelType getPixelType(uint32_t pixel);
 
     /**
      * LPSD ROC event formats.

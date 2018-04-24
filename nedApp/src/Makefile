@@ -101,6 +101,7 @@ $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 #$(PROD_NAME)_SRCS  += BnlFlatFieldPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
 #$(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
+$(PROD_NAME)_SRCS  += StateAnalyzerPlugin.cpp
 
 
 # Module handler plugins - in alphabetical order

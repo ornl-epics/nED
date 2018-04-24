@@ -19,16 +19,8 @@ class Fifo : private std::deque<T> {
         epicsEvent m_event;
 
     public:
-        /**
-         * Push an element to FIFO.
-         */
-        void enqueue(const T data)
-        {
-            m_mutex.lock();
-            std::deque<T>::push_back(data);
-            m_mutex.unlock();
-        }
-
+        using std::deque<T>::size;
+    
         /**
          * Push array of elements to FIFO.
          */
@@ -38,6 +30,17 @@ class Fifo : private std::deque<T> {
             while (count--) {
                 std::deque<T>::push_back(*data++);
             }
+            m_event.signal();
+            m_mutex.unlock();
+        }
+
+        /**
+         * Push std::move-able element to FIFO.
+         */
+        void enqueue(T &&element)
+        {
+            m_mutex.lock();
+            std::deque<T>::emplace_back(element);
             m_event.signal();
             m_mutex.unlock();
         }
@@ -85,6 +88,33 @@ class Fifo : private std::deque<T> {
             m_mutex.unlock();
 
             return count;
+        }
+
+        /**
+         * Move one element from FIFO.
+         */
+        bool deque(T &element, double timeout=0.0) {
+            bool empty = true;
+
+            // This loop runs at most 2 times
+            while (true) {
+                m_mutex.lock();
+                empty = std::deque<T>::empty();
+                if (!empty) {
+                    element = std::move(std::deque<T>::front());
+                    std::deque<T>::pop_front();
+                }
+                m_mutex.unlock();
+
+                if (empty && timeout > 0.0) {
+                    m_event.wait(timeout);
+                    timeout = 0.0;
+                    continue;
+                }
+                break;
+            }
+
+            return !empty;
         }
 };
 

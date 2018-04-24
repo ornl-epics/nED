@@ -1,4 +1,4 @@
-/* PacketList.h
+/* Packet.h
  *
  * Copyright (c) 2017 Oak Ridge National Laboratory.
  * All rights reserved.

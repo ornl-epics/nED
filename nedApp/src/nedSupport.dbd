@@ -22,6 +22,7 @@ registrar("registerPvaNeutronsPlugin")
 registrar("registerPixelMapPlugin")
 registrar("registerRtdlPlugin")
 registrar("registerStatPlugin")
+registrar("registerStateAnalyzerPlugin")
 
 #registrar("registerAcpcPvaPlugin")
 #registrar("registerAdaraPlugin")

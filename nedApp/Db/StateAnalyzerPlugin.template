@@ -1,0 +1,198 @@
+include "BasePlugin.include"
+
+record(longin, "$(P)Status")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Status")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))StatusText")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longout, "$(P)MaxCacheLen")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of pulses to cache")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MaxCacheLen")
+    field(VAL,  "10")
+    field(PINI, "YES")
+}
+record(longin, "$(P)State")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Current calculated state")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))State")
+    field(SCAN, "I/O Intr")
+}
+record(bi, "$(P)Vetoing")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Current vetoing state")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Vetoing")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "false")
+    field(ONAM, "true")
+}
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable state calculation")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Enable")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(ao, "$(P)NominalDist")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Nominal detector distance")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))NominalDist")
+    field(PINI, "YES")
+    field(EGU,  "m")
+    field(PREC, "3")
+}
+
+
+# The following records need to be moved to separate file for dynamic
+# instantiation.
+
+record(longout, "$(P)Dev2:PixelOn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 0 ON state pixel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev2PixOn")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev2:PixelOff")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 0 OFF state pixel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev2PixOff")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev2:PixelVetoOn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 0 veto ON state pixel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev2PixVetoOn")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev2:PixelVetoOff")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 0 veto OFF state pixel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev2PixVetoOff")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev2:BitOffset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Calculated state bit offset")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev2BitOffset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(ao, "$(P)Dev2:Distance")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 0 distance")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))Dev2Distance")
+    field(PINI, "YES")
+    field(EGU,  "m")
+    field(PREC, "3")
+}
+
+record(longout, "$(P)Dev1:PixelOn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 1 ON state pixel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev1PixOn")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev1:PixelOff")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 1 OFF state pixel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev1PixOff")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev1:PixelVetoOn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 1 veto ON state pixel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev1PixVetoOn")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev1:PixelVetoOff")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 1 veto OFF state pixel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev1PixVetoOff")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev1:BitOffset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Calculated state bit offset")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev1BitOffset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(ao, "$(P)Dev1:Distance")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 1 distance")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))Dev1Distance")
+    field(PINI, "YES")
+    field(EGU,  "m")
+    field(PREC, "3")
+}
