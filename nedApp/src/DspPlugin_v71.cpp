@@ -84,13 +84,11 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Lvds6:Dis",        '1', 0x15,  1, 13, 0); // LVDS channel 6 disable      (0=enable,1=disable)
     createConfigParam("Meta:Dis",         '1', 0x15,  1, 14, 0); // Meta channels disable       (0=enable,1=disable)
     createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x033E); // Bucket Timeout      (scale:0.0024094117,unit:ms)
-    createConfigParam("OdbTestAsync",     '1', 0x15,  1, 29, 0); // ODB Test Pulse Async (0=synchronous,1=asynchronous)
-    createConfigParam("LVDSDataRate",     '1', 0x15,  1, 30, 0); // Downstream LVDS Data Rate (0=30.36MHz,1=21.25MHz)
-    createConfigParam("TimeSource",       '1', 0x15,  1, 31, 0); // RTDL and EL source select (1=internal,0=acc timing)
-    createConfigParam("LegacyTsyncDly1",  '1', 0x16, 32,  0, 0); // Legacy Tsync Delay1            (unit:x100ns)
-    createConfigParam("LegacyTsyncDly2",  '1', 0x17, 32,  0, 0); // Legacy Tsync Delay2            (unit:x100ns)
-    createConfigParam("OdbTestDelay",     '1', 0x18, 16,  0, 0); // ODB Test Pulse Delay           (unit:x2.41us)
-    createConfigParam("OdbTestFrDelay",   '1', 0x18,  8, 16, 0); // ODB Test Pulse Frame Delay     (unit:frames)
+    createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable (0=enable,1=disable)
+    createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select (1=internal,0=acc timing)
+    createConfigParam("LegacyTsyncDly",   '1', 0x16, 32,  0, 0); // Legacy Tsync Delay             (unit:x100ns)
+    createConfigParam("Unused0",          '1', 0x17, 32,  0, 0); // Unused0
+    createConfigParam("Unused1",          '1', 0x18, 32,  0, 0); // Unused1
     createConfigParam("LegacyEvLength",   '1', 0x19, 24,  0, 4); // Legacy Event Length            (unit:bytes)
     createConfigParam("LegacyDataFormat", '1', 0x19,  8, 24, 2); // Legacy Data Format
     createConfigParam("ClockCorrUpd",     '1', 0x1A, 30,  0, 0); // DSP 40MHz Clock Corr Update
@@ -105,7 +103,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Lvds4TsyncSel",    '1', 0x1B,  1, 15, 0); // LVDS4 Tsync Select     (0=new format,1=legacy1)
     createConfigParam("Lvds5TsyncSel",    '1', 0x1B,  1, 16, 0); // LVDS5 Tsync Select     (0=new format,1=legacy2)
     createConfigParam("Lvds6TsyncSel",    '1', 0x1B,  1, 17, 0); // LVDS6 Tsync Select     (0=new format,1=legacy2)
-    createConfigParam("ODBOutSel",        '1', 0x1B,  2, 18, 0); // ODB Output Select      (0=run,1=test1,2=test2,3=test3)
+
     createConfigParam("TrigDelay0",       '1', 0x1C, 32,  0, 0); // Trigger Delays0     
     createConfigParam("TrigDelya1",       '1', 0x1D, 32,  0, 0); // Trigger Delays1   
     createConfigParam("TrigFreqSel0",     '1', 0x1E,  4,  0, 0); // Trigger Frequency Select0  
