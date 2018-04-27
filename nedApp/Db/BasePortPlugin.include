@@ -135,4 +135,13 @@ record(mbbo, "$(P)EventsFmt")
     field(FTVL, "14")
     field(FTST, "CROC verbose")
 }
-
+record(bo, "$(P)DumpCmdPkts")
+{
+    field(DESC, "Dump TX/RX command packets to console")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))DumpCmdPkts")
+    field(VAL,  "0")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+    field(PINI, "YES")
+}
