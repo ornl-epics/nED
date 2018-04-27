@@ -276,6 +276,7 @@ void DspPlugin::createParams_v71() {
     createStatusParam("Configured",        0x6,   1, 26); // DSP Configured
     createStatusParam("Acquiring",         0x6,   1, 27); // DSP Acquiring  (0=not acquiring,1=acquiring, archive:monitor)
     createStatusParam("HWReady",           0x6,   1, 28); // DSP Hardware Ready (0=not ready,1=ready, archive:monitor)
+    createStatusParam("HeartBit",          0x6,   1, 29); // Heart Bit (0=not present,1=present)
     createStatusParam("NoTsync",           0x7,   1,  0); // No TSYNC
     createStatusParam("NoRtdlXmit",        0x7,   1,  1); // No RTDL XMIT
     createStatusParam("NoRtdlValid",       0x7,   1,  2); // No RTDL VALID
