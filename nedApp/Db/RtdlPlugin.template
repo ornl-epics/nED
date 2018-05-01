@@ -13,15 +13,6 @@ record(stringin, "$(P)Timestamp")
     field(INP,  "@asyn($(PORT))Timestamp")
     field(SCAN, "I/O Intr")
 }
-record(bi, "$(P)BadPulse")
-{
-    field(DESC, "Bad pulse indicator")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BadPulse")
-    field(ZNAM, "No")
-    field(ONAM, "Yes")
-    field(SCAN, "I/O Intr")
-}
 record(mbbi, "$(P)PulseFlavor")
 {
     field(DESC, "Pulse flavor")
@@ -58,24 +49,6 @@ record(ai, "$(P)PulseCharge")
     field(INP,  "@asyn($(PORT))PulseCharge")
     field(EGU,  "C")
     field(PREC, "12")
-    field(SCAN, "I/O Intr")
-}
-record(bi, "$(P)BadVetoFrame")
-{
-    field(DESC, "Bad veto frame indicator")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BadVetoFrame")
-    field(ZNAM, "No")
-    field(ONAM, "Yes")
-    field(SCAN, "I/O Intr")
-}
-record(bi, "$(P)BadCycleFrame")
-{
-    field(DESC, "Bad cycle frame indicator")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))BadCycleFrame")
-    field(ZNAM, "No")
-    field(ONAM, "Yes")
     field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)TimingStatus")
