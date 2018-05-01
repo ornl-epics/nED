@@ -17,7 +17,7 @@
 EPICS_REGISTER_PLUGIN(FileReplayPlugin, 1, "Port name", string);
 
 FileReplayPlugin::FileReplayPlugin(const char *portName)
-    : BasePortPlugin(portName, 0, asynOctetMask, asynOctetMask)
+    : BasePortPlugin(portName, 0, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
 {
     createParam("Status",           asynParamInt32,     &Status, 0);                // READ - Status of FileReplayPlugin
     createParam("StatusText",       asynParamOctet,     &StatusText, "no file");    // READ - Current error text if any
@@ -81,11 +81,17 @@ asynStatus FileReplayPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         setIntegerParam(Running, m_file.isRunning());
         callParamCallbacks();
         return asynSuccess;
-    } else if (pasynUser->reason == Speed) {
-        m_file.setSpeed(value / 10.0);
-        return asynSuccess;
     }
     return asynPortDriver::writeInt32(pasynUser, value);
+}
+
+asynStatus FileReplayPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
+{
+    if (pasynUser->reason == Speed) {
+        m_file.setSpeed(value);
+        return asynSuccess;
+    }
+    return asynPortDriver::writeFloat64(pasynUser, value);
 }
 
 bool FileReplayPlugin::send(const uint8_t *data, size_t len)
