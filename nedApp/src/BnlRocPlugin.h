@@ -32,6 +32,7 @@
 class BnlRocPlugin : public BaseModulePlugin {
     private: // variables
         std::string m_version;                              //!< Version string as passed to constructor
+        std::string m_posCalcPort;                          //!< Plugin to send parameters to.
 
     public: // functions
 
@@ -45,8 +46,9 @@ class BnlRocPlugin : public BaseModulePlugin {
          * @param[in] hardwareId Hardware ID of the BNLROC module, can be in IP format (xxx.xxx.xxx.xxx) or
          *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version BNLROC HW&SW version, ie. V5_50
+         * @param[in] posCalcPortName Plugin to send parameters to.
          */
-        BnlRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
+        BnlRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version, const char *posCalcPortName);
 
         /**
          * Try to parse the BNLROC version response packet an populate the structure.
@@ -72,6 +74,11 @@ class BnlRocPlugin : public BaseModulePlugin {
         {
             return parseVersionRsp(packet, version);
         }
+
+        /**
+         * Overloaded method to send all parameters to BnlPosCalcPlugin
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
     private: // functions
         /**

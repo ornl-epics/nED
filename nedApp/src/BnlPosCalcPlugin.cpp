@@ -134,6 +134,21 @@ asynStatus BnlPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
+asynStatus BnlPosCalcPlugin::recvParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value)
+{
+    asynUser a;
+    asynStatus ret = asynPortDriver::findParam(paramName.c_str(), &a.reason);
+    if (ret == asynSuccess) {
+        ret = writeInt32(&a, value);
+        if (ret == asynSuccess) {
+            // For the read-write asyn mechanism to pick up new values
+            setIntegerParam(a.reason, value);
+            callParamCallbacks();
+        }
+    }
+    return ret;
+}
+
 void BnlPosCalcPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     DasDataPacketList outPackets;

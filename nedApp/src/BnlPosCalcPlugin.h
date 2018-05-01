@@ -144,6 +144,11 @@ class BnlPosCalcPlugin : public BasePlugin {
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
         /**
+         * Handle inter-plugin params.
+         */
+        asynStatus recvParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value) override;
+
+        /**
          * Overloaded function to process incoming data packets.
          */
         void recvDownstream(const DasDataPacketList &packets) override;
