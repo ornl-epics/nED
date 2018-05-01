@@ -43,22 +43,22 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Meta14:Id",        '1', 0x3,   4, 20,14); // Channel 14 id
     createConfigParam("Meta15:Type",      '1', 0x3,   4, 24, 7); // Channel 15 type               (0=detector,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta15:Id",        '1', 0x3,   4, 28,15); // Channel 15 id
-    createConfigParam("Meta10:Delay",     '1', 0x4,  32,  0, 0); // Channel  0 delay              (unit:x100ns)
-    createConfigParam("Meta11:Delay",     '1', 0x5,  32,  0, 0); // Channel  1 delay              (unit:x100ns)
-    createConfigParam("Meta12:Delay",     '1', 0x6,  32,  0, 0); // Channel  2 delay              (unit:x100ns)
-    createConfigParam("Meta13:Delay",     '1', 0x7,  32,  0, 0); // Channel  3 delay              (unit:x100ns)
-    createConfigParam("Meta14:Delay",     '1', 0x8,  32,  0, 0); // Channel  4 delay              (unit:x100ns)
-    createConfigParam("Meta15:Delay",     '1', 0x9,  32,  0, 0); // Channel  5 delay              (unit:x100ns)
-    createConfigParam("Meta16:Delay",     '1', 0xA,  32,  0, 0); // Channel  6 delay              (unit:x100ns)
-    createConfigParam("Meta17:Delay",     '1', 0xB,  32,  0, 0); // Channel  7 delay              (unit:x100ns)
-    createConfigParam("Meta18:Delay",     '1', 0xC,  32,  0, 0); // Channel  8 delay              (unit:x100ns)
-    createConfigParam("Meta19:Delay",     '1', 0xD,  32,  0, 0); // Channel  9 delay              (unit:x100ns)
-    createConfigParam("Meta110:Delay",    '1', 0xE,  32,  0, 0); // Channel 10 delay              (unit:x100ns)
-    createConfigParam("Meta111:Delay",    '1', 0xF,  32,  0, 0); // Channel 11 delay              (unit:x100ns)
-    createConfigParam("Meta112:Delay",    '1', 0x10, 32,  0, 0); // Channel 12 delay              (unit:x100ns)
-    createConfigParam("Meta113:Delay",    '1', 0x11, 32,  0, 0); // Channel 13 delay              (unit:x100ns)
-    createConfigParam("Meta114:Delay",    '1', 0x12, 32,  0, 0); // Channel 14 delay              (unit:x100ns)
-    createConfigParam("Meta115:Delay",    '1', 0x13, 32,  0, 0); // Channel 15 delay              (unit:x100ns)
+    createConfigParam("Meta10:Delay",     '1', 0x4,  32,  0, 0); // Channel  0 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta11:Delay",     '1', 0x5,  32,  0, 0); // Channel  1 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta12:Delay",     '1', 0x6,  32,  0, 0); // Channel  2 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta13:Delay",     '1', 0x7,  32,  0, 0); // Channel  3 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta14:Delay",     '1', 0x8,  32,  0, 0); // Channel  4 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta15:Delay",     '1', 0x9,  32,  0, 0); // Channel  5 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta16:Delay",     '1', 0xA,  32,  0, 0); // Channel  6 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta17:Delay",     '1', 0xB,  32,  0, 0); // Channel  7 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta18:Delay",     '1', 0xC,  32,  0, 0); // Channel  8 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta19:Delay",     '1', 0xD,  32,  0, 0); // Channel  9 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta110:Delay",    '1', 0xE,  32,  0, 0); // Channel 10 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta111:Delay",    '1', 0xF,  32,  0, 0); // Channel 11 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta112:Delay",    '1', 0x10, 32,  0, 0); // Channel 12 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta113:Delay",    '1', 0x11, 32,  0, 0); // Channel 13 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta114:Delay",    '1', 0x12, 32,  0, 0); // Channel 14 delay              (scale:0.1,unit:us,prec:1)
+    createConfigParam("Meta115:Delay",    '1', 0x13, 32,  0, 0); // Channel 15 delay              (scale:0.1,unit:us,prec:1)
     createConfigParam("Meta0:Mode",       '1', 0x14,  2,  0, 0); // Channel 0 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
     createConfigParam("Meta1:Mode",       '1', 0x14,  2,  2, 0); // Channel 1 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
     createConfigParam("Meta2:Mode",       '1', 0x14,  2,  4, 0); // Channel 2 mode              (0=disabled,1=rising edge,2=falling edge,3=disabled)
@@ -75,7 +75,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Meta13:Mode",      '1', 0x14,  2, 26, 0); // Channel 13 mode             (0=disabled,1=rising edge,2=falling edge,3=both)
     createConfigParam("Meta14:Mode",      '1', 0x14,  2, 28, 0); // Channel 14 mode             (0=disabled,1=rising edge,2=falling edge,3=both)
     createConfigParam("Meta15:Mode",      '1', 0x14,  2, 30, 0); // Channel 15 mode             (0=disabled,1=rising edge,2=falling edge,3=both)
-    createConfigParam("AcqRate",          '1', 0x15,  8,  0, 60); // Acqisition Frame Rate                (unit:Hz)
+    createConfigParam("AcqRate",          '1', 0x15,  8,  0, 60); // Acqisition Frame Rate      (60=60Hz,30=30Hz,20=20Hz,15=15Hz,10=10Hz,5=5Hz,2=2Hz,1=1Hz)
     createConfigParam("Lvds1:Dis",        '1', 0x15,  1,  8, 0); // LVDS channel 1 disable      (0=enable,1=disable)
     createConfigParam("Lvds2:Dis",        '1', 0x15,  1,  9, 0); // LVDS channel 2 disable      (0=enable,1=disable)
     createConfigParam("Lvds3:Dis",        '1', 0x15,  1, 10, 0); // LVDS channel 3 disable      (0=enable,1=disable)
@@ -87,31 +87,31 @@ void DspPlugin::createParams_v71() {
     createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable (0=enable,1=disable)
     createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select (1=internal,0=acc timing)
     createConfigParam("Unused0",          '1', 0x16, 32,  0, 0); // Unused0
-    createConfigParam("LegacyTsyncDly",   '1', 0x17, 32,  0, 0); // Legacy Tsync Delay             (unit:x100ns)
+    createConfigParam("LegacyTsyncDly",   '1', 0x17, 32,  0, 0); // Legacy Tsync Delay             (scale:0.1,unit:us,prec:1)
     createConfigParam("LegacyEvLength",   '1', 0x18, 24,  0, 4); // Legacy Event Length            (unit:bytes)
     createConfigParam("LegacyDataFormat", '1', 0x18,  8, 24, 2); // Legacy Data Format
     createConfigParam("ClockCorrUpd",     '1', 0x19, 30,  0, 0); // DSP 40MHz Clock Corr Update
     createConfigParam("ClockCorrCtrl",    '1', 0x19,  2, 30, 0); // DSP 40MHz Clock Corr Ctrl (0=disable,1=disable,2=stall,3=advance)
-    createConfigParam("TclkClkSource",    '1', 0x1A,  2,  0, 0); // Tclk Clock Source (0=none,1=external,2=internal,3=else)
+    createConfigParam("TclkClkSource",    '1', 0x1A,  2,  0, 1); // Tclk Clock Source (0=none,1=external,2=internal,3=else)
     createConfigParam("DspClkSel",        '1', 0x1A,  1,  2, 0); // Dsp Clock Select (0=internal,1=external)
     createConfigParam("ChopperEquip",     '1', 0x1A,  1,  3, 0); // Chopper Equipment Select (0=AST,1=SKF)
-    createConfigParam("ChopperRate",      '1', 0x1A,  8,  4, 60); // Chopper Frame Rate                (unit:Hz)
-    createConfigParam("Lvds1TsyncSel",    '1', 0x1A,  1, 12, 0); // LVDS1 Tsync Select     (0=new format,1=legacy1)
-    createConfigParam("Lvds2TsyncSel",    '1', 0x1A,  1, 13, 0); // LVDS2 Tsync Select     (0=new format,1=legacy1)
-    createConfigParam("Lvds3TsyncSel",    '1', 0x1A,  1, 14, 0); // LVDS3 Tsync Select     (0=new format,1=legacy1)
-    createConfigParam("Lvds4TsyncSel",    '1', 0x1A,  1, 15, 0); // LVDS4 Tsync Select     (0=new format,1=legacy1)
-    createConfigParam("Lvds5TsyncSel",    '1', 0x1A,  1, 16, 0); // LVDS5 Tsync Select     (0=new format,1=legacy2)
-    createConfigParam("Lvds6TsyncSel",    '1', 0x1A,  1, 17, 0); // LVDS6 Tsync Select     (0=new format,1=legacy2)
+    createConfigParam("ChopperRate",      '1', 0x1A,  8,  4, 60); // Chopper Frame Rate    (60=60Hz,30=30Hz,20=20Hz,15=15Hz,10=10Hz,5=5Hz,2=2Hz,1=1Hz)
+    createConfigParam("Lvds1TsyncSel",    '1', 0x1A,  1, 12, 0); // LVDS1 Tsync Select     (0=new format,1=legacy)
+    createConfigParam("Lvds2TsyncSel",    '1', 0x1A,  1, 13, 0); // LVDS2 Tsync Select     (0=new format,1=legacy)
+    createConfigParam("Lvds3TsyncSel",    '1', 0x1A,  1, 14, 0); // LVDS3 Tsync Select     (0=new format,1=legacy)
+    createConfigParam("Lvds4TsyncSel",    '1', 0x1A,  1, 15, 0); // LVDS4 Tsync Select     (0=new format,1=legacy)
+    createConfigParam("Lvds5TsyncSel",    '1', 0x1A,  1, 16, 0); // LVDS5 Tsync Select     (0=new format,1=legacy)
+    createConfigParam("Lvds6TsyncSel",    '1', 0x1A,  1, 17, 0); // LVDS6 Tsync Select     (0=new format,1=legacy)
     createConfigParam("Unused1",          '1', 0x1B, 32,  0, 0); // Unused1     
-    createConfigParam("TrigDelay2",       '1', 0x1C, 32,  0, 0); // Trigger Delay2 
-    createConfigParam("TrigDelay3",       '1', 0x1D, 32,  0, 0); // Trigger Delay3   
-    createConfigParam("TrigFreqSel0",     '1', 0x1E,  4,  0, 0); // Trigger Frequency Select0  
-    createConfigParam("TrigFreqSel1",     '1', 0x1E,  4,  4, 0); // Trigger Frequency Select1
-    createConfigParam("TrigFreqSel2",     '1', 0x1E,  4,  8, 0); // Trigger Frequency Select2
-    createConfigParam("TrigFreqSel3",     '1', 0x1E,  4, 12, 0); // Trigger Frequency Select3 
+    createConfigParam("TrigDelay2",       '1', 0x1C, 32,  0, 0); // Trigger Delay2         (scale:0.0094117,unit:us,prec:1)
+    createConfigParam("TrigDelay3",       '1', 0x1D, 32,  0, 0); // Trigger Delay3         (scale:0.0094117,unit:us,prec:1)
+    createConfigParam("TrigFreqSel0",     '1', 0x1E,  4,  0, 0); // Trigger Frequency Select0 (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz) 
+    createConfigParam("TrigFreqSel1",     '1', 0x1E,  4,  4, 0); // Trigger Frequency Select1 (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
+    createConfigParam("TrigFreqSel2",     '1', 0x1E,  4,  8, 0); // Trigger Frequency Select2 (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
+    createConfigParam("TrigFreqSel3",     '1', 0x1E,  4, 12, 0); // Trigger Frequency Select3 (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("TrigWidthSel2",    '1', 0x1F,  4,  0, 0); // Trigger Width Select2  
     createConfigParam("TrigWidthSel3",    '1', 0x1F,  4,  4, 0); // Trigger Width Select3
-    createConfigParam("TrigFrameDelay1",  '1', 0x1F,  8, 24, 0); // Trigger Frame Delay1
+    createConfigParam("TrigFrameDelay1",  '1', 0x1F,  8, 24, 0); // Trigger Frame Delay1 (unit:frames)
     
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
