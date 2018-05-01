@@ -84,6 +84,8 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
                     add("num_events",       standardField->scalar(pvUInt, ""))->
                     add("time_of_flight",   standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("pixel",            standardField->scalarArray(epics::pvData::pvUInt, ""))->
+                    // proton_charge field is here temporarily until ADnED can use RtdlPlugin instead
+                    add("proton_charge",    standardField->scalar(pvDouble, "display"))->
                     createStructure()
             );
 
@@ -112,13 +114,18 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
             if (pvRecord->pvPixel.get() == NULL)
                 return PvaRecordPixel::shared_pointer();
 
+            // Again, temporarily here
+            pvRecord->pvProtonCharge = pvRecord->getPVStructure()->getSubField<epics::pvData::PVDouble>("proton_charge.value");
+            if (pvRecord->pvProtonCharge.get() == NULL)
+                return PvaRecordPixel::shared_pointer();
+
             return pvRecord;
         }
 
         /**
          * Publish a single atomic update of the PV, take values from packet.
          */
-        bool update(const DasDataPacket *packet, uint32_t &nEvents)
+        bool update(const DasDataPacket *packet, uint32_t &nEvents, double pCharge)
         {
             bool posted = false;
 
@@ -159,6 +166,10 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
                     mapped = true;
                     std::tie(nEvents, tofs, pixels) = getTofPixelsMapped<Event::BNL::Diag>(packet);
                     break;
+                case DasDataPacket::EVENT_FMT_TIME_CALIB:
+                    mapped = true;
+                    nEvents = 0;
+                    break;
                 default:
                     nEvents = 0;
                     return false;
@@ -190,6 +201,7 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntPtr        pvNumEvents;    //!< Number of events in tof,pixelid arrays
         epics::pvData::PVUIntArrayPtr   pvTimeOfFlight; //!< Time offset relative to time stamp
         epics::pvData::PVUIntArrayPtr   pvPixel;        //!< Pixel ID
+        epics::pvData::PVDoublePtr      pvProtonCharge; //!< Proton charge in for this pulse
 
 };
 
@@ -1998,10 +2010,10 @@ class PvaNeutronsPlugin::PvaRecordAroc : public epics::pvDatabase::PVRecord {
 };
 
 
-EPICS_REGISTER_PLUGIN(PvaNeutronsPlugin, 3, "Port name", string, "Parent plugins", string, "PVA records prefix", string);
+EPICS_REGISTER_PLUGIN(PvaNeutronsPlugin, 4, "Port name", string, "Parent data plugins", string, "Parent RTDL plugins", string, "PVA records prefix", string);
 
-PvaNeutronsPlugin::PvaNeutronsPlugin(const char *portName, const char *parentPlugins, const char *pvPrefix)
-    : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos, asynOctetMask, asynOctetMask)
+PvaNeutronsPlugin::PvaNeutronsPlugin(const char *portName, const char *dataPlugins, const char *rtdlPlugins, const char *pvPrefix)
+    : BasePlugin(portName, std::string(dataPlugins).find(',')!=std::string::npos, asynOctetMask, asynOctetMask)
 {
     int status = STATUS_READY;
 
@@ -2135,7 +2147,8 @@ PvaNeutronsPlugin::PvaNeutronsPlugin(const char *portName, const char *parentPlu
     createParam("Status", asynParamInt32, &Status, status);
     callParamCallbacks();
 
-    BasePlugin::connect(parentPlugins, MsgDasData);
+    BasePlugin::connect(dataPlugins, MsgDasData);
+    BasePlugin::connect(rtdlPlugins, MsgDasRtdl);
 }
 
 void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
@@ -2162,10 +2175,11 @@ void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
     int nMetaEvents  = -1;
     for (const auto &packet: packets) {
         uint32_t nEvents;
+        double pCharge = getProtonCharge(packet->getTimeStamp());
         switch (packet->getEventsFormat()) {
             case DasDataPacket::EVENT_FMT_ACPC_DIAG:
                 if (m_pixelRecord && pixelEn && pixelGood) {
-                    pixelGood = m_pixelRecord->update(packet, nEvents);
+                    pixelGood = m_pixelRecord->update(packet, nEvents, pCharge);
                     nPixelEvents = (nPixelEvents == -1 ? nEvents : nPixelEvents + nEvents);
                 }
                 // fall-thru
@@ -2184,7 +2198,7 @@ void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
             case DasDataPacket::EVENT_FMT_BNL_VERBOSE:
             case DasDataPacket::EVENT_FMT_BNL_DIAG:
                 if (m_pixelRecord && pixelEn && pixelGood) {
-                    pixelGood = m_pixelRecord->update(packet, nEvents);
+                    pixelGood = m_pixelRecord->update(packet, nEvents, pCharge);
                     nPixelEvents = (nPixelEvents == -1 ? nEvents : nPixelEvents + nEvents);
                 }
                 // fall-thru
@@ -2197,7 +2211,7 @@ void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
             case DasDataPacket::EVENT_FMT_LPSD_VERBOSE:
             case DasDataPacket::EVENT_FMT_LPSD_DIAG:
                 if (m_pixelRecord && pixelEn && pixelGood) {
-                    pixelGood = m_pixelRecord->update(packet, nEvents);
+                    pixelGood = m_pixelRecord->update(packet, nEvents, pCharge);
                     nPixelEvents = (nPixelEvents == -1 ? nEvents : nPixelEvents + nEvents);
                 }
                 // fall-thru
@@ -2209,14 +2223,22 @@ void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
                 break;
             case DasDataPacket::EVENT_FMT_PIXEL:
                 if (m_pixelRecord && pixelEn && pixelGood) {
-                    pixelGood = m_pixelRecord->update(packet, nEvents);
+                    pixelGood = m_pixelRecord->update(packet, nEvents, pCharge);
                     nPixelEvents = (nPixelEvents == -1 ? nEvents : nPixelEvents + nEvents);
                 }
                 break;
             case DasDataPacket::EVENT_FMT_META:
                 if (m_metaRecord && metaEn && metaGood) {
-                    metaGood = m_metaRecord->update(packet, nEvents);
+                    metaGood = m_metaRecord->update(packet, nEvents, pCharge);
                     nMetaEvents = (nMetaEvents == -1 ? nEvents : nMetaEvents + nEvents);
+                }
+                break;
+            case DasDataPacket::EVENT_FMT_TIME_CALIB:
+                // Use this event type as a heartbeat signal used for proton
+                // charge counting only. No events are pushed to pixel record.
+                if (m_pixelRecord && pixelEn && pixelGood) {
+                    pixelGood = m_pixelRecord->update(packet, nEvents, pCharge);
+                    nPixelEvents = (nPixelEvents == -1 ? nEvents : nPixelEvents + nEvents);
                 }
                 break;
             default:
@@ -2300,3 +2322,32 @@ void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
     callParamCallbacks();
 }
 
+void PvaNeutronsPlugin::recvDownstream(const RtdlPacketList &packets)
+{
+    for (auto &packet: packets) {
+        bool found = false;
+        for (auto it = m_pChargeFifo.begin(); it != m_pChargeFifo.end(); it++) {
+            if (it->first == packet->getTimeStamp()) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            m_pChargeFifo.push_front(std::make_pair(packet->getTimeStamp(), packet->getProtonCharge()));
+            // Does queue size need to be configurable?
+            if (m_pChargeFifo.size() > 20) {
+                m_pChargeFifo.pop_back();
+            }
+        }
+    }
+}
+
+double PvaNeutronsPlugin::getProtonCharge(const epicsTime &timestamp)
+{
+    for (auto it = m_pChargeFifo.begin(); it != m_pChargeFifo.end(); it++) {
+        if (it->first == timestamp) {
+            return it->second;
+        }
+    }
+    return 0;
+}
