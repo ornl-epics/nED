@@ -33,6 +33,7 @@ class DumpPlugin : public BasePlugin {
     private: // variables
         int m_fd = -1;      //!< File handle for an opened file, or -1
         bool m_fdIsPipe;    //!< true when opened file is a named pipe
+        std::string m_parentPlugins;
 
     public: // functions
         /**

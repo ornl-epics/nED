@@ -36,6 +36,7 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins
     : BasePlugin(portName, 1, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
     , m_tableSizeX(0)
     , m_tableSizeY(0)
+    , m_parentPlugins(parentPlugins)
 {
     createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
     createParam("ImportStatus", asynParamInt32, &ImportStatus, IMPORT_STATUS_NONE); // Import status
@@ -397,11 +398,15 @@ float FlatFieldPlugin::importFilesCb(const std::string &path)
     // So let's unsubscribe temporarily from receiving any data
     bool enabled = this->isConnected();
     if (enabled) {
+        this->unlock();
         this->disconnect();
+        this->lock();
     }
     importFiles(path);
     if (enabled) {
-        this->connect();
+        this->unlock();
+        this->connect(m_parentPlugins, MsgDasData);
+        this->lock();
     }
     m_importTimer.reset();
     return 0.0;

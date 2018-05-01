@@ -132,11 +132,6 @@ class BasePlugin : public asynPortDriver {
         bool connect(const std::string &ports, const std::list<int> &messageTypes);
 
         /**
-         * Connect to same ports and message type as last time.
-         */
-        bool connect();
-
-        /**
          * Connect to one or many parent plugins.
          *
          * Helper functions accepting comma-separated string of remote ports.
@@ -595,6 +590,7 @@ class BasePlugin : public asynPortDriver {
         struct RemotePort {
             std::string pluginName;                 //!< Name of connected port
             asynUser *pasynuser;                    //!< asynUser handler for asyn management
+            int messageType;                        //!< Message type
             void *asynGenericPointerInterrupt;      //!< Generic pointer interrupt handler
         };
 
@@ -604,8 +600,6 @@ class BasePlugin : public asynPortDriver {
         Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
         std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
-        std::list<std::string> m_lastConnectedPlugins; //!< Names of ports used for last connection
-        std::list<int> m_lastConnectedTypes;        //!< Message types used for last connection
 
     protected:
         int MsgOldDas;

@@ -304,6 +304,7 @@ class FlatFieldPlugin : public BasePlugin {
         double m_psScale;           //!< Scaling factor to convert unsigned UQm.n 32 bit value into double
         Counters m_counters;        //!< Global event counters
         ObjectPool<DasDataPacket> m_packetsPool{true};  //!< Pool of allocated data packets to store modified data
+        std::string m_parentPlugins;//!< Parent plugins to connect to
 
         int ImportReport;   //!< Generate textual file import report
         int ImportStatus;   //!< Import status
