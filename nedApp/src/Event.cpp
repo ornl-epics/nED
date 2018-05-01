@@ -12,10 +12,6 @@
 
 namespace Event {
 
-PixelType getPixelType(uint32_t pixel) {
-    return static_cast<PixelType>(pixel >> 28);
-}
-
 namespace BNL {
     Diag& Diag::operator=(const Raw &raw) {
         // Use memcpy() for efficiency

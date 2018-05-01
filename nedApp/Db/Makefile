@@ -36,6 +36,7 @@ DB += PulsedMagnet.db
 #DB += BnlPosCalcPlugin.db
 #DB += CRocPosCalcPlugin.db
 DB += PvaNeutronsPlugin.db
+DB += StateAnalyzerPlugin.db
 
 DB += DspPlugin_v51.db
 DB += DspPlugin_v52.db
