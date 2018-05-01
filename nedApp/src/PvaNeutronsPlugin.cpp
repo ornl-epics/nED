@@ -44,7 +44,6 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
             for (uint32_t i = 0; i < nEvents; i++) {
                 tofs[i]   = events[i].tof;
                 pixels[i] = events[i].pixelid;
-                events++;
             }
             return std::make_tuple(nEvents, tofs, pixels);
         }
@@ -60,7 +59,6 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
             for (uint32_t i = 0; i < nEvents; i++) {
                 tofs[i]   = events[i].tof;
                 pixels[i] = events[i].mapped_pixelid;
-                events++;
             }
             return std::make_tuple(nEvents, tofs, pixels);
         }
@@ -219,7 +217,6 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
             for (uint32_t i = 0; i < nEvents; i++) {
                 tofs[i]   = events[i].tof;
                 pixels[i] = events[i].pixelid;
-                events++;
             }
             return std::make_tuple(nEvents, tofs, pixels);
         }
@@ -792,7 +789,6 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
                     sample_y15[i] = events[i].sample_y15;
                     sample_y16[i] = events[i].sample_y16;
                     sample_y17[i] = events[i].sample_y17;
-                    events++;
                 }
             } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
                 const Event::BNL::Diag *events = packet->getEvents<Event::BNL::Diag>();
@@ -842,7 +838,6 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
                     sample_y15[i]   = events[i].sample_y15;
                     sample_y16[i]   = events[i].sample_y16;
                     sample_y17[i]   = events[i].sample_y17;
-                    events++;
                 }
             } else {
                 nEvents = 0;
@@ -1345,8 +1340,6 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
                     photon_count_g12[i] = events[i].photon_count_g[11];
                     photon_count_g13[i] = events[i].photon_count_g[12];
                     photon_count_g14[i] = events[i].photon_count_g[13];
-
-                    events++;
                 }
             } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_CROC_DIAG) {
                 const Event::CROC::Diag *events = packet->getEvents<Event::CROC::Diag>();
@@ -1395,7 +1388,6 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
                     photon_count_g12[i] = events[i].photon_count_g[11];
                     photon_count_g13[i] = events[i].photon_count_g[12];
                     photon_count_g14[i] = events[i].photon_count_g[13];
-                    events++;
                 }
             } else {
                 nEvents = 0;
@@ -1656,7 +1648,6 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                     corrected_ys[i] = -1;
                     photo_sum_x[i]  = events[i].photo_sum_x;
                     photo_sum_y[i]  = events[i].photo_sum_y;
-                    events++;
                 }
             } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_ACPC_DIAG) {
                 const Event::ACPC::Diag *events = packet->getEvents<Event::ACPC::Diag>();
@@ -1671,7 +1662,6 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                     corrected_ys[i] = 1.0 * events[i].corrected_y;
                     photo_sum_x[i]  = 1.0 * events[i].photo_sum_x / (1 << 15);
                     photo_sum_y[i]  = 1.0 * events[i].photo_sum_y / (1 << 15);
-                    events++;
                 }
             } else {
                 nEvents = 0;
@@ -1942,7 +1932,6 @@ class PvaNeutronsPlugin::PvaRecordAroc : public epics::pvDatabase::PVRecord {
                         sample_b7[i]  = events[i].sample_b[1];
                         sample_b8[i]  = events[i].sample_b[0];
                     }
-                    events++;
                 }
             } else {
                 nEvents = 0;

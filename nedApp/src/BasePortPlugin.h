@@ -104,6 +104,11 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         std::unique_ptr<Thread> m_processThread;        //!< Thread processing data from buffer
         BaseCircularBuffer *m_circularBuffer = nullptr; //!< Derived class must provide circular buffer
 
+        /**
+         * Dump part of data from buffer.
+         */
+        void dump(const char *data, uint32_t len);
+
     private:
         unsigned m_sendId = 0;                          //!< Output packets sequence number
         unsigned m_recvId = 0;                          //!< Last received packet sequence number
@@ -122,11 +127,6 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
          */
         void processDataThread(epicsEvent *shutdown);
 
-        /**
-         * Dump part of data from buffer.
-         */
-        void dump(const char *data, uint32_t len);
-
     protected:
         int BufUsed;
         int BufSize;
@@ -134,6 +134,7 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         int ProcRate;
         int OldPktsEn;
         int EventsFmt;
+        int DumpCmdPkts;
 };
 
 #endif // BASE_PORT_PLUGIN_H

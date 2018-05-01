@@ -27,6 +27,7 @@ BasePortPlugin::BasePortPlugin(const char *pluginName, int blocking, int interfa
     createParam("ProcRate",         asynParamInt32,     &ProcRate);                 // READ - Data processing throughput in B/s
     createParam("OldPktsEn",        asynParamInt32,     &OldPktsEn, 0);             // WRITE - Enable support for old DAS 1.0 packets
     createParam("EventsFmt",        asynParamInt32,     &EventsFmt, 0);             // WRITE - Data type when not defined in packet (DAS 1.0 only)
+    createParam("DumpCmdPkts",      asynParamInt32,     &DumpCmdPkts, 0);           // WRITE - When enabled, dump inbound and outbound packets to console in hex format
     callParamCallbacks();
 
     m_processThread = std::unique_ptr<Thread>(new Thread(
@@ -119,6 +120,10 @@ void BasePortPlugin::recvUpstream(const DasCmdPacketList &packets)
                 Packet *packet = new (m_sendBuffer.data()) Packet(p);
                 packet->setSequenceId(++m_sendId % 255);
 
+                if (getBooleanParam(DumpCmdPkts) == true) {
+                    LOG_DEBUG("Sending command packet");
+                    dump((const char*)packet, packet->getLength());
+                }
                 if (packet && !send(m_sendBuffer.data(), packet->getLength())) {
                     LOG_ERROR("Failed to send packet");
                     break;
@@ -280,6 +285,11 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
                         dasCmd.push_back(cmdPacket);
                     else
                         LOG_WARN("Discarding DAS command packet, integrity check failed");
+
+                    if (getBooleanParam(DumpCmdPkts) == true) {
+                        LOG_DEBUG("Received command packet");
+                        dump((const char*)cmdPacket, cmdPacket->getLength());
+                    }
                 }
                 break;
             case Packet::TYPE_ERROR:
