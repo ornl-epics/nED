@@ -281,6 +281,15 @@ asynStatus BasePlugin::writeGenericPointer(asynUser *pasynUser, void *ptr)
     return asynSuccess;
 }
 
+asynStatus BasePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (pasynUser->reason == MsgParamExch) {
+        ParamsExch *p = reinterpret_cast<ParamsExch *>(pasynUser->userData);
+        return this->recvParam(p->portName, p->paramName, value);
+    }
+    return asynPortDriver::writeInt32(pasynUser, value);
+}
+
 void BasePlugin::recvUpstream(int type, PluginMessage *msg)
 {
     if (type == MsgOldDas) {

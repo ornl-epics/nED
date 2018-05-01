@@ -428,6 +428,24 @@ class BasePlugin : public asynPortDriver {
         bool sendParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value);
 
         /**
+         * Handle the receiving of int32 parameter from another plugin.
+         *
+         * This function relies being called from writeInt32. When derived plugin
+         * overrides writeInt32 but wants to receive parameters from other plugins,
+         * it needs to invoke BasePlugin::writeInt32.
+         * 
+         * @param[in] remotePort name of the remote plugin.
+         * @param[in] paramName name of the parameter
+         * @param[in] value of the parameter
+         * @return Re-implemented function should return asynSuccess when it handled
+         *         the parameter, or asynError otherwise (error or not supported param).
+         */
+        virtual asynStatus recvParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value)
+        {
+            return asynError;
+        };
+
+        /**
          * Returns the value for an integer from the parameter library.
          *
          * Convenience function to look by parameter name that only works for
@@ -538,12 +556,17 @@ class BasePlugin : public asynPortDriver {
         asynStatus addIntegerParam(int param, int increment);
 
         /**
-         * Overloaded asynPortDriver function to receive messges from child plugins.
+         * Overloaded asynPortDriver function to receive messages from child plugins.
          *
          * To comply with name terminology in this class, the functions is a
          * simple wrapper around cbDownstream().
          */
-        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
+        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer) override;
+
+        /**
+         * Overloaded asynPortDriver function to receive parameters from other plugins.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
     private:
         /**
