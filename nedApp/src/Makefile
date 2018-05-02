@@ -117,6 +117,7 @@ $(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v05.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v06.cpp
+$(PROD_NAME)_SRCS  += AdcRocPlugin_v07.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin_v24.cpp

@@ -151,8 +151,19 @@ class AdcRocPlugin : public BaseModulePlugin {
 
         /**
          * Create and register all ADCROC v0.6 parameters to be exposed to EPICS.
+         *
+         * ADC ROC 0.6 is the first firmware supporting new timing protocol between
+         * DSP 7 and ROC.
          */
         void createParams_v06();
+
+        /**
+         * Create and register all ADCROC v0.7 parameters to be exposed to EPICS.
+         *
+         * ADC ROC 0.7 is the first one with 4 time domains that can be assigned
+         * to input channels.
+         */
+        void createParams_v07();
 };
 
 #endif // ADC_ROC_PLUGIN_H
