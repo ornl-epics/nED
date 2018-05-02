@@ -34,12 +34,13 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
         /**
          * Upgraded std::list holding Events, always sorted if sortedInsert() used.
          */
-        class EventList : public std::list<Event::Pixel> {
+        template <typename T>
+        class EventList : public std::list<T> {
             public:
                 /**
-                 * Insert event to the sorted list.
+                 * Sorted insert based on event->tof field.
                  */
-                void sortedInsert(const Event::Pixel &event);
+                void sortedInsert(const T &event);
         };
 
         struct DeviceInfo {
@@ -53,8 +54,9 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
         };
         struct PulseEvents {
             epicsTime timestamp;
-            EventList neutrons;
-            EventList states;
+            EventList<Event::Pixel> pixel_neutrons;
+            EventList<Event::BNL::Diag> bnl_neutrons;
+            EventList<Event::Pixel> states;
             PulseEvents(epicsTime timestamp_, uint32_t nSignals)
                 : timestamp(timestamp_) {}
         };
@@ -99,25 +101,6 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
     private:
 
         /**
-         * Process all events from a single frame and send them on.
-         *
-         * It first calculates combined states for each device transition
-         * and projects the time of flight to the nominal distance. It
-         * saves combined states in a sorted array.
-         *
-         * It then iterates over neutron events and correlates each event
-         * to the combined state. It modifies pixel id only and encodes
-         * combined state number to the higher bits in pixelid.
-         * 
-         * It can be run from a separate thread.
-         * 
-         * @param pulseEvents
-         * @param neutrons
-         * @param states
-         */
-        void processEvents(PulseEvents &pulseEvents, Event::Pixel *neutrons, Event::Pixel *states);
-
-        /**
          * Return pixel id distance from moderator.
          * 
          * For now always return the nominal value, but in the future we could
@@ -137,6 +120,56 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
          * meta.
          */
         void processThread(epicsEvent *shutdown);
+
+        /**
+         * Process all events from a single frame and send them to subscribed plugins.
+         *
+         * Invokes calcCombinedStates() and tagPixelIds() functions. Puts
+         * the results into DasDataPacket's and send them to subscribed
+         * plugins. It reflects current state through PVs.
+         * 
+         * It can be run from a separate thread.
+         */
+        void processEvents(PulseEvents &pulseEvents);
+
+        /**
+         * Calculate combined state events
+         *
+         * Iterates through a list of signal events that were
+         * previously sorted based on their time-of-flight projected to the
+         * same nominal distance. It converts signal events pixel ids
+         * into combined state events using a mask in m_statePixelMask.
+         * Veto states are flagged with 0x100 bit.
+         *
+         * states array is modified in place, but for optimization reasons
+         * the events are also copied to outEvents raw array which needs to
+         * be pre-allocated and big enough to accomodate all events.
+         *
+         * state and vetostate are input and output parameters and are used
+         * for keeping track of the states in between the pulses or invokations
+         * to this function. When this function returns, the values reflect
+         * the last calculated state.
+         */
+        void calcCombinedStates(EventList<Event::Pixel> &states, Event::Pixel *outEvents, uint32_t &state, uint32_t &vetostate);
+
+        /**
+         * Tag pixelid with the state information.
+         *
+         * This is a templated function that works for all types of events
+         * that contain pixelid field. Function uses m_state and m_vetostate
+         * so be careful modifying those object variables.
+         *
+         * Walks through all events and correlates them to the pre-calculated
+         * combined states. It puts the combined state information in the
+         * upper bits of each pixel id where the bit location is defined by
+         * m_bitOffset. State veto is flagged in pixel id as bit 27.
+         *
+         * events array is modified in place, but for optimization reasons
+         * the events are also copied to outEvents raw array which needs to
+         * be pre-allocated and big enough to accomodate all events.
+         */
+        template <typename T>
+        void tagPixelIds(EventList<T> &events, const EventList<Event::Pixel> &states, T *outEvents);
 
     private:
         int Status;             // Plugin overall status
