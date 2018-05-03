@@ -124,14 +124,14 @@ void AdcRocPlugin::createParams_v07()
     createCounterParam("RateOut",           0x3D, 16,  0);  // Board total events ratemeter
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-    createConfigParam("Dig1:PositionIdx",   '1', 0x0,  32, 0, 0x50000000);  // Chan1 Digital position index
-    createConfigParam("Dig2:PositionIdx",   '1', 0x2,  32, 0, 0x50010000);  // Chan2 Digital position index
-    createConfigParam("Dig3:PositionIdx",   '1', 0x4,  32, 0, 0x50020000);  // Chan3 Digital position index
-    createConfigParam("Dig4:PositionIdx",   '1', 0x6,  32, 0, 0x50030000);  // Chan4 Digital position index
-    createConfigParam("Dig5:PositionIdx",   '1', 0x8,  32, 0, 0x50040000);  // Chan5 Digital position index
-    createConfigParam("Dig6:PositionIdx",   '1', 0xA,  32, 0, 0x50050000);  // Chan6 Digital position index
-    createConfigParam("Dig7:PositionIdx",   '1', 0xC,  32, 0, 0x50060000);  // Chan7 Digital position index
-    createConfigParam("Dig8:PositionIdx",   '1', 0xE,  32, 0, 0x50070000);  // Chan8 Digital position index
+    createConfigParam("Dig1:PositionIdx",   '1', 0x0,  32, 0, 0x50000000); // Chan1 Digital position index
+    createConfigParam("Dig2:PositionIdx",   '1', 0x2,  32, 0, 0x50010000); // Chan2 Digital position index
+    createConfigParam("Dig3:PositionIdx",   '1', 0x4,  32, 0, 0x50020000); // Chan3 Digital position index
+    createConfigParam("Dig4:PositionIdx",   '1', 0x6,  32, 0, 0x50030000); // Chan4 Digital position index
+    createConfigParam("Dig5:PositionIdx",   '1', 0x8,  32, 0, 0x50040000); // Chan5 Digital position index
+    createConfigParam("Dig6:PositionIdx",   '1', 0xA,  32, 0, 0x50050000); // Chan6 Digital position index
+    createConfigParam("Dig7:PositionIdx",   '1', 0xC,  32, 0, 0x50060000); // Chan7 Digital position index
+    createConfigParam("Dig8:PositionIdx",   '1', 0xE,  32, 0, 0x50070000); // Chan8 Digital position index
     createConfigParam("Adc1:PositionIdx",   '1', 0x10, 32, 0, 0x60000000); // Chan1 ADC position index
     createConfigParam("Adc2:PositionIdx",   '1', 0x12, 32, 0, 0x60010000); // Chan2 ADC position index
     createConfigParam("Adc3:PositionIdx",   '1', 0x14, 32, 0, 0x60020000); // Chan3 ADC position index
@@ -140,7 +140,6 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("Adc6:PositionIdx",   '1', 0x1A, 32, 0, 0x60050000); // Chan6 ADC position index
     createConfigParam("Adc7:PositionIdx",   '1', 0x1C, 32, 0, 0x60060000); // Chan7 ADC position index
     createConfigParam("Adc8:PositionIdx",   '1', 0x1E, 32, 0, 0x60070000); // Chan8 ADC position index
-    createConfigParam("PositionIdxBus",     '1', 0x20, 32, 0, 0);          // Pos Index bus *** UNUSED ***
 
     createConfigParam("Adc1:Threshold",     'C', 0x0, 16,  0, 10);  // Chan1 ADC Threshold
     createConfigParam("Adc2:Threshold",     'C', 0x1, 16,  0, 10);  // Chan2 ADC Threshold
@@ -159,7 +158,7 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("Dig5:Mode",          'C', 0xB,  2,  8, 0);   // Chan5 Digital mode
     createConfigParam("Dig6:Mode",          'C', 0xB,  2, 10, 0);   // Chan6 Digital mode
     createConfigParam("Dig7:Mode",          'C', 0xB,  2, 12, 0);   // Chan7 Digital mode
-//  createConfigParam("Dig8:Mode",          'C', 0xB,  2, 14, 0);   // Chan7 Digital mode UNUSED
+    createConfigParam("Dig8:Mode",          'C', 0xB,  2, 14, 0);   // Chan8 Digital mode
 
     createConfigParam("AdcOversampling",    'D', 0x0,  3,  0, 0);   // ADC Oversampling
     createConfigParam("MPAlwaysReady",      'D', 0x0,  1,  3, 0);   // MP Always Ready
