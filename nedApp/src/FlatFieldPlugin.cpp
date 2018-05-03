@@ -34,13 +34,12 @@ EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Parent plugins",
 
 FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins, const char *positions, int bufSize)
     : BasePlugin(portName, 1, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
-    , m_tableSizeX(0)
-    , m_tableSizeY(0)
     , m_parentPlugins(parentPlugins)
 {
     createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
     createParam("ImportStatus", asynParamInt32, &ImportStatus, IMPORT_STATUS_NONE); // Import status
     createParam("ImportDir",    asynParamOctet, &ImportDir);            // Path to correction tables directory
+    createParam("NumPositions", asynParamInt32, &NumPositions, 0);      // READ - All tables Y size
     createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);     // Number of calculated events
     createParam("CntPosVetos",  asynParamInt32, &CntPosVetos, 0);       // Number of bad position vetos
     createParam("CntRangeVetos",asynParamInt32, &CntRangeVetos, 0);     // Number of bad X,Y range vetos
@@ -54,8 +53,8 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins
     createParam("YMaxIn",       asynParamFloat64, &YMaxIn, 158.0);      // WRITE - Defines input Y range
     createParam("XMaxOut",      asynParamInt32, &XMaxOut, 511);         // WRITE - Converted max X value
     createParam("YMaxOut",      asynParamInt32, &YMaxOut, 511);         // WRITE - Converted max Y value
-    createParam("TablesSizeX",  asynParamInt32, &TablesSizeX, (int)m_tableSizeX); // READ - All tables X size
-    createParam("TablesSizeY",  asynParamInt32, &TablesSizeY, (int)m_tableSizeY); // READ - All tables Y size
+    createParam("TablesSizeX",  asynParamInt32, &TablesSizeX, 0);       // READ - All tables X size
+    createParam("TablesSizeY",  asynParamInt32, &TablesSizeY, 0);       // READ - All tables Y size
 
     std::vector<std::string> positions_ = Common::split(positions, ',');
     for (auto it=positions_.begin(); it!=positions_.end(); it++) {
@@ -90,6 +89,7 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins
         PosPsLowX[position_id] = param;
     }
 
+    setIntegerParam(NumPositions, positions_.size());
     callParamCallbacks();
 
     BasePlugin::connect(parentPlugins, MsgDasData);
@@ -274,6 +274,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
     DasDataPacket *packet = m_packetsPool.get(DasDataPacket::getLength(DasDataPacket::EVENT_FMT_BNL_DIAG, nEvents));
     if (packet != nullptr) {
         packet->init(DasDataPacket::EVENT_FMT_BNL_DIAG, timestamp, nEvents, srcEvents);
+        packet->setEventsCorrected(true);
         Event::BNL::Diag *events = packet->getEvents<Event::BNL::Diag>();
 
         while (nEvents-- > 0) {
@@ -300,7 +301,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
             events++;
         }
     }
-    return std::make_pair(packet, counters);
+    return std::make_pair(packet, std::move(counters));
 }
 
 std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEvents(const epicsTimeStamp &timestamp, const Event::ACPC::Normal *srcEvents, uint32_t nEvents) {
@@ -308,6 +309,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
     DasDataPacket *packet = m_packetsPool.get(DasDataPacket::getLength(DasDataPacket::EVENT_FMT_ACPC_DIAG, nEvents));
     if (packet != nullptr) {
         packet->init(DasDataPacket::EVENT_FMT_ACPC_DIAG, timestamp, nEvents);
+        packet->setEventsCorrected(true);
         Event::ACPC::Diag *events = packet->getEvents<Event::ACPC::Diag>();
 
         while (nEvents-- > 0) {
@@ -575,6 +577,8 @@ void FlatFieldPlugin::importFiles(const std::string &path_)
         setIntegerParam(PosEnable[it->second.position_id], it->second.enabled);
     }
     setIntegerParam(ImportStatus, IMPORT_STATUS_DONE);
+    setIntegerParam(TablesSizeX, (int)m_tableSizeX);
+    setIntegerParam(TablesSizeY, (int)m_tableSizeY);
     callParamCallbacks();
 }
 
@@ -601,4 +605,33 @@ void FlatFieldPlugin::report(FILE *fp, int details)
     fwrite(positionsReport.c_str(), 1, positionsReport.length(), fp);
     fwrite(m_importReport.c_str(), 1, m_importReport.length(), fp);
     return BasePlugin::report(fp, details);
+}
+
+FlatFieldPlugin::Counters::Counters()
+{
+    reset();
+}
+
+void FlatFieldPlugin::Counters::reset()
+{
+    m_map.clear();
+    m_map[VETO_NO]              = 0;
+    m_map[VETO_NO]              = 0;
+    m_map[VETO_POSITION]        = 0;
+    m_map[VETO_RANGE]           = 0;
+    m_map[VETO_POSITION_CFG]    = 0;
+    m_map[VETO_PHOTOSUM]        = 0;
+}
+
+FlatFieldPlugin::Counters &FlatFieldPlugin::Counters::operator+=(const FlatFieldPlugin::Counters &rhs)
+{
+    for (auto it = rhs.m_map.begin(); it != rhs.m_map.end(); it++) {
+        m_map[it->first] += it->second;
+    }
+    return *this;
+}
+
+uint32_t &FlatFieldPlugin::Counters::operator[](VetoType index)
+{
+    return m_map[index];
 }

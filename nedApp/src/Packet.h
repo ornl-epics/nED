@@ -396,6 +396,22 @@ class DasDataPacket : public Packet {
         void setEventsMapped(bool m) {
             mapped = m;
         }
+
+        /**
+         * Have all events in packet been corrected?
+         * @return true/false
+         */
+        bool getEventsCorrected() const {
+            return corrected;
+        }
+
+        /**
+         * Set or clear corrected flag.
+         * @param c true/false
+         */
+        void setEventsCorrected(bool c) {
+            corrected = c;
+        }
 };
 
 class RtdlPacket : public Packet {

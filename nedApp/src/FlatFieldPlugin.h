@@ -105,31 +105,14 @@ class FlatFieldPlugin : public BasePlugin {
          * It's easier to parallelize and more effiecient than passing arguments
          * by reference.
          */
-        class Counters : public std::map<VetoType, uint32_t> {
+        class Counters {
+            private:
+                std::map<VetoType, uint32_t> m_map;
             public:
-                Counters()
-                {
-                    reset();
-                }
-
-                Counters &operator+=(const Counters &rhs)
-                {
-                    at(VETO_NO)             += rhs.at(VETO_NO);
-                    at(VETO_POSITION)       += rhs.at(VETO_POSITION);
-                    at(VETO_RANGE)          += rhs.at(VETO_RANGE);
-                    at(VETO_POSITION_CFG)   += rhs.at(VETO_POSITION_CFG);
-                    at(VETO_PHOTOSUM)       += rhs.at(VETO_PHOTOSUM);
-                    return *this;
-                }
-
-                void reset()
-                {
-                    at(VETO_NO)             = 0;
-                    at(VETO_POSITION)       = 0;
-                    at(VETO_RANGE)          = 0;
-                    at(VETO_POSITION_CFG)   = 0;
-                    at(VETO_PHOTOSUM)       = 0;
-                }
+                Counters();
+                void reset();
+                Counters &operator+=(const Counters &rhs);
+                uint32_t &operator[](VetoType index);
         };
 
     public: // structures and defines
@@ -288,8 +271,8 @@ class FlatFieldPlugin : public BasePlugin {
         std::string generatePositionsReport();
 
     private: // variables
-        uint32_t m_tableSizeX;      //!< X dimension size of all tables
-        uint32_t m_tableSizeY;      //!< Y dimension size of all tables
+        uint32_t m_tableSizeX{0};   //!< X dimension size of all tables
+        uint32_t m_tableSizeY{0};   //!< Y dimension size of all tables
         std::map<uint32_t, PositionTables> m_tables; //!< Map of lookup tables/number of detectors is usually small so hashing should be somewhat equally fast as vector, index is pixel_offset
         std::string m_importReport; //!< Text to be printed when asynReport() is called
         std::shared_ptr<Timer> m_importTimer; //!< Timer is used as a worker thread for importing files
@@ -309,6 +292,7 @@ class FlatFieldPlugin : public BasePlugin {
         int ImportReport;   //!< Generate textual file import report
         int ImportStatus;   //!< Import status
         int ImportDir;      //!< Absolute path to pixel map file
+        int NumPositions;   //!< Number of configured positions
         int CntGoodEvents;  //!< Number of calculated events
         int CntPosVetos;    //!< Number of bad position vetos
         int CntRangeVetos;  //!< Number of bad X,Y range vetos
