@@ -117,7 +117,7 @@ void AdcRocPlugin::createParams_v07()
     createCounterParam("Adc2:RateEvents",   0x36, 16,  0);  // ADC1 events ratemeter
     createCounterParam("Adc3:RateEvents",   0x37, 16,  0);  // ADC2 events ratemeter
     createCounterParam("Adc4:RateEvents",   0x38, 16,  0);  // ADC3 events ratemeter
-    createCounterParam("Adc5:RateEvents",   0x39, 16,  0);  // ADC4 events ratemeter
+    createCounterParam("Adc5:RateEvents",   0x39, 16,  0);  // ADC4 events ratemeter<UCAMS ID>
     createCounterParam("Adc6:RateEvents",   0x3A, 16,  0);  // ADC5 events ratemeter
     createCounterParam("Adc7:RateEvents",   0x3B, 16,  0);  // ADC6 events ratemeter
     createCounterParam("Adc8:RateEvents",   0x3C, 16,  0);  // ADC7 events ratemeter
@@ -183,13 +183,13 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("Adc8:RateCoef",      'D', 0x8, 16,  0, 1000); // Chan8 ADC Rate Coefficient
 
     createConfigParam("Adc1:TsyncSrc",      'D', 0x9,  2,  0,  0);  // TOF source for ADC ch 0          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc1:TsyncSrc",      'D', 0x9,  2,  4,  0);  // TOF source for ADC ch 1          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc2:TsyncSrc",      'D', 0x9,  2,  8,  0);  // TOF source for ADC ch 2          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc3:TsyncSrc",      'D', 0x9,  2, 12, 0);   // TOF source for ADC ch 3          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc4:TsyncSrc",      'D', 0xA,  2,  0,  0);  // TOF source for ADC ch 4          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc5:TsyncSrc",      'D', 0xA,  2,  4,  0);  // TOF source for ADC ch 5          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc6:TsyncSrc",      'D', 0xA,  2,  8,  0);  // TOF source for ADC ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc7:TsyncSrc",      'D', 0xA,  2, 12, 0);   // TOF source for ADC ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc2:TsyncSrc",      'D', 0x9,  2,  4,  0);  // TOF source for ADC ch 1          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc3:TsyncSrc",      'D', 0x9,  2,  8,  0);  // TOF source for ADC ch 2          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc4:TsyncSrc",      'D', 0x9,  2, 12, 0);   // TOF source for ADC ch 3          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc5:TsyncSrc",      'D', 0xA,  2,  0,  0);  // TOF source for ADC ch 4          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc6:TsyncSrc",      'D', 0xA,  2,  4,  0);  // TOF source for ADC ch 5          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc7:TsyncSrc",      'D', 0xA,  2,  8,  0);  // TOF source for ADC ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc8:TsyncSrc",      'D', 0xA,  2, 12, 0);   // TOF source for ADC ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
 
     createConfigParam("Dig1:TsyncSrc",      'D', 0xB,  2,  0,  0);  // TOF source for Dig ch 0          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
     createConfigParam("Dig2:TsyncSrc",      'D', 0xB,  2,  4,  0);  // TOF source for Dig ch 1          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
