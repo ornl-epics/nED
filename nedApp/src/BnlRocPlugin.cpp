@@ -13,9 +13,9 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(BnlRocPlugin, 4, "Port name", string,
+EPICS_REGISTER_PLUGIN(BnlRocPlugin, 5, "Port name", string,
         "Parent plugins", string, "Hardware ID", string,
-        "Hw & SW version", string);
+        "Hw & SW version", string, "BnlPosCalc plugin", string);
 
 /**
  * BNL ROC version response format
@@ -34,9 +34,10 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-BnlRocPlugin::BnlRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
+BnlRocPlugin::BnlRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version, const char *posCalcPortName)
     : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_BNLROC, 2)
     , m_version(version)
+    , m_posCalcPort(posCalcPortName)
 {
     if (0) {
     } else if (m_version == "v00") {
@@ -82,6 +83,13 @@ bool BnlRocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin:
     version.fw_day      = HEX_BYTE_TO_DEC(response->day);
 
     return true;
+}
+
+asynStatus BnlRocPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (!m_posCalcPort.empty())
+        BasePlugin::sendParam(m_posCalcPort, getParamName(pasynUser->reason), value);
+    return BaseModulePlugin::writeInt32(pasynUser, value);
 }
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in

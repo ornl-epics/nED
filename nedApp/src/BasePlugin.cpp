@@ -80,17 +80,24 @@ BasePlugin::~BasePlugin()
     disconnect();
 }
 
-bool BasePlugin::connect()
-{
-    return connect(m_lastConnectedPlugins, m_lastConnectedTypes);
-}
-
 bool BasePlugin::connect(const std::list<std::string> &plugins, const std::list<int> &messageTypes)
 {
-    disconnect();
 
     for (auto it=plugins.begin(); it!=plugins.end(); it++) {
         for (auto jt=messageTypes.begin(); jt!= messageTypes.end(); jt++) {
+
+            // Check if already connected
+            bool connected = false;
+            for (auto kt=m_connectedPorts.begin(); kt != m_connectedPorts.end(); kt++) {
+                if (kt->pluginName == *it && kt->messageType == *jt) {
+                    connected = true;
+                    break;
+                }
+            }
+            if (connected) {
+                LOG_WARN("Already connected to this plugin %s with message type %d", it->c_str(), *jt);
+                continue;
+            }
 
             asynUser *pasynuser = pasynManager->createAsynUser(0, 0);
             if (pasynuser == 0) {
@@ -132,14 +139,12 @@ bool BasePlugin::connect(const std::list<std::string> &plugins, const std::list<
 
             RemotePort port;
             port.pluginName = *it;
+            port.messageType = *jt;
             port.pasynuser = pasynuser;
             port.asynGenericPointerInterrupt = asynGenericPointerInterrupt;
             m_connectedPorts.push_back(port);
         }
     }
-
-    m_lastConnectedPlugins = plugins;
-    m_lastConnectedTypes = messageTypes;
 
     LOG_DEBUG("Connected to parent plugins: %s", std::accumulate(plugins.begin(), plugins.end(), std::string(",")).substr(1).c_str());
     return true;
@@ -279,6 +284,15 @@ asynStatus BasePlugin::writeGenericPointer(asynUser *pasynUser, void *ptr)
 
     recvUpstream(msgType, msg);
     return asynSuccess;
+}
+
+asynStatus BasePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+{
+    if (pasynUser->reason == MsgParamExch) {
+        ParamsExch *p = reinterpret_cast<ParamsExch *>(pasynUser->userData);
+        return this->recvParam(p->portName, p->paramName, value);
+    }
+    return asynPortDriver::writeInt32(pasynUser, value);
 }
 
 void BasePlugin::recvUpstream(int type, PluginMessage *msg)

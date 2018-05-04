@@ -157,10 +157,6 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
 
     DasDataPacketList sendPackets;
     for (const auto &packet: packets) {
-        // Pass meta and other events un-processed
-        if (packet->getEventsFormat() != DasDataPacket::EVENT_FMT_PIXEL)
-            sendPackets.push_back(packet);
-
         // This is assuming that packet timestamps are monotonically
         // increasing or same. It uses that knowledge to optimize
         // cache access to always insert at the beginning for
@@ -177,45 +173,64 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
             cached = m_cache.begin();
         }
 
-        // Meta events are used here but not changed - will not send again
-        if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_PIXEL ||
-            packet->getEventsFormat() == DasDataPacket::EVENT_FMT_META) {
+        if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_PIXEL) {
+            auto event = packet->getEvents<Event::Pixel>();
+            uint32_t nEvents = packet->getNumEvents();
+            while (nEvents-- > 0) {
+                cached->pixel_neutrons.sortedInsert(*event);
+                event++;
+            }
+        } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
+            auto event = packet->getEvents<Event::BNL::Diag>();
+            uint32_t nEvents = packet->getNumEvents();
+            while (nEvents-- > 0) {
+                cached->bnl_neutrons.sortedInsert(*event);
+                event++;
+            }
+        } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_META) {
+            // Meta events are used here but not changed - will not send again
+            sendPackets.push_back(packet);
 
-            // Separate out signal events
+            // Normalize TOF to nominal distance and put in sorted array
             const Event::Pixel *event = packet->getEvents<Event::Pixel>();
             uint32_t nEvents = packet->getNumEvents();
             while (nEvents-- > 0) {
-                if (event->getType() == Event::Pixel::Type::NEUTRON) {
-                    cached->neutrons.sortedInsert(*event);
-                } else {
-                    uint32_t pixelid = event->pixelid; // optimization: put event->pixelid to local CPU register
-                    for (size_t i = 0; i < m_devices.size(); i++) {
-                        if (!m_devices[i].enabled)
-                            continue;
+                uint32_t pixelid = event->pixelid; // optimization: put event->pixelid to local CPU register
+                for (size_t i = 0; i < m_devices.size(); i++) {
+                    if (!m_devices[i].enabled)
+                        continue;
 
-                        if (pixelid == m_devices[i].pixelOn || pixelid == m_devices[i].pixelOff) {
+                    if (pixelid == m_devices[i].pixelOn || pixelid == m_devices[i].pixelOff) {
 
-                            Event::Pixel state_event;
-                            state_event.tof = lround(event->tof * (m_distance / m_devices[i].distance));
-                            state_event.pixelid = ((pixelid == m_devices[i].pixelOn ? 0x1 : 0x0) << 28);
-                            state_event.pixelid |= i;
+                        Event::Pixel state_event;
+                        state_event.tof = lround(event->tof * (m_distance / m_devices[i].distance));
+                        state_event.pixelid = ((pixelid == m_devices[i].pixelOn ? 0x1 : 0x0) << 28);
+                        state_event.pixelid |= i;
 
-                            cached->states.sortedInsert(state_event);
-                            break;
-                        }
-                        if (pixelid == m_devices[i].pixelVetoOn || pixelid == m_devices[i].pixelVetoOff) {
+                        cached->states.sortedInsert(state_event);
+                        break;
+                    }
+                    if (pixelid == m_devices[i].pixelVetoOn || pixelid == m_devices[i].pixelVetoOff) {
 
-                            Event::Pixel state_event;
-                            state_event.tof = lround(event->tof * (m_distance / m_devices[i].distance));
-                            state_event.pixelid = ((pixelid == m_devices[i].pixelVetoOn ? 0x3 : 0x2) << 28);
-                            state_event.pixelid |= i;
+                        Event::Pixel state_event;
+                        state_event.tof = lround(event->tof * (m_distance / m_devices[i].distance));
+                        state_event.pixelid = ((pixelid == m_devices[i].pixelVetoOn ? 0x3 : 0x2) << 28);
+                        state_event.pixelid |= i;
 
-                            cached->states.sortedInsert(state_event);
-                            break;
-                        }
+                        cached->states.sortedInsert(state_event);
+                        break;
                     }
                 }
                 event++;
+            }
+        } else {
+            // Pass other events un-processed
+            sendPackets.push_back(packet);
+
+            static bool logged = false;
+            if (!logged) {
+                LOG_WARN("StateAnalyzerPlugin setup but some events in this environment are not supported!");
+                logged = true;
             }
         }
 
@@ -224,7 +239,7 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
         uint8_t retries = 0;
         while (m_cache.size() > m_maxCacheLen) {
             if (m_processQue.size() < m_maxCacheLen) {
-                if (m_cache.back().neutrons.size() > 0 || m_cache.back().states.size() >0) {
+                if (!m_cache.back().pixel_neutrons.empty() || !m_cache.back().bnl_neutrons.empty() || !m_cache.back().states.empty()) {
                     m_processQue.enqueue(std::move(m_cache.back()));
                 }
                 m_cache.pop_back();
@@ -245,53 +260,132 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
     }
 }
 
-void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents, Event::Pixel *neutrons, Event::Pixel *states) {
-    // We'll need these in the neutron pixel changing loop,
-    // it's important to capture before m_state and m_vetostate
-    // are modified by the combined state loop.
-    uint8_t state = m_state;
-    uint32_t veto = (m_vetostate != 0x0 ? PIXEL_STATE_VETO_MASK : 0x0);
+void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
+{
+    // We need to make local copies for calcCombinedStates to modify it.
+    // Because we need previous pulse values in tagPixelIds()
+    uint32_t state = m_state;
+    uint32_t vetostate = m_vetostate;
 
-    // First convert raw signals to combined state events.
-    // Assumption: the state array is pre-sorted
-    for (auto state_event = pulseEvents.states.begin(); state_event != pulseEvents.states.end(); state_event++) {
+    do {
+        DasDataPacketList packets;
+
+        // Calculate combined states
+        auto statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META,  pulseEvents.states.size())   );
+        if (statesPkt) {
+            packets.push_back(statesPkt.get());
+            statesPkt->init(  DasDataPacket::EVENT_FMT_META,  pulseEvents.timestamp, pulseEvents.states.size());
+            calcCombinedStates(pulseEvents.states, statesPkt->getEvents<Event::Pixel>(), state, vetostate);
+        } else {
+            this->lock();
+            setIntegerParam(Status, 0);
+            setStringParam(StatusText, "Insufficent memory");
+            callParamCallbacks();
+            LOG_ERROR("Failed to allocate output packets for combined states from pool");
+            this->unlock();
+            break;
+        }
+
+        // Tag pixel ids in regular Event::Pixel format
+        std::shared_ptr<DasDataPacket> pixelsPkt;
+        if (!pulseEvents.pixel_neutrons.empty()) {
+            pixelsPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.pixel_neutrons.size()) );
+            if (pixelsPkt) {
+                packets.push_back(pixelsPkt.get());
+                pixelsPkt->init(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.timestamp, pulseEvents.pixel_neutrons.size());
+                tagPixelIds<Event::Pixel>(pulseEvents.pixel_neutrons, pulseEvents.states, pixelsPkt->getEvents<Event::Pixel>());
+            } else {
+                this->lock();
+                setIntegerParam(Status, 0);
+                setStringParam(StatusText, "Insufficent memory");
+                callParamCallbacks();
+                LOG_ERROR("Failed to allocate output packets for neutron events from pool");
+                this->unlock();
+                break;
+            }
+        }
+
+        // Tag pixel ids in Event::BNL::Diag format
+        std::shared_ptr<DasDataPacket> bnlPkt;
+        if (!pulseEvents.bnl_neutrons.empty()) {
+            bnlPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.bnl_neutrons.size()) );
+            if (bnlPkt) {
+                packets.push_back(bnlPkt.get());
+                bnlPkt->init(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.timestamp, pulseEvents.bnl_neutrons.size());
+                tagPixelIds<Event::BNL::Diag>(pulseEvents.bnl_neutrons, pulseEvents.states, bnlPkt->getEvents<Event::BNL::Diag>());
+            } else {
+                this->lock();
+                setIntegerParam(Status, 0);
+                setStringParam(StatusText, "Insufficent memory");
+                callParamCallbacks();
+                LOG_ERROR("Failed to allocate output packets for neutron events from pool");
+                this->unlock();
+                break;
+            }
+        }
+
+        // Now we can change those to be used in the next run round.
+        m_state = state;
+        m_vetostate = vetostate;
+
+        // Send packets and update status
+        this->lock();
+        sendDownstream(packets);
+        setIntegerParam(State, state);
+        setIntegerParam(Vetoing, vetostate != 0x0);
+        callParamCallbacks();
+        this->unlock();
+    } while (false);
+}
+
+void StateAnalyzerPlugin::calcCombinedStates(EventList<Event::Pixel> &states, Event::Pixel *outEvents, uint32_t &state, uint32_t &vetostate) {
+
+    for (auto state_event = states.begin(); state_event != states.end(); state_event++) {
         uint32_t i = state_event->pixelid & 0xFF;
         assert(i < m_devices.size());
 
         switch (state_event->pixelid >> 28) {
         case 0x0: // state OFF
-            m_state &= ~(1 << m_devices[i].bitOffset);
+            state &= ~(1 << m_devices[i].bitOffset);
             break;
         case 0x1: // state ON
-            m_state |= (1 << m_devices[i].bitOffset);
+            state |= (1 << m_devices[i].bitOffset);
             break;
         case 0x2: // veto OFF
-            m_vetostate &= ~(1 << m_devices[i].bitOffset);
+            vetostate &= ~(1 << m_devices[i].bitOffset);
             break;
         case 0x3: // veto ON
-            m_vetostate |= (1 << m_devices[i].bitOffset);
+            vetostate |= (1 << m_devices[i].bitOffset);
             break;
         default:
             break;
         }
 
-        state_event->pixelid = m_statePixelMask | m_state;
-        if (m_vetostate != 0x0)
+        state_event->pixelid = m_statePixelMask | state;
+        if (vetostate != 0x0)
             state_event->pixelid |= 0x100;
 
-        *states = *state_event;
-        states++;
+        // Copy to output array
+        *outEvents = *state_event;
+        outEvents++;
     }
-    
-    // Double loop but the complexity of this entire function is really just O(Nneutrons+Nstates)
-    // If Nneutrons is a huge number, the outer loop can be split between multiple threads
-    auto state_event = pulseEvents.states.begin();
-    for (auto event = pulseEvents.neutrons.begin(); event != pulseEvents.neutrons.end(); event++) {
+}
+
+template <typename T>
+void StateAnalyzerPlugin::tagPixelIds(EventList<T> &events, const EventList<Event::Pixel> &states, T *outEvents)
+{
+    uint32_t state = m_state;
+    uint32_t veto = (m_vetostate != 0x0 ? PIXEL_STATE_VETO_MASK : 0x0);
+
+    // Double loop but the complexity of this entire function is really just O(Nevents+Nstates)
+    // If Nevents is a huge number, the outer loop can be split between multiple threads
+    auto state_event = states.begin();
+    for (auto event = events.begin(); event != events.end(); event++) {
         // Project this event time of flight to the nominal distance domain
         // so that we only have to calculate it once per event.
         uint32_t tof = lround(m_distance * (event->tof / getPixelDistance(event->pixelid)));
 
-        while (state_event != pulseEvents.states.end()) {
+        while (state_event != states.end()) {
             if (state_event->tof > tof) {
                 break;
             }
@@ -299,10 +393,11 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents, Event::Pixel *
             veto = ((state_event->pixelid & 0x100) ? PIXEL_STATE_VETO_MASK : 0x0);
             state_event++;
         }
+        event->pixelid |= (state << m_bitOffset) | veto;
 
-        neutrons->tof = event->tof;
-        neutrons->pixelid = event->pixelid | (state << m_bitOffset) | veto;
-        neutrons++;
+        // Copy to output array
+        *outEvents = *event;
+        outEvents++;
     }
 }
 
@@ -317,42 +412,14 @@ void StateAnalyzerPlugin::processThread(epicsEvent *shutdown)
     while (shutdown->tryWait() == false) {
         PulseEvents pulseEvents(epicsTimeStamp(), 0);
         if (m_processQue.deque(pulseEvents, 0.1)) {
-            // Allocate outgoing packets from pool
-            auto neutronsPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.neutrons.size()) );
-            auto statesPkt   = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META,  pulseEvents.states.size())   );
-
-            if (neutronsPkt && statesPkt) {
-                neutronsPkt->init(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.timestamp, pulseEvents.neutrons.size());
-                statesPkt->init(  DasDataPacket::EVENT_FMT_META,  pulseEvents.timestamp, pulseEvents.states.size());
-                
-                // Do the heavy lifting
-                processEvents(pulseEvents, neutronsPkt->getEvents<Event::Pixel>(), statesPkt->getEvents<Event::Pixel>());
-
-                // And finally send 2 packets out
-                DasDataPacketList packets;
-                packets.push_back(neutronsPkt.get());
-                packets.push_back(statesPkt.get());
-
-                this->lock();
-                sendDownstream(packets);
-                setIntegerParam(State, m_state);
-                setIntegerParam(Vetoing, m_vetostate != 0x0);
-                callParamCallbacks();
-                this->unlock();
-            } else {
-                this->lock();
-                setIntegerParam(Status, 0);
-                setStringParam(StatusText, "Insufficent memory");
-                callParamCallbacks();
-                this->unlock();
-                LOG_ERROR("Failed to allocate output packets from pool");
-            }
+            processEvents(pulseEvents);
         }
     }
     LOG_DEBUG("Processing thread exiting");
 }
 
-void StateAnalyzerPlugin::EventList::sortedInsert(const Event::Pixel &event) {
+template <typename T>
+void StateAnalyzerPlugin::EventList<T>::sortedInsert(const T &event) {
     for (auto it = this->rbegin(); it != this->rend(); it++) {
         if (event.tof >= it->tof) {
             this->insert(it.base(), event);

@@ -278,20 +278,15 @@ bool DasDataPacket::checkIntegrity() const
 uint32_t DasDataPacket::getEventsSize(DasDataPacket::EventFormat format)
 {
     switch (format) {
-        case EVENT_FMT_INVALID:      return 1;
         case EVENT_FMT_META:         return sizeof(Event::Pixel);
         case EVENT_FMT_PIXEL:        return sizeof(Event::Pixel);
-        case EVENT_FMT_LPSD_RAW:     return 4; // TODO
-        case EVENT_FMT_LPSD_VERBOSE: return 4; // TODO
-        case EVENT_FMT_ACPC_XY_PS:   return 4; // TODO
-        case EVENT_FMT_ACPC_RAW:     return 4; // TODO
-        case EVENT_FMT_ACPC_VERBOSE: return 4; // TODO
-        case EVENT_FMT_AROC_RAW:     return 4; // TODO
-        case EVENT_FMT_BNL_XY:       return 4; // TODO
         case EVENT_FMT_BNL_RAW:      return sizeof(Event::BNL::Raw);
         case EVENT_FMT_BNL_VERBOSE:  return sizeof(Event::BNL::Verbose);
-        case EVENT_FMT_CROC_RAW:     return 4; // TODO
-        case EVENT_FMT_CROC_VERBOSE: return 4; // TODO
-        default:                     return 4;
+        case EVENT_FMT_BNL_DIAG:     return sizeof(Event::BNL::Diag);
+        case EVENT_FMT_ACPC_XY_PS:   return sizeof(Event::ACPC::Normal);
+        case EVENT_FMT_ACPC_DIAG:    return sizeof(Event::ACPC::Diag);
+        case EVENT_FMT_TIME_CALIB:   return sizeof(Event::Pixel);
+        default:
+            throw std::runtime_error("Packet::getEventsSize() not implemented for requested format");
     }
 }

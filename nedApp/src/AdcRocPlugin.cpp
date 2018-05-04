@@ -53,6 +53,10 @@ AdcRocPlugin::AdcRocPlugin(const char *portName, const char *parentPlugins, cons
         setIntegerParam(Supported, 1);
         createParams_v06();
         setExpectedVersion(0, 6);
+    } else if (m_version == "v07") {
+        setIntegerParam(Supported, 1);
+        createParams_v07();
+        setExpectedVersion(0, 7);
     }  else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ADC ROC version '%s'", version);

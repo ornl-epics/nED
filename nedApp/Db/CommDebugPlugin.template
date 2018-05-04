@@ -238,14 +238,6 @@ record(stringout, "$(P)ReqModule")
     field(DTYP, "asynOctetWrite")
     field(OUT,  "@asyn($(PORT))ReqModule")
 }
-record(ai, "$(P)ReqTimeStamp")
-{
-    info(asyn:READBACK, "1")
-    field(DTYP, "asynFloat64")
-    field(DESC, "Response time")
-    field(INP,  "@asyn($(PORT))ReqTimeStamp")
-    field(EGU,  "ms")
-}
 record(longout, "$(P)ReqRaw0")
 {
     info(asyn:READBACK, "1")
@@ -464,7 +456,7 @@ record(longin, "$(P)RspCmdRsp")
 record(longin, "$(P)RspCmdVer")
 {
     field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))RspAck")
+    field(INP,  "@asyn($(PORT))RspCmdVer")
     field(SCAN, "I/O Intr")
 }
 record(stringin, "$(P)RspCmdModule")

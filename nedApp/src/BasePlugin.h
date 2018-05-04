@@ -132,11 +132,6 @@ class BasePlugin : public asynPortDriver {
         bool connect(const std::string &ports, const std::list<int> &messageTypes);
 
         /**
-         * Connect to same ports and message type as last time.
-         */
-        bool connect();
-
-        /**
          * Connect to one or many parent plugins.
          *
          * Helper functions accepting comma-separated string of remote ports.
@@ -428,6 +423,24 @@ class BasePlugin : public asynPortDriver {
         bool sendParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value);
 
         /**
+         * Handle the receiving of int32 parameter from another plugin.
+         *
+         * This function relies being called from writeInt32. When derived plugin
+         * overrides writeInt32 but wants to receive parameters from other plugins,
+         * it needs to invoke BasePlugin::writeInt32.
+         * 
+         * @param[in] remotePort name of the remote plugin.
+         * @param[in] paramName name of the parameter
+         * @param[in] value of the parameter
+         * @return Re-implemented function should return asynSuccess when it handled
+         *         the parameter, or asynError otherwise (error or not supported param).
+         */
+        virtual asynStatus recvParam(const std::string &remotePort, const std::string &paramName, epicsInt32 value)
+        {
+            return asynError;
+        };
+
+        /**
          * Returns the value for an integer from the parameter library.
          *
          * Convenience function to look by parameter name that only works for
@@ -538,12 +551,17 @@ class BasePlugin : public asynPortDriver {
         asynStatus addIntegerParam(int param, int increment);
 
         /**
-         * Overloaded asynPortDriver function to receive messges from child plugins.
+         * Overloaded asynPortDriver function to receive messages from child plugins.
          *
          * To comply with name terminology in this class, the functions is a
          * simple wrapper around cbDownstream().
          */
-        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer);
+        asynStatus writeGenericPointer(asynUser *pasynUser, void *pointer) override;
+
+        /**
+         * Overloaded asynPortDriver function to receive parameters from other plugins.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
     private:
         /**
@@ -572,6 +590,7 @@ class BasePlugin : public asynPortDriver {
         struct RemotePort {
             std::string pluginName;                 //!< Name of connected port
             asynUser *pasynuser;                    //!< asynUser handler for asyn management
+            int messageType;                        //!< Message type
             void *asynGenericPointerInterrupt;      //!< Generic pointer interrupt handler
         };
 
@@ -581,8 +600,6 @@ class BasePlugin : public asynPortDriver {
         Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
         std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
-        std::list<std::string> m_lastConnectedPlugins; //!< Names of ports used for last connection
-        std::list<int> m_lastConnectedTypes;        //!< Message types used for last connection
 
     protected:
         int MsgOldDas;

@@ -31,6 +31,7 @@ ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, co
     , m_outCfg(false)
     , m_disableTimer(true)
     , m_dbPath(dbPath)
+    , m_parentPlugins(parentPlugins)
 {
     // Allocate and initialize text buffers
     m_bufferTxt = (char *)malloc(BUFFER_SIZE);
@@ -86,9 +87,11 @@ asynStatus ModulesPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         // been issued. Usually responses come back in under a second.
         m_disableTimer.cancel();
         if (!isConnected()) {
-            connect();
+            this->unlock();
+            connect(m_parentPlugins, {MsgDasCmd});
+            this->lock();
         }
-        std::function<float(void)> disableCb = [this](){ lock(); disconnect(); unlock(); return 0; };
+        std::function<float(void)> disableCb = [this](){ disconnect(); return 0; };
         m_disableTimer.schedule(disableCb, 10);
 
         m_discovered.clear();

@@ -1,18 +1,21 @@
 include "BasePlugin.include"
 
-record(calc, "$(P)StatusCalc")
+record(calcout, "$(P)StatusCalc")
 {
-    field(INPA, "$(P)Enable.SEVR")
-    field(CALC, "(A)=0")
-    field(FLNK, "$(P)Status")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Flat field plugin status")
+    field(INPA, "$(P)ImportStatus.SEVR NPP")
+    field(CALC, "A=0?1:A=1?2:0")
+    field(OUT,  "$(P)Status PP")
+    field(FLNK, "$(P)StatusTextCalc")
 }
-record(bi, "$(P)Status")
+record(scalcout, "$(P)StatusTextCalc")
 {
-    field(DESC, "FlatField plugin status")
-    field(ZNAM, "Not OK")
-    field(ONAM, "OK")
-    field(ZSV,  "MAJOR")
-    field(INP,  "$(P)StatusCalc")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Flat field plugin status")
+    field(INAA, "$(P)ImportStatus.SEVR NPP")
+    field(CALC, "AA")
+    field(OUT,  "$(P)StatusText PP")
 }
 record(mbbi, "$(P)ImportStatus")
 {
@@ -28,6 +31,10 @@ record(mbbi, "$(P)ImportStatus")
     field(ONST, "Error")
     field(TWST, "In progress")
     field(THST, "Done")
+    field(ZRSV, "MINOR")
+    field(ONSV, "MAJOR")
+    field(TWSV, "MINOR")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(waveform, "$(P)ImportReport")
 {
@@ -46,6 +53,13 @@ record(waveform, "$(P)ImportDir")
     field(INP,  "@asyn($(PORT))ImportDir")
     field(FTVL, "CHAR")
     field(NELM, "1024")
+    field(PINI, "YES")
+}
+record(longin, "$(P)NumPositions")
+{
+    field(DESC, "Number of configured positions")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))NumPositions")
     field(PINI, "YES")
 }
 
@@ -199,15 +213,17 @@ record(longout, "$(P)PsFractWidth")
 }
 record(longin, "$(P)TablesSizeX")
 {
-    field(DESC, "All tables number of Xs")
+    field(DESC, "Size X of all tables")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))TablesSizeX")
-    field(PINI, "YES")
+    field(VAL,  "0")
+    field(SCAN, "I/O Intr")
 }
 record(longin, "$(P)TablesSizeY")
 {
-    field(DESC, "All tables number of Ys")
+    field(DESC, "Size Y of all tables")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))TablesSizeY")
-    field(PINI, "YES")
+    field(VAL,  "0")
+    field(SCAN, "I/O Intr")
 }

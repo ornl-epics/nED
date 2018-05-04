@@ -19,6 +19,7 @@ EPICS_REGISTER_PLUGIN(DumpPlugin, 2, "Port name", string, "Parent plugins", stri
 
 DumpPlugin::DumpPlugin(const char *portName, const char *parentPlugins)
     : BasePlugin(portName, 1, asynOctetMask, asynOctetMask)
+    , m_parentPlugins(parentPlugins)
 {
     createParam("Enable",           asynParamInt32, &Enable, 0);         // WRITE - Enable saving data - master switch
     createParam("FilePath",         asynParamOctet, &FilePath);          // WRITE - Path to file where to save all received data
@@ -171,7 +172,9 @@ asynStatus DumpPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == Enable) {
         if (value == 0) {
             closeFile();
+            this->unlock();
             disconnect();
+            this->lock();
         } else {
             char path[1024];
 
@@ -182,7 +185,9 @@ asynStatus DumpPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             if (getStringParam(FilePath, sizeof(path), path) == asynSuccess) {
                 if (!openFile(path, getBooleanParam(Overwrite)))
                     return asynError;
-                connect();
+                this->unlock();
+                connect(m_parentPlugins, {MsgDasData, MsgDasCmd, MsgDasRtdl, MsgError, MsgOldDas});
+                this->lock();
             }
         }
         return asynSuccess;

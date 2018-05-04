@@ -172,6 +172,7 @@ class BaseModulePlugin : public BasePlugin {
         std::list<std::function<bool(const DasCmdPacket *)> > m_stateMachines; //!< Active internal state machines
         epicsTime m_connStaleTime;                      //!< Time when connection becomes candidate to close, used for book-keeping the connection
         Timer m_connTimer;                              //!< Periodic timer to check whether connection can be closed.
+        std::string m_parentPlugins;                    //!< Parent plugins to connect to
 
     public: // functions
 

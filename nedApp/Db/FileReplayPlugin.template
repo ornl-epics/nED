@@ -72,12 +72,10 @@ record(waveform, "$(P)FilePath")
     field(FTVL, "CHAR")
     field(NELM, "256")
 }
-record(mbbo, "$(P)Speed")
+record(mbbo, "$(P)SpeedMenu")
 {
     field(DESC, "Replay speed")
     field(PINI, "YES")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))Speed")
     field(VAL,  "3")
     field(ZRVL, "1")
     field(ZRST, "0.1x")
@@ -99,6 +97,24 @@ record(mbbo, "$(P)Speed")
     field(EIST, "5x")
     field(NIVL, "100")
     field(NIST, "10x")
+    field(TEVL, "1000000")
+    field(TEST, "full speed")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)SpeedScale.A PP")
+}
+record(calcout, "$(P)SpeedScale")
+{
+    field(CALC, "A/10")
+    field(OUT,  "$(P)Speed PP")
+}
+record(ao, "$(P)Speed")
+{
+    field(DESC, "Replay speed as number")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))Speed")
+    field(DRVL, "0.1")
+    field(DRVH, "10000")
+    field(PREC, "1")
 }
 record(longout, "$(P)MaxPackets")
 {

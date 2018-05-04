@@ -43,6 +43,11 @@ class epicsShareFunc FileReplayPlugin : public BasePortPlugin {
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
         /**
+         * Overloaded method.
+         */
+        asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value) override;
+
+        /**
          * Send data to socket.
          */
         bool send(const uint8_t *data, size_t len) override;

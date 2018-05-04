@@ -21,7 +21,7 @@ namespace BNL {
         corrected_x = -1.0;
         corrected_y = -1.0;
         position = raw.position;
-        mapped_pixelid = 0;
+        pixelid_raw = 0;
 
         return *this;
     }
@@ -34,7 +34,7 @@ namespace ACPC {
         corrected_x = -1.0;
         corrected_y = -1.0;
         pixelid = 0;
-        mapped_pixelid = 0;
+        pixelid_raw = 0;
 
         return *this;
     }

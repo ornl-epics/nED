@@ -83,6 +83,7 @@ class ModulesPlugin : public BasePlugin {
         std::map<uint32_t, ModuleDesc> m_discovered;    //!< Map of modules discovered, key is module's hardware id
         Timer m_disableTimer;                           //!< Timer to trigger disabling the module after inactivity timeout
         std::string m_dbPath;                           //!< detectors.substition file path
+        std::string m_parentPlugins;                    //!< Parent plugins to connect to
 
     public:
         /**

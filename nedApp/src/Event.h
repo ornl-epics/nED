@@ -78,7 +78,7 @@ namespace Event {
          * Event structure that includes everything about event, generated and used by software only.
          */
         struct Diag : public Verbose {
-            uint32_t mapped_pixelid;
+            uint32_t pixelid_raw;
 
             /**
              * Copy fields from Raw event.
@@ -206,7 +206,7 @@ namespace Event {
             double corrected_x;     // Interpolated and corrected X position
             double corrected_y;     // Interpolated and corrected Y position
             uint32_t position;      // Detector id
-            uint32_t mapped_pixelid;// Mapped pixel id
+            uint32_t pixelid_raw;   // Mapped pixel id
 
             /**
              * Copy fields from Raw event.
@@ -277,7 +277,7 @@ namespace Event {
             double y;               // Interpolated Y position
             double corrected_x;     // Interpolated and corrected X position
             double corrected_y;     // Interpolated and corrected Y position
-            uint32_t mapped_pixelid;// Mapped pixel id
+            uint32_t pixelid_raw;   // Mapped pixel id
 
             /**
              * Copy fields from Raw event.
@@ -311,7 +311,7 @@ namespace Event {
             double corrected_x;     // Interpolated and corrected X position
             double corrected_y;     // Interpolated and corrected Y position
             uint32_t pixelid;       // Pixel id
-            uint32_t mapped_pixelid;// Mapped pixel id
+            uint32_t pixelid_raw;   // Mapped pixel id
 
             /**
              * Copy fields from Raw event.

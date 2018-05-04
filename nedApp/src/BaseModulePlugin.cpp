@@ -56,6 +56,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     , m_numChannels(0)
     , m_wordSize(wordSize)
     , m_connTimer(false)
+    , m_parentPlugins(parentPlugins)
 {
     // DSP uses 4 byte words, everybody else 2 bytes
     assert(wordSize==2 || wordSize==4);
@@ -109,7 +110,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == CmdReq) {
         if (!processRequest(static_cast<DasCmdPacket::CommandType>(value)))
             return asynError;
-        return asynSuccess;
+        return asynSuccess; 
     }
     if (pasynUser->reason == CfgSection) {
         if (value < 0x0 || value > 0xF) {
@@ -168,8 +169,11 @@ bool BaseModulePlugin::processRequest(DasCmdPacket::CommandType command)
     callParamCallbacks();
 
     do {
-        if (!isConnected())
-            connect();
+        if (!isConnected()) {
+            this->unlock();
+            connect(m_parentPlugins, {MsgDasCmd});
+            this->lock();
+        }
 
         m_waitingResponse = handleRequest(command, timeout);
 
@@ -1295,10 +1299,11 @@ void BaseModulePlugin::getModuleNames(std::list<std::string> &modules)
 
 float BaseModulePlugin::checkConnection()
 {
-    lock();
-    if (isConnected() && m_connStaleTime < epicsTime::getCurrent()) {
+    this->lock();
+    bool cleanup = (isConnected() && m_connStaleTime < epicsTime::getCurrent());
+    this->unlock();
+    if (cleanup) {
         disconnect();
     }
-    unlock();
     return std::max(CONN_CLOSE_TIMEOUT, 0.5f) + 0.1;
 }

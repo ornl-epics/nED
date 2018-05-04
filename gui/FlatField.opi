@@ -18,7 +18,6 @@
   <height>600</height>
   <macros>
     <include_parent_macros>true</include_parent_macros>
-    <P>$(BL):$(TA):$(D):</P>
   </macros>
   <name>Flat field</name>
   <rules />
@@ -347,7 +346,7 @@
       <name>Text Update_390</name>
       <precision>0</precision>
       <precision_from_pv>true</precision_from_pv>
-      <pv_name>$(P)pos1:Id</pv_name>
+      <pv_name>$(P)pos0:Id</pv_name>
       <pv_value />
       <rotation_angle>0.0</rotation_angle>
       <rules />
@@ -399,7 +398,7 @@ $(pv_value)</tooltip>
       <name>Text Update_391</name>
       <precision>0</precision>
       <precision_from_pv>true</precision_from_pv>
-      <pv_name>$(P)pos1:CorrX</pv_name>
+      <pv_name>$(P)pos0:CorrX</pv_name>
       <pv_value />
       <rotation_angle>0.0</rotation_angle>
       <rules />
@@ -451,7 +450,7 @@ $(pv_value)</tooltip>
       <name>Text Update_392</name>
       <precision>0</precision>
       <precision_from_pv>true</precision_from_pv>
-      <pv_name>$(P)pos1:CorrY</pv_name>
+      <pv_name>$(P)pos0:CorrY</pv_name>
       <pv_value />
       <rotation_angle>0.0</rotation_angle>
       <rules />
@@ -503,7 +502,7 @@ $(pv_value)</tooltip>
       <name>Text Update_393</name>
       <precision>0</precision>
       <precision_from_pv>true</precision_from_pv>
-      <pv_name>$(P)pos1:PsLowX</pv_name>
+      <pv_name>$(P)pos0:PsLowX</pv_name>
       <pv_value />
       <rotation_angle>0.0</rotation_angle>
       <rules />
@@ -555,7 +554,7 @@ $(pv_value)</tooltip>
       <name>Text Update_394</name>
       <precision>0</precision>
       <precision_from_pv>true</precision_from_pv>
-      <pv_name>$(P)pos1:PsUpX</pv_name>
+      <pv_name>$(P)pos0:PsUpX</pv_name>
       <pv_value />
       <rotation_angle>0.0</rotation_angle>
       <rules />
@@ -607,7 +606,7 @@ $(pv_value)</tooltip>
       <name>Text Update_585</name>
       <precision>0</precision>
       <precision_from_pv>true</precision_from_pv>
-      <pv_name>$(P)pos8:Enabled</pv_name>
+      <pv_name>$(P)pos0:Enabled</pv_name>
       <pv_value />
       <rotation_angle>0.0</rotation_angle>
       <rules />
