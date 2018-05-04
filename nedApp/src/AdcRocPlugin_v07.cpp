@@ -124,7 +124,7 @@ void AdcRocPlugin::createParams_v07()
     createCounterParam("RateOut",           0x3D, 16,  0);  // Board total events ratemeter
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-    createConfigParam("Dig1:PositionIdx",   '1', 0x0,  32, 0, 0x50000000); // Chan1 Digital position index
+    createConfigParam("Dig1:PositionIdx",   '1', 0x0,  32, 0, 0x50000000); // Chan1 Digital position index (TsyncDAQ)
     createConfigParam("Dig2:PositionIdx",   '1', 0x2,  32, 0, 0x50010000); // Chan2 Digital position index
     createConfigParam("Dig3:PositionIdx",   '1', 0x4,  32, 0, 0x50020000); // Chan3 Digital position index
     createConfigParam("Dig4:PositionIdx",   '1', 0x6,  32, 0, 0x50030000); // Chan4 Digital position index
@@ -199,14 +199,14 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("Dig7:TsyncSrc",      'D', 0xC,  2,  8,  0);  // TOF source for Dig ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
     createConfigParam("Dig8:TsyncSrc",      'D', 0xC,  2, 12, 0);   // TOF source for Dig ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
 
-    createConfigParam("Ctrl1:TsyncSrc",     'D', 0xD,  2,  0,  0);  // Tsync src for CTRL ch 0 PM       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl2:TsyncSrc",     'D', 0xD,  2,  4,  0);  // Tsync src for CTRL ch 1 HP       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl3:TsyncSrc",     'D', 0xD,  2,  8,  0);  // Tsync source for CTRL ch 2       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl4:TsyncSrc",     'D', 0xD,  2, 12, 0);   // Tsync source for CTRL ch 3       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl5:TsyncSrc",     'D', 0xE,  2,  0,  0);  // Tsync source for CTRL ch 4       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl6:TsyncSrc",     'D', 0xE,  2,  4,  0);  // Tsync source for CTRL ch 5       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl7:TsyncSrc",     'D', 0xE,  2,  8,  0);  // Tsync source for CTRL ch 6       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl8:TsyncSrc",     'D', 0xE,  2, 12, 0);   // Tsync source for CTRL ch 7       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl1:TsyncSrc",     'D', 0xD,  2,  0,  0);  // Tsync src for CTRL ch 0 TsyncDAQ (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl2:TsyncSrc",     'D', 0xD,  2,  4,  0);  // Tsync src for CTRL ch 1 PM       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl3:TsyncSrc",     'D', 0xD,  2,  8,  0);  // Tsync src for CTRL ch 2 HP       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl4:TsyncSrc",     'D', 0xD,  2, 12, 0);   // Tsync src for CTRL ch 3          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl5:TsyncSrc",     'D', 0xE,  2,  0,  0);  // Tsync src for CTRL ch 4          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl6:TsyncSrc",     'D', 0xE,  2,  4,  0);  // Tsync src for CTRL ch 5          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl7:TsyncSrc",     'D', 0xE,  2,  8,  0);  // Tsync src for CTRL ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl8:TsyncSrc",     'D', 0xE,  2, 12, 0);   // Tsync src for CTRL ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
 
     createConfigParam("FakeTrigPeriod",     'E', 0x0, 16,  0, 0);   // Fake trigger period
     createConfigParam("EnableDigChs",       'E', 0x1, 16,  0, 31);  // Enables digital channels
