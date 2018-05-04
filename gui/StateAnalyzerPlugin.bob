@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>State Analyzer</name>
+  <width>700</width>
+  <height>700</height>
+  <widget type="group" version="2.0.0">
+    <name>Fast device 1</name>
+    <macros>
+      <D>Dev1</D>
+    </macros>
+    <y>230</y>
+    <width>230</width>
+    <height>240</height>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_14</name>
+      <pv_name>$(P)$(D):PixelOff</pv_name>
+      <x>105</x>
+      <y>95</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_22</name>
+      <text>OFF pixel:</text>
+      <y>95</y>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_15</name>
+      <pv_name>$(P)$(D):PixelOn</pv_name>
+      <x>105</x>
+      <y>125</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_23</name>
+      <text>ON pixel:</text>
+      <y>125</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_25</name>
+      <text>Bit offset:</text>
+      <y>35</y>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_16</name>
+      <pv_name>$(P)$(D):BitOffset</pv_name>
+      <x>105</x>
+      <y>34</y>
+      <width>90</width>
+      <precision>0</precision>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_17</name>
+      <pv_name>$(P)$(D):Distance</pv_name>
+      <x>105</x>
+      <y>64</y>
+      <width>90</width>
+      <precision>3</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_26</name>
+      <text>Distance:</text>
+      <y>65</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_21</name>
+      <text>Veto ON pixel:</text>
+      <y>185</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_20</name>
+      <text>Veto OFF pixel:</text>
+      <y>155</y>
+      <width>105</width>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_12</name>
+      <pv_name>$(P)$(D):PixelVetoOff</pv_name>
+      <x>105</x>
+      <y>155</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_13</name>
+      <pv_name>$(P)$(D):PixelVetoOn</pv_name>
+      <x>105</x>
+      <y>185</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_27</name>
+      <text>Enabled:</text>
+      <y>5</y>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>CheckBox</name>
+      <pv_name>$(P)$(D):Enable</pv_name>
+      <label></label>
+      <x>105</x>
+      <y>5</y>
+      <width>77</width>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Slow device 1 - not implemented</name>
+    <macros>
+      <ID>1</ID>
+    </macros>
+    <y>470</y>
+    <height>220</height>
+    <widget type="label" version="2.0.0">
+      <name>Label_50</name>
+      <text>PV:</text>
+      <x>14</x>
+      <y>44</y>
+      <width>120</width>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_32</name>
+      <pv_name>loc://init51("BL4A:Det:He3:State")</pv_name>
+      <x>106</x>
+      <y>44</y>
+      <width>150</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_33</name>
+      <pv_name>loc://init52(7)</pv_name>
+      <x>106</x>
+      <y>74</y>
+      <width>120</width>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_51</name>
+      <text>On value:</text>
+      <x>14</x>
+      <y>74</y>
+      <width>120</width>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_34</name>
+      <pv_name>loc://init53(2)</pv_name>
+      <x>106</x>
+      <y>104</y>
+      <width>120</width>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_52</name>
+      <text>Off value:</text>
+      <x>14</x>
+      <y>104</y>
+      <width>120</width>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_55</name>
+      <text>Enabled:</text>
+      <x>14</x>
+      <y>14</y>
+      <width>120</width>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>CheckBox_17</name>
+      <pv_name>loc://enable5(1)</pv_name>
+      <label></label>
+      <x>106</x>
+      <y>14</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_56</name>
+      <text>Other values vetoed</text>
+      <x>14</x>
+      <y>134</y>
+      <width>182</width>
+    </widget>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_33</name>
+    <text>Pixel tagging enabled:</text>
+    <x>18</x>
+    <y>10</y>
+    <width>160</width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_34</name>
+    <text>Current state:</text>
+    <x>18</x>
+    <y>70</y>
+    <width>160</width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_35</name>
+    <text>Current vetoing:</text>
+    <x>18</x>
+    <y>100</y>
+    <width>160</width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_36</name>
+    <text>Nominal distance:</text>
+    <x>18</x>
+    <y>130</y>
+    <width>160</width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_37</name>
+    <text>Status:</text>
+    <x>18</x>
+    <y>40</y>
+    <width>160</width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update</name>
+    <pv_name>$(P)StatusText</pv_name>
+    <x>178</x>
+    <y>40</y>
+    <width>130</width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_2</name>
+    <pv_name>$(P)State</pv_name>
+    <x>178</x>
+    <y>70</y>
+    <width>130</width>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update_3</name>
+    <pv_name>$(P)Vetoing</pv_name>
+    <x>178</x>
+    <y>100</y>
+    <width>130</width>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>Text Update_4</name>
+    <pv_name>BL100:Klemen:sa:NominalDist</pv_name>
+    <x>178</x>
+    <y>130</y>
+    <width>130</width>
+    <background_color>
+      <color name="Read_Background" red="240" green="240" blue="240">
+      </color>
+    </background_color>
+    <precision>3</precision>
+    <wrap_words>true</wrap_words>
+    <tooltip>BL100:Klemen:sa:NominalDist
+VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_38</name>
+    <text>Combined state mask:</text>
+    <x>18</x>
+    <y>190</y>
+    <width>160</width>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>Text Update_5</name>
+    <pv_name>BL100:Klemen:sa:StatePixelMask</pv_name>
+    <x>178</x>
+    <y>190</y>
+    <width>130</width>
+    <background_color>
+      <color name="Read_Background" red="240" green="240" blue="240">
+      </color>
+    </background_color>
+    <format>4</format>
+    <precision>0</precision>
+    <wrap_words>true</wrap_words>
+    <tooltip>Bit mask for the combined state event</tooltip>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_39</name>
+    <text>State bit offset:</text>
+    <x>18</x>
+    <y>160</y>
+    <width>160</width>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>Text Update_6</name>
+    <pv_name>BL100:Klemen:sa:PixelBitOffset</pv_name>
+    <x>178</x>
+    <y>160</y>
+    <width>130</width>
+    <background_color>
+      <color name="Read_Background" red="240" green="240" blue="240">
+      </color>
+    </background_color>
+    <precision>0</precision>
+    <wrap_words>true</wrap_words>
+    <tooltip>Bit position of calculated state in each neutron pixel id</tooltip>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Fast  device 2</name>
+    <macros>
+      <D>Dev2</D>
+    </macros>
+    <x>230</x>
+    <y>230</y>
+    <width>230</width>
+    <height>240</height>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_21</name>
+      <pv_name>$(P)$(D):PixelOff</pv_name>
+      <x>105</x>
+      <y>95</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_28</name>
+      <text>OFF pixel:</text>
+      <y>95</y>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_22</name>
+      <pv_name>$(P)$(D):PixelOn</pv_name>
+      <x>105</x>
+      <y>125</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_29</name>
+      <text>ON pixel:</text>
+      <y>125</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_30</name>
+      <text>Bit offset:</text>
+      <y>35</y>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_23</name>
+      <pv_name>$(P)$(D):BitOffset</pv_name>
+      <x>105</x>
+      <y>34</y>
+      <width>90</width>
+      <precision>0</precision>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_24</name>
+      <pv_name>$(P)$(D):Distance</pv_name>
+      <x>105</x>
+      <y>64</y>
+      <width>90</width>
+      <precision>3</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_31</name>
+      <text>Distance:</text>
+      <y>65</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_32</name>
+      <text>Veto ON pixel:</text>
+      <y>185</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_40</name>
+      <text>Veto OFF pixel:</text>
+      <y>155</y>
+      <width>105</width>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_25</name>
+      <pv_name>$(P)$(D):PixelVetoOff</pv_name>
+      <x>105</x>
+      <y>155</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_26</name>
+      <pv_name>$(P)$(D):PixelVetoOn</pv_name>
+      <x>105</x>
+      <y>185</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_41</name>
+      <text>Enabled:</text>
+      <y>5</y>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>CheckBox_1</name>
+      <pv_name>$(P)$(D):Enable</pv_name>
+      <label></label>
+      <x>105</x>
+      <y>5</y>
+      <width>77</width>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Fast device 3</name>
+    <macros>
+      <D>Dev3</D>
+    </macros>
+    <x>460</x>
+    <y>230</y>
+    <width>230</width>
+    <height>240</height>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_28</name>
+      <pv_name>$(P)$(D):PixelOff</pv_name>
+      <x>105</x>
+      <y>95</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_42</name>
+      <text>OFF pixel:</text>
+      <y>95</y>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_29</name>
+      <pv_name>$(P)$(D):PixelOn</pv_name>
+      <x>105</x>
+      <y>125</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_43</name>
+      <text>ON pixel:</text>
+      <y>125</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_44</name>
+      <text>Bit offset:</text>
+      <y>35</y>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_30</name>
+      <pv_name>$(P)$(D):BitOffset</pv_name>
+      <x>105</x>
+      <y>34</y>
+      <width>90</width>
+      <precision>0</precision>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_31</name>
+      <pv_name>$(P)$(D):Distance</pv_name>
+      <x>105</x>
+      <y>64</y>
+      <width>90</width>
+      <precision>3</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_45</name>
+      <text>Distance:</text>
+      <y>65</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_46</name>
+      <text>Veto ON pixel:</text>
+      <y>185</y>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_47</name>
+      <text>Veto OFF pixel:</text>
+      <y>155</y>
+      <width>105</width>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_35</name>
+      <pv_name>$(P)$(D):PixelVetoOff</pv_name>
+      <x>105</x>
+      <y>155</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_36</name>
+      <pv_name>$(P)$(D):PixelVetoOn</pv_name>
+      <x>105</x>
+      <y>185</y>
+      <width>90</width>
+      <format>4</format>
+      <precision>0</precision>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_48</name>
+      <text>Enabled:</text>
+      <y>5</y>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>CheckBox_2</name>
+      <pv_name>$(P)$(D):Enable</pv_name>
+      <label></label>
+      <x>105</x>
+      <y>5</y>
+      <width>77</width>
+    </widget>
+  </widget>
+  <widget type="checkbox" version="2.0.0">
+    <name>Text Update_1</name>
+    <pv_name>$(P)Enable</pv_name>
+    <label></label>
+    <x>178</x>
+    <y>10</y>
+    <width>50</width>
+    <tooltip>BL100:Klemen:sa:Enable
+VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
+  </widget>
+</display>
