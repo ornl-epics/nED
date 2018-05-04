@@ -48,21 +48,6 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
             return std::make_tuple(nEvents, tofs, pixels);
         }
 
-        template <typename T>
-        std::tuple<uint32_t, epics::pvData::PVUIntArray::svector, epics::pvData::PVUIntArray::svector> getTofPixelsMapped(const DasDataPacket *packet)
-        {
-            uint32_t nEvents = packet->getNumEvents();
-            const T *events = packet->getEvents<T>();
-
-            epics::pvData::PVUIntArray::svector tofs(nEvents);
-            epics::pvData::PVUIntArray::svector pixels(nEvents);
-            for (uint32_t i = 0; i < nEvents; i++) {
-                tofs[i]   = events[i].tof;
-                pixels[i] = events[i].mapped_pixelid;
-            }
-            return std::make_tuple(nEvents, tofs, pixels);
-        }
-
     public:
         POINTER_DEFINITIONS(PvaRecordPixel);
 
@@ -143,31 +128,24 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
             // Now extract events from packet
             epics::pvData::PVUIntArray::svector tofs;
             epics::pvData::PVUIntArray::svector pixels;
-            bool mapped = false;
+            bool mapped = packet->getEventsMapped();
             switch (packet->getEventsFormat()) {
                 case DasDataPacket::EVENT_FMT_PIXEL:
-                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::Pixel>(packet);
-                    break;
-                case DasDataPacket::EVENT_FMT_PIXEL_MAPPED:
-                    mapped = true;
                     std::tie(nEvents, tofs, pixels) = getTofPixels<Event::Pixel>(packet);
                     break;
                 case DasDataPacket::EVENT_FMT_LPSD_VERBOSE:
                     std::tie(nEvents, tofs, pixels) = getTofPixels<Event::LPSD::Verbose>(packet);
                     break;
                 case DasDataPacket::EVENT_FMT_LPSD_DIAG:
-                    mapped = true;
-                    std::tie(nEvents, tofs, pixels) = getTofPixelsMapped<Event::LPSD::Diag>(packet);
+                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::LPSD::Diag>(packet);
                     break;
                 case DasDataPacket::EVENT_FMT_BNL_VERBOSE:
                     std::tie(nEvents, tofs, pixels) = getTofPixels<Event::BNL::Verbose>(packet);
                     break;
                 case DasDataPacket::EVENT_FMT_BNL_DIAG:
-                    mapped = true;
-                    std::tie(nEvents, tofs, pixels) = getTofPixelsMapped<Event::BNL::Diag>(packet);
+                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::BNL::Diag>(packet);
                     break;
                 case DasDataPacket::EVENT_FMT_TIME_CALIB:
-                    mapped = true;
                     nEvents = 0;
                     break;
                 default:
@@ -218,21 +196,6 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
             , m_sequence(0)
         {}
 
-        template <typename T>
-        std::tuple<uint32_t, epics::pvData::PVUIntArray::svector, epics::pvData::PVUIntArray::svector> getTofPixels(const DasDataPacket *packet)
-        {
-            uint32_t nEvents = packet->getNumEvents();
-            const T *events = packet->getEvents<T>();
-
-            epics::pvData::PVUIntArray::svector tofs(nEvents);
-            epics::pvData::PVUIntArray::svector pixels(nEvents);
-            for (uint32_t i = 0; i < nEvents; i++) {
-                tofs[i]   = events[i].tof;
-                pixels[i] = events[i].pixelid;
-            }
-            return std::make_tuple(nEvents, tofs, pixels);
-        }
-
     public:
         POINTER_DEFINITIONS(PvaRecordLpsd);
 
@@ -254,7 +217,6 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
                     add("time_of_flight",   standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("position",         standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("pixel",            standardField->scalarArray(epics::pvData::pvUInt, ""))->
-                    add("mapped_pixel",     standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("sample_a1",        standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("sample_a2",        standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("sample_b1",        standardField->scalarArray(epics::pvData::pvUInt, ""))->
@@ -285,10 +247,6 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
 
             pvRecord->pvPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("pixel.value");
             if (pvRecord->pvPixel.get() == NULL)
-                return PvaRecordLpsd::shared_pointer();
-
-            pvRecord->pvMappedPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("mapped_pixel.value");
-            if (pvRecord->pvMappedPixel.get() == NULL)
                 return PvaRecordLpsd::shared_pointer();
 
             pvRecord->pvSampleA1 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a1.value");
@@ -331,7 +289,6 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
             // Pre-allocate svector to minimize gradual memory allocations
             epics::pvData::PVUIntArray::svector tofs(nEvents);
             epics::pvData::PVUIntArray::svector pixels(nEvents);
-            epics::pvData::PVUIntArray::svector mapped_pixels(nEvents);
             epics::pvData::PVUIntArray::svector positions(nEvents);
             epics::pvData::PVUShortArray::svector sample_a1(nEvents);
             epics::pvData::PVUShortArray::svector sample_a2(nEvents);
@@ -345,7 +302,6 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
                     tofs[i]   = events[i].tof;
                     positions[i] = events[i].position;
                     pixels[i] = 0;
-                    mapped_pixels[i] = 0;
                     sample_a1[i]  = events[i].sample_a1;
                     sample_a2[i]  = events[i].sample_a2;
                     sample_b1[i]  = events[i].sample_b1;
@@ -357,7 +313,6 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
                     tofs[i]   = events[i].tof;
                     positions[i] = events[i].position;
                     pixels[i] = events[i].pixelid;
-                    mapped_pixels[i] = 0;
                     sample_a1[i]  = events[i].sample_a1;
                     sample_a2[i]  = events[i].sample_a2;
                     sample_b1[i]  = events[i].sample_b1;
@@ -365,11 +320,11 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
                 }
             } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_LPSD_DIAG) {
                 const Event::LPSD::Diag *events = packet->getEvents<Event::LPSD::Diag>();
+                bool mapped = packet->getEventsMapped();
                 for (uint32_t i = 0; i < nEvents; i++) {
                     tofs[i]   = events[i].tof;
                     positions[i] = events[i].position;
-                    pixels[i] = events[i].pixelid;
-                    mapped_pixels[i] = events[i].mapped_pixelid;
+                    pixels[i] = (mapped ? events[i].pixelid_raw : events[i].pixelid);
                     sample_a1[i]  = events[i].sample_a1;
                     sample_a2[i]  = events[i].sample_a2;
                     sample_b1[i]  = events[i].sample_b1;
@@ -405,7 +360,7 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr   pvTimeOfFlight; //!< Time offset relative to time stamp
         epics::pvData::PVUIntArrayPtr   pvPosition;     //!< Detector position
         epics::pvData::PVUIntArrayPtr   pvPixel;        //!< Pixel ID
-        epics::pvData::PVUIntArrayPtr   pvMappedPixel;  //!< Mapped pixel ID
+        epics::pvData::PVUIntArrayPtr   pvRawPixel;     //!< Mapped pixel ID
         epics::pvData::PVUIntArrayPtr   pvSampleA1;     //!< Raw sample A1
         epics::pvData::PVUIntArrayPtr   pvSampleA2;     //!< Raw sample A2
         epics::pvData::PVUIntArrayPtr   pvSampleB1;     //!< Raw sample B1
@@ -449,7 +404,6 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
                     add("corrected_x",      standardField->scalarArray(epics::pvData::pvFloat, ""))->
                     add("corrected_y",      standardField->scalarArray(epics::pvData::pvFloat, ""))->
                     add("pixel",            standardField->scalarArray(epics::pvData::pvUInt, ""))->
-                    add("mapped_pixel",     standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("sample_x1",        standardField->scalarArray(epics::pvData::pvUShort, ""))->
                     add("sample_x2",        standardField->scalarArray(epics::pvData::pvUShort, ""))->
                     add("sample_x3",        standardField->scalarArray(epics::pvData::pvUShort, ""))->
@@ -513,10 +467,6 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
 
             pvRecord->pvPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("pixel.value");
             if (pvRecord->pvPixel.get() == NULL)
-                return PvaRecordBnl::shared_pointer();
-
-            pvRecord->pvMappedPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("mapped_pixel.value");
-            if (pvRecord->pvMappedPixel.get() == NULL)
                 return PvaRecordBnl::shared_pointer();
 
             pvRecord->pvX = pvRecord->getPVStructure()->getSubField<epics::pvData::PVFloatArray>("x.value");
@@ -709,7 +659,6 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
             // Pre-allocate svector to minimize gradual memory allocations
             epics::pvData::PVUIntArray::svector tofs(nEvents);
             epics::pvData::PVUIntArray::svector pixels(nEvents);
-            epics::pvData::PVUIntArray::svector mapped_pixels(nEvents);
             epics::pvData::PVUIntArray::svector positions(nEvents);
             epics::pvData::PVFloatArray::svector xs(nEvents);
             epics::pvData::PVFloatArray::svector ys(nEvents);
@@ -759,7 +708,6 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
                     tofs[i]   = events[i].tof;
                     positions[i] = events[i].position;
                     pixels[i] = 0;
-                    mapped_pixels[i] = 0;
                     xs[i] = -1;
                     ys[i] = -1;
                     corrected_xs[i] = -1;
@@ -804,11 +752,11 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
                 }
             } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
                 const Event::BNL::Diag *events = packet->getEvents<Event::BNL::Diag>();
+                bool mapped = packet->getEventsMapped();
                 for (uint32_t i = 0; i < nEvents; i++) {
                     tofs[i]         = events[i].tof;
                     positions[i]    = events[i].position;
-                    pixels[i]       = events[i].pixelid;
-                    mapped_pixels[i]= events[i].mapped_pixelid;
+                    pixels[i]       = (mapped ? events[i].pixelid_raw : events[i].pixelid);
                     xs[i]           = 1.0 * events[i].x / (1 << 11);
                     ys[i]           = 1.0 * events[i].y / (1 << 11);
                     corrected_xs[i] = 1.0 * events[i].corrected_x;
@@ -865,7 +813,6 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
                 pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
                 pvPosition->replace(epics::pvData::freeze(positions));
                 pvPixel->replace(epics::pvData::freeze(pixels));
-                pvMappedPixel->replace(epics::pvData::freeze(mapped_pixels));
                 pvX->replace(epics::pvData::freeze(xs));
                 pvY->replace(epics::pvData::freeze(ys));
                 pvCorrectedX->replace(epics::pvData::freeze(corrected_xs));
@@ -924,7 +871,7 @@ class PvaNeutronsPlugin::PvaRecordBnl : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr   pvTimeOfFlight;  //!< Time offset relative to time stamp
         epics::pvData::PVUIntArrayPtr   pvPosition;      //!< Calculated pixel ID
         epics::pvData::PVUIntArrayPtr   pvPixel;         //!< Calculated pixel ID
-        epics::pvData::PVUIntArrayPtr   pvMappedPixel;   //!< Calculated pixel ID
+        epics::pvData::PVUIntArrayPtr   pvRawPixel;      //!< Calculated pixel ID
         epics::pvData::PVFloatArrayPtr  pvX;             //!< Position X
         epics::pvData::PVFloatArrayPtr  pvY;             //!< Position Y
         epics::pvData::PVFloatArrayPtr  pvCorrectedX;    //!< Corrected position X
@@ -1006,7 +953,6 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
                     add("corrected_x",      standardField->scalarArray(epics::pvData::pvFloat, ""))->
                     add("corrected_y",      standardField->scalarArray(epics::pvData::pvFloat, ""))->
                     add("pixel",            standardField->scalarArray(epics::pvData::pvUInt, ""))->
-                    add("mapped_pixel",     standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("time_range1",      standardField->scalarArray(epics::pvData::pvUShort, ""))->
                     add("time_range2",      standardField->scalarArray(epics::pvData::pvUShort, ""))->
                     add("time_range3",      standardField->scalarArray(epics::pvData::pvUShort, ""))->
@@ -1069,10 +1015,6 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
 
             pvRecord->pvPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("pixel.value");
             if (pvRecord->pvPixel.get() == NULL)
-                return PvaRecordCroc::shared_pointer();
-
-            pvRecord->pvMappedPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("mapped_pixel.value");
-            if (pvRecord->pvMappedPixel.get() == NULL)
                 return PvaRecordCroc::shared_pointer();
 
             pvRecord->pvX = pvRecord->getPVStructure()->getSubField<epics::pvData::PVFloatArray>("x.value");
@@ -1261,7 +1203,6 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
             // Pre-allocate svector to minimize gradual memory allocations
             epics::pvData::PVUIntArray::svector tofs(nEvents);
             epics::pvData::PVUIntArray::svector pixels(nEvents);
-            epics::pvData::PVUIntArray::svector mapped_pixels(nEvents);
             epics::pvData::PVUIntArray::svector positions(nEvents);
             epics::pvData::PVFloatArray::svector xs(nEvents);
             epics::pvData::PVFloatArray::svector ys(nEvents);
@@ -1311,7 +1252,6 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
                     tofs[i]   = events[i].tof & 0x000FFFFF;
                     positions[i] = events[i].position;
                     pixels[i] = 0;
-                    mapped_pixels[i] = 0;
                     xs[i] = -1;
                     ys[i] = -1;
                     corrected_xs[i] = -1;
@@ -1355,11 +1295,11 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
                 }
             } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_CROC_DIAG) {
                 const Event::CROC::Diag *events = packet->getEvents<Event::CROC::Diag>();
+                bool mapped = packet->getEventsMapped();
                 for (uint32_t i = 0; i < nEvents; i++) {
                     tofs[i]         = events[i].tof & 0x000FFFFF;
                     positions[i]    = events[i].position;
-                    pixels[i]       = events[i].pixelid;
-                    mapped_pixels[i]= events[i].mapped_pixelid;
+                    pixels[i]       = (mapped ? events[i].pixelid_raw : events[i].pixelid);
                     xs[i]           = 1.0 * events[i].x / (1 << 11);
                     ys[i]           = 1.0 * events[i].y / (1 << 11);
                     corrected_xs[i] = 1.0 * events[i].corrected_x;
@@ -1415,7 +1355,6 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
                 pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
                 pvPosition->replace(epics::pvData::freeze(positions));
                 pvPixel->replace(epics::pvData::freeze(pixels));
-                pvMappedPixel->replace(epics::pvData::freeze(mapped_pixels));
                 pvX->replace(epics::pvData::freeze(xs));
                 pvY->replace(epics::pvData::freeze(ys));
                 pvCorrectedX->replace(epics::pvData::freeze(corrected_xs));
@@ -1472,7 +1411,7 @@ class PvaNeutronsPlugin::PvaRecordCroc : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr   pvTimeOfFlight;  //!< Time offset relative to time stamp
         epics::pvData::PVUIntArrayPtr   pvPosition;      //!< Calculated pixel ID
         epics::pvData::PVUIntArrayPtr   pvPixel;         //!< Calculated pixel ID
-        epics::pvData::PVUIntArrayPtr   pvMappedPixel;   //!< Calculated pixel ID
+        epics::pvData::PVUIntArrayPtr   pvRawPixel;      //!< Calculated pixel ID
         epics::pvData::PVFloatArrayPtr  pvX;             //!< Position X
         epics::pvData::PVFloatArrayPtr  pvY;             //!< Position Y
         epics::pvData::PVFloatArrayPtr  pvCorrectedX;    //!< Corrected position X
@@ -1555,7 +1494,6 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                     add("photo_sum_x",      standardField->scalarArray(epics::pvData::pvFloat, ""))->
                     add("photo_sum_y",      standardField->scalarArray(epics::pvData::pvFloat, ""))->
                     add("pixel",            standardField->scalarArray(epics::pvData::pvUInt, ""))->
-                    add("mapped_pixel",     standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     createStructure()
             );
 
@@ -1582,10 +1520,6 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
 
             pvRecord->pvPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("pixel.value");
             if (pvRecord->pvPixel.get() == NULL)
-                return PvaRecordAcpc::shared_pointer();
-
-            pvRecord->pvMappedPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("mapped_pixel.value");
-            if (pvRecord->pvMappedPixel.get() == NULL)
                 return PvaRecordAcpc::shared_pointer();
 
             pvRecord->pvX = pvRecord->getPVStructure()->getSubField<epics::pvData::PVFloatArray>("x.value");
@@ -1638,7 +1572,6 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
             // Pre-allocate svector to minimize gradual memory allocations
             epics::pvData::PVUIntArray::svector tofs(nEvents);
             epics::pvData::PVUIntArray::svector pixels(nEvents);
-            epics::pvData::PVUIntArray::svector mapped_pixels(nEvents);
             epics::pvData::PVUIntArray::svector positions(nEvents);
             epics::pvData::PVFloatArray::svector xs(nEvents);
             epics::pvData::PVFloatArray::svector ys(nEvents);
@@ -1653,7 +1586,6 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                     tofs[i]         = events[i].tof & 0x000FFFFF;
                     positions[i]    = events[i].position & 0x7FFFFFFF;
                     pixels[i]       = 0;
-                    mapped_pixels[i]= 0;
                     xs[i]           = 1.0 * events[i].x / (1 << 24);
                     ys[i]           = 1.0 * events[i].y / (1 << 24);
                     corrected_xs[i] = -1;
@@ -1663,11 +1595,11 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                 }
             } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_ACPC_DIAG) {
                 const Event::ACPC::Diag *events = packet->getEvents<Event::ACPC::Diag>();
+                bool mapped = packet->getEventsMapped();
                 for (uint32_t i = 0; i < nEvents; i++) {
                     tofs[i]         = events[i].tof & 0x000FFFFF;
                     positions[i]    = events[i].position & 0x7FFFFFFF;
-                    pixels[i]       = events[i].pixelid;
-                    mapped_pixels[i]= events[i].mapped_pixelid;
+                    pixels[i]       = (mapped ? events[i].pixelid_raw : events[i].pixelid);
                     xs[i]           = 1.0 * events[i].x / (1 << 24);
                     ys[i]           = 1.0 * events[i].y / (1 << 24);
                     corrected_xs[i] = 1.0 * events[i].corrected_x;
@@ -1689,7 +1621,6 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                 pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
                 pvPosition->replace(epics::pvData::freeze(positions));
                 pvPixel->replace(epics::pvData::freeze(pixels));
-                pvMappedPixel->replace(epics::pvData::freeze(mapped_pixels));
                 pvX->replace(epics::pvData::freeze(xs));
                 pvY->replace(epics::pvData::freeze(ys));
                 pvCorrectedX->replace(epics::pvData::freeze(corrected_xs));
@@ -1712,7 +1643,7 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr   pvTimeOfFlight;  //!< Time offset relative to time stamp
         epics::pvData::PVUIntArrayPtr   pvPosition;      //!< Calculated pixel ID
         epics::pvData::PVUIntArrayPtr   pvPixel;         //!< Calculated pixel ID
-        epics::pvData::PVUIntArrayPtr   pvMappedPixel;   //!< Calculated pixel ID
+        epics::pvData::PVUIntArrayPtr   pvRawPixel;      //!< Calculated pixel ID
         epics::pvData::PVFloatArrayPtr  pvX;             //!< Position X
         epics::pvData::PVFloatArrayPtr  pvY;             //!< Position Y
         epics::pvData::PVFloatArrayPtr  pvCorrectedX;    //!< Corrected position X
