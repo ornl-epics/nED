@@ -124,7 +124,7 @@ void AdcRocPlugin::createParams_v07()
     createCounterParam("RateOut",           0x3D, 16,  0);  // Board total events ratemeter
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-    createConfigParam("Dig1:PositionIdx",   '1', 0x0,  32, 0, 0x50000000); // Chan1 Digital position index (TsyncDAQ)
+    createConfigParam("Dig1:PositionIdx",   '1', 0x0,  32, 0, 0x50000000); // Chan1 Digital position index
     createConfigParam("Dig2:PositionIdx",   '1', 0x2,  32, 0, 0x50010000); // Chan2 Digital position index
     createConfigParam("Dig3:PositionIdx",   '1', 0x4,  32, 0, 0x50020000); // Chan3 Digital position index
     createConfigParam("Dig4:PositionIdx",   '1', 0x6,  32, 0, 0x50030000); // Chan4 Digital position index
@@ -199,38 +199,38 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("Dig7:TsyncSrc",      'D', 0xC,  2,  8,  0);  // TOF source for Dig ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
     createConfigParam("Dig8:TsyncSrc",      'D', 0xC,  2, 12, 0);   // TOF source for Dig ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
 
-    createConfigParam("Ctrl1:TsyncSrc",     'D', 0xD,  2,  0,  0);  // Tsync src for CTRL ch 0 TsyncDAQ (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl2:TsyncSrc",     'D', 0xD,  2,  4,  0);  // Tsync src for CTRL ch 1 PM       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl3:TsyncSrc",     'D', 0xD,  2,  8,  0);  // Tsync src for CTRL ch 2 HP       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl4:TsyncSrc",     'D', 0xD,  2, 12, 0);   // Tsync src for CTRL ch 3          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl5:TsyncSrc",     'D', 0xE,  2,  0,  0);  // Tsync src for CTRL ch 4          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl6:TsyncSrc",     'D', 0xE,  2,  4,  0);  // Tsync src for CTRL ch 5          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl7:TsyncSrc",     'D', 0xE,  2,  8,  0);  // Tsync src for CTRL ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl8:TsyncSrc",     'D', 0xE,  2, 12, 0);   // Tsync src for CTRL ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl1:TsyncSrc",     'D', 0xD,  2,  0,  0);  // Tsync src for CTRL ch 0 PM       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl2:TsyncSrc",     'D', 0xD,  2,  4,  0);  // Tsync src for CTRL ch 1 HP       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl3:TsyncSrc",     'D', 0xD,  2,  8,  0);  // Tsync source for CTRL ch 2       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl4:TsyncSrc",     'D', 0xD,  2, 12, 0);   // Tsync source for CTRL ch 3       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl5:TsyncSrc",     'D', 0xE,  2,  0,  0);  // Tsync source for CTRL ch 4       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl6:TsyncSrc",     'D', 0xE,  2,  4,  0);  // Tsync source for CTRL ch 5       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl7:TsyncSrc",     'D', 0xE,  2,  8,  0);  // Tsync source for CTRL ch 6       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl8:TsyncSrc",     'D', 0xE,  2, 12, 0);   // Tsync source for CTRL ch 7       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
 
     createConfigParam("FakeTrigPeriod",     'E', 0x0, 16,  0, 0);   // Fake trigger period
-    createConfigParam("EnableDigChs",       'E', 0x1, 16,  0, 31);  // Enables digital channels
-    createConfigParam("HpTsyncDelay",       'E', 0x2, 20,  0, 0);   // Heat pulser register
-    createConfigParam("NmosOnWidth",        'E', 0x4, 24,  0, 0);   // NMOS On pulse width
-    createConfigParam("PmosOnWidth",        'E', 0x6, 10,  0, 0);   // PMOS On pulse width
-    createConfigParam("NmosOnDelay",        'E', 0x6,  4, 12, 0);   // NMOS pulse delay after PMOS
-    createConfigParam("HpRate",             'E', 0x7, 10,  0, 0);   // Heat pulser rate
-    createConfigParam("HpEnable",           'E', 0x7,  1, 10, 0);   // Heat pulser enable               (0=disable,1=enable)
-    createConfigParam("TsyncDelay0",        'E', 0x8, 32,  0, 0);   // Tsync Delay 0                    (scale:100,unit:ns)
-    createConfigParam("TsyncDelay1",        'E', 0xA, 32,  0, 0);   // Tsync Delay 1                    (scale:100,unit:ns)
-    createConfigParam("TsyncDelay2",        'E', 0xC, 32,  0, 0);   // Tsync Delay 2                    (scale:100,unit:ns)
-    createConfigParam("TsyncDelay3",        'E', 0xE, 32,  0, 0);   // Tsync Delay 3                    (scale:100,unit:ns)
+    createConfigParam("HpTsyncDelay",       'E', 0x1, 20,  0, 0);   // Heat pulser register
+    createConfigParam("NmosOnWidth",        'E', 0x3, 24,  0, 0);   // NMOS On pulse width
+    createConfigParam("PmosOnWidth",        'E', 0x5, 10,  0, 0);   // PMOS On pulse width
+    createConfigParam("NmosOnDelay",        'E', 0x5,  4, 12, 0);   // NMOS pulse delay after PMOS
+    createConfigParam("HpRate",             'E', 0x6, 10,  0, 0);   // Heat pulser rate
+    createConfigParam("HpEnable",           'E', 0x6,  1, 10, 0);   // Heat pulser enable               (0=disable,1=enable)
+    createConfigParam("TsyncDelay0",        'E', 0x7, 32,  0, 0);   // Tsync Delay 0                    (scale:100,unit:ns)
+    createConfigParam("TsyncDelay1",        'E', 0x9, 32,  0, 0);   // Tsync Delay 1                    (scale:100,unit:ns)
+    createConfigParam("TsyncDelay2",        'E', 0xB, 32,  0, 0);   // Tsync Delay 2                    (scale:100,unit:ns)
+    createConfigParam("TsyncDelay3",        'E', 0xD, 32,  0, 0);   // Tsync Delay 3                    (scale:100,unit:ns)
 
     createConfigParam("LvdsReset",          'F', 0x0,  1,  0,  0);  // Reset source                     (0=disable,1=enable)
     createConfigParam("TclkSelect",         'F', 0x0,  1,  1,  0);  // Tclk source                      (0=external,1=internal)
     createConfigParam("TsyncSelect",        'F', 0x0,  1,  2,  0);  // Tsync source                     (0=external,1=internal)
     createConfigParam("TxEnable",           'F', 0x0,  1,  3,  1);  // Tx Enable force                  (0=do not force,1=force)
     createConfigParam("AcquireMode",        'F', 0x0,  2,  4,  2);  // Acquire Mode                     (0=idle,1=idle,2=normal,3=trigger)
+    createConfigParam("GetDigChnls",        'F', 0x0,  1,  6,  2);  // Acquire Digital lines on Start   (0=disable,1=enable)
     createConfigParam("OutputMode",         'F', 0x0,  1, 10,  1);  // Output Mode                      (0=slow,1=40MHz)
 
-    createConfigParam("TestPatternEn",      'F', 0x1,  1, 15,  0);  // Test pattern enable              (0=disable,1=enable)
-    createConfigParam("TestPatternDebug",   'F', 0x1,  3, 12,  0);  // Engineering Use only
     createConfigParam("TestPatternId",      'F', 0x1, 12,  0,  0);  // Test pattern id
+    createConfigParam("TestPatternDebug",   'F', 0x1,  3, 12,  0);  // Engineering Use only
+    createConfigParam("TestPatternEn",      'F', 0x1,  1, 15,  0);  // Test pattern enable              (0=disable,1=enable)
     createConfigParam("TestPatternRate",    'F', 0x2, 16,  0,  0);  // Test pattern rate                (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
     createConfigParam("CycleAdvance",       'F', 0x3, 10,  0,  1);  // Num cycles to advance @TSYNC     (1=60Hz,2=30Hz,3=20Hz,4=15Hz,6=10Hz,12=5Hz,60=1Hz)
     createConfigParam("Protocol",           'F', 0x4,  1, 15,  0);  // Extended event format            (0=legacy,1=new)
