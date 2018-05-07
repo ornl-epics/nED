@@ -13,8 +13,11 @@ record(scalcout, "$(P)StatusTextCalc")
 {
     field(ASG,  "BEAMLINE")
     field(DESC, "Flat field plugin status")
-    field(INAA, "$(P)ImportStatus.SEVR NPP")
-    field(CALC, "AA")
+    field(INPA, "$(P)ImportStatus.SEVR NPP")
+    field(AA,   "disabled")
+    field(BB,   "OK")
+    field(CC,   "error")
+    field(CALC, "A=0?BB:A=1?AA:CC")
     field(OUT,  "$(P)StatusText PP")
 }
 record(mbbi, "$(P)ImportStatus")
