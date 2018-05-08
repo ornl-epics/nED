@@ -227,3 +227,135 @@ record(longin, "$(P)TablesSizeY")
     field(VAL,  "0")
     field(SCAN, "I/O Intr")
 }
+
+##### Next set of PVs deals with preset config params depending on selected type #####
+record(mbbo, "$(P)Presets")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Detector preset config")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(ZRST, "")
+    field(ONST, "BNL")
+    field(TWST, "ACPC")
+    field(OUT,  "$(P)PresetsCalc PP")
+    field(PINI, "NO")
+}
+record(calcout, "$(P)PresetsCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)Presets NPP")
+    field(CALC, "A")
+    field(OOPT, "When Non-zero")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)PresetsFan.PROC")
+}
+record(fanout, "$(P)PresetsFan")
+{
+    field(ASG,  "BEAMLINE")
+    field(LNK1, "$(P)XyFractWidthSel")
+    field(LNK2, "$(P)PsFractWidthSel")
+    field(LNK3, "$(P)XMaxInSel")
+    field(LNK4, "$(P)YMaxInSel")
+    field(LNK5, "$(P)XMaxOutSel")
+    field(LNK6, "$(P)YMaxOutSel")
+}
+record(sel, "$(P)XMaxInSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "19")
+    field(INPC, "158")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)XMaxInSet")
+}
+record(longout, "$(P)XMaxInSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)XMaxInSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)XMaxIn PP")
+}
+record(sel, "$(P)YMaxInSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "16")
+    field(INPC, "158")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)YMaxInSet")
+}
+record(longout, "$(P)YMaxInSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)YMaxInSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)YMaxIn PP")
+}
+record(sel, "$(P)XMaxOutSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "303")
+    field(INPC, "255")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)XMaxOutSet")
+}
+record(longout, "$(P)XMaxOutSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)XMaxOutSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)XMaxOut PP")
+}
+record(sel, "$(P)YMaxOutSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "255")
+    field(INPC, "255")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)YMaxOutSet")
+}
+record(longout, "$(P)YMaxOutSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)YMaxOutSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)YMaxOut PP")
+}
+record(sel, "$(P)XyFractWidthSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "11")
+    field(INPC, "24")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)XyFractWidthSet")
+}
+record(longout, "$(P)XyFractWidthSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)XyFractWidthSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)XyFractWidth PP")
+}
+record(sel, "$(P)PsFractWidthSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "1")
+    field(INPC, "15")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)PsFractWidthSet")
+}
+record(longout, "$(P)PsFractWidthSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)PsFractWidthSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)PsFractWidth PP")
+}
