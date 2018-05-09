@@ -88,7 +88,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select (1=internal,0=acc timing)
     createConfigParam("Unused0",          '1', 0x16, 32,  0, 0); // Unused0
     createConfigParam("LegacyTsyncDly",   '1', 0x17, 32,  0, 0); // Legacy Tsync Delay             (scale:0.1,unit:us,prec:1)
-    createConfigParam("LegacyEvLength",   '1', 0x18, 24,  0, 4); // Legacy Event Length            (unit:bytes)
+    createConfigParam("LegacyEvLength",   '1', 0x18, 24,  0, 8); // Legacy Event Length            (unit:bytes)
     createConfigParam("LegacyDataFormat", '1', 0x18,  8, 24, 2); // Legacy Data Format
     createConfigParam("ClockCorrUpd",     '1', 0x19, 30,  0, 0); // DSP 40MHz Clock Corr Update
     createConfigParam("ClockCorrCtrl",    '1', 0x19,  2, 30, 0); // DSP 40MHz Clock Corr Ctrl (0=disable,1=disable,2=stall,3=advance)
