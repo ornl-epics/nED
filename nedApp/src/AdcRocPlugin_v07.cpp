@@ -214,7 +214,7 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("PmosOnWidth",        'E', 0x5, 10,  0, 0);   // PMOS_ON pulse width = (Code + 1)*100ns, Code is 10-bit
     createConfigParam("NmosOnDelay",        'E', 0x5,  4, 12, 0);   // NMOS pulse delay after PMOS = (Code + 1)*100ns, Code is 4-bit
     createConfigParam("HpRate",             'E', 0x6, 10,  0, 0);   // Heat pulser rate: TsyncFrequency/(Code+1), Code is 10-bit
-    createConfigParam("HpEnable",           'E', 0x6,  1, 10, 0);   // Heat pulser enable               (0=disable,1=enable)
+    createConfigParam("HpEnable",           'E', 0x6,  1, 12, 0);   // Heat pulser enable               (0=disable,1=enable)
     createConfigParam("TsyncDelay0",        'E', 0x7, 32,  0, 0);   // Tsync Delay 0                    (scale:100,unit:ns)
     createConfigParam("TsyncDelay1",        'E', 0x9, 32,  0, 0);   // Tsync Delay 1                    (scale:100,unit:ns)
     createConfigParam("TsyncDelay2",        'E', 0xB, 32,  0, 0);   // Tsync Delay 2                    (scale:100,unit:ns)
