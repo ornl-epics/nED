@@ -163,7 +163,7 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("AdcOversampling",    'D', 0x0,  3,  0, 0);   // ADC Oversampling
     createConfigParam("MPAlwaysReady",      'D', 0x0,  1,  3, 0);   // MP Always Ready                  (0=OFF,1=ON)
     createConfigParam("AdcRange",           'D', 0x0,  1,  4, 1);   // ADC Range                        (0=+/-5V,1=+/-10V)
-    createConfigParam("PmEnable",           'D', 0x0,  1,  5, 1);   // Pulsed Magnet Enable             (0=disable,1=enable)
+    createConfigParam("PmEnable",           'D', 0x0,  1,  5, 0);   // Pulsed Magnet Enable             (0=disable,1=enable)
     createConfigParam("Adc0:Enable",        'D', 0x0,  1,  8, 1);   // Chan0 ADC Enable                 (0=disable,1=enable)
     createConfigParam("Adc1:Enable",        'D', 0x0,  1,  9, 1);   // Chan1 ADC Enable                 (0=disable,1=enable)
     createConfigParam("Adc2:Enable",        'D', 0x0,  1, 10, 1);   // Chan2 ADC Enable                 (0=disable,1=enable)
