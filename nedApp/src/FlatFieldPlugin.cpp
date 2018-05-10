@@ -30,9 +30,9 @@
 #   define PATH_SEPARATOR '/'
 #endif
 
-EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 4, "Port name", string, "Parent plugins", string, "Positions", string, "Buffer size", int);
+EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 3, "Port name", string, "Parent plugins", string, "Positions", string);
 
-FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins, const char *positions, int bufSize)
+FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins, const char *positions)
     : BasePlugin(portName, 1, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
     , m_parentPlugins(parentPlugins)
 {

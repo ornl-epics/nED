@@ -87,8 +87,8 @@ void DspPlugin::createParams_v71() {
     createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable (0=enable,1=disable)
     createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select (1=internal,0=acc timing)
     createConfigParam("Unused0",          '1', 0x16, 32,  0, 0); // Unused0
-    createConfigParam("LegacyTsyncDly",   '1', 0x17, 32,  0, 0); // Legacy Tsync Delay             (scale:0.1,unit:us,prec:1)
-    createConfigParam("LegacyEvLength",   '1', 0x18, 24,  0, 4); // Legacy Event Length            (unit:bytes)
+    createConfigParam("LegacyTsyncDly",   '1', 0x17, 16,  0, 0); // Legacy Tsync Delay             (scale:0.1,unit:us,prec:1)
+    createConfigParam("LegacyEvLength",   '1', 0x18, 24,  0, 8); // Legacy Event Length            (unit:bytes)
     createConfigParam("LegacyDataFormat", '1', 0x18,  8, 24, 2); // Legacy Data Format
     createConfigParam("ClockCorrUpd",     '1', 0x19, 30,  0, 0); // DSP 40MHz Clock Corr Update
     createConfigParam("ClockCorrCtrl",    '1', 0x19,  2, 30, 0); // DSP 40MHz Clock Corr Ctrl (0=disable,1=disable,2=stall,3=advance)
@@ -102,15 +102,19 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Lvds4TsyncSel",    '1', 0x1A,  1, 15, 0); // LVDS4 Tsync Select     (0=new format,1=legacy)
     createConfigParam("Lvds5TsyncSel",    '1', 0x1A,  1, 16, 0); // LVDS5 Tsync Select     (0=new format,1=legacy)
     createConfigParam("Lvds6TsyncSel",    '1', 0x1A,  1, 17, 0); // LVDS6 Tsync Select     (0=new format,1=legacy)
-    createConfigParam("Unused1",          '1', 0x1B, 32,  0, 0); // Unused1     
+    createConfigParam("MetaChan12Source", '1', 0x1A,  1, 18, 0); // Meta Channel12 Source  (0=ODB_In12,1=tsync_in)
+    createConfigParam("MetaChan13Source", '1', 0x1A,  1, 19, 0); // Meta Channel13 Source  (0=ODB_In13,1=tclk_in)
+    createConfigParam("MetaChan14Source", '1', 0x1A,  1, 20, 0); // Meta Channel14 Source  (0=ODB_In14,1=sysrstb_in)
+    createConfigParam("MetaChan15Source", '1', 0x1A,  1, 21, 0); // Meta Channel15 Source  (0=ODB_In15,1=txenb_in)
+    createConfigParam("TestPatternDly",   '1', 0x1B, 16,  0, 0); // Test Pattern Delay     (scale:0.0024094117,unit:ms)
     createConfigParam("TrigDelay2",       '1', 0x1C, 32,  0, 0); // Trigger Delay2         (scale:0.0094117,unit:us,prec:1)
     createConfigParam("TrigDelay3",       '1', 0x1D, 32,  0, 0); // Trigger Delay3         (scale:0.0094117,unit:us,prec:1)
     createConfigParam("TrigFreqSel0",     '1', 0x1E,  4,  0, 0); // Trigger Frequency Select0 (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz) 
     createConfigParam("TrigFreqSel1",     '1', 0x1E,  4,  4, 0); // Trigger Frequency Select1 (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("TrigFreqSel2",     '1', 0x1E,  4,  8, 0); // Trigger Frequency Select2 (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("TrigFreqSel3",     '1', 0x1E,  4, 12, 0); // Trigger Frequency Select3 (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
-    createConfigParam("TrigWidthSel2",    '1', 0x1F,  4,  0, 0); // Trigger Width Select2  
-    createConfigParam("TrigWidthSel3",    '1', 0x1F,  4,  4, 0); // Trigger Width Select3
+    createConfigParam("TrigWidthSel2",    '1', 0x1F,  4,  0, 0); // Trigger Width Select2     (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
+    createConfigParam("TrigWidthSel3",    '1', 0x1F,  4,  4, 0); // Trigger Width Select3     (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
     createConfigParam("TrigFrameDelay1",  '1', 0x1F,  8, 24, 0); // Trigger Frame Delay1 (unit:frames)
     
 

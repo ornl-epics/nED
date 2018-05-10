@@ -133,6 +133,9 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
                 case DasDataPacket::EVENT_FMT_PIXEL:
                     std::tie(nEvents, tofs, pixels) = getTofPixels<Event::Pixel>(packet);
                     break;
+                case DasDataPacket::EVENT_FMT_META:
+                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::Pixel>(packet);
+                    break;
                 case DasDataPacket::EVENT_FMT_LPSD_VERBOSE:
                     std::tie(nEvents, tofs, pixels) = getTofPixels<Event::LPSD::Verbose>(packet);
                     break;
@@ -2244,7 +2247,7 @@ void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
             setParamAlarmStatus(MetaPvaName, epicsAlarmNone);
             setParamAlarmSeverity(MetaPvaName, epicsSevNone);
         } else {
-            LOG_ERROR("Failed to send PVA update on Neutrons channel");
+            LOG_ERROR("Failed to send PVA update on Metadata channel");
             setParamAlarmStatus(MetaPvaName, epicsAlarmComm);
             setParamAlarmSeverity(MetaPvaName, epicsSevMinor);
         }

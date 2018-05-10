@@ -14,22 +14,22 @@
 void AdcRocPlugin::createParams_v07()
 {
 //    BLXXX:Det:RocXXX:| sig nam|      | EPICS record description | (bi and mbbi description)
-    createStatusParam("Dig1:Trigger",       0x0,  1,  0);   // Detected DIG0                (0=low,1=high)
-    createStatusParam("Dig2:Trigger",       0x0,  1,  1);   // Detected DIG1                (0=low,1=high)
-    createStatusParam("Dig3:Trigger",       0x0,  1,  2);   // Detected DIG2                (0=low,1=high)
-    createStatusParam("Dig4:Trigger",       0x0,  1,  3);   // Detected DIG3                (0=low,1=high)
-    createStatusParam("Dig5:Trigger",       0x0,  1,  4);   // Detected DIG4                (0=low,1=high)
-    createStatusParam("Dig6:Trigger",       0x0,  1,  5);   // Detected DIG5                (0=low,1=high)
-    createStatusParam("Dig7:Trigger",       0x0,  1,  6);   // Detected DIG6                (0=low,1=high)
-    createStatusParam("Dig8:Trigger",       0x0,  1,  7);   // Detected DIG7                (0=low,1=high)
-    createStatusParam("Adc1:Trigger",       0x0,  1,  8);   // Detected ADC0 triggered      (0=no,1=yes)
-    createStatusParam("Adc2:Trigger",       0x0,  1,  9);   // Detected ADC1 triggered      (0=no,1=yes)
-    createStatusParam("Adc3:Trigger",       0x0,  1, 10);   // Detected ADC2 triggered      (0=no,1=yes)
-    createStatusParam("Adc4:Trigger",       0x0,  1, 11);   // Detected ADC3 triggered      (0=no,1=yes)
-    createStatusParam("Adc5:Trigger",       0x0,  1, 12);   // Detected ADC4 triggered      (0=no,1=yes)
-    createStatusParam("Adc6:Trigger",       0x0,  1, 13);   // Detected ADC5 triggered      (0=no,1=yes)
-    createStatusParam("Adc7:Trigger",       0x0,  1, 14);   // Detected ADC6 triggered      (0=no,1=yes)
-    createStatusParam("Adc8:Trigger",       0x0,  1, 15);   // Detected ADC7 triggered      (0=no,1=yes)
+    createStatusParam("Dig0:Trigger",       0x0,  1,  0);   // Detected DIG0 Tsync DAQ      (0=low,1=high)
+    createStatusParam("Dig1:Trigger",       0x0,  1,  1);   // Detected DIG1                (0=low,1=high)
+    createStatusParam("Dig2:Trigger",       0x0,  1,  2);   // Detected DIG2                (0=low,1=high)
+    createStatusParam("Dig3:Trigger",       0x0,  1,  3);   // Detected DIG3                (0=low,1=high)
+    createStatusParam("Dig4:Trigger",       0x0,  1,  4);   // Detected DIG4                (0=low,1=high)
+    createStatusParam("Dig5:Trigger",       0x0,  1,  5);   // Detected DIG5                (0=low,1=high)
+    createStatusParam("Dig6:Trigger",       0x0,  1,  6);   // Detected DIG6                (0=low,1=high)
+    createStatusParam("Dig7:Trigger",       0x0,  1,  7);   // Detected DIG7                (0=low,1=high)
+    createStatusParam("Adc0:Trigger",       0x0,  1,  8);   // Detected ADC0 triggered      (0=no,1=yes)
+    createStatusParam("Adc1:Trigger",       0x0,  1,  9);   // Detected ADC1 triggered      (0=no,1=yes)
+    createStatusParam("Adc2:Trigger",       0x0,  1, 10);   // Detected ADC2 triggered      (0=no,1=yes)
+    createStatusParam("Adc3:Trigger",       0x0,  1, 11);   // Detected ADC3 triggered      (0=no,1=yes)
+    createStatusParam("Adc4:Trigger",       0x0,  1, 12);   // Detected ADC4 triggered      (0=no,1=yes)
+    createStatusParam("Adc5:Trigger",       0x0,  1, 13);   // Detected ADC5 triggered      (0=no,1=yes)
+    createStatusParam("Adc6:Trigger",       0x0,  1, 14);   // Detected ADC6 triggered      (0=no,1=yes)
+    createStatusParam("Adc7:Trigger",       0x0,  1, 15);   // Detected ADC7 triggered      (0=no,1=yes)
 
     createStatusParam("DIG",                0x2, 32,  0);   // DIG[32:0] scroc_8adc_acqa
 
@@ -72,149 +72,149 @@ void AdcRocPlugin::createParams_v07()
     createCounterParam("CntPktLengthErr",   0x9,  16,  0);  // packet length err counter
     createCounterParam("CntProgramErr",     0xA,  16,  0);  // programming err counter
     createCounterParam("CntFifoFull",       0xB,  16,  0);  // board output FIFO full cnt
-    createCounterParam("Dig1:CntFifoFull",  0xC,  16,  0);  // DIG0 output FIFO full cnt
-    createCounterParam("Dig2:CntFifoFull",  0xD,  16,  0);  // DIG1 output FIFO full cnt
-    createCounterParam("Dig3:CntFifoFull",  0xE,  16,  0);  // DIG2 output FIFO full cnt
-    createCounterParam("Dig4:CntFifoFull",  0xF,  16,  0);  // DIG3 output FIFO full cnt
-    createCounterParam("Dig5:CntFifoFull",  0x10, 16,  0);  // DIG4 output FIFO full cnt
-    createCounterParam("Dig6:CntFifoFull",  0x11, 16,  0);  // DIG5 output FIFO full cnt
-    createCounterParam("Dig7:CntFifoFull",  0x12, 16,  0);  // DIG6 output FIFO full cnt
-    createCounterParam("Dig8:CntFifoFull",  0x13, 16,  0);  // DIG7 output FIFO full cnt
-    createCounterParam("Adc1:CntFifoFull",  0x14, 16,  0);  // ADC0 output FIFO full cnt
-    createCounterParam("Adc2:CntFifoFull",  0x15, 16,  0);  // ADC1 output FIFO full cnt
-    createCounterParam("Adc3:CntFifoFull",  0x16, 16,  0);  // ADC2 output FIFO full cnt
-    createCounterParam("Adc4:CntFifoFull",  0x17, 16,  0);  // ADC3 output FIFO full cnt
-    createCounterParam("Adc5:CntFifoFull",  0x18, 16,  0);  // ADC4 output FIFO full cnt
-    createCounterParam("Adc6:CntFifoFull",  0x19, 16,  0);  // ADC5 output FIFO full cnt
-    createCounterParam("Adc7:CntFifoFull",  0x1A, 16,  0);  // ADC6 output FIFO full cnt
-    createCounterParam("Adc8:CntFifoFull",  0x1B, 16,  0);  // ADC7 output FIFO full cnt
+    createCounterParam("Dig0:CntFifoFull",  0xC,  16,  0);  // DIG0 output FIFO full cnt  Tsync DAQ
+    createCounterParam("Dig1:CntFifoFull",  0xD,  16,  0);  // DIG1 output FIFO full cnt
+    createCounterParam("Dig2:CntFifoFull",  0xE,  16,  0);  // DIG2 output FIFO full cnt
+    createCounterParam("Dig3:CntFifoFull",  0xF,  16,  0);  // DIG3 output FIFO full cnt
+    createCounterParam("Dig4:CntFifoFull",  0x10, 16,  0);  // DIG4 output FIFO full cnt
+    createCounterParam("Dig5:CntFifoFull",  0x11, 16,  0);  // DIG5 output FIFO full cnt
+    createCounterParam("Dig6:CntFifoFull",  0x12, 16,  0);  // DIG6 output FIFO full cnt
+    createCounterParam("Dig7:CntFifoFull",  0x13, 16,  0);  // DIG7 output FIFO full cnt
+    createCounterParam("Adc0:CntFifoFull",  0x14, 16,  0);  // ADC0 output FIFO full cnt
+    createCounterParam("Adc1:CntFifoFull",  0x15, 16,  0);  // ADC1 output FIFO full cnt
+    createCounterParam("Adc2:CntFifoFull",  0x16, 16,  0);  // ADC2 output FIFO full cnt
+    createCounterParam("Adc3:CntFifoFull",  0x17, 16,  0);  // ADC3 output FIFO full cnt
+    createCounterParam("Adc4:CntFifoFull",  0x18, 16,  0);  // ADC4 output FIFO full cnt
+    createCounterParam("Adc5:CntFifoFull",  0x19, 16,  0);  // ADC5 output FIFO full cnt
+    createCounterParam("Adc6:CntFifoFull",  0x1A, 16,  0);  // ADC6 output FIFO full cnt
+    createCounterParam("Adc7:CntFifoFull",  0x1B, 16,  0);  // ADC7 output FIFO full cnt
     createCounterParam("CntLinkDisconnect", 0x1C, 16,  0);  // Ch Link disconnect counter
-    createCounterParam("Dig1:Rate",         0x1D, 16,  0);  // DIG0 ratemeter
-    createCounterParam("Dig2:Rate",         0x1E, 16,  0);  // DIG1 ratemeter
-    createCounterParam("Dig3:Rate",         0x1F, 16,  0);  // DIG2 ratemeter
-    createCounterParam("Dig4:Rate",         0x20, 16,  0);  // DIG3 ratemeter
-    createCounterParam("Dig5:Rate",         0x21, 16,  0);  // DIG4 ratemeter
-    createCounterParam("Dig6:Rate",         0x22, 16,  0);  // DIG5 ratemeter
-    createCounterParam("Dig7:Rate",         0x23, 16,  0);  // DIG6 ratemeter
-    createCounterParam("Dig8:Rate",         0x24, 16,  0);  // DIG7 ratemeter
-    createCounterParam("Dig1:RateEvents",   0x25, 16,  0);  // DIG0 events ratemeter
-    createCounterParam("Dig2:RateEvents",   0x26, 16,  0);  // DIG1 events ratemeter
-    createCounterParam("Dig3:RateEvents",   0x27, 16,  0);  // DIG2 events ratemeter
-    createCounterParam("Dig4:RateEvents",   0x28, 16,  0);  // DIG3 events ratemeter
-    createCounterParam("Dig5:RateEvents",   0x29, 16,  0);  // DIG4 events ratemeter
-    createCounterParam("Dig6:RateEvents",   0x2A, 16,  0);  // DIG5 events ratemeter
-    createCounterParam("Dig7:RateEvents",   0x2B, 16,  0);  // DIG6 events ratemeter
-    createCounterParam("Dig8:RateEvents",   0x2C, 16,  0);  // DIG7 events ratemeter
-    createCounterParam("Adc1:RatePulses",   0x2D, 16,  0);  // ADC0 Ok pulses ratemeter
-    createCounterParam("Adc2:RatePulses",   0x2E, 16,  0);  // ADC1 Ok pulses ratemeter
-    createCounterParam("Adc3:RatePulses",   0x2F, 16,  0);  // ADC2 Ok pulses ratemeter
-    createCounterParam("Adc4:RatePulses",   0x30, 16,  0);  // ADC3 Ok pulses ratemeter
-    createCounterParam("Adc5:RatePulses",   0x31, 16,  0);  // ADC4 Ok pulses ratemeter
-    createCounterParam("Adc6:RatePulses",   0x32, 16,  0);  // ADC5 Ok pulses ratemeter
-    createCounterParam("Adc7:RatePulses",   0x33, 16,  0);  // ADC6 Ok pulses ratemeter
-    createCounterParam("Adc8:RatePulses",   0x34, 16,  0);  // ADC7 Ok pulses ratemeter
-    createCounterParam("Adc1:RateEvents",   0x35, 16,  0);  // ADC0 events ratemeter
-    createCounterParam("Adc2:RateEvents",   0x36, 16,  0);  // ADC1 events ratemeter
-    createCounterParam("Adc3:RateEvents",   0x37, 16,  0);  // ADC2 events ratemeter
-    createCounterParam("Adc4:RateEvents",   0x38, 16,  0);  // ADC3 events ratemeter
-    createCounterParam("Adc5:RateEvents",   0x39, 16,  0);  // ADC4 events ratemeter<UCAMS ID>
-    createCounterParam("Adc6:RateEvents",   0x3A, 16,  0);  // ADC5 events ratemeter
-    createCounterParam("Adc7:RateEvents",   0x3B, 16,  0);  // ADC6 events ratemeter
-    createCounterParam("Adc8:RateEvents",   0x3C, 16,  0);  // ADC7 events ratemeter
-    createCounterParam("RateOut",           0x3D, 16,  0);  // Board total events ratemeter
+    createCounterParam("Dig0:RatePulses",   0x1D, 16,  0);  // DIG0 ratemeter Tsync DAQ        (scale:19.073,unit:per sec)
+    createCounterParam("Dig1:RatePulses",   0x1E, 16,  0);  // DIG1 ratemeter                  (scale:19.073,unit:per sec)
+    createCounterParam("Dig2:RatePulses",   0x1F, 16,  0);  // DIG2 ratemeter                  (scale:19.073,unit:per sec)
+    createCounterParam("Dig3:RatePulses",   0x20, 16,  0);  // DIG3 ratemeter                  (scale:19.073,unit:per sec)
+    createCounterParam("Dig4:RatePulses",   0x21, 16,  0);  // DIG4 ratemeter                  (scale:19.073,unit:per sec)
+    createCounterParam("Dig5:RatePulses",   0x22, 16,  0);  // DIG5 ratemeter                  (scale:19.073,unit:per sec)
+    createCounterParam("Dig6:RatePulses",   0x23, 16,  0);  // DIG6 ratemeter                  (scale:19.073,unit:per sec)
+    createCounterParam("Dig7:RatePulses",   0x24, 16,  0);  // DIG7 ratemeter                  (scale:19.073,unit:per sec)
+    createCounterParam("Dig0:RateEvents",   0x25, 16,  0);  // DIG0 events ratemeter Tsync DAQ (scale:19.073,unit:per sec)
+    createCounterParam("Dig1:RateEvents",   0x26, 16,  0);  // DIG1 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Dig2:RateEvents",   0x27, 16,  0);  // DIG2 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Dig3:RateEvents",   0x28, 16,  0);  // DIG3 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Dig4:RateEvents",   0x29, 16,  0);  // DIG4 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Dig5:RateEvents",   0x2A, 16,  0);  // DIG5 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Dig6:RateEvents",   0x2B, 16,  0);  // DIG6 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Dig7:RateEvents",   0x2C, 16,  0);  // DIG7 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Adc0:RatePulses",   0x2D, 16,  0);  // ADC0 Ok pulses ratemeter        (scale:19.073,unit:per sec)
+    createCounterParam("Adc1:RatePulses",   0x2E, 16,  0);  // ADC1 Ok pulses ratemeter        (scale:19.073,unit:per sec)
+    createCounterParam("Adc2:RatePulses",   0x2F, 16,  0);  // ADC2 Ok pulses ratemeter        (scale:19.073,unit:per sec)
+    createCounterParam("Adc3:RatePulses",   0x30, 16,  0);  // ADC3 Ok pulses ratemeter        (scale:19.073,unit:per sec)
+    createCounterParam("Adc4:RatePulses",   0x31, 16,  0);  // ADC4 Ok pulses ratemeter        (scale:19.073,unit:per sec)
+    createCounterParam("Adc5:RatePulses",   0x32, 16,  0);  // ADC5 Ok pulses ratemeter        (scale:19.073,unit:per sec)
+    createCounterParam("Adc6:RatePulses",   0x33, 16,  0);  // ADC6 Ok pulses ratemeter        (scale:19.073,unit:per sec)
+    createCounterParam("Adc7:RatePulses",   0x34, 16,  0);  // ADC7 Ok pulses ratemeter        (scale:19.073,unit:per sec)
+    createCounterParam("Adc0:RateEvents",   0x35, 16,  0);  // ADC0 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Adc1:RateEvents",   0x36, 16,  0);  // ADC1 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Adc2:RateEvents",   0x37, 16,  0);  // ADC2 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Adc3:RateEvents",   0x38, 16,  0);  // ADC3 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Adc4:RateEvents",   0x39, 16,  0);  // ADC4 events ratemeter<UCAMS ID> (scale:19.073,unit:per sec)
+    createCounterParam("Adc5:RateEvents",   0x3A, 16,  0);  // ADC5 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Adc6:RateEvents",   0x3B, 16,  0);  // ADC6 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("Adc7:RateEvents",   0x3C, 16,  0);  // ADC7 events ratemeter           (scale:19.073,unit:per sec)
+    createCounterParam("RateOut",           0x3D, 16,  0);  // Board total events ratemeter    (scale:19.073,unit:per sec)
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-    createConfigParam("Dig1:PositionIdx",   '1', 0x0,  32, 0, 0x50000000); // Chan1 Digital position index
-    createConfigParam("Dig2:PositionIdx",   '1', 0x2,  32, 0, 0x50010000); // Chan2 Digital position index
-    createConfigParam("Dig3:PositionIdx",   '1', 0x4,  32, 0, 0x50020000); // Chan3 Digital position index
-    createConfigParam("Dig4:PositionIdx",   '1', 0x6,  32, 0, 0x50030000); // Chan4 Digital position index
-    createConfigParam("Dig5:PositionIdx",   '1', 0x8,  32, 0, 0x50040000); // Chan5 Digital position index
-    createConfigParam("Dig6:PositionIdx",   '1', 0xA,  32, 0, 0x50050000); // Chan6 Digital position index
-    createConfigParam("Dig7:PositionIdx",   '1', 0xC,  32, 0, 0x50060000); // Chan7 Digital position index
-    createConfigParam("Dig8:PositionIdx",   '1', 0xE,  32, 0, 0x50070000); // Chan8 Digital position index
-    createConfigParam("Adc1:PositionIdx",   '1', 0x10, 32, 0, 0x60000000); // Chan1 ADC position index
-    createConfigParam("Adc2:PositionIdx",   '1', 0x12, 32, 0, 0x60010000); // Chan2 ADC position index
-    createConfigParam("Adc3:PositionIdx",   '1', 0x14, 32, 0, 0x60020000); // Chan3 ADC position index
-    createConfigParam("Adc4:PositionIdx",   '1', 0x16, 32, 0, 0x60030000); // Chan4 ADC position index
-    createConfigParam("Adc5:PositionIdx",   '1', 0x18, 32, 0, 0x60040000); // Chan5 ADC position index
-    createConfigParam("Adc6:PositionIdx",   '1', 0x1A, 32, 0, 0x60050000); // Chan6 ADC position index
-    createConfigParam("Adc7:PositionIdx",   '1', 0x1C, 32, 0, 0x60060000); // Chan7 ADC position index
-    createConfigParam("Adc8:PositionIdx",   '1', 0x1E, 32, 0, 0x60070000); // Chan8 ADC position index
+    createConfigParam("Dig0:PositionIdx",   '1', 0x0,  32, 0, 0x50000000); // Chan0 Digital position index Tsync DAQ
+    createConfigParam("Dig1:PositionIdx",   '1', 0x2,  32, 0, 0x50010000); // Chan1 Digital position index
+    createConfigParam("Dig2:PositionIdx",   '1', 0x4,  32, 0, 0x50020000); // Chan2 Digital position index
+    createConfigParam("Dig3:PositionIdx",   '1', 0x6,  32, 0, 0x50030000); // Chan3 Digital position index
+    createConfigParam("Dig4:PositionIdx",   '1', 0x8,  32, 0, 0x50040000); // Chan4 Digital position index
+    createConfigParam("Dig5:PositionIdx",   '1', 0xA,  32, 0, 0x50050000); // Chan5 Digital position index
+    createConfigParam("Dig6:PositionIdx",   '1', 0xC,  32, 0, 0x50060000); // Chan6 Digital position index
+    createConfigParam("Dig7:PositionIdx",   '1', 0xE,  32, 0, 0x50070000); // Chan7 Digital position index
+    createConfigParam("Adc0:PositionIdx",   '1', 0x10, 32, 0, 0x60000000); // Chan0 ADC position index
+    createConfigParam("Adc1:PositionIdx",   '1', 0x12, 32, 0, 0x60010000); // Chan1 ADC position index
+    createConfigParam("Adc2:PositionIdx",   '1', 0x14, 32, 0, 0x60020000); // Chan2 ADC position index
+    createConfigParam("Adc3:PositionIdx",   '1', 0x16, 32, 0, 0x60030000); // Chan3 ADC position index
+    createConfigParam("Adc4:PositionIdx",   '1', 0x18, 32, 0, 0x60040000); // Chan4 ADC position index
+    createConfigParam("Adc5:PositionIdx",   '1', 0x1A, 32, 0, 0x60050000); // Chan5 ADC position index
+    createConfigParam("Adc6:PositionIdx",   '1', 0x1C, 32, 0, 0x60060000); // Chan6 ADC position index
+    createConfigParam("Adc7:PositionIdx",   '1', 0x1E, 32, 0, 0x60070000); // Chan7 ADC position index
 
-    createConfigParam("Adc1:Threshold",     'C', 0x0, 16,  0, 10);  // Chan1 ADC Threshold
-    createConfigParam("Adc2:Threshold",     'C', 0x1, 16,  0, 10);  // Chan2 ADC Threshold
-    createConfigParam("Adc3:Threshold",     'C', 0x2, 16,  0, 10);  // Chan3 ADC Threshold
-    createConfigParam("Adc4:Threshold",     'C', 0x3, 16,  0, 10);  // Chan4 ADC Threshold
-    createConfigParam("Adc5:Threshold",     'C', 0x4, 16,  0, 10);  // Chan5 ADC Threshold
-    createConfigParam("Adc6:Threshold",     'C', 0x5, 16,  0, 10);  // Chan6 ADC Threshold
-    createConfigParam("Adc7:Threshold",     'C', 0x6, 16,  0, 10);  // Chan7 ADC Threshold
-    createConfigParam("Adc8:Threshold",     'C', 0x7, 16,  0, 10);  // Chan8 ADC Threshold
-    createConfigParam("PmTsyncDelay",       'C', 0x8, 24,  0, 0);   // Pulsed Magnet Tsync Delay
-    createConfigParam("PmRatePeriod",       'C', 0xA, 16,  0, 1000);// Pulsed Magnet Rate Period
-    createConfigParam("Dig1:Mode",          'C', 0xB,  2,  0, 0);   // Chan1 Digital mode
-    createConfigParam("Dig2:Mode",          'C', 0xB,  2,  2, 0);   // Chan2 Digital mode
-    createConfigParam("Dig3:Mode",          'C', 0xB,  2,  4, 0);   // Chan3 Digital mode
-    createConfigParam("Dig4:Mode",          'C', 0xB,  2,  6, 0);   // Chan4 Digital mode
-    createConfigParam("Dig5:Mode",          'C', 0xB,  2,  8, 0);   // Chan5 Digital mode
-    createConfigParam("Dig6:Mode",          'C', 0xB,  2, 10, 0);   // Chan6 Digital mode
-    createConfigParam("Dig7:Mode",          'C', 0xB,  2, 12, 0);   // Chan7 Digital mode
-    createConfigParam("Dig8:Mode",          'C', 0xB,  2, 14, 0);   // Chan8 Digital mode
+    createConfigParam("Adc0:Threshold",     'C', 0x0, 16,  0, 10);   // Chan0 ADC Threshold       (unit:ADC LSB)
+    createConfigParam("Adc1:Threshold",     'C', 0x1, 16,  0, 10);   // Chan1 ADC Threshold       (unit:ADC LSB)
+    createConfigParam("Adc2:Threshold",     'C', 0x2, 16,  0, 10);   // Chan2 ADC Threshold       (unit:ADC LSB)
+    createConfigParam("Adc3:Threshold",     'C', 0x3, 16,  0, 10);   // Chan3 ADC Threshold       (unit:ADC LSB)
+    createConfigParam("Adc4:Threshold",     'C', 0x4, 16,  0, 10);   // Chan4 ADC Threshold       (unit:ADC LSB)
+    createConfigParam("Adc5:Threshold",     'C', 0x5, 16,  0, 10);   // Chan5 ADC Threshold       (unit:ADC LSB)
+    createConfigParam("Adc6:Threshold",     'C', 0x6, 16,  0, 10);   // Chan6 ADC Threshold       (unit:ADC LSB)
+    createConfigParam("Adc7:Threshold",     'C', 0x7, 16,  0, 10);   // Chan7 ADC Threshold       (unit:ADC LSB)
+    createConfigParam("PmTsyncDelay",       'C', 0x8, 25,  0, 0);    // Pulsed Magnet Tsync Delay = Code * 50ns, Code is 25-bit  (scale:50,unit:ns)
+    createConfigParam("PmRatePeriod",       'C', 0xA, 16,  0, 1000); // Pulsed Magnet Rate Period = Code * 16ms, Code is 16-bit, CodeMin=2  (scale:16,unit:ms)
+    createConfigParam("Dig0:Mode",          'C', 0xB,  2,  0, 0);    // Chan0 Digital Edge mode Tsync DAQ  (0=None,1=Rising,2=Falling,3=Both)
+    createConfigParam("Dig1:Mode",          'C', 0xB,  2,  2, 0);    // Chan1 Digital Edge mode            (0=None,1=Rising,2=Falling,3=Both)
+    createConfigParam("Dig2:Mode",          'C', 0xB,  2,  4, 0);    // Chan2 Digital Edge mode            (0=None,1=Rising,2=Falling,3=Both)
+    createConfigParam("Dig3:Mode",          'C', 0xB,  2,  6, 0);    // Chan3 Digital Edge mode            (0=None,1=Rising,2=Falling,3=Both)
+    createConfigParam("Dig4:Mode",          'C', 0xB,  2,  8, 0);    // Chan4 Digital Edge mode            (0=None,1=Rising,2=Falling,3=Both)
+    createConfigParam("Dig5:Mode",          'C', 0xB,  2, 10, 0);    // Chan5 Digital Edge mode            (0=None,1=Rising,2=Falling,3=Both)
+    createConfigParam("Dig6:Mode",          'C', 0xB,  2, 12, 0);    // Chan6 Digital Edge mode            (0=None,1=Rising,2=Falling,3=Both)
+    createConfigParam("Dig7:Mode",          'C', 0xB,  2, 14, 0);    // Chan7 Digital Edge mode            (0=None,1=Rising,2=Falling,3=Both)
 
     createConfigParam("AdcOversampling",    'D', 0x0,  3,  0, 0);   // ADC Oversampling
-    createConfigParam("MPAlwaysReady",      'D', 0x0,  1,  3, 0);   // MP Always Ready
+    createConfigParam("MPAlwaysReady",      'D', 0x0,  1,  3, 0);   // MP Always Ready                  (0=OFF,1=ON)
     createConfigParam("AdcRange",           'D', 0x0,  1,  4, 1);   // ADC Range                        (0=+/-5V,1=+/-10V)
-    createConfigParam("PmEnable",           'D', 0x0,  1,  5, 1);   // Pulsed Magnet Enable             (0=disable,1=enable)
-    createConfigParam("Adc1:Enable",        'D', 0x0,  1,  8, 1);   // Chan1 ADC Enable
-    createConfigParam("Adc2:Enable",        'D', 0x0,  1,  9, 1);   // Chan2 ADC Enable
-    createConfigParam("Adc3:Enable",        'D', 0x0,  1, 10, 1);   // Chan3 ADC Enable
-    createConfigParam("Adc4:Enable",        'D', 0x0,  1, 11, 1);   // Chan4 ADC Enable
-    createConfigParam("Adc5:Enable",        'D', 0x0,  1, 12, 1);   // Chan5 ADC Enable
-    createConfigParam("Adc6:Enable",        'D', 0x0,  1, 13, 1);   // Chan6 ADC Enable
-    createConfigParam("Adc7:Enable",        'D', 0x0,  1, 14, 1);   // Chan7 ADC Enable
-    createConfigParam("Adc8:Enable",        'D', 0x0,  1, 15, 1);   // Chan8 ADC Enable
-    createConfigParam("Adc1:RateCoef",      'D', 0x1, 16,  0, 1000); // Chan1 ADC Rate Coefficient
-    createConfigParam("Adc2:RateCoef",      'D', 0x2, 16,  0, 1000); // Chan2 ADC Rate Coefficient
-    createConfigParam("Adc3:RateCoef",      'D', 0x3, 16,  0, 1000); // Chan3 ADC Rate Coefficient
-    createConfigParam("Adc4:RateCoef",      'D', 0x4, 16,  0, 1000); // Chan4 ADC Rate Coefficient
-    createConfigParam("Adc5:RateCoef",      'D', 0x5, 16,  0, 1000); // Chan5 ADC Rate Coefficient
-    createConfigParam("Adc6:RateCoef",      'D', 0x6, 16,  0, 1000); // Chan6 ADC Rate Coefficient
-    createConfigParam("Adc7:RateCoef",      'D', 0x7, 16,  0, 1000); // Chan7 ADC Rate Coefficient
-    createConfigParam("Adc8:RateCoef",      'D', 0x8, 16,  0, 1000); // Chan8 ADC Rate Coefficient
+    createConfigParam("PmEnable",           'D', 0x0,  1,  5, 0);   // Pulsed Magnet Enable             (0=disable,1=enable)
+    createConfigParam("Adc0:Enable",        'D', 0x0,  1,  8, 1);   // Chan0 ADC Enable                 (0=disable,1=enable)
+    createConfigParam("Adc1:Enable",        'D', 0x0,  1,  9, 1);   // Chan1 ADC Enable                 (0=disable,1=enable)
+    createConfigParam("Adc2:Enable",        'D', 0x0,  1, 10, 1);   // Chan2 ADC Enable                 (0=disable,1=enable)
+    createConfigParam("Adc3:Enable",        'D', 0x0,  1, 11, 1);   // Chan3 ADC Enable                 (0=disable,1=enable)
+    createConfigParam("Adc4:Enable",        'D', 0x0,  1, 12, 1);   // Chan4 ADC Enable                 (0=disable,1=enable)
+    createConfigParam("Adc5:Enable",        'D', 0x0,  1, 13, 1);   // Chan5 ADC Enable                 (0=disable,1=enable)
+    createConfigParam("Adc6:Enable",        'D', 0x0,  1, 14, 1);   // Chan6 ADC Enable                 (0=disable,1=enable)
+    createConfigParam("Adc7:Enable",        'D', 0x0,  1, 15, 1);   // Chan7 ADC Enable                 (0=disable,1=enable)
+    createConfigParam("Adc0:RateIdle",      'D', 0x1, 16,  0, 1000); // Chan0 ADC Idle Rate = 100kHz/(Code+1), Code is 16-bit
+    createConfigParam("Adc1:RateIdle",      'D', 0x2, 16,  0, 1000); // Chan1 ADC Idle Rate = 100kHz/(Code+1), Code is 16-bit
+    createConfigParam("Adc2:RateIdle",      'D', 0x3, 16,  0, 1000); // Chan2 ADC Idle Rate = 100kHz/(Code+1), Code is 16-bit
+    createConfigParam("Adc3:RateIdle",      'D', 0x4, 16,  0, 1000); // Chan3 ADC Idle Rate = 100kHz/(Code+1), Code is 16-bit
+    createConfigParam("Adc4:RateIdle",      'D', 0x5, 16,  0, 1000); // Chan4 ADC Idle Rate = 100kHz/(Code+1), Code is 16-bit
+    createConfigParam("Adc5:RateIdle",      'D', 0x6, 16,  0, 1000); // Chan5 ADC Idle Rate = 100kHz/(Code+1), Code is 16-bit
+    createConfigParam("Adc6:RateIdle",      'D', 0x7, 16,  0, 1000); // Chan6 ADC Idle Rate = 100kHz/(Code+1), Code is 16-bit
+    createConfigParam("Adc7:RateIdle",      'D', 0x8, 16,  0, 1000); // Chan7 ADC Idle Rate = 100kHz/(Code+1), Code is 16-bit
 
-    createConfigParam("Adc1:TsyncSrc",      'D', 0x9,  2,  0,  0);  // TOF source for ADC ch 0          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc2:TsyncSrc",      'D', 0x9,  2,  4,  0);  // TOF source for ADC ch 1          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc3:TsyncSrc",      'D', 0x9,  2,  8,  0);  // TOF source for ADC ch 2          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc4:TsyncSrc",      'D', 0x9,  2, 12, 0);   // TOF source for ADC ch 3          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc5:TsyncSrc",      'D', 0xA,  2,  0,  0);  // TOF source for ADC ch 4          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc6:TsyncSrc",      'D', 0xA,  2,  4,  0);  // TOF source for ADC ch 5          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc7:TsyncSrc",      'D', 0xA,  2,  8,  0);  // TOF source for ADC ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Adc8:TsyncSrc",      'D', 0xA,  2, 12, 0);   // TOF source for ADC ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc0:TsyncSrc",      'D', 0x9,  2,  0,  0);  // TOF src for ADC ch 0          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc1:TsyncSrc",      'D', 0x9,  2,  4,  0);  // TOF src for ADC ch 1          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc2:TsyncSrc",      'D', 0x9,  2,  8,  0);  // TOF src for ADC ch 2          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc3:TsyncSrc",      'D', 0x9,  2, 12, 0);   // TOF src for ADC ch 3          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc4:TsyncSrc",      'D', 0xA,  2,  0,  0);  // TOF src for ADC ch 4          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc5:TsyncSrc",      'D', 0xA,  2,  4,  0);  // TOF src for ADC ch 5          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc6:TsyncSrc",      'D', 0xA,  2,  8,  0);  // TOF src for ADC ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Adc7:TsyncSrc",      'D', 0xA,  2, 12, 0);   // TOF src for ADC ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
 
-    createConfigParam("Dig1:TsyncSrc",      'D', 0xB,  2,  0,  0);  // TOF source for Dig ch 0          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Dig2:TsyncSrc",      'D', 0xB,  2,  4,  0);  // TOF source for Dig ch 1          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Dig3:TsyncSrc",      'D', 0xB,  2,  8,  0);  // TOF source for Dig ch 2          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Dig4:TsyncSrc",      'D', 0xB,  2, 12, 0);   // TOF source for Dig ch 3          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Dig5:TsyncSrc",      'D', 0xC,  2,  0,  0);  // TOF source for Dig ch 4          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Dig6:TsyncSrc",      'D', 0xC,  2,  4,  0);  // TOF source for Dig ch 5          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Dig7:TsyncSrc",      'D', 0xC,  2,  8,  0);  // TOF source for Dig ch 6          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Dig8:TsyncSrc",      'D', 0xC,  2, 12, 0);   // TOF source for Dig ch 7          (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Dig0:TsyncSrc",      'D', 0xB,  2,  0,  0);  // TOF src for Dig ch 0 Tsync DAQ (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Dig1:TsyncSrc",      'D', 0xB,  2,  4,  0);  // TOF src for Dig ch 1           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Dig2:TsyncSrc",      'D', 0xB,  2,  8,  0);  // TOF src for Dig ch 2           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Dig3:TsyncSrc",      'D', 0xB,  2, 12, 0);   // TOF src for Dig ch 3           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Dig4:TsyncSrc",      'D', 0xC,  2,  0,  0);  // TOF src for Dig ch 4           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Dig5:TsyncSrc",      'D', 0xC,  2,  4,  0);  // TOF src for Dig ch 5           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Dig6:TsyncSrc",      'D', 0xC,  2,  8,  0);  // TOF src for Dig ch 6           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Dig7:TsyncSrc",      'D', 0xC,  2, 12, 0);   // TOF src for Dig ch 7           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
 
-    createConfigParam("Ctrl1:TsyncSrc",     'D', 0xD,  2,  0,  0);  // Tsync src for CTRL ch 0 PM       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl2:TsyncSrc",     'D', 0xD,  2,  4,  0);  // Tsync src for CTRL ch 1 HP       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl3:TsyncSrc",     'D', 0xD,  2,  8,  0);  // Tsync source for CTRL ch 2       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl4:TsyncSrc",     'D', 0xD,  2, 12, 0);   // Tsync source for CTRL ch 3       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl5:TsyncSrc",     'D', 0xE,  2,  0,  0);  // Tsync source for CTRL ch 4       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl6:TsyncSrc",     'D', 0xE,  2,  4,  0);  // Tsync source for CTRL ch 5       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl7:TsyncSrc",     'D', 0xE,  2,  8,  0);  // Tsync source for CTRL ch 6       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
-    createConfigParam("Ctrl8:TsyncSrc",     'D', 0xE,  2, 12, 0);   // Tsync source for CTRL ch 7       (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl0:TsyncSrc",     'D', 0xD,  2,  0,  0);  // Tsync src for CTRL ch 0 Tsync DAQ (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl1:TsyncSrc",     'D', 0xD,  2,  4,  0);  // Tsync src for CTRL ch 1 PM        (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl2:TsyncSrc",     'D', 0xD,  2,  8,  0);  // Tsync src for CTRL ch 2 HP        (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl3:TsyncSrc",     'D', 0xD,  2, 12,  0);  // Tsync src for CTRL ch 3           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl4:TsyncSrc",     'D', 0xE,  2,  0,  0);  // Tsync src for CTRL ch 4           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl5:TsyncSrc",     'D', 0xE,  2,  4,  0);  // Tsync src for CTRL ch 5           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl6:TsyncSrc",     'D', 0xE,  2,  8,  0);  // Tsync src for CTRL ch 6           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
+    createConfigParam("Ctrl7:TsyncSrc",     'D', 0xE,  2, 12,  0);  // Tsync src for CTRL ch 7           (0=Tsync delay 0,1=Tsync delay 1,2=Tsync delay 2,3=Tsync delay 3)
 
     createConfigParam("FakeTrigPeriod",     'E', 0x0, 16,  0, 0);   // Fake trigger period
-    createConfigParam("HpTsyncDelay",       'E', 0x1, 20,  0, 0);   // Heat pulser register
-    createConfigParam("NmosOnWidth",        'E', 0x3, 24,  0, 0);   // NMOS On pulse width
-    createConfigParam("PmosOnWidth",        'E', 0x5, 10,  0, 0);   // PMOS On pulse width
-    createConfigParam("NmosOnDelay",        'E', 0x5,  4, 12, 0);   // NMOS pulse delay after PMOS
-    createConfigParam("HpRate",             'E', 0x6, 10,  0, 0);   // Heat pulser rate
-    createConfigParam("HpEnable",           'E', 0x6,  1, 10, 0);   // Heat pulser enable               (0=disable,1=enable)
+    createConfigParam("HpTsyncDelay",       'E', 0x1, 20,  0, 0);   // Heat pulser: delay PMOS_ON from Tsync = (Code*4 + 1)*25ns, Code is 20-bit
+    createConfigParam("NmosOnWidth",        'E', 0x3, 24,  0, 0);   // NMOS_ON pulse width = (Code + 1)*100ns, Code is 24-bit
+    createConfigParam("PmosOnWidth",        'E', 0x5, 10,  0, 0);   // PMOS_ON pulse width = (Code + 1)*100ns, Code is 10-bit
+    createConfigParam("NmosOnDelay",        'E', 0x5,  4, 12, 0);   // NMOS pulse delay after PMOS = (Code + 1)*100ns, Code is 4-bit
+    createConfigParam("HpRate",             'E', 0x6, 10,  0, 0);   // Heat pulser rate: TsyncFrequency/(Code+1), Code is 10-bit
+    createConfigParam("HpEnable",           'E', 0x6,  1, 12, 0);   // Heat pulser enable               (0=disable,1=enable)
     createConfigParam("TsyncDelay0",        'E', 0x7, 32,  0, 0);   // Tsync Delay 0                    (scale:100,unit:ns)
     createConfigParam("TsyncDelay1",        'E', 0x9, 32,  0, 0);   // Tsync Delay 1                    (scale:100,unit:ns)
     createConfigParam("TsyncDelay2",        'E', 0xB, 32,  0, 0);   // Tsync Delay 2                    (scale:100,unit:ns)
@@ -233,6 +233,6 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("TestPatternEn",      'F', 0x1,  1, 15,  0);  // Test pattern enable              (0=disable,1=enable)
     createConfigParam("TestPatternRate",    'F', 0x2, 16,  0,  0);  // Test pattern rate                (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
     createConfigParam("CycleAdvance",       'F', 0x3, 10,  0,  1);  // Num cycles to advance @TSYNC     (1=60Hz,2=30Hz,3=20Hz,4=15Hz,6=10Hz,12=5Hz,60=1Hz)
-    createConfigParam("Protocol",           'F', 0x4,  1, 15,  0);  // Extended event format            (0=legacy,1=new)
     createConfigParam("DataFormat",         'F', 0x4,  8,  0,  2);  // Data format identifier           (2=pixel)
+    createConfigParam("Protocol",           'F', 0x4,  1, 15,  0);  // Extended event format            (0=legacy,1=new)
 }

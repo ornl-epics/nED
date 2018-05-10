@@ -127,9 +127,8 @@ class FlatFieldPlugin : public BasePlugin {
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] positions Coma delimited list of position ids (not pixel offsets)
-         * @param[in] bufSize Transformation buffer size.
          */
-        FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importFilePath, int bufSize);
+        FlatFieldPlugin(const char *portName, const char *dispatcherPortName, const char *importFilePath);
 
         /**
          * Handle writing plugin integer parameters from PV.
