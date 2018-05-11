@@ -292,7 +292,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
 
             if (veto != VETO_NO) {
                 counters[veto]++;
-                events->pixelid |= Event::PIXEL_VETO_MASK;
+                events->pixelid |= Event::Pixel::VETO_MASK;
             } else {
                 counters[VETO_NO]++;
             }
@@ -321,7 +321,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
             VetoType veto1 = checkPhotoSumLimits(srcEvents->x, srcEvents->y, srcEvents->photo_sum_x, srcEvents->position);
             if (veto1 != VETO_NO) {
                 counters[veto1]++;
-                events->pixelid |= Event::PIXEL_VETO_MASK;
+                events->pixelid |= Event::Pixel::VETO_MASK;
             }
 
             // Apply flat-field correction
@@ -330,7 +330,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
             VetoType veto2 = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
             if (veto2 != VETO_NO) {
                 counters[veto1]++;
-                events->pixelid |= Event::PIXEL_VETO_MASK;
+                events->pixelid |= Event::Pixel::VETO_MASK;
             }
 
             if (veto1 == VETO_NO && veto2 == VETO_NO)

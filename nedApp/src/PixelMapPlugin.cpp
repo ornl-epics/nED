@@ -9,15 +9,9 @@
 
 #include "Event.h"
 #include "PixelMapPlugin.h"
-#include "likely.h"
 #include "Log.h"
 
 #include <fstream>
-#include <string>
-
-#define PIXID_ERR       (1 << 31)
-#define PIXID_ERR_MAP   PIXID_ERR
-//#define PIXID_ERR_MAP   (1 << 27 | PIXID_ERR) // TODO: Uncomment if the error pickels should be additionally flagged by this plugin
 
 EPICS_REGISTER_PLUGIN(PixelMapPlugin, 3, "Port name", string, "Parent plugins", string, "PixelMap file", string);
 
@@ -29,10 +23,8 @@ PixelMapPlugin::PixelMapPlugin(const char *portName, const char *parentPlugins, 
     createParam("FilePath",     asynParamOctet, &FilePath, pixelMapFile); // Path to pixel map file
     createParam("ErrImport",    asynParamInt32, &ErrImport, err); // Last mapping import error
     createParam("CntUnmap",     asynParamInt32, &CntUnmap,  0);   // Number of unmapped pixels
-    createParam("CntError",     asynParamInt32, &CntError,  0);   // Number of unknown-error pixels
     createParam("ResetCnt",     asynParamInt32, &ResetCnt);       // Reset counters
     createParam("MapEn",        asynParamInt32, &MapEn, 0);       // Toggle pixel mapping
-    createParam("VetoMode",     asynParamInt32, &VetoMode, 1);    // Toggle discarding veto events
     callParamCallbacks();
 
     BasePlugin::connect(parentPlugins, MsgDasData);
@@ -43,7 +35,6 @@ asynStatus PixelMapPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == ResetCnt) {
         if (value > 0) {
             setIntegerParam(CntUnmap, 0);
-            setIntegerParam(CntError, 0);
             callParamCallbacks();
         }
         return asynSuccess;
@@ -51,14 +42,64 @@ asynStatus PixelMapPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     return BasePlugin::writeInt32(pasynUser, value);
 }
 
+template <typename T>
+uint32_t PixelMapPlugin::eventsMap(T *events, uint32_t nEvents)
+{
+    uint32_t nUnmapped = 0;
+
+    while (nEvents-- > 0) {
+        events->pixelid_raw = events->pixelid;
+
+        if (Event::Pixel::getType(events->pixelid) == Event::Pixel::Type::NEUTRON) {
+            if (events->pixelid < m_map.size()) {
+                // Gaps in pixel map table resolve to error pixels,
+                // no need to care here. Already vetoed pixels
+                // are outside map range and are not processed here.
+                events->pixelid = m_map[events->pixelid];
+            } else if ((events->pixelid & Event::Pixel::VETO_MASK) == 0x0) {
+                nUnmapped++;
+            } else {
+                events->pixelid |= Event::Pixel::VETO_MASK;
+            }
+        }
+
+        events++;
+    }
+
+    return nUnmapped;
+}
+
+template <>
+uint32_t PixelMapPlugin::eventsMap(Event::Pixel *events, uint32_t nEvents)
+{
+    uint32_t nUnmapped = 0;
+
+    while (nEvents-- > 0) {
+        if (Event::Pixel::getType(events->pixelid) == Event::Pixel::Type::NEUTRON) {
+            if (events->pixelid < m_map.size()) {
+                // Gaps in pixel map table resolve to error pixels,
+                // no need to care here. Already vetoed pixels
+                // are outside map range and are not processed here.
+                events->pixelid = m_map[events->pixelid];
+            } else if ((events->pixelid & Event::Pixel::VETO_MASK) == 0x0) {
+                nUnmapped++;
+            } else {
+                events->pixelid |= Event::Pixel::VETO_MASK;
+            }
+        }
+
+        events++;
+    }
+
+    return nUnmapped;
+}
+
 void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     bool mapEn = getBooleanParam(MapEn);
-    bool passVetoes = getBooleanParam(VetoMode);
-    PixelMapErrors errors;
+    int errors = 0;
 
-    getIntegerParam(CntUnmap,   &errors.nUnmapped);
-    getIntegerParam(CntError,   &errors.nErrors);
+    getIntegerParam(CntUnmap, &errors);
     if (m_map.empty())
         mapEn = false;
 
@@ -66,29 +107,50 @@ void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
     if (mapEn == false) {
         sendDownstream(packets);
     } else {
-        DasDataPacketList modifiedPackets;
+        DasDataPacketList outPackets;
         std::vector<DasDataPacket *> allocatedPackets;
 
         for (auto it = packets.cbegin(); it != packets.cend(); it++) {
-            const DasDataPacket *origPacket = *it;
+            const DasDataPacket *srcPacket = *it;
+            uint32_t nEvents = srcPacket->getNumEvents();
 
-            if (origPacket->getEventsFormat() != DasDataPacket::EVENT_FMT_PIXEL) {
-                modifiedPackets.push_back(origPacket);
+            DasDataPacket *destPacket = nullptr;
+            if (srcPacket->getEventsFormat() == DasDataPacket::EVENT_FMT_PIXEL) {
+                uint32_t destPacketLen = sizeof(DasDataPacket) + nEvents*sizeof(Event::Pixel);
+                destPacket = m_packetsPool.get(destPacketLen);
+                if (!destPacket) {
+                    LOG_ERROR("Failed to allocate output packet");
+                    continue;
+                }
+                allocatedPackets.push_back(destPacket);
+                destPacket->init(DasDataPacket::EVENT_FMT_PIXEL, srcPacket->getTimeStamp(), nEvents, srcPacket->getEvents<Event::Pixel>());
+                errors += eventsMap(destPacket->getEvents<Event::Pixel>(), nEvents);
+                destPacket->setEventsMapped(true);
+                outPackets.push_back(destPacket);
+            } else if (srcPacket->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
+                uint32_t destPacketLen = sizeof(DasDataPacket) + nEvents*sizeof(Event::BNL::Diag);
+                destPacket = m_packetsPool.get(destPacketLen);
+                if (!destPacket) {
+                    LOG_ERROR("Failed to allocate output packet");
+                    continue;
+                }
+                allocatedPackets.push_back(destPacket);
+                destPacket->init(DasDataPacket::EVENT_FMT_BNL_DIAG, srcPacket->getTimeStamp(), nEvents, srcPacket->getEvents<Event::BNL::Diag>());
+                errors += eventsMap(destPacket->getEvents<Event::BNL::Diag>(), nEvents);
+                destPacket->setEventsMapped(true);
+                outPackets.push_back(destPacket);
+            } else {
+                static bool logged = false;
+                if (!logged) {
+                    logged = true;
+                    LOG_WARN("Unsupported data format %d, skipping packet", srcPacket->getEventsFormat());
+                }
+                outPackets.push_back(srcPacket);
                 continue;
             }
-
-            DasDataPacket *newPacket = m_packetsPool.get(origPacket->getLength());
-            if (!newPacket) {
-                LOG_ERROR("Failed to allocate output packet");
-                continue;
-            }
-            allocatedPackets.push_back(newPacket);
-
-            errors += packetMap(origPacket, newPacket, passVetoes);
-            modifiedPackets.push_back(newPacket);
         }
-        if (!modifiedPackets.empty()) {
-            sendDownstream(modifiedPackets);
+        if (!outPackets.empty()) {
+            sendDownstream(outPackets);
         }
 
         for (auto it = allocatedPackets.begin(); it != allocatedPackets.end(); it++) {
@@ -96,55 +158,8 @@ void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
         }
     }
 
-    setIntegerParam(CntUnmap,   errors.nUnmapped);
-    setIntegerParam(CntError,   errors.nErrors);
+    setIntegerParam(CntUnmap, errors);
     callParamCallbacks();
-}
-
-PixelMapPlugin::PixelMapErrors PixelMapPlugin::packetMap(const DasDataPacket *srcPacket, DasDataPacket *destPacket, bool passVetos)
-{
-    PixelMapErrors errors;
-    const Event::Pixel *srcEvent = srcPacket->getEvents<Event::Pixel>();
-    Event::Pixel *destEvent = destPacket->getEvents<Event::Pixel>();
-    uint32_t nEvents = srcPacket->getNumEvents();
-
-    destPacket->init(DasDataPacket::EVENT_FMT_PIXEL, srcPacket->getTimeStamp(), nEvents);
-    destPacket->setEventsMapped(true);
-
-    // The below code was optimized for speed and is not as elegant as could be
-    // otherwise. Bitfield, condition rearranging were both tried with worse results.
-    while (nEvents-- > 0) {
-
-        if (likely((srcEvent->pixelid & PIXID_ERR) == 0 && srcEvent->pixelid < m_map.size())) {
-            // Gaps in pixel map table resolve to error pixels,
-            // no need to care here
-            destEvent->tof = srcEvent->tof;
-            destEvent->pixelid = m_map[srcEvent->pixelid];
-            destEvent++;
-        } else if ((srcEvent->pixelid & 0x70000000) != 0) {
-            // This must be some fast-metadata events put into neutron packet
-            // Let them through as is
-            destEvent->tof = srcEvent->tof;
-            destEvent->pixelid = srcEvent->pixelid;
-            destEvent++;
-        } else if (passVetos == true) {
-            destEvent->tof = srcEvent->tof;
-            destEvent->pixelid = srcEvent->pixelid;
-
-            if (srcEvent->pixelid & PIXID_ERR) { // Already tagged as error
-                errors.nErrors++;
-            } else {
-                destEvent->pixelid |= PIXID_ERR_MAP;
-                errors.nUnmapped++;
-            }
-
-            destEvent++;
-        }
-
-        srcEvent++;
-    }
-
-    return errors;
 }
 
 PixelMapPlugin::ImportError PixelMapPlugin::importPixelMapFile(const char *filepath)
@@ -189,13 +204,13 @@ PixelMapPlugin::ImportError PixelMapPlugin::importPixelMapFile(const char *filep
 
         // Fill gaps with invalid mappings
         for (uint32_t i = m_map.size(); i < raw; i++) {
-            m_map.push_back(i | PIXID_ERR_MAP);
+            m_map.push_back(i | Event::Pixel::VETO_MASK);
         }
 
         // Insert mapping at proper position
         if (raw == m_map.size())
             m_map.push_back(mapped);
-        else if (m_map[raw] == (raw | PIXID_ERR_MAP))
+        else if (m_map[raw] == (raw | Event::Pixel::VETO_MASK))
             m_map[raw] = mapped;
         else {
             LOG_ERROR("Duplicate raw pixel id in pixel map '%s' file, line %d", filepath, lineno);

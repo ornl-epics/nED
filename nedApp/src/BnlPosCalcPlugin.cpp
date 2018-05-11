@@ -221,19 +221,19 @@ std::pair<DasDataPacket *, BnlPosCalcPlugin::Stats> BnlPosCalcPlugin::processPac
                     destEvent->y = round(y * calcParams.xyDivider);
                     stats.nGood++;
                 } else if (ret == CALC_OVERFLOW_FLAG) {
-                    destEvent->position |= Event::PIXEL_VETO_MASK;
+                    destEvent->position |= Event::Pixel::VETO_MASK;
                     stats.nOverflow++;
                 } else if (ret == CALC_EDGE) {
-                    destEvent->position |= Event::PIXEL_VETO_MASK;
+                    destEvent->position |= Event::Pixel::VETO_MASK;
                     stats.nEdge++;
                 } else if (ret == CALC_LOW_CHARGE) {
-                    destEvent->position |= Event::PIXEL_VETO_MASK;
+                    destEvent->position |= Event::Pixel::VETO_MASK;
                     stats.nLowCharge++;
                 } else if (ret == CALC_MULTI_EVENT) {
-                    destEvent->position |= Event::PIXEL_VETO_MASK;
+                    destEvent->position |= Event::Pixel::VETO_MASK;
                     stats.nMultiEvent++;
                 } else if (ret == CALC_BAD_CONFIG) {
-                    destEvent->position |= Event::PIXEL_VETO_MASK;
+                    destEvent->position |= Event::Pixel::VETO_MASK;
                     stats.nBadConfig++;
                 }
             }
