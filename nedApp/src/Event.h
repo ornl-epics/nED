@@ -14,14 +14,14 @@
 
 namespace Event {
 
-    static const uint32_t PIXEL_VETO_MASK = 0x80000000;
-
     /**
      * Structure representing single TOF,pixel event
      */
     struct Pixel {
         uint32_t tof;
         uint32_t pixelid;
+
+        static const uint32_t VETO_MASK = 0x80000000;
 
         enum class Type {
             NEUTRON      = 0x0,

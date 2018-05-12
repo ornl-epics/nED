@@ -21,6 +21,7 @@ namespace BNL {
         corrected_x = -1.0;
         corrected_y = -1.0;
         position = raw.position;
+        pixelid = 0;
         pixelid_raw = 0;
 
         return *this;
