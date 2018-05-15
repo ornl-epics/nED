@@ -19,14 +19,14 @@
 # Build settings that are NOT module paths should appear in a
 # CONFIG_SITE file.
 
-ASYN=           /home/controls/epics/asyn/asyn4-32
+ASYN=           /home/controls/epics/asyn/master
 AUTOSAVE=       /home/controls/epics/autosave/master
-STREAMDEVICE=   /home/controls/epics/StreamDevice/asyn4-32
+STREAMDEVICE=   /home/controls/epics/StreamDevice/master
 OCCLIB=         /home/controls/occ/master/lib
 SNCSEQ=		/home/controls/epics/seq/master
 PVMEDIATOR=	/home/controls/epics/pvMediator/master
 CALC=		/home/controls/epics/calc/master
-BUSY=		/home/controls/epics/busy/asyn4-32
+BUSY=		/home/controls/epics/busy/master
 GENERICIO=      /home/controls/epics/genericIO/master
 
 EPICS_BASE=     /home/controls/epics/base/master

@@ -101,7 +101,7 @@
     <name>Text Update</name>
     <precision>0</precision>
     <precision_from_pv>true</precision_from_pv>
-    <pv_name>$(P)ProcServ:STATUS</pv_name>
+    <pv_name>$(PROCSERV)STATUS</pv_name>
     <pv_value />
     <rotation_angle>0.0</rotation_angle>
     <rules />
@@ -158,14 +158,14 @@ $(pv_value)</tooltip>
     <image></image>
     <name>Action Button</name>
     <push_action_index>0</push_action_index>
-    <pv_name>$(P)ProcServ:START</pv_name>
+    <pv_name>$(PROCSERV)START</pv_name>
     <pv_value />
     <rules>
       <rule name="Enabled" prop_id="enabled" out_exp="true">
         <exp bool_exp="true">
           <value>pv0==1</value>
         </exp>
-        <pv trig="true">$(P)ProcServ:STATUS</pv>
+        <pv trig="true">$(PROCSERV)STATUS</pv>
       </rule>
     </rules>
     <scale_options>
@@ -219,14 +219,14 @@ $(pv_value)</tooltip>
     <image></image>
     <name>Action Button_1</name>
     <push_action_index>0</push_action_index>
-    <pv_name>$(P)ProcServ:STOP</pv_name>
+    <pv_name>$(PROCSERV)STOP</pv_name>
     <pv_value />
     <rules>
       <rule name="Enabled" prop_id="enabled" out_exp="true">
         <exp bool_exp="true">
           <value>pv0==0</value>
         </exp>
-        <pv trig="true">$(P)ProcServ:STATUS</pv>
+        <pv trig="true">$(PROCSERV)STATUS</pv>
       </rule>
     </rules>
     <scale_options>

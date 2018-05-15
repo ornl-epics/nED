@@ -241,7 +241,7 @@
   </widget>
   <widget type="textentry" version="3.0.0">
     <name>Text Update_4</name>
-    <pv_name>BL100:Klemen:sa:NominalDist</pv_name>
+    <pv_name>$(P)NominalDist</pv_name>
     <x>178</x>
     <y>130</y>
     <width>130</width>
@@ -251,8 +251,7 @@
     </background_color>
     <precision>3</precision>
     <wrap_words>true</wrap_words>
-    <tooltip>BL100:Klemen:sa:NominalDist
-VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
+    <tooltip>Nominal distance to project all events to (ie. detector center)</tooltip>
   </widget>
   <widget type="label" version="2.0.0">
     <name>Label_38</name>
@@ -263,7 +262,7 @@ VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
   </widget>
   <widget type="textentry" version="3.0.0">
     <name>Text Update_5</name>
-    <pv_name>BL100:Klemen:sa:StatePixelMask</pv_name>
+    <pv_name>$(P)StatePixelMask</pv_name>
     <x>178</x>
     <y>190</y>
     <width>130</width>
@@ -285,7 +284,7 @@ VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
   </widget>
   <widget type="textentry" version="3.0.0">
     <name>Text Update_6</name>
-    <pv_name>BL100:Klemen:sa:PixelBitOffset</pv_name>
+    <pv_name>$(P)PixelBitOffset</pv_name>
     <x>178</x>
     <y>160</y>
     <width>130</width>
@@ -516,7 +515,7 @@ VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
     <x>178</x>
     <y>10</y>
     <width>50</width>
-    <tooltip>BL100:Klemen:sa:Enable
+    <tooltip>$(P)Enable
 VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
   </widget>
 </display>
