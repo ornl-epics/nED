@@ -23,10 +23,9 @@ StatPlugin::StatPlugin(const char *portName, const char *parentPlugins)
     createParam("CmdBytes",     asynParamFloat64, &CmdBytes,     0.0); // READ - Command response packets bytes
     createParam("NeutronCnts",  asynParamFloat64, &NeutronCnts,  0.0); // READ - Number of data packets
     createParam("NeutronBytes", asynParamFloat64, &NeutronBytes, 0.0); // READ - Data packets bytes
-    createParam("NeutronTimes", asynParamFloat64, &NeutronTimes, 0.0); // READ - Unique neutron data timestamps
+    createParam("AcqFrameCnts", asynParamFloat64, &AcqFrameCnts, 0.0); // READ - Number of acquisition frames
     createParam("MetaCnts",     asynParamFloat64, &MetaCnts,     0.0); // READ - Number of metadata packets
     createParam("MetaBytes",    asynParamFloat64, &MetaBytes,    0.0); // READ - Metadata packets bytes
-    createParam("MetaTimes",    asynParamFloat64, &MetaTimes,    0.0); // READ - Unique meta data timestamps
     createParam("ErrorPkts",    asynParamFloat64, &ErrorPkts,    0.0); // READ - Number of bad packets
     createParam("RtdlPkts",     asynParamFloat64, &RtdlPkts,     0.0); // READ - Number of RTDL packets
     createParam("RtdlBytes",    asynParamFloat64, &RtdlBytes,    0.0); // READ - RTDL packets bytes
@@ -43,10 +42,9 @@ void StatPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     uint64_t neutronCnts  = getDoubleParam(NeutronCnts);
     uint64_t neutronBytes = getDoubleParam(NeutronBytes);
-    uint64_t neutronTimes = getDoubleParam(NeutronTimes);
+    uint64_t acqFrameCnts = getDoubleParam(AcqFrameCnts);
     uint64_t metaCnts     = getDoubleParam(MetaCnts);
     uint64_t metaBytes    = getDoubleParam(MetaBytes);
-    uint64_t metaTimes    = getDoubleParam(MetaTimes);
     uint64_t totBytes     = getDoubleParam(TotBytes);
 
     for (const auto &packet: packets) {
@@ -56,16 +54,13 @@ void StatPlugin::recvDownstream(const DasDataPacketList &packets)
         if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_META) {
             metaBytes += nEvents * packet->getEventsSize();
             metaCnts += nEvents;
-            if (isTimestampUnique(packet->getTimeStamp(), m_metaTimes))
-                metaTimes += 1;
 
         } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_TIME_CALIB) {
-            // drop
+            if (isTimestampUnique(packet->getTimeStamp(), m_frameTimes))
+                acqFrameCnts += 1;
         } else {
             neutronBytes += nEvents * packet->getEventsSize();
             neutronCnts += nEvents;
-            if (isTimestampUnique(packet->getTimeStamp(), m_neutronTimes))
-                neutronTimes += 1;
         }
 
         double pcharge = getDataProtonCharge(packet->getTimeStamp());
@@ -79,10 +74,9 @@ void StatPlugin::recvDownstream(const DasDataPacketList &packets)
 
     setDoubleParam(NeutronCnts,     neutronCnts % LLONG_MAX);
     setDoubleParam(NeutronBytes,    neutronBytes % LLONG_MAX);
-    setDoubleParam(NeutronTimes,    neutronTimes % LLONG_MAX);
+    setDoubleParam(AcqFrameCnts,    acqFrameCnts % LLONG_MAX);
     setDoubleParam(MetaCnts,        metaCnts % LLONG_MAX);
     setDoubleParam(MetaBytes,       metaBytes % LLONG_MAX);
-    setDoubleParam(MetaTimes,       metaTimes % LLONG_MAX);
     setDoubleParam(TotBytes,        totBytes % LLONG_MAX);
     callParamCallbacks();
 }
