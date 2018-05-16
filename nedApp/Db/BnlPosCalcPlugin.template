@@ -18,7 +18,7 @@ record(calcout, "$(P)StatusCalc")
     field(INPG, "$(P)RateMultiEventVetos.SEVR NPP")
     field(INPH, "$(P)BadConfig NPP")
     field(CALC, "A#0||H#0?0:(B<C||(D+E+F+G)=0)?1:2")
-    field(OUT,  "$(P)Status")
+    field(OUT,  "$(P)Status PP")
     field(FLNK, "$(P)StatusTextCalc")
 }
 record(scalcout, "$(P)StatusTextCalc")
