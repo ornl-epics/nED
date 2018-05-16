@@ -59,6 +59,8 @@ void StatPlugin::recvDownstream(const DasDataPacketList &packets)
             if (isTimestampUnique(packet->getTimeStamp(), m_metaTimes))
                 metaTimes += 1;
 
+        } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_TIME_CALIB) {
+            // drop
         } else {
             neutronBytes += nEvents * packet->getEventsSize();
             neutronCnts += nEvents;
