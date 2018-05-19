@@ -18,8 +18,6 @@ namespace Event {
      * Structure representing single TOF,pixel event
      */
     struct Pixel {
-        static const uint32_t VETO_MASK = 0x80000000;
-
         uint32_t tof;
         uint32_t pixelid;
 
