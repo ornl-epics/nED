@@ -16,11 +16,8 @@ record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)NoRtdlValid NPP")
     field(INPB, "$(P)ELReady NPP")
-    field(INPC, "$(P)ODBUnplugged NPP")
-    field(INPD, "$(P)ODBRXLoss NPP")
-    field(INPE, "$(P)ODBTXFault NPP")
-    field(INPF, "$(P)Configured NPP")
-    field(CALC, "A=0&&B=1&&C=0&&D=0&&E=0&&F=1")
+    field(INPC, "$(P)Configured NPP")
+    field(CALC, "A=0&&B=1&&C=1")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 }

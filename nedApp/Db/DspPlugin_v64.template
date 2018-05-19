@@ -3,3 +3,36 @@ include "BaseModulePlugin.include"
 include "DspPlugin_v64.generated"
 include "DspPlugin.include"
 include "GlobalConD.include"
+
+record(calcout, "$(P)EventLength")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Convert event size to 2b words")
+    field(INPA, "$(P)EventLenSet PP")
+    field(CALC, "A/2")
+    field(OUT,  "$(P)LvdsDataSize PP")
+}
+record(mbbo, "$(P)OutputMode")
+{
+    field(ASG,  "BEAMLINE")
+    field(ZRVL, "1")
+    field(ZRST, "meta")
+    field(ONVL, "2")
+    field(ONST, "pixel")
+    field(TWVL, "3")
+    field(TWST, "LPSD verbose")
+    field(TWSV, "MAJOR")
+    field(THVL, "5")
+    field(THST, "XY PS")
+    field(FRVL, "8")
+    field(FRST, "AROC raw")
+    field(FRSV, "MAJOR")
+    field(FVVL, "10")
+    field(FVST, "BNL raw")
+    field(SXVL, "7")
+    field(SXST, "CROC raw")
+    field(VAL,  "1")
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+

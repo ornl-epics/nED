@@ -1,18 +1,3 @@
-# Upgrade DataMode record with link to OutputMode
-record(mbbo, "$(P)DataMode")
-{
-    field(FLNK, "$(P)DataModeL")
-}
-# AROCs OutputMode raw and normal mode are swapped compared to every other module
-# We don't do extended, instead we switch to normal to get 'dbg raw normal' 
-# mode.
-record(calcout, "$(P)DataModeL")
-{
-    field(INPA, "$(P)DataMode.RVAL NPP")
-    field(CALC, "(A=0||A=2)?1:A=1?0:A")
-    field(OUT,  "$(P)OutputMode PP")
-}
-# Add Discovered to the list of checks
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")
@@ -21,4 +6,13 @@ record(calc, "$(P)HwStatus")
     field(CALC, "(A+B+C)=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
+}
+record(mbbo, "$(P)DiagEn")
+{
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)OutputMode PP")
 }

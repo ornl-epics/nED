@@ -129,6 +129,6 @@ void AdcRocPlugin::createParams_v02()
     createConfigParam("TsyncSelect",          'F', 0x0,  1, 2, 0);    // Tsync source (0=external,1=internal)
     createConfigParam("TxEnable",             'F', 0x0,  1, 3, 1);    // Tx Enable force (0=do not force,1=force)
     createConfigParam("AcquireMode",          'F', 0x0,  2, 4, 2);    // Acquire Mode (0=idle,1=idle,2=normal,3=trigger)
-    createConfigParam("OutputMode",           'F', 0x0,  1,10, 1);    // Output Mode (0=slow,1=40MHz)
+    createConfigParam("OutputSpeed",          'F', 0x0,  1,10, 1);    // Output Mode (0=slow,1=40MHz)
     createConfigParam("TpCtrl",               'F', 0x0,  5,11, 0);    // TP Control *** UNUSED ***
 }

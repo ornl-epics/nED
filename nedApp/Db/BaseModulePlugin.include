@@ -110,12 +110,11 @@ record(fanout, "$(P)RspCheck")
     field(DESC, "Response check fanout")
     field(LNK1, "$(P)RspMissCount PP")
     field(LNK2, "$(P)HwStatus PP")
-    field(LNK3, "$(P)AcquiringCalc PP")
-    field(LNK4, "$(P)AcquiringCheck PP")
+    field(LNK3, "$(P)RspCheckAcq PP")
     # LNK5,LNK6 reserved for custom use by modules
 }
 # Monitor CmdReq for start/stop commands and set AcquireSet to yes/no
-record(calcout, "$(P)AcquiringCalc")
+record(calcout, "$(P)RspCheckAcq")
 {
     field(INPA, "$(P)CmdReq NPP")
     field(INPB, "$(P)CmdRsp NPP")
@@ -132,14 +131,14 @@ record(bi, "$(P)AcquiringSet")
     field(ONAM, "acquiring")
     field(VAL,  "0")
     field(PINI, "YES")
-    field(FLNK, "$(P)StatusCalc")
+    field(FLNK, "$(P)AcquiringCheckCalc")
 }
 # Verifies that acquiring state matches the request
 # 0 .. mismatch (MAJOR alarm)
 # 1 .. not acquiring
 # 2 .. acquiring
 # When module is disabled, we follow the request
-record(calc, "$(P)AcquiringCheckCalc")
+record(calcout, "$(P)AcquiringCheckCalc")
 {
     field(INPA, "$(P)Acquiring NPP")
     field(INPB, "$(P)AcquiringSet NPP")
@@ -147,11 +146,11 @@ record(calc, "$(P)AcquiringCheckCalc")
     field(CALC, "(C=1&&A#B)?0:A+1")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
+    field(OUT,  "$(P)AcquiringCheck PP")
+    field(FLNK, "$(P)StatusCalc")
 }
 record(mbbo, "$(P)AcquiringCheck")
 {
-    field(DOL,  "$(P)AcquiringCheckCalc PP")
-    field(OMSL, "closed_loop")
     field(ZRVL, "0")
     field(ZRST, "mismatch")
     field(ZRSV, "MAJOR")
@@ -159,11 +158,24 @@ record(mbbo, "$(P)AcquiringCheck")
     field(ONST, "not acquiring")
     field(TWVL, "2")
     field(TWST, "acquiring")
-    field(FLNK, "$(P)StatusCalc")
 }
 record(bi, "$(P)Acquiring")
 {
-    field(FLNK, "$(P)AcquiringCalc")
+    field(FLNK, "$(P)AcquiringCheckCalc")
+}
+# ConfStatus record should include all configuration checks that ensure
+# production data. Be careful with SEVR as timeout alarm is common due
+# to non-reliable communication. Records generated from .cpp files and
+# using [alarm] specification all translate to MAJOR alarm.
+record(calc, "$(P)ConfStatus")
+{
+    field(DESC, "Configuration status")
+    field(INPA, "$(P)Enable NPP")
+    field(INPB, "$(P)OutputMode.SEVR CP MS")
+    field(CALC, "A=0||B#2")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
 }
 # Placeholder record, may be extended by module.
 # MAJOR alarm is captured in overall status.
@@ -171,6 +183,21 @@ record(calc, "$(P)HwStatus")
 {
     info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "Hardware status")
+    field(INPA, "$(P)Enable NPP")
+    field(INPB, "$(P)Supported.SEVR NPP")
+    field(INPC, "$(P)Verified.SEVR NPP")
+    field(INPD, "$(P)RspMissCount.SEVR NPP")
+    field(INPE, "0")
+    field(INPF, "0")
+    field(INPG, "0")
+    field(INPH, "0")
+    field(INPI, "0")
+    field(INPJ, "0")
+    field(INPK, "0")
+    field(INPL, "0")
+    field(CALC, "A=0||(A+B+C+D+E+F+G+H+I+J+K+L)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
     field(FLNK, "$(P)StatusCalc")
 }
 # Detector is considered missing if it doesn't respond to at 2 or more
@@ -187,49 +214,40 @@ record(calc, "$(P)RspMissCount")
     field(CALC, "C=0?0:(A=3)?B+1:(A=2)?B:0")
     field(HIHI, "3")
     field(HHSV, "MAJOR")
-    field(FLNK, "$(P)StatusCalc")
-}
-# All status logic tries to use 1 = OK, 0 = Not OK
-# Summarize alarms.
-record(calc, "$(P)HealthStatusCalc")
-{
-    field(DESC, "Aggregate alarms")
-    field(INPA, "$(P)RspMissCount.SEVR")
-    field(INPB, "$(P)Supported.SEVR")
-    field(INPC, "$(P)Verified.SEVR")
-    field(INPD, "$(P)HwStatus.SEVR")
-    field(INPE, "$(P)Enable NPP")
-    field(CALC, "(A+B+C+D)=0||E=0")
-    field(LOW,  "0")
-    field(LSV,  "MAJOR")
-    field(PINI, "YES") # For Supported link
-    field(FLNK, "$(P)StatusCalc")
+    field(FLNK, "$(P)HwStatus")
 }
 record(calcout, "$(P)StatusCalc")
 {
     field(INPA, "$(P)Enable NPP")
-    field(INPB, "$(P)HealthStatusCalc.SEVR PP")
-    field(INPC, "$(P)AcquiringCheck.SEVR PP")
-    field(CALC, "A=0||(B+C)=0")
-    field(PINI, "YES") # For Supported link
+    field(INPB, "$(P)HwStatus.SEVR NPP")
+    field(INPC, "$(P)AcquiringCheck.SEVR NPP")
+    field(INPD, "$(P)ConfStatus NPP")
+    field(INPE, "$(P)AcquiringCheck NPP")
+    field(CALC, "A=0?1:(B+C)#0?0:(D#1||E#2)?2:1")
+    field(PINI, "YES")
     field(OUT,  "$(P)Status PP")
     field(FLNK, "$(P)StatusTextCalc")
 }
 record(scalcout, "$(P)StatusTextCalc")
 {
+    field(ASG,  "BEAMLINE")
     field(INPA, "$(P)Enable NPP")
-    field(AA,   "disabled")
-    field(INPB, "$(P)HealthStatusCalc.SEVR PP MSS")
-    field(BB,   "error")
-    field(INPC, "$(P)AcquiringCheck.SEVR PP MSS")
-    field(CC,   "acquire mismatch")
-    field(DD,   "ready")
-    field(CALC, "A=0?AA:B#0?BB:C#0?CC:DD")
-    field(PINI, "YES") # For Supported link
-    field(OUT,  "$(P)StatusText PP")
+    field(AA,   "comm disabled")
+    field(INPB, "$(P)HwStatus.SEVR NPP MSS")
+    field(BB,   "hw error")
+    field(INPC, "$(P)ConfStatus.SEVR NPP")
+    field(CC,   "check config")
+    field(INPD, "$(P)AcquiringCheck NPP")
+    field(DD,   "acquiring mismatch")
+    field(EE,   "not acquiring")
+    field(FF,   "acquiring")
+    field(CALC, "A=0?AA:B#0?BB:C#0?CC:D=0?DD:D=1?EE:FF")
+    field(PINI, "YES")
+    field(FLNK, "$(P)StatusText")
 }
 record(stringin, "$(P)StatusText")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Module status text")
     field(INP,  "$(P)StatusTextCalc.SVAL PP MSS")
 }
@@ -394,6 +412,7 @@ record(bi, "$(P)Supported")
     field(ZNAM, "Not supported")
     field(ZSV,  "MAJOR")
     field(ONAM, "Supported")
+    field(FLNK, "$(P)HwStatus")
 }
 record(mbbi, "$(P)Verified")
 {
@@ -428,7 +447,7 @@ record(mbbi, "$(P)Verified")
     field(EIVL, "6") # b0110
     field(EIST, "Type mismatch")
     field(EISV, "MAJOR")
-    field(FLNK, "$(P)StatusCalc")
+    field(FLNK, "$(P)HwStatus")
 }
 record(mbbi, "$(P)HwType")
 {

@@ -1,11 +1,10 @@
-# Upgrade DataMode record with link to OutputMode
-record(mbbo, "$(P)DataMode")
+record(mbbo, "$(P)DiagEn")
 {
-    field(FLNK, "$(P)DataModeL")
-}
-record(longout, "$(P)DataModeL")
-{
-    field(DOL,  "$(P)DataMode.RVAL NPP")
-    field(OMSL, "closed_loop")
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "1")
+    field(ONVL, "1")
+    field(DTYP, "Raw Soft Channel")
     field(OUT,  "$(P)OutputMode PP")
 }
+

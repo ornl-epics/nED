@@ -134,7 +134,7 @@ void BnlRocPlugin::createParams_v00()
     createConfigParam("IgnoreVeto",          'F',  0x0,   1,  9,   0);  // Ignore Veto (0=False,1=True)
     createConfigParam("IgnoreMultStarts",    'F',  0x0,   1,  8,   0);  // Ignore Multiple Starts (0=False,1=True)
     createConfigParam("TxEnable",            'F',  0x0,   1,  7,   0);  // TXEN internal
-    createConfigParam("OutputMode",          'F',  0x0,   2,  5,   0);  // Output Format (0=Normal,1=Raw,2=Ext)
+    createConfigParam("OutputMode",          'F',  0x0,   2,  5,   0);  // Output Format (0=normal [alarm],1=raw,2=extended [alarm])
     createConfigParam("TsyncSelect",         'F',  0x0,   1,  4,   0);  // TSYNC interal
     createConfigParam("TclkSelect",          'F',  0x0,   1,  3,   0);  // TCLK internal
     createConfigParam("Reset",               'F',  0x0,   1,  2,   0);  // RESET external

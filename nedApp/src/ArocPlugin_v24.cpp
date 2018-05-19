@@ -482,7 +482,7 @@ void ArocPlugin::createParams_v24()
     createConfigParam("RawDiscOutput",    'F',  0x0,  1,  9,    1); // Raw disc output               (0=disabled,1=enabled)
     createConfigParam("YorderEn",         'F',  0x0,  1, 10,    1); // Y order                       (0=disabled,1=enabled)
     createConfigParam("VariableMode",     'F',  0x0,  1, 11,    0); // Variable sample mode          (0=disabled,1=enabled)
-    createConfigParam("OutputMode",       'F',  0x0,  2, 12,    1); // Output mode                   (0=raw,1=normal,2=extended)
+    createConfigParam("OutputMode",       'F',  0x0,  2, 12,    1); // Output mode                   (0=raw [alarm],1=normal,2=extended [alarm])
     createConfigParam("TpSelect",         'F',  0x0,  2, 14,    2); // Test point select
 
     createConfigParam("TestPatternId",    'F',  0x1, 12,  0,    0); // Test pattern id

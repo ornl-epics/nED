@@ -1,20 +1,16 @@
-# Upgrade DataMode record with link to OutputMode
-record(mbbo, "$(P)DataMode")
-{
-    field(FLNK, "$(P)DataModeL")
-}
-# ACPCs OutputMode is different than everybody else
-# We don't use raw synced, instead we want raw always
-record(calcout, "$(P)DataModeL")
-{
-    field(INPA, "$(P)DataMode.RVAL NPP")
-    field(CALC, "A=2?1:A")
-    field(OUT,  "$(P)OutputMode PP")
-}
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")
     field(CALC, "A=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
+}
+record(mbbo, "$(P)DiagEn")
+{
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)OutputMode PP")
 }

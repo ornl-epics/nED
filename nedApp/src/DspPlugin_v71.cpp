@@ -83,13 +83,14 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Lvds5:Dis",        '1', 0x15,  1, 12, 0); // LVDS channel 5 disable      (0=enable,1=disable)
     createConfigParam("Lvds6:Dis",        '1', 0x15,  1, 13, 0); // LVDS channel 6 disable      (0=enable,1=disable)
     createConfigParam("Meta:Dis",         '1', 0x15,  1, 14, 0); // Meta channels disable       (0=enable,1=disable)
-    createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x033E); // Bucket Timeout      (scale:0.0024094117,unit:ms)
-    createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable (0=enable,1=disable)
-    createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select (1=internal,0=acc timing)
+    createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x033E); // Bucket Timeout         (scale:0.0024094117,unit:ms)
+    createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable i   (0=enable,1=disable)
+    createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select   (1=internal,0=acc timing)
     createConfigParam("Unused0",          '1', 0x16, 32,  0, 0); // Unused0
-    createConfigParam("LegacyTsyncDly",   '1', 0x17, 16,  0, 0); // Legacy Tsync Delay             (scale:0.1,unit:us,prec:1)
-    createConfigParam("LegacyEvLength",   '1', 0x18, 24,  0, 8); // Legacy Event Length            (unit:bytes)
-    createConfigParam("LegacyDataFormat", '1', 0x18,  8, 24, 2); // Legacy Data Format
+    createConfigParam("TsyncDelay",       '1', 0x17, 16,  0, 0); // Legacy Tsync Delay          (scale:100,unit:ns,prec:1)
+    createConfigParam("EventLength",      '1', 0x18, 24,  0, 8); // Legacy Event Length         (unit:bytes)
+    createConfigParam("OutputMode",       '1', 0x18,  8, 24, 2); // Legacy Data Format          (1=meta,2=pixel,3=LPSD verbose [alarm],5=XY PS,8=AROC raw [alarm],10=BNL raw,7=CROC raw)
+
     createConfigParam("ClockCorrUpd",     '1', 0x19, 30,  0, 0); // DSP 40MHz Clock Corr Update
     createConfigParam("ClockCorrCtrl",    '1', 0x19,  2, 30, 0); // DSP 40MHz Clock Corr Ctrl (0=disable,1=disable,2=stall,3=advance)
     createConfigParam("TclkClkSource",    '1', 0x1A,  2,  0, 1); // Tclk Clock Source (0=none,1=external,2=internal,3=else)

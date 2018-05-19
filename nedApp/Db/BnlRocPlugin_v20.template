@@ -12,3 +12,13 @@ record(calc, "$(P)HwStatus")
     field(LSV,  "MAJOR")
 }
 
+record(mbbo, "$(P)DiagEn")
+{
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "1")
+    field(ONVL, "1")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)OutputMode PP")
+}
+

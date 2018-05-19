@@ -2,3 +2,22 @@ include "BasePlugin.include"
 include "BaseModulePlugin.include"
 include "BnlRocPlugin_v00.generated"
 include "GlobalConD.include"
+
+record(calc, "$(P)HwStatus")
+{
+    field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
+    field(CALC, "(A+B)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+}
+
+record(mbbo, "$(P)DiagEn")
+{
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "1")
+    field(ONVL, "1")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)OutputMode PP")
+}
