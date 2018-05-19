@@ -32,13 +32,17 @@ namespace Event {
             SIGNAL       = 0x5,
             ADC          = 0x6,
             CHOPPER      = 0x7,
+            VETO_NEUTRON = 0x8,
         };
 
         Type getType() const {
-            return static_cast<Type>((this->pixelid >> 28) & 0x7);
+            return getType(this->pixelid);
+        }
+
+        static Type getType(uint32_t pixelid_) {
+            return static_cast<Type>((pixelid_ >> 28) & 0x7);
         }
     };
-    
 
     /**
      * LPSD ROC event formats.
@@ -54,7 +58,7 @@ namespace Event {
          */
         struct __attribute((__packed__)) Raw {
             uint32_t tof;       // Regular format
-            uint32_t position;  // BNL ROC position index
+            uint32_t position;  // LPSD ROC position index
             uint16_t sample_a1;
             uint16_t sample_b1;
             uint16_t sample_b2;
@@ -66,7 +70,7 @@ namespace Event {
          */
         struct __attribute((__packed__)) Verbose {
             uint32_t tof;       // Regular format
-            uint32_t position;  // BNL ROC position index
+            uint32_t position;  // LPSD ROC position index
             uint16_t sample_a1;
             uint16_t sample_b1;
             uint16_t sample_b2;
@@ -78,7 +82,7 @@ namespace Event {
          * Event structure that includes everything about event, generated and used by software only.
          */
         struct Diag : public Verbose {
-            uint32_t pixelid_raw;
+            uint32_t pixelid_raw; // Pixel as received from detector when mapping enabled, same as pixelid otherwise.
 
             /**
              * Copy fields from Raw event.
@@ -206,7 +210,7 @@ namespace Event {
             double corrected_x;     // Interpolated and corrected X position
             double corrected_y;     // Interpolated and corrected Y position
             uint32_t position;      // Detector id
-            uint32_t pixelid_raw;   // Mapped pixel id
+            uint32_t pixelid_raw;   // Pixel as received from detector when mapping enabled, same as pixelid otherwise.
 
             /**
              * Copy fields from Raw event.
