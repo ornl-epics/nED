@@ -23,6 +23,8 @@ namespace Event {
         uint32_t tof;
         uint32_t pixelid;
 
+        static const uint32_t VETO_MASK = 0x80000000;
+
         enum class Type {
             NEUTRON      = 0x0,
             UNUSED1      = 0x1,

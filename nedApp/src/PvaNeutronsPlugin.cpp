@@ -165,6 +165,7 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
                 pvNumEvents->put(nEvents);
                 pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
                 pvPixel->replace(epics::pvData::freeze(pixels));
+                pvProtonCharge->put(pCharge);
 
                 endGroupPut();
                 posted = true;

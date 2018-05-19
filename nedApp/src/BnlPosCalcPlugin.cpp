@@ -220,21 +220,18 @@ std::pair<DasDataPacket *, BnlPosCalcPlugin::Stats> BnlPosCalcPlugin::processPac
                     destEvent->x = round(x * calcParams.xyDivider);
                     destEvent->y = round(y * calcParams.xyDivider);
                     stats.nGood++;
-                } else if (ret == CALC_OVERFLOW_FLAG) {
-                    destEvent->position |= Event::Pixel::VETO_MASK;
-                    stats.nOverflow++;
-                } else if (ret == CALC_EDGE) {
-                    destEvent->position |= Event::Pixel::VETO_MASK;
-                    stats.nEdge++;
-                } else if (ret == CALC_LOW_CHARGE) {
-                    destEvent->position |= Event::Pixel::VETO_MASK;
-                    stats.nLowCharge++;
-                } else if (ret == CALC_MULTI_EVENT) {
-                    destEvent->position |= Event::Pixel::VETO_MASK;
-                    stats.nMultiEvent++;
-                } else if (ret == CALC_BAD_CONFIG) {
-                    destEvent->position |= Event::Pixel::VETO_MASK;
-                    stats.nBadConfig++;
+                } else {
+                    destEvent->pixelid |= Event::Pixel::VETO_MASK;
+                    destEvent->x = -1;
+                    destEvent->y = -1;
+                    switch (ret) {
+                        case CALC_OVERFLOW_FLAG: stats.nOverflow++;   break;
+                        case CALC_EDGE:          stats.nEdge++;       break;
+                        case CALC_LOW_CHARGE:    stats.nLowCharge++;  break;
+                        case CALC_MULTI_EVENT:   stats.nMultiEvent++; break;
+                        case CALC_BAD_CONFIG:    stats.nBadConfig++;  break;
+                        default:                                      break;
+                    }
                 }
             }
 

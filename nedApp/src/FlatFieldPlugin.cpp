@@ -41,6 +41,7 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins
     createParam("ImportDir",    asynParamOctet, &ImportDir);            // Path to correction tables directory
     createParam("NumPositions", asynParamInt32, &NumPositions, 0);      // READ - All tables Y size
     createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);     // Number of calculated events
+    createParam("CntInhVetos",  asynParamInt32, &CntInhVetos, 0);       // Number of vetos inherited from others
     createParam("CntPosVetos",  asynParamInt32, &CntPosVetos, 0);       // Number of bad position vetos
     createParam("CntRangeVetos",asynParamInt32, &CntRangeVetos, 0);     // Number of bad X,Y range vetos
     createParam("CntPosCfgVetos",asynParamInt32, &CntPosCfgVetos, 0);   // Number of position configuration vetos
@@ -259,6 +260,7 @@ void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
     }
 
     setIntegerParam(CntGoodEvents,  m_counters[VETO_NO]           % std::numeric_limits<int32_t>::max());
+    setIntegerParam(CntInhVetos,    m_counters[VETO_INHERITED]    % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntPosVetos,    m_counters[VETO_POSITION]     % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntRangeVetos,  m_counters[VETO_RANGE]        % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntPosCfgVetos, m_counters[VETO_POSITION_CFG] % std::numeric_limits<int32_t>::max());
@@ -280,21 +282,28 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
         while (nEvents-- > 0) {
             // events were already (efficiently) copied by packet->init()
             // Only populate the changes.
+            events->pixelid &= Event::Pixel::VETO_MASK;
+            events->pixelid |= srcEvents->position;
 
-            events->corrected_x = srcEvents->x * m_xScaleIn;
-            events->corrected_y = srcEvents->y * m_yScaleIn;
+            VetoType veto = VETO_NO;
+            if (srcEvents->x < 0 || srcEvents->y < 0) {
+                // Probably previously tagged veto
+                veto = VETO_INHERITED;
+            } else {
+                events->corrected_x = srcEvents->x * m_xScaleIn;
+                events->corrected_y = srcEvents->y * m_yScaleIn;
 
-            VetoType veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
+                veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
 
-            events->pixelid = srcEvents->position;
-            events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
-            events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
+                events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
+                events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
+            }
+            counters[veto]++;
 
             if (veto != VETO_NO) {
-                counters[veto]++;
+                events->corrected_x = -1;
+                events->corrected_y = -1;
                 events->pixelid |= Event::Pixel::VETO_MASK;
-            } else {
-                counters[VETO_NO]++;
             }
 
             srcEvents++;
@@ -315,30 +324,35 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
         while (nEvents-- > 0) {
             // Changing format requires event-by-event copy
             *events = *srcEvents;
-            events->pixelid = srcEvents->position;
+            events->pixelid &= Event::Pixel::VETO_MASK;
+            events->pixelid |= srcEvents->position;
 
-            // Check photo sum first
-            VetoType veto1 = checkPhotoSumLimits(srcEvents->x, srcEvents->y, srcEvents->photo_sum_x, srcEvents->position);
-            if (veto1 != VETO_NO) {
-                counters[veto1]++;
+            VetoType veto = VETO_NO;
+            if (srcEvents->x < 0 || srcEvents->y < 0) {
+                // Probably previously tagged veto - don't double count
+                veto = VETO_INHERITED;
+            } else {
+                events->corrected_x = srcEvents->x * m_xScaleIn;
+                events->corrected_y = srcEvents->y * m_yScaleIn;
+
+                // Check photo sum first
+                veto = checkPhotoSumLimits(srcEvents->x, srcEvents->y, srcEvents->photo_sum_x, srcEvents->position);
+                if (veto == VETO_NO) {
+                    // Apply flat-field correction
+                    veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
+                }
+
+                // Calculate pixelid
+                events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
+                events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
+            }
+            counters[veto]++;
+
+            if (veto != VETO_NO) {
+                events->corrected_x = -1;
+                events->corrected_y = -1;
                 events->pixelid |= Event::Pixel::VETO_MASK;
             }
-
-            // Apply flat-field correction
-            events->corrected_x = srcEvents->x * m_xScaleIn;
-            events->corrected_y = srcEvents->y * m_yScaleIn;
-            VetoType veto2 = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
-            if (veto2 != VETO_NO) {
-                counters[veto1]++;
-                events->pixelid |= Event::Pixel::VETO_MASK;
-            }
-
-            if (veto1 == VETO_NO && veto2 == VETO_NO)
-                counters[VETO_NO]++;
-
-            // Calculate pixelid
-            events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
-            events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
 
             srcEvents++;
             events++;
@@ -616,7 +630,7 @@ void FlatFieldPlugin::Counters::reset()
 {
     m_map.clear();
     m_map[VETO_NO]              = 0;
-    m_map[VETO_NO]              = 0;
+    m_map[VETO_INHERITED]       = 0;
     m_map[VETO_POSITION]        = 0;
     m_map[VETO_RANGE]           = 0;
     m_map[VETO_POSITION_CFG]    = 0;

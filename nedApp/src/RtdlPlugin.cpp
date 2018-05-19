@@ -20,11 +20,11 @@ EPICS_REGISTER_PLUGIN(RtdlPlugin, 3, "Port name", string, "Parent plugins", stri
 #define TIMESTAMP_FORMAT        "%Y/%m/%d %T.%09f"
 
 RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const char *pvName)
-    : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos, asynOctetMask, asynOctetMask)
+    : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
 {
     createParam("Timestamp",        asynParamOctet, &Timestamp);    // READ - Timestamp string of last RTDL
     createParam("PulseFlavor",      asynParamInt32, &PulseFlavor);  // READ - Pulse flavor
-    createParam("PulseCharge",      asynParamInt32, &PulseCharge);  // READ - Pulse charge
+    createParam("ProtonCharge",     asynParamFloat64, &ProtonCharge); // READ - Pulse proton charge
     createParam("TimingStatus",     asynParamInt32, &TimingStatus); // READ - Timing status
     createParam("LastCycleVeto",    asynParamInt32, &LastCycleVeto);// READ - Last pulse veto
     createParam("Cycle",            asynParamInt32, &Cycle);        // READ - Cycle frame
@@ -110,7 +110,7 @@ void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl,
 
     setStringParam(Timestamp,           rtdlTimeStr);
     setIntegerParam(PulseFlavor,        rtdl.pulse.flavor);
-    setIntegerParam(PulseCharge,        rtdl.pulse.charge * 10e-12);
+    setDoubleParam(ProtonCharge,        rtdl.pulse.charge * 10e-12);
     setIntegerParam(TimingStatus,       rtdl.timing_status);
     setIntegerParam(LastCycleVeto,      rtdl.last_cycle_veto);
     setIntegerParam(Cycle,              rtdl.cycle);

@@ -91,18 +91,15 @@ class StatPlugin : public BasePlugin {
 
     private:
         std::list<std::tuple<epicsTime,double,bool>> m_dataPcharge; //!< Cache of data acq frames pcharge
-        std::list<epicsTime> m_neutronTimes; //!< Que of unique neutron times
-        std::list<epicsTime> m_metaTimes;    //!< Que of unique meta data times
+        std::list<epicsTime> m_frameTimes; //!< Que of unique frame times
 
     private: // asyn parameters
         int CmdPkts;
         int CmdBytes;
         int NeutronCnts;
         int NeutronBytes;
-        int NeutronTimes;
         int MetaCnts;
         int MetaBytes;
-        int MetaTimes;
         int ErrorPkts;
         int RtdlPkts;
         int RtdlBytes;
@@ -111,6 +108,7 @@ class StatPlugin : public BasePlugin {
         int PChargeRtdl;
         int PChargeData;
         int RtdlCacheSize;
+        int AcqFrameCnts;
 };
 
 #endif // STAT_PLUGIN_H

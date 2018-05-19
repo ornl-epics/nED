@@ -68,17 +68,17 @@ record(calc, "$(P)NeutronBytesRate")
     field(SCAN,  "1 second")
 }
 
-record(ai, "$(P)NeutronTimes")
+record(ai, "$(P)AcqFrameCnts")
 {
     field(DTYP,  "asynFloat64")
-    field(INP,   "@asyn($(PORT))NeutronTimes")
+    field(INP,   "@asyn($(PORT))AcqFrameCnts")
     field(VAL,   "0")
     field(SCAN,  "Passive")
 }
-record(calc, "$(P)NeutronTimesRate")
+record(calc, "$(P)AcqFrameRate")
 {
-    field(INPA,  "$(P)NeutronTimes NPP")
-    field(INPB,  "$(P)NeutronTimes PP")
+    field(INPA,  "$(P)AcqFrameCnts NPP")
+    field(INPB,  "$(P)AcqFrameCnts PP")
     field(CALC,  "B-A")
     field(EGU,   "Hz")
     field(VAL,   "0")
@@ -115,23 +115,6 @@ record(calc, "$(P)MetaBytesRate")
     field(INPB,  "$(P)MetaBytes PP")
     field(CALC,  "B-A")
     field(EGU,   "B/s")
-    field(VAL,   "0")
-    field(SCAN,  "1 second")
-}
-
-record(ai, "$(P)MetaTimes")
-{
-    field(DTYP,  "asynFloat64")
-    field(INP,   "@asyn($(PORT))MetaTimes")
-    field(VAL,   "0")
-    field(SCAN,  "Passive")
-}
-record(calc, "$(P)MetaTimesRate")
-{
-    field(INPA,  "$(P)MetaTimes NPP")
-    field(INPB,  "$(P)MetaTimes PP")
-    field(CALC,  "B-A")
-    field(EGU,   "Hz")
     field(VAL,   "0")
     field(SCAN,  "1 second")
 }

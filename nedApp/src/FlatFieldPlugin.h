@@ -84,6 +84,7 @@ class FlatFieldPlugin : public BasePlugin {
          */
         typedef enum {
             VETO_NO,                 //!< No veto
+            VETO_INHERITED,          //!< Previously flagged by others
             VETO_POSITION,           //!< Invalid/unconfigured position
             VETO_RANGE,              //!< X,Y out of range
             VETO_POSITION_CFG,       //!< Position configuration error - overlaps pixel id
@@ -294,6 +295,7 @@ class FlatFieldPlugin : public BasePlugin {
         int NumPositions;   //!< Number of configured positions
         int CntGoodEvents;  //!< Number of calculated events
         int CntPosVetos;    //!< Number of bad position vetos
+        int CntInhVetos;    //!< Number of vetos inherited from others
         int CntRangeVetos;  //!< Number of bad X,Y range vetos
         int CntPosCfgVetos; //!< Number of position config vetos
         int CntPsVetos;     //!< Number of photosum discriminated events
