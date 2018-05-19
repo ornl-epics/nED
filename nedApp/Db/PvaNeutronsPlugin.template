@@ -69,6 +69,7 @@ record(bo, "$(P)AcpcEnable")
     field(OUT,  "@asyn($(PORT))AcpcEnable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
+    field(PINI, "YES")
 }
 
 # AROC diagnostic channel
@@ -98,6 +99,7 @@ record(bo, "$(P)ArocEnable")
     field(OUT,  "@asyn($(PORT))ArocEnable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
+    field(PINI, "YES")
 }
 
 # Neutrons channel
@@ -127,6 +129,7 @@ record(bo, "$(P)PixelEnable")
     field(OUT,  "@asyn($(PORT))PixelEnable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
+    field(PINI, "YES")
 }
 
 # Metadata channel
@@ -156,6 +159,7 @@ record(bo, "$(P)MetaEnable")
     field(OUT,  "@asyn($(PORT))MetaEnable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
+    field(PINI, "YES")
 }
 
 # LPSD diagnostic channel
@@ -214,6 +218,7 @@ record(bo, "$(P)BnlEnable")
     field(OUT,  "@asyn($(PORT))BnlEnable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
+    field(PINI, "YES")
 }
 
 # CROC diagnostic channel
@@ -243,4 +248,5 @@ record(bo, "$(P)CrocEnable")
     field(OUT,  "@asyn($(PORT))CrocEnable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
+    field(PINI, "YES")
 }
