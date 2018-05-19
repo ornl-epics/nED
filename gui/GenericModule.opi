@@ -2258,7 +2258,7 @@ $(pv_value)</tooltip>
       <actions hook="false" hook_all="false">
         <action type="WRITE_PV">
           <pv_name>$(pv_name)</pv_name>
-          <value>Read status</value>
+          <value>1</value>
           <timeout>10</timeout>
           <confirm_message></confirm_message>
           <description></description>
@@ -2287,7 +2287,7 @@ $(pv_value)</tooltip>
       <image></image>
       <name>Action Button</name>
       <push_action_index>0</push_action_index>
-      <pv_name>$(P)CmdReq</pv_name>
+      <pv_name>$(P)CheckSeq.PROC</pv_name>
       <pv_value />
       <rules />
       <scale_options>
@@ -2312,7 +2312,7 @@ $(pv_value)</tooltip>
       <actions hook="false" hook_all="false">
         <action type="WRITE_PV">
           <pv_name>$(pv_name)</pv_name>
-          <value>Write config</value>
+          <value>1</value>
           <timeout>10</timeout>
           <confirm_message></confirm_message>
           <description></description>
@@ -2341,7 +2341,7 @@ $(pv_value)</tooltip>
       <image></image>
       <name>Action Button</name>
       <push_action_index>0</push_action_index>
-      <pv_name>$(P)CmdReq</pv_name>
+      <pv_name>$(P)ConfSeq.PROC</pv_name>
       <pv_value />
       <rules />
       <scale_options>
@@ -2366,7 +2366,7 @@ $(pv_value)</tooltip>
       <actions hook="false" hook_all="false">
         <action type="WRITE_PV">
           <pv_name>$(pv_name)</pv_name>
-          <value>Start acquisition</value>
+          <value>1</value>
           <timeout>10</timeout>
           <confirm_message></confirm_message>
           <description></description>
@@ -2395,7 +2395,7 @@ $(pv_value)</tooltip>
       <image></image>
       <name>Action Button_2</name>
       <push_action_index>0</push_action_index>
-      <pv_name>$(P)CmdReq</pv_name>
+      <pv_name>$(P)StartSeq.PROC</pv_name>
       <pv_value />
       <rules />
       <scale_options>
@@ -2420,7 +2420,7 @@ $(pv_value)</tooltip>
       <actions hook="false" hook_all="false">
         <action type="WRITE_PV">
           <pv_name>$(pv_name)</pv_name>
-          <value>Stop acquisition</value>
+          <value>1</value>
           <timeout>10</timeout>
           <confirm_message></confirm_message>
           <description></description>
@@ -2449,7 +2449,7 @@ $(pv_value)</tooltip>
       <image></image>
       <name>Action Button</name>
       <push_action_index>0</push_action_index>
-      <pv_name>$(P)CmdReq</pv_name>
+      <pv_name>$(P)StopSeq.PROC</pv_name>
       <pv_value />
       <rules />
       <scale_options>

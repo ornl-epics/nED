@@ -643,3 +643,56 @@ record(bo, "$(P)Upg:Supported")
     field(PINI, "YES")
     field(VAL,  "0")
 }
+
+record(seq, "$(P)StartSeq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Start acq sequence")
+    field(LNK1, "$(P)CmdReq PP")
+    field(DO1,  "5")
+    field(LNK2, "$(P)CmdReq PP")
+    field(DO2,  "2")
+    field(DLY2, "0.2")
+}
+
+record(seq, "$(P)StopSeq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Stop acq sequence")
+    field(LNK1, "$(P)CmdReq PP")
+    field(DO1,  "6")
+    field(LNK2, "$(P)CmdReq PP")
+    field(DO2,  "2")
+    field(DLY2, "0.2")
+}
+
+record(seq, "$(P)CheckSeq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Check sequence")
+    field(LNK1, "$(P)CmdReq PP")
+    field(DO1,  "2")
+    field(LNK2, "$(P)CmdReq PP")
+    field(DO2,  "0")
+    field(DLY2, "0.1")
+    field(LNK3, "$(P)CmdReq PP")
+    field(DO3,  "1")
+    field(DLY3, "0.2")
+}
+
+record(seq, "$(P)ConfSeq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Check sequence")
+    field(LNK1, "$(P)CmdReq PP")
+    field(DO1,  "6")
+    field(LNK2, "$(P)CmdReq PP")
+    field(DO2,  "4")
+    field(DLY2, "0.1")
+    field(LNK3, "$(P)CmdReq PP")
+    field(DO3,  "5")
+    field(DLY3, "0.2")
+    field(LNK4, "$(P)CmdReq PP")
+    field(DO4,  "2")
+    field(DLY4, "0.3")
+}
