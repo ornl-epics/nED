@@ -101,6 +101,7 @@ record(mbbo, "$(P)DataType")
 {
     field(ASG,  "BEAMLINE")
     field(DESC, "Filter data type")
+    field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))DataType")
     field(VAL,  "0")
     field(ZRVL, "0")
