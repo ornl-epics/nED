@@ -1,15 +1,6 @@
 include "BasePlugin.include"
 include "BaseSocketPlugin.include"
 
-# Upgrade BasePlugin::Enable PV
-record(bo, "$(P)Enable")
-{
-    info(archive, "Monitor, 00:10:00, VAL")
-    info(autosaveFields, "VAL")
-    field(ZSV,  "MAJOR")
-    field(PINI, "YES")
-    field(FLNK, "$(P)StatusCalc")
-}
 # Upgrade BaseSocketPlugin::* PVs
 record(stringout, "$(P)ListenIp")
 {
@@ -32,23 +23,45 @@ record(stringin, "$(P)ClientIp")
     field(FLNK, "$(P)StatusCalc.PROC")
 }
 
+# AdaraPlugin only PVs
+record(bo, "$(P)Enable")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    info(autosaveFields, "VAL")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Enable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(ZSV,  "MAJOR")
+    field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
+}
 record(scalcout, "$(P)StatusCalc")
 {
     field(DESC, "Determine global plugin status")
     field(INAA, "$(P)ClientIp NPP")
     field(INPA, "$(P)Enable.SEVR NPP")
-    field(CALC, "A=0&&LEN(AA)>0")
-    field(PINI, "YES")
-    field(FLNK, "$(P)Status")
+    field(CALC, "A#1?2:LEN(AA)>0")
+    field(OUT,  "$(P)Status PP")
+    field(DTYP, "Soft Channel")
+    field(FLNK, "$(P)StatusTextCalc")
 }
 record(bi, "$(P)Status")
 {
     info(archive, "Monitor, 00:00:10, VAL")
     field(DESC, "ADARA plugin status")
-    field(ZNAM, "Not connected")
-    field(ONAM, "Connected")
-    field(ZSV,  "MAJOR")
-    field(INP,  "$(P)StatusCalc")
+}
+record(scalcout, "$(P)StatusTextCalc")
+{
+    field(DESC, "Determine global plugin status")
+    field(INAA, "$(P)ClientIp NPP")
+    field(INPA, "$(P)Enable.SEVR NPP")
+    field(INBB, "not connected")
+    field(INCC, "ready")
+    field(INDD, "disabled")
+    field(CALC, "A#1?DD:LEN(AA)>0?CC:BB")
+    field(OUT,  "$(P)StatusText PP")
+    field(DTYP, "Soft Channel")
 }
 record(ao, "$(P)InactiveTimeout")
 {
@@ -74,36 +87,26 @@ record(ai, "$(P)ClientInactive")
 {
     field(FLNK, "$(P)AutoReset PP")
 }
-record(bo, "$(P)PixelsMapped")
+record(longin, "$(P)CntDataPkts")
 {
-    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
-    field(DESC, "Were pixels previously mapped?")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))PixelsMapped")
-    field(ZNAM, "Raw pixels")
-    field(ONAM, "Mapped pixels")
-    field(PINI, "YES")
+    field(INP,  "@asyn($(PORT))CntDataPkts")
+    field(SCAN, "I/O Intr")
 }
-record(bo, "$(P)NeutronsEn")
+record(longin, "$(P)CntRtdlPkts")
 {
-    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))NeutronsEn")
-    field(ZNAM, "No")
-    field(ONAM, "Yes")
-    field(PINI, "YES")
+    field(INP,  "@asyn($(PORT))CntRtdlPkts")
+    field(SCAN, "I/O Intr")
 }
-record(bo, "$(P)MetadataEn")
+record(longin, "$(P)CntPingPkts")
 {
-    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))MetadataEn")
-    field(ZNAM, "No")
-    field(ONAM, "Yes")
-    field(PINI, "YES")
+    field(INP,  "@asyn($(PORT))CntPingPkts")
+    field(SCAN, "I/O Intr")
 }
 record(bo, "$(P)Reset")
 {

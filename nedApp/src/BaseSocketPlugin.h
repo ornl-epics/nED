@@ -48,25 +48,8 @@ class BaseSocketPlugin : public BasePlugin {
          * Constructor
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
-         * @param[in] numParams The number of parameters that the derived class supports.
-         * @param[in] maxAddr The maximum  number of asyn addr addresses this driver supports. 1 is minimum.
-         * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
-         * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
-         * @param[in] asynFlags Flags when creating the asyn port driver; includes ASYN_CANBLOCK and ASYN_MULTIDEVICE.
-         * @param[in] autoConnect The autoConnect flag for the asyn port driver.
-         * @param[in] priority The thread priority for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
-         * @param[in] stackSize The stack size for the asyn port driver thread if ASYN_CANBLOCK is set in asynFlags.
          */
-        BaseSocketPlugin(const char *portName, const char *dispatcherPortName, int blocking, int numParams=0,
-                     int maxAddr=1, int interfaceMask=defaultInterfaceMask, int interruptMask=defaultInterruptMask,
-                     int asynFlags=0, int autoConnect=1, int priority=0, int stackSize=0);
-
-        /**
-         * Destructor
-         */
-        virtual ~BaseSocketPlugin();
+        BaseSocketPlugin(const char *portName);
 
         /**
          * Handle BaseSocketPlugin integer parameters changes.
@@ -207,10 +190,9 @@ class BaseSocketPlugin : public BasePlugin {
          * otherwise client disconnect detection relies on other data being
          * sent.
          */
-        virtual void sendHeartbeat() {};
+        virtual bool sendHeartbeat() { return false; };
 
     protected:
-        #define FIRST_BASESOCKETPLUGIN_PARAM ListenIP
         int ListenIP;
         int ListenPort;
         int ListenStatus;
@@ -218,7 +200,6 @@ class BaseSocketPlugin : public BasePlugin {
         int CheckInt;
         int ClientInactive;
         int CloseClient;
-        #define LAST_BASESOCKETPLUGIN_PARAM CloseClient
 };
 
 #endif // BASESOCKET_PLUGIN_H

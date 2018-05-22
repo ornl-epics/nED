@@ -16,13 +16,8 @@
 #include <osiSock.h>
 #include <string.h> // strerror
 
-#define NUM_BASESOCKETPLUGIN_PARAMS     ((int)(&LAST_BASESOCKETPLUGIN_PARAM - &FIRST_BASESOCKETPLUGIN_PARAM + 1))
-
-BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherPortName, int blocking,
-                           int numParams, int maxAddr, int interfaceMask, int interruptMask,
-                           int asynFlags, int autoConnect, int priority, int stackSize)
-    : BasePlugin(portName, dispatcherPortName, REASON_OCCDATA, blocking, NUM_BASESOCKETPLUGIN_PARAMS + numParams,
-                 maxAddr, interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask, asynFlags, autoConnect, priority, stackSize)
+BaseSocketPlugin::BaseSocketPlugin(const char *portName)
+    : BasePlugin(portName, 1)
     , m_listenSock(-1)
     , m_clientSock(-1)
 {
@@ -40,10 +35,6 @@ BaseSocketPlugin::BaseSocketPlugin(const char *portName, const char *dispatcherP
     // Schedule a period task to check for incoming client
     std::function<float(void)> watchdogCb = std::bind(&BaseSocketPlugin::checkClient, this);
     scheduleCallback(watchdogCb, 2.0);
-}
-
-BaseSocketPlugin::~BaseSocketPlugin()
-{
 }
 
 bool BaseSocketPlugin::recv(uint32_t *data, uint32_t length, double timeout, uint32_t *actual)

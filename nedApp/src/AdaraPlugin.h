@@ -11,6 +11,9 @@
 #define ADARA_PLUGIN_H
 
 #include "BaseSocketPlugin.h"
+#include "RtdlHeader.h"
+
+#include <list>
 
 /**
  * Plugin that forwards Neutron Event data to ADARA SMS over TCP/IP.
@@ -32,66 +35,40 @@
  */
 class AdaraPlugin : public BaseSocketPlugin {
     private:
-        uint64_t m_nTransmitted;    //!< Number of packets sent to BASESOCKET
-        uint64_t m_nProcessed;      //!< Number of processed packets
-        uint64_t m_nReceived;       //!< Number of packets received from dispatcher
-        epicsTimeStamp m_lastDataTimestamp; //!< Timestamp of last event data sent to Adara for SMS book-keeping
-        epicsTimeStamp m_lastRtdlTimestamp; //!< Timestamp of last RTDL packet sent to Adara
-        uint32_t m_dataPktType;     //!< Type of data packets, raw or mapped pixel data
+        epicsTimeStamp m_lastDataTimestamp{0,0}; //!< Timestamp of last event data sent to Adara for SMS book-keeping
+        uint16_t m_packetSeq{0};
 
-        /**
-         * Structure describing output packets sequence for a given source.
-         *
-         * A source is any unique data channel with a specific event type.
-         * Each DSP provides up to 2 sources, a neutron and metadata source.
-         */
-        struct SourceSequence {
-            uint32_t sourceId;          //!< Source id for output packets
-            RtdlHeader rtdl;            //!< RTDL header of the current pulse
-            uint32_t pulseSeq;          //!< Packet sequence number within one pulse
-            uint32_t totalSeq;          //!< Overall packet sequence number
-            SourceSequence()
-                : pulseSeq(0)
-                , totalSeq(0)
-            {
-                reset();
-            }
-            void reset()
-            {
-                rtdl.timestamp_sec  = 0;
-                rtdl.timestamp_nsec = 0;
-            }
+        struct DataInfo {
+            uint16_t sourceId{0};
+            uint16_t pulseSeq{0};
+            RtdlHeader rtdl;
         };
 
-        std::map<uint64_t, SourceSequence> m_sources;   //!< Registered sources
+        std::list<std::pair<epicsTime, DataInfo>> m_cachedRtdl;
 
     public:
         /**
          * Constructor
          *
          * @param[in] portName asyn port name.
-         * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] blocking Should processing of callbacks block execution of caller thread or not.
-         * @param[in] numDsps Number of DSPs that will be sending data
+         * @param[in] parentPlugins to connect to.
          */
-        AdaraPlugin(const char *portName, const char *dispatcherPortName, int blocking, int numDsps);
-
-        /**
-         * Destructor
-         */
-        ~AdaraPlugin();
+        AdaraPlugin(const char *portName, const char *parentPlugins);
 
         /**
          * Overloaded function.
          */
-        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
         /**
-         * Process RTDL and NeutronData packets only, skip rest.
-         *
-         * @param[in] packetList List of packets to be processed
+         * Process RTDL packets.
          */
-        void processData(const DasPacketList * const packetList);
+        void recvDownstream(const RtdlPacketList &packets) override;
+
+        /**
+         * Process data packets.
+         */
+        void recvDownstream(const DasDataPacketList &packets) override;
 
         /**
          * Overloaded periodic function to send ADARA Heartbeat packet.
@@ -110,16 +87,16 @@ class AdaraPlugin : public BaseSocketPlugin {
          * @retval true When data has been sent.
          * @retval false Socket not connected or other socket error.
          */
-        void sendHeartbeat();
+        bool sendHeartbeat() override;
 
         /**
          * When socket is connected, send RTDL to ADARA.
          *
-         * @param[in] data
+         * @param[in] packet RTDL packet
          * @retval true When data has been sent.
          * @retval false Socket not connected or other socket error.
          */
-        bool sendRtdl(const uint32_t data[8]);
+        bool sendRtdl(epicsTimeStamp timestamp, const RtdlHeader &rtdl, const std::vector<RtdlPacket::RtdlFrame> &frames);
 
         /**
          * When socket is connected, send events to ADARA.
@@ -132,15 +109,8 @@ class AdaraPlugin : public BaseSocketPlugin {
          * @retval true When data has been sent.
          * @retval false Socket not connected or other socket error.
          */
-        bool sendEvents(SourceSequence *seq, const DasPacket::Event *events, uint32_t eventCount, bool neutrons, bool endOfPulse=false);
-
-        /**
-         * Return a source structure for given data type and hardware id pair.
-         *
-         * @param[in] neutron Flags the source data type.
-         * @param[in] id A unique number to identifiy the data source, usually DSP hardware id
-         */
-        SourceSequence *findSource(bool neutron, uint32_t id);
+        template <typename T>
+        bool sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *events, uint32_t nEvents);
 
         /**
          * Overloaded function resets internal state when new client connects.
@@ -157,12 +127,11 @@ class AdaraPlugin : public BaseSocketPlugin {
         void reset();
 
     protected:
-        #define FIRST_ADARAPLUGIN_PARAM PixelsMapped
-        int PixelsMapped;
-        int NeutronsEn;
-        int MetadataEn;
-        int Reset;;
-        #define LAST_ADARAPLUGIN_PARAM Reset
+        int Enable;
+        int Reset;
+        int CntDataPkts;
+        int CntRtdlPkts;
+        int CntPingPkts;
 };
 
 #endif // ADARA_PLUGIN_H

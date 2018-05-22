@@ -25,7 +25,7 @@ registrar("registerStatPlugin")
 registrar("registerStateAnalyzerPlugin")
 
 #registrar("registerAcpcPvaPlugin")
-#registrar("registerAdaraPlugin")
+registrar("registerAdaraPlugin")
 #registrar("registerBnlFlatFieldPlugin")
 registrar("registerBnlPosCalcPlugin")
 #registrar("registerBnlRocPvaPlugin")
