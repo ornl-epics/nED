@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <string.h>
 
-EPICS_REGISTER_PLUGIN(AdaraPlugin, 2, "port name", string, "parent plugins", string);
+EPICS_REGISTER_PLUGIN(AdaraPlugin, 3, "port name", string, "Parent data plugins", string, "Parent RTDL plugins", string);
 
 #define ADARA_PKT_TYPE_RAW_EVENT    0x00000000
 #define ADARA_PKT_TYPE_RTDL         0x00000100
@@ -22,14 +22,18 @@ EPICS_REGISTER_PLUGIN(AdaraPlugin, 2, "port name", string, "parent plugins", str
 #define ADARA_PKT_TYPE_MAPPED_EVENT 0x00000300
 #define ADARA_PKT_TYPE_HEARTBEAT    0x00400900
 
-AdaraPlugin::AdaraPlugin(const char *portName, const char *parentPlugins)
+AdaraPlugin::AdaraPlugin(const char *portName, const char *dataPlugins, const char *rtdlPlugins)
     : BaseSocketPlugin(portName)
 {
     createParam("Enable",       asynParamInt32, &Enable, 0);     // WRITE - Enable sending events to SMS
     createParam("Reset",        asynParamInt32, &Reset, 0);      // WRITE - Reset internal logic
+    createParam("CntDataPkts",  asynParamInt32, &CntDataPkts, 0);// WRITE - Number of data packets sent to SMS
+    createParam("CntRtdlPkts",  asynParamInt32, &CntRtdlPkts, 0);// WRITE - Number of RTDL packets sent to SMS
+    createParam("CntPingPkts",  asynParamInt32, &CntPingPkts, 0);// WRITE - Number of heartbeat packets sent to SMS
     callParamCallbacks();
 
-    BasePlugin::connect(parentPlugins, {MsgDasData, MsgDasRtdl});
+    BasePlugin::connect(dataPlugins, MsgDasData);
+    BasePlugin::connect(rtdlPlugins, MsgDasRtdl);
 }
 
 asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -149,7 +153,8 @@ void AdaraPlugin::recvDownstream(const RtdlPacketList &packets)
 {
     if (getBooleanParam(Enable) == false)
         return;
-    
+
+    uint32_t sentPackets = 0;
     for (const auto &packet: packets) {
         DataInfo info;
         epicsTime timestamp(packet->getTimeStamp());
@@ -166,8 +171,9 @@ void AdaraPlugin::recvDownstream(const RtdlPacketList &packets)
 
         if (sent == false && connectClient() == true) {
             if (sendRtdl(timestamp, info.rtdl, frames)) {
+                sentPackets++;
                 m_cachedRtdl.emplace_front(std::make_pair(timestamp, info));
-                while (m_cachedRtdl.size() > 10) {
+                while (m_cachedRtdl.size() > 20) {
                     m_cachedRtdl.pop_back();
                 }
             } else {
@@ -176,7 +182,7 @@ void AdaraPlugin::recvDownstream(const RtdlPacketList &packets)
         }
     }
 
-    addIntegerParam(CntRtdlPkts, packets.size());
+    addIntegerParam(CntRtdlPkts, sentPackets);
     callParamCallbacks();
 }
 

@@ -17,7 +17,7 @@
 #include <string.h> // strerror
 
 BaseSocketPlugin::BaseSocketPlugin(const char *portName)
-    : BasePlugin(portName, 1)
+    : BasePlugin(portName, 1, asynOctetMask, asynOctetMask)
     , m_listenSock(-1)
     , m_clientSock(-1)
 {

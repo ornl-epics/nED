@@ -169,7 +169,7 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
                 break;
         }
         if (cached == m_cache.end()) {
-            m_cache.push_front(PulseEvents(timestamp, m_devices.size()));
+            m_cache.push_front(PulseEvents(timestamp, packet->getEventsMapped(), m_devices.size()));
             cached = m_cache.begin();
         }
 
@@ -293,6 +293,7 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
             if (pixelsPkt) {
                 packets.push_back(pixelsPkt.get());
                 pixelsPkt->init(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.timestamp, pulseEvents.pixel_neutrons.size());
+                pixelsPkt->setEventsMapped(pulseEvents.mapped);
                 tagPixelIds<Event::Pixel>(pulseEvents.pixel_neutrons, pulseEvents.states, pixelsPkt->getEvents<Event::Pixel>());
             } else {
                 this->lock();
@@ -312,6 +313,7 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
             if (bnlPkt) {
                 packets.push_back(bnlPkt.get());
                 bnlPkt->init(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.timestamp, pulseEvents.bnl_neutrons.size());
+                bnlPkt->setEventsMapped(pulseEvents.mapped);
                 tagPixelIds<Event::BNL::Diag>(pulseEvents.bnl_neutrons, pulseEvents.states, bnlPkt->getEvents<Event::BNL::Diag>());
             } else {
                 this->lock();
@@ -410,7 +412,7 @@ void StateAnalyzerPlugin::processThread(epicsEvent *shutdown)
 {
     LOG_DEBUG("Processing thread started");
     while (shutdown->tryWait() == false) {
-        PulseEvents pulseEvents(epicsTimeStamp(), 0);
+        PulseEvents pulseEvents(epicsTimeStamp(), false, 0);
         if (m_processQue.deque(pulseEvents, 0.1)) {
             processEvents(pulseEvents);
         }

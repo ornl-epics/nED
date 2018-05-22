@@ -51,9 +51,10 @@ class AdaraPlugin : public BaseSocketPlugin {
          * Constructor
          *
          * @param[in] portName asyn port name.
-         * @param[in] parentPlugins to connect to.
+         * @param[in] dataPlugins to connect to.
+         * @param[in] rtdlPlugins to connect to.
          */
-        AdaraPlugin(const char *portName, const char *parentPlugins);
+        AdaraPlugin(const char *portName, const char *dataPlugins, const char *rtdlPlugins);
 
         /**
          * Overloaded function.
@@ -92,7 +93,9 @@ class AdaraPlugin : public BaseSocketPlugin {
         /**
          * When socket is connected, send RTDL to ADARA.
          *
-         * @param[in] packet RTDL packet
+         * @param[in] timestamp of the RTLD packet
+         * @param[in] rtdl header as expected by ADARA protocol
+         * @param[in] frames from RTDL packet
          * @retval true When data has been sent.
          * @retval false Socket not connected or other socket error.
          */
@@ -101,11 +104,10 @@ class AdaraPlugin : public BaseSocketPlugin {
         /**
          * When socket is connected, send events to ADARA.
          *
-         * @param[in] seq Channel/sequence information
-         * @param[in] events to be sent.
-         * @param[in] eventsCount number of events to send.
-         * @param[in] neutrons flags whether the events to send are neutrons
-         * @param[in] endOfPulse set to true if these are last events for given pulse.
+         * @param[in] timestamp of the data packet
+         * @param[in] mapped flags whether events have been previously mapped
+         * @param[in] events array of events, templated parameter.
+         * @param[in] nEvents number of events to send.
          * @retval true When data has been sent.
          * @retval false Socket not connected or other socket error.
          */

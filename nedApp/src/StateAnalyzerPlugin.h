@@ -54,11 +54,13 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
         };
         struct PulseEvents {
             epicsTime timestamp;
+            bool mapped;
             EventList<Event::Pixel> pixel_neutrons;
             EventList<Event::BNL::Diag> bnl_neutrons;
             EventList<Event::Pixel> states;
-            PulseEvents(epicsTime timestamp_, uint32_t nSignals)
-                : timestamp(timestamp_) {}
+            PulseEvents(epicsTime timestamp_, bool mapped_, uint32_t nSignals)
+                : timestamp(timestamp_)
+                , mapped(mapped_) {}
         };
         std::list<PulseEvents> m_cache;
         std::vector<DeviceInfo> m_devices;
