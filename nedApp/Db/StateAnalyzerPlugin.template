@@ -110,6 +110,12 @@ record(bo, "$(P)Dev1:Enable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
 }
+record(stringin, "$(P)Dev1:Name")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(PINI, "YES")
+}
 record(longout, "$(P)Dev1:PixelOn")
 {
     info(autosaveFields, "VAL")
@@ -183,6 +189,12 @@ record(bo, "$(P)Dev2:Enable")
     field(VAL,  "0")
     field(ZNAM, "disable")
     field(ONAM, "enable")
+}
+record(stringin, "$(P)Dev2:Name")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(PINI, "YES")
 }
 record(longout, "$(P)Dev2:PixelOn")
 {
@@ -258,6 +270,12 @@ record(bo, "$(P)Dev3:Enable")
     field(ZNAM, "disable")
     field(ONAM, "enable")
 }
+record(stringin, "$(P)Dev3:Name")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(PINI, "YES")
+}
 record(longout, "$(P)Dev3:PixelOn")
 {
     info(autosaveFields, "VAL")
@@ -331,6 +349,12 @@ record(bo, "$(P)Dev4:Enable")
     field(VAL,  "0")
     field(ZNAM, "disable")
     field(ONAM, "enable")
+}
+record(stringin, "$(P)Dev4:Name")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(PINI, "YES")
 }
 record(longout, "$(P)Dev4:PixelOn")
 {
