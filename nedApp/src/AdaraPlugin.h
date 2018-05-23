@@ -131,6 +131,7 @@ class AdaraPlugin : public BaseSocketPlugin {
     protected:
         int Enable;
         int Reset;
+        int RtdlCacheSize;
         int CntDataPkts;
         int CntRtdlPkts;
         int CntPingPkts;

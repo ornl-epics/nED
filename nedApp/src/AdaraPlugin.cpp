@@ -27,6 +27,7 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dataPlugins, const ch
 {
     createParam("Enable",       asynParamInt32, &Enable, 0);     // WRITE - Enable sending events to SMS
     createParam("Reset",        asynParamInt32, &Reset, 0);      // WRITE - Reset internal logic
+    createParam("RtdlCacheSize",asynParamInt32, &RtdlCacheSize, 30);// WRITE - Number of RTDLs to cache
     createParam("CntDataPkts",  asynParamInt32, &CntDataPkts, 0);// WRITE - Number of data packets sent to SMS
     createParam("CntRtdlPkts",  asynParamInt32, &CntRtdlPkts, 0);// WRITE - Number of RTDL packets sent to SMS
     createParam("CntPingPkts",  asynParamInt32, &CntPingPkts, 0);// WRITE - Number of heartbeat packets sent to SMS
@@ -153,6 +154,7 @@ void AdaraPlugin::recvDownstream(const RtdlPacketList &packets)
 {
     if (getBooleanParam(Enable) == false)
         return;
+    uint32_t maxCacheLen = getIntegerParam(RtdlCacheSize);
 
     uint32_t sentPackets = 0;
     for (const auto &packet: packets) {
@@ -173,7 +175,7 @@ void AdaraPlugin::recvDownstream(const RtdlPacketList &packets)
             if (sendRtdl(timestamp, info.rtdl, frames)) {
                 sentPackets++;
                 m_cachedRtdl.emplace_front(std::make_pair(timestamp, info));
-                while (m_cachedRtdl.size() > 20) {
+                while (m_cachedRtdl.size() > maxCacheLen) {
                     m_cachedRtdl.pop_back();
                 }
             } else {
