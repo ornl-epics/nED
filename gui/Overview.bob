@@ -142,7 +142,7 @@
     </widget>
     <widget type="textupdate" version="2.0.0">
       <name>Text Update_1</name>
-      <pv_name>$(P)stat:NeutronTimesRate</pv_name>
+      <pv_name>$(P)stat:AcqFrameRate</pv_name>
       <x>150</x>
       <y>36</y>
       <width>163</width>
