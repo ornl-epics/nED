@@ -271,25 +271,26 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
         DasDataPacketList packets;
 
         // Calculate combined states
-        auto statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META,  pulseEvents.states.size())   );
-        if (statesPkt) {
-            packets.push_back(statesPkt.get());
-            statesPkt->init(  DasDataPacket::EVENT_FMT_META,  pulseEvents.timestamp, pulseEvents.states.size());
-            calcCombinedStates(pulseEvents.states, statesPkt->getEvents<Event::Pixel>(), state, vetostate);
-        } else {
-            this->lock();
-            setIntegerParam(Status, 0);
-            setStringParam(StatusText, "Insufficent memory");
-            callParamCallbacks();
-            LOG_ERROR("Failed to allocate output packets for combined states from pool");
-            this->unlock();
-            break;
+        if (!pulseEvents.states.empty()) {
+            auto statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META,  pulseEvents.states.size())   );
+            if (statesPkt) {
+                packets.push_back(statesPkt.get());
+                statesPkt->init(  DasDataPacket::EVENT_FMT_META,  pulseEvents.timestamp, pulseEvents.states.size());
+                calcCombinedStates(pulseEvents.states, statesPkt->getEvents<Event::Pixel>(), state, vetostate);
+            } else {
+                this->lock();
+                setIntegerParam(Status, 0);
+                setStringParam(StatusText, "Insufficent memory");
+                callParamCallbacks();
+                LOG_ERROR("Failed to allocate output packets for combined states from pool");
+                this->unlock();
+                break;
+            }
         }
 
         // Tag pixel ids in regular Event::Pixel format
-        std::shared_ptr<DasDataPacket> pixelsPkt;
         if (!pulseEvents.pixel_neutrons.empty()) {
-            pixelsPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.pixel_neutrons.size()) );
+            auto pixelsPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.pixel_neutrons.size()) );
             if (pixelsPkt) {
                 packets.push_back(pixelsPkt.get());
                 pixelsPkt->init(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.timestamp, pulseEvents.pixel_neutrons.size());
@@ -395,7 +396,7 @@ void StateAnalyzerPlugin::tagPixelIds(EventList<T> &events, const EventList<Even
             veto = ((state_event->pixelid & 0x100) ? PIXEL_STATE_VETO_MASK : 0x0);
             state_event++;
         }
-        event->pixelid |= (state << m_bitOffset) | veto;
+        event->pixelid |= ((state | veto) << m_bitOffset);
 
         // Copy to output array
         *outEvents = *event;
