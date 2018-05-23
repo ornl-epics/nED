@@ -33,6 +33,8 @@ record(longout, "$(P)MaxCacheLen")
     field(OUT,  "@asyn($(PORT))MaxCacheLen")
     field(VAL,  "10")
     field(PINI, "YES")
+    field(LOPR, "1")
+    field(HOPR, "600")
 }
 record(longin, "$(P)State")
 {

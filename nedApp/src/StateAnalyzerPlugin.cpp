@@ -72,12 +72,6 @@ StateAnalyzerPlugin::StateAnalyzerPlugin(const char *portName, const char *paren
 
 asynStatus StateAnalyzerPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    if (pasynUser->reason == MaxCacheLen) {
-        if (value <= 0)
-            return asynError;
-        m_maxCacheLen = value;
-        return asynSuccess;
-    }
     if (pasynUser->reason == PixelBitOffset) {
         if (value <= 0 || value >= 28)
             return asynError;
@@ -146,6 +140,8 @@ asynStatus StateAnalyzerPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
 void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
 {
+    uint32_t maxCacheLen = getIntegerParam(MaxCacheLen);
+
     if (!m_enabled) {
         sendDownstream(packets);
         if (m_cache.size() > 0) {
@@ -242,8 +238,8 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
         // Send events from the back of the queue to processing thread
         // which in the end sends events to subscribed plugins.
         uint8_t retries = 0;
-        while (m_cache.size() > m_maxCacheLen) {
-            if (m_processQue.size() < m_maxCacheLen) {
+        while (m_cache.size() > maxCacheLen) {
+            if (m_processQue.size() < maxCacheLen) {
                 m_processQue.enqueue(std::move(m_cache.back()));
                 m_cache.pop_back();
             } else {

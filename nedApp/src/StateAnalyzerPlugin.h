@@ -67,7 +67,6 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
         bool m_enabled{false};
         uint32_t m_state{0};
         uint32_t m_vetostate{0};
-        uint32_t m_maxCacheLen{10};
         double m_distance{1.0};
         uint32_t m_bitOffset{20};
         uint32_t m_statePixelMask{0x60320000};

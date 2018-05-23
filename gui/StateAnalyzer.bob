@@ -600,7 +600,7 @@ VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
       <y>31</y>
       <width>77</width>
     </widget>
-    <widget type="textupdate" version="2.0.0">
+    <widget type="textentry" version="3.0.0">
       <name>Label</name>
       <pv_name>$(P)Dev1:Name</pv_name>
       <x>120</x>
@@ -610,10 +610,10 @@ VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
         <color name="Background" red="255" green="255" blue="255">
         </color>
       </background_color>
-      <transparent>true</transparent>
+      <wrap_words>true</wrap_words>
       <tooltip></tooltip>
     </widget>
-    <widget type="textupdate" version="2.0.0">
+    <widget type="textentry" version="3.0.0">
       <name>Label_1</name>
       <pv_name>$(P)Dev2:Name</pv_name>
       <x>250</x>
@@ -623,10 +623,10 @@ VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
         <color name="Background" red="255" green="255" blue="255">
         </color>
       </background_color>
-      <transparent>true</transparent>
+      <wrap_words>true</wrap_words>
       <tooltip></tooltip>
     </widget>
-    <widget type="textupdate" version="2.0.0">
+    <widget type="textentry" version="3.0.0">
       <name>Label_2</name>
       <pv_name>$(P)Dev3:Name</pv_name>
       <x>380</x>
@@ -636,10 +636,10 @@ VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
         <color name="Background" red="255" green="255" blue="255">
         </color>
       </background_color>
-      <transparent>true</transparent>
+      <wrap_words>true</wrap_words>
       <tooltip></tooltip>
     </widget>
-    <widget type="textupdate" version="2.0.0">
+    <widget type="textentry" version="3.0.0">
       <name>Label_3</name>
       <pv_name>$(P)Dev4:Name</pv_name>
       <x>510</x>
@@ -649,7 +649,7 @@ VString[No PV, 1969/12/31 19:00:00.000]</tooltip>
         <color name="Background" red="255" green="255" blue="255">
         </color>
       </background_color>
-      <transparent>true</transparent>
+      <wrap_words>true</wrap_words>
       <tooltip></tooltip>
     </widget>
   </widget>
