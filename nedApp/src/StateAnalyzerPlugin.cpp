@@ -169,9 +169,14 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
                 break;
         }
         if (cached == m_cache.end()) {
-            m_cache.push_front(PulseEvents(timestamp, packet->getEventsMapped(), m_devices.size()));
+            m_cache.push_front(PulseEvents(timestamp, m_devices.size()));
             cached = m_cache.begin();
         }
+
+        // Potential mismatch when plugin connected to multiple parents and one
+        // is mapped and the other one is not
+        if (packet->getEventsMapped() == true && cached->mapped == false)
+            cached->mapped = true;
 
         if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_PIXEL) {
             auto event = packet->getEvents<Event::Pixel>();
@@ -239,9 +244,7 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
         uint8_t retries = 0;
         while (m_cache.size() > m_maxCacheLen) {
             if (m_processQue.size() < m_maxCacheLen) {
-                if (!m_cache.back().pixel_neutrons.empty() || !m_cache.back().bnl_neutrons.empty() || !m_cache.back().states.empty()) {
-                    m_processQue.enqueue(std::move(m_cache.back()));
-                }
+                m_processQue.enqueue(std::move(m_cache.back()));
                 m_cache.pop_back();
             } else {
                 if (++retries > 1000) {
@@ -308,9 +311,8 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
         }
 
         // Tag pixel ids in Event::BNL::Diag format
-        std::shared_ptr<DasDataPacket> bnlPkt;
         if (!pulseEvents.bnl_neutrons.empty()) {
-            bnlPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.bnl_neutrons.size()) );
+            auto bnlPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.bnl_neutrons.size()) );
             if (bnlPkt) {
                 packets.push_back(bnlPkt.get());
                 bnlPkt->init(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.timestamp, pulseEvents.bnl_neutrons.size());
@@ -333,7 +335,8 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
 
         // Send packets and update status
         this->lock();
-        sendDownstream(packets);
+        if (!packets.empty())
+            sendDownstream(packets);
         setIntegerParam(State, state);
         setIntegerParam(Vetoing, vetostate != 0x0);
         callParamCallbacks();
@@ -413,7 +416,7 @@ void StateAnalyzerPlugin::processThread(epicsEvent *shutdown)
 {
     LOG_DEBUG("Processing thread started");
     while (shutdown->tryWait() == false) {
-        PulseEvents pulseEvents(epicsTimeStamp(), false, 0);
+        PulseEvents pulseEvents(epicsTimeStamp(), 0);
         if (m_processQue.deque(pulseEvents, 0.1)) {
             processEvents(pulseEvents);
         }
