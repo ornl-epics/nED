@@ -18,7 +18,8 @@ EPICS_REGISTER_PLUGIN(StateAnalyzerPlugin, 2, "Port name", string, "Parent plugi
 StateAnalyzerPlugin::StateAnalyzerPlugin(const char *portName, const char *parentPlugins)
     : BasePlugin(portName, 1, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
     , m_processThread("StateAnalyzerThread", std::bind(&StateAnalyzerPlugin::processThread, this, std::placeholders::_1))
-    , Devices(4)
+    , FastDevices(4)
+    , SlowDevices(2)
 {
     createParam("Status",       asynParamInt32, &Status, 1);                // READ - Plugin status, 0=error, 1=ok, 2=warning
     createParam("StatusText",   asynParamOctet, &StatusText, "Ready");      // READ - Text description of the error, if any
@@ -34,35 +35,55 @@ StateAnalyzerPlugin::StateAnalyzerPlugin(const char *portName, const char *paren
         int param;
         char name[16];
 
-        m_devices.push_back({0,0,0,0});
+        m_devices.push_back({0,0,0,0,0,false,0.0});
 
         snprintf(name, sizeof(name), "Dev%uEnable", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].Enable = param;
+        FastDevices[i].Enable = param;
 
         snprintf(name, sizeof(name), "Dev%uPixOn", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].PixelOn = param;
+        FastDevices[i].PixelOn = param;
 
         snprintf(name, sizeof(name), "Dev%uPixOff", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].PixelOff = param;
+        FastDevices[i].PixelOff = param;
 
         snprintf(name, sizeof(name), "Dev%uPixVetoOn", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].PixelVetoOn = param;
+        FastDevices[i].PixelVetoOn = param;
 
         snprintf(name, sizeof(name), "Dev%uPixVetoOff", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].PixelVetoOff = param;
+        FastDevices[i].PixelVetoOff = param;
 
         snprintf(name, sizeof(name), "Dev%uBitOffset", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].BitOffset = param;
+        FastDevices[i].BitOffset = param;
 
         snprintf(name, sizeof(name), "Dev%uDistance", i+1);
         createParam(name, asynParamFloat64, &param, 0);
-        Devices[i].Distance = param;
+        FastDevices[i].Distance = param;
+    }
+    for (uint8_t i = 0; i < 2; i++) {
+        int param;
+        char name[16];
+
+        snprintf(name, sizeof(name), "Dev%uEnable", i+1);
+        createParam(name, asynParamInt32, &param, 0);
+        SlowDevices[i].Enable = param;
+
+        snprintf(name, sizeof(name), "Dev%uBitOffset", i+1);
+        createParam(name, asynParamInt32, &param, 0);
+        SlowDevices[i].BitOffset = param;
+
+        snprintf(name, sizeof(name), "Dev%uState", i+1);
+        createParam(name, asynParamInt32, &param, 0);
+        SlowDevices[i].State = param;
+
+        snprintf(name, sizeof(name), "Dev%uVeto", i+1);
+        createParam(name, asynParamInt32, &param, 0);
+        SlowDevices[i].Veto = param;
     }
     callParamCallbacks();
 
@@ -92,28 +113,53 @@ asynStatus StateAnalyzerPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value
         m_enabled = (value > 0);
         return asynSuccess;
     }
-    for (size_t i = 0; i < Devices.size(); i++) {
-        if (pasynUser->reason == Devices[i].Enable) {
+    for (size_t i = 0; i < SlowDevices.size(); i++) {
+        asynStatus ret = asynDisabled;
+        if (pasynUser->reason == SlowDevices[i].State) {
+            ret = BasePlugin::writeInt32(pasynUser, value != 0);
+        } else if (pasynUser->reason == SlowDevices[i].Veto) {
+            ret = BasePlugin::writeInt32(pasynUser, value != 0);
+        }
+
+        if (ret != asynDisabled) {
+            if (ret == asynSuccess && getBooleanParam(SlowDevices[i].Enable)) {
+                // We rely on at least one data packet per acquisition frame
+                // which creates record in cache.
+                if (m_cache.empty()) {
+                    LOG_ERROR("No data events in queue, can not inject slow state change");
+                    return asynError;
+                }
+                SlowEvent e;
+                e.bitOffset = getIntegerParam(SlowDevices[i].BitOffset);
+                e.veto = getBooleanParam(SlowDevices[i].Veto);
+                e.state = getBooleanParam(SlowDevices[i].State);
+                m_cache.front().slow_events.emplace_back(e);
+            }
+            return ret;
+        }
+    }
+    for (size_t i = 0; i < FastDevices.size(); i++) {
+        if (pasynUser->reason == FastDevices[i].Enable) {
             m_devices[i].enabled = (value > 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].PixelOn) {
+        if (pasynUser->reason == FastDevices[i].PixelOn) {
             m_devices[i].pixelOn = (value >= 0 ? value : 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].PixelOff) {
+        if (pasynUser->reason == FastDevices[i].PixelOff) {
             m_devices[i].pixelOff = (value >= 0 ? value : 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].PixelVetoOn) {
+        if (pasynUser->reason == FastDevices[i].PixelVetoOn) {
             m_devices[i].pixelVetoOn = (value >= 0 ? value : 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].PixelVetoOff) {
+        if (pasynUser->reason == FastDevices[i].PixelVetoOff) {
             m_devices[i].pixelVetoOff = (value >= 0 ? value : 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].BitOffset) {
+        if (pasynUser->reason == FastDevices[i].BitOffset) {
             m_devices[i].bitOffset = (value >= 0 ? value : 0);
             return asynSuccess;
         }
@@ -129,8 +175,8 @@ asynStatus StateAnalyzerPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 v
         m_distance = value;
         return asynSuccess;
     }
-    for (size_t i = 0; i < Devices.size(); i++) {
-        if (pasynUser->reason == Devices[i].Distance) {
+    for (size_t i = 0; i < FastDevices.size(); i++) {
+        if (pasynUser->reason == FastDevices[i].Distance) {
             m_devices[i].distance = (value >= 0 ? value : 0);
             return asynSuccess;
         }
@@ -270,12 +316,21 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
         DasDataPacketList packets;
 
         // Calculate combined states
-        if (!pulseEvents.states.empty()) {
-            auto statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META,  pulseEvents.states.size())   );
+        if (!pulseEvents.states.empty() || !pulseEvents.slow_events.empty()) {
+            uint32_t nEvents = pulseEvents.states.size() + pulseEvents.slow_events.size();
+            auto statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META, nEvents) );
             if (statesPkt) {
                 packets.push_back(statesPkt.get());
-                statesPkt->init(  DasDataPacket::EVENT_FMT_META,  pulseEvents.timestamp, pulseEvents.states.size());
-                calcCombinedStates(pulseEvents.states, statesPkt->getEvents<Event::Pixel>(), state, vetostate);
+                statesPkt->init(  DasDataPacket::EVENT_FMT_META,  pulseEvents.timestamp, nEvents);
+                Event::Pixel *events = statesPkt->getEvents<Event::Pixel>();
+                if (!pulseEvents.states.empty()) {
+                    calcCombinedStates(pulseEvents.states, events, state, vetostate);
+                    events += pulseEvents.states.size();
+                }
+                if (!pulseEvents.slow_events.empty()) {
+                    uint32_t tof = (pulseEvents.states.empty() ? 0 : pulseEvents.states.back().tof+1);
+                    addSlowCombinedStates(pulseEvents.slow_events, events, tof, state, vetostate);
+                }
             } else {
                 this->lock();
                 setIntegerParam(Status, 0);
@@ -369,6 +424,25 @@ void StateAnalyzerPlugin::calcCombinedStates(EventList<Event::Pixel> &states, Ev
 
         // Copy to output array
         *outEvents = *state_event;
+        outEvents++;
+    }
+}
+
+void StateAnalyzerPlugin::addSlowCombinedStates(const std::list<SlowEvent> &states, Event::Pixel *outEvents, uint32_t tof, uint32_t &state, uint32_t &vetostate)
+{
+    for (const auto &state_event: states) {
+        if (state_event.veto)
+            vetostate |= (1 << state_event.bitOffset);
+        else
+            vetostate &= ~(1 << state_event.bitOffset);
+        if (state_event.state)
+            state |= (1 << state_event.bitOffset);
+        else
+            state &= ~(1 << state_event.bitOffset);
+
+        // Copy to output array
+        outEvents->tof = tof++;
+        outEvents->pixelid = m_statePixelMask | state | (vetostate != 0x0 ? 0x100 : 0x0);
         outEvents++;
     }
 }

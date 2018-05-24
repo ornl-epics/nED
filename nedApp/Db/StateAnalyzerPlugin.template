@@ -264,7 +264,7 @@ record(bo, "$(P)Dev3:Enable")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
-    field(DESC, "Device 2 enable switch")
+    field(DESC, "Device 3 enable switch")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))Dev3Enable")
     field(PINI, "YES")
@@ -344,7 +344,7 @@ record(bo, "$(P)Dev4:Enable")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
-    field(DESC, "Device 2 enable switch")
+    field(DESC, "Device 4 enable switch")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))Dev4Enable")
     field(PINI, "YES")
@@ -420,3 +420,104 @@ record(ao, "$(P)Dev4:Distance")
     field(PREC, "3")
 }
 
+# Dev5-Dev6 are slow devices connected through PVs
+record(bo, "$(P)Dev5:Enable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 5 enable switch")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev4Enable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(stringin, "$(P)Dev5:Name")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(PINI, "YES")
+}
+record(bo, "$(P)Dev5:State")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev4Enable")
+    field(ZNAM, "on")
+    field(ONAM, "off")
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
+record(bo, "$(P)Dev5:Veto")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev4Enable")
+    field(ZNAM, "on")
+    field(ONAM, "off")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev5:BitOffset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Calculated state bit offset")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev5BitOffset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bo, "$(P)Dev6:Enable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Device 6 enable switch")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev4Enable")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(stringin, "$(P)Dev6:Name")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(PINI, "YES")
+}
+record(bo, "$(P)Dev6:State")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev4Enable")
+    field(ZNAM, "on")
+    field(ONAM, "off")
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
+record(bo, "$(P)Dev6:Veto")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev4Enable")
+    field(ZNAM, "on")
+    field(ONAM, "off")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longout, "$(P)Dev6:BitOffset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Calculated state bit offset")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Dev6BitOffset")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
