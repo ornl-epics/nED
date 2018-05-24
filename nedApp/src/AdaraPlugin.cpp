@@ -137,8 +137,8 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     outpacket[9] = 0; // TSYNC delay
 
     for (uint32_t i = 0; i < nEvents; i++) {
-        outpacket[10+i] = events[i].tof;
-        outpacket[11+i] = events[i].pixelid;
+        outpacket[10+2*i] = events[i].tof;
+        outpacket[11+2*i] = events[i].pixelid;
     }
 
     this->unlock();
