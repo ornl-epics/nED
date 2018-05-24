@@ -69,19 +69,19 @@ StateAnalyzerPlugin::StateAnalyzerPlugin(const char *portName, const char *paren
         int param;
         char name[16];
 
-        snprintf(name, sizeof(name), "Dev%uEnable", i+1);
+        snprintf(name, sizeof(name), "Dev%uEnable", i+5);
         createParam(name, asynParamInt32, &param, 0);
         SlowDevices[i].Enable = param;
 
-        snprintf(name, sizeof(name), "Dev%uBitOffset", i+1);
+        snprintf(name, sizeof(name), "Dev%uBitOffset", i+5);
         createParam(name, asynParamInt32, &param, 0);
         SlowDevices[i].BitOffset = param;
 
-        snprintf(name, sizeof(name), "Dev%uState", i+1);
+        snprintf(name, sizeof(name), "Dev%uState", i+5);
         createParam(name, asynParamInt32, &param, 0);
         SlowDevices[i].State = param;
 
-        snprintf(name, sizeof(name), "Dev%uVeto", i+1);
+        snprintf(name, sizeof(name), "Dev%uVeto", i+5);
         createParam(name, asynParamInt32, &param, 0);
         SlowDevices[i].Veto = param;
     }
@@ -316,19 +316,20 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
         DasDataPacketList packets;
 
         // Calculate combined states
+        std::shared_ptr<DasDataPacket> statesPkt;
         if (!pulseEvents.states.empty() || !pulseEvents.slow_events.empty()) {
             uint32_t nEvents = pulseEvents.states.size() + pulseEvents.slow_events.size();
-            auto statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META, nEvents) );
+            statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META, nEvents) );
             if (statesPkt) {
                 packets.push_back(statesPkt.get());
-                statesPkt->init(  DasDataPacket::EVENT_FMT_META,  pulseEvents.timestamp, nEvents);
+                statesPkt->init(DasDataPacket::EVENT_FMT_META, pulseEvents.timestamp, nEvents);
                 Event::Pixel *events = statesPkt->getEvents<Event::Pixel>();
                 if (!pulseEvents.states.empty()) {
                     calcCombinedStates(pulseEvents.states, events, state, vetostate);
                     events += pulseEvents.states.size();
                 }
                 if (!pulseEvents.slow_events.empty()) {
-                    uint32_t tof = (pulseEvents.states.empty() ? 0 : pulseEvents.states.back().tof+1);
+                    uint32_t tof = (pulseEvents.states.empty() ? 0 : pulseEvents.states.back().tof);
                     addSlowCombinedStates(pulseEvents.slow_events, events, tof, state, vetostate);
                 }
             } else {
@@ -343,8 +344,9 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
         }
 
         // Tag pixel ids in regular Event::Pixel format
+        std::shared_ptr<DasDataPacket> pixelsPkt;
         if (!pulseEvents.pixel_neutrons.empty()) {
-            auto pixelsPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.pixel_neutrons.size()) );
+            pixelsPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.pixel_neutrons.size()) );
             if (pixelsPkt) {
                 packets.push_back(pixelsPkt.get());
                 pixelsPkt->init(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.timestamp, pulseEvents.pixel_neutrons.size());
@@ -362,8 +364,9 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
         }
 
         // Tag pixel ids in Event::BNL::Diag format
+        std::shared_ptr<DasDataPacket> bnlPkt;
         if (!pulseEvents.bnl_neutrons.empty()) {
-            auto bnlPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.bnl_neutrons.size()) );
+            bnlPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.bnl_neutrons.size()) );
             if (bnlPkt) {
                 packets.push_back(bnlPkt.get());
                 bnlPkt->init(DasDataPacket::EVENT_FMT_BNL_DIAG, pulseEvents.timestamp, pulseEvents.bnl_neutrons.size());
@@ -441,7 +444,7 @@ void StateAnalyzerPlugin::addSlowCombinedStates(const std::list<SlowEvent> &stat
             state &= ~(1 << state_event.bitOffset);
 
         // Copy to output array
-        outEvents->tof = tof++;
+        outEvents->tof = ++tof;
         outEvents->pixelid = m_statePixelMask | state | (vetostate != 0x0 ? 0x100 : 0x0);
         outEvents++;
     }
