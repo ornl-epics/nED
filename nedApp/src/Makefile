@@ -136,6 +136,7 @@ $(PROD_NAME)_SRCS  += DspPlugin_v67.cpp
 $(PROD_NAME)_SRCS  += DspPlugin_v71.cpp
 $(PROD_NAME)_SRCS  += DspWPlugin.cpp
 $(PROD_NAME)_SRCS  += DspWPlugin_v10.cpp
+$(PROD_NAME)_SRCS  += DspWPlugin_v20.cpp
 $(PROD_NAME)_SRCS  += CRocPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPlugin_v93.cpp
 $(PROD_NAME)_SRCS  += CRocPlugin_v94.cpp

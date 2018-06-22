@@ -40,6 +40,10 @@ DspWPlugin::DspWPlugin(const char *portName, const char *parentPlugins, const ch
         createParams_v10();
         setIntegerParam(Supported, 1);
         setExpectedVersion(1, 0);
+    } else if (m_version == "v20") {
+        createParams_v20();
+        setIntegerParam(Supported, 1);
+        setExpectedVersion(2, 0);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported DSP-W version '%s'", version);

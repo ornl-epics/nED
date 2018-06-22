@@ -58,6 +58,11 @@ class DspWPlugin : public BaseModulePlugin {
          * Create and register all 1.0 parameters to be exposed to EPICS.
          */
         void createParams_v10();
+
+        /**
+         * Create and register all 2.0 parameters to be exposed to EPICS.
+         */
+        void createParams_v20();
 };
 
 #endif // DSPW_PLUGIN_H

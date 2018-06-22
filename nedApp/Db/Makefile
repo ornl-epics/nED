@@ -48,6 +48,7 @@ DB += DspPlugin_v67.db
 DB += DspPlugin_v71.db
 DB += DspPlugin_v71.db
 DB += DspWPlugin_v10.db
+DB += DspWPlugin_v20.db
 DB += FemPlugin_v32.db
 DB += FemPlugin_v35.db
 DB += FemPlugin_v36.db
@@ -80,6 +81,7 @@ DB += BnlRocPlugin_v20.db
 DB += AcpcPlugin_v144.db
 DB += AcpcPlugin_v171.db
 DB += AcpcPlugin_v172.db
+DB += AcpcPlugin_v180.db
 DB += ArocPlugin_v23.db
 DB += ArocPlugin_v24.db
 DB += ArocPlugin_v255255.db
@@ -106,6 +108,7 @@ DspPlugin_v66.template: DspPlugin_v66.generated
 DspPlugin_v67.template: DspPlugin_v67.generated
 DspPlugin_v71.template: DspPlugin_v71.generated
 DspWPlugin_v10.template: DspWPlugin_v10.generated
+DspWPlugin_v20.template: DspWPlugin_v20.generated
 FemPlugin_v32.template: FemPlugin_v32.generated
 FemPlugin_v35.template: FemPlugin_v35.generated
 FemPlugin_v36.template: FemPlugin_v36.generated
@@ -138,6 +141,7 @@ BnlRocPlugin_v20.template: BnlRocPlugin_v20.generated
 AcpcPlugin_v144.template: AcpcPlugin_v144.generated
 AcpcPlugin_v171.template: AcpcPlugin_v171.generated
 AcpcPlugin_v172.template: AcpcPlugin_v172.generated
+AcpcPlugin_v180.template: AcpcPlugin_v180.generated
 ArocPlugin_v23.template: ArocPlugin_v23.generated
 ArocPlugin_v24.template: ArocPlugin_v24.generated
 ArocPlugin_v255255.template: ArocPlugin_v255255.generated
