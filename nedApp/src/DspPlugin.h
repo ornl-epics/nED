@@ -12,6 +12,8 @@
 
 #include "BaseModulePlugin.h"
 
+#include <chrono>
+
 /**
  * Plugin for DSP module.
  */
@@ -20,6 +22,14 @@ class DspPlugin : public BaseModulePlugin {
         static const unsigned NUM_DSPPLUGIN_PARAMS;         //!< This is used as a runtime assert check and must match number of status parameters
         static const double DSP_RESPONSE_TIMEOUT;           //!< Default DSP response timeout, in seconds
         std::string m_version;
+        struct {
+            bool enable{false};
+            bool posted{false};
+            FILE *logFile{nullptr};                         //!< File to log time sync statistics
+            std::chrono::time_point<std::chrono::steady_clock> preSendTime;
+            std::chrono::time_point<std::chrono::steady_clock> postSendTime;
+            std::chrono::time_point<std::chrono::steady_clock> recvTime;
+        } m_timeSync;
 
     public:
 
@@ -52,6 +62,16 @@ class DspPlugin : public BaseModulePlugin {
         {
             return parseVersionRsp(packet, version);
         }
+
+        /**
+         * Handle time sync packets for DSP 7.1+
+         */
+        DasCmdPacket::CommandType reqTimeSync() override;
+
+        /**
+         * Handle time sync packets for DSP 7.1+
+         */
+        bool rspTimeSync(const DasCmdPacket *packet) override;
 
     private:
 

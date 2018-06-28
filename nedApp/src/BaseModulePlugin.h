@@ -657,6 +657,25 @@ class BaseModulePlugin : public BasePlugin {
         virtual bool rspReadTemperature(const DasCmdPacket *packet);
 
         /**
+         * Called when time syncronization request to the module should be made.
+         *
+         * Base implementation doesn't do anything.
+         *
+         * @return Response to wait for.
+         */
+        virtual DasCmdPacket::CommandType reqTimeSync() { return static_cast<DasCmdPacket::CommandType>(0); }
+
+        /**
+         * Default handler for time sync response.
+         *
+         * Only check for timeout.
+         *
+         * @param[in] packet with response to time sync
+         * @return true if timeout has not yet expired, false otherwise.
+         */
+        virtual bool rspTimeSync(const DasCmdPacket *packet) { return false; }
+
+        /**
          * Sets all parameters corresponding to command with the same alarm.
          */
         void setParamsAlarm(DasCmdPacket::CommandType command, int alarm);

@@ -15,6 +15,7 @@
 #include <osiSock.h>
 #include <string.h>
 
+#include <chrono>
 #include <functional>
 #include <string>
 
@@ -95,6 +96,8 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
         setIntegerParam(Supported, 1);
         setExpectedVersion(7, 1);
         setCmdVersion(1);
+        m_timeSync.enable = true;
+        m_timeSync.logFile = fopen("/tmp/time_sync.log", "w");
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported DSP version '%s'", version);
@@ -137,4 +140,61 @@ bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
         return true;
     }
     return false;
+}
+
+DasCmdPacket::CommandType DspPlugin::reqTimeSync()
+{
+    if (!m_timeSync.enable)
+        return BaseModulePlugin::reqTimeSync();
+
+    struct __attribute__ ((__packed__)) {
+        epicsTimeStamp timestamp;
+        struct __attribute__ ((__packed__)) {
+            uint32_t adj_counter:29;        //!< Number of events
+            bool adj_sign:1;                //!< Flag whether events are mapped to logical ids
+            bool adj_enabled:1;             //!< Flag whether geometrical correction has been applied
+            bool ts_sync:1;                 //!< Instructs module to take time from this packet
+        };
+    } payload;
+
+    payload.timestamp = epicsTime::getCurrent();
+    payload.adj_enabled = false;
+    payload.ts_sync = false;
+
+    m_timeSync.preSendTime = std::chrono::steady_clock::now();
+    sendUpstream(DasCmdPacket::CMD_DISCOVER, 0, reinterpret_cast<uint32_t*>(&payload), sizeof(payload));
+    m_timeSync.postSendTime = std::chrono::steady_clock::now();
+
+    if (m_timeSync.logFile != nullptr) {
+        if (m_timeSync.posted)
+            fprintf(m_timeSync.logFile, "missing response\n");
+        std::chrono::duration<double> diff = m_timeSync.postSendTime - m_timeSync.preSendTime;
+        fprintf(m_timeSync.logFile, "%.09f %u.%09u - ", diff.count(), payload.timestamp.secPastEpoch, payload.timestamp.nsec);
+    }
+
+    m_timeSync.posted = true;
+
+    return DasCmdPacket::CMD_TIME_SYNC;
+}
+
+bool DspPlugin::rspTimeSync(const DasCmdPacket *packet)
+{
+    m_timeSync.posted = false;
+
+    if (!m_timeSync.enable)
+        return BaseModulePlugin::rspTimeSync(packet);
+
+    m_timeSync.recvTime = std::chrono::steady_clock::now();
+
+    struct __attribute__ ((__packed__)) {
+        epicsTimeStamp timestamp;
+        uint32_t counter;
+    } payload;
+
+    if (m_timeSync.logFile != nullptr) {
+        std::chrono::duration<double> diff = m_timeSync.recvTime - m_timeSync.postSendTime;
+        fprintf(m_timeSync.logFile, "%.09f %u.%09u %u\n", diff.count(), payload.timestamp.secPastEpoch, payload.timestamp.nsec, payload.counter);
+    }
+
+    return true;
 }
