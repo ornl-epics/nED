@@ -123,3 +123,16 @@ record(bo, "$(P)Reset")
     field(ZNAM,  "No reset")
     field(ONAM,  "Reset")
 }
+record(longout, "$(P)RtdlCacheSize")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of RTDLs to cache")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))RtdlCacheSize")
+    field(VAL,  "30")
+    field(PINI, "YES")
+    field(LOPR, "1")
+    field(HOPR, "600")
+}
+

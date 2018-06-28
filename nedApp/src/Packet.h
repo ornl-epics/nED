@@ -603,6 +603,7 @@ class DasCmdPacket : public Packet {
             CMD_HV_SEND                 = 0x50, //!< Send data through RS232 port, HV connected to ROC
             CMD_HV_RECV                 = 0x51, //!< Receive data from RS232 port, HV connected to ROC
             CMD_UPGRADE                 = 0x6F, //!< Send chunk of new firmware data
+            CMD_TIME_SYNC               = 0x71, //!< Synchronizing internal clocks
             CMD_DISCOVER                = 0x80, //!< Discover modules
             CMD_RESET                   = 0x81, //!< Reset of all components
             CMD_START                   = 0x82, //!< Start acquisition

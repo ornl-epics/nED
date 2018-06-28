@@ -253,6 +253,9 @@ DasCmdPacket::CommandType BaseModulePlugin::handleRequest(DasCmdPacket::CommandT
     case DasCmdPacket::CMD_READ_TEMPERATURE:
         LOG_INFO("Sending %s command", cmd2str(command));
         return reqReadTemperature();
+    case DasCmdPacket::CMD_TIME_SYNC:
+        LOG_INFO("Sending %s command", cmd2str(command));
+        return reqTimeSync();
     default:
         LOG_ERROR("Skip unrecognized 0x%02X command", command);
         return static_cast<DasCmdPacket::CommandType>(0);

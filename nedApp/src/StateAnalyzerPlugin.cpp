@@ -18,7 +18,8 @@ EPICS_REGISTER_PLUGIN(StateAnalyzerPlugin, 2, "Port name", string, "Parent plugi
 StateAnalyzerPlugin::StateAnalyzerPlugin(const char *portName, const char *parentPlugins)
     : BasePlugin(portName, 1, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
     , m_processThread("StateAnalyzerThread", std::bind(&StateAnalyzerPlugin::processThread, this, std::placeholders::_1))
-    , Devices(4)
+    , FastDevices(4)
+    , SlowDevices(2)
 {
     createParam("Status",       asynParamInt32, &Status, 1);                // READ - Plugin status, 0=error, 1=ok, 2=warning
     createParam("StatusText",   asynParamOctet, &StatusText, "Ready");      // READ - Text description of the error, if any
@@ -34,35 +35,55 @@ StateAnalyzerPlugin::StateAnalyzerPlugin(const char *portName, const char *paren
         int param;
         char name[16];
 
-        m_devices.push_back({0,0,0,0});
+        m_devices.push_back({0,0,0,0,0,false,0.0});
 
         snprintf(name, sizeof(name), "Dev%uEnable", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].Enable = param;
+        FastDevices[i].Enable = param;
 
         snprintf(name, sizeof(name), "Dev%uPixOn", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].PixelOn = param;
+        FastDevices[i].PixelOn = param;
 
         snprintf(name, sizeof(name), "Dev%uPixOff", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].PixelOff = param;
+        FastDevices[i].PixelOff = param;
 
         snprintf(name, sizeof(name), "Dev%uPixVetoOn", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].PixelVetoOn = param;
+        FastDevices[i].PixelVetoOn = param;
 
         snprintf(name, sizeof(name), "Dev%uPixVetoOff", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].PixelVetoOff = param;
+        FastDevices[i].PixelVetoOff = param;
 
         snprintf(name, sizeof(name), "Dev%uBitOffset", i+1);
         createParam(name, asynParamInt32, &param, 0);
-        Devices[i].BitOffset = param;
+        FastDevices[i].BitOffset = param;
 
         snprintf(name, sizeof(name), "Dev%uDistance", i+1);
         createParam(name, asynParamFloat64, &param, 0);
-        Devices[i].Distance = param;
+        FastDevices[i].Distance = param;
+    }
+    for (uint8_t i = 0; i < 2; i++) {
+        int param;
+        char name[16];
+
+        snprintf(name, sizeof(name), "Dev%uEnable", i+5);
+        createParam(name, asynParamInt32, &param, 0);
+        SlowDevices[i].Enable = param;
+
+        snprintf(name, sizeof(name), "Dev%uBitOffset", i+5);
+        createParam(name, asynParamInt32, &param, 0);
+        SlowDevices[i].BitOffset = param;
+
+        snprintf(name, sizeof(name), "Dev%uState", i+5);
+        createParam(name, asynParamInt32, &param, 0);
+        SlowDevices[i].State = param;
+
+        snprintf(name, sizeof(name), "Dev%uVeto", i+5);
+        createParam(name, asynParamInt32, &param, 0);
+        SlowDevices[i].Veto = param;
     }
     callParamCallbacks();
 
@@ -72,12 +93,6 @@ StateAnalyzerPlugin::StateAnalyzerPlugin(const char *portName, const char *paren
 
 asynStatus StateAnalyzerPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    if (pasynUser->reason == MaxCacheLen) {
-        if (value <= 0)
-            return asynError;
-        m_maxCacheLen = value;
-        return asynSuccess;
-    }
     if (pasynUser->reason == PixelBitOffset) {
         if (value <= 0 || value >= 28)
             return asynError;
@@ -98,28 +113,53 @@ asynStatus StateAnalyzerPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value
         m_enabled = (value > 0);
         return asynSuccess;
     }
-    for (size_t i = 0; i < Devices.size(); i++) {
-        if (pasynUser->reason == Devices[i].Enable) {
+    for (size_t i = 0; i < SlowDevices.size(); i++) {
+        asynStatus ret = asynDisabled;
+        if (pasynUser->reason == SlowDevices[i].State) {
+            ret = BasePlugin::writeInt32(pasynUser, value != 0);
+        } else if (pasynUser->reason == SlowDevices[i].Veto) {
+            ret = BasePlugin::writeInt32(pasynUser, value != 0);
+        }
+
+        if (ret != asynDisabled) {
+            if (ret == asynSuccess && getBooleanParam(SlowDevices[i].Enable)) {
+                // We rely on at least one data packet per acquisition frame
+                // which creates record in cache.
+                if (m_cache.empty()) {
+                    LOG_ERROR("No data events in queue, can not inject slow state change");
+                    return asynError;
+                }
+                SlowEvent e;
+                e.bitOffset = getIntegerParam(SlowDevices[i].BitOffset);
+                e.veto = getBooleanParam(SlowDevices[i].Veto);
+                e.state = getBooleanParam(SlowDevices[i].State);
+                m_cache.front().slow_events.emplace_back(e);
+            }
+            return ret;
+        }
+    }
+    for (size_t i = 0; i < FastDevices.size(); i++) {
+        if (pasynUser->reason == FastDevices[i].Enable) {
             m_devices[i].enabled = (value > 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].PixelOn) {
+        if (pasynUser->reason == FastDevices[i].PixelOn) {
             m_devices[i].pixelOn = (value >= 0 ? value : 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].PixelOff) {
+        if (pasynUser->reason == FastDevices[i].PixelOff) {
             m_devices[i].pixelOff = (value >= 0 ? value : 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].PixelVetoOn) {
+        if (pasynUser->reason == FastDevices[i].PixelVetoOn) {
             m_devices[i].pixelVetoOn = (value >= 0 ? value : 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].PixelVetoOff) {
+        if (pasynUser->reason == FastDevices[i].PixelVetoOff) {
             m_devices[i].pixelVetoOff = (value >= 0 ? value : 0);
             return asynSuccess;
         }
-        if (pasynUser->reason == Devices[i].BitOffset) {
+        if (pasynUser->reason == FastDevices[i].BitOffset) {
             m_devices[i].bitOffset = (value >= 0 ? value : 0);
             return asynSuccess;
         }
@@ -135,8 +175,8 @@ asynStatus StateAnalyzerPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 v
         m_distance = value;
         return asynSuccess;
     }
-    for (size_t i = 0; i < Devices.size(); i++) {
-        if (pasynUser->reason == Devices[i].Distance) {
+    for (size_t i = 0; i < FastDevices.size(); i++) {
+        if (pasynUser->reason == FastDevices[i].Distance) {
             m_devices[i].distance = (value >= 0 ? value : 0);
             return asynSuccess;
         }
@@ -146,6 +186,8 @@ asynStatus StateAnalyzerPlugin::writeFloat64(asynUser *pasynUser, epicsFloat64 v
 
 void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
 {
+    uint32_t maxCacheLen = getIntegerParam(MaxCacheLen);
+
     if (!m_enabled) {
         sendDownstream(packets);
         if (m_cache.size() > 0) {
@@ -169,9 +211,14 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
                 break;
         }
         if (cached == m_cache.end()) {
-            m_cache.push_front(PulseEvents(timestamp, packet->getEventsMapped(), m_devices.size()));
+            m_cache.push_front(PulseEvents(timestamp, m_devices.size()));
             cached = m_cache.begin();
         }
+
+        // Potential mismatch when plugin connected to multiple parents and one
+        // is mapped and the other one is not
+        if (packet->getEventsMapped() == true && cached->mapped == false)
+            cached->mapped = true;
 
         if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_PIXEL) {
             auto event = packet->getEvents<Event::Pixel>();
@@ -237,11 +284,9 @@ void StateAnalyzerPlugin::recvDownstream(const DasDataPacketList &packets)
         // Send events from the back of the queue to processing thread
         // which in the end sends events to subscribed plugins.
         uint8_t retries = 0;
-        while (m_cache.size() > m_maxCacheLen) {
-            if (m_processQue.size() < m_maxCacheLen) {
-                if (!m_cache.back().pixel_neutrons.empty() || !m_cache.back().bnl_neutrons.empty() || !m_cache.back().states.empty()) {
-                    m_processQue.enqueue(std::move(m_cache.back()));
-                }
+        while (m_cache.size() > maxCacheLen) {
+            if (m_processQue.size() < maxCacheLen) {
+                m_processQue.enqueue(std::move(m_cache.back()));
                 m_cache.pop_back();
             } else {
                 if (++retries > 1000) {
@@ -271,12 +316,22 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
         DasDataPacketList packets;
 
         // Calculate combined states
-        if (!pulseEvents.states.empty()) {
-            auto statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META,  pulseEvents.states.size())   );
+        std::shared_ptr<DasDataPacket> statesPkt;
+        if (!pulseEvents.states.empty() || !pulseEvents.slow_events.empty()) {
+            uint32_t nEvents = pulseEvents.states.size() + pulseEvents.slow_events.size();
+            statesPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_META, nEvents) );
             if (statesPkt) {
                 packets.push_back(statesPkt.get());
-                statesPkt->init(  DasDataPacket::EVENT_FMT_META,  pulseEvents.timestamp, pulseEvents.states.size());
-                calcCombinedStates(pulseEvents.states, statesPkt->getEvents<Event::Pixel>(), state, vetostate);
+                statesPkt->init(DasDataPacket::EVENT_FMT_META, pulseEvents.timestamp, nEvents);
+                Event::Pixel *events = statesPkt->getEvents<Event::Pixel>();
+                if (!pulseEvents.states.empty()) {
+                    calcCombinedStates(pulseEvents.states, events, state, vetostate);
+                    events += pulseEvents.states.size();
+                }
+                if (!pulseEvents.slow_events.empty()) {
+                    uint32_t tof = (pulseEvents.states.empty() ? 0 : pulseEvents.states.back().tof);
+                    addSlowCombinedStates(pulseEvents.slow_events, events, tof, state, vetostate);
+                }
             } else {
                 this->lock();
                 setIntegerParam(Status, 0);
@@ -289,8 +344,9 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
         }
 
         // Tag pixel ids in regular Event::Pixel format
+        std::shared_ptr<DasDataPacket> pixelsPkt;
         if (!pulseEvents.pixel_neutrons.empty()) {
-            auto pixelsPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.pixel_neutrons.size()) );
+            pixelsPkt = m_packetsPool.getPtr( DasDataPacket::getLength(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.pixel_neutrons.size()) );
             if (pixelsPkt) {
                 packets.push_back(pixelsPkt.get());
                 pixelsPkt->init(DasDataPacket::EVENT_FMT_PIXEL, pulseEvents.timestamp, pulseEvents.pixel_neutrons.size());
@@ -333,7 +389,8 @@ void StateAnalyzerPlugin::processEvents(PulseEvents &pulseEvents)
 
         // Send packets and update status
         this->lock();
-        sendDownstream(packets);
+        if (!packets.empty())
+            sendDownstream(packets);
         setIntegerParam(State, state);
         setIntegerParam(Vetoing, vetostate != 0x0);
         callParamCallbacks();
@@ -370,6 +427,25 @@ void StateAnalyzerPlugin::calcCombinedStates(EventList<Event::Pixel> &states, Ev
 
         // Copy to output array
         *outEvents = *state_event;
+        outEvents++;
+    }
+}
+
+void StateAnalyzerPlugin::addSlowCombinedStates(const std::list<SlowEvent> &states, Event::Pixel *outEvents, uint32_t tof, uint32_t &state, uint32_t &vetostate)
+{
+    for (const auto &state_event: states) {
+        if (state_event.veto)
+            vetostate |= (1 << state_event.bitOffset);
+        else
+            vetostate &= ~(1 << state_event.bitOffset);
+        if (state_event.state)
+            state |= (1 << state_event.bitOffset);
+        else
+            state &= ~(1 << state_event.bitOffset);
+
+        // Copy to output array
+        outEvents->tof = ++tof;
+        outEvents->pixelid = m_statePixelMask | state | (vetostate != 0x0 ? 0x100 : 0x0);
         outEvents++;
     }
 }
@@ -413,7 +489,7 @@ void StateAnalyzerPlugin::processThread(epicsEvent *shutdown)
 {
     LOG_DEBUG("Processing thread started");
     while (shutdown->tryWait() == false) {
-        PulseEvents pulseEvents(epicsTimeStamp(), false, 0);
+        PulseEvents pulseEvents(epicsTimeStamp(), 0);
         if (m_processQue.deque(pulseEvents, 0.1)) {
             processEvents(pulseEvents);
         }

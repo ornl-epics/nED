@@ -43,7 +43,7 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
                 void sortedInsert(const T &event);
         };
 
-        struct DeviceInfo {
+        struct FastDeviceInfo {
             uint32_t pixelOn;
             uint32_t pixelOff;
             uint32_t pixelVetoOn;
@@ -52,23 +52,27 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
             bool enabled;
             double distance;
         };
+        struct SlowEvent {
+            uint8_t bitOffset;
+            bool state;
+            bool veto;
+        };
         struct PulseEvents {
             epicsTime timestamp;
-            bool mapped;
+            bool mapped{false};
+            std::list<SlowEvent> slow_events;
             EventList<Event::Pixel> pixel_neutrons;
             EventList<Event::BNL::Diag> bnl_neutrons;
             EventList<Event::Pixel> states;
-            PulseEvents(epicsTime timestamp_, bool mapped_, uint32_t nSignals)
-                : timestamp(timestamp_)
-                , mapped(mapped_) {}
+            PulseEvents(epicsTime timestamp_, uint32_t nSignals)
+                : timestamp(timestamp_) {}
         };
         std::list<PulseEvents> m_cache;
-        std::vector<DeviceInfo> m_devices;
+        std::vector<FastDeviceInfo> m_devices;
         ObjectPool<DasDataPacket> m_packetsPool{true};
         bool m_enabled{false};
         uint32_t m_state{0};
         uint32_t m_vetostate{0};
-        uint32_t m_maxCacheLen{10};
         double m_distance{1.0};
         uint32_t m_bitOffset{20};
         uint32_t m_statePixelMask{0x60320000};
@@ -155,6 +159,11 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
         void calcCombinedStates(EventList<Event::Pixel> &states, Event::Pixel *outEvents, uint32_t &state, uint32_t &vetostate);
 
         /**
+         * Append combined states from slow signals.
+         */
+        void addSlowCombinedStates(const std::list<SlowEvent> &states, Event::Pixel *outEvents, uint32_t tof, uint32_t &state, uint32_t &vetostate);
+
+        /**
          * Tag pixelid with the state information.
          *
          * This is a templated function that works for all types of events
@@ -183,7 +192,7 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
         int NominalDist;        // Distance where all events get projected to for time-ordering purposes, usually detector center distance.
         int PixelBitOffset;     // Calculated state number bit-offset in pixel id
         int StatePixelMask;     // Bit mask for combined state events
-        struct DeviceParams {
+        struct FastDeviceParams {
             int Enable;         // Enables this device
             int PixelOn;        // State ON pixel
             int PixelOff;       // State OFF pixel
@@ -192,7 +201,14 @@ class epicsShareFunc StateAnalyzerPlugin : public BasePlugin {
             int BitOffset;      // This device bit offset in calculated state
             int Distance;       // Device distance from moderator
         };
-        std::vector<DeviceParams> Devices;
+        std::vector<FastDeviceParams> FastDevices;
+        struct SlowDeviceParams {
+            int Enable;         // Enables this device
+            int BitOffset;      // This device bit offset in calculated state
+            int State;          // Current state, ON(0) or OFF(1)
+            int Veto;           // Current veto state, ON(0) or OFF(1)
+        };
+        std::vector<SlowDeviceParams> SlowDevices;
 };
 
 #endif // STATE_ANALYZER_PLUGIN_H
