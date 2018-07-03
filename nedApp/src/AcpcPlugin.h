@@ -72,6 +72,11 @@ class AcpcPlugin : public BaseModulePlugin {
          * Create and register all ACPC 17.2 parameters to be exposed to EPICS.
          */
         void createParams_v172();
+
+        /**
+         * Create and register all ACPC 18.0 parameters to be exposed to EPICS.
+         */
+        void createParams_v180();
 };
 
 #endif // ACPC_PLUGIN_H

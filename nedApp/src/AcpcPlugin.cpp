@@ -52,6 +52,10 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *parentPlugins, const ch
         setIntegerParam(Supported, 1);
         createParams_v172();
         setExpectedVersion(17, 2);
+    } else if (m_version == "v180") {
+        setIntegerParam(Supported, 1);
+        createParams_v180();
+        setExpectedVersion(18, 0);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ACPC version '%s'", version);
