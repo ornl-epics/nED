@@ -29,6 +29,7 @@ class DspPlugin : public BaseModulePlugin {
             std::chrono::time_point<std::chrono::steady_clock> preSendTime;
             std::chrono::time_point<std::chrono::steady_clock> postSendTime;
             std::chrono::time_point<std::chrono::steady_clock> recvTime;
+            epicsTimeStamp sendTimeStamp;
         } m_timeSync;
 
     public:

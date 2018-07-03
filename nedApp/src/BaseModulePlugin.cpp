@@ -483,6 +483,8 @@ bool BaseModulePlugin::handleResponse(const DasCmdPacket *packet)
         return rspUpgrade(packet);
     case DasCmdPacket::CMD_READ_TEMPERATURE:
         return rspReadTemperature(packet);
+    case DasCmdPacket::CMD_TIME_SYNC:
+        return rspTimeSync(packet);
     default:
         LOG_WARN("Unhandled %s response (0x%02X)", cmd2str(packet->getCommand()), packet->getCommand());
         return false;

@@ -162,17 +162,20 @@ DasCmdPacket::CommandType DspPlugin::reqTimeSync()
     payload.ts_sync = false;
 
     m_timeSync.preSendTime = std::chrono::steady_clock::now();
-    sendUpstream(DasCmdPacket::CMD_DISCOVER, 0, reinterpret_cast<uint32_t*>(&payload), sizeof(payload));
+    sendUpstream(DasCmdPacket::CMD_TIME_SYNC, 0, reinterpret_cast<uint32_t*>(&payload), sizeof(payload));
     m_timeSync.postSendTime = std::chrono::steady_clock::now();
 
     if (m_timeSync.logFile != nullptr) {
         if (m_timeSync.posted)
             fprintf(m_timeSync.logFile, "missing response\n");
         std::chrono::duration<double> diff = m_timeSync.postSendTime - m_timeSync.preSendTime;
-        fprintf(m_timeSync.logFile, "%.09f %u.%09u - ", diff.count(), payload.timestamp.secPastEpoch, payload.timestamp.nsec);
+        fprintf(m_timeSync.logFile, "%u.%09u tx_diff=%.09f => ", payload.timestamp.secPastEpoch, payload.timestamp.nsec, diff.count());
+        fflush(m_timeSync.logFile);
     }
 
     m_timeSync.posted = true;
+    m_timeSync.sendTimeStamp.secPastEpoch = payload.timestamp.secPastEpoch;
+    m_timeSync.sendTimeStamp.nsec         = payload.timestamp.nsec;
 
     return DasCmdPacket::CMD_TIME_SYNC;
 }
@@ -186,14 +189,17 @@ bool DspPlugin::rspTimeSync(const DasCmdPacket *packet)
 
     m_timeSync.recvTime = std::chrono::steady_clock::now();
 
-    struct __attribute__ ((__packed__)) {
+    struct __attribute__ ((__packed__)) TimeSyncRsp {
         epicsTimeStamp timestamp;
         uint32_t counter;
-    } payload;
+    };
+    const TimeSyncRsp *payload = reinterpret_cast<const TimeSyncRsp *>(packet->getCmdPayload());
 
     if (m_timeSync.logFile != nullptr) {
         std::chrono::duration<double> diff = m_timeSync.recvTime - m_timeSync.postSendTime;
-        fprintf(m_timeSync.logFile, "%.09f %u.%09u %u\n", diff.count(), payload.timestamp.secPastEpoch, payload.timestamp.nsec, payload.counter);
+        double ts_diff = epicsTimeDiffInSeconds(&payload->timestamp, &m_timeSync.sendTimeStamp);
+        fprintf(m_timeSync.logFile, "%u.%09u (diff=%.09f) rx_diff=%.09f counter=%u\n", payload->timestamp.secPastEpoch, payload->timestamp.nsec, ts_diff, diff.count(), payload->counter);
+        fflush(m_timeSync.logFile);
     }
 
     return true;
