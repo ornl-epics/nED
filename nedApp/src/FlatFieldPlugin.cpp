@@ -414,15 +414,11 @@ float FlatFieldPlugin::importFilesCb(const std::string &path)
     // So let's unsubscribe temporarily from receiving any data
     bool enabled = this->isConnected();
     if (enabled) {
-        this->unlock();
         this->disconnect();
-        this->lock();
     }
     importFiles(path);
     if (enabled) {
-        this->unlock();
         this->connect(m_parentPlugins, MsgDasData);
-        this->lock();
     }
     m_importTimer.reset();
     return 0.0;
