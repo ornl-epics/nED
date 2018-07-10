@@ -87,11 +87,9 @@ asynStatus ModulesPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         // been issued. Usually responses come back in under a second.
         m_disableTimer.cancel();
         if (!isConnected()) {
-            this->unlock();
             connect(m_parentPlugins, {MsgDasCmd});
-            this->lock();
         }
-        std::function<float(void)> disableCb = [this](){ disconnect(); return 0; };
+        std::function<float(void)> disableCb = [this](){ this->lock(); disconnect(); this->unlock(); return 0; };
         m_disableTimer.schedule(disableCb, 10);
 
         m_discovered.clear();

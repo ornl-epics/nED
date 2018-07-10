@@ -170,9 +170,7 @@ bool BaseModulePlugin::processRequest(DasCmdPacket::CommandType command)
 
     do {
         if (!isConnected()) {
-            this->unlock();
             connect(m_parentPlugins, {MsgDasCmd});
-            this->lock();
         }
 
         m_waitingResponse = handleRequest(command, timeout);
@@ -1306,9 +1304,9 @@ float BaseModulePlugin::checkConnection()
 {
     this->lock();
     bool cleanup = (isConnected() && m_connStaleTime < epicsTime::getCurrent());
-    this->unlock();
     if (cleanup) {
         disconnect();
     }
+    this->unlock();
     return std::max(CONN_CLOSE_TIMEOUT, 0.5f) + 0.1;
 }

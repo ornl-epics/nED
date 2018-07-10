@@ -563,6 +563,22 @@ class BasePlugin : public asynPortDriver {
          */
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
+        /**
+         * Locks this port instance.
+         *
+         * All functions invoked from asyn context - basically all functions defined in
+         * this class - will ensure the lock prior the call. Application must also ensure
+         * to keep the lock engaged when calling any of the functions from this class.
+         *
+         * Lock is not recursive, single lock only.
+         */
+        asynStatus lock() override { m_locked = true; return asynPortDriver::lock(); };
+
+        /**
+         * Unlocks this port instance.
+         */
+        asynStatus unlock() override { m_locked = false; return asynPortDriver::unlock(); };
+
     private:
         /**
          * Receive threads' main function when in blocking mode.
@@ -600,6 +616,7 @@ class BasePlugin : public asynPortDriver {
         Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
         std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
+        bool m_locked{false};
 
     protected:
         int MsgOldDas;
