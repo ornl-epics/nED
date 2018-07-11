@@ -117,41 +117,38 @@ void AcpcPlugin::createParams_v180()
     createCounterParam("RateEventsOut",       0x5, 16,  0); // Total events out             (unit:cnts/s)
     createCounterParam("RateEventsIn",        0x6, 32,  0); // Total events in              (unit:cnts/s)
 
+
+
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
-    createConfigParam("PositionIdx",        '1',  0x0, 32,  0,    0); // Position Index
-    createConfigParam("PhotosumMin",        '1',  0x1, 32,  0,  600); // Low PhotoSum threshold        
-    createConfigParam("PhotosumMax",        '1',  0x2, 32,  0, 2700); // High PhotoSum threshold       
-    createConfigParam("TsyncDelay",         '1',  0x3, 32,  0,    0); // TSYNC delay
-    createConfigParam("Lvds1:En",           '1',  0x4,  1,  0,    0); // Channel 1 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds2:En",           '1',  0x4,  1,  1,    0); // Channel 2 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds3:En",           '1',  0x4,  1,  2,    0); // Channel 3 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds4:En",           '1',  0x4,  1,  3,    0); // Channel 4 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds5:En",           '1',  0x4,  1,  4,    0); // Channel 5 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds6:En",           '1',  0x4,  1,  5,    0); // Channel 6 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds7:En",           '1',  0x4,  1,  6,    0); // Channel 7 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds8:En",           '1',  0x4,  1,  7,    0); // Channel 8 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds9:En",           '1',  0x4,  1,  8,    0); // Channel 9 Enable              (0=enable, 1=disable)
-    createConfigParam("TimeTolerance",      '1',  0x4,  7,  9,   31); // Timestamp tolerance           (unit:100ns ticks)
-    createConfigParam("ResetMode",          '1',  0x4,  1, 16,    0); // Reset mode                    (0=soft, 1=hard)
-    createConfigParam("TclkMode",           '1',  0x4,  1, 17,    0); // Tclk mode                     (0=external, 1=internal)
-    createConfigParam("TsyncMode",          '1',  0x4,  1, 18,    0); // TSYNC mode                    (0=external, 1=internal)
-    createConfigParam("TxenMode",           '1',  0x4,  1, 19,    0); // TXen  mode                    (0=external, 1=internal)
-    createConfigParam("OutputMode",         '1',  0x4,  2, 20,    1); // Output mode                   (0=normal,1=raw [alarm],2=raw synced [alarm],3=unused [alarm],4=verbose [alarm])
-    createConfigParam("LongVerbose",        '1',  0x4,  1, 22,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
-    createConfigParam("DetectorSelect",     '1',  0x4,  1, 23,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
-    createConfigParam("MSEsamples",         '1',  0x4,  1, 24,    0); // MSE samples                   (0=five, 1=three)
-    createConfigParam("TestMode",           '1',  0x4,  1, 25,    0); // Test pattern mode             (0=pos calc, 1=packet)
-    createConfigParam("TestEn",             '1',  0x4,  1, 26,    0); // Test pattern enable           (0=disable,1=enable)
-    createConfigParam("TestPatternRate",    '1',  0x4,  2, 27,    0); // Test pattern rate             (0=2700/10000 ev/s, 1=9600/40000 ev/s, 2=13000/160000 ev/s, 3=59000/640000 ev/s)
-    createConfigParam("TBD0",               '1',  0x5,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD1",               '1',  0x6,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD2",               '1',  0x7,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD3",               '1',  0x8,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD4",               '1',  0x9,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD5",               '1',  0xA,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD6",               '1',  0xB,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD7",               '1',  0xC,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD8",               '1',  0xD,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD9",               '1',  0xE,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
-    createConfigParam("TBD10",              '1',  0xF,  32, 0,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
+    createConfigParam("PositionIdx",        '1',  0x0, 32,  0,    0); // Position index
+
+    createConfigParam("PhotosumMin",        'E',  0x0, 32,  0,  600); // Low PhotoSum threshold        (scale:0.0009765625)
+    createConfigParam("PhotosumMax",        'E',  0x2, 32,  0, 2700); // High PhotoSum threshold       (scale:0.0009765625)
+    createConfigParam("TsyncDelay",         'E',  0x4, 32,  0,    0); // TSYNC delay
+    createConfigParam("Lvds1:En",           'E',  0x6,  1,  0,    0); // Channel 1 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds2:En",           'E',  0x6,  1,  1,    0); // Channel 2 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds3:En",           'E',  0x6,  1,  2,    0); // Channel 3 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds4:En",           'E',  0x6,  1,  3,    0); // Channel 4 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds5:En",           'E',  0x6,  1,  4,    0); // Channel 5 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds6:En",           'E',  0x6,  1,  5,    0); // Channel 6 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds7:En",           'E',  0x6,  1,  6,    0); // Channel 7 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds8:En",           'E',  0x6,  1,  7,    0); // Channel 8 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds9:En",           'E',  0x6,  1,  8,    0); // Channel 9 Enable              (0=enable, 1=disable)
+    createConfigParam("TimeTolerance",      'E',  0x6,  7,  9,   31); // Time tolerance
+    createConfigParam("ClockCorrUpd",       'E',  0x7, 30,  0,    0); // Clock Correction Update
+    createConfigParam("ClockCorrCctrl",     'E',  0x7,  2, 30,    0); // Clock Correction Ctrl         (0=disable, 1=disable, 2=stall, 3=advance)
+
+    createConfigParam("TcResetMode",        'F',  0x0,  1,  0,    0); // Reset mode                    (0=soft, 1=hard)
+    createConfigParam("TcTclkMode",         'F',  0x0,  1,  1,    0); // Tclk mode                     (0=external, 1=internal)
+    createConfigParam("TcTsyncMode",        'F',  0x0,  1,  2,    0); // TSYNC mode                    (0=external, 1=internal)
+    createConfigParam("TcTxenMode",         'F',  0x0,  1,  3,    0); // TXen  mode                    (0=external, 1=internal)
+    createConfigParam("OutputMode",         'F',  0x0,  3,  4,    1); // Output mode                   (0=normal,1=raw [alarm],2=raw synced [alarm],3=unused [alarm],4=verbose [alarm])
+    createConfigParam("DetectorSelect",     'F',  0x0,  1, 10,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
+    createConfigParam("MSEsamples",         'F',  0x0,  1, 14,    0); // MSE samples                   (0=five, 1=three)
+    createConfigParam("TestPatternEn",      'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternMode",    'F',  0x1,  1, 14,    0); // Test pattern mode             (0=pos calc, 1=packet)
+    createConfigParam("TestPatternRate",    'F',  0x2,  2,  0,    0); // Test pattern rate             (0=2700 ev/s, 1=9600 ev/s, 2=13000 ev/s, 3=59000 ev/s)
+    createConfigParam("TsyncTimestampDis",  'F',  0x2,  1,  2,    0); // Tsync Timestamp Disable       (0=enable, 1=disable)
+    createConfigParam("DataFormat",         'F',  0x2,  8,  3,    0); // Data format                   (5=ACPC normal, 6=ACPC verbose, 7=ACPC raw)
+
 }
