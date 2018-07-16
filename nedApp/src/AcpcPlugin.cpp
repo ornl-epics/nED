@@ -52,6 +52,10 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *parentPlugins, const ch
         setIntegerParam(Supported, 1);
         createParams_v172();
         setExpectedVersion(17, 2);
+    } else if (m_version == "v173") {
+        setIntegerParam(Supported, 1);
+        createParams_v173();
+        setExpectedVersion(17, 3);
     } else if (m_version == "v180") {
         setIntegerParam(Supported, 1);
         createParams_v180();

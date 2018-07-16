@@ -112,6 +112,7 @@ $(PROD_NAME)_SRCS  += AcpcPlugin.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin_v171.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin_v172.cpp
+$(PROD_NAME)_SRCS  += AcpcPlugin_v173.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin_v180.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp

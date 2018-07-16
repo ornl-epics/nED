@@ -81,6 +81,7 @@ DB += BnlRocPlugin_v20.db
 DB += AcpcPlugin_v144.db
 DB += AcpcPlugin_v171.db
 DB += AcpcPlugin_v172.db
+DB += AcpcPlugin_v173.db
 DB += AcpcPlugin_v180.db
 DB += ArocPlugin_v23.db
 DB += ArocPlugin_v24.db
@@ -141,6 +142,7 @@ BnlRocPlugin_v20.template: BnlRocPlugin_v20.generated
 AcpcPlugin_v144.template: AcpcPlugin_v144.generated
 AcpcPlugin_v171.template: AcpcPlugin_v171.generated
 AcpcPlugin_v172.template: AcpcPlugin_v172.generated
+AcpcPlugin_v173.template: AcpcPlugin_v173.generated
 AcpcPlugin_v180.template: AcpcPlugin_v180.generated
 ArocPlugin_v23.template: ArocPlugin_v23.generated
 ArocPlugin_v24.template: ArocPlugin_v24.generated
