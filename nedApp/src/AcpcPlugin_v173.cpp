@@ -123,30 +123,27 @@ void AcpcPlugin::createParams_v173()
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("PositionIdx",        '1',  0x0, 32,  0,    0); // Chan1 position index
-
-    createConfigParam("PhotosumMin",        'E',  0x0, 32,  0,  600); // Low PhotoSum threshold        (scale:0.0009765625)
-    createConfigParam("PhotosumMax",        'E',  0x2, 32,  0, 2700); // High PhotoSum threshold       (scale:0.0009765625)
-    createConfigParam("TsyncDelay",         'E',  0x4, 32,  0,    0); // TSYNC delay
-    createConfigParam("Lvds1:En",           'E',  0x6,  1,  0,    0); // Channel 1 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds2:En",           'E',  0x6,  1,  1,    0); // Channel 2 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds3:En",           'E',  0x6,  1,  2,    0); // Channel 3 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds4:En",           'E',  0x6,  1,  3,    0); // Channel 4 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds5:En",           'E',  0x6,  1,  4,    0); // Channel 5 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds6:En",           'E',  0x6,  1,  5,    0); // Channel 6 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds7:En",           'E',  0x6,  1,  6,    0); // Channel 7 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds8:En",           'E',  0x6,  1,  7,    0); // Channel 8 Enable              (0=enable, 1=disable)
-    createConfigParam("Lvds9:En",           'E',  0x6,  1,  8,    0); // Channel 9 Enable              (0=enable, 1=disable)
-    createConfigParam("TimeTolerance",      'E',  0x6,  7,  9,   31); // Time tolerance
-
-    createConfigParam("TcResetMode",        'F',  0x0,  1,  0,    0); // Reset mode                    (0=soft, 1=hard)
-    createConfigParam("TcTclkMode",         'F',  0x0,  1,  1,    0); // Tclk mode                     (0=external, 1=internal)
-    createConfigParam("TcTsyncMode",        'F',  0x0,  1,  2,    0); // TSYNC mode                    (0=external, 1=internal)
-    createConfigParam("TcTxenMode",         'F',  0x0,  1,  3,    0); // TXen  mode                    (0=external, 1=internal)
-    createConfigParam("OutputMode",         'F',  0x0,  3,  4,    1); // Output mode                   (0=normal,1=raw [alarm],2=raw synced [alarm],3=unused [alarm],4=verbose [alarm])
-    createConfigParam("DetectorSelect",     'F',  0x0,  1, 10,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
-    createConfigParam("MSEsamples",         'F',  0x0,  1, 14,    0); // MSE samples                   (0=five, 1=three)
-    createConfigParam("TestPatternEn",      'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
-    createConfigParam("TestPatternDebug",   'F',  0x1,  3, 12,    0); // Engineering Use only          (0=pos calc, 1=packet)
-    createConfigParam("TestPatternId",      'F',  0x1, 12,  0,    0); // Test pattern id
-    createConfigParam("TestPatternRate",    'F',  0x2, 16,  0,    0); // Test pattern rate             (0=2700 ev/s, 1=9600 ev/s, 2=13000 ev/s, 3=59000 ev/s)
+    createConfigParam("PhotosumMin",        '1',  0x2, 32,  0,  600); // Low PhotoSum threshold        (scale:0.0009765625)
+    createConfigParam("PhotosumMax",        '1',  0x4, 32,  0, 2700); // High PhotoSum threshold       (scale:0.0009765625)
+    createConfigParam("TsyncDelay",         '1',  0x6, 32,  0,    0); // TSYNC delay
+    createConfigParam("Lvds1:En",           '1',  0x8,  1,  0,    0); // Channel 1 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds2:En",           '1',  0x8,  1,  1,    0); // Channel 2 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds3:En",           '1',  0x8,  1,  2,    0); // Channel 3 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds4:En",           '1',  0x8,  1,  3,    0); // Channel 4 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds5:En",           '1',  0x8,  1,  4,    0); // Channel 5 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds6:En",           '1',  0x8,  1,  5,    0); // Channel 6 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds7:En",           '1',  0x8,  1,  6,    0); // Channel 7 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds8:En",           '1',  0x8,  1,  7,    0); // Channel 8 Enable              (0=enable, 1=disable)
+    createConfigParam("Lvds9:En",           '1',  0x8,  1,  8,    0); // Channel 9 Enable              (0=enable, 1=disable)
+    createConfigParam("TimestampTolerance", '1',  0x8,  7,  9,   31); // Timestamp tolerance
+    createConfigParam("TcResetMode",        '1',  0x9,  1,  0,    0); // Reset mode                    (0=soft, 1=hard)
+    createConfigParam("TcTclkMode",         '1',  0x9,  1,  1,    0); // Tclk mode                     (0=external, 1=internal)
+    createConfigParam("TcTsyncMode",        '1',  0x9,  1,  2,    0); // TSYNC mode                    (0=external, 1=internal)
+    createConfigParam("TcTxenMode",         '1',  0x9,  1,  3,    0); // TXen  mode                    (0=external, 1=internal)
+    createConfigParam("OutputMode",         '1',  0x9,  2,  4,    0); // Output mode                   (0=normal,1=raw [alarm],2=raw synced [alarm],3=unused [alarm],4=verbose [alarm])
+    createConfigParam("LongVerbose",        '1',  0x9,  1,  6,    0); // Verbose select                (0=short verbose, 1=long verbose)
+    createConfigParam("DetectorSelect",     '1',  0x9,  1, 10,    0); // Detector select               (0=MANDI/TOPAZ, 1=SNAP)
+    createConfigParam("TestPatternEn",      '1',  0x9,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
+    createConfigParam("TestPatternMode",    '1',  0x9,  1, 14,    0); // Test pattern mode             (0=pos calc, 1=packet)
+    createConfigParam("TestPatternRate",    '1',  0x9,  2, 11,    0); // Test pattern rate             (0=2700 ev/s, 1=9600 ev/s, 2=13000 ev/s, 3=59000 ev/s)
 }
