@@ -142,6 +142,9 @@ bool BaseModulePlugin::processRequest(DasPacket::CommandType command)
 
     if (m_waitingResponse != 0) {
         LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", command, m_waitingResponse);
+        setParamAlarmStatus(CmdReq, epicsAlarmWrite);
+        setParamAlarmSeverity(CmdReq, epicsSevInvalid);
+        callParamCallbacks();
         return false;
     }
 
