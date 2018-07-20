@@ -48,39 +48,24 @@ record(mbbo, "$(P)CmdReq")
     field(TEST, "Reset")
     field(ELVL, "39")
     field(ELST, "Reset LVDS")
-    field(FLNK, "$(P)CmdReqDis")
+    field(FLNK, "$(P)CmdRspEn")
 }
-# Force single outstanding operation at any time.
-# put to CmdReq will fail until the response is received.
-# CmdRsp will re-enable once received some response or timeout.
-record(longout, "$(P)CmdReqDis")
+record(longout, "$(P)CmdRspEn")
 {
     field(VAL,  "1")
-    field(OUT,  "$(P)CmdReq.DISP")
+    field(OUT,  "$(P)CmdRsp.DISA")
 }
 record(longin, "$(P)CmdRspRaw")
 {
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))CmdRsp")
     field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)CmdRspCalc")
-}
-# Only process CmdRsp while CmdReq is disabled. This prevents
-# to react on other asynInt32::CmdReq requests. For some reason
-# the excersize with DISV & SDIS in CmdRsp caches previous response
-# and doesn't work as expected.
-record(calcout, "$(P)CmdRspCalc")
-{
-    field(INPA, "$(P)CmdReq.DISP")
-    field(INPB, "$(P)CmdRspRaw NPP")
-    field(CALC, "A=1")
-    field(OOPT, "When Non-zero")
-    field(OCAL, "B")
-    field(DOPT, "Use OCAL")
-    field(OUT,  "$(P)CmdRsp PP")
+    field(FLNK, "$(P)CmdRsp")
 }
 record(mbbi, "$(P)CmdRsp")
 {
+    field(INP,  "$(P)CmdRspRaw NPP")
+    field(DISV, "0")
     field(DESC, "Last command response")
     field(ZRVL, "0")
     field(ZRST, "None issued")
@@ -94,14 +79,14 @@ record(mbbi, "$(P)CmdRsp")
     field(FRST, "Error")
     field(FVVL, "5")
     field(FVST, "Skipped")
-    field(FLNK, "$(P)CmdReqEn")
+    field(FLNK, "$(P)CmdRspDis")
 }
-# Re-enable CmdReq as soon as leaving Waiting state
-record(calcout, "$(P)CmdReqEn")
+# Disable CmdRsp as soon as leaving Waiting state
+record(calcout, "$(P)CmdRspDis")
 {
     field(INPA, "$(P)CmdRsp NPP")
     field(CALC, "A=2")
-    field(OUT,  "$(P)CmdReq.DISP")
+    field(OUT,  "$(P)CmdRsp.DISA")
     field(OOPT, "When Zero")
     field(FLNK, "$(P)RspCheck")
 }
