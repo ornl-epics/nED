@@ -84,7 +84,13 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
             bool passVetoes;
             bool inExtMode;
             bool outExtMode;
-            bool processModeNew;
+            enum {
+                RESOLUTION_ORIGINAL,
+                RESOLUTION_MEDIUM,
+                RESOLUTION_HIGH,
+            } resolution{RESOLUTION_ORIGINAL};
+            uint32_t maxX{14*11};
+            uint32_t maxY{7};
 
             float gNongapMaxRatio;  //!< Percentage of the second max G comparing to max in order to qualify
             bool efficiencyBoost;       //!< Ignore min threshold if single channel response
@@ -269,14 +275,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          * @param[out] y calculated position
          * @return Positive number when rejected, 0 otherwise.
          */
-        CRocDataPacket::VetoType calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
-
-        /**
-         * Calculate the Y position of the event
-         *
-         * @todo Work in progress, not used right now due to ghosting.
-         */
-        CRocDataPacket::VetoType calculateYPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &y);
+        CRocDataPacket::VetoType calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint16_t &y);
 
         /**
          * Calculate the X position of the event
@@ -316,14 +315,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
          * @param[out] x calculated position
          * @return Positive number when rejected, 0 otherwise.
          */
-        CRocDataPacket::VetoType calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &x);
-
-        /**
-         * Calculate the X position of the event
-         *
-         * @todo Work in progress, not used right now due to ghosting.
-         */
-        CRocDataPacket::VetoType calculateXPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint8_t &x);
+        CRocDataPacket::VetoType calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *params, uint16_t &x);
 
     private:
         /**
@@ -383,6 +375,20 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         static inline std::vector<uint8_t> sortIndexesDesc(const uint8_t *values, size_t size);
 
         /**
+         * Calculate interpolated position by using centroid fitting.
+         * 
+         * maxIndex defines the coarse estimate around which the more
+         * exact position is calculated using the left and right neighbour
+         * by doing 3-sample centroid formula .5+(left-right)/(left+center+right).
+         * 
+         * @param weights Array of weights for each position
+         * @param size Size of the array
+         * @param maxIndex Index of largest weight
+         * @return fitted position
+         */
+        double interpolate(const uint8_t *weights, size_t size, uint8_t maxIndex);
+
+        /**
          * Save a single detector parameter into cache
          *
          * Find CRocParams structure based on detector name. Create new one if
@@ -414,7 +420,7 @@ class CRocPosCalcPlugin : public BaseDispatcherPlugin {
         int TimeRangeSumMax;    //!< High threshold for integrated time ranges
         int EchoDeadTime;       //!< Time between two events in 100ns
         int EchoDeadArea;       //!< Pixel area for echo detection
-        int ProcessMode;        //!< Select event verification algorithm
+        int Resolution;         //!< Toggle high resolution mode
 
         int CntTotalEvents;    //!< Number of all events
         int CntGoodEvents;     //!< Number of good events
