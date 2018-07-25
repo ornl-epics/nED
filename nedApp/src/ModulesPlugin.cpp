@@ -198,6 +198,7 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
         BaseModulePlugin::Version version = it->second.version;
         char line[128];
 
+        const char *notInDb = "";
         std::stringstream id;
         if (!name.empty()) {
             id << name;
@@ -224,21 +225,22 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
             
             if (ids.find(type) == ids.end())
                 ids.insert(std::pair<std::string, uint32_t>(type, 1));
-            id << "UNKWN " << type << ids[type]++;
+            id << type << ids[type]++;
+            notInDb = " *** NOT IN DATABASE ***";
         }
 
         if (it->second.parent != 0) {
             ret = snprintf(line, sizeof(line),
-                           "%-20s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d (DSP=%s)\n",
+                           "%-12s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d (DSP=%s)%s\n",
                            id.str().c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
                            version.fw_version, version.fw_revision, version.fw_year,
-                           version.fw_month, version.fw_day, parentId.c_str());
+                           version.fw_month, version.fw_day, parentId.c_str(), notInDb);
         } else {
             ret = snprintf(line, sizeof(line),
-                           "%-20s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d\n",
+                           "%-12s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d%s\n",
                            id.str().c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
                            version.fw_version, version.fw_revision, version.fw_year,
-                           version.fw_month, version.fw_day);
+                           version.fw_month, version.fw_day, notInDb);
         }
         if (ret == -1) {
             LOG_WARN("String exceeds limit of %u bytes", (unsigned)sizeof(line));

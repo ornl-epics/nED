@@ -124,6 +124,8 @@ asynStatus BaseModulePlugin::writeOctet(asynUser *pasynUser, const char *value, 
 
         m_hardwareId = hardwareId;
         setStringParam(HwId, addr2ip(hardwareId));
+        setIntegerParam(Verified, 0);
+        callParamCallbacks();
         return asynSuccess;
     }
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
@@ -289,26 +291,30 @@ DasCmdPacket::CommandType BaseModulePlugin::handleRequest(DasCmdPacket::CommandT
 
 void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t channel, uint32_t *payload, uint32_t length)
 {
-    std::array<uint8_t, 1024> buffer;
-    DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, m_cmdVer, false, false, channel, length, payload);
-    if (!packet) {
-        LOG_ERROR("Failed to create and send packet");
-        return;
-    }
+    if (m_hardwareId != 0) {
+        std::array<uint8_t, 1024> buffer;
+        DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, m_cmdVer, false, false, channel, length, payload);
+        if (!packet) {
+            LOG_ERROR("Failed to create and send packet");
+            return;
+        }
 
-    BasePlugin::sendUpstream(packet);
+        BasePlugin::sendUpstream(packet);
+    }
 }
 
 void BaseModulePlugin::recvDownstream(const DasCmdPacketList &packetList)
 {
-    for (auto it = packetList.cbegin(); it != packetList.cend(); it++) {
-        const DasCmdPacket *packet = *it;
+    if (m_hardwareId != 0) {
+        for (auto it = packetList.cbegin(); it != packetList.cend(); it++) {
+            const DasCmdPacket *packet = *it;
 
-        // Silently skip packets we're not interested in
-        if (!packet->isResponse() || packet->getModuleId() != m_hardwareId)
-            continue;
+            // Silently skip packets we're not interested in
+            if (!packet->isResponse() || packet->getModuleId() != m_hardwareId)
+                continue;
 
-        (void)processResponse(packet);
+            (void)processResponse(packet);
+        }
     }
 }
 
