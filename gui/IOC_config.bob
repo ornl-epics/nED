@@ -148,7 +148,7 @@ def writeToFile(file_path, text):
 show_dialog = PVUtil.getInt(pvs[3])
 pvs[3].write(1)
 
-file_path = PVUtil.getString(pvs[4])
+file_path = widget.getEffectiveMacros().getValue("DET_DB")
 
 if PVUtil.getInt(pvs[0]) == 1:
     content = readFromFile(file_path, show_dialog)
@@ -163,7 +163,6 @@ elif PVUtil.getInt(pvs[1]) == 1:
         <pv_name>loc://$(DID)save_db</pv_name>
         <pv_name trigger="false">loc://the_text("")</pv_name>
         <pv_name trigger="false">loc://$(DID)show_dialog(0)</pv_name>
-        <pv_name trigger="false">$(P)nED:DbPath</pv_name>
       </script>
     </scripts>
     <tooltip></tooltip>
