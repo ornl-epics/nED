@@ -82,14 +82,20 @@ BasePlugin::~BasePlugin()
 
 bool BasePlugin::connect(const std::list<std::string> &plugins, const std::list<int> &messageTypes)
 {
+    std::list<RemotePort> connectedPorts; // This list will get populated with newly connected ports
+    std::list<RemotePort> preconnectedPorts = m_connectedPorts; // Make a local copy while locked
     bool locked = m_locked;
+    bool success = true;
 
-    for (auto it=plugins.begin(); it!=plugins.end(); it++) {
+    // Must unlock port when talking to pasynManager or dead-lock will occur.
+    if (locked) unlock();
+
+    for (auto it=plugins.begin(); it!=plugins.end() && success; it++) {
         for (auto jt=messageTypes.begin(); jt!= messageTypes.end(); jt++) {
 
             // Check if already connected
             bool connected = false;
-            for (auto kt=m_connectedPorts.begin(); kt != m_connectedPorts.end(); kt++) {
+            for (auto kt=preconnectedPorts.begin(); kt != preconnectedPorts.end(); kt++) {
                 if (kt->pluginName == *it && kt->messageType == *jt) {
                     connected = true;
                     break;
@@ -100,36 +106,30 @@ bool BasePlugin::connect(const std::list<std::string> &plugins, const std::list<
                 continue;
             }
 
-            // Must unlock port when talking to pasynManager or dead-lock will occur.
-            if (locked) unlock();
-
             asynUser *pasynuser = pasynManager->createAsynUser(0, 0);
             if (pasynuser == 0) {
-                if (locked) lock();
                 LOG_ERROR("Failed to create asyn user interface for %s", it->c_str());
-                disconnect();
-                return false;
+                success = false;
+                break;
             }
             pasynuser->userPvt = this;
             pasynuser->reason = *jt;
 
             asynStatus status = pasynManager->connectDevice(pasynuser, it->c_str(), 0);
             if (status != asynSuccess) {
-                if (locked) lock();
                 LOG_ERROR("Failed calling pasynManager->connectDevice to port %s (status=%d)",
                           it->c_str(), status);
                 pasynManager->freeAsynUser(pasynuser);
-                disconnect();
-                return false;
+                success = false;
+                break;
             }
 
             asynInterface *interface = pasynManager->findInterface(pasynuser, asynGenericPointerType, 1);
             if (!interface) {
-                if (locked) lock();
                 LOG_ERROR("Can't find asynGenericPointer interface on remote plugin %s", it->c_str());
                 pasynManager->freeAsynUser(pasynuser);
-                disconnect();
-                return false;
+                success = false;
+                break;
             }
 
             asynGenericPointer *asynGenericPointerInterface = reinterpret_cast<asynGenericPointer *>(interface->pinterface);
@@ -138,22 +138,31 @@ bool BasePlugin::connect(const std::list<std::string> &plugins, const std::list<
                         interface->drvPvt, pasynuser,
                         ::recvDownstreamCb, this, &asynGenericPointerInterrupt);
             if (status != asynSuccess) {
-                if (locked) lock();
                 LOG_ERROR("Can't enable interrupt callbacks: %s", pasynuser->errorMessage);
                 pasynManager->freeAsynUser(pasynuser);
-                disconnect();
-                return false;
+                success = false;
+                break;
             }
-
-            if (locked) lock();
 
             RemotePort port;
             port.pluginName = *it;
             port.messageType = *jt;
             port.pasynuser = pasynuser;
             port.asynGenericPointerInterrupt = asynGenericPointerInterrupt;
-            m_connectedPorts.push_back(port);
+            connectedPorts.push_back(port);
         }
+    }
+
+    if (locked) lock();
+
+    // Now that we're back in safe environment, let's modify global list
+    for (auto it = connectedPorts.begin(); it != connectedPorts.end(); it++) {
+        m_connectedPorts.push_back(*it);
+    }
+
+    if (!success) {
+        disconnect();
+        return false;
     }
 
     LOG_DEBUG("Connected to parent plugins: %s", std::accumulate(plugins.begin(), plugins.end(), std::string(",")).substr(1).c_str());
@@ -169,12 +178,14 @@ bool BasePlugin::connect(const std::string &ports, const std::list<int> &message
 
 bool BasePlugin::disconnect()
 {
+    std::list<RemotePort> connectedPorts = m_connectedPorts; // Make a local copy while locked
     bool locked = m_locked;
-    for (auto it=m_connectedPorts.begin(); it!=m_connectedPorts.end(); it++) {
+
+    m_connectedPorts.clear();
+    if (locked) unlock();
+
+    for (auto it=connectedPorts.begin(); it!=connectedPorts.end(); it++) {
         if (it->asynGenericPointerInterrupt) {
-
-            if (locked) unlock();
-
             asynInterface *interface = pasynManager->findInterface(it->pasynuser, asynGenericPointerType, 1);
             if (!interface) {
                 LOG_ERROR("Can't find asynGenericPointer interface on remote plugin %s", it->pluginName.c_str());
@@ -191,14 +202,13 @@ bool BasePlugin::disconnect()
                     LOG_ERROR("Can't disable interrupt callbacks on dispatcher port: %s", it->pasynuser->errorMessage);
                 }
             }
-
-            if (locked) lock();
-
         }
     }
-    if (!m_connectedPorts.empty())
+
+    if (locked) lock();
+
+    if (!connectedPorts.empty())
         LOG_DEBUG("Disconnected from parent plugins");
-    m_connectedPorts.clear();
     return true;
 }
 
