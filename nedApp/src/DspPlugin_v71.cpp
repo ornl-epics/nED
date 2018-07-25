@@ -117,7 +117,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Trig3:Width",      '1', 0x1F,  4,  4, 0); // Trigger 3 Width             (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
     createConfigParam("Trig3:Delay",      '1', 0x1D, 32,  0, 0); // Trigger 3 Delay             (scale:9.4117,unit:ns)
     createConfigParam("TestPatternDly",   '1', 0x1B, 16,  0, 0); // Test Pattern Delay          (scale:0.0024094117,unit:ms)
-    createConfigParam("TestPattPulsePer", '1', 0x1B, 16, 16, 10625); // Test Pattern Pulse Period   (scale:0.0094117,unit:us)
+    createConfigParam("TestPattPlsPer",   '1', 0x1B, 16, 16, 10625); // Test Pattern Pulse Period   (scale:0.0094117,unit:us)
     
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
