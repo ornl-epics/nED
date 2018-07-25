@@ -30,12 +30,10 @@ class CRocPlugin : public BaseModulePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins Plugins to connect to
-         * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
-         *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version ROC HW&SW version, ie. V5_50
          * @param[in] posCalcPortName Name of the CROC position calculation plugin
          */
-        CRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version, const char *posCalcPortName=0);
+        CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *posCalcPortName=0);
 
         /**
          * Try to parse the ROC version response packet an populate the structure.

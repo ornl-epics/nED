@@ -85,11 +85,9 @@ class FemPlugin : public BaseModulePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins to connect to.
-         * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
-         *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version FEM HW&SW version, ie. V10_50
          */
-        FemPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
+        FemPlugin(const char *portName, const char *parentPlugins, const char *version);
 
         /**
          * Overload start request and return 0 - skipped.

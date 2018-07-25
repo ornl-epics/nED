@@ -24,13 +24,11 @@
 #include <cstring>
 #include <sstream>
 
-EPICS_REGISTER_PLUGIN(ModulesPlugin, 4, "Port name", string, "Parent plugins", string, "PVA name", string, "DB path", string);
+EPICS_REGISTER_PLUGIN(ModulesPlugin, 3, "Port name", string, "Parent plugins", string, "PVA name", string);
 
-ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, const char *pvName, const char *dbPath)
+ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, const char *pvName)
     : BasePlugin(portName, 1, asynOctetMask, asynOctetMask)
-    , m_outCfg(false)
     , m_disableTimer(true)
-    , m_dbPath(dbPath)
     , m_parentPlugins(parentPlugins)
 {
     // Allocate and initialize text buffers
@@ -39,21 +37,12 @@ ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, co
         LOG_ERROR("Failed to allocate text buffer");
         assert(m_bufferTxt != 0);
     }
-    m_bufferCfg = (char *)malloc(BUFFER_SIZE);
-    if (m_bufferCfg == 0) {
-        LOG_ERROR("Failed to allocate config buffer");
-        assert(m_bufferCfg != 0);
-    }
-    readDbFile();
 
     createParam("Discover",     asynParamInt32, &Discover);         // WRITE - Trigger discovery of modules
-    createParam("FileOp",       asynParamInt32, &FileOp);           // WRITE - Trigger loading/saving the file of modules
     createParam("RefreshPvaList",asynParamInt32,&RefreshPvaList);   // WRITE - Refresh modules list in PVA record
     createParam("Discovered",   asynParamInt32, &Discovered, 0);    // READ - Modules found formatted in ASCII table
     createParam("Verified",     asynParamInt32, &Verified, 0);      // READ - Modules found formatted in ASCII table
     createParam("TxtDisplay",   asynParamOctet, &TxtDisplay);       // READ - Text in human readable format
-    createParam("CfgDisplay",   asynParamOctet, &CfgDisplay, m_bufferCfg); // READ - Text in substitution format
-    createParam("CfgStatus",    asynParamInt32, &CfgStatus, 0);     // READ - Status of the displayed text
 
     if (pvName == 0 || strlen(pvName) == 0) {
         LOG_ERROR("Missing PVA record name");
@@ -75,12 +64,9 @@ ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, co
 asynStatus ModulesPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (pasynUser->reason == Discover) {
-        m_outCfg = (value == 1);
-
         setIntegerParam(Discovered, 0);
         setIntegerParam(Verified, 0);
-        setIntegerParam(CfgStatus, 1);
-        setStringParam(m_outCfg ? CfgDisplay : TxtDisplay, "");
+        setStringParam(TxtDisplay, "");
         callParamCallbacks();
 
         // Stay connected to parent plugins for 10 seconds after discover has
@@ -95,47 +81,12 @@ asynStatus ModulesPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         m_discovered.clear();
         reqDiscover();
         return asynSuccess;
-    } else if (pasynUser->reason == FileOp) {
-        if (value == 0) {
-            if (!readDbFile())
-                return asynError;
-            setStringParam(CfgDisplay, m_bufferCfg);
-            setIntegerParam(CfgStatus, 0);
-            callParamCallbacks();
-            return asynSuccess;
-        } else if (value == 1) {
-            if (getIntegerParam(CfgStatus) != 0) {
-                if (!writeDbFile())
-                    return asynError;
-                setIntegerParam(CfgStatus, 0);
-                callParamCallbacks();
-                LOG_INFO("Wrote new detector configuration to file: %s", m_dbPath.c_str());
-            }
-            return asynSuccess;
-        } else {
-            return asynError;
-        }
     } else if (pasynUser->reason == RefreshPvaList) {
         std::list<std::string> modules;
         BaseModulePlugin::getModuleNames(modules);
         return m_record->update(modules) ? asynSuccess : asynError;
     }
     return BasePlugin::writeInt32(pasynUser, value);
-}
-
-asynStatus ModulesPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
-{
-    if (pasynUser->reason == CfgDisplay) {
-        if (nChars >= BUFFER_SIZE)
-            nChars = BUFFER_SIZE - 1;
-        *nActual = nChars;
-        strncpy(m_bufferCfg, value, nChars);
-        setStringParam(CfgDisplay, m_bufferCfg);
-        setIntegerParam(CfgStatus, 1);
-        callParamCallbacks();
-        return asynSuccess;
-    }
-    return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
 void ModulesPlugin::recvDownstream(const DasCmdPacketList &packets)
@@ -216,15 +167,8 @@ void ModulesPlugin::recvDownstream(const DasCmdPacketList &packets)
     }
 
     if (updateText) {
-        if (m_outCfg) {
-            if (formatSubstitution(m_bufferCfg, BUFFER_SIZE) > 0) {
-                setStringParam(CfgDisplay, m_bufferCfg);
-                setIntegerParam(CfgStatus, 2);
-            }
-        } else {
-            if (formatTxt(m_bufferTxt, BUFFER_SIZE) > 0) {
-                setStringParam(TxtDisplay, m_bufferTxt);
-            }
+        if (formatTxt(m_bufferTxt, BUFFER_SIZE) > 0) {
+            setStringParam(TxtDisplay, m_bufferTxt);
         }
     }
 
@@ -251,123 +195,51 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
         std::string moduleId(BaseModulePlugin::addr2ip(it->first));
         std::string parentId(BaseModulePlugin::addr2ip(it->second.parent));
         std::string name(BaseModulePlugin::getModuleName(it->first));
-        const char *type;
         BaseModulePlugin::Version version = it->second.version;
         char line[128];
 
-        switch (it->second.type) {
-            case DasCmdPacket::MOD_TYPE_ACPC:      type = "acpc";      break;
-            case DasCmdPacket::MOD_TYPE_ACPCFEM:   type = "acpcfem";   break;
-            case DasCmdPacket::MOD_TYPE_AROC:      type = "aroc";      break;
-            case DasCmdPacket::MOD_TYPE_BIDIMROC:  type = "bidimroc";  break;
-            case DasCmdPacket::MOD_TYPE_BNLROC:    type = "bnlroc";    break;
-            case DasCmdPacket::MOD_TYPE_CROC:      type = "croc";      break;
-            case DasCmdPacket::MOD_TYPE_DSP:       type = "dsp";       break;
-            case DasCmdPacket::MOD_TYPE_DSPW:      type = "dsp-w";     break;
-            case DasCmdPacket::MOD_TYPE_FFC:       type = "ffc";       break;
-            case DasCmdPacket::MOD_TYPE_FEM:       type = "fem";       break;
-            case DasCmdPacket::MOD_TYPE_HROC:      type = "hroc";      break;
-            case DasCmdPacket::MOD_TYPE_IROC:      type = "iroc";      break;
-            case DasCmdPacket::MOD_TYPE_ROC:       type = "roc";       break;
-            case DasCmdPacket::MOD_TYPE_ADCROC:    type = "adcroc";    break;
-            case DasCmdPacket::MOD_TYPE_SANSROC:   type = "sansroc";   break;
-            default:                            type = "unknown";
-        }
-
         std::stringstream id;
-        if (name.empty()) {
+        if (!name.empty()) {
+            id << name;
+        } else {
+            std::string type;
+            switch (it->second.type) {
+                case DasCmdPacket::MOD_TYPE_ACPC:      type = "acpc";      break;
+                case DasCmdPacket::MOD_TYPE_ACPCFEM:   type = "acpcfem";   break;
+                case DasCmdPacket::MOD_TYPE_AROC:      type = "aroc";      break;
+                case DasCmdPacket::MOD_TYPE_BIDIMROC:  type = "bidimroc";  break;
+                case DasCmdPacket::MOD_TYPE_BNLROC:    type = "bnlroc";    break;
+                case DasCmdPacket::MOD_TYPE_CROC:      type = "croc";      break;
+                case DasCmdPacket::MOD_TYPE_DSP:       type = "dsp";       break;
+                case DasCmdPacket::MOD_TYPE_DSPW:      type = "dsp-w";     break;
+                case DasCmdPacket::MOD_TYPE_FFC:       type = "ffc";       break;
+                case DasCmdPacket::MOD_TYPE_FEM:       type = "fem";       break;
+                case DasCmdPacket::MOD_TYPE_HROC:      type = "hroc";      break;
+                case DasCmdPacket::MOD_TYPE_IROC:      type = "iroc";      break;
+                case DasCmdPacket::MOD_TYPE_ROC:       type = "roc";       break;
+                case DasCmdPacket::MOD_TYPE_ADCROC:    type = "adcroc";    break;
+                case DasCmdPacket::MOD_TYPE_SANSROC:   type = "sansroc";   break;
+                default:                               type = "invalid";
+            }
+            
             if (ids.find(type) == ids.end())
                 ids.insert(std::pair<std::string, uint32_t>(type, 1));
-            id << type << ids[type]++;
-        } else {
-            id << name;
+            id << "UNKWN " << type << ids[type]++;
         }
 
         if (it->second.parent != 0) {
             ret = snprintf(line, sizeof(line),
-                           "%-12s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d (DSP=%s)\n",
+                           "%-20s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d (DSP=%s)\n",
                            id.str().c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
                            version.fw_version, version.fw_revision, version.fw_year,
                            version.fw_month, version.fw_day, parentId.c_str());
         } else {
             ret = snprintf(line, sizeof(line),
-                           "%-12s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d\n",
+                           "%-20s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d\n",
                            id.str().c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
                            version.fw_version, version.fw_revision, version.fw_year,
                            version.fw_month, version.fw_day);
         }
-        if (ret == -1) {
-            LOG_WARN("String exceeds limit of %u bytes", (unsigned)sizeof(line));
-        } else {
-            lines.push_back(line);
-        }
-    }
-
-    std::sort(lines.begin(), lines.end());
-    for (auto line = lines.begin(); line != lines.end(); line++) {
-        if (line->length() >= length) {
-            LOG_WARN("Truncating output, buffer to short");
-            break;
-        }
-
-        strncpy(buffer, line->c_str(), line->length());
-        length -= line->length();
-        buffer += line->length();
-    }
-    return (size - length);
-}
-
-uint32_t ModulesPlugin::formatSubstitution(char *buffer, uint32_t size)
-{
-    int ret;
-    size_t length = size;
-    uint32_t i = 1;
-
-    std::vector<std::string> lines;
-    std::map<std::string, uint32_t> ids;
-    memset(buffer, 0, size);
-
-    for (std::map<uint32_t, ModuleDesc>::iterator it = m_discovered.begin(); it != m_discovered.end(); it++, i++) {
-        std::string moduleId(BaseModulePlugin::addr2ip(it->first));
-        std::string name(BaseModulePlugin::getModuleName(it->first));
-        const char *plugin;
-        const char *type;
-        BaseModulePlugin::Version version = it->second.version;
-        char line[128];
-
-        switch (it->second.type) {
-            case DasCmdPacket::MOD_TYPE_ACPCFEM:   plugin = "AcpcFemPlugin";   type = "afem";    break;
-            case DasCmdPacket::MOD_TYPE_ACPC:      plugin = "AcpcPlugin";      type = "acpc";    break;
-            case DasCmdPacket::MOD_TYPE_ADCROC:    plugin = "AdcRocPlugin";    type = "adcroc";  break;
-            case DasCmdPacket::MOD_TYPE_AROC:      plugin = "ArocPlugin";      type = "aroc";    break;
-            case DasCmdPacket::MOD_TYPE_BNLROC:    plugin = "BnlRocPlugin";    type = "broc";    break;
-            case DasCmdPacket::MOD_TYPE_CROC:      plugin = "CRocPlugin";      type = "croc";    break;
-            case DasCmdPacket::MOD_TYPE_DSP:       plugin = "DspPlugin";       type = "dsp";     break;
-            case DasCmdPacket::MOD_TYPE_DSPW:      plugin = "DspWPlugin";      type = "dspw";    break;
-            case DasCmdPacket::MOD_TYPE_FEM:       plugin = "FemPlugin";       type = "fem";     break;
-            case DasCmdPacket::MOD_TYPE_ROC:       plugin = "RocPlugin";       type = "roc";     break;
-/*
- * These are not yet supported
-            case DasCmdPacket::MOD_TYPE_BIDIMROC:  plugin = "BidimRocPlugin";  type = "Broc";    break;
-            case DasCmdPacket::MOD_TYPE_FFC:       plugin = "FfcPlugin";       type = "ffc";     break;
-            case DasCmdPacket::MOD_TYPE_HROC:      plugin = "HrocPlugin";      type = "hroc";    break;
-            case DasCmdPacket::MOD_TYPE_IROC:      plugin = "IrocPlugin";      type = "iroc";    break;
-            case DasCmdPacket::MOD_TYPE_SANSROC:   plugin = "SansRocPlugin";   type = "sroc";    break;
-*/
-            default:                            plugin = "Unknown";         type = "unkn";    break;
-        }
-
-        std::stringstream id;
-        if (name.empty()) {
-            if (ids.find(type) == ids.end())
-                ids.insert(std::pair<std::string, uint32_t>(type, 1));
-            id << type << ids[type]++;
-        } else {
-            id << name;
-        }
-
-        ret = snprintf(line, sizeof(line), "{ PLUGIN=%s, ID=%s, IP=%s, VER=%d%d }\n",
-                       plugin, id.str().c_str(), moduleId.c_str(), version.fw_version, version.fw_revision);
         if (ret == -1) {
             LOG_WARN("String exceeds limit of %u bytes", (unsigned)sizeof(line));
         } else {
@@ -416,35 +288,6 @@ void ModulesPlugin::reqVersion(uint32_t moduleId)
         return;
     }
     sendUpstream(packet);
-}
-
-bool ModulesPlugin::readDbFile()
-{
-    FILE *fp = fopen(m_dbPath.c_str(), "r");
-    if (!fp) {
-        LOG_ERROR("Failed to open file for reading: %s", m_dbPath.c_str());
-        return false;
-    }
-    size_t len = fread(m_bufferCfg, 1, BUFFER_SIZE, fp);
-    fclose(fp);
-    m_bufferCfg[len+1] = 0;
-    return true;
-}
-
-bool ModulesPlugin::writeDbFile()
-{
-    FILE *fp = fopen(m_dbPath.c_str(), "w");
-    if (!fp) {
-        LOG_ERROR("Failed to open file for writing: %s", m_dbPath.c_str());
-        return false;
-    }
-    if (fwrite(m_bufferCfg, 1, strlen(m_bufferCfg), fp) != strlen(m_bufferCfg)) {
-        LOG_ERROR("Failed to write detectors configuration to file: %s", m_dbPath.c_str());
-        fclose(fp);
-        return false;
-    }
-    fclose(fp);
-    return true;
 }
 
 ModulesPlugin::Record::Record(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure)

@@ -43,12 +43,10 @@ class BnlRocPlugin : public BaseModulePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins Plugins to connect to
-         * @param[in] hardwareId Hardware ID of the BNLROC module, can be in IP format (xxx.xxx.xxx.xxx) or
-         *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version BNLROC HW&SW version, ie. V5_50
          * @param[in] posCalcPortName Plugin to send parameters to.
          */
-        BnlRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version, const char *posCalcPortName);
+        BnlRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *posCalcPortName);
 
         /**
          * Try to parse the BNLROC version response packet an populate the structure.

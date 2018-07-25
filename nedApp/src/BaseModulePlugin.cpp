@@ -44,12 +44,13 @@ const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitude
  * for thread safety mechanisms.
  */
 static std::map<uint32_t, std::string> g_namesMap;
+static epicsMutex g_namesMapMutex;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugins,
-                                   const char *hardwareId, DasCmdPacket::ModuleType hardwareType,
+                                   DasCmdPacket::ModuleType hardwareType,
                                    uint8_t wordSize, int interfaceMask, int interruptMask)
     : BasePlugin(portName, 0, interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
-    , m_hardwareId(ip2addr(hardwareId))
+    , m_hardwareId(0)
     , m_hardwareType(hardwareType)
     , m_waitingResponse(static_cast<DasCmdPacket::CommandType>(0))
     , m_expectedChannel(0)
@@ -64,7 +65,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     createParam("Enable",       asynParamInt32, &Enable,    1);             // WRITE - Enables this module
     createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
     createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasCmdPacket::CommandType)
-    createParam("HwId",         asynParamOctet, &HwId);                     // READ - Connected module hardware id
+    createParam("HwId",         asynParamOctet, &HwId);                     // WRITE - Connected module hardware id
     createParam("HwType",       asynParamInt32, &HwType, hardwareType);     // READ - Module type                    (see DasCmdPacket::ModuleType)
     createParam("HwDate",       asynParamOctet, &HwDate);                   // READ - Module hardware date
     createParam("HwVer",        asynParamInt32, &HwVer);                    // READ - Module hardware version
@@ -82,12 +83,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     createParam("CfgChannel",   asynParamInt32, &CfgChannel, 0);            // WRITE - Select channel to be configured, 0 means main configuration
     createParam("NoRspTimeout", asynParamFloat64, &NoRspTimeout, NO_RESPONSE_TIMEOUT); // WRITE - Time to wait for response
 
-    std::string hardwareIp = addr2ip(m_hardwareId);
-    setStringParam(HwId, hardwareIp.c_str());
     setIntegerParam(CmdRsp, LAST_CMD_NONE);
     callParamCallbacks();
-
-    g_namesMap[ip2addr(hardwareId)] = portName;
 
     // Let connect the first time, helps diagnose start-up problems
     BasePlugin::connect(parentPlugins, MsgDasCmd);
@@ -103,6 +100,33 @@ void BaseModulePlugin::setNumChannels(uint32_t n)
     assert(m_numChannels == 0); // Prevent running multiple times
     assert(n <= 16);
     m_numChannels = n;
+}
+
+asynStatus BaseModulePlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
+{
+    if (pasynUser->reason == HwId) {
+        *nActual = nChars;
+
+        std::string ip(value, nChars);
+        uint32_t hardwareId = ip2addr(ip);
+        if (hardwareId == 0) {
+            setParamAlarmStatus(HwId, epicsAlarmWrite);
+            setParamAlarmSeverity(HwId, epicsSevInvalid);
+            callParamCallbacks();
+            return asynError;
+        }
+
+        g_namesMapMutex.lock();
+        if (m_hardwareId != 0)
+            g_namesMap.erase(m_hardwareId);
+        g_namesMap[hardwareId] = portName;
+        g_namesMapMutex.unlock();
+
+        m_hardwareId = hardwareId;
+        setStringParam(HwId, addr2ip(hardwareId));
+        return asynSuccess;
+    }
+    return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
 asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
@@ -1289,18 +1313,23 @@ void BaseModulePlugin::setExpectedVersion(uint8_t fw_version, uint8_t fw_revisio
 
 std::string BaseModulePlugin::getModuleName(uint32_t hardwareId)
 {
-    auto name = g_namesMap.find(hardwareId);
-    if (name != g_namesMap.end())
-        return name->second;
-    return "";
+    std::string name = "";
+    g_namesMapMutex.lock();
+    auto it = g_namesMap.find(hardwareId);
+    if (it != g_namesMap.end())
+        name = it->second;
+    g_namesMapMutex.unlock();
+    return name;
 }
 
 void BaseModulePlugin::getModuleNames(std::list<std::string> &modules)
 {
     modules.clear();
+    g_namesMapMutex.lock();
     for (auto it = g_namesMap.begin(); it != g_namesMap.end(); it++) {
         modules.push_back(it->second);
     }
+    g_namesMapMutex.unlock();
 }
 
 float BaseModulePlugin::checkConnection()

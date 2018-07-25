@@ -16,38 +16,6 @@ record(waveform, "$(P)TxtDisplay")
     field(NELM, "100000")
     field(SCAN, "I/O Intr")
 }
-record(waveform, "$(P)CfgDisplay")
-{
-    field(ASG,  "BEAMLINE")
-    field(DTYP, "asynOctetWrite")
-    field(INP,  "@asyn($(PORT))CfgDisplay")
-    field(FTVL, "CHAR")
-    field(NELM, "100000")
-    info(asyn:READBACK, "1")
-}
-record(mbbi, "$(P)CfgStatus")
-{
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))CfgStatus")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-    field(ZRVL, "0")
-    field(ZRST, "saved")
-    field(ONVL, "1")
-    field(ONST, "modified")
-    field(ONSV, "MAJOR")
-    field(TWVL, "2")
-    field(TWST, "discovered")
-    field(TWSV, "MINOR")
-}
-record(bo, "$(P)FileOp")
-{
-    field(ASG,  "BEAMLINE")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))FileOp")
-    field(ZNAM, "load")
-    field(ONAM, "save")
-}
 record(longout, "$(P)Discover")
 {
     field(ASG,  "BEAMLINE")

@@ -28,11 +28,9 @@ class AcpcPlugin : public BaseModulePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins Plugins to connect to
-         * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
-         *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version ROC HW&SW version, ie. V5_50
          */
-        AcpcPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
+        AcpcPlugin(const char *portName, const char *parentPlugins, const char *version);
 
         /**
          * Try to parse the ACPC version response packet an populate the structure.

@@ -76,13 +76,10 @@ class ModulesPlugin : public BasePlugin {
         };
 
         static const uint32_t BUFFER_SIZE = 100000;
-        char *m_bufferCfg;                              //!< Buffer for output config
         char *m_bufferTxt;                              //!< Buffer for output discover text
-        bool m_outCfg;                                  //!< True when output should be to CfgDisplay PV
         ModulesPlugin::Record::shared_pointer m_record; //!< PVA record for registered modules list
         std::map<uint32_t, ModuleDesc> m_discovered;    //!< Map of modules discovered, key is module's hardware id
         Timer m_disableTimer;                           //!< Timer to trigger disabling the module after inactivity timeout
-        std::string m_dbPath;                           //!< detectors.substition file path
         std::string m_parentPlugins;                    //!< Parent plugins to connect to
 
     public:
@@ -94,9 +91,8 @@ class ModulesPlugin : public BasePlugin {
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] listPv defines a name of PVAccess PV to export modules name thru
-         * @param[in] dbPath is a path to detectors.substitution file
          */
-        ModulesPlugin(const char *portName, const char *parentPlugins, const char *listPv, const char *dbPath);
+        ModulesPlugin(const char *portName, const char *parentPlugins, const char *listPv);
 
     private:
         /**
@@ -108,12 +104,6 @@ class ModulesPlugin : public BasePlugin {
          * Process incoming command packets.
          */
         void recvDownstream(const DasCmdPacketList &packetList);
-
-        /**
-         * Overloaded method to handle reading the output string.
-         */
-        //asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
-        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
 
         /**
          * Overloaded function to print details about discovered devices.
@@ -140,30 +130,13 @@ class ModulesPlugin : public BasePlugin {
          */
         uint32_t formatTxt(char *buffer, uint32_t size);
 
-        /**
-         * Print discovered modules in substitution format
-         */
-        uint32_t formatSubstitution(char *buffer, uint32_t size);
-
-        /**
-         * Read contents of DB file into m_bufferCfg.
-         */
-        bool readDbFile();
-
-        /**
-         * Write m_bufferCfg to DB file.
-         */
-        bool writeDbFile();
-
     private:
         int Discover;           //!< Trigger discovery of modules
-        int FileOp;             //!< DB file operation
         int TxtDisplay;
-        int CfgDisplay;
-        int CfgStatus;
         int Discovered;         //!< Number of discovered modules
         int Verified;           //!< Number of detectors with version verified
         int RefreshPvaList;     //!< Refresh list of modules in PVA record
+        int DbPath;             //!< Path to detectors substitution file
 };
 
 #endif // MODULES_PLUGIN_H

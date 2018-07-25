@@ -9,13 +9,14 @@ record(bo, "$(P)Enable")
     field(PINI, "YES")
     field(FLNK, "$(P)StatusCalc")
 }
-record(stringin, "$(P)HwId")
+record(stringout, "$(P)HwId")
 {
     info(archive, "Monitor, 00:01:00, VAL")
+    info(autosaveFields, "VAL")
     field(DESC, "Hardware ID address")
-    field(DTYP, "asynOctetRead")
-    field(INP,  "@asyn($(PORT))HwId")
-    field(SCAN, "Passive")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))HwId")
+    field(VAL,  "0.0.0.0")
     field(PINI, "YES")
 }
 record(mbbo, "$(P)CmdReq")

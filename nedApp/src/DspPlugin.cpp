@@ -19,7 +19,7 @@
 #include <functional>
 #include <string>
 
-EPICS_REGISTER_PLUGIN(DspPlugin, 4, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Version", string);
+EPICS_REGISTER_PLUGIN(DspPlugin, 3, "Port name", string, "Parent plugins", string, "Version", string);
 
 const double DspPlugin::DSP_RESPONSE_TIMEOUT            = 1.0;
 
@@ -59,8 +59,8 @@ struct RspReadVersion7 {
 #error Missing DspVersionRegister declaration
 #endif
 
-DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_DSP, 4)
+DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_DSP, 4)
     , m_version(version)
 {
     if (m_version == "v51") {

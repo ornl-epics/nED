@@ -13,7 +13,7 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(AdcRocPlugin, 4, "Port name", string, "Parent plugins", string, "Hardware ID", string, "Hw & SW version", string);
+EPICS_REGISTER_PLUGIN(AdcRocPlugin, 3, "Port name", string, "Parent plugins", string, "Hw & SW version", string);
 
 /**
  * ADC ROC version response format
@@ -32,8 +32,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-AdcRocPlugin::AdcRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_ADCROC, 2)
+AdcRocPlugin::AdcRocPlugin(const char *portName, const char *parentPlugins, const char *version)
+    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_ADCROC, 2)
     , m_version(version)
 {
     if (0) {

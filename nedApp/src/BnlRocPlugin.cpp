@@ -13,8 +13,8 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(BnlRocPlugin, 5, "Port name", string,
-        "Parent plugins", string, "Hardware ID", string,
+EPICS_REGISTER_PLUGIN(BnlRocPlugin, 4, "Port name", string,
+        "Parent plugins", string,
         "Hw & SW version", string, "BnlPosCalc plugin", string);
 
 /**
@@ -34,8 +34,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-BnlRocPlugin::BnlRocPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version, const char *posCalcPortName)
-    : BaseModulePlugin(portName, parentPlugins, hardwareId, DasCmdPacket::MOD_TYPE_BNLROC, 2)
+BnlRocPlugin::BnlRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *posCalcPortName)
+    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_BNLROC, 2)
     , m_version(version)
     , m_posCalcPort(posCalcPortName)
 {

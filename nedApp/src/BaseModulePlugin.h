@@ -156,9 +156,9 @@ class BaseModulePlugin : public BasePlugin {
 
     protected: // variables
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
-        DasCmdPacket::ModuleType m_hardwareType;           //!< Hardware type
+        DasCmdPacket::ModuleType m_hardwareType;        //!< Hardware type
         std::map<std::string, ParamTable> m_params;     //!< Maps of exported parameters
-        DasCmdPacket::CommandType m_waitingResponse;       //!< Expected response code while waiting for response or timeout event, 0 otherwise
+        DasCmdPacket::CommandType m_waitingResponse;    //!< Expected response code while waiting for response or timeout event, 0 otherwise
         uint8_t m_expectedChannel;                      //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
         uint32_t m_numChannels;                         //!< Maximum number of channels supported by module
         uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
@@ -183,8 +183,6 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
-         * @param[in] hardwareId Hardware ID of the module, can be in IP format (xxx.xxx.xxx.xxx) or
-         *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] hardwareType Type of hardware module.
          * @param[in] wordSize Number of bytes describing single register word
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
@@ -192,7 +190,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
          * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
-        BaseModulePlugin(const char *portName, const char *parentPlugins, const char *hardwareId,
+        BaseModulePlugin(const char *portName, const char *parentPlugins,
                          DasCmdPacket::ModuleType hardwareType, uint8_t wordSize,
                          int interfaceMask=0, int interruptMask=0);
 
@@ -200,6 +198,11 @@ class BaseModulePlugin : public BasePlugin {
          * Abstract destructor
          */
         virtual ~BaseModulePlugin() = 0;
+
+        /**
+         * Write octet parameter value.
+         */
+        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
 
         /**
          * Set number of channels supported by module.

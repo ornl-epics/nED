@@ -31,11 +31,9 @@ class AcpcFemPlugin : public BaseModulePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins Plugins to connect to
-         * @param[in] hardwareId Hardware ID of the ROC module, can be in IP format (xxx.xxx.xxx.xxx) or
-         *                       in hex number string in big-endian byte order (0x15FACB2D equals to IP 21.250.203.45)
          * @param[in] version ACPC FEM HW&SW version, ie. V10_50
          */
-        AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *hardwareId, const char *version);
+        AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *version);
 
         /**
          * Try to parse the ACPC FEM version response packet an populate the structure.
