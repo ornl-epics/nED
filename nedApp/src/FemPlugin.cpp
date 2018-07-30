@@ -11,7 +11,7 @@
 #include "FemPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(FemPlugin, 3, "Port name", string, "Parent plugins", string, "Hw & SW version", string);
+EPICS_REGISTER_PLUGIN(FemPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
 
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
@@ -33,8 +33,8 @@ struct RspReadVersion {
 // GCC specific - but very efficient 1 CPU cycle
 #define BYTE_SWAP(a) __builtin_bswap32(a)
 
-FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_FEM, 2)
+FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_FEM, 2)
     , m_version(version)
 {
     createParam("Upg:File",     asynParamOctet, &UpgradeFile);             // WRITE - Path to the firmware file to be programmed
@@ -99,7 +99,6 @@ FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char
     }
     setStringParam(UpgradeErrorStr, "");
 
-    callParamCallbacks();
     initParams();
 }
 

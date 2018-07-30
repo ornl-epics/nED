@@ -501,6 +501,15 @@ asynStatus BasePlugin::setIntegerParam(const std::string &name, int value)
     return ret;
 }
 
+asynStatus BasePlugin::setStringParam(const std::string &name, const std::string &value)
+{
+    int param;
+    asynStatus ret = asynPortDriver::findParam(name.c_str(), &param);
+    if (ret == asynSuccess)
+        ret = setStringParam(param, value.c_str());
+    return ret;
+}
+
 asynStatus BasePlugin::addIntegerParam(const std::string &name, int increment) {
     int tmp;
     getIntegerParam(name, tmp);

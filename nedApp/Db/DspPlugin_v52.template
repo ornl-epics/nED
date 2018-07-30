@@ -3,3 +3,8 @@ include "BaseModulePlugin.include"
 include "DspPlugin_v52.generated"
 include "DspPlugin.include"
 include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "DspPlugin_v52")
+}

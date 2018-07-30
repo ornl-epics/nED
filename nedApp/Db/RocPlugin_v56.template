@@ -4,6 +4,11 @@ include "RocPlugin_v56.generated"
 include "RocPlugin.include"
 include "GlobalConD.include"
 
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "RocPlugin_v56")
+}
+
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")

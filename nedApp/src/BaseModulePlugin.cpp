@@ -12,9 +12,13 @@
 #include "Log.h"
 #include "ValueConvert.h"
 
+#include <algorithm>
 #include <alarm.h>
+#include <chrono>
+#include <dirent.h>
 #include <map>
 #include <osiSock.h>
+#include <sys/stat.h>
 #include <string.h>
 
 #define VERIFY_DISCOVER_OK      (1 << 0)
@@ -47,9 +51,10 @@ static std::map<uint32_t, std::string> g_namesMap;
 static epicsMutex g_namesMapMutex;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugins,
-                                   DasCmdPacket::ModuleType hardwareType,
+                                   const char *configDir, DasCmdPacket::ModuleType hardwareType,
                                    uint8_t wordSize, int interfaceMask, int interruptMask)
     : BasePlugin(portName, 0, interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
+    , m_features(0)
     , m_hardwareId(0)
     , m_hardwareType(hardwareType)
     , m_waitingResponse(static_cast<DasCmdPacket::CommandType>(0))
@@ -58,11 +63,25 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     , m_wordSize(wordSize)
     , m_connTimer(false)
     , m_parentPlugins(parentPlugins)
+    , m_configDir("")
 {
     // DSP uses 4 byte words, everybody else 2 bytes
     assert(wordSize==2 || wordSize==4);
 
+    // configDir must be existing writable directory!
+    char tmpfile[1024];
+    snprintf(tmpfile, 1024, "%s/XXXXXX", configDir);
+    int fd = mkstemp(tmpfile);
+    if (fd == -1) {
+        LOG_ERROR("Configuration directory '%s' does not exist or is not writable directory!", configDir.c_str());
+    } else {
+        m_configDir = configDir;
+        close(fd);
+        unlink(tmpfile);
+    }
+
     createParam("Enable",       asynParamInt32, &Enable,    1);             // WRITE - Enables this module
+    createParam("Features",     asynParamInt32, &Features, 0);              // READ - Features supported by this module
     createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
     createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasCmdPacket::CommandType)
     createParam("HwId",         asynParamOctet, &HwId);                     // WRITE - Connected module hardware id
@@ -83,7 +102,29 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     createParam("CfgChannel",   asynParamInt32, &CfgChannel, 0);            // WRITE - Select channel to be configured, 0 means main configuration
     createParam("NoRspTimeout", asynParamFloat64, &NoRspTimeout, NO_RESPONSE_TIMEOUT); // WRITE - Time to wait for response
 
+    createParam("SaveConfig",   asynParamOctet, &SaveConfig);               // WRITE - Save configuration to file
+    createParam("LoadConfig",   asynParamOctet, &LoadConfig);               // WRITE - Load configuration from file
+    createParam("CopyConfig",   asynParamInt32, &CopyConfig);               // WRITE - Trigger configration copying
+    createParam("Config1",      asynParamOctet, &Config1);                  // WRITE - Name of newest config
+    createParam("Config2",      asynParamOctet, &Config2);                  // WRITE - Name of 2nd newest config
+    createParam("Config3",      asynParamOctet, &Config3);                  // WRITE - Name of 3rd newest config
+    createParam("Config4",      asynParamOctet, &Config4);                  // WRITE - Name of 4th newest config
+    createParam("Config5",      asynParamOctet, &Config5);                  // WRITE - Name of 5th newest config
+
+    createParam("ConfigSaved",  asynParamInt32, &ConfigSaved, 0);           // WRITE - Flag =1 when all the PVs are in config control
+    createParam("ConfigApplied",asynParamInt32, &ConfigApplied, 0);         // WRITE - Flag =1 when all PVs are synchronized to module
+
     setIntegerParam(CmdRsp, LAST_CMD_NONE);
+
+    std::list<std::string> configs = getListConfigs();
+    unsigned i = 0;
+    for (auto config: configs) {
+        if (++i > 5)
+            break;
+        if (i == 1)
+            loadConfig(config);
+        setStringParam("Config" + std::to_string(i), config);
+    }
     callParamCallbacks();
 
     // Let connect the first time, helps diagnose start-up problems
@@ -126,6 +167,39 @@ asynStatus BaseModulePlugin::writeOctet(asynUser *pasynUser, const char *value, 
         setStringParam(HwId, addr2ip(hardwareId));
         return asynSuccess;
     }
+    if (pasynUser->reason == SaveConfig) {
+        std::string name(value, nChars);
+        *nActual = nChars;
+        if (!saveConfig(name)) {
+            LOG_ERROR("Failed to save configuration '%s'", name.c_str());
+            return asynError;
+        }
+
+        setIntegerParam(ConfigSaved, 1);
+
+        // Synchronize PVs for the LoadConfigMenu
+        std::list<std::string> configs = getListConfigs();
+        unsigned i = 0;
+        for (auto config: configs) {
+            if (++i > 5)
+                break;
+            setStringParam("Config" + std::to_string(i), config);
+        }
+        callParamCallbacks();
+
+        return asynSuccess;
+    }
+    if (pasynUser->reason == LoadConfig) {
+        std::string name(value, nChars);
+        *nActual = nChars;
+        if (!loadConfig(name)) {
+            LOG_ERROR("Failed to load configuration '%s'", name.c_str());
+            return asynError;
+        }
+        setIntegerParam(ConfigSaved, 1);
+        callParamCallbacks();
+        return asynSuccess;
+    }
     return BasePlugin::writeOctet(pasynUser, value, nChars, nActual);
 }
 
@@ -145,6 +219,12 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         callParamCallbacks();
         return asynSuccess;
     }
+    if (pasynUser->reason == CopyConfig) {
+        copyConfig();
+        setIntegerParam(ConfigApplied, 0);
+        callParamCallbacks();
+        return asynSuccess;
+    }
     // Not a command, it's probably one of the writeable parameters
     for (auto it = m_params.begin(); it != m_params.end(); it++) {
         if (it->second.readonly)
@@ -159,6 +239,8 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
             return asynError;
         } else {
             setIntegerParam(jt->first, value);
+            setIntegerParam(ConfigApplied, 0);
+            setIntegerParam(ConfigSaved, 0);
             callParamCallbacks();
             return asynSuccess;
         }
@@ -758,6 +840,7 @@ DasCmdPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t section, uint
 
 bool BaseModulePlugin::rspWriteConfig(const DasCmdPacket *packet, uint8_t channel)
 {
+    if (packet->isAcknowledge()) setIntegerParam(ConfigApplied, 1);
     int alarm = (packet->isAcknowledge() ? epicsAlarmNone : epicsAlarmWrite);
     setParamsAlarm("CONFIG", alarm);
     return packet->isAcknowledge();
@@ -864,11 +947,13 @@ void BaseModulePlugin::setParamsAlarm(const std::string &section, int alarm)
 void BaseModulePlugin::createStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
     createRegParam("STATUS", name, true, channel, 0x0, offset, nBits, shift, 0);
+    m_features |= (uint32_t)ModuleFeatures::STATUS;
 }
 
 void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
     createRegParam("COUNTERS", name, true, 0, 0x0, offset, nBits, shift, 0);
+    m_features |= (uint32_t)ModuleFeatures::COUNTERS;
 }
 
 void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv)
@@ -883,6 +968,13 @@ void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, 
     }
 
     createRegParam("CONFIG", name, false, channel, section, offset, nBits, shift, value, conv);
+
+    std::string nameSaved(name);
+    nameSaved += "_Saved";
+    int index;
+    if (createParam(nameSaved.c_str(), asynParamInt32, &index) != asynSuccess)
+        LOG_ERROR("CONFIG save parameter '%s' cannot be created (already exist?)", nameSaved.c_str());
+    m_features |= (uint32_t)ModuleFeatures::CONFIG;
 }
 
 void BaseModulePlugin::createMetaConfigParam(const char *name, uint32_t nBits, int value, const BaseConvert *conv)
@@ -893,16 +985,19 @@ void BaseModulePlugin::createMetaConfigParam(const char *name, uint32_t nBits, i
 void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, const BaseConvert *conv)
 {
     createRegParam("TEMPERATURE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
+    m_features |= (uint32_t)ModuleFeatures::TEMPERATURE;
 }
 
 void BaseModulePlugin::createUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, const BaseConvert *conv)
 {
     createRegParam("UPGRADE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
+    m_features |= (uint32_t)ModuleFeatures::UPGRADE;
 }
 
 void BaseModulePlugin::linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
     linkRegParam("UPGRADE", name, true, 0, 0x0, offset, nBits, shift);
+    m_features |= (uint32_t)ModuleFeatures::UPGRADE;
 }
 
 uint32_t BaseModulePlugin::ip2addr(const std::string &text)
@@ -1186,6 +1281,9 @@ void BaseModulePlugin::initParams()
             }
         }
     }
+
+    setIntegerParam(Features, m_features);
+    callParamCallbacks();
 }
 
 const char *BaseModulePlugin::cmd2str(const DasCmdPacket::CommandType cmd)
@@ -1341,4 +1439,134 @@ float BaseModulePlugin::checkConnection()
     }
     this->unlock();
     return std::max(CONN_CLOSE_TIMEOUT, 0.5f) + 0.1;
+}
+
+static bool invalidChar(char ch)
+{
+    return (!std::isalnum(ch) && ch != '_' && ch != '.' && ch != '-');
+}
+
+std::string BaseModulePlugin::getConfigPath(const std::string &name, bool existing)
+{
+    std::string filepath = m_configDir + getPortName() + "_";
+    std::string configName = name;
+    std::replace_if(configName.begin(), configName.end(), invalidChar, '_');
+    if (configName.empty()) {
+        auto time_now = std::chrono::system_clock::now();
+        auto time_now_t = std::chrono::system_clock::to_time_t(time_now);
+        auto now_tm = *std::localtime(&time_now_t);
+        char buf[32];
+        std::strftime(buf, 32, "%Y-%m-%d", &now_tm);
+        configName = buf;
+    }
+
+    filepath += configName;
+    if (existing) {
+        std::string path = filepath + ".sav";
+        std::ifstream f_exists(path);
+        if (f_exists.is_open() == true)
+            return path;
+    } else {
+        for (int i = 0; i < 100; i++) {
+            std::string path = filepath;
+            if (i > 0)
+                path += "_" + std::to_string(i);
+            path += ".sav";
+            std::ifstream f_exists(path);
+            if (f_exists.is_open() == false)
+                return path;
+        }
+    }
+    return std::string();
+}
+
+std::string BaseModulePlugin::parseConfigName(const std::string &filename)
+{
+    std::string portName = getPortName();
+    if (filename.compare(0, portName.length() + 1, portName + "_") != 0)
+        return std::string();
+
+    std::string name = filename.substr(portName.length() + 1);
+    if (name.length() > 4 && name.compare(name.length() - 5, 4, ".sav"))
+        name = name.substr(0, name.length() - 4);
+    return name;
+}
+
+bool BaseModulePlugin::saveConfig(const std::string &name)
+{
+    std::string filepath = getConfigPath(name, false);
+    if (filepath.empty() == true)
+        return false;
+
+    std::ofstream f(filepath);
+    auto it = m_params.find("CONFIG");
+    if (it != m_params.end()) {
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+            std::string param = getParamName(jt->first);
+            int value = getIntegerParam(jt->first);
+            f << param << " " << value << std::endl;
+        }
+    }
+    return true;
+}
+
+bool BaseModulePlugin::loadConfig(const std::string &name)
+{
+    std::string filepath = getConfigPath(name, true);
+    if (filepath.empty() == true)
+        return false;
+
+    std::string param;
+    int value;
+    std::ifstream f(filepath);
+    while (f >> param >> value) {
+        (void)setIntegerParam(param + "_Saved", value);
+    }
+    callParamCallbacks();
+    return true;
+}
+
+void BaseModulePlugin::copyConfig()
+{
+    auto it = m_params.find("CONFIG");
+    if (it != m_params.end()) {
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+            std::string param = getParamName(jt->first) + "_Saved";
+            int index;
+            asynStatus ret = asynPortDriver::findParam(param.c_str(), &index);
+            if (ret == asynSuccess) {
+                int value;
+                ret = getIntegerParam(index, &value);
+                if (ret == asynSuccess)
+                    setIntegerParam(jt->first, value);
+            }
+        }
+    }
+    callParamCallbacks();
+}
+
+std::list<std::string> BaseModulePlugin::getListConfigs()
+{
+    std::list<time_t> times;
+    std::list<std::string> configs;
+    std::string portName = getPortName();
+    DIR *dirp = opendir(m_configDir.c_str());
+    struct dirent *dp = nullptr;
+    if (dirp != nullptr) {
+        while ((dp = readdir(dirp)) != nullptr) {
+            std::string name = parseConfigName(dp->d_name);
+            if (name.empty() == false) {
+                struct stat st;
+                std::string path = m_configDir + dp->d_name;
+                if (stat(path.c_str(), &st) == 0) {
+                    auto it = times.begin();
+                    auto jt = configs.begin();
+                    for (; it != times.end() && st.st_ctime < *it; it++, jt++);
+                    times.insert(it, st.st_ctime);
+                    configs.insert(jt, name);
+                }
+            }
+        }
+    }
+    return configs;
 }

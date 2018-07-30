@@ -11,7 +11,7 @@
 #include "Log.h"
 #include "Common.h"
 
-EPICS_REGISTER_PLUGIN(ArocPlugin, 3, "Port name", string, "Dispatcher port name", string, "Hw & SW version", string);
+EPICS_REGISTER_PLUGIN(ArocPlugin, 4, "Port name", string, "Dispatcher port name", string, "Hw & SW version", string, "Config dir", string);
 
 /**
  * AROC version response format
@@ -30,8 +30,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_AROC, 2)
+ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_AROC, 2)
     , m_version(version)
 {
     if (m_version == "v23") {
@@ -51,7 +51,6 @@ ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const ch
         LOG_ERROR("Unsupported AROC version '%s'", version);
     }
 
-    callParamCallbacks();
     initParams();
 }
 

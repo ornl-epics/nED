@@ -11,7 +11,7 @@
 #include "AcpcFemPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(AcpcFemPlugin, 3, "Port name", string, "Parent plugins", string, "Hw & SW version", string);
+EPICS_REGISTER_PLUGIN(AcpcFemPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
 
 struct RspReadVersion {
 #ifdef BITFIELD_LSB_FIRST
@@ -31,8 +31,8 @@ struct RspReadVersion {
 };
 
 
-AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_ACPCFEM, 2)
+AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_ACPCFEM, 2)
     , m_version(version)
 {
     if (m_version == "v14") {
@@ -45,7 +45,6 @@ AcpcFemPlugin::AcpcFemPlugin(const char *portName, const char *parentPlugins, co
         setIntegerParam(Supported, 0);
     }
 
-    callParamCallbacks();
     initParams();
 }
 

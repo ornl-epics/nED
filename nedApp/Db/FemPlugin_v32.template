@@ -3,3 +3,8 @@ include "BaseModulePlugin.include"
 include "FemPlugin.include"
 include "FemPlugin_v32.generated"
 include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "FemPlugin_v32")
+}

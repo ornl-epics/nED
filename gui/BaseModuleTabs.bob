@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>$(D)</name>
+  <width>740</width>
+  <widget type="navtabs" version="2.0.0">
+    <name>ModuleTabs</name>
+    <tabs>
+      <tab>
+        <name>Main</name>
+        <file>BaseModuleMain.bob</file>
+        <macros>
+        </macros>
+        <group_name></group_name>
+      </tab>
+    </tabs>
+    <width>740</width>
+    <height>600</height>
+    <direction>0</direction>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import ScriptUtil, PVUtil
+
+tabs = ScriptUtil.findWidgetByName(widget, "ModuleTabs").propTabs()
+
+features = PVUtil.getInt(pvs[0])
+plugin_id = PVUtil.getString(pvs[1])
+
+featuresMap = {
+    0x1: "Config",
+    0x2: "Status",
+    0x4: "Temp",
+    0x8: "Counters",
+}
+
+for bit,feature in featuresMap.iteritems():
+    if feature == "Config":
+        tab = tabs.addElement()
+        tab.name().setValue(feature)
+        tab.file().setValue("BaseModuleConfig.bob")
+#        tab.macros().getValue().add("P", "$(P_)%s:" % module)
+        ScriptUtil.getLogger().info("Added %s tab for $(D)" % feature.lower())
+    elif features & bit:
+        tab = tabs.addElement()
+        tab.name().setValue(feature)
+        tab.macros().getValue().add("TABLE_TYPE", feature)
+        tab.file().setValue("BaseModuleHeader.bob")
+        ScriptUtil.getLogger().info("Added %s tab" % feature.lower())
+]]></text>
+        <pv_name>$(P)Features</pv_name>
+        <pv_name trigger="false">loc://testdfdsnfd("DspPlugin_v71")</pv_name>
+      </script>
+    </scripts>
+  </widget>
+</display>

@@ -117,6 +117,7 @@
     <scripts>
       <script file="EmbeddedPy">
         <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil, ScriptUtil
+from org.csstudio.display.builder.model.macros import MacroHandler
 
 def readFromFile(file_path, show_dialog):
     ScriptUtil.getLogger().info("Reading detectors file: '" + file_path + "'")
@@ -148,7 +149,7 @@ def writeToFile(file_path, text):
 show_dialog = PVUtil.getInt(pvs[3])
 pvs[3].write(1)
 
-file_path = widget.getEffectiveMacros().getValue("DET_DB")
+file_path = MacroHandler.replace(widget.getEffectiveMacros(), "$(DET_DB)")
 
 if PVUtil.getInt(pvs[0]) == 1:
     content = readFromFile(file_path, show_dialog)

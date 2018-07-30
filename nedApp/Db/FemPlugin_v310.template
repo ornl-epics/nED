@@ -5,6 +5,11 @@ include "FemPlugin_v310.generated"
 include "GlobalConD.include"
 include "RemoteUpgrade.include"
 
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "FemPlugin_v310")
+}
+
 record(mbbo, "$(P)CmdReq")
 {
     field(TVVL, "41")

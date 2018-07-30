@@ -6,6 +6,11 @@ include "GlobalConD.include"
 include "CRocPmt.db"
 include "CRocPmts.include"
 
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "CRocPlugin_v94")
+}
+
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")

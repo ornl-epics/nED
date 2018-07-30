@@ -33,7 +33,7 @@ class ArocPlugin : public BaseModulePlugin {
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version AROC HW&SW version, ie. V5_50
          */
-        ArocPlugin(const char *portName, const char *parentPlugins, const char *version);
+        ArocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
          * Try to parse the AROC version response packet an populate the structure.

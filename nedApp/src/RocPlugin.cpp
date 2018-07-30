@@ -13,7 +13,7 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(RocPlugin, 3, "Port name", string, "Parent plugins", string, "Hw & SW version", string);
+EPICS_REGISTER_PLUGIN(RocPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
 
 /**
  * ROC V5 version response format
@@ -58,8 +58,8 @@ struct RspReadVersionGE {
 #endif // BITFIELD_LSB_FIRST
 };
 
-RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_ROC, 2)
+RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_ROC, 2)
     , m_version(version)
 {
     if (0) {
@@ -135,7 +135,6 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
     createParam("HvDelay",      asynParamFloat64, &HvDelay,     0.0); // READ - Time from HV request to first response character
     createParam("HvB2bDelay",   asynParamFloat64, &HvB2bDelay,  0.0); // READ - Time from HV request to last response character
 
-    callParamCallbacks();
     initParams();
 }
 

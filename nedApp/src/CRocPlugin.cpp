@@ -13,10 +13,10 @@
 
 #include <cstring>
 
-EPICS_REGISTER_PLUGIN(CRocPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "PosCalc port name", string);
+EPICS_REGISTER_PLUGIN(CRocPlugin, 5, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string, "PosCalc port name", string);
 
-CRocPlugin::CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *posCalcPortName)
-    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_CROC, 2)
+CRocPlugin::CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir, const char *posCalcPortName)
+    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_CROC, 2)
     , m_version(version)
     , m_posCalcPort(posCalcPortName)
 {
@@ -35,7 +35,6 @@ CRocPlugin::CRocPlugin(const char *portName, const char *parentPlugins, const ch
         return;
     }
 
-    callParamCallbacks();
     initParams();
 }
 

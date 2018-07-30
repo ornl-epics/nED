@@ -33,7 +33,7 @@ class AcpcFemPlugin : public BaseModulePlugin {
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version ACPC FEM HW&SW version, ie. V10_50
          */
-        AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *version);
+        AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
          * Try to parse the ACPC FEM version response packet an populate the structure.

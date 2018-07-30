@@ -31,7 +31,7 @@ class DspWPlugin : public BaseModulePlugin {
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version Configured module version, must match the actual version
          */
-        DspWPlugin(const char *portName, const char *parentPlugins, const char *version);
+        DspWPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
          * Try to parse the DSP-W version response packet an populate the structure.

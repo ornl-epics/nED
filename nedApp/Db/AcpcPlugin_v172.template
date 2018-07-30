@@ -3,3 +3,8 @@ include "BaseModulePlugin.include"
 include "AcpcPlugin_v172.generated"
 include "AcpcPlugin.include"
 include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "AcpcPlugin_v172")
+}

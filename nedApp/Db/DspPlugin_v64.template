@@ -4,6 +4,11 @@ include "DspPlugin_v64.generated"
 include "DspPlugin.include"
 include "GlobalConD.include"
 
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "DspPlugin_v64")
+}
+
 record(calcout, "$(P)EventLength")
 {
     field(ASG,  "BEAMLINE")

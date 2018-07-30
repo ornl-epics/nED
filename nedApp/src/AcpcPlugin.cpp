@@ -11,7 +11,7 @@
 #include "Common.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(AcpcPlugin, 3, "Port name", string, "Parent plugins", string, "Hw & SW version", string);
+EPICS_REGISTER_PLUGIN(AcpcPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
 
 /**
  * ACPC version response format
@@ -35,8 +35,8 @@ struct RspReadVersion {
 #endif // BITFIELD_LSB_FIRST
 };
 
-AcpcPlugin::AcpcPlugin(const char *portName, const char *parentPlugins, const char *version)
-    : BaseModulePlugin(portName, parentPlugins, DasCmdPacket::MOD_TYPE_ACPC, 2)
+AcpcPlugin::AcpcPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_ACPC, 2)
     , m_version(version)
 {
     if (0) {
@@ -65,7 +65,6 @@ AcpcPlugin::AcpcPlugin(const char *portName, const char *parentPlugins, const ch
         LOG_ERROR("Unsupported ACPC version '%s'", version);
     }
 
-    callParamCallbacks();
     initParams();
 }
 

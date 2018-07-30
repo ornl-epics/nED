@@ -541,6 +541,17 @@ class BasePlugin : public asynPortDriver {
         using asynPortDriver::getStringParam;
 
         /**
+         * Sets new value of a string in the parameter library.
+         *
+         * Convenience function to look by parameter name that only works for
+         * for first asynPort address plugins.
+         *
+         * @see asynPortDriver::setStringParam(int, int)
+         */
+        asynStatus setStringParam(const std::string &name, const std::string &value);
+        using asynPortDriver::setStringParam;
+
+        /**
          * Convenience function to increment current parameter value.
          */
         asynStatus addIntegerParam(const std::string &name, int increment);
@@ -578,6 +589,11 @@ class BasePlugin : public asynPortDriver {
          * Unlocks this port instance.
          */
         asynStatus unlock() override { m_locked = false; return asynPortDriver::unlock(); };
+
+        /**
+         * Return name of asyn port.
+         */
+        std::string getPortName() { return m_portName; };
 
     private:
         /**

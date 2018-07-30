@@ -129,7 +129,15 @@ def parse_src_file(path, verbose=False):
                         desc = match_d.group(1)
                         extra = match_d.group(2)
 
-                    params.append( parse_one(type, match.group(1), desc, extra) )
+                    param = parse_one(type, match.group(1), desc, extra)
+                    params.append(param)
+
+                    # Duplicate config PVs and make them read-only - used for showing saved data
+                    if type in ["config", "config_ch", "config_meta"]:
+                        param = param.copy()
+                        param['direction'] = "in"
+                        param['name'] += "_Saved"
+                        params.append(param)
 
                     break
 

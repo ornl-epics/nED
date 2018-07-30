@@ -43,7 +43,7 @@ class DspPlugin : public BaseModulePlugin {
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version Configured module version, must match the actual version
          */
-        DspPlugin(const char *portName, const char *parentPlugins, const char *version);
+        DspPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
          * Try to parse the DSP version response packet an populate the structure.

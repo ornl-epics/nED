@@ -3,6 +3,11 @@ include "BaseModulePlugin.include"
 include "BnlRocPlugin_v00.generated"
 include "GlobalConD.include"
 
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "BnlRocPlugin_v00")
+}
+
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")

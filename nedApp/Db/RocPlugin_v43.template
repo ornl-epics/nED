@@ -4,3 +4,8 @@ include "RocPlugin_v4x.include"
 include "RocPlugin_v43.generated"
 include "RocPlugin.include"
 include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "RocPlugin_v43")
+}

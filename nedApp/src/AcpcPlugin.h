@@ -30,7 +30,7 @@ class AcpcPlugin : public BaseModulePlugin {
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version ROC HW&SW version, ie. V5_50
          */
-        AcpcPlugin(const char *portName, const char *parentPlugins, const char *version);
+        AcpcPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
          * Try to parse the ACPC version response packet an populate the structure.

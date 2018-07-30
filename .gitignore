@@ -11,3 +11,4 @@ nedApp/doc/html/
 nedApp/doc/latex/
 nedApp/doc/tmp/
 core*
+gui/generated/*

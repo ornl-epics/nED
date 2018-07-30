@@ -3,3 +3,8 @@ include "BaseModulePlugin.include"
 include "ArocPlugin_v24.generated"
 include "ArocPlugin.include"
 include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "ArocPlugin_v24")
+}

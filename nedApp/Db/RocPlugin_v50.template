@@ -5,6 +5,11 @@ include "RocPlugin_v50.generated"
 include "RocPlugin.include"
 include "GlobalConD.include"
 
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "RocPlugin_v50")
+}
+
 record(dfanout, "$(P)A:SampleMin")
 {
     info(autosaveFields, "VAL")

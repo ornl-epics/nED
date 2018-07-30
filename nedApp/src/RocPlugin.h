@@ -74,7 +74,7 @@ class RocPlugin : public BaseModulePlugin {
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version ROC HW&SW version, ie. V5_50
          */
-        RocPlugin(const char *portName, const char *parentPlugins, const char *version);
+        RocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
          * Process ROC custom commands.

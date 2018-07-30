@@ -44,7 +44,7 @@ class AdcRocPlugin : public BaseModulePlugin {
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version ADCROC HW&SW version, ie. V5_50
          */
-        AdcRocPlugin(const char *portName, const char *parentPlugins, const char *version);
+        AdcRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
          * Try to parse the ADCROC version response packet an populate the structure.

@@ -4,6 +4,11 @@ include "DspPlugin_v65.generated"
 include "DspPlugin.include"
 include "GlobalConD.include"
 
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "DspPlugin_v65")
+}
+
 record(mbbo, "$(P)CmdReq")
 {
     field(TVVL, "129")

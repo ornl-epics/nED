@@ -33,7 +33,7 @@ class CRocPlugin : public BaseModulePlugin {
          * @param[in] version ROC HW&SW version, ie. V5_50
          * @param[in] posCalcPortName Name of the CROC position calculation plugin
          */
-        CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *posCalcPortName=0);
+        CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir, const char *posCalcPortName=0);
 
         /**
          * Try to parse the ROC version response packet an populate the structure.

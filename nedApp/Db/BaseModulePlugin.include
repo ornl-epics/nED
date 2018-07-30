@@ -9,6 +9,13 @@ record(bo, "$(P)Enable")
     field(PINI, "YES")
     field(FLNK, "$(P)StatusCalc")
 }
+record(longin, "$(P)Features")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Features")
+    field(PINI, "YES")
+}
 record(stringout, "$(P)HwId")
 {
     info(archive, "Monitor, 00:01:00, VAL")
@@ -565,6 +572,16 @@ record(calcout, "$(P)StatusRefresh")
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
+    field(FLNK, "$(P)StatusRefreshNext")
+}
+record(calc, "$(P)StatusRefreshNext")
+{
+    field(DESC, "Seconds remaining until next refresh")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)StatusRefreshInt NPP")
+    field(INPB, "$(P)StatusRefresh NPP")
+    field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
+    field(PINI, "YES")
 }
 record(longout, "$(P)CountersRefreshInt")
 {
@@ -589,6 +606,16 @@ record(calcout, "$(P)CountersRefresh")
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
+    field(FLNK, "$(P)CountersRefreshNext")
+}
+record(calc, "$(P)CountersRefreshNext")
+{
+    field(DESC, "Seconds remaining until next refresh")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CountersRefreshInt NPP")
+    field(INPB, "$(P)CountersRefresh NPP")
+    field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
+    field(PINI, "YES")
 }
 record(longout, "$(P)TempRefreshInt")
 {
@@ -612,6 +639,16 @@ record(calcout, "$(P)TempRefresh")
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
+    field(FLNK, "$(P)TempRefreshNext")
+}
+record(calc, "$(P)TempRefreshNext")
+{
+    field(DESC, "Seconds remaining until next refresh")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)TempRefreshInt NPP")
+    field(INPB, "$(P)TempRefresh NPP")
+    field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
+    field(PINI, "YES")
 }
 record(ao, "$(P)NoRspTimeout")
 {
@@ -681,4 +718,170 @@ record(seq, "$(P)ConfSeq")
     field(LNK4, "$(P)CmdReq PP")
     field(DO4,  "2")
     field(DLY4, "0.3")
+}
+record(stringout, "$(P)SaveConfig")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Save config to file")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))SaveConfig")
+}
+record(stringout, "$(P)SaveConfigName")
+{
+    field(ASG,  "BEAMLINE")
+}
+record(stringout, "$(P)SaveConfigTrig")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)SaveConfigName NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)SaveConfig PP")
+}
+record(stringout, "$(P)LoadConfig")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Load config from file to temp PVs")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))LoadConfig")
+}
+record(mbbo, "$(P)LoadConfigMenu")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Configuration to load")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(ZRST, "")
+    field(ONST, "")
+    field(TWST, "")
+    field(THST, "")
+    field(FRST, "")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(FLNK, "$(P)LoadConfigMenuTrig")
+}
+record(stringout, "$(P)LoadConfigMenuTrig")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)LoadConfigMenu NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfig PP")
+}
+record(stringin, "$(P)Config1")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config1")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config1Sync")
+}
+record(stringin, "$(P)Config2")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "2nd newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config2")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config2Sync")
+}
+record(stringin, "$(P)Config3")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "3rd newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config3")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config3Sync")
+}
+record(stringin, "$(P)Config4")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "4th newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config4")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config4Sync")
+}
+record(stringin, "$(P)Config5")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "5th newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config5")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config5Sync")
+}
+record(stringout, "$(P)Config1Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config1")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.ZRST NPP")
+}
+record(stringout, "$(P)Config2Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config2")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.ONST NPP")
+}
+record(stringout, "$(P)Config3Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config3")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.TWST NPP")
+}
+record(stringout, "$(P)Config4Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config4")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.THST NPP")
+}
+record(stringout, "$(P)Config5Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config5")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.FRST NPP")
+}
+record(bi, "$(P)ConfigSaved")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ConfigSaved")
+    field(ZNAM, "not saved")
+    field(ONAM, "saved")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(bi, "$(P)ConfigApplied")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ConfigApplied")
+    field(ZNAM, "not applied")
+    field(ONAM, "applied")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(bo, "$(P)CopyConfig")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Copy current loaded config to actual")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CopyConfig")
+    field(ZNAM, "no action")
+    field(ONAM, "copy")
+}
+record(stringin, "$(P)PluginId")
+{
+    field(ASG,  "BEAMLINE")
 }

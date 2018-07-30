@@ -46,7 +46,7 @@ class BnlRocPlugin : public BaseModulePlugin {
          * @param[in] version BNLROC HW&SW version, ie. V5_50
          * @param[in] posCalcPortName Plugin to send parameters to.
          */
-        BnlRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *posCalcPortName);
+        BnlRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir, const char *posCalcPortName);
 
         /**
          * Try to parse the BNLROC version response packet an populate the structure.

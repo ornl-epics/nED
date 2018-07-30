@@ -81,6 +81,18 @@
  */
 class BaseModulePlugin : public BasePlugin {
     public: // structures and defines
+
+        /**
+         * Available features.
+         */
+        enum class ModuleFeatures : uint32_t {
+            CONFIG                  = 1,    //!< Module supports configuration registers
+            STATUS                  = 2,    //!< Module supports status registers
+            TEMPERATURE             = 4,    //!< Module supports temperature registers
+            COUNTERS                = 8,    //!< Module supports counters registers
+            UPGRADE                 = 16,   //!< Module supports remote upgrade
+        };
+
         /**
          * Valid last command return codes
          */
@@ -155,6 +167,7 @@ class BaseModulePlugin : public BasePlugin {
         static const SignMagnitudeConvert *CONV_SIGN_MAGN;
 
     protected: // variables
+        uint32_t m_features;
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
         DasCmdPacket::ModuleType m_hardwareType;        //!< Hardware type
         std::map<std::string, ParamTable> m_params;     //!< Maps of exported parameters
@@ -173,6 +186,7 @@ class BaseModulePlugin : public BasePlugin {
         epicsTime m_connStaleTime;                      //!< Time when connection becomes candidate to close, used for book-keeping the connection
         Timer m_connTimer;                              //!< Periodic timer to check whether connection can be closed.
         std::string m_parentPlugins;                    //!< Parent plugins to connect to
+        std::string m_configDir;                        //!< Directory where to save all configurations
 
     public: // functions
 
@@ -183,6 +197,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] configDir Folder to store module configurations.
          * @param[in] hardwareType Type of hardware module.
          * @param[in] wordSize Number of bytes describing single register word
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
@@ -190,7 +205,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
          * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
-        BaseModulePlugin(const char *portName, const char *parentPlugins,
+        BaseModulePlugin(const char *portName, const char *parentPlugins, const char *configDir,
                          DasCmdPacket::ModuleType hardwareType, uint8_t wordSize,
                          int interfaceMask=0, int interruptMask=0);
 
@@ -963,6 +978,12 @@ class BaseModulePlugin : public BasePlugin {
          * receiving and sending packets. Must be called after any call to
          * create*Param but before any packet can be received or sent. The
          * safest is to put it in plugin constructor.
+         *
+         * It also populates Features parameter from detected features or
+         * set by derived class and finally invoked callParamCallbacks().
+         *
+         * Every derived class should call this function from its constructor
+         * just before return.
          */
         void initParams();
 
@@ -1036,8 +1057,52 @@ class BaseModulePlugin : public BasePlugin {
          */
         float checkConnection();
 
+        /**
+         * Save all configuration PVs to a file.
+         *
+         * Filename is based on the name parameter, with a '.sav' suffix. File is
+         * saved to a pre-defined folder.
+         */
+        bool saveConfig(const std::string &name);
+
+        /**
+         * Load configuration PVs from a file and populate '_Saved' counterparts.
+         *
+         * Filename is based on the name parameter, with a '.sav' suffix. File is
+         * saved to a pre-defined folder.
+         */
+        bool loadConfig(const std::string &name);
+        
+        /**
+         * Copies configuration PV values from '_Saved' counterparts.
+         *
+         */
+        void copyConfig();
+
+        /**
+         * Determine configuration file path.
+         *
+         * If existing is true, file must exist. Returns empty string if path doesn't exist.
+         */
+        std::string getConfigPath(const std::string &name, bool existing);
+
+        /**
+         * Parse filename (not path) and return configuration name.
+         *
+         * Return empty string if filename can not be parsed or is not for this module.
+         */
+        std::string parseConfigName(const std::string &filename);
+
+        /**
+         * Return list of valid configurations for this module.
+         *
+         * List is sorted in order of creation, newest first.
+         */
+        std::list<std::string> getListConfigs();
+
     protected:
         int Enable;         //!< Enable this module
+        int Features;       //!< Bit-mask of supported features (see BaseModulePlugin::Features)
         int CmdReq;         //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
         int CmdRsp;         //!< Last command response status
         int HwId;           //!< Hw ID that this object is controlling
@@ -1057,6 +1122,16 @@ class BaseModulePlugin : public BasePlugin {
         int CfgSection;     //!< Selected configuration section to be written
         int CfgChannel;     //!< Selected channel to be configured
         int NoRspTimeout;   //!< Time to wait for response
+        int SaveConfig;     //!< Save configuration to file
+        int LoadConfig;     //!< Load configuration from file
+        int CopyConfig;     //!< Copy configuration from saved
+        int Config1;        //!< Name of newest config
+        int Config2;        //!< Name of 2nd newest config
+        int Config3;        //!< Name of 3rd newest config
+        int Config4;        //!< Name of 4th newest config
+        int Config5;        //!< Name of 5th newest config
+        int ConfigSaved;    //!< Flag =1 when all the PVs are in config control
+        int ConfigApplied;  //!< Flag =1 when all PVs are synchronized to module
 };
 
 #endif // BASE_MODULE_PLUGIN_H

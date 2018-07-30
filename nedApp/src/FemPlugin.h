@@ -87,7 +87,7 @@ class FemPlugin : public BaseModulePlugin {
          * @param[in] parentPlugins to connect to.
          * @param[in] version FEM HW&SW version, ie. V10_50
          */
-        FemPlugin(const char *portName, const char *parentPlugins, const char *version);
+        FemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
          * Overload start request and return 0 - skipped.
