@@ -729,6 +729,7 @@ record(stringout, "$(P)SaveConfig")
 record(stringout, "$(P)SaveConfigName")
 {
     field(ASG,  "BEAMLINE")
+    field(PINI, "YES")
 }
 record(stringout, "$(P)SaveConfigTrig")
 {
@@ -761,6 +762,15 @@ record(mbbo, "$(P)LoadConfigMenu")
     field(VAL,  "0")
     field(PINI, "YES")
     field(FLNK, "$(P)LoadConfigMenuTrig")
+}
+record(calcout, "$(P)LoadConfigMenuPini")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)LoadConfigMenuPini NPP")
+    field(CALC, "A=0")
+    field(VAL,  "0")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)LoadConfigMenu.PROC")
 }
 record(stringout, "$(P)LoadConfigMenuTrig")
 {
@@ -820,6 +830,7 @@ record(stringout, "$(P)Config1Sync")
     field(DOL,  "$(P)Config1")
     field(OMSL, "closed_loop")
     field(OUT,  "$(P)LoadConfigMenu.ZRST NPP")
+    field(FLNK, "$(P)LoadConfigMenuPini")
 }
 record(stringout, "$(P)Config2Sync")
 {

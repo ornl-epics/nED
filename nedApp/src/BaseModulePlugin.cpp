@@ -73,7 +73,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     snprintf(tmpfile, 1024, "%s/XXXXXX", configDir);
     int fd = mkstemp(tmpfile);
     if (fd == -1) {
-        LOG_ERROR("Configuration directory '%s' does not exist or is not writable directory!", configDir.c_str());
+        LOG_ERROR("Configuration directory '%s' does not exist or is not writable directory!", configDir);
     } else {
         m_configDir = configDir;
         close(fd);
