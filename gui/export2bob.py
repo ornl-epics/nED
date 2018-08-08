@@ -51,6 +51,16 @@ def parse_src_file(path, verbose=False):
 
     return params
 
+def xml_escape(text):
+    xml_escape_table = {
+        "&": "&amp;",
+        '"': "&quot;",
+        "'": "&apos;",
+        ">": "&gt;",
+        "<": "&lt;",
+    }
+    return "".join(xml_escape_table.get(c,c) for c in text)
+
 def generate_config_file(outfile, title, params):
     outfile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
     outfile.write("<display version=\"2.0.0\">\n")
@@ -80,7 +90,7 @@ def generate_config_file(outfile, title, params):
         outfile.write("    <width>145</width>\n")
         outfile.write("    <height>20</height>\n")
         outfile.write("    <text>{0}</text>\n".format(param['name']))
-        outfile.write("    <tooltip>{0}</tooltip>\n".format(param['desc']))
+        outfile.write("    <tooltip>{0}</tooltip>\n".format(xml_escape(param['desc'])))
         outfile.write("    <horizontal_alignment>0</horizontal_alignment>")
         outfile.write("  </widget>\n")
 
@@ -150,7 +160,7 @@ def generate_table_file(outfile, title, params):
         outfile.write("    <width>145</width>\n")
         outfile.write("    <height>20</height>\n")
         outfile.write("    <text>{0}</text>\n".format(param['name']))
-        outfile.write("    <tooltip>{0}</tooltip>\n".format(param['desc']))
+        outfile.write("    <tooltip>{0}</tooltip>\n".format(xml_escape(param['desc'])))
         outfile.write("    <horizontal_alignment>0</horizontal_alignment>")
         outfile.write("  </widget>\n")
 
