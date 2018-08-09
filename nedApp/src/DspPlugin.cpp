@@ -96,8 +96,11 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
         setIntegerParam(Supported, 1);
         setExpectedVersion(7, 1);
         setCmdVersion(1);
-        m_timeSync.enable = true;
-        m_timeSync.logFile = fopen("/tmp/time_sync.log", "w");
+    } else if (m_version == "v72") {
+        createParams_v72();
+        setIntegerParam(Supported, 1);
+        setExpectedVersion(7, 2);
+        setCmdVersion(1);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported DSP version '%s'", version);

@@ -1,21 +1,29 @@
 include "BasePlugin.include"
 include "BaseModulePlugin.include"
-include "RocPlugin_v57.generated"
+include "RocPlugin_v510.generated"
 include "RocPlugin.include"
 include "GlobalConD.include"
 
 record(stringin, "$(P)PluginId")
 {
-    field(VAL,  "RocPlugin_v57")
+    field(VAL,  "RocPlugin_v510")
 }
 
 record(calc, "$(P)HwStatus")
 {
     field(INPA, "$(P)Configured.SEVR NPP")
+    field(INPB, "$(P)Discovered.SEVR NPP")
     field(INPC, "$(P)TempBoard.SEVR NPP")
     field(INPD, "$(P)TempPreampA.SEVR NPP")
     field(INPE, "$(P)TempPreampB.SEVR NPP")
-    field(CALC, "(A+C+D+E)=0")
+    field(CALC, "(A+B+C+D+E)=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
+}
+record(mbbo, "$(P)CmdReq")
+{
+    field(TTVL, "146")
+    field(TTST, "Pre-amp config")
+    field(FTVL, "147")
+    field(FTST, "Pre-amp trigger")
 }

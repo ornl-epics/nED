@@ -103,67 +103,19 @@ $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
 #$(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += StateAnalyzerPlugin.cpp
 
-
 # Module handler plugins - in alphabetical order
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp
-$(PROD_NAME)_SRCS  += AcpcFemPlugin_v14.cpp
-$(PROD_NAME)_SRCS  += AcpcFemPlugin_v22.cpp
 $(PROD_NAME)_SRCS  += AcpcPlugin.cpp
-$(PROD_NAME)_SRCS  += AcpcPlugin_v144.cpp
-$(PROD_NAME)_SRCS  += AcpcPlugin_v171.cpp
-$(PROD_NAME)_SRCS  += AcpcPlugin_v172.cpp
-$(PROD_NAME)_SRCS  += AcpcPlugin_v173.cpp
-$(PROD_NAME)_SRCS  += AcpcPlugin_v180.cpp
 $(PROD_NAME)_SRCS  += AdcRocPlugin.cpp
-$(PROD_NAME)_SRCS  += AdcRocPlugin_v02.cpp
-$(PROD_NAME)_SRCS  += AdcRocPlugin_v03.cpp
-$(PROD_NAME)_SRCS  += AdcRocPlugin_v05.cpp
-$(PROD_NAME)_SRCS  += AdcRocPlugin_v06.cpp
-$(PROD_NAME)_SRCS  += AdcRocPlugin_v07.cpp
 $(PROD_NAME)_SRCS  += ArocPlugin.cpp
-$(PROD_NAME)_SRCS  += ArocPlugin_v23.cpp
-$(PROD_NAME)_SRCS  += ArocPlugin_v24.cpp
-$(PROD_NAME)_SRCS  += ArocPlugin_v255255.cpp
 $(PROD_NAME)_SRCS  += BnlRocPlugin.cpp
-$(PROD_NAME)_SRCS  += BnlRocPlugin_v00.cpp
-$(PROD_NAME)_SRCS  += BnlRocPlugin_v20.cpp
 $(PROD_NAME)_SRCS  += DspPlugin.cpp
-$(PROD_NAME)_SRCS  += DspPlugin_v51.cpp
-$(PROD_NAME)_SRCS  += DspPlugin_v52.cpp
-$(PROD_NAME)_SRCS  += DspPlugin_v63.cpp
-$(PROD_NAME)_SRCS  += DspPlugin_v64.cpp
-$(PROD_NAME)_SRCS  += DspPlugin_v65.cpp
-$(PROD_NAME)_SRCS  += DspPlugin_v66.cpp
-$(PROD_NAME)_SRCS  += DspPlugin_v67.cpp
-$(PROD_NAME)_SRCS  += DspPlugin_v71.cpp
 $(PROD_NAME)_SRCS  += DspWPlugin.cpp
-$(PROD_NAME)_SRCS  += DspWPlugin_v10.cpp
-$(PROD_NAME)_SRCS  += DspWPlugin_v20.cpp
 $(PROD_NAME)_SRCS  += CRocPlugin.cpp
-$(PROD_NAME)_SRCS  += CRocPlugin_v93.cpp
-$(PROD_NAME)_SRCS  += CRocPlugin_v94.cpp
 $(PROD_NAME)_SRCS  += FemPlugin.cpp
-$(PROD_NAME)_SRCS  += FemPlugin_v32.cpp
-$(PROD_NAME)_SRCS  += FemPlugin_v35.cpp
-$(PROD_NAME)_SRCS  += FemPlugin_v36.cpp
-$(PROD_NAME)_SRCS  += FemPlugin_v37.cpp
-$(PROD_NAME)_SRCS  += FemPlugin_v38.cpp
-$(PROD_NAME)_SRCS  += FemPlugin_v39.cpp
-$(PROD_NAME)_SRCS  += FemPlugin_v310.cpp
-$(PROD_NAME)_SRCS  += FemPlugin_v320.cpp
 $(PROD_NAME)_SRCS  += RocPlugin.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v14.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v43.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v45.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v47.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v50.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v51.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v52.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v54.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v56.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v57.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v58.cpp
-$(PROD_NAME)_SRCS  += RocPlugin_v59.cpp
+$(PROD_NAME)_SRCS  += $(notdir $(wildcard ../*Plugin_v*.cpp))
+
 #===========================
 
 include $(TOP)/configure/RULES

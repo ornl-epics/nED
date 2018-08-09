@@ -42,6 +42,10 @@ ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const ch
         setIntegerParam(Supported, 1);
         createParams_v24();
         setExpectedVersion(2, 4);
+    } else if (m_version == "v25") {
+        setIntegerParam(Supported, 1);
+        createParams_v25();
+        setExpectedVersion(2, 5);
     } else if (m_version == "v255255") {
         setIntegerParam(Supported, 1);
         createParams_v255255();

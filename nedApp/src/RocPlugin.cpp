@@ -127,6 +127,10 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
         setIntegerParam(Supported, 1);
         createParams_v59();
         setExpectedVersion(5, 9);
+    } else if (m_version == "v510") {
+        setIntegerParam(Supported, 1);
+        createParams_v510();
+        setExpectedVersion(5, 10);
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);

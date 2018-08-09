@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 #
 # The script generates EPICS databases files for the selected module.
 #
