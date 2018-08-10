@@ -295,7 +295,7 @@ void DspPlugin::createParams_v67() {
     createConfigParam("LvdsTsMeta",     'E', 0x3,  2, 14, 2); // LVDS TSYNC metadata src ctrl (0=RTDL,1=LVDS,2=detector TSYNC,3=OFB0)
 
     createConfigParam("LvdsTsyncPeriod",'E', 0x4, 32,  0, 166660); // LVDS TSYNC period       (scale:100,unit:ns)
-    createConfigParam("TsyncDelay",     'E', 0x5, 32,  0, 0); // LVDS TSYNC delay             (scale:9.4,unit:ns)
+    createConfigParam("TsyncDelay",     'E', 0x5, 32,  0, 0); // LVDS TSYNC delay             (scale:9.411765,unit:ns)
     createConfigParam("TsyncWidth",     'E', 0x6, 32,  0, 83330); // LVDS TSYNC width divisor (scale:100,unit:ns)
 
     createConfigParam("OptA:TxMode",    'E', 0x8,  2,  0, 0); // Optical TX A output mode     (0=data,1=forward,2=chopper,3=timing master)
