@@ -215,9 +215,7 @@ bool DasCmdPacket::checkIntegrity() const
 
 uint32_t DasCmdPacket::getCmdPayloadLength() const
 {
-    if (this->cmd_length < (sizeof(DasCmdPacket) - 6))
-        return 0;
-    if (this->length < (sizeof(DasCmdPacket) - 6 + this->cmd_length))
+    if (this->length < (sizeof(DasCmdPacket) + (this->cmd_length - 6)))
         return 0;
 
     return this->cmd_length - 6;
