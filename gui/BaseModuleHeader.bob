@@ -32,16 +32,16 @@ widget.setPropertyValue("file", filepath)]]></text>
   </widget>
   <widget type="label" version="2.0.0">
     <name>Label_2</name>
-    <text>Next update in</text>
-    <x>330</x>
+    <text>Update interval </text>
+    <x>340</x>
     <width>108</width>
     <horizontal_alignment>2</horizontal_alignment>
   </widget>
   <widget type="textupdate" version="2.0.0">
     <name>Text Update</name>
     <pv_name>$(P)$(TABLE_TYPE)RefreshNext</pv_name>
-    <x>440</x>
-    <width>50</width>
+    <x>610</x>
+    <width>30</width>
     <background_color>
       <color name="OPI_Background" red="255" green="255" blue="255">
       </color>
@@ -52,15 +52,35 @@ widget.setPropertyValue("file", filepath)]]></text>
     <actions>
       <action type="write_pv">
         <pv_name>$(pv_name)</pv_name>
-        <value>0</value>
-        <description>Write PV</description>
+        <value>1</value>
+        <description>Refresh</description>
       </action>
     </actions>
-    <pv_name>$(P)$(TABLE_TYPE)Refresh</pv_name>
+    <pv_name>$(P)$(TABLE_TYPE)RefreshNow.PROC</pv_name>
     <text>Now</text>
-    <x>490</x>
+    <x>640</x>
     <width>80</width>
     <height>20</height>
     <tooltip>$(actions)</tooltip>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>Text Entry</name>
+    <pv_name>$(P)$(TABLE_TYPE)RefreshInt</pv_name>
+    <x>448</x>
+    <width>40</width>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_3</name>
+    <text>s</text>
+    <x>490</x>
+    <width>20</width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_4</name>
+    <text>Next update in </text>
+    <x>510</x>
+    <horizontal_alignment>2</horizontal_alignment>
   </widget>
 </display>

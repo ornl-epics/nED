@@ -583,6 +583,15 @@ record(calc, "$(P)StatusRefreshNext")
     field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
     field(PINI, "YES")
 }
+record(calcout, "$(P)StatusRefreshNow")
+{
+    field(DESC, "Cause counter to expire and refresh now")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)StatusRefreshInt NPP")
+    field(CALC, "2*A-1")
+    field(OUT,  "$(P)StatusRefresh PP")
+    field(OOPT, "Every Time")
+}
 record(longout, "$(P)CountersRefreshInt")
 {
     info(autosaveFields, "VAL")
@@ -594,7 +603,6 @@ record(longout, "$(P)CountersRefreshInt")
 }
 record(calcout, "$(P)CountersRefresh")
 {
-    info(autosaveFields, "INPA")
     field(DESC, "Periodically update counters")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)CountersRefreshInt NPP")
@@ -616,6 +624,15 @@ record(calc, "$(P)CountersRefreshNext")
     field(INPB, "$(P)CountersRefresh NPP")
     field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
     field(PINI, "YES")
+}
+record(calcout, "$(P)CountersRefreshNow")
+{
+    field(DESC, "Cause counter to expire and refresh now")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CountersRefreshInt NPP")
+    field(CALC, "2*A-1")
+    field(OUT,  "$(P)CountersRefresh PP")
+    field(OOPT, "Every Time")
 }
 record(longout, "$(P)TempRefreshInt")
 {
@@ -649,6 +666,15 @@ record(calc, "$(P)TempRefreshNext")
     field(INPB, "$(P)TempRefresh NPP")
     field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
     field(PINI, "YES")
+}
+record(calcout, "$(P)TempRefreshNow")
+{
+    field(DESC, "Cause counter to expire and refresh now")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)TempRefreshInt NPP")
+    field(CALC, "2*A-1")
+    field(OUT,  "$(P)TempRefresh PP")
+    field(OOPT, "Every Time")
 }
 record(ao, "$(P)NoRspTimeout")
 {
