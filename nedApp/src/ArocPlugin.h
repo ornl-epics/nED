@@ -63,6 +63,11 @@ class ArocPlugin : public BaseModulePlugin {
         /**
          * Create and register all AROC v2.3 parameters to be exposed to EPICS.
          */
+        void createParams_v22();
+
+        /**
+         * Create and register all AROC v2.3 parameters to be exposed to EPICS.
+         */
         void createParams_v23();
 
         /**

@@ -34,7 +34,11 @@ ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const ch
     : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_AROC, 2)
     , m_version(version)
 {
-    if (m_version == "v23") {
+    if (m_version == "v22") {
+        setIntegerParam(Supported, 1);
+        createParams_v22();
+        setExpectedVersion(2, 2);
+    } else if (m_version == "v23") {
         setIntegerParam(Supported, 1);
         createParams_v23();
         setExpectedVersion(2, 3);
