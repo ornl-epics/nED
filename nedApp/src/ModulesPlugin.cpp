@@ -249,6 +249,7 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
         }
     }
 
+    memset(buffer, 0, size);
     std::sort(lines.begin(), lines.end());
     for (auto line = lines.begin(); line != lines.end(); line++) {
         if (line->length() >= length) {
