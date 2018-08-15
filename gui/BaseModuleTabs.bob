@@ -23,7 +23,7 @@
 tabs = ScriptUtil.findWidgetByName(widget, "ModuleTabs").propTabs()
 
 features = PVUtil.getInt(pvs[0])
-plugin_id = PVUtil.getString(pvs[1])
+init_script = PVUtil.getInt(pvs[1])
 
 featuresMap = {
     0x1: "Config",
@@ -32,7 +32,9 @@ featuresMap = {
     0x8: "Counters",
 }
 
-for bit,feature in featuresMap.iteritems():
+if init_script == 1:
+  pvs[1].write(0)
+  for bit,feature in featuresMap.iteritems():
     if feature == "Config":
         tab = tabs.addElement()
         tab.name().setValue(feature)
@@ -47,7 +49,7 @@ for bit,feature in featuresMap.iteritems():
         ScriptUtil.getLogger().info("Added %s tab" % feature.lower())
 ]]></text>
         <pv_name>$(P)Features</pv_name>
-        <pv_name trigger="false">loc://testdfdsnfd("DspPlugin_v71")</pv_name>
+        <pv_name trigger="false">loc://init_script$(DID)(1)</pv_name>
       </script>
     </scripts>
   </widget>
