@@ -25,17 +25,15 @@ record(mbbo, "$(P)DetTypeSel")
     field(THST, "CROC")
     field(FRVL, "4")
     field(FRST, "ADCROC")
-    field(FLNK, "$(P)OutputMode")
+    field(FLNK, "$(P)DiagEn")
 }
 
-record(mbbo, "$(P)OutputMode")
+record(mbbo, "$(P)DiagEn")
 {
+    field(ZRST, "disable")
+    field(ONST, "enable")
     field(ZRVL, "0")
-    field(ZRST, "normal")
     field(ONVL, "1")
-    field(ONST, "raw")
-    field(TWVL, "2")
-    field(TWST, "extended")
     field(FLNK, "$(P)DataFormatIdSet PP")
 }
 
@@ -62,14 +60,14 @@ record(sel, "$(P)DataFormatIdSel")
 record(calc, "$(P)DataFormatIdLpsd")
 {
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)OutputMode NPP")
+    field(INPA, "$(P)DiagEn NPP")
     field(CALC, "A=0?1:2")
 }
 
 record(calc, "$(P)DataFormatIdAcpc")
 {
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)OutputMode NPP")
+    field(INPA, "$(P)DiagEn NPP")
     field(CALC, "A=0?3:4")
 }
 

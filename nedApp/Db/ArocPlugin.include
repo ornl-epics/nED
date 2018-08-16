@@ -11,8 +11,8 @@ record(mbbo, "$(P)DiagEn")
 {
     field(ZRST, "disable")
     field(ONST, "enable")
-    field(ZRVL, "0")
-    field(ONVL, "1")
+    field(ZRVL, "1")
+    field(ONVL, "0")
     field(DTYP, "Raw Soft Channel")
     field(OUT,  "$(P)OutputMode PP")
 }
