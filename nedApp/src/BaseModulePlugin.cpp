@@ -195,7 +195,8 @@ asynStatus BaseModulePlugin::writeOctet(asynUser *pasynUser, const char *value, 
         std::string name(value, nChars);
         *nActual = nChars;
         if (!loadConfig(name)) {
-            LOG_ERROR("Failed to load configuration '%s'", name.c_str());
+            if (!name.empty())
+                LOG_ERROR("Failed to load configuration '%s'", name.c_str());
             return asynError;
         }
         setIntegerParam(ConfigSaved, 1);

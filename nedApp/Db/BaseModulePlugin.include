@@ -163,7 +163,7 @@ record(bi, "$(P)Acquiring")
 record(calc, "$(P)ConfStatus")
 {
     field(DESC, "Configuration status")
-    field(INPA, "$(P)Enable NPP")
+    field(INPA, "$(P)Enable CP")
     field(INPB, "$(P)OutputMode.SEVR CP MS")
     field(CALC, "A=0||B#2")
     field(LOW,  "0")

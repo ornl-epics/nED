@@ -28,8 +28,6 @@ record(calc, "$(P)HwStatus")
 # Override BaseModulePlugin PVs
 record(calc, "$(P)ConfStatus")
 {
-    field(INPA, "$(P)Enable NPP")
     field(INPB, "")
     field(CALC, "1")
 }
-
