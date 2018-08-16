@@ -1,0 +1,708 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Flat field</name>
+  <actions>
+  </actions>
+  <scripts>
+    <script file="EmbeddedPy">
+      <text><![CDATA[from org.csstudio.display.builder.model import WidgetFactory
+from org.csstudio.display.builder.runtime.script import PVUtil, ScriptUtil
+from org.csstudio.display.builder.model.macros import MacroHandler
+
+initialized = PVUtil.getInt(pvs[0])
+positions = PVUtil.getLongArray(pvs[1])
+num_positions = PVUtil.getInt(pvs[2])
+pv_prefix = MacroHandler.replace(widget.getEffectiveMacros(), "$(P)")
+
+display = widget.getDisplayModel()
+frame = widget.getDisplayModel().runtimeChildren().getChildByName("Detectors positions")
+
+def createWidget(pvname, x, y, width, heigth):
+    global frame
+    global pv_prefix
+    w = WidgetFactory.getInstance().getWidgetDescriptor("textupdate").createWidget();
+    w.setPropertyValue("x", x)
+    w.setPropertyValue("y", y)
+    w.setPropertyValue("width", width)
+    w.setPropertyValue("height", heigth)
+    w.setPropertyValue("pv_name", pv_prefix + pvname)
+    frame.runtimeChildren().addChild(w)
+
+logger = ScriptUtil.getLogger()
+logger.info("{0}".format(num_positions))
+frame.setPropertyValue("height", 120+num_positions*30)
+for i in range(num_positions):
+  logger.info("{0}".format(positions[i]))
+  createWidget("pos{0}:Id".format(positions[i]),        6, 78+i*30, 49, 26)
+  createWidget("pos{0}:CorrX".format(positions[i]),    57, 78+i*30, 61, 26)
+  createWidget("pos{0}:CorrY".format(positions[i]),   120, 78+i*30, 61, 26)
+  createWidget("pos{0}:PsLowX".format(positions[i]),  183, 78+i*30, 61, 26)
+  createWidget("pos{0}:PsUpX".format(positions[i]),   246, 78+i*30, 61, 26)
+  createWidget("pos{0}:Enabled".format(positions[i]), 309, 78+i*30, 61, 26)
+]]></text>
+      <pv_name>loc://init$(DID)(1)</pv_name>
+      <pv_name trigger="false">$(P)Positions</pv_name>
+      <pv_name trigger="false">$(P)NumPositions</pv_name>
+    </script>
+  </scripts>
+  <widget type="group" version="2.0.0">
+    <name>Detectors positions</name>
+    <y>264</y>
+    <width>679</width>
+    <height>229</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>Id</text>
+      <x>6</x>
+      <y>48</y>
+      <width>49</width>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_1</name>
+      <text>Corr X</text>
+      <x>57</x>
+      <y>48</y>
+      <width>61</width>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_2</name>
+      <text>Corr Y</text>
+      <x>120</x>
+      <y>48</y>
+      <width>61</width>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_3</name>
+      <text>PS low</text>
+      <x>183</x>
+      <y>48</y>
+      <width>61</width>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_4</name>
+      <text>PS high</text>
+      <x>246</x>
+      <y>48</y>
+      <width>61</width>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_5</name>
+      <text>Enabled</text>
+      <x>309</x>
+      <y>48</y>
+      <width>67</width>
+      <height>26</height>
+      <horizontal_alignment>1</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_7</name>
+      <text>Import dir:</text>
+      <x>6</x>
+      <y>6</y>
+      <width>91</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text</name>
+      <pv_name>$(P)ImportDir</pv_name>
+      <x>96</x>
+      <y>3</y>
+      <width>501</width>
+      <height>31</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>6</format>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_8</name>
+      <text>Import status:</text>
+      <x>420</x>
+      <y>42</y>
+      <width>115</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <pv_name>$(P)ImportStatus</pv_name>
+      <x>534</x>
+      <y>42</y>
+      <width>103</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="fileselector" version="2.0.0">
+      <pv_name>$(P)ImportDir</pv_name>
+      <filespace>1</filespace>
+      <component>1</component>
+      <x>597</x>
+      <y>3</y>
+      <height>31</height>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Control</name>
+    <width>313</width>
+    <height>265</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="label" version="2.0.0">
+      <name>Text Update_1</name>
+      <text>Output</text>
+      <x>1</x>
+      <y>163</y>
+      <width>264</width>
+      <height>53</height>
+      <background_color>
+        <color name="OPI_Background" red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <transparent>false</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <border_width>1</border_width>
+      <border_color>
+        <color name="Read_Background" red="240" green="240" blue="240">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Text Update</name>
+      <text>From detector</text>
+      <x>1</x>
+      <y>37</y>
+      <width>264</width>
+      <height>116</height>
+      <background_color>
+        <color name="OPI_Background" red="255" green="255" blue="255">
+        </color>
+      </background_color>
+      <transparent>false</transparent>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <tooltip>$(pv_name)
+$(pv_value)</tooltip>
+      <border_width>1</border_width>
+      <border_color>
+        <color name="Read_Background" red="240" green="240" blue="240">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>XyRange_Label</name>
+      <text>Max X:</text>
+      <y>36</y>
+      <width>187</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>XyRange_Input</name>
+      <pv_name>$(P)XMaxIn</pv_name>
+      <x>192</x>
+      <y>36</y>
+      <width>70</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <format>1</format>
+      <actions>
+      </actions>
+      <tooltip>Maximum X and Y value returned by detector.</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PsFractWidth_Label</name>
+      <text>Photo sum fraction bits:</text>
+      <y>126</y>
+      <width>187</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>PsFractWidth_Input</name>
+      <pv_name>$(P)PsFractWidth</pv_name>
+      <x>192</x>
+      <y>126</y>
+      <width>70</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <tooltip>Raw 32 bit photo sum X and Y values are in UQn.m format. This field specifies m.</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PsLowDecBase_Label</name>
+      <text>Max Y:</text>
+      <y>66</y>
+      <width>187</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>PsLowDecBase_Input</name>
+      <pv_name>$(P)YMaxIn</pv_name>
+      <x>192</x>
+      <y>66</y>
+      <width>70</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PsLowDecLim_Label</name>
+      <text>Pixel max Y:</text>
+      <y>191</y>
+      <width>187</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>XyFractWidth_Label</name>
+      <text>X,Y fraction bits:</text>
+      <x>24</x>
+      <y>96</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>XyFractWidth_Input</name>
+      <pv_name>$(P)XyFractWidth</pv_name>
+      <x>192</x>
+      <y>96</y>
+      <width>70</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <tooltip>Raw 32 bit X and Y values are in UQn.m format. This field specifies m.</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>FlatFieldEn_Label</name>
+      <text>Pixel max X:</text>
+      <x>24</x>
+      <y>162</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Input</name>
+      <pv_name>$(P)YMaxOut</pv_name>
+      <x>192</x>
+      <y>191</y>
+      <width>70</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>PsLowDecLim_Input</name>
+      <pv_name>$(P)XMaxOut</pv_name>
+      <x>192</x>
+      <y>162</y>
+      <width>70</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>PsLowDecLim_Label</name>
+      <text>Preset:</text>
+      <x>36</x>
+      <y>6</y>
+      <width>94</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="combo" version="2.0.0">
+      <name>Menu Button</name>
+      <pv_name>$(P)Presets</pv_name>
+      <x>138</x>
+      <y>6</y>
+      <width>128</width>
+      <height>25</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Status</name>
+    <x>312</x>
+    <width>367</width>
+    <height>265</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="label" version="2.0.0">
+      <name>BadDsp_Label</name>
+      <text>Good events:</text>
+      <y>102</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Number of ignored pixels due to missing flat-field correctin data</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>CntPhotoSum_Label</name>
+      <text>Rejected events:</text>
+      <y>135</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Number of ignored pixels received after pulse flagged as complete</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>BadPhotoSum_Update</name>
+      <pv_name>$(P)RateVetoEvents</pv_name>
+      <x>174</x>
+      <y>135</y>
+      <width>151</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>BadDsp_Update</name>
+      <pv_name>$(P)RateGoodEvents</pv_name>
+      <x>174</x>
+      <y>102</y>
+      <width>151</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>OverallStatus_Label</name>
+      <text>Overall status</text>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="led" version="2.0.0">
+      <name>LED</name>
+      <pv_name>$(P)Status</pv_name>
+      <bit>0</bit>
+      <x>174</x>
+      <y>2</y>
+      <width>21</width>
+      <height>21</height>
+      <off_color>
+        <color name="Major" red="255" green="0" blue="0">
+        </color>
+      </off_color>
+      <on_color>
+        <color name="On" red="0" green="255" blue="0">
+        </color>
+      </on_color>
+      <actions>
+      </actions>
+      <border_alarm_sensitive>false</border_alarm_sensitive>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update</name>
+      <pv_name>$(P)TablesSizeX</pv_name>
+      <x>174</x>
+      <y>36</y>
+      <width>151</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>Text Update_3</name>
+      <pv_name>$(P)TablesSizeY</pv_name>
+      <x>174</x>
+      <y>69</y>
+      <width>151</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>Y size of tables:</text>
+      <x>18</x>
+      <y>69</y>
+      <width>145</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_8</name>
+      <text>X size of tables:</text>
+      <x>24</x>
+      <y>36</y>
+      <width>139</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+  </widget>
+</display>

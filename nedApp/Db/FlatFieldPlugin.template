@@ -60,9 +60,20 @@ record(waveform, "$(P)ImportDir")
 }
 record(longin, "$(P)NumPositions")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Number of configured positions")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))NumPositions")
+    field(PINI, "YES")
+}
+record(waveform, "$(P)Positions")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "List of configured positions")
+    field(DTYP, "asynInt32ArrayIn")
+    field(INP,  "@asyn($(PORT))Positions")
+    field(FTVL, "LONG")
+    field(NELM, "100")
     field(PINI, "YES")
 }
 

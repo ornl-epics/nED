@@ -33,13 +33,14 @@
 EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 3, "Port name", string, "Parent plugins", string, "Positions", string);
 
 FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins, const char *positions)
-    : BasePlugin(portName, 1, asynOctetMask | asynFloat64Mask, asynOctetMask | asynFloat64Mask)
+    : BasePlugin(portName, 1, asynOctetMask | asynFloat64Mask | asynInt32ArrayMask, asynOctetMask | asynFloat64Mask)
     , m_parentPlugins(parentPlugins)
 {
     createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
     createParam("ImportStatus", asynParamInt32, &ImportStatus, IMPORT_STATUS_NONE); // Import status
     createParam("ImportDir",    asynParamOctet, &ImportDir);            // Path to correction tables directory
-    createParam("NumPositions", asynParamInt32, &NumPositions, 0);      // READ - All tables Y size
+    createParam("NumPositions", asynParamInt32, &NumPositions, 0);      // READ - Number of configured positions
+    createParam("Positions",    asynParamInt32Array, &Positions);       // READ - All configured positions
     createParam("CntGoodEvents",asynParamInt32, &CntGoodEvents, 0);     // Number of calculated events
     createParam("CntInhVetos",  asynParamInt32, &CntInhVetos, 0);       // Number of vetos inherited from others
     createParam("CntPosVetos",  asynParamInt32, &CntPosVetos, 0);       // Number of bad position vetos
@@ -155,6 +156,19 @@ asynStatus FlatFieldPlugin::readOctet(asynUser *pasynUser, char *value, size_t n
         return asynSuccess;
     }
     return BasePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
+}
+
+asynStatus FlatFieldPlugin::readInt32Array(asynUser *pasynUser, epicsInt32 *value, size_t nElements, size_t *nIn)
+{
+    if (pasynUser->reason == Positions) {
+        size_t i = 0;
+        for (auto it = PosId.begin(); it != PosId.end() && i < nElements; it++, i++) {
+            value[i] = it->first;
+        }
+        *nIn = i;
+        return asynSuccess;
+    }
+    return BasePlugin::readInt32Array(pasynUser, value, nElements, nIn);
 }
 
 asynStatus FlatFieldPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)

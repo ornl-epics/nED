@@ -152,6 +152,11 @@ class FlatFieldPlugin : public BasePlugin {
         asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
 
         /**
+         * Handle reading arrays of ints
+         */
+        asynStatus readInt32Array(asynUser *pasynUser, epicsInt32 *value, size_t nElements, size_t *nIn);
+
+        /**
          * Overloaded function to process incoming OCC packets.
          */
         void recvDownstream(const DasDataPacketList &packets);
@@ -293,6 +298,7 @@ class FlatFieldPlugin : public BasePlugin {
         int ImportStatus;   //!< Import status
         int ImportDir;      //!< Absolute path to pixel map file
         int NumPositions;   //!< Number of configured positions
+        int Positions;      //!< Configured positions
         int CntGoodEvents;  //!< Number of calculated events
         int CntPosVetos;    //!< Number of bad position vetos
         int CntInhVetos;    //!< Number of vetos inherited from others
