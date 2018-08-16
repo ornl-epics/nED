@@ -107,7 +107,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Meta13:Source",    '1', 0x1A,  1, 19, 0); // Meta Channel13 Source       (0=ODB_In13,1=tclk_in)
     createConfigParam("Meta14:Source",    '1', 0x1A,  1, 20, 0); // Meta Channel14 Source       (0=ODB_In14,1=sysrstb_in)
     createConfigParam("Meta15:Source",    '1', 0x1A,  1, 21, 0); // Meta Channel15 Source       (0=ODB_In15,1=txenb_in)
-    createConfigParam("Trig0:Freq",       '1', 0x1E,  4,  0, 0); // Trigger 0 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz) 
+    createConfigParam("Trig0:Freq",       '1', 0x1E,  4,  0, 0); // Trigger 0 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("Trig1:Freq",       '1', 0x1E,  4,  4, 0); // Trigger 1 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("Trig1FrameDelay",  '1', 0x1F,  8, 24, 0); // Trigger 1 Frame Delay       (unit:frames)
     createConfigParam("Trig2:Freq",       '1', 0x1E,  4,  8, 0); // Trigger 2 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
@@ -118,7 +118,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Trig3:Delay",      '1', 0x1D, 32,  0, 0); // Trigger 3 Delay             (scale:9.4117,unit:ns)
     createConfigParam("TestPatternDly",   '1', 0x1B, 16,  0, 0); // Test Pattern Delay          (scale:0.0024094117,unit:ms)
     createConfigParam("TestPattPlsPer",   '1', 0x1B, 16, 16, 10625); // Test Pattern Pulse Period   (scale:0.0094117,unit:us)
-    
+
 
 //      BLXXX:Det:DspX:| sig nam|      addr size off  | EPICS record description | (bi and mbbi description)
     createCounterParam("Lvds1:Good",      0x0, 32,  0); // LVDS 1 Number of good events
@@ -142,12 +142,102 @@ void DspPlugin::createParams_v71() {
 
 
 //      BLXXX:Det:DspX:| sig nam|          addr size off  | EPICS record description | (bi and mbbi description)
-    createStatusParam("Lvds1:Status",      0x0,  16,  0); // Lvds1 Status
-    createStatusParam("Lvds2:Status",      0x0,  16, 16); // Lvds2 Status
-    createStatusParam("Lvds3:Status",      0x1,  16,  0); // Lvds3 Status
-    createStatusParam("Lvds4:Status",      0x1,  16, 16); // Lvds4 Status
-    createStatusParam("Lvds5:Status",      0x2,  16,  0); // Lvds5 Status
-    createStatusParam("Lvds6:Status",      0x2,  16, 16); // Lvds6 Status
+    createStatusParam("Lvds1:ParityErr",   0x0,   1,  0); // LVDS1 had parity errors
+    createStatusParam("Lvds1:EvBlocked",   0x0,   1,  1); // LVDS1 blocked events
+    createStatusParam("Lvds1:EvShort",     0x0,   1,  2); // LVDS1 had short events
+    createStatusParam("Lvds1:Ev2Starts",   0x0,   1,  3); // LVDS1 had double starts
+    createStatusParam("Lvds1:FifoAlmostF", 0x0,   1,  4); // LVDS1 FIFO almost full
+    createStatusParam("Lvds1:FifoFull",    0x0,   1,  5); // LVDS1 FIFO full
+    createStatusParam("Lvds1:FifoHasData", 0x0,   1,  6); // LVDS1 FIFO has data
+    createStatusParam("Lvds1:ChAlmostF",   0x0,   1,  7); // LVDS1 channel almost full
+    createStatusParam("Lvds1:ChHasData",   0x0,   1,  8); // LVDS1 channel has data
+    createStatusParam("Lvds1:ChHasCmd",    0x0,   1,  9); // LVDS1 channel has command
+    createStatusParam("Lvds1:CmdAlmostF",  0x0,   1, 10); // LVDS1 command FIFO almost full
+    createStatusParam("Lvds1:CmdWren",     0x0,   1, 11); // LVDS1 command FIFO WREN
+    createStatusParam("Lvds1:DataAlmostF", 0x0,   1, 12); // LVDS1 data FIFO almost full
+    createStatusParam("Lvds1:DataPresent", 0x0,   1, 13); // LVDS1 data FIFO has data
+    createStatusParam("Lvds1:Overflow",    0x0,   1, 14); // LVDS1 overflow
+    createStatusParam("Lvds1:BadPacket",   0x0,   1, 15); // LVDS1 had bad packet
+    createStatusParam("Lvds2:ParityErr",   0x0,   1, 16); // LVDS2 had parity errors
+    createStatusParam("Lvds2:EvBlocked",   0x0,   1, 17); // LVDS2 blocked events
+    createStatusParam("Lvds2:EvShort",     0x0,   1, 18); // LVDS2 had short events
+    createStatusParam("Lvds2:Ev2Starts",   0x0,   1, 19); // LVDS2 had double starts
+    createStatusParam("Lvds2:FifoAlmostF", 0x0,   1, 20); // LVDS2 FIFO almost full
+    createStatusParam("Lvds2:FifoFull",    0x0,   1, 21); // LVDS2 FIFO full
+    createStatusParam("Lvds2:FifoHasData", 0x0,   1, 22); // LVDS2 FIFO has data
+    createStatusParam("Lvds2:ChAlmostF",   0x0,   1, 23); // LVDS2 channel almost full
+    createStatusParam("Lvds2:ChHasData",   0x0,   1, 24); // LVDS2 channel has data
+    createStatusParam("Lvds2:ChHasCmd",    0x0,   1, 25); // LVDS2 channel has command
+    createStatusParam("Lvds2:CmdAlmostF",  0x0,   1, 26); // LVDS2 command FIFO almost full
+    createStatusParam("Lvds2:CmdWren",     0x0,   1, 27); // LVDS2 command FIFO WREN
+    createStatusParam("Lvds2:DataAlmostF", 0x0,   1, 28); // LVDS2 data FIFO almost full
+    createStatusParam("Lvds2:DataPresent", 0x0,   1, 29); // LVDS2 data FIFO has data
+    createStatusParam("Lvds2:Overflow",    0x0,   1, 30); // LVDS2 overflow
+    createStatusParam("Lvds2:BadPacket",   0x0,   1, 31); // LVDS2 had bad packet
+    createStatusParam("Lvds3:ParityErr",   0x1,   1,  0); // LVDS3 had parity errors
+    createStatusParam("Lvds3:EvBlocked",   0x1,   1,  1); // LVDS3 blocked events
+    createStatusParam("Lvds3:EvShort",     0x1,   1,  2); // LVDS3 had short events
+    createStatusParam("Lvds3:Ev2Starts",   0x1,   1,  3); // LVDS3 had double starts
+    createStatusParam("Lvds3:FifoAlmostF", 0x1,   1,  4); // LVDS3 FIFO almost full
+    createStatusParam("Lvds3:FifoFull",    0x1,   1,  5); // LVDS3 FIFO full
+    createStatusParam("Lvds3:FifoHasData", 0x1,   1,  6); // LVDS3 FIFO has data
+    createStatusParam("Lvds3:ChAlmostF",   0x1,   1,  7); // LVDS3 channel almost full
+    createStatusParam("Lvds3:ChHasData",   0x1,   1,  8); // LVDS3 channel has data
+    createStatusParam("Lvds3:ChHasCmd",    0x1,   1,  9); // LVDS3 channel has command
+    createStatusParam("Lvds3:CmdAlmostF",  0x1,   1, 10); // LVDS3 command FIFO almost full
+    createStatusParam("Lvds3:CmdWren",     0x1,   1, 11); // LVDS3 command FIFO WREN
+    createStatusParam("Lvds3:DataAlmostF", 0x1,   1, 12); // LVDS3 data FIFO almost full
+    createStatusParam("Lvds3:DataPresent", 0x1,   1, 13); // LVDS3 data FIFO has data
+    createStatusParam("Lvds3:Overflow",    0x1,   1, 14); // LVDS3 overflow
+    createStatusParam("Lvds3:BadPacket",   0x1,   1, 15); // LVDS3 had bad packet
+    createStatusParam("Lvds4:ParityErr",   0x1,   1, 16); // LVDS4 had parity errors
+    createStatusParam("Lvds4:EvBlocked",   0x1,   1, 17); // LVDS4 blocked events
+    createStatusParam("Lvds4:EvShort",     0x1,   1, 18); // LVDS4 had short events
+    createStatusParam("Lvds4:Ev2Starts",   0x1,   1, 19); // LVDS4 had double starts
+    createStatusParam("Lvds4:FifoAlmostF", 0x1,   1, 20); // LVDS4 FIFO almost full
+    createStatusParam("Lvds4:FifoFull",    0x1,   1, 21); // LVDS4 FIFO full
+    createStatusParam("Lvds4:FifoHasData", 0x1,   1, 22); // LVDS4 FIFO has data
+    createStatusParam("Lvds4:ChAlmostF",   0x1,   1, 23); // LVDS4 channel almost full
+    createStatusParam("Lvds4:ChHasData",   0x1,   1, 24); // LVDS4 channel has data
+    createStatusParam("Lvds4:ChHasCmd",    0x1,   1, 25); // LVDS4 channel has command
+    createStatusParam("Lvds4:CmdAlmostF",  0x1,   1, 26); // LVDS4 command FIFO almost full
+    createStatusParam("Lvds4:CmdWren",     0x1,   1, 27); // LVDS4 command FIFO WREN
+    createStatusParam("Lvds4:DataAlmostF", 0x1,   1, 28); // LVDS4 data FIFO almost full
+    createStatusParam("Lvds4:DataPresent", 0x1,   1, 29); // LVDS4 data FIFO has data
+    createStatusParam("Lvds4:Overflow",    0x1,   1, 30); // LVDS4 overflow
+    createStatusParam("Lvds4:BadPacket",   0x1,   1, 31); // LVDS4 had bad packet
+    createStatusParam("Lvds5:ParityErr",   0x2,   1,  0); // LVDS5 had parity errors
+    createStatusParam("Lvds5:EvBlocked",   0x2,   1,  1); // LVDS5 blocked events
+    createStatusParam("Lvds5:EvShort",     0x2,   1,  2); // LVDS5 had short events
+    createStatusParam("Lvds5:Ev2Starts",   0x2,   1,  3); // LVDS5 had double starts
+    createStatusParam("Lvds5:FifoAlmostF", 0x2,   1,  4); // LVDS5 FIFO almost full
+    createStatusParam("Lvds5:FifoFull",    0x2,   1,  5); // LVDS5 FIFO full
+    createStatusParam("Lvds5:FifoHasData", 0x2,   1,  6); // LVDS5 FIFO has data
+    createStatusParam("Lvds5:ChAlmostF",   0x2,   1,  7); // LVDS5 channel almost full
+    createStatusParam("Lvds5:ChHasData",   0x2,   1,  8); // LVDS5 channel has data
+    createStatusParam("Lvds5:ChHasCmd",    0x2,   1,  9); // LVDS5 channel has command
+    createStatusParam("Lvds5:CmdAlmostF",  0x2,   1, 10); // LVDS5 command FIFO almost full
+    createStatusParam("Lvds5:CmdWren",     0x2,   1, 11); // LVDS5 command FIFO WREN
+    createStatusParam("Lvds5:DataAlmostF", 0x2,   1, 12); // LVDS5 data FIFO almost full
+    createStatusParam("Lvds5:DataPresent", 0x2,   1, 13); // LVDS5 data FIFO has data
+    createStatusParam("Lvds5:Overflow",    0x2,   1, 14); // LVDS5 overflow
+    createStatusParam("Lvds5:BadPacket",   0x2,   1, 15); // LVDS5 had bad packet
+    createStatusParam("Lvds6:ParityErr",   0x2,   1, 16); // LVDS6 had parity errors
+    createStatusParam("Lvds6:EvBlocked",   0x2,   1, 17); // LVDS6 blocked events
+    createStatusParam("Lvds6:EvShort",     0x2,   1, 18); // LVDS6 had short events
+    createStatusParam("Lvds6:Ev2Starts",   0x2,   1, 19); // LVDS6 had double starts
+    createStatusParam("Lvds6:FifoAlmostF", 0x2,   1, 20); // LVDS6 FIFO almost full
+    createStatusParam("Lvds6:FifoFull",    0x2,   1, 21); // LVDS6 FIFO full
+    createStatusParam("Lvds6:FifoHasData", 0x2,   1, 22); // LVDS6 FIFO has data
+    createStatusParam("Lvds6:ChAlmostF",   0x2,   1, 23); // LVDS6 channel almost full
+    createStatusParam("Lvds6:ChHasData",   0x2,   1, 24); // LVDS6 channel has data
+    createStatusParam("Lvds6:ChHasCmd",    0x2,   1, 25); // LVDS6 channel has command
+    createStatusParam("Lvds6:CmdAlmostF",  0x2,   1, 26); // LVDS6 command FIFO almost full
+    createStatusParam("Lvds6:CmdWren",     0x2,   1, 27); // LVDS6 command FIFO WREN
+    createStatusParam("Lvds6:DataAlmostF", 0x2,   1, 28); // LVDS6 data FIFO almost full
+    createStatusParam("Lvds6:DataPresent", 0x2,   1, 29); // LVDS6 data FIFO has data
+    createStatusParam("Lvds6:Overflow",    0x2,   1, 30); // LVDS6 overflow
+    createStatusParam("Lvds6:BadPacket",   0x2,   1, 31); // LVDS6 had bad packet
     createStatusParam("TsyncCountsRF",     0x3,  32,  0); // TsyncCountRF
     createStatusParam("TsyncCountsInt",    0x4,  32,  0); // TsyncCountInt
     createStatusParam("TsyncCountsGPS",    0x5,  32,  0); // TsyncCountGPS
