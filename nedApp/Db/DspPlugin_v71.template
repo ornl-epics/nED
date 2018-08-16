@@ -1,7 +1,7 @@
 include "BasePlugin.include"
 include "BaseModulePlugin.include"
 include "DspPlugin_v71.generated"
-include "DspPlugin.include"
+include "DspPlugin7.include"
 include "GlobalConD.include"
 
 record(stringin, "$(P)PluginId")
@@ -15,14 +15,4 @@ record(mbbo, "$(P)CmdReq")
     field(TVST, "Down reset")
     field(TTVL, "39")
     field(TTST, "Down reset LVDS")
-}
-
-record(calc, "$(P)HwStatus")
-{
-    field(INPA, "$(P)NoRtdlValid NPP")
-    field(INPB, "$(P)ELReady NPP")
-    field(INPC, "$(P)Configured NPP")
-    field(CALC, "A=0&&B=1&&C=1")
-    field(LOW,  "0")
-    field(LSV,  "MAJOR")
 }
