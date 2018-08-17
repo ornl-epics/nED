@@ -48,7 +48,7 @@ CRocPosCalcPlugin::CRocPosCalcPlugin(const char *portName, const char *dispatche
     createParam("TimeRangeSumMax",  asynParamInt32, &TimeRangeSumMax, 600); // WRITE - High threshold for integrated time ranges
     createParam("EchoDeadTime",     asynParamInt32, &EchoDeadTime, 250);    // WRITE - Time between two local events in 100ns
     createParam("EchoDeadArea",     asynParamInt32, &EchoDeadArea, 160);    // WRITE - Number of pixels defining the echo-detection area
-    createParam("ProcessMode",      asynParamInt32, &ProcessMode, 0);       // WRITE - Select event verification algorithm (0=legacy,1=new)
+    createParam("Resolution",       asynParamInt32, &Resolution, 0);        // WRITE - Toggle high-resolution mode (0=original,1=medium,2=high)
 
     createParam("CntTotalEvents",   asynParamInt32, &CntTotalEvents, 0);    // READ - Number of all events
     createParam("CntGoodEvents",    asynParamInt32, &CntGoodEvents, 0);     // READ - Number of good events
@@ -126,8 +126,25 @@ asynStatus CRocPosCalcPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason == OutExtMode) {
         m_calcParams.outExtMode = (value != 0);
         handled = true;
-    } else if (pasynUser->reason == ProcessMode) {
-        m_calcParams.processModeNew = (value != 0);
+    } else if (pasynUser->reason == Resolution) {
+        switch (value) {
+            case 2:
+                m_calcParams.resolution = CalcParams::RESOLUTION_HIGH;
+                m_calcParams.maxX = 14*11*3;
+                m_calcParams.maxY = 25;
+                break;
+            case 1:
+                m_calcParams.resolution = CalcParams::RESOLUTION_MEDIUM;
+                m_calcParams.maxX = 14*11*3;
+                m_calcParams.maxY = 13;
+                break;
+            case 0:
+            default:
+                m_calcParams.resolution = CalcParams::RESOLUTION_ORIGINAL;
+                m_calcParams.maxX = 14*11*3;
+                m_calcParams.maxY = 25;
+                break;
+        }
         handled = true;
     }
     m_paramsMutex.unlock();
@@ -417,6 +434,12 @@ static inline uint32_t diff_unsigned(uint32_t a, uint32_t b)
     }
 }
 
+static inline int32_t diff_signed(uint32_t a, uint32_t b)
+{
+    int32_t d = a;
+    return -1 * (d - b);
+}
+
 /**
  * Calculates X and Y dimension from the raw counts and encodes it into pixel id
  * format. The encoded pixel id includes pixel position withing the detector and
@@ -430,7 +453,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
 {
     CRocDataPacket::VetoType veto = CRocDataPacket::VETO_NO;
     CRocDataPacket::VetoType tmpVeto = CRocDataPacket::VETO_NO;
-    uint8_t x,y;
+    uint16_t x,y;
 
     tmpVeto = checkTimeRange(event, detParams);
     if (tmpVeto != CRocDataPacket::VETO_NO) {
@@ -438,35 +461,29 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculatePixel(const CRocDataPacket:
         if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
     }
 
-    if (m_calcParams.processModeNew)
-        tmpVeto = calculateYPositionNew(event, detParams, y);
-    else
-        tmpVeto = calculateYPosition(event, detParams, y);
+    tmpVeto = calculateYPosition(event, detParams, y);
     if (tmpVeto != CRocDataPacket::VETO_NO) {
         if (m_calcParams.passVetoes == false) return tmpVeto;
         if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
     }
-    if (y >= 7) {
+    if (y >= m_calcParams.maxY) {
         if (veto == CRocDataPacket::VETO_NO) veto = CRocDataPacket::VETO_OUT_OF_RANGE;
         if (m_calcParams.passVetoes == false) return veto;
-        y = 6;
+        y = m_calcParams.maxY - 1;
     }
 
-    if (m_calcParams.processModeNew)
-        tmpVeto = calculateXPositionNew(event, detParams, x);
-    else
-        tmpVeto = calculateXPosition(event, detParams, x);
+    tmpVeto = calculateXPosition(event, detParams, x);
     if (tmpVeto != CRocDataPacket::VETO_NO) {
         if (m_calcParams.passVetoes == false) return tmpVeto;
         if (veto == CRocDataPacket::VETO_NO) veto = tmpVeto;
     }
-    if (x >= 14*11) {
+    if (x >= m_calcParams.maxX) {
         if (m_calcParams.passVetoes == false) return CRocDataPacket::VETO_OUT_OF_RANGE;
         if (veto == CRocDataPacket::VETO_NO) veto = CRocDataPacket::VETO_OUT_OF_RANGE;
-        x = 14*11 - 1;
+        x = m_calcParams.maxX - 1;
     }
 
-    pixel = detParams->position + 7*x + y;
+    pixel = detParams->position + m_calcParams.maxY*x + y;
     if (veto == CRocDataPacket::VETO_NO) {
         // Reduce the echo events - strong neutrons with light response spanning
         // over multiple acq frames
@@ -521,19 +538,28 @@ inline std::vector<uint8_t> CRocPosCalcPlugin::sortIndexesDesc(const uint8_t *va
         sorted[i]=i;
     }
 
-	for (size_t i=0; i<size; i++) {
-		for(size_t j=i+1; j<size; j++) {
+    for (size_t i=0; i<size; i++) {
+        for(size_t j=i+1; j<size; j++) {
             if (values[sorted[i]] < values[sorted[j]]) {
                 uint8_t tmp = sorted[j];
-				sorted[j] = sorted[i];
-				sorted[i] = tmp;
-			}
-		}
-	}
+                sorted[j] = sorted[i];
+                sorted[i] = tmp;
+            }
+        }
+    }
     return sorted;
 }
 
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &y)
+double CRocPosCalcPlugin::interpolate(const uint8_t *weights, size_t size, uint8_t coarse)
+{
+    int left   = (coarse > 0        ? weights[coarse-1] : 0);
+    int center = weights[coarse];
+    int right  = (coarse < (size-1) ? weights[coarse+1] : 0);
+
+    return coarse + ((double)(right - left))/(left + center + right);
+}
+
+CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint16_t &y)
 {
     uint8_t totalCnt = 0;
     for (uint8_t i=0; i<7; i++) {
@@ -555,17 +581,75 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPosition(const CRocDataPac
         }
     }
 
-    // When equal, pick the Y index with stronger neighbours response
-    if (event->photon_count_y[ySorted[0]] == event->photon_count_y[ySorted[1]]) {
-        if ( (ySorted[1] - ySorted[2]) < (ySorted[0] - ySorted[2]) ) {
-            y = ySorted[1];
+    if (m_calcParams.resolution == CalcParams::RESOLUTION_ORIGINAL) {
+        // When equal, pick the Y index with stronger neighbours response
+        if (event->photon_count_y[ySorted[0]] == event->photon_count_y[ySorted[1]]) {
+            if ( (ySorted[1] - ySorted[2]) < (ySorted[0] - ySorted[2]) ) {
+                y = ySorted[1];
+            }
         }
+    } else if (m_calcParams.resolution == CalcParams::RESOLUTION_MEDIUM) {
+        // Y axis fiber distribution to PMTs is [16,24,24,24,24,24,16]
+        // and the double resolution mapping of PMTs is as follow:
+        // y1 = 10
+        // y2 = 6+6
+        // y3 = 12
+        // y4 = 6+6
+        // y5 = 12
+        // ...
+        // y11 = 12
+        // y12 = 6+6
+        // y13 = 10
+        double fitted = interpolate(event->photon_count_y, 7, ySorted[0]) + 0.5;
+        if (fitted < (10/16)) {
+            y = 0;
+        } else if (fitted > (6 + 6/16)) {
+            y = 12;
+        } else {
+            int yi = floor(fitted);
+            double r = fitted - yi;
+            if (r < (6/24))
+                y = std::max(0,  yi*2 - 1);
+            else if (r < (18/24))
+                y =             yi*2;
+            else
+                y = std::min(12, yi*2 + 1);
+        }
+    } else {
+        // Y axis fiber distribution to PMTs is [16,24,24,24,24,24,16]
+        // and the triple resolution mapping of PMTs is as follow:
+        // y1 = 7
+        // y2 = 6
+        // y3 = 3+3
+        // y4 = 6
+        // y5 = 6
+        // y6 = 6
+        // y7 = 3+3
+        // y8 = 6
+        // ...
+        // y22 = 6
+        // y23 = 3+3
+        // y24 = 6
+        // y25 = 7
+        double fitted = interpolate(event->photon_count_y, 7, ySorted[0]) + 0.5;
+        int yi = floor(fitted);
+        double r = fitted - yi;
+        if (r < 0.125)
+            y = std::max(0,  yi*4 - 2);
+        else if (r < 0.375)
+            y = std::max(0,  yi*4 - 1);
+        else if (r < 0.625)
+            y =              yi*4;
+        else if (r < 0.875)
+            y = std::min(24, yi*4 + 1);
+        else
+            y = std::min(24, yi*4 + 2);
     }
 
     return CRocDataPacket::VETO_NO;
 }
 
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &x)
+CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint16_t &x)
 {
     uint8_t totalCnt = 0;
     for (uint8_t i=0; i<11; i++) {
@@ -621,6 +705,8 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
             }
             if ((xIndex == 0  && gSorted[0] < gSorted[1]) || (xIndex == 10 && gSorted[0] > gSorted[1])) {
                 gIndex = gSorted[1];
+                gSorted[1] = gSorted[0];
+                gSorted[0] = gIndex;
             }
         } else if ((detParams->g1GapMin != 0 || detParams->x1GapMin != 0) && (xIndex == 1 || xIndex ==9)) {
             if (event->photon_count_g[gSorted[0]] < detParams->g1GapMin) {
@@ -652,6 +738,9 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
             if (event->photon_count_g[gSorted[1]] > gThreshold)
                 return CRocDataPacket::VETO_G_HIGH_SIGNAL;
         } else if (xIndex == 1 || xIndex == 9) {
+            // This code never executes - it's a bug when porting from dcomserver but nobody
+            // complained so far. Leave it here for reference. Condition should read:
+            // } else if (xSorted[1] == 1 || xSorted[1] == 9) {
             uint8_t xThreshold = 0.65 * event->photon_count_x[xIndex];
             if (detParams->xMin >= xThreshold) {
                 xThreshold = detParams->xMin + 1;
@@ -664,7 +753,7 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
                         return CRocDataPacket::VETO_G_GHOST;
                     }
                 } else {
-                    if ((xSorted[1] == 1 && xSorted[0] == 0)  || (xSorted[1] == 9 && xSorted[10] == 0)) {
+                    if ((xSorted[1] == 1 && xSorted[0] == 0)  || (xSorted[1] == 9 && xSorted[10] == 10)) {
                         xIndex = xSorted[1];
                     } else {
                         return CRocDataPacket::VETO_G_GHOST;
@@ -694,7 +783,51 @@ CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPosition(const CRocDataPac
         return CRocDataPacket::VETO_INVALID_CALC;
     }
 
-    x = 11*gIndex + xIndex;
+    if (m_calcParams.resolution == CalcParams::RESOLUTION_ORIGINAL) {
+        x = gIndex*11 + xIndex;
+    } else {
+        // Make a combined array of X read-outs used for centroid fitting
+        uint8_t photon_count_x[14*11] = {0};
+        memcpy(&photon_count_x[gIndex*11], event->photon_count_x, 11*sizeof(uint8_t));
+
+        switch (detParams->fiberCoding) {
+        case CRocParams::FIBER_CODING_V2:
+            // Move roll-overed left or right value for 3-point fitting
+            if (xIndex == 0 && diff_signed(gIndex, gSorted[1]) == -1) {
+                photon_count_x[gIndex*11 - 1]  = photon_count_x[gIndex*11 + 10];
+                photon_count_x[gIndex*11 + 10] = 0;
+            } else if (xIndex == 10 && diff_signed(gIndex, gSorted[1]) == 1) {
+                photon_count_x[gIndex*11 + 11] = photon_count_x[gIndex*11 + 0];
+                photon_count_x[gIndex*11]      = 0;
+            }
+            break;
+        case CRocParams::FIBER_CODING_V3:
+            // Swap X0<=>X10 due to fiber coding - xIndex was already adjusted above
+            if ((gIndex % 2) == 1) {
+                photon_count_x[gIndex*11 +  0] = event->photon_count_x[10];
+                photon_count_x[gIndex*11 + 10] = event->photon_count_x[0];
+            }
+
+            // As X0 or X10 have counts from 2 Gs, divide X counts proportionally to G counts
+            if (xIndex == 0 && diff_signed(gIndex, gSorted[1]) == -1) {
+                double ratio = 1.0 * event->photon_count_g[gSorted[1]] / (event->photon_count_g[gSorted[1]] + event->photon_count_g[gIndex]);
+                photon_count_x[gIndex*11 - 1]  = photon_count_x[gIndex*11] * ratio;
+                photon_count_x[gIndex*11]      = photon_count_x[gIndex*11] * (1 - ratio);
+            } else if (xIndex == 10 && diff_signed(gIndex, gSorted[1]) == 1) {
+                double ratio = 1.0 * event->photon_count_g[gSorted[1]] / (event->photon_count_g[gSorted[1]] + event->photon_count_g[gIndex]);
+                photon_count_x[gIndex*11 + 11] = photon_count_x[gIndex*11 + 10] * ratio;
+                photon_count_x[gIndex*11 + 10] = photon_count_x[gIndex*11 + 10] * (1 - ratio);
+            }
+            break;
+        default:
+            return CRocDataPacket::VETO_INVALID_CALC;
+        }
+
+        // Do the 3 samples centroid fitting and scale up by factor of 3.
+        double fitted = interpolate(photon_count_x, 14*11, gIndex*11+xIndex);
+        x = std::min(m_calcParams.maxX-1, (uint32_t)std::max(0L, lround(3*fitted)));
+    }
+
     return CRocDataPacket::VETO_NO;
 }
 
@@ -732,192 +865,6 @@ inline float CRocPosCalcPlugin::findDirection(const uint8_t *values, size_t size
         right = values[maxIndex+1];
     }
     return (right - left)/center;
-}
-
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculateYPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &y)
-{
-    uint8_t yMaxIndex;
-
-    if (findMaxIndex(event->photon_count_y, 7, yMaxIndex) == false) {
-        return CRocDataPacket::VETO_Y_LOW_SIGNAL;
-    }
-
-    double noise = calculateNoise(event->photon_count_y, 7, yMaxIndex, detParams->yWeights);
-    if (noise > detParams->yNoiseThreshold) {
-        return CRocDataPacket::VETO_Y_HIGH_SIGNAL;
-    }
-
-    if (event->photon_count_y[yMaxIndex] < detParams->yMin) {
-        // Allow low signal single channel events when efficiency boost is enabled
-        if (!m_calcParams.efficiencyBoost || noise > 1.0) {
-            return CRocDataPacket::VETO_Y_LOW_SIGNAL;
-        }
-    }
-    y = yMaxIndex;
-    return CRocDataPacket::VETO_NO;
-}
-
-/**
- * Fiber mapping v3 correction:
- * Every even G index (index starts at 0) has x1 fiber swapped with x11. This is
- * to help more accurtely determine the position on the edge between two Gs.
- * Knowing that, post-processing correction is necessary for even G indexes.
- * Consider these 2 cases:
- * \verbatim
-   Event 1:              v
-    # | | | | | | | | | | # | | | | | | | | | | # | | ...
-              G=1                      G=2
-
-   Possible readouts:
-   X: 0 1 0 0 0 0 0 0 1 3 8
-   G: 7 4 0 0 0 0 0 0 0 0 0 0 0 0
-   or
-   G: 4 7 0 0 0 0 0 0 0 0 0 0 0 0
-
-   Event 2:                v
-    # | | | | | | | | | | # | | | | | | | | | | # | | ...
-             G=1                      G=2
-
-   Possible readout:
-   X: 0 3 1 0 0 0 0 0 0 1 8
-   G: 7 4 0 0 0 0 0 0 0 0 0 0 0 0
-   or
-   G: 4 7 0 0 0 0 0 0 0 0 0 0 0 0
-   \endverbatim
- *
- * The 2 readouts are almost the same except for the possible difference in X
- * readout. Common correction for both cases is to correct swap X position
- * 0<=>10 when G is even number and closest G neighbour is on the opposite side
- * of X.
- *
- * Similar exercise can be made for G=2 and G=3.
- */
-CRocDataPacket::VetoType CRocPosCalcPlugin::calculateXPositionNew(const CRocDataPacket::RawEvent *event, const CRocParams *detParams, uint8_t &x)
-{
-    // G rejection
-    uint8_t gMaxIndex;
-    if (findMaxIndex(event->photon_count_g, 14, gMaxIndex) == false) {
-        return CRocDataPacket::VETO_G_LOW_SIGNAL;
-    }
-    double gNoise = calculateNoise(event->photon_count_g, 14, gMaxIndex, detParams->gWeights);
-    if (gNoise > detParams->gNoiseThreshold) {
-        return CRocDataPacket::VETO_G_HIGH_SIGNAL;
-    }
-    if (event->photon_count_g[gMaxIndex] < detParams->gMin) {
-        // Allow low signal single channel events when efficiency boost is enabled
-        if (!m_calcParams.efficiencyBoost || gNoise > 1.0) {
-            return CRocDataPacket::VETO_G_LOW_SIGNAL;
-        }
-    }
-
-    // X rejection
-    uint8_t xMaxIndex;
-    if (findMaxIndex(event->photon_count_x, 11, xMaxIndex) == false) {
-        return CRocDataPacket::VETO_X_LOW_SIGNAL;
-    }
-    double xNoise = calculateNoise(event->photon_count_x, 11, xMaxIndex, detParams->xWeights);
-    if (xNoise > detParams->xNoiseThreshold) {
-        return CRocDataPacket::VETO_X_HIGH_SIGNAL;
-    }
-    if (event->photon_count_x[xMaxIndex] < detParams->xMin) {
-        // Allow low signal single channel events when efficiency boost is enabled
-        if (!m_calcParams.efficiencyBoost || xNoise > 1.0) {
-            return CRocDataPacket::VETO_X_LOW_SIGNAL;
-        }
-    }
-
-    // Inspect edges and consider modifying G or X index
-    if (detParams->fiberCoding == CRocParams::FIBER_CODING_V2) {
-        float gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
-        if ((xMaxIndex == 0 || xMaxIndex == 10) && gMaxIndex > 0 && gMaxIndex < 13) {
-            // 1-to-1 mapping, but an event might get G group wrong
-            if (gDirection > 0) {
-                assert(gMaxIndex < 13);
-                // Reject ghosts with indipendent discrimination
-                if (event->photon_count_g[gMaxIndex] < detParams->gGapMin1) {
-                    return CRocDataPacket::VETO_G_GHOST;
-                }
-                if (event->photon_count_g[gMaxIndex+1] < detParams->gGapMin2) {
-                    return CRocDataPacket::VETO_G_GHOST;
-                }
-                if (event->photon_count_x[0] > event->photon_count_x[10]) {
-                    gMaxIndex++;
-                } else if (event->photon_count_x[0] == event->photon_count_x[10]) {
-                    if (event->photon_count_x[1] >= event->photon_count_x[9]) {
-                        gMaxIndex++;
-                    } else {
-                        xMaxIndex = 10;
-                    }
-                }
-            } else if (gDirection < 0) {
-                assert(gMaxIndex > 0);
-                // Reject ghosts with indipendent discrimination
-                if (event->photon_count_g[gMaxIndex] < detParams->gGapMin1) {
-                    return CRocDataPacket::VETO_G_GHOST;
-                }
-                if (event->photon_count_g[gMaxIndex-1] < detParams->gGapMin2) {
-                    return CRocDataPacket::VETO_G_GHOST;
-                }
-                if (event->photon_count_x[10] > event->photon_count_x[0]) {
-                    gMaxIndex--;
-                } else if (event->photon_count_x[10] == event->photon_count_x[0]) {
-                    if (event->photon_count_x[9] >= event->photon_count_x[1]) {
-                        gMaxIndex--;
-                    } else {
-                        xMaxIndex = 0;
-                    }
-                }
-            } else {
-                // Left and right neighbours are the same, are they both 0?
-                uint8_t leftG  = (gMaxIndex > 0  ? event->photon_count_g[gMaxIndex-1] : 0);
-                uint8_t rightG = (gMaxIndex < 13 ? event->photon_count_g[gMaxIndex+1] : 0);
-                if (leftG > 0 && rightG > 0) {
-                    // Imposible to deduce the location, must reject
-                    return CRocDataPacket::VETO_G_GHOST;
-                } else if (leftG == 0 && rightG == 0) {
-                    if (event->photon_count_x[0] > detParams->xMin && event->photon_count_x[10] > detParams->xMin) {
-                        // Response on both edges of X, but a single G?
-                        return CRocDataPacket::VETO_G_GHOST;
-                    }
-                }
-            }
-        } else {
-            uint8_t gThreshold = m_calcParams.gNongapMaxRatio * event->photon_count_g[gMaxIndex];
-            if (gDirection > 0 && event->photon_count_g[gMaxIndex+1] > gThreshold)
-                return CRocDataPacket::VETO_G_HIGH_SIGNAL;
-            else if (gDirection < 0 && event->photon_count_g[gMaxIndex-1] > gThreshold)
-                return CRocDataPacket::VETO_G_HIGH_SIGNAL;
-        }
-    } else if (detParams->fiberCoding == CRocParams::FIBER_CODING_V3) {
-        if (xMaxIndex == 0 || xMaxIndex == 10) {
-            float gDirection = findDirection(event->photon_count_g, 14, gMaxIndex);
-            // Every second G group has X0 and X10 swapped, see function comment
-            // for details.
-            if ((gMaxIndex % 2) == 1) {
-                if (gDirection == 0) {
-                    // gDirection == 0 when right neighbour matches left one or
-                    // they're both zero
-                    assert(gMaxIndex > 0);
-                    if (event->photon_count_g[gMaxIndex-1] > 0) {
-                        // As left neighbour is non zero, right one is non-zero too.
-                        // We can't deduce the proper location and must reject.
-                        return CRocDataPacket::VETO_G_GHOST;
-                    } else {
-                        // Left and right neighbours are both zero, yet the
-                        // PMTs are swapped. Swap again to make it right.
-                        xMaxIndex = (xMaxIndex == 0 ? 10 : 0);
-                    }
-                } else if (gDirection < 0 && xMaxIndex == 10) {
-                    xMaxIndex = 0;
-                } else if (gDirection > 0 && xMaxIndex == 0) {
-                    xMaxIndex = 10;
-                }
-            }
-        }
-    }
-
-    x = 11*gMaxIndex + xMaxIndex;
-    return CRocDataPacket::VETO_NO;
 }
 
 // ============= CRocPosCalcPlugin::Stats class implementation ============= //
