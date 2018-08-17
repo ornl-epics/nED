@@ -31,3 +31,10 @@ record(calc, "$(P)ConfStatus")
     field(INPB, "")
     field(CALC, "1")
 }
+
+record(bo, "$(P)OutputMode")
+{
+    field(ZNAM, "pass thru")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}

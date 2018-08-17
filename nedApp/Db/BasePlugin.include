@@ -14,6 +14,7 @@ record(longin, "$(P)Status")
     field(HIGH, "2")
     field(HSV,  "MINOR")
     field(VAL,  "1")
+    field(PINI, "YES")
 }
 
 # Every plugin must implement StatusText PV.
