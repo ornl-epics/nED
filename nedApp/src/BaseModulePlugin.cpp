@@ -12,6 +12,7 @@
 #include "Log.h"
 #include "ValueConvert.h"
 
+#include <alarm.h>
 #include <map>
 #include <osiSock.h>
 #include <string.h>
