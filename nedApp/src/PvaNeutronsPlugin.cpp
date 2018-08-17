@@ -148,6 +148,9 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
                 case DasDataPacket::EVENT_FMT_BNL_DIAG:
                     std::tie(nEvents, tofs, pixels) = getTofPixels<Event::BNL::Diag>(packet);
                     break;
+                case DasDataPacket::EVENT_FMT_ACPC_DIAG:
+                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::ACPC::Diag>(packet);
+                    break;
                 case DasDataPacket::EVENT_FMT_TIME_CALIB:
                     nEvents = 0;
                     break;

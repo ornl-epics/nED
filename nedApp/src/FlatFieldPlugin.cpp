@@ -245,8 +245,8 @@ void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
         std::pair<DasDataPacket*, Counters> res;
         if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
             res = processEvents(timestamp, packet->getEvents<Event::BNL::Diag>(), nEvents);
-        } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
-            res = processEvents(timestamp, packet->getEvents<Event::ACPC::Diag>(), nEvents);
+        } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_ACPC_XY_PS) {
+            res = processEvents(timestamp, packet->getEvents<Event::ACPC::Normal>(), nEvents);
         } else {
             res = std::make_pair(const_cast<DasDataPacket*>(packet), Counters());
         }
@@ -348,9 +348,10 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
             } else {
                 events->corrected_x = srcEvents->x * m_xScaleIn;
                 events->corrected_y = srcEvents->y * m_yScaleIn;
+                double photo_sum_x = srcEvents->photo_sum_x * m_psScale;
 
                 // Check photo sum first
-                veto = checkPhotoSumLimits(srcEvents->x, srcEvents->y, srcEvents->photo_sum_x, srcEvents->position);
+                veto = checkPhotoSumLimits(events->corrected_x, events->corrected_y, photo_sum_x, srcEvents->position);
                 if (veto == VETO_NO) {
                     // Apply flat-field correction
                     veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
