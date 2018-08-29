@@ -17,3 +17,10 @@ record(calc, "$(P)HwStatus")
     field(LSV,  "MAJOR")
 }
 
+record(bo, "$(P)OutputMode")
+{
+    field(ZNAM, "pass thru")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
