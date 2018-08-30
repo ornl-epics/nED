@@ -23,12 +23,19 @@ def parse_src_file(path, verbose=False):
         'createCounterParam': "counters",
         'createTempParam': "temp"
     }
-    regex = re.compile("(create.*Param)\s*\(\"([^\"]*)\"[^;]*;\s*/?/?([^\(]*)(.*)$")
+    re_param = re.compile("(create.*Param)\s*\(\"([^\"]*)\"[^;]*;\s*/?/?([^\(]*)(.*)$")
+    re_plugin = re.compile("void (.*)Plugin::createParams.*")
 
     params = {}
+    typ = None
     with open(path, "r") as infile:
         for line in infile:
-            match = regex.search(line)
+            match = re_plugin.search(line)
+            if match:
+                typ = match.group(1)
+                continue
+
+            match = re_param.search(line)
             if match and match.group(1) in types:
                 typ_ = types[match.group(1)]
                 if typ_ not in params:
@@ -49,7 +56,7 @@ def parse_src_file(path, verbose=False):
                     'selectable': dropdown,
                 })
 
-    return params
+    return typ, params
 
 def xml_escape(text):
     xml_escape_table = {
@@ -61,7 +68,7 @@ def xml_escape(text):
     }
     return "".join(xml_escape_table.get(c,c) for c in text)
 
-def generate_config_file(outfile, title, params):
+def generate_config_file(outfile, typ, title, params):
     outfile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
     outfile.write("<display version=\"2.0.0\">\n")
     outfile.write("  <name>{0}</name>\n".format(title))
@@ -73,7 +80,7 @@ def generate_config_file(outfile, title, params):
         outfile.write("    <name>Rectangle</name>\n")
         outfile.write("    <x>1</x>\n")
         outfile.write("    <y>{0}</y>\n".format(row*24))
-        outfile.write("    <width>440</width>\n")
+        outfile.write("    <width>665</width>\n")
         outfile.write("    <height>25</height>\n")
         outfile.write("    <line_width>1</line_width>\n")
         outfile.write("    <line_color>\n")
@@ -126,12 +133,65 @@ def generate_config_file(outfile, title, params):
         outfile.write("    <height>20</height>\n")
         outfile.write("  </widget>\n")
 
+        outfile.write("  <widget type=\"action_button\" version=\"3.0.0\">\n")
+        outfile.write("    <actions>\n")
+        outfile.write("      <action type=\"write_pv\">\n")
+        outfile.write("        <pv_name>loc://sync_all_{0}(0)</pv_name>\n".format(param['name']))
+        outfile.write("        <value>1</value>\n")
+        outfile.write("        <description>Write PV</description>\n")
+        outfile.write("      </action>\n")
+        outfile.write("    </actions>\n")
+        outfile.write("    <text>Do all</text>\n")
+        outfile.write("    <x>450</x>\n")
+        outfile.write("    <y>{0}</y>\n".format(row*24+2))
+        outfile.write("    <width>90</width>\n")
+        outfile.write("    <height>20</height>\n")
+        outfile.write("    <scripts>\n")
+        outfile.write("      <script file=\"../SetModuleParam.py\">\n")
+        outfile.write("        <pv_name>loc://sync_all_{0}(0)</pv_name>\n".format(param['name']))
+        outfile.write("        <pv_name trigger=\"false\">pva://BL12:Det:pva:Modules/modules</pv_name>\n")
+        outfile.write("        <pv_name trigger=\"false\">loc://module_$(D)(\"$(D)\")</pv_name>\n")
+        outfile.write("        <pv_name trigger=\"false\">loc://param_$(D)_{0}(\"$(P){0}\")</pv_name>\n".format(param['name']))
+        outfile.write("        <pv_name trigger=\"false\">$(P){0}</pv_name>\n".format(param['name']))
+        outfile.write("        <pv_name trigger=\"false\">loc://match_all_$(D)(0)</pv_name>\n")
+        outfile.write("      </script>\n")
+        outfile.write("    </scripts>\n")
+        outfile.write("    <tooltip>$(actions)</tooltip>\n")
+        outfile.write("  </widget>\n")
+
+        if typ.lower() == "aroc":
+            outfile.write("  <widget type=\"action_button\" version=\"3.0.0\">\n")
+            outfile.write("    <actions>\n")
+            outfile.write("      <action type=\"write_pv\">\n")
+            outfile.write("        <pv_name>loc://sync_dig_{0}(0)</pv_name>\n".format(param['name']))
+            outfile.write("        <value>1</value>\n")
+            outfile.write("        <description>Write PV</description>\n")
+            outfile.write("      </action>\n")
+            outfile.write("    </actions>\n")
+            outfile.write("    <text>Do position</text>\n")
+            outfile.write("    <x>550</x>\n")
+            outfile.write("    <y>{0}</y>\n".format(row*24+2))
+            outfile.write("    <width>110</width>\n")
+            outfile.write("    <height>20</height>\n")
+            outfile.write("    <scripts>\n")
+            outfile.write("      <script file=\"../SetModuleParam.py\">\n")
+            outfile.write("        <pv_name>loc://sync_dig_{0}(0)</pv_name>\n".format(param['name']))
+            outfile.write("        <pv_name trigger=\"false\">pva://BL12:Det:pva:Modules/modules</pv_name>\n")
+            outfile.write("        <pv_name trigger=\"false\">loc://module_$(D)(\"$(D)\")</pv_name>\n")
+            outfile.write("        <pv_name trigger=\"false\">loc://param_$(D)_{0}(\"$(P){0}\")</pv_name>\n".format(param['name']))
+            outfile.write("        <pv_name trigger=\"false\">$(P){0}</pv_name>\n".format(param['name']))
+            outfile.write("        <pv_name trigger=\"false\">loc://replace_digits_$(D)(1)</pv_name>\n")
+            outfile.write("      </script>\n")
+            outfile.write("    </scripts>\n")
+            outfile.write("    <tooltip>$(actions)</tooltip>\n")
+            outfile.write("  </widget>\n")
+
         row += 1
 
     outfile.write("  <height>{0}</height>\n".format(row*24+6))
     outfile.write("</display>\n")
 
-def generate_table_file(outfile, title, params):
+def generate_table_file(outfile, typ, title, params):
     outfile.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
     outfile.write("<display version=\"2.0.0\">\n")
     outfile.write("  <name>{0}</name>\n".format(title))
@@ -193,16 +253,16 @@ def main():
     if not os.path.isdir(args.outdir):
         os.makedirs(args.outdir)
 
-    params = parse_src_file(args.infile, args.verbose)
+    typ, params = parse_src_file(args.infile, args.verbose)
     for filetype,fileparams in params.iteritems():
         filename = os.path.basename(args.infile).rsplit(".", 1)[0]
         filename += "_" + filetype + ".bob"
         filepath = os.path.join(args.outdir, filename)
         with open(filepath, "w") as outfile:
             if filetype is "config":
-                generate_config_file(outfile, "$(D) config", fileparams)
+                generate_config_file(outfile, typ, "$(D) config", fileparams)
             else:
-                generate_table_file(outfile, "$(D) " + filetype, fileparams)
+                generate_table_file(outfile, typ, "$(D) " + filetype, fileparams)
 
 if __name__ == "__main__":
     main()
