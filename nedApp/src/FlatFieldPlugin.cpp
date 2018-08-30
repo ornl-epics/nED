@@ -57,6 +57,7 @@ FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins
     createParam("YMaxOut",      asynParamInt32, &YMaxOut, 511);         // WRITE - Converted max Y value
     createParam("TablesSizeX",  asynParamInt32, &TablesSizeX, 0);       // READ - All tables X size
     createParam("TablesSizeY",  asynParamInt32, &TablesSizeY, 0);       // READ - All tables Y size
+    createParam("EnableCorr",   asynParamInt32, &EnableCorr, 1);        // WRITE - Enable flat-field and photosum correction
 
     std::vector<std::string> positions_ = Common::split(positions, ',');
     for (auto it=positions_.begin(); it!=positions_.end(); it++) {
@@ -119,22 +120,6 @@ asynStatus FlatFieldPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     } else if (pasynUser->reason ==  XMaxOut || pasynUser->reason == YMaxOut) {
         if (value < 1 || value >= 1024)
             return asynError;
-    } else {
-        for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
-            if (pasynUser->reason == PosEnable[it->second.position_id]) {
-                asynStatus ret = asynSuccess;
-                if (value == 1 && (it->second.corrX == 0 || it->second.corrY == 0)) {
-                    LOG_ERROR("Failed to enable position %u, missing correction tables", it->second.position_id);
-                    value = 0;
-                    ret = asynError;
-                } else {
-                    it->second.enabled = (value != 0);
-                }
-                setIntegerParam(PosEnable[it->second.position_id], value);
-                callParamCallbacks();
-                return ret;
-            }
-        }
     }
     return BasePlugin::writeInt32(pasynUser, value);
 }
@@ -211,6 +196,7 @@ void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
 {
     double xMaxIn, yMaxIn;
     int xMaxOut, yMaxOut;
+    bool corrEn = true;
 
     // Parametrise calculating algorithms based on detector.
     int xyFractWidth = 0;
@@ -222,6 +208,7 @@ void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
     getDoubleParam(YMaxIn,          &yMaxIn);
     getIntegerParam(XMaxOut,        &xMaxOut);
     getIntegerParam(YMaxOut,        &yMaxOut);
+    getBooleanParam(EnableCorr,     corrEn);
 
     // This is a trick to avoid locking access to member variables. Since
     // plugin design ensures a single instance of processDataUnlocked()
@@ -244,9 +231,9 @@ void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
 
         std::pair<DasDataPacket*, Counters> res;
         if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_BNL_DIAG) {
-            res = processEvents(timestamp, packet->getEvents<Event::BNL::Diag>(), nEvents);
+            res = processEvents(timestamp, packet->getEvents<Event::BNL::Diag>(), nEvents, corrEn);
         } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_ACPC_XY_PS) {
-            res = processEvents(timestamp, packet->getEvents<Event::ACPC::Normal>(), nEvents);
+            res = processEvents(timestamp, packet->getEvents<Event::ACPC::Normal>(), nEvents, corrEn);
         } else {
             res = std::make_pair(const_cast<DasDataPacket*>(packet), Counters());
         }
@@ -285,12 +272,12 @@ void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
 // Only implement processEvents() for known input events.
 // This could be solved with constexpr from std=c++17
 
-std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEvents(const epicsTimeStamp &timestamp, const Event::BNL::Diag *srcEvents, uint32_t nEvents) {
+std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEvents(const epicsTimeStamp &timestamp, const Event::BNL::Diag *srcEvents, uint32_t nEvents, bool corrEn) {
     Counters counters;
     DasDataPacket *packet = m_packetsPool.get(DasDataPacket::getLength(DasDataPacket::EVENT_FMT_BNL_DIAG, nEvents));
     if (packet != nullptr) {
         packet->init(DasDataPacket::EVENT_FMT_BNL_DIAG, timestamp, nEvents, srcEvents);
-        packet->setEventsCorrected(true);
+        packet->setEventsCorrected(corrEn);
         Event::BNL::Diag *events = packet->getEvents<Event::BNL::Diag>();
 
         while (nEvents-- > 0) {
@@ -307,7 +294,8 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
                 events->corrected_x = srcEvents->x * m_xScaleIn;
                 events->corrected_y = srcEvents->y * m_yScaleIn;
 
-                veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
+                if (corrEn)
+                    veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
 
                 events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
                 events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
@@ -327,12 +315,12 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
     return std::make_pair(packet, std::move(counters));
 }
 
-std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEvents(const epicsTimeStamp &timestamp, const Event::ACPC::Normal *srcEvents, uint32_t nEvents) {
+std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEvents(const epicsTimeStamp &timestamp, const Event::ACPC::Normal *srcEvents, uint32_t nEvents, bool corrEn) {
     Counters counters;
     DasDataPacket *packet = m_packetsPool.get(DasDataPacket::getLength(DasDataPacket::EVENT_FMT_ACPC_DIAG, nEvents));
     if (packet != nullptr) {
         packet->init(DasDataPacket::EVENT_FMT_ACPC_DIAG, timestamp, nEvents);
-        packet->setEventsCorrected(true);
+        packet->setEventsCorrected(corrEn);
         Event::ACPC::Diag *events = packet->getEvents<Event::ACPC::Diag>();
 
         while (nEvents-- > 0) {
@@ -350,11 +338,13 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
                 events->corrected_y = srcEvents->y * m_yScaleIn;
                 double photo_sum_x = srcEvents->photo_sum_x * m_psScale;
 
-                // Check photo sum first
-                veto = checkPhotoSumLimits(events->corrected_x, events->corrected_y, photo_sum_x, srcEvents->position);
-                if (veto == VETO_NO) {
-                    // Apply flat-field correction
-                    veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
+                if (corrEn) {
+                    // Check photo sum first
+                    veto = checkPhotoSumLimits(events->corrected_x, events->corrected_y, photo_sum_x, srcEvents->position);
+                    if (veto == VETO_NO) {
+                        // Apply flat-field correction
+                        veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
+                    }
                 }
 
                 // Calculate pixelid

@@ -1,5 +1,16 @@
 include "BasePlugin.include"
 
+record(bo, "$(P)EnableCorr")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable flat-field correction")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))EnableCorr")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+}
 record(calcout, "$(P)StatusCalc")
 {
     field(ASG,  "BEAMLINE")
