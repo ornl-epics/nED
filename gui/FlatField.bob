@@ -545,7 +545,7 @@ $(pv_value)</tooltip>
     <widget type="label" version="2.0.0">
       <name>BadDsp_Label</name>
       <text>Good events:</text>
-      <y>102</y>
+      <y>132</y>
       <width>163</width>
       <height>26</height>
       <horizontal_alignment>2</horizontal_alignment>
@@ -561,7 +561,7 @@ $(pv_value)</tooltip>
     <widget type="label" version="2.0.0">
       <name>CntPhotoSum_Label</name>
       <text>Rejected events:</text>
-      <y>135</y>
+      <y>165</y>
       <width>163</width>
       <height>26</height>
       <horizontal_alignment>2</horizontal_alignment>
@@ -578,7 +578,7 @@ $(pv_value)</tooltip>
       <name>BadPhotoSum_Update</name>
       <pv_name>$(P)RateVetoEvents</pv_name>
       <x>174</x>
-      <y>135</y>
+      <y>165</y>
       <width>151</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -594,7 +594,7 @@ $(pv_value)</tooltip>
       <name>BadDsp_Update</name>
       <pv_name>$(P)RateGoodEvents</pv_name>
       <x>174</x>
-      <y>102</y>
+      <y>132</y>
       <width>151</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -620,31 +620,44 @@ $(pv_value)</tooltip>
         </color>
       </border_color>
     </widget>
-    <widget type="led" version="2.0.0">
-      <name>LED</name>
+    <widget type="multi_state_led" version="2.0.0">
+      <name>LED (Multi State)</name>
       <pv_name>$(P)Status</pv_name>
-      <bit>0</bit>
       <x>174</x>
-      <y>2</y>
-      <width>21</width>
-      <height>21</height>
-      <off_color>
-        <color name="Major" red="255" green="0" blue="0">
-        </color>
-      </off_color>
-      <on_color>
-        <color name="On" red="0" green="255" blue="0">
-        </color>
-      </on_color>
-      <actions>
-      </actions>
+      <y>3</y>
       <border_alarm_sensitive>false</border_alarm_sensitive>
+      <states>
+        <state>
+          <value>0</value>
+          <label></label>
+          <color>
+            <color name="MAJOR" red="255" green="0" blue="0">
+            </color>
+          </color>
+        </state>
+        <state>
+          <value>1</value>
+          <label></label>
+          <color>
+            <color name="On" red="0" green="255" blue="0">
+            </color>
+          </color>
+        </state>
+        <state>
+          <value>2</value>
+          <label></label>
+          <color>
+            <color name="Off" red="60" green="100" blue="60">
+            </color>
+          </color>
+        </state>
+      </states>
     </widget>
     <widget type="textupdate" version="2.0.0">
       <name>Text Update</name>
       <pv_name>$(P)TablesSizeX</pv_name>
       <x>174</x>
-      <y>36</y>
+      <y>66</y>
       <width>151</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -660,7 +673,7 @@ $(pv_value)</tooltip>
       <name>Text Update_3</name>
       <pv_name>$(P)TablesSizeY</pv_name>
       <x>174</x>
-      <y>69</y>
+      <y>99</y>
       <width>151</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -676,7 +689,7 @@ $(pv_value)</tooltip>
       <name>Label</name>
       <text>Y size of tables:</text>
       <x>18</x>
-      <y>69</y>
+      <y>99</y>
       <width>145</width>
       <height>26</height>
       <horizontal_alignment>2</horizontal_alignment>
@@ -692,7 +705,7 @@ $(pv_value)</tooltip>
       <name>Label_8</name>
       <text>X size of tables:</text>
       <x>24</x>
-      <y>36</y>
+      <y>66</y>
       <width>139</width>
       <height>26</height>
       <horizontal_alignment>2</horizontal_alignment>
@@ -704,5 +717,28 @@ $(pv_value)</tooltip>
         </color>
       </border_color>
     </widget>
+    <widget type="label" version="2.0.0">
+      <name>OverallStatus_Label_1</name>
+      <text>Correction enabled:</text>
+      <y>33</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="bool_button" version="2.0.0">
+      <name>Boolean Button</name>
+      <pv_name>$(P)EnableCorr</pv_name>
+      <x>174</x>
+      <y>33</y>
+      <height>26</height>
+    </widget>
+
   </widget>
 </display>
