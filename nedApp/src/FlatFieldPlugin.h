@@ -169,42 +169,44 @@ class FlatFieldPlugin : public BasePlugin {
     private:
         /**
          * Apply flat-field correction to all BNL events.
-         * 
+         *
          * New packet is allocated to contain same number of events as defined
          * by nEvents parameter. Source events array is copied to newly
          * allocated packet. For each event a flat-field correction is
          * calculated and added to event. Any errors are accounted for in
          * counters structure returned along the new packet.
-         * 
+         *
          * This function is not thread safe as it uses class member variables
          * as correction parameters.
-         * 
+         *
          * @param timestamp to be put in the newly allocated packet
          * @param srcEvents to be corrected
          * @param nEvents of events
+         * @param corrEn Toggle flat-field & photosum correction
          * @return Newly allocated packet (or null on alloc error) and the counters.
          */
-        std::pair<DasDataPacket *, Counters> processEvents(const epicsTimeStamp &timestamp, const Event::BNL::Diag *srcEvents, uint32_t nEvents);
+        std::pair<DasDataPacket *, Counters> processEvents(const epicsTimeStamp &timestamp, const Event::BNL::Diag *srcEvents, uint32_t nEvents, bool corrEn);
 
         /**
          * Apply photo-sum rejection and flat-field correction to all ACPC events.
-         * 
+         *
          * New packet is allocated to contain same number of events as defined
          * by nEvents parameter. Source events array is copied to newly
          * allocated packet. For each event a flat-field correction is
          * calculated and added to event. Photo sum thresholds are checked and
          * outlier events are vetoed. Any errors are accounted for in
          * counters structure returned along the new packet.
-         * 
+         *
          * This function is not thread safe as it uses class member variables
          * as correction parameters.
-         * 
+         *
          * @param timestamp to be put in the newly allocated packet
          * @param srcEvents to be corrected
          * @param nEvents of events
+         * @param corrEn Toggle flat-field & photosum correction
          * @return Newly allocated packet (or null on alloc error) and the counters.
          */
-        std::pair<DasDataPacket *, Counters> processEvents(const epicsTimeStamp &timestamp, const Event::ACPC::Normal *srcEvents, uint32_t nEvents);
+        std::pair<DasDataPacket *, Counters> processEvents(const epicsTimeStamp &timestamp, const Event::ACPC::Normal *srcEvents, uint32_t nEvents, bool corrEn);
 
         /**
          * Apply flat field correction on X,Y event
@@ -314,6 +316,7 @@ class FlatFieldPlugin : public BasePlugin {
         int YMaxOut;        //!< Maximum Y values when converted to pixel id format
         int TablesSizeX;    //!< All tables size X
         int TablesSizeY;    //!< All tables size Y
+        int EnableCorr;     //!< Enable flat-field and photosum correction
 
         std::map<uint32_t, int> PosEnable;
         std::map<uint32_t, int> PosId;

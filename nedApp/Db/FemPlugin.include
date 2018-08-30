@@ -38,3 +38,15 @@ record(bo, "$(P)OutputMode")
     field(VAL,  "0")
     field(PINI, "YES")
 }
+
+# Make sure counters are updated at startup for temperature reading
+record(calcout, "$(P)CountersRefreshInit")
+{
+    field(DESC, "Cause counter to refresh at startup")
+    field(ASG,  "BEAMLINE")
+    field(CALC, "1")
+    field(OUT,  "$(P)CountersRefreshNow.PROC")
+    field(ODLY, "5")
+    field(PINI, "YES")
+}
+

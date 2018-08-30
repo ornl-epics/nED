@@ -1,5 +1,13 @@
 include "BasePlugin.include"
 
+record(calcout, "$(P)InitPvaList")
+{
+    field(ASG,  "BEAMLINE")
+    field(CALC, "1")
+    field(OUT,  "$(P)RefreshPvaList.PROC")
+    field(ODLY, "5")
+    field(PINI, "YES")
+}
 record(longout, "$(P)RefreshPvaList")
 {
     field(ASG,  "BEAMLINE")
