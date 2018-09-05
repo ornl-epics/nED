@@ -1,4 +1,4 @@
-/* AcpcPlugin_v173.cpp
+/* AcpcPlugin_v174.cpp
  *
  * Copyright (c) 2016 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -10,14 +10,14 @@
 #include "AcpcPlugin.h"
 
 /**
- * @file AcpcPlugin_v172.cpp
+ * @file AcpcPlugin_v174.cpp
  *
- * ACPC 17.03 parameters
+ * ACPC 17.04 parameters
  *
- * ACPC 17.03 is compatible with DSP7.
+ * ACPC 17.04 is compatible with DSP7.
  */
 
-void AcpcPlugin::createParams_v173()
+void AcpcPlugin::createParams_v174()
 {
     createStatusParam("ErrCmdBad",            0x0,  1,  0); // Unrecognized command error   (0=no error,1=error)
     createStatusParam("ErrPktLengthError",    0x0,  1,  1); // Packet length error          (0=no error,1=error)
