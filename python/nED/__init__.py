@@ -84,29 +84,16 @@ class Module(epics.device.Device):
     @staticmethod
     def sendCommand(self, command):
         if isinstance(self, Module):
-            if req is None:
+            if self.req_pv is None:
                 self.req_pv = getPv(self.__dict__['name'] + ":CmdReq")
                 self.rsp_pv = getPv(self.__dict__['name'] + ":CmdRsp")
             req = self.req_pv
             rsp = self.rsp_pv
         else:
-            self.req_pv = getPv(name + ":CmdReq")
-            self.rsp_pv = getPv(name + ":CmdRsp")
+            req_pv = getPv(name + ":CmdReq")
+            rsp_pv = getPv(name + ":CmdRsp")
 
         req.put(command)
-        rsp = getPv(name, "CmdRsp")
-        while rsp.get(as_string=True) == "Waiting"):
+        while rsp_pv.get(as_string=True) == "Waiting":
             time.sleep(0.01)
-        return rsp.get(as_string=True) != "Success"
-
-    @staticmethod
-    def sendConfig(self):
-        name = self.__dict__['name'] if isinstance(self, Module) else self
-
-        req = getPv(name, "CmdReq")
-        rsp = getPv(name, "CmdRsp")
-
-        acquiring = (getPv(name, "Acquiring").get(as_string=True) == "acquiring")
-        if acquiring:
-            if not sendCommand(self, "Stop acquiring"):
-                return False
+        return rsp_pv.get(as_string=True) != "Success"
