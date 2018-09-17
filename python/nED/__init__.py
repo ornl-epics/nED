@@ -6,6 +6,11 @@ import os
 BL=os.environ['BL'] if "BL" in os.environ else "BL100"
 _pvprefix = os.environ['BL'] + ":Det:"
 _pvs = {}
+_verbose = False
+
+def setVerbose(verbose):
+    global _verbose
+    _verbose = verbose
 
 def getPvPrefix():
     global _pvprefix
@@ -17,16 +22,23 @@ def setPvPrefix(prefix):
         prefix += ":"
     _pvprefix = prefix
 
-def getPv(plugin, param, connection_timeout=1.0):
+def getPv(plugin, param, wait_connect=True, timeout=1.0):
     """Returns PyEpics PV object for the selected plugin parameter"""
     global _pvprefix
+    global _verbose
     # We use epics.get_pv() as it caches PVs and they don't have to reconnect every time
     # get_pv() also doesn't create new PV object except the first time => faster
     pv = _pvprefix + plugin + ":" + param
-    return epics.get_pv(pv, connection_timeout=connection_timeout)
+    if _verbose:
+        print "nED get PV: ", pv
+    return epics.get_pv(pv, connect=wait_connect, timeout=timeout)
+
+def getPva(name="Neutrons"):
+    return pvaccess.Channel( _pvprefix + "pva:" + name.strip(":") )
 
 def getModuleNames(expr=".*"):
-    getPv("modules", "RefreshPvaList").put(1)
+    global _verbose
+
     try:
         o = pvaccess.Channel(_pvprefix + "pva:Modules").get()
         modules = o.getScalarArray('modules.value')
@@ -42,7 +54,12 @@ def getModuleNames(expr=".*"):
     regex = re.compile(expr)
     modules = list(filter(lambda x: regex.match(x), modules))
 
-    return sorted(modules, key=lambda s: s.lower())
+    modules = sorted(modules, key=lambda s: s.lower())
+
+    if _verbose:
+        print "Discovered modules: ", modules
+
+    return modules
 
 def getModules(expr=".*"):
     modules = []
@@ -50,29 +67,56 @@ def getModules(expr=".*"):
         modules.append(Module(module))
     return modules
 
-class Module(epics.device.Device):
+class Module:
     def __init__(self, name):
-        global _pvprefix
-        epics.device.Device.__init__(self, _pvprefix + name + ":")
+        self.name = name
         self.__dict__['name'] = name
+        self._req_pv = None
+        self._rsp_pv = None
 
-        self.add_pv(_pvprefix + name + ":HwId",          attr="address")
-        self.add_pv(_pvprefix + name + ":FwVerStr.SVAL", attr="version")
-        self.add_pv(_pvprefix + name + ":FwDate",        attr="date")
-        self.add_pv(_pvprefix + name + ":StatusText",    attr="status")
-        self.add_pv(_pvprefix + name + ":PluginId",      attr="pluginid")
+        self._cached_pvs = []
+        for pv in [ "HwId", "Type", "FwVerStr.SVAL", "Status", "StatusText", "OutputMode" ]:
+            getPv(name, pv, wait_connect=False)
+            self._cached_pvs.append(pv)
 
-        # Handle enums as strings
-        self.__dict__['type']     = getPv(name, "HwType").get(as_string=True)
-        self.__dict__['datamode'] = getPv(name, "OutputMode").get(as_string=True)
+    def __getattr__(self, param):
+        self.getPv(param)
 
-        self.req_pv = None
-        self.rsp_pv = None
+    def getPv(self, param):
+        global _verbose
 
-    def getParams(self, typ):
+        # User is likely asking for one of the registers and is likely to ask
+        # for others in the same group of 'Config', 'Status', etc.
+        # Let's start to connect them all to minimize the connection delay
+        if param not in self._cached_pvs:
+            for group in [ "Status", "Config", "Temp", "Counter" ]:
+                params = self.getParams(group)
+                if param in params:
+                    if _verbose:
+                        print "Caching '{0}' parameters".format(group)
+                    for p in params:
+                        getPv(self.name, p, wait_connect=False)
+                    self._cached_pvs += params
+                    break
+
+        # Now select the requested one and make sure it's connected
+        return getPv(self.name, param, wait_connect=True)
+
+    def getParams(self, typ=None):
+        if typ:
+            return self._getParams(typ)
+
+        params  = self._getParams("Status")
+        params += self._getParams("Config")
+        params += self._getParams("Temp")
+        params += self._getParams("Counter")
+        return params
+
+    def _getParams(self, typ=None):
+        pluginid = getPv(self.name, "PluginId").get(as_string=True)
         params = []
-        top = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-        src = os.path.join(top, "nedApp", "src", self.pluginid + ".cpp")
+        top = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+        src = os.path.join(top, "nedApp", "src", pluginid + ".cpp")
         with open(src, "r") as f:
             regex = re.compile(".*create[a-zA-Z]*" + typ.title() + "Param\(\"([^\"]*)\"")
             for line in f.readlines():
@@ -82,18 +126,19 @@ class Module(epics.device.Device):
         return params
 
     @staticmethod
-    def sendCommand(self, command):
-        if isinstance(self, Module):
-            if self.req_pv is None:
-                self.req_pv = getPv(self.__dict__['name'] + ":CmdReq")
-                self.rsp_pv = getPv(self.__dict__['name'] + ":CmdRsp")
-            req = self.req_pv
-            rsp = self.rsp_pv
+    def sendCommand(name, command):
+        if isinstance(name, Module):
+            self = name
+            if self._req_pv is None:
+                self._req_pv = getPv(self.name, "CmdReq")
+                self._rsp_pv = getPv(self.name, "CmdRsp")
+            req_pv = self._req_pv
+            rsp_pv = self._rsp_pv
         else:
-            req_pv = getPv(name + ":CmdReq")
-            rsp_pv = getPv(name + ":CmdRsp")
+            req_pv = getPv(name, "CmdReq")
+            rsp_pv = getPv(name, "CmdRsp")
 
-        req.put(command)
+        req_pv.put(command)
         while rsp_pv.get(as_string=True) == "Waiting":
             time.sleep(0.01)
         return rsp_pv.get(as_string=True) != "Success"
