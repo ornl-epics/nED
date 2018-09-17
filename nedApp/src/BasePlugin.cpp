@@ -80,6 +80,23 @@ BasePlugin::~BasePlugin()
     disconnect();
 }
 
+asynStatus BasePlugin::lock()
+{
+    asynStatus r = asynPortDriver::lock();
+    if (r == asynSuccess)
+        m_locked = true;
+    return r;
+}
+
+asynStatus BasePlugin::unlock()
+{
+    m_locked = false;
+    asynStatus r = asynPortDriver::unlock();
+    if (r != asynSuccess)
+        m_locked = true;
+    return r;
+}
+
 bool BasePlugin::connect(const std::list<std::string> &plugins, const std::list<int> &messageTypes)
 {
     std::list<RemotePort> connectedPorts; // This list will get populated with newly connected ports

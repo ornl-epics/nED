@@ -583,12 +583,12 @@ class BasePlugin : public asynPortDriver {
          *
          * Lock is not recursive, single lock only.
          */
-        asynStatus lock() override { m_locked = true; return asynPortDriver::lock(); };
+        asynStatus lock() override;
 
         /**
          * Unlocks this port instance.
          */
-        asynStatus unlock() override { m_locked = false; return asynPortDriver::unlock(); };
+        asynStatus unlock() override;
 
         /**
          * Return name of asyn port.
