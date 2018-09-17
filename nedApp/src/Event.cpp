@@ -29,17 +29,4 @@ namespace BNL {
 
 }; // namespace BNL
 
-namespace ACPC {
-    Diag& Diag::operator=(const Normal &normal) {
-        memcpy(this, &normal, sizeof(Normal));
-        corrected_x = -1.0;
-        corrected_y = -1.0;
-        pixelid = 0;
-        pixelid_raw = 0;
-
-        return *this;
-    }
-
-}; // namespace ACPC
-
 }; // namespace Event

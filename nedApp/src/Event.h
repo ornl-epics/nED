@@ -311,16 +311,25 @@ namespace Event {
         /**
          * Structure representing Diagnostic mode data packet
          */
-        struct Diag : public Normal {
+        struct Diag {
+            uint32_t tof;
+            uint32_t position;
+            enum class Veto {
+                GOOD = 0,
+                UNKNOWN,
+                POSITION,
+                RANGE,
+                PHOTOSUM,
+                MAPPING,
+            } veto;
+            double x;               // Interpolated X position in Q8.24 format
+            double y;               // Interpolated Y position in Q8.24 format
+            double photo_sum_x;     // X photo sum in Q17.15 format
+            double photo_sum_y;     // Y photo sum in Q17.15 format
             double corrected_x;     // Interpolated and corrected X position
             double corrected_y;     // Interpolated and corrected Y position
             uint32_t pixelid;       // Pixel id
             uint32_t pixelid_raw;   // Mapped pixel id
-
-            /**
-             * Copy fields from Raw event.
-             */
-            Diag& operator=(const Normal &normal);
         };
     };
 

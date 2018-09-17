@@ -285,10 +285,12 @@ class FlatFieldPlugin : public BasePlugin {
         std::shared_ptr<Timer> m_importTimer; //!< Timer is used as a worker thread for importing files
 
         // Following member variables must be carefully set since they're used un-locked
-        double m_xScaleIn;          //!< Scaling factor to transform raw X range to [0 .. m_tableSizeX)
-        double m_yScaleIn;          //!< Scaling factor to transform raw Y range to [0 .. m_tableSizeY)
+        double m_xScaleIn;          //!< Scaling factor to transform raw X to floating point
+        double m_yScaleIn;          //!< Scaling factor to transform raw Y to floating point
         double m_xScaleOut;         //!< Scaling factor to convert X to pixel id format
         double m_yScaleOut;         //!< Scaling factor to convert Y to pixel id format
+        double m_xScaleTable;       //!< Scaling factor to convert X to tables dimensions
+        double m_yScaleTable;       //!< Scaling factor to convert Y to tables dimensions
         uint32_t m_xMaskOut;        //!< Mask to be applied to X when converting to pixel id format
         uint32_t m_yMaskOut;        //!< Mask to be applied to Y when converting to pixel id format
         double m_psScale;           //!< Scaling factor to convert unsigned UQm.n 32 bit value into double

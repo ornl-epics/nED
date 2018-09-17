@@ -215,10 +215,12 @@ void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
     // function at any time, we read in values and store them as class members.
     // This makes member variables const for the duration of this function.
     m_psScale = 1.0 / (1 << psFractWidth);
-    m_xScaleIn = 1.0 * (m_tableSizeX - 1) / ((1 << xyFractWidth) * xMaxIn);
-    m_yScaleIn = 1.0 * (m_tableSizeY - 1) / ((1 << xyFractWidth) * yMaxIn);
-    m_xScaleOut = 1.0 * Bits::roundUpPower2(yMaxOut) * xMaxOut / (m_tableSizeX - 1);
-    m_yScaleOut = 1.0 *                                yMaxOut / (m_tableSizeY - 1);
+    m_xScaleIn = 1.0 / (1 << xyFractWidth);
+    m_yScaleIn = 1.0 / (1 << xyFractWidth);
+    m_xScaleTable = (m_tableSizeX - 1) / xMaxIn;
+    m_yScaleTable = (m_tableSizeY - 1) / yMaxIn;
+    m_xScaleOut = 1.0 * Bits::roundUpPower2(yMaxOut) * xMaxOut / xMaxIn;
+    m_yScaleOut = 1.0 *                                yMaxOut / yMaxIn;
     m_xMaskOut = (Bits::roundUpPower2(xMaxOut) - 1) * Bits::roundUpPower2(yMaxOut);
     m_yMaskOut = (Bits::roundUpPower2(yMaxOut) - 1);
 
@@ -287,8 +289,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
             events->pixelid |= srcEvents->position;
 
             VetoType veto = VETO_NO;
-            if (srcEvents->x < 0 || srcEvents->y < 0) {
-                // Probably previously tagged veto
+            if (events->pixelid & Event::Pixel::VETO_MASK) {
                 veto = VETO_INHERITED;
             } else {
                 events->corrected_x = srcEvents->x * m_xScaleIn;
@@ -324,39 +325,39 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
         Event::ACPC::Diag *events = packet->getEvents<Event::ACPC::Diag>();
 
         while (nEvents-- > 0) {
-            // Changing format requires event-by-event copy
-            *events = *srcEvents;
-            events->pixelid &= Event::Pixel::VETO_MASK;
-            events->pixelid |= srcEvents->position;
+            events->tof = srcEvents->tof;
+            events->position = srcEvents->position;
+            events->veto = Event::ACPC::Diag::Veto::GOOD;
+            events->x = srcEvents->x * m_xScaleIn;
+            events->y = srcEvents->y * m_xScaleIn;
+            events->photo_sum_x = srcEvents->photo_sum_x * m_psScale;
+            events->photo_sum_y = srcEvents->photo_sum_y * m_psScale;
+            events->corrected_x = events->x;
+            events->corrected_y = events->y;
 
             VetoType veto = VETO_NO;
-            if (srcEvents->x < 0 || srcEvents->y < 0) {
-                // Probably previously tagged veto - don't double count
-                veto = VETO_INHERITED;
-            } else {
-                events->corrected_x = srcEvents->x * m_xScaleIn;
-                events->corrected_y = srcEvents->y * m_yScaleIn;
-                double photo_sum_x = srcEvents->photo_sum_x * m_psScale;
+            if (corrEn) {
+                VetoType psVeto = checkPhotoSumLimits(events->corrected_x, events->corrected_y, events->photo_sum_x, events->position);
+                VetoType ffVeto = correctPosition(events->corrected_x, events->corrected_y, events->position);
 
-                if (corrEn) {
-                    // Check photo sum first
-                    veto = checkPhotoSumLimits(events->corrected_x, events->corrected_y, photo_sum_x, srcEvents->position);
-                    if (veto == VETO_NO) {
-                        // Apply flat-field correction
-                        veto = correctPosition(events->corrected_x, events->corrected_y, srcEvents->position);
-                    }
-                }
-
-                // Calculate pixelid
-                events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
-                events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
+                if (psVeto != VETO_NO)
+                    veto = psVeto;
+                else if (ffVeto != VETO_NO)
+                    veto = ffVeto;
             }
             counters[veto]++;
 
+
+            // Calculate pixelid
+            events->pixelid  = srcEvents->position;
+            events->pixelid |= (std::lround(events->corrected_x * m_xScaleOut) & m_xMaskOut);
+            events->pixelid |= (std::lround(events->corrected_y * m_yScaleOut) & m_yMaskOut);
             if (veto != VETO_NO) {
-                events->corrected_x = -1;
-                events->corrected_y = -1;
                 events->pixelid |= Event::Pixel::VETO_MASK;
+                if (veto == VETO_POSITION)      events->veto = Event::ACPC::Diag::Veto::POSITION;
+                else if (veto == VETO_RANGE)    events->veto = Event::ACPC::Diag::Veto::RANGE;
+                else if (veto == VETO_PHOTOSUM) events->veto = Event::ACPC::Diag::Veto::PHOTOSUM;
+                else                            events->veto = Event::ACPC::Diag::Veto::UNKNOWN;
             }
 
             srcEvents++;
@@ -373,12 +374,16 @@ FlatFieldPlugin::VetoType FlatFieldPlugin::correctPosition(double &x, double &y,
     if (!xtable || !ytable || m_tables[position].enabled == false)
         return VETO_POSITION;
 
+    x *= m_xScaleTable;
+    y *= m_yScaleTable;
     unsigned xp = x;
     unsigned yp = y;
 
-    // All tables of the same size, safe to compare against just one
-    if (x < 0.0 || xp >= (xtable->sizeX-1) || y < 0.0 || yp >= (xtable->sizeY-1))
+    if (x < 0.0 || xp >= (xtable->sizeX-1) || y < 0.0 || yp >= (xtable->sizeY-1)) {
+        x /= m_xScaleTable;
+        y /= m_yScaleTable;
         return VETO_RANGE;
+    }
 
     // All checks passed - do the correction
     double dx = (xp == 0 || xp == (xtable->sizeX - 1)) ? 0 : x - xp;
@@ -386,6 +391,9 @@ FlatFieldPlugin::VetoType FlatFieldPlugin::correctPosition(double &x, double &y,
 
     x -= (dx * xtable->data[xp+1][yp]) + ((1 - dx) * xtable->data[xp][yp]);
     y -= (dy * ytable->data[xp][yp+1]) + ((1 - dy) * ytable->data[xp][yp]);
+
+    x /= m_xScaleTable;
+    y /= m_yScaleTable;
 
     return VETO_NO;
 }
@@ -397,20 +405,19 @@ FlatFieldPlugin::VetoType FlatFieldPlugin::checkPhotoSumLimits(double x, double 
     if (!upperLimits || !lowerLimits || m_tables[position].enabled == false)
         return VETO_POSITION;
 
-    unsigned xp = nearbyint(x);
-    unsigned yp = nearbyint(y);
+    unsigned xp = nearbyint(x * m_xScaleTable);
+    unsigned yp = nearbyint(y * m_yScaleTable);
 
-    // All tables of the same size, safe to compare against just one
     if (x < 0.0 || xp >= (upperLimits->sizeX-1) || y < 0.0 || yp >= (upperLimits->sizeY-1))
         return VETO_RANGE;
 
     double upperLimit = upperLimits->data[xp][yp];
     double lowerLimit = lowerLimits->data[xp][yp];
 
-    if (lowerLimit <= photosum_x && photosum_x <= upperLimit)
-        return VETO_NO;
-    else
+    if (photosum_x < lowerLimit || photosum_x > upperLimit)
         return VETO_PHOTOSUM;
+
+    return VETO_NO;
 }
 
 float FlatFieldPlugin::importFilesCb(const std::string &path)

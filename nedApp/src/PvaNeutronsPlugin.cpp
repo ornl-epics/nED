@@ -1494,6 +1494,7 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                     add("num_events",       standardField->scalar(pvUInt, ""))->
                     add("time_of_flight",   standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("position",         standardField->scalarArray(epics::pvData::pvUInt, ""))->
+                    add("veto",             standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("x",                standardField->scalarArray(epics::pvData::pvFloat, ""))->
                     add("y",                standardField->scalarArray(epics::pvData::pvFloat, ""))->
                     add("corrected_x",      standardField->scalarArray(epics::pvData::pvFloat, ""))->
@@ -1523,6 +1524,10 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
 
             pvRecord->pvPosition = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("position.value");
             if (pvRecord->pvPosition.get() == NULL)
+                return PvaRecordAcpc::shared_pointer();
+
+            pvRecord->pvVeto = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("veto.value");
+            if (pvRecord->pvVeto.get() == NULL)
                 return PvaRecordAcpc::shared_pointer();
 
             pvRecord->pvPixel = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("pixel.value");
@@ -1580,6 +1585,7 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
             epics::pvData::PVUIntArray::svector tofs(nEvents);
             epics::pvData::PVUIntArray::svector pixels(nEvents);
             epics::pvData::PVUIntArray::svector positions(nEvents);
+            epics::pvData::PVUIntArray::svector vetos(nEvents);
             epics::pvData::PVFloatArray::svector xs(nEvents);
             epics::pvData::PVFloatArray::svector ys(nEvents);
             epics::pvData::PVFloatArray::svector corrected_xs(nEvents);
@@ -1592,13 +1598,14 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                 for (uint32_t i = 0; i < nEvents; i++) {
                     tofs[i]         = events[i].tof & 0x000FFFFF;
                     positions[i]    = events[i].position & 0x7FFFFFFF;
+                    vetos[i]        = 0;
                     pixels[i]       = 0;
                     xs[i]           = 1.0 * events[i].x / (1 << 24);
                     ys[i]           = 1.0 * events[i].y / (1 << 24);
                     corrected_xs[i] = -1;
                     corrected_ys[i] = -1;
-                    photo_sum_x[i]  = events[i].photo_sum_x;
-                    photo_sum_y[i]  = events[i].photo_sum_y;
+                    photo_sum_x[i]  = events[i].photo_sum_x / (1 << 15);
+                    photo_sum_y[i]  = events[i].photo_sum_y / (1 << 15);
                 }
             } else if (packet->getEventsFormat() == DasDataPacket::EVENT_FMT_ACPC_DIAG) {
                 const Event::ACPC::Diag *events = packet->getEvents<Event::ACPC::Diag>();
@@ -1606,13 +1613,14 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                 for (uint32_t i = 0; i < nEvents; i++) {
                     tofs[i]         = events[i].tof & 0x000FFFFF;
                     positions[i]    = events[i].position & 0x7FFFFFFF;
+                    vetos[i]        = static_cast<unsigned>(events[i].veto);
                     pixels[i]       = (mapped ? events[i].pixelid_raw : events[i].pixelid);
-                    xs[i]           = 1.0 * events[i].x / (1 << 24);
-                    ys[i]           = 1.0 * events[i].y / (1 << 24);
-                    corrected_xs[i] = 1.0 * events[i].corrected_x;
-                    corrected_ys[i] = 1.0 * events[i].corrected_y;
-                    photo_sum_x[i]  = 1.0 * events[i].photo_sum_x / (1 << 15);
-                    photo_sum_y[i]  = 1.0 * events[i].photo_sum_y / (1 << 15);
+                    xs[i]           = events[i].x;
+                    ys[i]           = events[i].y;
+                    corrected_xs[i] = events[i].corrected_x;
+                    corrected_ys[i] = events[i].corrected_y;
+                    photo_sum_x[i]  = events[i].photo_sum_x;
+                    photo_sum_y[i]  = events[i].photo_sum_y;
                 }
             } else {
                 nEvents = 0;
@@ -1627,6 +1635,7 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
                 pvNumEvents->put(nEvents);
                 pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
                 pvPosition->replace(epics::pvData::freeze(positions));
+                pvVeto->replace(epics::pvData::freeze(vetos));
                 pvPixel->replace(epics::pvData::freeze(pixels));
                 pvX->replace(epics::pvData::freeze(xs));
                 pvY->replace(epics::pvData::freeze(ys));
@@ -1648,7 +1657,8 @@ class PvaNeutronsPlugin::PvaRecordAcpc : public epics::pvDatabase::PVRecord {
         epics::pvData::PVTimeStamp      pvTimeStamp;     //!< Time stamp common to all events
         epics::pvData::PVUIntPtr        pvNumEvents;     //!< Number of events in all arrays
         epics::pvData::PVUIntArrayPtr   pvTimeOfFlight;  //!< Time offset relative to time stamp
-        epics::pvData::PVUIntArrayPtr   pvPosition;      //!< Calculated pixel ID
+        epics::pvData::PVUIntArrayPtr   pvPosition;      //!< Detector position id
+        epics::pvData::PVUIntArrayPtr   pvVeto;          //!< Veto flag or 0 when good
         epics::pvData::PVUIntArrayPtr   pvPixel;         //!< Calculated pixel ID
         epics::pvData::PVUIntArrayPtr   pvRawPixel;      //!< Calculated pixel ID
         epics::pvData::PVFloatArrayPtr  pvX;             //!< Position X
