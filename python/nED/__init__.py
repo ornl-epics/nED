@@ -80,7 +80,10 @@ class Module:
             self._cached_pvs.append(pv)
 
     def __getattr__(self, param):
-        self.getPv(param)
+        pv = self.getPv(param)
+        if not pv:
+            return None
+        return pv.get()
 
     def getPv(self, param):
         global _verbose
