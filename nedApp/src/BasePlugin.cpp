@@ -253,10 +253,12 @@ void BasePlugin::recvDownstreamCb(asynUser *pasynUser, void *ptr)
              */
             msg->claim();
             std::pair<int, PluginMessage*> *q = new std::pair<int, PluginMessage *>(msgType, msg);
-            if (m_messageQueue.trySend(&q, sizeof(&q)) == -1) {
+            if (q == nullptr || m_messageQueue.trySend(&q, sizeof(&q)) == -1) {
                 msg->release();
-                LOG_ERROR("Message queue full, discarding message");
-                m_messageQueue.show();
+                if (q != nullptr) {
+                    LOG_ERROR("Message queue full, discarding message");
+                    m_messageQueue.show();
+                }
             }
         }
     }
@@ -272,11 +274,12 @@ void BasePlugin::recvDownstreamThread(epicsEvent *shutdown)
         int msgType = q->first;
         PluginMessage *msg = q->second;
 
-        lock();
-        recvDownstream(msgType, msg);
-        unlock();
-
-        msg->release();
+        if (msg != 0) {
+            lock();
+            recvDownstream(msgType, msg);
+            unlock();
+            msg->release();
+        }
         delete q;
     }
 }
