@@ -80,23 +80,28 @@ int FileCircularBuffer::wait(void **data, uint32_t *len, double timeout)
         if (m_fd != -1) {
             // Calculate the latest timestamp for any packet in this iteration
             epicsTimeStamp maxTimeStamp{0, 0};
-            if (m_timeDiff != std::numeric_limits<double>::min()) {
+            if (m_timeDiff == std::numeric_limits<double>::min()) {
+                // Force reading first packet to get its timestamp and be able to
+                // calculate time difference of first packet to current time
+                maxTimeStamp = { std::numeric_limits<uint32_t>::max(), 0 };
+                count = 1;
+            } else {
                 epicsTime now{epicsTime::getCurrent()};
                 double scaledDiff = (now - m_startTime);
                 scaledDiff *= m_speed;
                 maxTimeStamp = m_startTime - m_timeDiff + scaledDiff;
             }
 
-            while (m_reading && --count > 0) {
+            while (m_reading && count-- > 0) {
                 epicsTime maxTime{maxTimeStamp};
                 if (readPacket(maxTime) == false) {
+                    // Either no packet or time past requested
                     break;
                 }
-                if (m_timeDiff == std::numeric_limits<double>::min()) {
-                    if (maxTime != epicsTimeStamp{0, 0}) {
-                        m_timeDiff = epicsTime::getCurrent() - maxTime;
-                        break;
-                    }
+                if (m_timeDiff == std::numeric_limits<double>::min() && maxTime != epicsTimeStamp{0, 0}) {
+                    // Calculate offset when data was taken to current time
+                    m_timeDiff = epicsTime::getCurrent() - maxTime;
+                    break;
                 }
             }
 
