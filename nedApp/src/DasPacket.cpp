@@ -404,14 +404,13 @@ DasDataPacket::EventFormat DasPacket::getEventsFormat() const
     switch (getDataFormat()) {
     case DATA_FMT_META:             return DasDataPacket::EVENT_FMT_META;
     case DATA_FMT_PIXEL:            return DasDataPacket::EVENT_FMT_PIXEL;
+    case DATA_FMT_XY_PS:            return DasDataPacket::EVENT_FMT_ACPC_XY_PS;
     case DATA_FMT_LPSD_RAW:         return DasDataPacket::EVENT_FMT_LPSD_RAW;
     case DATA_FMT_LPSD_VERBOSE:     return DasDataPacket::EVENT_FMT_LPSD_VERBOSE;
     case DATA_FMT_AROC_RAW:         return DasDataPacket::EVENT_FMT_AROC_RAW;
     case DATA_FMT_BNL_RAW:          return DasDataPacket::EVENT_FMT_BNL_RAW;
     case DATA_FMT_BNL_VERBOSE:      return DasDataPacket::EVENT_FMT_BNL_VERBOSE;
     case DATA_FMT_CROC_RAW:         return DasDataPacket::EVENT_FMT_CROC_RAW;
-    case DATA_FMT_CROC_VERBOSE:     return DasDataPacket::EVENT_FMT_CROC_VERBOSE;
-    case DATA_FMT_ACPC_VERBOSE:     return DasDataPacket::EVENT_FMT_ACPC_VERBOSE;
     default:                        return DasDataPacket::EVENT_FMT_INVALID;
     }
 }
