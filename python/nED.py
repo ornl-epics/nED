@@ -82,7 +82,7 @@ def actionSet(args=[]):
     return 0
 
 def actionGet(args=[]):
-    """get modules param            Print current parameter value for selected modules"""
+    """get modules param            Print parameter value for selected modules"""
     if len(args) < 2:
         usage("get: missing arguments")
         return 1
@@ -95,6 +95,32 @@ def actionGet(args=[]):
         val = pv.get(as_string=True)
         units = pv.units if pv.units else ""
         print "{0} {1}={2}{3}".format(module, param, val, units)
+    return 0
+
+def actionMonitor(args=[]):
+    """monitor modules param        Monitor parameter value for selected modules"""
+    if len(args) < 2:
+        usage("save: missing parameter value")
+        return 1
+
+    expr = args[0] if args else ".*"
+    param = args[1]
+
+    pvs = []
+    for module in nED.getModules(expr):
+        pv = module.getPv(param)
+        units = pv.units if pv.units else ""
+        pvs.append( [pv, None, units, module.name] )
+
+    # Do 1Hz loops, this could be improved with real CA monitor
+    # but most nED PVs update at max 1Hz rate anyway
+    while True:
+        for pv in pvs:
+            new_val = pv[0].get(as_string=True)
+            if new_val != pv[1]:
+                print "{0} {1}={2}{3}".format(pv[3], param, new_val, pv[2])
+                pv[1] = new_val
+        time.sleep(1)
     return 0
 
 def autocompleteGet(args=[]):
@@ -115,7 +141,7 @@ def autocompleteGet(args=[]):
     return 0
 
 def actionSave(args=[]):
-    """save modules name            Save current module configuration as name"""
+    """save modules name            Save modules configuration as name"""
     if len(args) < 2:
         usage("save: missing parameter value")
         return 1
@@ -124,9 +150,44 @@ def actionSave(args=[]):
     name = args[1]
 
     for module in nED.getModuleNames(expr):
-        nED.getPv(module, "SaveConfigName").put(name)
-        nED.getPv(module, "SaveConfigTrig").put(1)
-        print "Saved '{0}' configuration as '{1}'".format(module, name)
+        try:
+            module.saveConfig(name)
+            print "Saved '{0}' configuration as '{1}'".format(module, name)
+        except UserWarning, e:
+            print e
+    return 0
+
+def actionRestore(args=[]):
+    """restore modules name         Restore modules configuration from name"""
+    if len(args) < 2:
+        usage("save: missing parameter value")
+        return 1
+
+    expr = args[0] if args else ".*"
+    name = args[1]
+
+    for module in nED.getModuleNames(expr):
+        try:
+            module.restoreConfig(name)
+            print "Restored '{0}' configuration as '{1}'".format(module, name)
+        except UserWarning, e:
+            print e
+    return 0
+
+def actionConfig(args=[]):
+    """config modules               Apply current configuration to module"""
+    if len(args) < 1:
+        usage("save: missing parameter value")
+        return 1
+
+    expr = args[0] if args else ".*"
+
+    for module in nED.getModuleNames(expr):
+        try:
+            module.applyConfig()
+            print "Applied current configuration to '{0}'".format(module)
+        except UserWarning, e:
+            print e
     return 0
 
 def autocompleteSave(args=[]):

@@ -33,19 +33,30 @@ def getPv(plugin, param, wait_connect=True, timeout=1.0):
         print "nED get PV: ", pv
     return epics.get_pv(pv, connect=wait_connect, timeout=timeout)
 
-def getPva(name="Neutrons"):
-    return pvaccess.Channel( _pvprefix + "pva:" + name.strip(":") )
+def getDataChannel(event_type="Pixel"):
+    """ Return a new not-connected instance of PVA channel """
+    # Get PV channel name based on event type
+    event_type = event_type.strip(":").title()
+    pvaName = getPv("pva", event_type + "PvaName").get()
+    ch = pvaccess.Channel(pvaName)
+
+    # Now make sure this channel is enabled, but keep it at its previous
+    # settings after we're done with this program
+    enablePv = getPv("pva", event_type + "Enable")
+    autorestore.save(enablePv)
+    enablePv.put(1)
+
+    return ch
 
 def getModuleNames(expr=".*"):
+    """Return a list of module names that match the pattern expression."""
     global _verbose
 
     try:
         o = pvaccess.Channel(_pvprefix + "pva:Modules").get()
         modules = o.getScalarArray('modules.value')
-        if not modules:
-            modules = []
     except:
-        modules = []
+        raise RuntimeError("Failed to communicate to nED")
 
     # Convert simple globing to regular expression
     expr = re.sub(r"([^\.]?)\*", r"\1.*", expr)
@@ -62,6 +73,12 @@ def getModuleNames(expr=".*"):
     return modules
 
 def getModules(expr=".*"):
+    """Return a list of modules that match the pattern expression.
+
+    The returned list contains Module instances and since it's connecting
+    PVs automatically, this function is slower than getModuleNames() if
+    you don't need all Module class functionality.
+    """
     modules = []
     for module in getModuleNames(expr):
         modules.append(Module(module))
@@ -80,9 +97,11 @@ class Module:
             self._cached_pvs.append(pv)
 
     def __getattr__(self, param):
+        if param.startswith("__"):
+            raise AttributeError("Module class has no attribute {0}".format(param))
         pv = self.getPv(param)
-        if not pv:
-            return None
+        if pv.status != 1:
+            raise AttributeError("Module '{0}' has no parameter '{1}'".format(self.name, param))
         return pv.get()
 
     def getPv(self, param):
@@ -145,3 +164,52 @@ class Module:
         while rsp_pv.get(as_string=True) == "Waiting":
             time.sleep(0.01)
         return rsp_pv.get(as_string=True) != "Success"
+
+    def saveConfig(self, name):
+        pv = getPv(self.name, "SaveConfig")
+        pv.put(name, wait=True)
+        if pv.severity != 0:
+            raise UserWarning("Failed to save {0} configuration '{1}'".format(self.name, name))
+
+    def restoreConfig(self, name):
+        pv = getPv(self.name, "LoadConfig")
+        pv.put(name, wait=True)
+        if pv.severity != 0:
+            raise UserWarning("Failed to restore {0} configuration '{1}'".format(self.name, name))
+
+    def applyConfig(self, retries=3):
+        for retry in range(retries):
+            if self.sendCommand("Write config"):
+                break
+        else:
+            raise UserWarning("Failed to apply configuration to {0}".format(name))
+
+class _AutoRestore:
+    """ This class is used for automatically restoring PV values when program exits.
+
+    In its destructor, this class will restore all previously saved values.
+    This is useful for some functionality that needs to be enabled temporarily
+    while program is running and would impact performance otherwise. Once PV and
+    its value is saved, it can be then changed to whatever value and this class
+    will ensure it gets reverted back.
+
+    Due to use of __del__() destructor, auto-restore method is not 100% reliable.
+    """
+    def __init__(self):
+        self._pvs = {}
+
+    def __del__(self):
+        for pv,value in self._pvs.iteritems():
+            pv.put(value)
+
+    def save(self, pv, restore_value=None):
+        """ Saves a value to be restored on shutdown.
+
+        If restore_value is not provided, current value from PV is used instead.
+        This method can be called many times for same PV with new values if so
+        desired.
+        """
+        if restore_value is None:
+            restore_value = pv.get()
+        self._pvs[pv] = restore_value
+autorestore = _AutoRestore()
