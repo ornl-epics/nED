@@ -13,9 +13,9 @@ record(stringin, "$(P)PluginId")
 
 record(calc, "$(P)HwStatus")
 {
-    field(INPA, "$(P)Configured.SEVR NPP")
-    field(INPB, "$(P)Discovered.SEVR NPP")
-    field(CALC, "(A+B)=0")
+    field(INPA, "$(P)Configured.SEVR NPP NMS")
+    field(INPB, "$(P)Discovered.SEVR NPP NMS")
+    field(CALC, "A#2&&B=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 }

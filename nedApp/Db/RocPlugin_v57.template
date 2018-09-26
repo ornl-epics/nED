@@ -15,7 +15,7 @@ record(calc, "$(P)HwStatus")
     field(INPC, "$(P)TempBoard.SEVR NPP")
     field(INPD, "$(P)TempPreampA.SEVR NPP")
     field(INPE, "$(P)TempPreampB.SEVR NPP")
-    field(CALC, "(A+C+D+E)=0")
+    field(CALC, "A#2&&C#2&&D#2&&E#2")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 }

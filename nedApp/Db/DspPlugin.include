@@ -1,8 +1,8 @@
 record(calc, "$(P)HwStatus")
 {
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)Configured.SEVR NPP")
-    field(CALC, "A=0")
+    field(INPA, "$(P)Configured.SEVR NPP NMS")
+    field(CALC, "A#2")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
 }
