@@ -139,6 +139,18 @@ void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
                 errors += eventsMap(destPacket->getEvents<Event::BNL::Diag>(), nEvents);
                 destPacket->setEventsMapped(true);
                 outPackets.push_back(destPacket);
+            } else if (srcPacket->getEventsFormat() == DasDataPacket::EVENT_FMT_ACPC_DIAG) {
+                uint32_t destPacketLen = sizeof(DasDataPacket) + nEvents*sizeof(Event::ACPC::Diag);
+                destPacket = m_packetsPool.get(destPacketLen);
+                if (!destPacket) {
+                    LOG_ERROR("Failed to allocate output packet");
+                    continue;
+                }
+                allocatedPackets.push_back(destPacket);
+                destPacket->init(DasDataPacket::EVENT_FMT_ACPC_DIAG, srcPacket->getTimeStamp(), nEvents, srcPacket->getEvents<Event::ACPC::Diag>());
+                errors += eventsMap(destPacket->getEvents<Event::ACPC::Diag>(), nEvents);
+                destPacket->setEventsMapped(true);
+                outPackets.push_back(destPacket);
             } else {
                 static bool logged = false;
                 if (!logged) {
