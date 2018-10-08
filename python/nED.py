@@ -149,10 +149,10 @@ def actionSave(args=[]):
     expr = args[0] if args else ".*"
     name = args[1]
 
-    for module in nED.getModuleNames(expr):
+    for module in nED.getModules(expr):
         try:
             module.saveConfig(name)
-            print "Saved '{0}' configuration as '{1}'".format(module, name)
+            print "Saved '{0}' current configuration as '{1}'".format(module.name, name)
         except UserWarning, e:
             print e
     return 0
@@ -169,9 +169,27 @@ def actionRestore(args=[]):
     for module in nED.getModuleNames(expr):
         try:
             module.restoreConfig(name)
-            print "Restored '{0}' configuration as '{1}'".format(module, name)
+            print "Restored '{0}' configuration '{1}'".format(module, name)
         except UserWarning, e:
             print e
+    return 0
+
+def actionCompare(args=[]):
+    """compare modules name -d      Compare modules current configuration to saved one, only show diff if -d"""
+    if len(args) < 2:
+        usage("save: missing parameter name")
+        return 1
+
+    expr = args[0] if args else ".*"
+    name = args[1]
+    show_all = False if (len(args) > 2 and args[2]=="-d") else True
+
+    for module in nED.getModules(expr):
+        for param in module.getParams("Config"):
+            current = module.getPv(param).get(as_string=True)
+            saved = module.getPv(param + "_Saved").get(as_string=True)
+            if current != saved or show_all:
+                print "{0} {1} {2}=>{3}".format(module.name, param, saved, current)
     return 0
 
 def actionConfig(args=[]):
@@ -211,6 +229,7 @@ def usage(error=None):
     print ""
     print "Options:"
     print "  --pv-prefix                  nED PV prefix, defaults to {0}".format(nED.getPvPrefix())
+    print "  --verbose                    Print detailed progress"
     print ""
     print "Actions:"
     for name,cb in globals().iteritems():
@@ -230,7 +249,9 @@ def main():
 
         if arg == "--autocomplete":
             autocomplete = True
-        if arg == "--pv-prefix":
+        elif arg == "--verbose":
+            nED.setVerbose(True)
+        elif arg == "--pv-prefix":
             if not val:
                 print "ERROR: --pv-prefix argument requires a value"
                 return 1

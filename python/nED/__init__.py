@@ -100,8 +100,6 @@ class Module:
         if param.startswith("__"):
             raise AttributeError("Module class has no attribute {0}".format(param))
         pv = self.getPv(param)
-        if pv.status != 1:
-            raise AttributeError("Module '{0}' has no parameter '{1}'".format(self.name, param))
         return pv.get()
 
     def getPv(self, param):
