@@ -23,6 +23,7 @@ record(bi, "$(P)Acquiring")
 # ROC doesn't update any valueable fields, like Discovered or Configured
 record(calc, "$(P)HwStatus")
 {
-    field(INPA, "1")
-    field(CALC, "1")
+    field(INPE, "0")
+    field(INPF, "0")
+    field(INPG, "0")
 }

@@ -9,17 +9,6 @@ record(stringin, "$(P)PluginId")
     field(VAL,  "RocPlugin_v59")
 }
 
-record(calc, "$(P)HwStatus")
-{
-    field(INPA, "$(P)Configured.SEVR NPP")
-    field(INPB, "$(P)Discovered.SEVR NPP")
-    field(INPC, "$(P)TempBoard.SEVR NPP")
-    field(INPD, "$(P)TempPreampA.SEVR NPP")
-    field(INPE, "$(P)TempPreampB.SEVR NPP")
-    field(CALC, "A#2&&B=0&&C#2&&D#2&&E#2")
-    field(LOW,  "0")
-    field(LSV,  "MAJOR")
-}
 record(mbbo, "$(P)CmdReq")
 {
     field(TTVL, "146")

@@ -7,3 +7,38 @@ record(mbbo, "$(P)DiagEn")
     field(DTYP, "Raw Soft Channel")
     field(OUT,  "$(P)OutputMode PP")
 }
+
+record(calc, "$(P)TempBoardAlrm")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "$(P)TempBoard.SEVR NPP NMS")
+    field(CALC, "A=1&&B=2")
+}
+
+record(calc, "$(P)TempPreampAAlrm")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "$(P)TempPreampA.SEVR NPP NMS")
+    field(CALC, "A=1&&B=2")
+}
+
+record(calc, "$(P)TempPreampBAlrm")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "$(P)TempPreampB.SEVR NPP NMS")
+    field(CALC, "A=1&&B=2")
+}
+
+record(calc, "$(P)HwStatus")
+{
+    field(INPF, "$(P)TempBoardAlrm PP")
+    field(INPG, "$(P)TempPreampAAlrm PP")
+    field(INPH, "$(P)TempPreampBAlrm PP")
+}
+

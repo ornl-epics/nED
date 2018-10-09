@@ -21,16 +21,38 @@ record(mbbi, "$(P)CfgChannel")
     field(EIST, "Channel 8")
 }
 
+record(calc, "$(P)TempBoardAlrm")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "$(P)TempBoard.SEVR NPP NMS")
+    field(CALC, "A=1&&B=2")
+}
+
+record(calc, "$(P)TempPreampAAlrm")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "$(P)TempPreampA.SEVR NPP NMS")
+    field(CALC, "A=1&&B=2")
+}
+
+record(calc, "$(P)TempPreampBAlrm")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "$(P)TempPreampB.SEVR NPP NMS")
+    field(CALC, "A=1&&B=2")
+}
+
 record(calc, "$(P)HwStatus")
 {
-    field(INPA, "$(P)Configured.SEVR NPP NMS")
-    field(INPB, "$(P)Discovered.SEVR NPP NMS")
-    field(INPC, "$(P)TempBoard.SEVR NPP NMS")
-    field(INPD, "$(P)TempPreampA.SEVR NPP NMS")
-    field(INPE, "$(P)TempPreampB.SEVR NPP NMS")
-    field(CALC, "A#2&&B=0&&C#2&&D#2&&E#2")
-    field(LOW,  "0")
-    field(LSV,  "MAJOR")
+    field(INPF, "$(P)TempBoardAlrm PP")
+    field(INPG, "$(P)TempPreampAAlrm PP")
+    field(INPH, "$(P)TempPreampBAlrm PP")
 }
 
 # Fanout records to synchronize channel configurations

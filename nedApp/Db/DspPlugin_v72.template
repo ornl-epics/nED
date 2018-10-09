@@ -17,12 +17,3 @@ record(mbbo, "$(P)CmdReq")
     field(TTST, "Down reset LVDS")
 }
 
-record(calc, "$(P)HwStatus")
-{
-    field(INPA, "$(P)NoRtdlValid NPP")
-    field(INPB, "$(P)ELReady NPP")
-    field(INPC, "$(P)Configured NPP")
-    field(CALC, "A=0&&B=1&&C=1")
-    field(LOW,  "0")
-    field(LSV,  "MAJOR")
-}

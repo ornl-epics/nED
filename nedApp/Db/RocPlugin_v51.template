@@ -8,15 +8,3 @@ record(stringin, "$(P)PluginId")
 {
     field(VAL,  "RocPlugin_v51")
 }
-
-record(calc, "$(P)HwStatus")
-{
-    field(INPA, "$(P)Configured.SEVR NPP NMS")
-    field(INPB, "$(P)Discovered.SEVR NPP NMS")
-    field(INPC, "$(P)TempBoard.SEVR NPP NMS")
-    field(INPD, "$(P)TempPreampA.SEVR NPP NMS")
-    field(INPE, "$(P)TempPreampB.SEVR NPP NMS")
-    field(CALC, "A#2&&B=0&&C#2&&D#2&&E#2")
-    field(LOW,  "0")
-    field(LSV,  "MAJOR")
-}
