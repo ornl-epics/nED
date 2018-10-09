@@ -329,7 +329,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
             events->position = srcEvents->position;
             events->veto = Event::ACPC::Diag::Veto::GOOD;
             events->x = srcEvents->x * m_xScaleIn;
-            events->y = srcEvents->y * m_xScaleIn;
+            events->y = srcEvents->y * m_yScaleIn;
             events->photo_sum_x = srcEvents->photo_sum_x * m_psScale;
             events->photo_sum_y = srcEvents->photo_sum_y * m_psScale;
             events->corrected_x = events->x;
@@ -337,7 +337,7 @@ std::pair<DasDataPacket *, FlatFieldPlugin::Counters> FlatFieldPlugin::processEv
 
             VetoType veto = VETO_NO;
             if (corrEn) {
-                VetoType psVeto = checkPhotoSumLimits(events->corrected_x, events->corrected_y, events->photo_sum_x, events->position);
+                VetoType psVeto = checkPhotoSumLimits(events->x, events->y, events->photo_sum_x, events->position);
                 VetoType ffVeto = correctPosition(events->corrected_x, events->corrected_y, events->position);
 
                 if (psVeto != VETO_NO)
