@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <epicsThread.h>
+#include <numeric>
 #include <string>
 
 #define MESSAGE_QUEUE_SIZE 5   //!< Size of the message queue for callbacks. Increased to 5 to allow multiple parent plugins.

@@ -526,7 +526,7 @@ struct DasPacket
          *
          * @return Casted valid packet, throws otherwise
          */
-        static const DasPacket *cast(const uint8_t *data, size_t size) throw(std::runtime_error);
+        static const DasPacket *cast(const uint8_t *data, size_t size);
 
         /**
          * Convert DasPacket to new packet format.

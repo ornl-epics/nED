@@ -415,7 +415,7 @@ DasDataPacket::EventFormat DasPacket::getEventsFormat() const
     }
 }
 
-const DasPacket *DasPacket::cast(const uint8_t *data, size_t size) throw(std::runtime_error)
+const DasPacket *DasPacket::cast(const uint8_t *data, size_t size)
 {
     if (size < sizeof(DasPacket)) {
         std::ostringstream error;

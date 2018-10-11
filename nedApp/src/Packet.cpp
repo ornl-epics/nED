@@ -28,7 +28,7 @@ Packet::Packet(const Packet *orig)
     memcpy(this, orig, orig->length);
 }
 
-const Packet *Packet::cast(const uint8_t *data, size_t size) throw(ParseError)
+const Packet *Packet::cast(const uint8_t *data, size_t size)
 {
     if (size < sizeof(Packet)) {
         std::ostringstream error;

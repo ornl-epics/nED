@@ -255,7 +255,7 @@ bool RocPlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel)
 
         if (packet->getLength() > sizeof(buffer)) {
             LOG_ERROR("Received v5.4 READ_CONFIG response bigger than expected");
-            return asynError;
+            return false;
         }
 
         // Packet in shared queue must not be modified. So we make a copy.

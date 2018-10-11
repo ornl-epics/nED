@@ -11,6 +11,7 @@
 #include "StateAnalyzerPlugin.h"
 
 #include <algorithm>
+#include <cmath>
 #include <string.h>
 
 EPICS_REGISTER_PLUGIN(StateAnalyzerPlugin, 2, "Port name", string, "Parent plugins", string);

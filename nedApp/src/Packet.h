@@ -70,7 +70,7 @@ class Packet {
          *
          * @return Casted valid packet, throws otherwise
          */
-        static const Packet *cast(const uint8_t *data, size_t size) throw(ParseError);
+        static const Packet *cast(const uint8_t *data, size_t size);
 
         /**
          * Decode and return packet version as defined in header.
