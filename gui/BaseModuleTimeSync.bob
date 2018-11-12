@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Display</name>
+  <width>720</width>
+  <height>520</height>
+  <widget type="group" version="2.0.0">
+    <name>Control</name>
+    <width>360</width>
+    <height>250</height>
+    <widget type="label" version="2.0.0">
+      <name>Label_5</name>
+      <text>Stop threshold:</text>
+      <x>12</x>
+      <y>160</y>
+      <height>26</height>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_2</name>
+      <pv_name>$(P)TS:NoSyncThr</pv_name>
+      <x>122</x>
+      <y>160</y>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_6</name>
+      <text>Adj threshold:</text>
+      <x>12</x>
+      <y>190</y>
+      <height>26</height>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_3</name>
+      <pv_name>$(P)TS:AdjThr</pv_name>
+      <x>122</x>
+      <y>190</y>
+      <height>26</height>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry_1</name>
+      <pv_name>$(P)TS:SyncSamples</pv_name>
+      <x>122</x>
+      <y>90</y>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_4</name>
+      <text>Sync samples:</text>
+      <x>12</x>
+      <y>90</y>
+      <height>26</height>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>Text Entry</name>
+      <pv_name>$(P)TS:SyncInt</pv_name>
+      <x>122</x>
+      <y>120</y>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_3</name>
+      <text>Sync interval:</text>
+      <x>12</x>
+      <y>120</y>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>Sync enable:</text>
+      <x>12</x>
+      <y>10</y>
+      <width>110</width>
+      <height>26</height>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>Check Box</name>
+      <pv_name>$(P)TS:Enable</pv_name>
+      <label></label>
+      <x>122</x>
+      <y>10</y>
+      <width>60</width>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_2</name>
+      <text>State:</text>
+      <x>12</x>
+      <y>40</y>
+      <width>70</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate</name>
+      <pv_name>$(P)TS:State</pv_name>
+      <x>122</x>
+      <y>40</y>
+      <height>26</height>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(P)TS:ForceSync</pv_name>
+          <value>1</value>
+          <description>Write PV</description>
+        </action>
+      </actions>
+      <text>Sync now</text>
+      <x>232</x>
+      <y>40</y>
+      <width>90</width>
+      <height>26</height>
+      <rules>
+        <rule name="Disabled" prop_id="enabled" out_exp="true">
+          <exp bool_exp="true">
+            <expression>pv0==1</expression>
+          </exp>
+          <pv_name>$(P)TS:State</pv_name>
+        </rule>
+      </rules>
+      <tooltip>$(actions)</tooltip>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Info</name>
+    <x>360</x>
+    <width>360</width>
+    <height>250</height>
+    <widget type="label" version="2.0.0">
+      <name>Label_7</name>
+      <text>Average comm delay:</text>
+      <x>12</x>
+      <y>86</y>
+      <width>160</width>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_8</name>
+      <text>Comm delay std dev:</text>
+      <x>12</x>
+      <y>116</y>
+      <width>160</width>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_9</name>
+      <text>Average clock offset:</text>
+      <x>12</x>
+      <y>16</y>
+      <width>160</width>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_10</name>
+      <text>Offset std deviation:</text>
+      <x>12</x>
+      <y>42</y>
+      <width>160</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate_1</name>
+      <pv_name>$(P)TS:SyncOffAvg</pv_name>
+      <x>172</x>
+      <y>12</y>
+      <width>150</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate_2</name>
+      <pv_name>$(P)TS:SyncOffStd</pv_name>
+      <x>172</x>
+      <y>42</y>
+      <width>150</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate_3</name>
+      <pv_name>$(P)TS:CommDlyAvg</pv_name>
+      <x>172</x>
+      <y>82</y>
+      <width>150</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate_4</name>
+      <pv_name>$(P)TS:CommDlyStd</pv_name>
+      <x>172</x>
+      <y>112</y>
+      <width>150</width>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_11</name>
+      <text>Local time:</text>
+      <x>12</x>
+      <y>152</y>
+      <width>108</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate_5</name>
+      <pv_name>$(P)TS:LocalTimeSec</pv_name>
+      <x>107</x>
+      <y>152</y>
+      <width>95</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate_6</name>
+      <pv_name>$(P)TS:LocalTimeNSec</pv_name>
+      <x>212</x>
+      <y>152</y>
+      <width>110</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate_7</name>
+      <pv_name>$(P)TS:RemoteTimeSec</pv_name>
+      <x>107</x>
+      <y>182</y>
+      <width>95</width>
+      <height>26</height>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_13</name>
+      <text>Remote time:</text>
+      <x>12</x>
+      <y>182</y>
+      <width>95</width>
+      <height>26</height>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>TextUpdate_8</name>
+      <pv_name>$(P)TS:RemoteTimeNSec</pv_name>
+      <x>212</x>
+      <y>182</y>
+      <width>110</width>
+      <height>26</height>
+    </widget>
+  </widget>
+  <widget type="databrowser" version="2.0.0">
+    <name>Data Browser_1</name>
+    <file>TimeSyncStats.plt</file>
+    <y>250</y>
+    <width>720</width>
+    <height>270</height>
+  </widget>
+</display>

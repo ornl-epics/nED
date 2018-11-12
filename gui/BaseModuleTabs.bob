@@ -30,23 +30,16 @@ featuresMap = {
     0x2: "Status",
     0x4: "Temp",
     0x8: "Counters",
+    0x20: "TimeSync",
 }
 
 if init_script == 1:
   pvs[1].write(0)
   for bit,feature in featuresMap.iteritems():
-    if feature == "Config":
-        tab = tabs.addElement()
-        tab.name().setValue(feature)
-        tab.file().setValue("BaseModuleConfig.bob")
-#        tab.macros().getValue().add("P", "$(P_)%s:" % module)
-        ScriptUtil.getLogger().info("Added %s tab for $(D)" % feature.lower())
-    elif features & bit:
-        tab = tabs.addElement()
-        tab.name().setValue(feature)
-        tab.macros().getValue().add("TABLE_TYPE", feature)
-        tab.file().setValue("BaseModuleHeader.bob")
-        ScriptUtil.getLogger().info("Added %s tab" % feature.lower())
+    tab = tabs.addElement()
+    tab.name().setValue(feature)
+    tab.file().setValue("BaseModule%s.bob" % feature)
+    ScriptUtil.getLogger().info("Added %s tab for $(D)" % feature.lower())
 ]]></text>
         <pv_name>$(P)Features</pv_name>
         <pv_name trigger="false">loc://init_script$(DID)(1)</pv_name>
