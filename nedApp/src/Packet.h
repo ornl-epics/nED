@@ -272,19 +272,19 @@ class DasDataPacket : public Packet {
 
         /**
          * Check packet data integrity.
-         * 
+         *
          * Function performs following checks:
          * - minimum packet length
          * - all events fit in packet
          * - decoded timestamp is valid
-         * 
+         *
          * @return true if packet checks out, false otherwise.
          */
         bool checkIntegrity() const;
 
         /**
          * Calculate size in bytes of the new packet based on events.
-         * 
+         *
          * @param format of the events to be put in packet
          * @param count of events to be put in packet
          * @return calculated packet size
@@ -461,19 +461,19 @@ class RtdlPacket : public Packet {
 
         /**
          * Check packet data integrity.
-         * 
+         *
          * Function performs following checks:
          * - minimum packet length
          * - all RTDL frames fit in packet
          * - decoded timestamp is valid
-         * 
+         *
          * @return true if packet checks out, false otherwise.
          */
         bool checkIntegrity() const;
 
         /**
          * Calculate size in bytes of the new packet based on number of RTDL frames.
-         * 
+         *
          * @param count of events to be put in packet
          * @return calculated packet size
          */
@@ -646,7 +646,7 @@ class DasCmdPacket : public Packet {
 
         /**
          * Check packet data integrity.
-         * 
+         *
          * @return true if packet checks out, false otherwise.
          */
         bool checkIntegrity() const;
@@ -699,6 +699,13 @@ class DasCmdPacket : public Packet {
         }
 
         /**
+         * Set new module id in packet.
+         */
+        void setModuleId(uint32_t id) {
+            module_id = id;
+        }
+
+        /**
          * Return remote module id as IP string.
          */
         std::string getModuleIdStr() const;
@@ -730,8 +737,15 @@ class DasCmdPacket : public Packet {
         /**
          * Return command/response verification id.
          */
-        bool getCmdId() const {
+        uint8_t getCmdId() const {
             return cmd_id;
+        }
+
+        /**
+         * Sets command id (aka sequence number).
+         */
+        void setCmdId(uint8_t id) {
+            cmd_id = (id & 0x1F);
         }
 
         /**

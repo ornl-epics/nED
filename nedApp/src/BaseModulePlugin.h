@@ -91,6 +91,7 @@ class BaseModulePlugin : public BasePlugin {
             TEMPERATURE             = 4,    //!< Module supports temperature registers
             COUNTERS                = 8,    //!< Module supports counters registers
             UPGRADE                 = 16,   //!< Module supports remote upgrade
+            TIME_SYNC               = 32,   //!< Module supports time synchronization
         };
 
         /**
@@ -265,6 +266,13 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] length Payload length in bytes.
          */
         void sendUpstream(DasCmdPacket::CommandType command, uint8_t channel=0, uint32_t *payload=0, uint32_t length=0);
+
+        /**
+         * Send packet to parent plugins.
+         *
+         * @param[in] packet to be sent
+         */
+        void sendUpstream(const DasCmdPacket* packet);
 
         /**
          * Overloaded incoming data handler.
@@ -1035,6 +1043,11 @@ class BaseModulePlugin : public BasePlugin {
          */
         static void getModuleNames(std::list<std::string> &modules);
 
+        /**
+         * Returns current hardware id.
+         */
+        uint32_t getHardwareId() { return m_hardwareId; }
+
     private: // functions
         /**
          * Trigger calculating the configuration parameter offsets.
@@ -1072,7 +1085,7 @@ class BaseModulePlugin : public BasePlugin {
          * saved to a pre-defined folder.
          */
         bool loadConfig(const std::string &name);
-        
+
         /**
          * Copies configuration PV values from '_Saved' counterparts.
          *

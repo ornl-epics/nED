@@ -102,6 +102,7 @@ $(PROD_NAME)_SRCS  += PixelMapPlugin.cpp
 $(PROD_NAME)_SRCS  += BnlPosCalcPlugin.cpp
 #$(PROD_NAME)_SRCS  += CRocPosCalcPlugin.cpp
 $(PROD_NAME)_SRCS  += StateAnalyzerPlugin.cpp
+$(PROD_NAME)_SRCS  += TimeSync.cpp
 
 # Module handler plugins - in alphabetical order
 $(PROD_NAME)_SRCS  += AcpcFemPlugin.cpp

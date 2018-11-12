@@ -1,0 +1,223 @@
+record(bo, "$(P)TS:Enable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TS:Enable")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
+record(mbbi, "$(P)TS:State")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TS:State")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "disabled")
+    field(ONVL, "1")
+    field(ONST, "not synced")
+    field(ONSV, "MAJOR")
+    field(TWVL, "2")
+    field(TWST, "synced")
+}
+record(longout, "$(P)TS:ForceSync")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(DESC, "Force synchronization by writing any value")
+    field(OUT,  "@asyn($(PORT))TS:ForceSync")
+}
+record(ao, "$(P)TS:SyncInt")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Synchronization interval")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))TS:SyncInt")
+    field(VAL,  "0.1")
+    field(PINI, "YES")
+    field(EGU,  "s")
+    field(LOPR, "0.01")
+    field(HOPR, "60")
+    field(LOW,  "0.01")
+    field(LSV,  "MINOR")
+    field(PREC, "1")
+}
+record(longout, "$(P)TS:SyncSamples")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Num samples for synchronization")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TS:SyncSamples")
+    field(VAL,  "10")
+    field(PINI, "YES")
+    field(LOPR, "5")
+    field(HOPR, "50")
+    field(LOW,  "3")
+    field(LSV,  "MINOR")
+    field(HIGH, "100")
+    field(HOPR, "MINOR")
+}
+record(ai, "$(P)TS:SyncOffAvg")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Clock avg offset")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))TS:SyncOffAvg")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "us")
+    field(PREC, "1")
+}
+record(ai, "$(P)TS:SyncOffStd")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Clock offset std dev")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))TS:SyncOffStd")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "us")
+    field(PREC, "1")
+}
+record(ai, "$(P)TS:GpsOffAvg")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Clock avg offset")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))TS:GpsOffAvg")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "us")
+    field(PREC, "1")
+}
+record(ai, "$(P)TS:GpsOffStd")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Clock offset std dev")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))TS:GpsOffStd")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "us")
+    field(PREC, "1")
+}
+record(longout, "$(P)TS:CommDlySamples")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Num samples to measure comm delay")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TS:CommDlySamples")
+    field(VAL,  "3")
+    field(PINI, "YES")
+    field(LOPR, "1")
+    field(HOPR, "10")
+}
+record(ai, "$(P)TS:CommDlyAvg")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Comm average delay")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))TS:CommDlyAvg")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "us")
+    field(PREC, "2")
+}
+record(ai, "$(P)TS:CommDlyStd")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Comm delay std deviation")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))TS:CommDlyStd")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "us")
+    field(PREC, "2")
+}
+record(ao, "$(P)TS:NoSyncThr")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Threshold when sync stops")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))TS:NoSyncThr")
+    field(EGU,  "ms")
+    field(VAL,  "10")
+    field(PINI, "YES")
+    field(PREC, "2")
+}
+record(ao, "$(P)TS:AdjThr")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Threshold when to adjust remote clock")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))TS:AdjThr")
+    field(EGU,  "ms")
+    field(VAL,  "0.1")
+    field(PINI, "YES")
+    field(PREC, "2")
+}
+record(longin, "$(P)TS:LocalTimeSec")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Local time (sec)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TS:LocalTimeSec")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TS:LocalTimeNSec")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Local time (nsec)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TS:LocalTimeNSec")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TS:RemoteTimeSec")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Remote time (sec)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TS:RemoteTimeSec")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TS:RemoteTimeNSec")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Remote time (nsec)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TS:RemoteTimeNSec")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TS:GpsTimeSec")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Gps time (sec)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TS:GpsTimeSec")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TS:GpsTimeNSec")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Gps time (nsec)")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TS:GpsTimeNSec")
+    field(SCAN, "I/O Intr")
+}
+
+record(longout, "$(P)TS:SetPace")
+{
+    field(OUT,  "@asyn($(PORT))TS:SetPace")
+    field(DTYP, "asynInt32")
+}

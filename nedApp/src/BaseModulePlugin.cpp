@@ -211,7 +211,7 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == CmdReq) {
         if (!processRequest(static_cast<DasCmdPacket::CommandType>(value)))
             return asynError;
-        return asynSuccess; 
+        return asynSuccess;
     }
     if (pasynUser->reason == CfgSection) {
         if (value < 0x0 || value > 0xF) {
@@ -281,14 +281,9 @@ bool BaseModulePlugin::processRequest(DasCmdPacket::CommandType command)
     callParamCallbacks();
 
     do {
-        if (!isConnected()) {
-            connect(m_parentPlugins, {MsgDasCmd});
-        }
-
         m_waitingResponse = handleRequest(command, timeout);
 
         if (m_waitingResponse != static_cast<DasCmdPacket::CommandType>(0)) {
-            m_connStaleTime = epicsTime::getCurrent() + timeout + CONN_CLOSE_TIMEOUT;
             if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
                LOG_WARN("Failed to schedule CmdRsp timeout callback");
             setIntegerParam(CmdRsp, LAST_CMD_WAIT);
@@ -375,6 +370,13 @@ DasCmdPacket::CommandType BaseModulePlugin::handleRequest(DasCmdPacket::CommandT
 void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t channel, uint32_t *payload, uint32_t length)
 {
     if (m_hardwareId != 0) {
+        auto timeout = getDoubleParam(NoRspTimeout);
+        m_connStaleTime = epicsTime::getCurrent() + timeout + CONN_CLOSE_TIMEOUT;
+
+        if (!isConnected()) {
+            connect(m_parentPlugins, {MsgDasCmd});
+        }
+
         std::array<uint8_t, 1024> buffer;
         DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, m_cmdVer, false, false, channel, length, payload);
         if (!packet) {
@@ -384,6 +386,19 @@ void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t c
 
         BasePlugin::sendUpstream(packet);
     }
+}
+
+void BaseModulePlugin::sendUpstream(const DasCmdPacket* packet)
+{
+    auto timeout = getDoubleParam(NoRspTimeout);
+    m_connStaleTime = epicsTime::getCurrent() + timeout + CONN_CLOSE_TIMEOUT;
+
+    if (!isConnected()) {
+        connect(m_parentPlugins, {MsgDasCmd});
+        LOG_ERROR("Connected to parent plugin");
+    }
+
+    BasePlugin::sendUpstream(packet);
 }
 
 void BaseModulePlugin::recvDownstream(const DasCmdPacketList &packetList)

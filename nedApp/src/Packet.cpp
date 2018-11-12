@@ -176,7 +176,7 @@ DasCmdPacket *DasCmdPacket::init(uint8_t *buffer, size_t size, uint32_t moduleId
 {
     DasCmdPacket *packet = nullptr;
     uint32_t packetLength = sizeof(DasCmdPacket) + ALIGN_UP(payloadSize, 4);
-    if (size > packetLength) {
+    if (size >= packetLength) {
         packet = reinterpret_cast<DasCmdPacket *>(buffer);
         packet->init(moduleId, cmd, cmd_ver, ack, rsp, ch, payloadSize, payload_);
     }
