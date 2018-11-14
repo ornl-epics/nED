@@ -16,6 +16,7 @@
 
 class BaseModulePlugin;
 class SyncRequestPacket;
+class SyncResponsePacket;
 
 class TimeSync {
     private:
@@ -23,6 +24,7 @@ class TimeSync {
             STATE_DISABLED,
             STATE_UNSYNCED,
             STATE_SYNCED,
+            STATE_ESTIMATING,
         };
         struct TimeRecord {
             double commDly;
@@ -38,7 +40,13 @@ class TimeSync {
         std::vector<TimeRecord> m_records;
         std::unique_ptr<uint8_t> m_buffer;
         SyncRequestPacket* m_outPacket;
-        uint32_t m_pace{0x3FFFFFFF};
+
+        int m_reg = 0x1FFFFFFF;
+        epicsTime m_lastTime;
+        double m_offset = 0.0;
+
+        double m_lastError = 0.0;
+        double m_adjError = 0.0;
 
     public:
         TimeSync(BaseModulePlugin* parent);
@@ -53,37 +61,38 @@ class TimeSync {
         bool sendPacket();
         bool sendPacket(epicsTime t);
         bool sendPacket(epicsTime t, int pace);
-        double measCommDelay();
-        void updateParams();
-        bool calcCommDelay(double& mean, double& stddev);
+        bool sendPacket(int pace);
+        double getCommDelay();
         bool calcSyncOffset(double& mean, double& stddev);
         bool calcGpsOffset(double& mean, double& stddev);
         bool calcMeanStddev(const std::vector<double>& numbers, double& mean, double& stddev);
+        double getSmoothOffset(double t);
+
+        bool PIloop(const SyncResponsePacket* packet);
+        bool RegressionLoop(const SyncResponsePacket* packet);
 
     private:
         int Enable;
         int State;
-        int ForceSync;
+        int SyncForce;
         int SyncInt;
         int SyncSamples;
-        int SyncOffAvg;
-        int SyncOffStd;
-        int GpsOffAvg;
-        int GpsOffStd;
-        int CommDlyAvg;
-        int CommDlyStd;
+        int CommDly;
         int CommDlySamples;
         int NoSyncThr;
-        int AdjThr;
         int LocalTimeSec;
         int LocalTimeNSec;
         int RemoteTimeSec;
         int RemoteTimeNSec;
+        int RemoteTimeOff;
         int GpsTimeSec;
         int GpsTimeNSec;
-        int RemotePace;
-
-        int SetPace; // TODO: remove
+        int GpsTimeOff;
+        int SyncRawError;
+        int SyncAdjError;
+        int SyncFinError;
+        int P;
+        int I;
 };
 
 #endif // TIMESYNC_H

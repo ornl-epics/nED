@@ -12,25 +12,18 @@
 
 #include "BaseModulePlugin.h"
 
-#include <chrono>
+#include <memory>
+
+class TimeSync;
 
 /**
  * Plugin for DSP module.
  */
 class DspPlugin : public BaseModulePlugin {
     private: // structures and definitions
-        static const unsigned NUM_DSPPLUGIN_PARAMS;         //!< This is used as a runtime assert check and must match number of status parameters
         static const double DSP_RESPONSE_TIMEOUT;           //!< Default DSP response timeout, in seconds
         std::string m_version;
-        struct {
-            bool enable{false};
-            bool posted{false};
-            FILE *logFile{nullptr};                         //!< File to log time sync statistics
-            std::chrono::time_point<std::chrono::steady_clock> preSendTime;
-            std::chrono::time_point<std::chrono::steady_clock> postSendTime;
-            std::chrono::time_point<std::chrono::steady_clock> recvTime;
-            epicsTimeStamp sendTimeStamp;
-        } m_timeSync;
+        std::unique_ptr<TimeSync> m_timeSync;
 
     public:
 
@@ -65,12 +58,14 @@ class DspPlugin : public BaseModulePlugin {
         /**
          * Handle time sync packets for DSP 7.1+
          */
-        DasCmdPacket::CommandType reqTimeSync() override;
+        bool rspTimeSync(const DasCmdPacket *packet) override;
 
         /**
-         * Handle time sync packets for DSP 7.1+
+         * Process local parameters.
          */
-        bool rspTimeSync(const DasCmdPacket *packet) override;
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
+
+        bool processResponse(const DasCmdPacket *packet) override;
 
     private:
 
