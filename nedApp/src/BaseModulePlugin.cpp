@@ -1589,6 +1589,7 @@ std::list<std::string> BaseModulePlugin::getListConfigs()
                 }
             }
         }
+        closedir(dirp);
     }
     return configs;
 }
