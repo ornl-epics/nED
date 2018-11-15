@@ -74,9 +74,9 @@ TimeSync::TimeSync(BaseModulePlugin* parent)
     m_parent->createParam("TS:GpsTimeSec",      asynParamInt32,   &GpsTimeSec,      0);
     m_parent->createParam("TS:GpsTimeNSec",     asynParamInt32,   &GpsTimeNSec,     0);
     m_parent->createParam("TS:GpsTimeOff",      asynParamFloat64, &GpsTimeOff,      0.0);
-    m_parent->createParam("TS:SyncRawError",    asynParamFloat64, &SyncRawError,    0.0);
-    m_parent->createParam("TS:SyncAdjError",    asynParamFloat64, &SyncAdjError,    0.0);
-    m_parent->createParam("TS:SyncFinError",    asynParamFloat64, &SyncFinError,    0.0);
+    m_parent->createParam("TS:SyncInErr",       asynParamFloat64, &SyncInErr,       0.0);
+    m_parent->createParam("TS:SyncAdjErr",      asynParamFloat64, &SyncAdjErr,      0.0);
+    m_parent->createParam("TS:SyncOutErr",      asynParamFloat64, &SyncOutErr,      0.0);
     m_parent->createParam("TS:P",               asynParamFloat64, &P,               0.0);
     m_parent->createParam("TS:I",               asynParamFloat64, &I,               0.0);
 
@@ -93,9 +93,8 @@ TimeSync::TimeSync(BaseModulePlugin* parent)
 bool TimeSync::setParam(int param, int value)
 {
     if (param == SyncForce) {
-        m_offset = 0.0;
         m_lastError = 0.0;
-        m_adjError = 0.0;
+        m_intError = 0.0;
         m_reg = 0x1FFFFFFF;
         if (sendPacket(epicsTime::getCurrent() + getCommDelay())) {
             m_parent->setIntegerParam(State, static_cast<int>(STATE_ESTIMATING));
@@ -167,38 +166,19 @@ float TimeSync::timerCb()
 
 bool TimeSync::rspTimeSync(const DasCmdPacket* packet)
 {
-    if (m_parent->getIntegerParam(State) == static_cast<int>(STATE_DISABLED)) {
-fprintf(stderr, "TimeSync: rsp wrong state\n");
-        return true;
+    if (m_parent->getIntegerParam(State) == static_cast<int>(STATE_DISABLED) ||
+        !packet->isResponse() || !packet->isAcknowledge() ||
+        packet->getCmdId() != m_packetSeq ||
+        packet->getCommand() != DasCmdPacket::CMD_TIME_SYNC ||
+        packet->getLength() != sizeof(SyncResponsePacket) ||
+        m_records.empty() ||
+        m_records.back().remoteTime != epicsTimeStamp{0, 0}) {
+
+        return false;
     }
-    if (!packet->isResponse() || !packet->isAcknowledge()) {
-fprintf(stderr, "TimeSync: rsp not response or ack\n");
-        return true;
-    }
-    if (packet->getCmdId() != m_packetSeq) {
-fprintf(stderr, "TimeSync: rsp wrong seq expect %u got %u\n", m_packetSeq, packet->getCmdId());
-        return true;
-    }
-    if (packet->getCommand() != DasCmdPacket::CMD_TIME_SYNC) {
-fprintf(stderr, "TimeSync: rsp not sync\n");
-        return true;
-    }
-    if (packet->getLength() != sizeof(SyncResponsePacket)) {
-fprintf(stderr, "TimeSync: rsp bad length\n");
-        return true;
-    }
+
     auto syncpkt = reinterpret_cast<const SyncResponsePacket*>(packet);
-//fprintf(stderr, "TimeSync: rsp GPS=%u.%09u DSP=%u.%09u 0x%08X\n", syncpkt->gpstime.secPastEpoch, syncpkt->gpstime.nsec, syncpkt->remotetime.secPastEpoch, syncpkt->remotetime.nsec, syncpkt->ctrl);
-    if (m_records.empty()) {
-fprintf(stderr, "TimeSync: rsp m_records empty\n");
-        return true;
-    }
-
-    // Map response packet to the sent request
     auto& rec = m_records.back();
-    if (rec.packetSeq != packet->getCmdId() || rec.remoteTime != epicsTimeStamp{0, 0})
-        return true;
-
     rec.remoteTime = syncpkt->remotetime;
     rec.gpsTime = epicsTime(syncpkt->gpstime) + syncpkt->tof/1e7;
     double offset = (rec.remoteTime - rec.localTime)*1e6;
@@ -226,100 +206,54 @@ fprintf(stderr, "TimeSync: rsp m_records empty\n");
     return true;
 }
 
-bool TimeSync::RegressionLoop(const SyncResponsePacket* packet) {
-/*
-    if (m_parent->getIntegerParam(State) == static_cast<int>(STATE_UNSYNCED))
-        return true;
-
-    double duration = m_records.back().remoteTime - m_records.front().remoteTime;
-    double offset = calcOffset();
-    m_parent->setDoubleParam(SyncError, offset*1e6);
+void TimeSync::PIloop(const SyncResponsePacket* packet) {
 
     if (m_records.size() < (size_t)m_parent->getIntegerParam(SyncSamples))
-        return true;
+        return;
 
-    if (std::abs(offset) > m_parent->getDoubleParam(NoSyncThr)) {
-        m_parent->setIntegerParam(State, static_cast<int>(STATE_UNSYNCED));
-        return true;
-    }
-
-    m_offset += offset;
-//    m_parent->setDoubleParam(SyncAccError, m_offset*1e6);
-
-    if (m_parent->getIntegerParam(State) == static_cast<int>(STATE_ESTIMATING)) {
-        m_pace = (offset != 0.0 ? duration / offset : 0x1FFFFFFF);
-    } else if (offset != 0.0) {
-        m_pace += duration / offset;
-    }
-
-    epicsTime t1, t2;
-    t1 = epicsTime::getCurrent();
-    sendPacket(epicsTime::getCurrent() + getCommDelay(), m_pace);
-    t2 = epicsTime::getCurrent();
-    m_parent->setDoubleParam(CommDly, (t2 - t1)*1e6);
-
-    TimeRecord rec;
-    rec.localTime = t2;
-    rec.commDly = t2 - t1;
-    rec.packetSeq = m_packetSeq;
-    m_records.clear();
-    m_records.push_back(std::move(rec));
-
-    m_parent->setIntegerParam(RemoteTimePace, m_pace);
-    m_parent->setIntegerParam(State, static_cast<int>(STATE_SYNCED));
-*/
-    return true;
-}
-
-bool TimeSync::PIloop(const SyncResponsePacket* packet) {
-
-    double P_ = m_parent->getDoubleParam(P);
-    double I_ = m_parent->getDoubleParam(I);
-
-    if (m_records.size() < (size_t)m_parent->getIntegerParam(SyncSamples))
-        return true;
-
-    // Calc offset between remote and local clock
-    double error = m_records.back().remoteTime - m_records.back().localTime;
-    m_parent->setDoubleParam(SyncRawError, error*1e6);
+    // Use linear-regresion to smooth the samples and calculate 'more accurate' error at last sample
+    double duration = m_records.back().localTime - m_records.front().localTime;
+    double error = getSmoothOffset(duration);
+    m_parent->setDoubleParam(SyncInErr, error*1e6);
 
     if (m_parent->getIntegerParam(State) == static_cast<int>(STATE_ESTIMATING)) {
         double duration = (m_records.back().localTime - m_records.front().localTime);
-        m_offset = error;
         m_lastError = error;
-        m_parent->setDoubleParam(SyncFinError, m_lastError*1e6);
-        m_parent->setDoubleParam(SyncRawError, error*1e6);
-        double Error = error * P_ + m_adjError * I_;
-        m_parent->setDoubleParam(SyncAdjError, Error*1e6);
+        m_intError = 0;
+        m_parent->setDoubleParam(SyncOutErr, m_lastError*1e6);
+        m_parent->setDoubleParam(SyncInErr, error*1e6);
+        m_parent->setDoubleParam(SyncAdjErr, m_intError*1e6);
         m_reg = duration / error;
 
         sendPacket(epicsTime::getCurrent() + getCommDelay(), m_reg);
         m_records.clear();
 
         m_parent->setIntegerParam(State, static_cast<int>(STATE_SYNCED));
-        return true;
+        return;
     }
 
     // Something bad happened - not tracking any more
     if (std::abs(error) > (m_parent->getDoubleParam(NoSyncThr)/1e6)) {
         m_parent->setIntegerParam(State, static_cast<int>(STATE_UNSYNCED));
-        return true;
+        return;
     }
 
-    m_adjError += error;
+    // PI error processor stage
+    m_intError += error;
 
-    double Error = error * P_ + m_adjError * I_;
-    m_parent->setDoubleParam(SyncAdjError, Error*1e6);
+    double P_ = m_parent->getDoubleParam(P);
+    double I_ = m_parent->getDoubleParam(I);
+    double Error = error * P_ + m_intError * I_;
+    m_parent->setDoubleParam(SyncAdjErr, Error*1e6);
 
-    m_lastError += Error;
-    m_parent->setDoubleParam(SyncFinError, m_lastError*1e6);
+    double outError = m_lastError + Error;
+    m_parent->setDoubleParam(SyncOutErr, outError*1e6);
 
-    double duration = m_records.back().localTime - m_records.front().localTime;
-    if (m_lastError != 0.0)
-        m_reg = duration/m_lastError;
+    if (outError != 0.0)
+        m_reg = duration/outError;
 
+    sendPacket(m_reg);
     m_records.clear();
-    return true;
 }
 
 double TimeSync::getSmoothOffset(double t)
@@ -341,7 +275,7 @@ double TimeSync::getSmoothOffset(double t)
     double numerator = 0.0;
     for (auto rec: m_records) {
         double a = (rec.localTime - m_records.front().localTime) - timesMean;
-        double b = (rec.localTime - rec.localTime) - offsetsMean;
+        double b = (rec.remoteTime - rec.localTime) - offsetsMean;
         denominator += a*a;
         numerator += a*b;
     }
@@ -365,8 +299,6 @@ double TimeSync::getCommDelay()
         return delay;
 
     // We have to measure it
-    const unsigned nSamples = m_parent->getIntegerParam(CommDlySamples);
-
     uint32_t moduleId = m_parent->getHardwareId();
     moduleId ^= 0x80000000; // Try to select non-existing module id
 
@@ -374,11 +306,12 @@ double TimeSync::getCommDelay()
     std::array<uint8_t, sizeof(SyncRequestPacket)> buffer;
     SyncRequestPacket *packet = SyncRequestPacket::init(buffer.data(), buffer.size(), moduleId);
     if (packet == nullptr)
-        return -1.0;
+        return 0.0;
 
     // Do a round of time measurements and calculate average value
     delay = 0.0;
     epicsTime t1, t2;
+    auto nSamples = m_parent->getIntegerParam(CommDlySamples);
     for (auto i = nSamples; i > 0; i--) {
         t1 = epicsTime::getCurrent();
         m_parent->sendUpstream(packet);
@@ -429,9 +362,6 @@ bool TimeSync::sendPacket(epicsTime t, int pace)
     m_outPacket->direction = (pace < 0);
     m_parent->sendUpstream(m_outPacket);
 
-epicsTimeStamp ts;
-epicsTimeGetCurrent(&ts);
-fprintf(stderr, "TimeSync: req T=%d.%09d 0x%08X\n", ts.secPastEpoch, ts.nsec, m_outPacket->ctrl);
     return true;
 }
 
@@ -451,30 +381,7 @@ bool TimeSync::sendPacket(int pace)
     m_outPacket->direction = (pace < 0);
     m_parent->sendUpstream(m_outPacket);
 
-epicsTimeStamp ts;
-epicsTimeGetCurrent(&ts);
-fprintf(stderr, "TimeSync: req T=%d.%09d 0x%08X\n", ts.secPastEpoch, ts.nsec, m_outPacket->ctrl);
     return true;
-}
-
-bool TimeSync::calcSyncOffset(double& mean, double& stddev)
-{
-    std::vector<double> v;
-    for (auto it: m_records) {
-        if (it.remoteTime != epicsTimeStamp{0,0})
-            v.push_back(it.remoteTime - it.localTime);
-    }
-    return calcMeanStddev(v, mean, stddev);
-}
-
-bool TimeSync::calcGpsOffset(double& mean, double& stddev)
-{
-    std::vector<double> v;
-    for (auto it: m_records) {
-        if (it.gpsTime != epicsTimeStamp{0,0})
-            v.push_back(it.gpsTime - it.localTime);
-    }
-    return calcMeanStddev(v, mean, stddev);
 }
 
 bool TimeSync::calcMeanStddev(const std::vector<double>& numbers, double& mean, double& stddev)

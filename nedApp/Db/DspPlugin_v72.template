@@ -3,6 +3,7 @@ include "BaseModulePlugin.include"
 include "DspPlugin_v72.generated"
 include "DspPlugin7.include"
 include "GlobalConD.include"
+include "TimeSync.include"
 
 record(stringin, "$(P)PluginId")
 {

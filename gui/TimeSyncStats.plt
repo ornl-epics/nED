@@ -6,7 +6,7 @@
   <update_period>3.0</update_period>
   <scroll_step>5</scroll_step>
   <scroll>true</scroll>
-  <start>-4 minutes -48.528 seconds</start>
+  <start>-10 minutes</start>
   <end>now</end>
   <archive_rescale>STAGGER</archive_rescale>
   <foreground>
@@ -39,10 +39,10 @@
         <green>0</green>
         <blue>0</blue>
       </color>
-      <min>-4130.0</min>
-      <max>1280.0</max>
+      <min>-300.0</min>
+      <max>300.0</max>
       <grid>true</grid>
-      <autoscale>false</autoscale>
+      <autoscale>true</autoscale>
       <log_scale>false</log_scale>
     </axis>
     <axis>
@@ -56,8 +56,8 @@
         <green>0</green>
         <blue>0</blue>
       </color>
-      <min>-94.0</min>
-      <max>55.0</max>
+      <min>-100.0</min>
+      <max>100.0</max>
       <grid>false</grid>
       <autoscale>false</autoscale>
       <log_scale>false</log_scale>
@@ -79,14 +79,14 @@
       <trace_type>AREA</trace_type>
       <linewidth>2</linewidth>
       <point_type>SQUARES</point_type>
-      <point_size>1</point_size>
+      <point_size>2</point_size>
       <waveform_index>0</waveform_index>
       <period>0.0</period>
       <ring_size>5000</ring_size>
       <request>OPTIMIZED</request>
     </pv>
     <pv>
-      <display_name>Comm delay</display_name>
+      <display_name>Comms Delay</display_name>
       <visible>true</visible>
       <name>BL100:Det4:dsp1:TS:CommDly</name>
       <axis>0</axis>
@@ -98,26 +98,7 @@
       <trace_type>AREA</trace_type>
       <linewidth>2</linewidth>
       <point_type>NONE</point_type>
-      <point_size>1</point_size>
-      <waveform_index>0</waveform_index>
-      <period>0.0</period>
-      <ring_size>5000</ring_size>
-      <request>OPTIMIZED</request>
-    </pv>
-    <pv>
-      <display_name>PI output error</display_name>
-      <visible>true</visible>
-      <name>BL100:Det4:dsp1:TS:SyncFinError</name>
-      <axis>1</axis>
-      <color>
-        <red>255</red>
-        <green>0</green>
-        <blue>0</blue>
-      </color>
-      <trace_type>AREA</trace_type>
-      <linewidth>2</linewidth>
-      <point_type>NONE</point_type>
-      <point_size>1</point_size>
+      <point_size>2</point_size>
       <waveform_index>0</waveform_index>
       <period>0.0</period>
       <ring_size>5000</ring_size>
@@ -126,7 +107,7 @@
     <pv>
       <display_name>PI input error</display_name>
       <visible>true</visible>
-      <name>BL100:Det4:dsp1:TS:SyncRawError</name>
+      <name>BL100:Det4:dsp1:TS:SyncInErr</name>
       <axis>1</axis>
       <color>
         <red>255</red>
@@ -136,7 +117,7 @@
       <trace_type>AREA</trace_type>
       <linewidth>2</linewidth>
       <point_type>NONE</point_type>
-      <point_size>1</point_size>
+      <point_size>2</point_size>
       <waveform_index>0</waveform_index>
       <period>0.0</period>
       <ring_size>5000</ring_size>
@@ -145,11 +126,30 @@
     <pv>
       <display_name>PI adjusted error</display_name>
       <visible>true</visible>
-      <name>BL100:Det4:dsp1:TS:SyncAdjError</name>
+      <name>BL100:Det4:dsp1:TS:SyncAdjErr</name>
       <axis>1</axis>
       <color>
-        <red>0</red>
-        <green>255</green>
+        <red>153</red>
+        <green>77</green>
+        <blue>102</blue>
+      </color>
+      <trace_type>AREA</trace_type>
+      <linewidth>2</linewidth>
+      <point_type>NONE</point_type>
+      <point_size>2</point_size>
+      <waveform_index>0</waveform_index>
+      <period>0.0</period>
+      <ring_size>5000</ring_size>
+      <request>OPTIMIZED</request>
+    </pv>
+    <pv>
+      <display_name>PI output error</display_name>
+      <visible>true</visible>
+      <name>BL100:Det4:dsp1:TS:SyncOutErr</name>
+      <axis>1</axis>
+      <color>
+        <red>255</red>
+        <green>0</green>
         <blue>0</blue>
       </color>
       <trace_type>AREA</trace_type>

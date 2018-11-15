@@ -40,13 +40,9 @@ class TimeSync {
         std::vector<TimeRecord> m_records;
         std::unique_ptr<uint8_t> m_buffer;
         SyncRequestPacket* m_outPacket;
-
         int m_reg = 0x1FFFFFFF;
-        epicsTime m_lastTime;
-        double m_offset = 0.0;
-
         double m_lastError = 0.0;
-        double m_adjError = 0.0;
+        double m_intError = 0.0;
 
     public:
         TimeSync(BaseModulePlugin* parent);
@@ -57,19 +53,14 @@ class TimeSync {
 
     private:
         float timerCb();
-
         bool sendPacket();
         bool sendPacket(epicsTime t);
         bool sendPacket(epicsTime t, int pace);
         bool sendPacket(int pace);
         double getCommDelay();
-        bool calcSyncOffset(double& mean, double& stddev);
-        bool calcGpsOffset(double& mean, double& stddev);
         bool calcMeanStddev(const std::vector<double>& numbers, double& mean, double& stddev);
         double getSmoothOffset(double t);
-
-        bool PIloop(const SyncResponsePacket* packet);
-        bool RegressionLoop(const SyncResponsePacket* packet);
+        void PIloop(const SyncResponsePacket* packet);
 
     private:
         int Enable;
@@ -88,9 +79,9 @@ class TimeSync {
         int GpsTimeSec;
         int GpsTimeNSec;
         int GpsTimeOff;
-        int SyncRawError;
-        int SyncAdjError;
-        int SyncFinError;
+        int SyncInErr;
+        int SyncAdjErr;
+        int SyncOutErr;
         int P;
         int I;
 };
