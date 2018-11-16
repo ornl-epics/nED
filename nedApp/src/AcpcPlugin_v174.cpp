@@ -38,8 +38,7 @@ void AcpcPlugin::createParams_v174()
     createStatusParam("TsyncHigh",            0x1,  1,  3); // TSYNC Got HIGH                (0=no,1=yes)
     createStatusParam("TxenBLow",             0x1,  1,  4); // TXEN_B Got LOW                (0=no,1=yes)
     createStatusParam("TxenBHigh",            0x1,  1,  5); // TXEN_B Got HIGH               (0=no,1=yes)
-    createStatusParam("SysrstBLow",           0x1,  1,  6); // SYSRST_B Got LOW              (0=no,1=yes)
-    createStatusParam("SysrstBHigh",          0x1,  1,  7); // SYSRST_B Got HIGH             (0=no,1=yes)
+    createStatusParam("AROCsMissing",         0x1,  9,  6); // AROCs missing              
 
     createStatusParam("Lvds1:DataParseError", 0x2,  8,  0); // Data parser error status
     createStatusParam("Lvds1:DataParseGood",  0x2,  2,  8); // Data parser good status
