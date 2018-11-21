@@ -291,6 +291,11 @@ class RocPlugin : public BaseModulePlugin {
          */
         void createParams_v510();
 
+        /**
+         * Create and register all ROC v5.11 parameters.
+         */
+        void createParams_v511();
+
     protected:
         #define FIRST_ROCPLUGIN_PARAM Acquiring
         int Acquiring;

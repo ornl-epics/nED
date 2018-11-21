@@ -1,0 +1,18 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "RocPlugin_v511.generated"
+include "RocPlugin.include"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "RocPlugin_v511")
+}
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TTVL, "146")
+    field(TTST, "Pre-amp config")
+    field(FTVL, "147")
+    field(FTST, "Pre-amp trigger")
+}
