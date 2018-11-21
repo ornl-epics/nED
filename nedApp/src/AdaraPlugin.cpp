@@ -130,7 +130,7 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     outpacket[2] = timestamp.secPastEpoch;
     outpacket[3] = timestamp.nsec;
     outpacket[4] = info.sourceId;
-    outpacket[5] = (info.pulseSeq++ & 0x7FF) | (m_packetSeq++);
+    outpacket[5] = ((info.pulseSeq++ & 0x7FFF) << 16) | (m_packetSeq++);
     outpacket[6] = info.rtdl.charge;
     outpacket[7] = info.rtdl.general_info;
     outpacket[8] = 0; // TSYNC period
