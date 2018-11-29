@@ -644,7 +644,7 @@ void RocPlugin::createParams_v511()
     createConfigParam("TestPatternId",    'F', 0x1, 12,  0, 0);     // Test pattern id
     createConfigParam("TestPatternRate",  'F', 0x2, 16,  0, 0);     // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
     createConfigParam("CycleAdvance",     'F', 0x3, 10,  0, 1);     // Num cycles to advance @TSYNC  (1=60Hz,2=30Hz,3=20Hz,4=15Hz,6=10Hz,12=5Hz,60=1Hz)
-    createConfigParam("DataFormat",       'F', 0x4,  8,  0, 2);     // Data format identifier        (2=pixel)
+    createConfigParam("DataFormat",       'F', 0x4,  8,  0, 2);     // Data format identifier        (2=pixel,3=raw,4=verbose)
     createConfigParam("Protocol",         'F', 0x4,  1, 15, 0);     // Extended event format         (0=legacy,1=new)
     createConfigParam("PreampIface",      'F', 0x5,  1,  0, 0);     // Preamplifier Interface        (0=SPI old preamps,1=I2C new preamps)
     createConfigParam("HVPSIface",        'F', 0x5,  1,  1, 0);     // HV PS Interface               (0=Serial old HVPS,1=I2C new HVPS)
