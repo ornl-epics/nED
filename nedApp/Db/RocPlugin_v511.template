@@ -16,3 +16,29 @@ record(mbbo, "$(P)CmdReq")
     field(FTVL, "147")
     field(FTST, "Pre-amp trigger")
 }
+
+# Protect from user mistakes
+record(mbbo, "$(P)OutputMode")
+{
+    field(FLNK, "$(P)DataFormat")
+}
+record(mbbo, "$(P)DataFormat")
+{
+    field(DOL,  "$(P)OutputMode.RVAL NPP")
+    field(OMSL, "closed_loop")
+}
+record(bo, "$(P)TestPatternAltEn")
+{
+    field(FLNK, "$(P)OutputModeNrm")
+}
+record(bo, "$(P)TestPatternEn")
+{
+    field(FLNK, "$(P)OutputModeNrm")
+}
+record(stringout, "$(P)OutputModeNrm")
+{
+    field(ASG,  "NOONE")
+    field(OUT,  "$(P)OutputMode PP")
+    field(VAL,  "normal")
+    field(OMSL, "supervisory")
+}

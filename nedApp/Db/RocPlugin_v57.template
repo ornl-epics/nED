@@ -8,3 +8,21 @@ record(stringin, "$(P)PluginId")
 {
     field(VAL,  "RocPlugin_v57")
 }
+
+# Protect from user mistakes
+record(bo, "$(P)TestPatternAltEn")
+{
+    field(FLNK, "$(P)OutputModeNrm")
+}
+record(bo, "$(P)TestPatternEn")
+{
+    field(FLNK, "$(P)OutputModeNrm")
+}
+record(stringout, "$(P)OutputModeNrm")
+{
+    field(ASG,  "NOONE")
+    field(OUT,  "$(P)OutputMode PP")
+    field(VAL,  "normal")
+    field(OMSL, "supervisory")
+}
+
