@@ -231,7 +231,7 @@ void AdcRocPlugin::createParams_v07()
     createConfigParam("TestPatternId",      'F', 0x1, 12,  0,  0);  // Test pattern id
     createConfigParam("TestPatternDebug",   'F', 0x1,  3, 12,  0);  // Engineering Use only
     createConfigParam("TestPatternEn",      'F', 0x1,  1, 15,  0);  // Test pattern enable              (0=disable,1=enable)
-    createConfigParam("TestPatternRate",    'F', 0x2, 16,  0,  0);  // Test pattern rate                (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
+    createConfigParam("TestPatternRate",    'F', 0x2, 16,  0, 65535);// Test pattern rate                (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
     createConfigParam("AcqRate",            'F', 0x3, 10,  0,  1);  // Num cycles to advance @TSYNC     (1=60Hz,2=30Hz,3=20Hz,4=15Hz,6=10Hz,12=5Hz,60=1Hz)
     createConfigParam("DataFormatId",       'F', 0x4,  8,  0,  2);  // Data format identifier           (1=metadata,2=pixel)
     createConfigParam("Protocol",           'F', 0x4,  1, 15,  0);  // LVDS protocol select             (0=legacy,1=new)
