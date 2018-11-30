@@ -285,6 +285,8 @@ uint32_t DasDataPacket::getEventsSize(DasDataPacket::EventFormat format)
         case EVENT_FMT_ACPC_DIAG:    return sizeof(Event::ACPC::Diag);
         case EVENT_FMT_TIME_CALIB:   return sizeof(Event::Pixel);
         case EVENT_FMT_AROC_RAW:     return sizeof(Event::AROC::Raw);
+        case EVENT_FMT_LPSD_RAW:     return sizeof(Event::LPSD::Raw);
+        case EVENT_FMT_LPSD_VERBOSE: return sizeof(Event::LPSD::Verbose);
         default:
             throw std::runtime_error("Packet::getEventsSize() not implemented for requested format");
     }
