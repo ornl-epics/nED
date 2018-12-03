@@ -10,7 +10,6 @@
 #include "Common.h"
 #include "BasePlugin.h"
 #include "Log.h"
-#include "Timer.h"
 
 #include <algorithm>
 #include <epicsThread.h>
@@ -376,28 +375,6 @@ void BasePlugin::sendUpstream(int type, const void *data)
         msg->release();
         msg->waitAllReleased();
     }
-}
-
-std::shared_ptr<Timer> BasePlugin::scheduleCallback(std::function<float(void)> &callback, double delay)
-{
-    std::shared_ptr<Timer> timer(new Timer(true));
-    if (timer) {
-        std::function<float(void)> timerCb = std::bind(&BasePlugin::timerExpire, this, timer, callback);
-        if (!timer->schedule(timerCb, delay))
-           LOG_WARN("Failed to schedule callback");
-    }
-    return timer;
-}
-
-float BasePlugin::timerExpire(std::shared_ptr<Timer> &timer, std::function<float(void)> callback)
-{
-    float delay = 0.0;
-    lock();
-    if (timer->isActive()) {
-        delay = callback();
-    }
-    unlock();
-    return delay;
 }
 
 // ===== Parameter helper functions =====

@@ -289,7 +289,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
 
             // Start a periodic timer
             std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeStatusRefresh, this);
-            m_remoteUpgrade.statusTimer = scheduleCallback(timeoutCb, 1.0);
+            m_remoteUpgrade.statusTimer.schedule(timeoutCb, 1.0);
 
             epicsTimeGetCurrent(&m_remoteUpgrade.eraseStartTime);
             m_remoteUpgrade.status = RemoteUpgrade::ERASING;
@@ -304,10 +304,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
         break;
     case RemoteUpgrade::PROCESS_RESPONSE:
         // Will set up new timer if necessary
-        if (m_remoteUpgrade.timer) {
-            m_remoteUpgrade.timer->cancel();
-            m_remoteUpgrade.timer.reset();
-        }
+        m_remoteUpgrade.responseTimer.cancel();
 
         if (packet == 0) {
             LOG_ERROR("Upgrade assert - packet==0");
@@ -341,10 +338,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                 epicsTimeGetCurrent(&m_remoteUpgrade.lastReadyTime);
                 m_remoteUpgrade.status = RemoteUpgrade::IN_PROGRESS;
 
-                if (m_remoteUpgrade.statusTimer) {
-                    m_remoteUpgrade.statusTimer->cancel();
-                    m_remoteUpgrade.statusTimer.reset();
-                }
+                m_remoteUpgrade.statusTimer.cancel();
 
                 // Sending another status request is redundant, but keeps SM sane
                 reqUpgrade();
@@ -358,19 +352,13 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                     LOG_ERROR("Upgrade error - giving up waiting on module 'erased' flag");
                     setStringParam(UpgradeErrorStr, "erase timeout");
 
-                    if (m_remoteUpgrade.statusTimer) {
-                        m_remoteUpgrade.statusTimer->cancel();
-                        m_remoteUpgrade.statusTimer.reset();
-                    }
+                    m_remoteUpgrade.statusTimer.cancel();
                 }
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
                 LOG_ERROR("Upgrade error - response check failed");
                 setStringParam(UpgradeErrorStr, "remote error");
-                if (m_remoteUpgrade.statusTimer) {
-                    m_remoteUpgrade.statusTimer->cancel();
-                    m_remoteUpgrade.statusTimer.reset();
-                }
+                m_remoteUpgrade.statusTimer.cancel();
             }
             break;
         } else if (m_remoteUpgrade.status == RemoteUpgrade::IN_PROGRESS ||
@@ -419,7 +407,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
 
                     // Start a periodic timer
                     std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeStatusRefresh, this);
-                    m_remoteUpgrade.statusTimer = scheduleCallback(timeoutCb, 1.0);
+                    m_remoteUpgrade.statusTimer.schedule(timeoutCb, 1.0);
 
                     LOG_INFO("Upgrade - programming");
                     break;
@@ -438,7 +426,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                 double timeout;
                 getDoubleParam(UpgradeNoRspTimeout, &timeout);
                 std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
-                m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
+                m_remoteUpgrade.responseTimer.schedule(timeoutCb, timeout);
 
             } else if (status == RemoteUpgrade::IN_PROGRESS) {
                 m_remoteUpgrade.seqRetries = 0;
@@ -463,7 +451,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                 double timeout;
                 getDoubleParam(UpgradeNoRspTimeout, &timeout);
                 std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
-                m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
+                m_remoteUpgrade.responseTimer.schedule(timeoutCb, timeout);
 
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
@@ -480,10 +468,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
             if (status == RemoteUpgrade::DONE) {
                 m_remoteUpgrade.status = RemoteUpgrade::DONE;
 
-                if (m_remoteUpgrade.statusTimer) {
-                    m_remoteUpgrade.statusTimer->cancel();
-                    m_remoteUpgrade.statusTimer.reset();
-                }
+                m_remoteUpgrade.statusTimer.cancel();
 
                 // Disable remote upgrade support
                 if (setIntegerParam("Upg:Enable", 0) != asynSuccess) {
@@ -505,19 +490,13 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                     LOG_ERROR("Upgrade error - giving up waiting on module 'programmed' flag");
                     setStringParam(UpgradeErrorStr, "program timeout");
 
-                    if (m_remoteUpgrade.statusTimer) {
-                        m_remoteUpgrade.statusTimer->cancel();
-                        m_remoteUpgrade.statusTimer.reset();
-                    }
+                    m_remoteUpgrade.statusTimer.cancel();
                 }
             } else {
                 m_remoteUpgrade.status = RemoteUpgrade::ERROR;
                 LOG_ERROR("Upgrade error - response check failed");
                 setStringParam(UpgradeErrorStr, "remote error");
-                if (m_remoteUpgrade.statusTimer) {
-                    m_remoteUpgrade.statusTimer->cancel();
-                    m_remoteUpgrade.statusTimer.reset();
-                }
+                m_remoteUpgrade.statusTimer.cancel();
             }
             break;
         } else {
@@ -532,14 +511,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
             m_remoteUpgrade.status == RemoteUpgrade::WAITING ||
             m_remoteUpgrade.status == RemoteUpgrade::FINALIZING) {
 
-            if (m_remoteUpgrade.timer) {
-                m_remoteUpgrade.timer->cancel();
-                m_remoteUpgrade.timer.reset();
-            }
-            if (m_remoteUpgrade.statusTimer) {
-                m_remoteUpgrade.statusTimer->cancel();
-                m_remoteUpgrade.statusTimer.reset();
-            }
+            m_remoteUpgrade.responseTimer.cancel();
+            m_remoteUpgrade.statusTimer.cancel();
             m_remoteUpgrade.status = RemoteUpgrade::ABORTED;
 
             LOG_INFO("Upgrade - user aborted");
@@ -555,10 +528,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
             m_remoteUpgrade.status == RemoteUpgrade::WAITING ||
             m_remoteUpgrade.status == RemoteUpgrade::FINALIZING) {
 
-            if (m_remoteUpgrade.timer) {
-                m_remoteUpgrade.timer->cancel();
-                m_remoteUpgrade.timer.reset();
-            }
+            m_remoteUpgrade.responseTimer.cancel();
 
             int maxRetries;
             getIntegerParam(UpgradeNoRspMaxRetries, &maxRetries);
@@ -580,7 +550,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                 double timeout;
                 getDoubleParam(UpgradeNoRspTimeout, &timeout);
                 std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
-                m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
+                m_remoteUpgrade.responseTimer.schedule(timeoutCb, timeout);
             }
 
         } else {
@@ -626,19 +596,25 @@ FemPlugin::RemoteUpgrade::Status FemPlugin::remoteUpgradeCheck(RemoteUpgrade::Ch
 
 float FemPlugin::remoteUpgradeTimeout()
 {
+    lock();
     remoteUpgradeSM(RemoteUpgrade::TIMEOUT);
+    unlock();
     return 0.0;
 }
 
 float FemPlugin::remoteUpgradeStatusRefresh()
 {
+    lock();
+
     reqUpgrade();
 
     // A packet was sent out, setup a timeout timer
     double timeout;
     getDoubleParam(UpgradeNoRspTimeout, &timeout);
     std::function<float(void)> timeoutCb = std::bind(&FemPlugin::remoteUpgradeTimeout, this);
-    m_remoteUpgrade.timer = scheduleCallback(timeoutCb, timeout);
+    m_remoteUpgrade.responseTimer.schedule(timeoutCb, timeout);
+
+    unlock();
 
     return 1.0;
 }

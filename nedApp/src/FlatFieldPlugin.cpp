@@ -171,13 +171,14 @@ asynStatus FlatFieldPlugin::writeOctet(asynUser *pasynUser, const char *value, s
                 setIntegerParam(ImportStatus, IMPORT_STATUS_ERROR);
                 callParamCallbacks();
                 return asynError;
-            } else if (m_importTimer.get() != 0) {
+            } else if (m_importTimer.isActive() != 0) {
+                // Since importFilesCb locks the port, the only case we're here
+                // is when waiting for timer to executeImportCb()
                 LOG_ERROR("Importing files in progress");
                 return asynError;
             } else {
                 std::function<float(void)> importCb = std::bind(&FlatFieldPlugin::importFilesCb, this, path);
-                m_importTimer = scheduleCallback(importCb, 0.1);
-                if (m_importTimer.get() == 0) {
+                if (m_importTimer.schedule(importCb, 0.1) == false) {
                     LOG_ERROR("Failed to schedule importing directory");
                     setIntegerParam(ImportStatus, IMPORT_STATUS_ERROR);
                     callParamCallbacks();
@@ -422,6 +423,7 @@ FlatFieldPlugin::VetoType FlatFieldPlugin::checkPhotoSumLimits(double x, double 
 
 float FlatFieldPlugin::importFilesCb(const std::string &path)
 {
+    lock();
     // Importing takes quite some time, don't starve other plugins in the mean time.
     // So let's unsubscribe temporarily from receiving any data
     bool enabled = this->isConnected();
@@ -432,7 +434,7 @@ float FlatFieldPlugin::importFilesCb(const std::string &path)
     if (enabled) {
         this->connect(m_parentPlugins, MsgDasData);
     }
-    m_importTimer.reset();
+    unlock();
     return 0.0;
 }
 
@@ -566,13 +568,10 @@ void FlatFieldPlugin::importFiles(const std::string &path_)
     // * all tables of the same size - already checked when tables created
     // * X and Y correction tables loaded if using correction (foundCorrTables==true)
     // * Lower and upper X photosum tables loaded if using photosum (foundPsTable==true)
-    bool nPositions = 0;
     for (auto it=m_tables.begin(); it!=m_tables.end(); it++) {
 
         if (it->second.corrX.get() == 0 && it->second.corrY.get() == 0 && it->second.psLowX.get() == 0 && it->second.psUpX.get() == 0)
             continue;
-
-        nPositions++;
 
         it->second.enabled = true;
         if (foundCorrTables == true) {

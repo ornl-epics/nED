@@ -12,6 +12,7 @@
 
 #include "BasePlugin.h"
 #include "ObjectPool.h"
+#include "Timer.h"
 
 #include <map>
 
@@ -282,7 +283,7 @@ class FlatFieldPlugin : public BasePlugin {
         uint32_t m_tableSizeY{0};   //!< Y dimension size of all tables
         std::map<uint32_t, PositionTables> m_tables; //!< Map of lookup tables/number of detectors is usually small so hashing should be somewhat equally fast as vector, index is pixel_offset
         std::string m_importReport; //!< Text to be printed when asynReport() is called
-        std::shared_ptr<Timer> m_importTimer; //!< Timer is used as a worker thread for importing files
+        Timer m_importTimer{false}; //!< Timer is used as a worker thread for importing files
 
         // Following member variables must be carefully set since they're used un-locked
         double m_xScaleIn;          //!< Scaling factor to transform raw X to floating point

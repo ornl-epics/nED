@@ -12,6 +12,7 @@
 
 #include "BaseModulePlugin.h"
 #include "McsFile.h"
+#include "Timer.h"
 
 #include <memory>
 
@@ -65,8 +66,8 @@ class FemPlugin : public BaseModulePlugin {
             uint32_t pktPayloadSize;//!< Size of allocated space in packet payload
             uint32_t offset;        //!< Current data position, used as progress
             uint32_t lastCount;     //!< Number of bytes sent in previous chunk
-            std::shared_ptr<Timer> timer; //!< Currently running timer for response timeout handling
-            std::shared_ptr<Timer> statusTimer; //!< Currently running timer for status refresh
+            Timer responseTimer{false};//!< Currently running timer for response timeout handling
+            Timer statusTimer{false};//!< Currently running timer for status refresh
             epicsTimeStamp eraseStartTime; //!< Timestamp of erase command sent out
             epicsTimeStamp lastReadyTime; //!< Timestamp of last 'ready' response
             epicsTimeStamp disableTime; //!< Timestamp when upgrade was disabled

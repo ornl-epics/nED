@@ -11,6 +11,7 @@
 #define BASESOCKET_PLUGIN_H
 
 #include "BasePlugin.h"
+#include "Timer.h"
 
 /**
  * Plugin with server socket capabilities
@@ -30,6 +31,7 @@ class BaseSocketPlugin : public BasePlugin {
         int m_listenSock;           //!< Socket for incoming connections, -1 when not listening
         int m_clientSock;           //!< Client socket to send/receive data to/from, -1 when no client
         epicsTimeStamp m_lastClientActivity;    //!< When did client last send or receive something, useful for connection upkeeping
+        Timer m_watchdogTimer{false};//!< Timer to run period callback
 
     public:
         static const int defaultInterfaceMask = asynOctetMask | asynFloat64Mask | BasePlugin::defaultInterfaceMask;
@@ -50,6 +52,11 @@ class BaseSocketPlugin : public BasePlugin {
          * @param[in] portName asyn port name.
          */
         BaseSocketPlugin(const char *portName);
+
+        /**
+         * Destructor.
+         */
+        ~BaseSocketPlugin();
 
         /**
          * Handle BaseSocketPlugin integer parameters changes.

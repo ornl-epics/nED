@@ -32,9 +32,14 @@ BaseSocketPlugin::BaseSocketPlugin(const char *portName)
 
     m_lastClientActivity = { 0, 0 };
 
-    // Schedule a period task to check for incoming client
-    std::function<float(void)> watchdogCb = std::bind(&BaseSocketPlugin::checkClient, this);
-    scheduleCallback(watchdogCb, 2.0);
+    // Schedule a periodic task to check for incoming client
+    std::function<float()> cb = std::bind(&BaseSocketPlugin::checkClient, this);
+    m_watchdogTimer.schedule(cb, 2.0);
+}
+
+BaseSocketPlugin::~BaseSocketPlugin()
+{
+    m_watchdogTimer.cancel();
 }
 
 bool BaseSocketPlugin::recv(uint32_t *data, uint32_t length, double timeout, uint32_t *actual)
@@ -355,6 +360,8 @@ float BaseSocketPlugin::checkClient()
     int checkInt;
     epicsTimeStamp now;
 
+    lock();
+
     getIntegerParam(CheckInt, &checkInt);
     epicsTimeGetCurrent(&now);
 
@@ -368,6 +375,8 @@ float BaseSocketPlugin::checkClient()
     if (!isClientConnected()) {
         connectClient();
     }
+
+    unlock();
 
     return checkInt;
 }

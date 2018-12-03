@@ -23,8 +23,6 @@
 #include <epicsMessageQueue.h>
 #include <epicsThread.h>
 
-class Timer;
-
 typedef std::vector<const DasPacket*> DasPacketList;
 typedef std::vector<const DasCmdPacket*> DasCmdPacketList;
 typedef std::vector<const RtdlPacket*> RtdlPacketList;
@@ -152,24 +150,6 @@ class BasePlugin : public asynPortDriver {
          * Return true if connected to *any* plugin, false when not connected.
          */
         bool isConnected();
-
-        /**
-         * Request a custom callback function to be called at some time in the future.
-         *
-         * Using this function, the plugin can request asynchronous task to be
-         * scheduled at some relative time.
-         * All tasks are run from a background thread and before they're
-         * executed, the plugin thread safety is guaranteed through its lock.
-         *
-         * When the timer expires, it invokes user defined function with no parameters.
-         * User defined function should return delay in seconds when the
-         * next invocation should occur, or 0 to stop the timer.
-         *
-         * @param[in] callback Function to be called after delay expires.
-         * @param[in] delay Delay from now when to invoke the function, in seconds.
-         * @return active or inactive timer
-         */
-        std::shared_ptr<Timer> scheduleCallback(std::function<float(void)> &callback, double delay);
 
         /**
          * A callback function called by asyn upon receiving message from parent plugin.
@@ -428,7 +408,7 @@ class BasePlugin : public asynPortDriver {
          * This function relies being called from writeInt32. When derived plugin
          * overrides writeInt32 but wants to receive parameters from other plugins,
          * it needs to invoke BasePlugin::writeInt32.
-         * 
+         *
          * @param[in] remotePort name of the remote plugin.
          * @param[in] paramName name of the parameter
          * @param[in] value of the parameter
@@ -610,11 +590,6 @@ class BasePlugin : public asynPortDriver {
          */
         void recvDownstreamThread(epicsEvent *shutdown);
 
-        /**
-         * Called from epicsTimer when timer expires.
-         */
-        float timerExpire(std::shared_ptr<Timer> &timer, std::function<float(void)> callback);
-
     private:
         /**
          * Structure to describe asyn interface.
@@ -631,7 +606,6 @@ class BasePlugin : public asynPortDriver {
         epicsMessageQueue m_messageQueue;           //!< Message queue for non-blocking mode
         Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
-        std::list<std::shared_ptr<Timer> > m_timers;//!< List of timers currently scheduled
         bool m_locked{false};
 
     protected:
