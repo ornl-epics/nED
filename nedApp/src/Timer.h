@@ -75,7 +75,6 @@ class Timer : private epicsTimerNotify {
         epicsTimer &m_timer;
         std::function<float()> m_callback;
         void *m_ctx;
-        bool m_active;
 
         expireStatus expire(const epicsTime & currentTime);
 };

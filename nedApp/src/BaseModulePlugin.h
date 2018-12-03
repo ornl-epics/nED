@@ -182,7 +182,7 @@ class BaseModulePlugin : public BasePlugin {
         uint8_t m_cmdVer = 0;                           //!< Commands protocol version
         std::map<int, uint32_t> m_configSectionSizes;   //!< Configuration section sizes, in words (word=2B for submodules, =4B for DSPs)
         std::map<int, uint32_t> m_configSectionOffsets; //!< Status response payload size, in words (word=2B for submodules, =4B for DSPs)
-        std::shared_ptr<Timer> m_timeoutTimer;          //!< Currently running timer for response timeout handling
+        Timer m_timeoutTimer;                           //!< Currently running timer for response timeout handling
         std::list<std::function<bool(const DasCmdPacket *)> > m_stateMachines; //!< Active internal state machines
         epicsTime m_connStaleTime;                      //!< Time when connection becomes candidate to close, used for book-keeping the connection
         Timer m_connTimer;                              //!< Periodic timer to check whether connection can be closed.
@@ -831,10 +831,7 @@ class BaseModulePlugin : public BasePlugin {
         virtual float noResponseCleanup(DasCmdPacket::CommandType command);
 
         /**
-         * Request a custom callback function to be called at some time in the future.
-         *
-         * Uses BasePlugin::scheduleCallback() for scheduling the BaseModulePlugin::noResponseTimeout()
-         * function and stores the timer as a member variable.
+         * Schedule noResponseTimeout() function execution.
          *
          * Function expects the Plugin to be locked.
          *
@@ -846,7 +843,7 @@ class BaseModulePlugin : public BasePlugin {
         bool scheduleTimeoutCallback(DasCmdPacket::CommandType command, double delay);
 
         /**
-         * Cancel any pending timeout callback and release the timer.
+         * Cancel any pending timeout callback.
          *
          * Function expects the Plugin to be locked.
          *

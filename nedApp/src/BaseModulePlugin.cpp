@@ -61,6 +61,7 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     , m_expectedChannel(0)
     , m_numChannels(0)
     , m_wordSize(wordSize)
+    , m_timeoutTimer(false)
     , m_connTimer(false)
     , m_parentPlugins(parentPlugins)
     , m_configDir("")
@@ -1049,6 +1050,8 @@ std::string BaseModulePlugin::addr2ip(uint32_t addr)
 
 float BaseModulePlugin::noResponseCleanup(DasCmdPacket::CommandType command)
 {
+    // This is called only from the Timer::expire()
+    lock();
     if (m_waitingResponse == command) {
         LOG_WARN("Timeout waiting for %s response", cmd2str(command));
         m_waitingResponse = static_cast<DasCmdPacket::CommandType>(0);
@@ -1056,24 +1059,25 @@ float BaseModulePlugin::noResponseCleanup(DasCmdPacket::CommandType command)
         setIntegerParam(CmdRsp, LAST_CMD_TIMEOUT);
         callParamCallbacks();
     }
-    m_timeoutTimer.reset();
+    unlock();
+    // Timer will auto-cancel since returning 0
     return 0;
 }
 
 bool BaseModulePlugin::scheduleTimeoutCallback(DasCmdPacket::CommandType command, double delay)
 {
     std::function<float(void)> timeoutCb = std::bind(&BaseModulePlugin::noResponseCleanup, this, command);
-    m_timeoutTimer = scheduleCallback(timeoutCb, delay);
-    return (m_timeoutTimer.get() != 0);
+    return m_timeoutTimer.schedule(timeoutCb, delay);
 }
 
 bool BaseModulePlugin::cancelTimeoutCallback()
 {
-    bool canceled = false;
-    if (m_timeoutTimer) {
-        canceled = m_timeoutTimer->cancel();
-        m_timeoutTimer.reset();
-    }
+    // We need to unlock the port to prevent dead-lock when Timer is just
+    // expiring. The cancel() function will wait for the expire callback
+    // to complete, which never happens if the port remains locked.
+    unlock();
+    bool canceled = m_timeoutTimer.cancel();
+    lock();
     return canceled;
 }
 

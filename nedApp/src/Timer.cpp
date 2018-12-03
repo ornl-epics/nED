@@ -12,7 +12,6 @@
 Timer::Timer(bool shared)
     : m_queue(epicsTimerQueueActive::allocate(shared))
     , m_timer(m_queue.createTimer())
-    , m_active(false)
 {
 }
 
@@ -27,32 +26,28 @@ bool Timer::schedule(std::function<float()> &callback, float delay)
         return false;
     m_callback = callback;
     m_timer.start(*this, delay);
-    m_active = true;
     return true;
 }
 
 epicsTimerNotify::expireStatus Timer::expire(const epicsTime & currentTime)
 {
-    float delay = m_callback();
-    if (delay > 0) {
-        return expireStatus(restart, delay);
-    } else {
-        cancel();
-        return expireStatus(noRestart);
+    if (m_callback) {
+        float delay = m_callback();
+        if (delay > 0)
+            return expireStatus(restart, delay);
     }
+    return expireStatus(noRestart);
 }
 
 bool Timer::cancel()
 {
-    if (m_active) {
-        m_callback = std::function<float()>();
-        m_active = false;
-        return true;
-    }
-    return false;
+    bool running = (m_timer.getExpireDelay() != DBL_MAX);
+    m_timer.cancel();
+    m_callback = std::function<float()>();
+    return running;
 }
 
 bool Timer::isActive()
 {
-    return m_active;
+    return (m_timer.getExpireDelay() != DBL_MAX);
 }
