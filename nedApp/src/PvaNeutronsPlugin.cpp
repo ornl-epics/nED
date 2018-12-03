@@ -224,10 +224,10 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
                     add("time_of_flight",   standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("position",         standardField->scalarArray(epics::pvData::pvUInt, ""))->
                     add("pixel",            standardField->scalarArray(epics::pvData::pvUInt, ""))->
-                    add("sample_a1",        standardField->scalarArray(epics::pvData::pvUInt, ""))->
-                    add("sample_a2",        standardField->scalarArray(epics::pvData::pvUInt, ""))->
-                    add("sample_b1",        standardField->scalarArray(epics::pvData::pvUInt, ""))->
-                    add("sample_b2",        standardField->scalarArray(epics::pvData::pvUInt, ""))->
+                    add("sample_a1",        standardField->scalarArray(epics::pvData::pvUShort, ""))->
+                    add("sample_a2",        standardField->scalarArray(epics::pvData::pvUShort, ""))->
+                    add("sample_b1",        standardField->scalarArray(epics::pvData::pvUShort, ""))->
+                    add("sample_b2",        standardField->scalarArray(epics::pvData::pvUShort, ""))->
                     createStructure()
             );
 
@@ -256,19 +256,19 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
             if (pvRecord->pvPixel.get() == NULL)
                 return PvaRecordLpsd::shared_pointer();
 
-            pvRecord->pvSampleA1 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a1.value");
+            pvRecord->pvSampleA1 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_a1.value");
             if (pvRecord->pvSampleA1.get() == NULL)
                 return PvaRecordLpsd::shared_pointer();
 
-            pvRecord->pvSampleA2 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_a2.value");
+            pvRecord->pvSampleA2 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_a2.value");
             if (pvRecord->pvSampleA2.get() == NULL)
                 return PvaRecordLpsd::shared_pointer();
 
-            pvRecord->pvSampleB1 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b1.value");
+            pvRecord->pvSampleB1 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_b1.value");
             if (pvRecord->pvSampleB1.get() == NULL)
                 return PvaRecordLpsd::shared_pointer();
 
-            pvRecord->pvSampleB2 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUIntArray>("sample_b2.value");
+            pvRecord->pvSampleB2 = pvRecord->getPVStructure()->getSubField<epics::pvData::PVUShortArray>("sample_b2.value");
             if (pvRecord->pvSampleB2.get() == NULL)
                 return PvaRecordLpsd::shared_pointer();
 
@@ -350,6 +350,11 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
                 pvNumEvents->put(nEvents);
                 pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
                 pvPixel->replace(epics::pvData::freeze(pixels));
+                pvPosition->replace(epics::pvData::freeze(positions));
+                pvSampleA1->replace(epics::pvData::freeze(sample_a1));
+                pvSampleA2->replace(epics::pvData::freeze(sample_a2));
+                pvSampleB1->replace(epics::pvData::freeze(sample_b1));
+                pvSampleB2->replace(epics::pvData::freeze(sample_b2));
 
                 endGroupPut();
                 posted = true;
@@ -368,10 +373,10 @@ class PvaNeutronsPlugin::PvaRecordLpsd : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr   pvPosition;     //!< Detector position
         epics::pvData::PVUIntArrayPtr   pvPixel;        //!< Pixel ID
         epics::pvData::PVUIntArrayPtr   pvRawPixel;     //!< Mapped pixel ID
-        epics::pvData::PVUIntArrayPtr   pvSampleA1;     //!< Raw sample A1
-        epics::pvData::PVUIntArrayPtr   pvSampleA2;     //!< Raw sample A2
-        epics::pvData::PVUIntArrayPtr   pvSampleB1;     //!< Raw sample B1
-        epics::pvData::PVUIntArrayPtr   pvSampleB2;     //!< Raw sample B2
+        epics::pvData::PVUShortArrayPtr pvSampleA1;     //!< Raw sample A1
+        epics::pvData::PVUShortArrayPtr pvSampleA2;     //!< Raw sample A2
+        epics::pvData::PVUShortArrayPtr pvSampleB1;     //!< Raw sample B1
+        epics::pvData::PVUShortArrayPtr pvSampleB2;     //!< Raw sample B2
 };
 
 /**

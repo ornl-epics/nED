@@ -494,7 +494,7 @@ void ArocPlugin::createParams_v25()
     createConfigParam("TestPatternEn",    'F',  0x1,  1, 15,    0); // Test pattern enable           (0=disable,1=enable)
     createConfigParam("TestPatternRate",  'F',  0x2, 16,  0,    0); // Test pattern rate
     createConfigParam("CycleAdvance",     'F',  0x3, 10,  0,    1); // Num cycles to advance @TSYNC  (1=60Hz,2=30Hz,3=20Hz,4=15Hz,6=10Hz,12=5Hz,60=1Hz)
-    createConfigParam("DataFormatId",     'F',  0x4,  8,  0,    8); // Data format identifier        (5=normal,8=AROC raw,0=unsupported)
+    createConfigParam("DataFormat",       'F',  0x4,  8,  0,    8); // Data format identifier        (5=normal,8=AROC raw,0=unsupported)
     createConfigParam("Protocol",         'F',  0x4,  1, 15,    0); // LVDS protocol select          (0=legacy,1=new)
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)

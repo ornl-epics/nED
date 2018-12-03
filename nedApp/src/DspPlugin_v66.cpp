@@ -332,7 +332,7 @@ void DspPlugin::createParams_v66() {
     createConfigParam("TestPatternSel", 'F', 0x1,  2, 12, 0); // Test pattern select          (0=optic,1=fake ch7,2=fake ch1-ch6,3=fake ch1-ch7)
     createConfigParam("TestPatternRtdlEn",'F',0x1, 1, 14, 1); // Add RTDL header to optic TP  (0=disable,1=enable)
     createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // Test pattern master enable   (0=disable,1=enable)
-    createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern optic rate      (65535=1.6 Kev/s (lowest), 53124=2 Kev/s, 13280=8 Kev/s, 5311=20 Kev/s, 1061=100 Kev/s, 264=400 Kev/s, 105=1 Mev/s, 52=2 Mev/s, 34=3 Mev/s, 25=4 Mev/s, 20=5M ev/s, 16=6 Mev/s, 12=8 Mev/s, 9=10 Mev/s, 6=15 Mev/s)
+    createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 65535); // Test pattern optic rate      (65535=1.6 Kev/s (lowest), 53124=2 Kev/s, 13280=8 Kev/s, 5311=20 Kev/s, 1061=100 Kev/s, 264=400 Kev/s, 105=1 Mev/s, 52=2 Mev/s, 34=3 Mev/s, 25=4 Mev/s, 20=5M ev/s, 16=6 Mev/s, 12=8 Mev/s, 9=10 Mev/s, 6=15 Mev/s)
 
     createConfigParam("TestPatPktSize", 'F', 0x2,  4,  0, 0); // TP optic sub-packet size
     createConfigParam("TestPatAlt1Rate",'F', 0x2, 12,  4, 0); // TP ch7 fake LVDS rate

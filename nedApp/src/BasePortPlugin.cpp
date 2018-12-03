@@ -261,25 +261,29 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
             // Put packet in the corresponding list
             switch (packet->getType()) {
             case Packet::TYPE_DAS_DATA:
-                {
+                try {
                     auto dataPacket = reinterpret_cast<const DasDataPacket *>(packet);
                     if (dataPacket->checkIntegrity())
                         dasData.push_back(dataPacket);
                     else
                         LOG_WARN("Discarding DAS data packet, integrity check failed");
+                } catch (std::runtime_error &e) {
+                    LOG_WARN("Discarding DAS data packet, %s", e.what());
                 }
                 break;
             case Packet::TYPE_RTDL:
-                {
+                try {
                     auto rtdlPacket = reinterpret_cast<const RtdlPacket *>(packet);
                     if (rtdlPacket->checkIntegrity())
                         rtdls.push_back(rtdlPacket);
                     else
                         LOG_WARN("Discarding RTDL packet, integrity check failed");
+                } catch (std::runtime_error &e) {
+                    LOG_WARN("Discarding RTDL packet, %s", e.what());
                 }
                 break;
             case Packet::TYPE_DAS_CMD:
-                {
+                try {
                     auto cmdPacket = reinterpret_cast<const DasCmdPacket *>(packet);
                     if (cmdPacket->checkIntegrity())
                         dasCmd.push_back(cmdPacket);
@@ -290,6 +294,8 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
                         LOG_DEBUG("Received command packet");
                         dump((const char*)cmdPacket, cmdPacket->getLength());
                     }
+                } catch (std::runtime_error &e) {
+                    LOG_WARN("Discarding DAS command packet, %s", e.what());
                 }
                 break;
             case Packet::TYPE_ERROR:

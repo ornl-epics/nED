@@ -329,7 +329,7 @@ void DspPlugin::createParams_v64() {
     createConfigParam("TestPatternId",  'F', 0x1, 12, 0,  0); // Test pattern id
     createConfigParam("TestPatternDebug",'F',0x1,  3, 12, 0); // Engineering Use only
     createConfigParam("TestPatternEn",  'F', 0x1,  1, 15, 0); // pattern enable               (0=disable,1=enable)
-    createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 0); // Test pattern rate            (65535=1.6 Kev/s (lowest), 53124=2 Kev/s, 13280=8 Kev/s, 5311=20 Kev/s, 1061=100 Kev/s, 264=400 Kev/s, 105=1 Mev/s, 52=2 Mev/s, 34=3 Mev/s, 25=4 Mev/s, 20=5M ev/s, 16=6 Mev/s, 12=8 Mev/s, 9=10 Mev/s, 6=15 Mev/s)
+    createConfigParam("TestPatternRate",'F', 0x1, 16, 16, 65535); // Test pattern rate            (65535=1.6 Kev/s (lowest), 53124=2 Kev/s, 13280=8 Kev/s, 5311=20 Kev/s, 1061=100 Kev/s, 264=400 Kev/s, 105=1 Mev/s, 52=2 Mev/s, 34=3 Mev/s, 25=4 Mev/s, 20=5M ev/s, 16=6 Mev/s, 12=8 Mev/s, 9=10 Mev/s, 6=15 Mev/s)
 
 //      BLXXX:Det:DspX:| sig nam|                     | EPICS record description | (bi and mbbi description)
     createCounterParam("PktLenErrCnt",     0x0, 16,  0); // TBD
