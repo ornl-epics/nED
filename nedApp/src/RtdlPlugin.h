@@ -106,6 +106,7 @@ class RtdlPlugin : public BasePlugin {
         int ErrorsPastTime;
         int PvaName;
         int CacheSize;
+        int FrameLen;
 };
 
 #endif // RTDL_PLUGIN_H

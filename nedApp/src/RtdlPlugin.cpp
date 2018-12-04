@@ -37,6 +37,7 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     createParam("ErrorsPastTime",   asynParamInt32, &ErrorsPastTime, 0);    // READ - Number of errors when time jumps in the past
     createParam("PvaName",          asynParamOctet, &PvaName, pvName);
     createParam("CacheSize",        asynParamInt32, &CacheSize, 10);// WRITE - Number of RTDLs to cache
+    createParam("FrameLen",         asynParamFloat64, &FrameLen, 0);// READ - Frame calculated by substracting previous timestamp from current
 
     if (pvName && strlen(pvName) > 0) {
         m_record = PvaRecord::create(pvName);
@@ -85,6 +86,7 @@ void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl,
         addIntegerParam(ErrorsPastTime, 1);
     }
 
+    epicsTime prevTime = m_timesCache.front();
     m_timesCache.push_front(rtdlTime);
 
     // Keep the cache sane, at 60Hz nominal update rate 10 samples should be plenty
@@ -119,6 +121,7 @@ void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl,
     setIntegerParam(FrameOffset,        rtdl.frame_offset);
     setIntegerParam(TofFixOffset,       rtdl.tof_fixed_offset * 100);
     setIntegerParam(RingPeriod,         ringPeriod);
+    setDoubleParam(FrameLen,            1000*(rtdlTime - prevTime));
 
     if (m_record) {
         if (m_record->update(timestamp, rtdl, frames) == false) {
