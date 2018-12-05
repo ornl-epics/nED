@@ -14,6 +14,7 @@
 #include "RtdlHeader.h"
 
 #include <list>
+#include <vector>
 
 /**
  * Plugin that forwards Neutron Event data to ADARA SMS over TCP/IP.
@@ -43,8 +44,11 @@ class AdaraPlugin : public BaseSocketPlugin {
             uint16_t pulseSeq{0};
             RtdlHeader rtdl;
         };
+        std::vector<uint32_t> m_buffer;
 
         std::list<std::pair<epicsTime, DataInfo>> m_cachedRtdl;
+
+        bool m_eventSel[8] = { true, true, true, true, true, true, true, true };
 
     public:
         /**
@@ -135,6 +139,11 @@ class AdaraPlugin : public BaseSocketPlugin {
         int CntDataPkts;
         int CntRtdlPkts;
         int CntPingPkts;
+        int DetEventsEn;
+        int MonEventsEn;
+        int SigEventsEn;
+        int AdcEventsEn;
+        int ChopEventsEn;
 };
 
 #endif // ADARA_PLUGIN_H

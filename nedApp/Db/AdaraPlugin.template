@@ -135,4 +135,58 @@ record(longout, "$(P)RtdlCacheSize")
     field(LOPR, "1")
     field(HOPR, "600")
 }
-
+record(bo, "$(P)DetEventsEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass detector events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))DetEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)MonEventsEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass monitor events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))MonEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)SigEventsEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass signal events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))SigEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)AdcEventsEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass ADC events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))AdcEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)ChopEventsEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass chopper events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))ChopEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}

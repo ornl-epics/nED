@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>$(DET_NAME) ADARA</name>
+  <width>875</width>
+  <height>380</height>
+  <actions>
+  </actions>
+  <widget type="group" version="2.0.0">
+    <name>Server</name>
+    <x>330</x>
+    <width>547</width>
+    <height>145</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="label" version="2.0.0">
+      <name>ListeIp_Label</name>
+      <text>Listen IP</text>
+      <x>54</x>
+      <width>118</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ListenPort_Label</name>
+      <text>Listen port</text>
+      <x>54</x>
+      <y>36</y>
+      <width>118</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>ListenStatus_Update</name>
+      <pv_name>$(P)ListenStatus</pv_name>
+      <x>180</x>
+      <y>72</y>
+      <width>200</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ListenStatus_Label</name>
+      <text>Listen status</text>
+      <x>63</x>
+      <y>72</y>
+      <width>109</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>ListenIp_Input</name>
+      <pv_name>$(P)ListenIp</pv_name>
+      <x>179</x>
+      <width>202</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>ListenPort_Input</name>
+      <pv_name>$(P)ListenPort</pv_name>
+      <x>179</x>
+      <y>36</y>
+      <width>202</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Client</name>
+    <x>330</x>
+    <y>145</y>
+    <width>547</width>
+    <height>235</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="label" version="2.0.0">
+      <name>CheckInt_Label</name>
+      <text>Heartbeat interval</text>
+      <y>36</y>
+      <width>169</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>ClientIp_Update</name>
+      <pv_name>$(P)ClientIp</pv_name>
+      <x>180</x>
+      <width>199</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ClientIp_Label</name>
+      <text>Client IP</text>
+      <width>169</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ClientInactive_Label</name>
+      <text>Inactive time</text>
+      <y>72</y>
+      <width>172</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>ClientInactive_Update</name>
+      <pv_name>$(P)ClientInactive</pv_name>
+      <x>180</x>
+      <y>72</y>
+      <width>103</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <tooltip>Time of not being able to push more data to client.</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ClientInactiveTimeout_Label</name>
+      <text>Inactive timeout</text>
+      <y>108</y>
+      <width>169</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions>
+        <action type="write_pv">
+          <pv_name>$(pv_name)</pv_name>
+          <value>1</value>
+        </action>
+      </actions>
+      <pv_name>$(P)CloseClient</pv_name>
+      <text>Disconnect</text>
+      <x>396</x>
+      <width>109</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ServerDisconnects_Label</name>
+      <text># server disconnects</text>
+      <y>144</y>
+      <width>175</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>ServerDisconnects_Update</name>
+      <pv_name>$(P)ServerCloseCnt</pv_name>
+      <x>183</x>
+      <y>144</y>
+      <width>103</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <tooltip>How many times server closed the connection</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label</name>
+      <text>Automatic disconnect threshold</text>
+      <x>288</x>
+      <y>108</y>
+      <width>217</width>
+      <height>26</height>
+      <font>
+        <font name="Comment" family="Liberation Sans" style="ITALIC" size="14.0">
+        </font>
+      </font>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button</name>
+      <actions execute_as_one="true">
+        <action type="write_pv">
+          <pv_name>$(pv_name).VAL</pv_name>
+          <value>-1</value>
+        </action>
+        <action type="write_pv">
+          <pv_name>$(pv_name).PROC</pv_name>
+          <value>1</value>
+        </action>
+      </actions>
+      <pv_name>$(P)ServerCloseCnt</pv_name>
+      <text>Reset</text>
+      <x>297</x>
+      <y>144</y>
+      <width>87</width>
+      <height>26</height>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>CheckInt_Input</name>
+      <pv_name>$(P)CheckInt</pv_name>
+      <x>179</x>
+      <y>36</y>
+      <width>202</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <tooltip>Time between two heartbeats when there's no RTDL, neutron or metadata.
+Also a time to check for incoming client when not connected.</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>ClientInactiveTimeout_Input</name>
+      <pv_name>$(P)InactiveTimeout</pv_name>
+      <x>180</x>
+      <y>108</y>
+      <width>103</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <tooltip>Set a timeout when client gets disconnected automatically.
+Automatic disconnect is disabled when this value equals 0.</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+  </widget>
+  <widget type="group" version="2.0.0">
+    <name>Status and config</name>
+    <width>331</width>
+    <height>380</height>
+    <font>
+      <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
+      </font>
+    </font>
+    <foreground_color>
+      <color name="Black" red="0" green="0" blue="0">
+      </color>
+    </foreground_color>
+    <actions>
+    </actions>
+    <widget type="label" version="2.0.0">
+      <name>Enable_Label</name>
+      <text>Enable</text>
+      <y>2</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="bool_button" version="2.0.0">
+      <name>Enable_Button</name>
+      <pv_name>$(P)Enable</pv_name>
+      <x>174</x>
+      <width>74</width>
+      <height>29</height>
+      <off_label>OFF</off_label>
+      <off_color>
+        <color name="Off" red="60" green="100" blue="60">
+        </color>
+      </off_color>
+      <on_label>ON</on_label>
+      <on_color>
+        <color name="On" red="0" green="255" blue="0">
+        </color>
+      </on_color>
+      <background_color>
+        <color red="240" green="240" blue="240">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>RxCount_Label</name>
+      <text>Data packets sent</text>
+      <y>62</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Number of packets received from OCC</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>RxCount_Update</name>
+      <pv_name>$(P)CntDataPkts</pv_name>
+      <x>174</x>
+      <y>62</y>
+      <width>103</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ProcCount_Label</name>
+      <text>RTDL packets sent</text>
+      <y>92</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Number of packets sent to SMS</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>ProcCount_Update</name>
+      <pv_name>$(P)CntRtdlPkts</pv_name>
+      <x>174</x>
+      <y>92</y>
+      <width>103</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ProcCount_Label</name>
+      <text>Heartbeat packets sent</text>
+      <y>122</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Number of packets sent to SMS</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>ProcCount_Update</name>
+      <pv_name>$(P)CntPingPkts</pv_name>
+      <x>174</x>
+      <y>122</y>
+      <width>103</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>RxCount_Label</name>
+      <text>Status</text>
+      <y>32</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Number of packets received from OCC</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textupdate" version="2.0.0">
+      <name>RxCount_Update</name>
+      <pv_name>$(P)StatusText</pv_name>
+      <x>174</x>
+      <y>32</y>
+      <width>103</width>
+      <height>26</height>
+      <vertical_alignment>1</vertical_alignment>
+      <wrap_words>false</wrap_words>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ProcCount_Label</name>
+      <text>RTDL cache size</text>
+      <y>152</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Number of packets sent to SMS</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="textentry" version="3.0.0">
+      <name>ListenPort_Input</name>
+      <pv_name>$(P)RtdlCacheSize</pv_name>
+      <x>174</x>
+      <y>152</y>
+      <width>103</width>
+      <height>26</height>
+      <background_color>
+        <color name="WritePV_Background" red="128" green="255" blue="255">
+        </color>
+      </background_color>
+      <actions>
+      </actions>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ProcCount_Label</name>
+      <text>Detector events</text>
+      <y>182</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Enable passing detector events</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ProcCount_Label</name>
+      <text>Beam monitor events</text>
+      <y>212</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Enable passing beam monitor events</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ProcCount_Label</name>
+      <text>Signal events</text>
+      <y>242</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Enable passing signal events</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ProcCount_Label</name>
+      <text>ADC events</text>
+      <y>272</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Enable passing ADC events</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="label" version="2.0.0">
+      <name>ProcCount_Label</name>
+      <text>Chopper events</text>
+      <y>302</y>
+      <width>163</width>
+      <height>26</height>
+      <horizontal_alignment>2</horizontal_alignment>
+      <vertical_alignment>1</vertical_alignment>
+      <actions>
+      </actions>
+      <tooltip>Enable passing chopper events</tooltip>
+      <border_color>
+        <color red="0" green="128" blue="255">
+        </color>
+      </border_color>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>Enable_Button</name>
+      <pv_name>$(P)DetEventsEn</pv_name>
+      <label></label>
+      <x>174</x>
+      <y>182</y>
+      <width>74</width>
+      <height>29</height>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>Enable_Button_1</name>
+      <pv_name>$(P)MonEventsEn</pv_name>
+      <label></label>
+      <x>174</x>
+      <y>212</y>
+      <width>74</width>
+      <height>29</height>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>Enable_Button_2</name>
+      <pv_name>$(P)SigEventsEn</pv_name>
+      <label></label>
+      <x>174</x>
+      <y>242</y>
+      <width>74</width>
+      <height>29</height>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>Enable_Button_3</name>
+      <pv_name>$(P)AdcEventsEn</pv_name>
+      <label></label>
+      <x>174</x>
+      <y>272</y>
+      <width>74</width>
+      <height>29</height>
+      <actions>
+      </actions>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>Enable_Button_4</name>
+      <pv_name>$(P)ChopEventsEn</pv_name>
+      <label></label>
+      <x>174</x>
+      <y>302</y>
+      <width>74</width>
+      <height>29</height>
+      <actions>
+      </actions>
+    </widget>
+  </widget>
+</display>

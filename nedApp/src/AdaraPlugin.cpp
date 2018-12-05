@@ -31,6 +31,11 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dataPlugins, const ch
     createParam("CntDataPkts",  asynParamInt32, &CntDataPkts, 0);// WRITE - Number of data packets sent to SMS
     createParam("CntRtdlPkts",  asynParamInt32, &CntRtdlPkts, 0);// WRITE - Number of RTDL packets sent to SMS
     createParam("CntPingPkts",  asynParamInt32, &CntPingPkts, 0);// WRITE - Number of heartbeat packets sent to SMS
+    createParam("DetEventsEn",  asynParamInt32, &DetEventsEn, 1);// WRITE - Enable forwarding detector events
+    createParam("MonEventsEn",  asynParamInt32, &MonEventsEn, 1);// WRITE - Enable forwarding beam monitor events
+    createParam("SigEventsEn",  asynParamInt32, &SigEventsEn, 1);// WRITE - Enable forwarding signal events
+    createParam("AdcEventsEn",  asynParamInt32, &AdcEventsEn, 1);// WRITE - Enable forwarding ADC events
+    createParam("ChopEventsEn", asynParamInt32, &ChopEventsEn, 1);// WRITE - Enable forwarding chopper events
     callParamCallbacks();
 
     BasePlugin::connect(dataPlugins, MsgDasData);
@@ -42,6 +47,17 @@ asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == Reset) {
         reset();
         return asynSuccess;
+    }
+    if (pasynUser->reason == DetEventsEn) {
+        m_eventSel[int(Event::Pixel::Type::NEUTRON)] = (value > 0);
+    } else if (pasynUser->reason == MonEventsEn) {
+        m_eventSel[int(Event::Pixel::Type::BEAM_MONITOR)] = (value > 0);
+    } else if (pasynUser->reason == SigEventsEn) {
+        m_eventSel[int(Event::Pixel::Type::SIGNAL)] = (value > 0);
+    } else if (pasynUser->reason == AdcEventsEn) {
+        m_eventSel[int(Event::Pixel::Type::ADC)] = (value > 0);
+    } else if (pasynUser->reason == ChopEventsEn) {
+        m_eventSel[int(Event::Pixel::Type::CHOPPER)] = (value > 0);
     }
     return BaseSocketPlugin::writeInt32(pasynUser, value);
 }
@@ -113,9 +129,14 @@ template <typename T>
 bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *events, uint32_t nEvents)
 {
     size_t len = 10 + (nEvents * sizeof(Event::Pixel)/sizeof(uint32_t));
-    uint32_t *outpacket = new uint32_t[len];
-    if (outpacket == nullptr)
+    try {
+        m_buffer.reserve(len);
+    } catch (...) {
+        LOG_ERROR("Failed to allocate send buffer of %u bytes", len);
         return false;
+    }
+
+    uint32_t *outpacket = m_buffer.data();
 
     DataInfo info;
     for (auto it = m_cachedRtdl.begin(); it != m_cachedRtdl.end(); it++) {
@@ -137,15 +158,16 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     outpacket[9] = 0; // TSYNC delay
 
     for (uint32_t i = 0; i < nEvents; i++) {
-        outpacket[10+2*i] = events[i].tof;
-        outpacket[11+2*i] = events[i].pixelid;
+        uint8_t type = (events[i].pixelid >> 28) & 0x7;
+        if (m_eventsSel[type] == true) {
+            outpacket[10+2*i] = events[i].tof;
+            outpacket[11+2*i] = events[i].pixelid;
+        }
     }
 
     this->unlock();
     bool ret = send(outpacket, len*sizeof(uint32_t));
     this->lock();
-
-    delete outpacket;
 
     return ret;
 }
