@@ -137,6 +137,7 @@ record(longout, "$(P)RtdlCacheSize")
 }
 record(bo, "$(P)DetEventsEn")
 {
+    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC,  "Pass detector events")
     field(DTYP,  "asynInt32")
@@ -148,6 +149,7 @@ record(bo, "$(P)DetEventsEn")
 }
 record(bo, "$(P)MonEventsEn")
 {
+    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC,  "Pass monitor events")
     field(DTYP,  "asynInt32")
@@ -159,6 +161,7 @@ record(bo, "$(P)MonEventsEn")
 }
 record(bo, "$(P)SigEventsEn")
 {
+    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC,  "Pass signal events")
     field(DTYP,  "asynInt32")
@@ -170,6 +173,7 @@ record(bo, "$(P)SigEventsEn")
 }
 record(bo, "$(P)AdcEventsEn")
 {
+    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC,  "Pass ADC events")
     field(DTYP,  "asynInt32")
@@ -181,6 +185,7 @@ record(bo, "$(P)AdcEventsEn")
 }
 record(bo, "$(P)ChopEventsEn")
 {
+    info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DESC,  "Pass chopper events")
     field(DTYP,  "asynInt32")

@@ -49,15 +49,15 @@ asynStatus AdaraPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
         return asynSuccess;
     }
     if (pasynUser->reason == DetEventsEn) {
-        m_eventSel[int(Event::Pixel::Type::NEUTRON)] = (value > 0);
+        m_eventsSel[int(Event::Pixel::Type::NEUTRON)] = (value > 0);
     } else if (pasynUser->reason == MonEventsEn) {
-        m_eventSel[int(Event::Pixel::Type::BEAM_MONITOR)] = (value > 0);
+        m_eventsSel[int(Event::Pixel::Type::BEAM_MONITOR)] = (value > 0);
     } else if (pasynUser->reason == SigEventsEn) {
-        m_eventSel[int(Event::Pixel::Type::SIGNAL)] = (value > 0);
+        m_eventsSel[int(Event::Pixel::Type::SIGNAL)] = (value > 0);
     } else if (pasynUser->reason == AdcEventsEn) {
-        m_eventSel[int(Event::Pixel::Type::ADC)] = (value > 0);
+        m_eventsSel[int(Event::Pixel::Type::ADC)] = (value > 0);
     } else if (pasynUser->reason == ChopEventsEn) {
-        m_eventSel[int(Event::Pixel::Type::CHOPPER)] = (value > 0);
+        m_eventsSel[int(Event::Pixel::Type::CHOPPER)] = (value > 0);
     }
     return BaseSocketPlugin::writeInt32(pasynUser, value);
 }
@@ -132,7 +132,7 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     try {
         m_buffer.reserve(len);
     } catch (...) {
-        LOG_ERROR("Failed to allocate send buffer of %u bytes", len);
+        LOG_ERROR("Failed to allocate send buffer of %zu bytes", len);
         return false;
     }
 

@@ -48,7 +48,7 @@ class AdaraPlugin : public BaseSocketPlugin {
 
         std::list<std::pair<epicsTime, DataInfo>> m_cachedRtdl;
 
-        bool m_eventSel[8] = { true, true, true, true, true, true, true, true };
+        bool m_eventsSel[8] = { true, true, true, true, true, true, true, true };
 
     public:
         /**
