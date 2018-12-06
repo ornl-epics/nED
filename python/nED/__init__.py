@@ -100,6 +100,8 @@ class Module:
         if param.startswith("__"):
             raise AttributeError("Module class has no attribute {0}".format(param))
         pv = self.getPv(param)
+        if "enum" in pv.type:
+            return pv.get(as_string=True)
         return pv.get()
 
     def getPv(self, param):
