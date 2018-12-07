@@ -274,3 +274,12 @@ record(longout, "$(P)CacheSize")
     field(HIGH, "20")
     field(HSV,  "MINOR")
 }
+record(ai, "$(P)FrameLen")
+{
+    field(DESC, "Frame length")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))FrameLen")
+    field(EGU,  "ms")
+    field(PREC, "6")
+    field(SCAN, "I/O Intr")
+}
