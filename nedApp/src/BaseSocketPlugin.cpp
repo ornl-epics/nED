@@ -378,5 +378,7 @@ float BaseSocketPlugin::checkClient()
 
     unlock();
 
+    if (checkInt <= 0)
+        checkInt = 1;
     return checkInt;
 }

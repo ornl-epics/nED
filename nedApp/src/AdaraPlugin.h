@@ -75,16 +75,6 @@ class AdaraPlugin : public BaseSocketPlugin {
          */
         void recvDownstream(const DasDataPacketList &packets) override;
 
-        /**
-         * Overloaded periodic function to send ADARA Heartbeat packet.
-         *
-         * Send Heartbeat packet and call base BaseSocketPlugin::checkClient()
-         * function for timer upkeep.
-         *
-         * @return Number returned from BaseSocketPlugin::checkClient()
-         */
-        float checkClient();
-
     private:
         /**
          * Sends ADARA heartbeat packet during event data inactivity.

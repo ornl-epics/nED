@@ -95,6 +95,12 @@ bool AdaraPlugin::sendHeartbeat()
     this->unlock();
     bool ret = send(outpacket, 4*sizeof(uint32_t));
     this->lock();
+
+    if (ret) {
+        addIntegerParam(CntPingPkts, 1);
+        callParamCallbacks();
+    }
+
     return ret;
 }
 
@@ -246,22 +252,4 @@ void AdaraPlugin::recvDownstream(const DasDataPacketList &packets)
         addIntegerParam(CntDataPkts, sentPackets);
         callParamCallbacks();
     }
-}
-
-float AdaraPlugin::checkClient()
-{
-    int heartbeatInt;
-    epicsTimeStamp now;
-
-    getIntegerParam(CheckInt, &heartbeatInt);
-    epicsTimeGetCurrent(&now);
-    double inactive = epicsTimeDiffInSeconds(&now, &m_lastDataTimestamp);
-
-    if (isClientConnected() && inactive > heartbeatInt) {
-        if (sendHeartbeat()) {
-            addIntegerParam(CntPingPkts, 1);
-            callParamCallbacks();
-        }
-    }
-    return BaseSocketPlugin::checkClient();
 }
