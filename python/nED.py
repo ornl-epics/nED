@@ -25,7 +25,7 @@ def actionStatus(args=[]):
     for module in modules:
         maxlen = max(maxlen, len(module.name))
     for module in modules:
-        print "{0}{1}: {2}".format(module.name, " "*(maxlen-len(module.name)), module.status)
+        print "{0}{1}: {2}".format(module.name, " "*(maxlen-len(module.name)), module.Status)
 
     # TODO: print other plugins
     return 0
@@ -38,13 +38,13 @@ def actionInfo(args=[]):
         if not first:
             print ""
         print "Name     : {0}".format(module.name)
-        print "Address  : {0}".format(module.address)
-        print "Type     : {0}".format(module.type)
-        print "Version  : {0} ({1})".format(module.version, module.date)
-        print "Status   : {0}".format(module.status)
-        print "Data mode: {0}".format(module.datamode)
+        print "Address  : {0}".format(module.HwId)
+        print "Type     : {0}".format(module.HwType)
+        print "Version  : {0} ({1})".format(module.FwVerStr, module.FwDate)
+        print "Status   : {0}".format(module.Status)
+        print "Data mode: {0}".format(module.OutputMode)
 
-        print "Plugin   : {0}".format(module.pluginid)
+        print "Plugin   : {0}".format(module.PluginId)
         first = False
 
     return 0
