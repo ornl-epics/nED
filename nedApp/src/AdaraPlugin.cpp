@@ -152,7 +152,7 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
         }
     }
 
-    outpacket[0] = 24 + sizeof(Event::Pixel)*nEvents;
+    outpacket[0] = 24;
     outpacket[1] = (mapped ? ADARA_PKT_TYPE_MAPPED_EVENT : ADARA_PKT_TYPE_RAW_EVENT);
     outpacket[2] = timestamp.secPastEpoch;
     outpacket[3] = timestamp.nsec;
@@ -166,6 +166,7 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     for (uint32_t i = 0; i < nEvents; i++) {
         uint8_t type = (events[i].pixelid >> 28) & 0x7;
         if (m_eventsSel[type] == true) {
+            outpacket[0] += sizeof(Event::Pixel);
             outpacket[10+2*i] = events[i].tof;
             outpacket[11+2*i] = events[i].pixelid;
         }
