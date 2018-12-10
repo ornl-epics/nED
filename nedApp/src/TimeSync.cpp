@@ -219,7 +219,7 @@ void TimeSync::PIloop(const SyncResponsePacket* packet) {
     if (m_parent->getIntegerParam(State) == static_cast<int>(STATE_ESTIMATING)) {
         double duration = (m_records.back().localTime - m_records.front().localTime);
         m_lastError = error;
-        m_intError = 0;
+        m_intError = error;
         m_parent->setDoubleParam(SyncOutErr, m_lastError*1e6);
         m_parent->setDoubleParam(SyncInErr, error*1e6);
         m_parent->setDoubleParam(SyncAdjErr, m_intError*1e6);

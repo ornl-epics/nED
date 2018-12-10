@@ -88,6 +88,21 @@
       <width>50</width>
       <height>26</height>
     </widget>
+    <widget type="action_button" version="3.0.0">
+      <name>Action Button_1</name>
+      <actions>
+        <action type="open_display">
+          <file>TimeSyncStats.plt</file>
+          <target>replace</target>
+          <description>Open Display</description>
+        </action>
+      </actions>
+      <text>Plot in tab</text>
+      <x>212</x>
+      <y>142</y>
+      <width>110</width>
+      <height>26</height>
+    </widget>
   </widget>
   <widget type="group" version="2.0.0">
     <name>Info</name>
