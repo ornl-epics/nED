@@ -579,8 +579,8 @@ class DasCmdPacket : public Packet {
             CMD_READ_CONFIG             = 0x21, //!< Read module configuration
             CMD_READ_STATUS             = 0x22, //!< Read module status
             CMD_READ_TEMPERATURE        = 0x23, //!< Read module temperature(s)
-            CMD_READ_STATUS_COUNTERS    = 0x24, //!< Read module status counters
-            CMD_RESET_STATUS_COUNTERS   = 0x25, //!< Reset module status counters
+            CMD_READ_COUNTERS           = 0x24, //!< Read module status counters
+            CMD_RESET_COUNTERS          = 0x25, //!< Reset module status counters
             CMD_RESET_LVDS              = 0x27, //!< Reset LVDS chips
             CMD_TC_RESET_LVDS           = 0x28, //!< Send a short T&C SysReset signal
             CMD_TC_RESET                = 0x29, //!< Send a long T&C SysReset signal
@@ -692,6 +692,13 @@ class DasCmdPacket : public Packet {
         }
 
         /**
+         * Return command text representation.
+         */
+        std::string getCommandText() const {
+            return commandToText(command);
+        }
+
+        /**
          * Return remote module id.
          */
         uint32_t getModuleId() const {
@@ -754,6 +761,14 @@ class DasCmdPacket : public Packet {
         uint8_t getCmdVer() const {
             return cmd_version;
         }
+
+        /**
+         * Convert command into a string.
+         *
+         * @parma[in] command to be converted.
+         * @return String describing the command.
+         */
+        static std::string commandToText(CommandType cmd);
 };
 
 #endif // PACKET_H

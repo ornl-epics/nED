@@ -708,7 +708,6 @@ record(seq, "$(P)StartSeq")
     field(DO1,  "5")
     field(LNK2, "$(P)CmdReq PP")
     field(DO2,  "2")
-    field(DLY2, "0.2")
 }
 
 record(seq, "$(P)StopSeq")
@@ -719,7 +718,6 @@ record(seq, "$(P)StopSeq")
     field(DO1,  "6")
     field(LNK2, "$(P)CmdReq PP")
     field(DO2,  "2")
-    field(DLY2, "0.2")
 }
 
 record(seq, "$(P)CheckSeq")
@@ -730,10 +728,8 @@ record(seq, "$(P)CheckSeq")
     field(DO1,  "2")
     field(LNK2, "$(P)CmdReq PP")
     field(DO2,  "0")
-    field(DLY2, "0.1")
     field(LNK3, "$(P)CmdReq PP")
     field(DO3,  "1")
-    field(DLY3, "0.2")
 }
 
 record(seq, "$(P)ConfSeq")
@@ -744,13 +740,12 @@ record(seq, "$(P)ConfSeq")
     field(DO1,  "6")
     field(LNK2, "$(P)CmdReq PP")
     field(DO2,  "4")
-    field(DLY2, "0.1")
     field(LNK3, "$(P)CmdReq PP")
-    field(DO3,  "5")
-    field(DLY3, "0.2")
+    field(DO3,  "3")
     field(LNK4, "$(P)CmdReq PP")
-    field(DO4,  "2")
-    field(DLY4, "0.3")
+    field(DO4,  "5")
+    field(LNK5, "$(P)CmdReq PP")
+    field(DO5,  "2")
 }
 record(stringout, "$(P)SaveConfig")
 {
@@ -819,7 +814,8 @@ record(stringin, "$(P)Config1")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))Config1")
     field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)Config1Sync")
+    # We need CA link to break the records loop and avoid asyn dead-lock
+    field(FLNK, "$(P)Config1Sync CA")
 }
 record(stringin, "$(P)Config2")
 {

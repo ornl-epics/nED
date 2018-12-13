@@ -97,8 +97,6 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
         setIntegerParam(Supported, 1);
         setExpectedVersion(7, 1);
         setCmdVersion(1);
-        m_timeSync.reset(new TimeSync(this));
-        m_features |= (uint32_t)ModuleFeatures::TIME_SYNC;
     } else if (m_version == "v72") {
         createParams_v72();
         setIntegerParam(Supported, 1);
@@ -149,13 +147,6 @@ bool DspPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
     return false;
 }
 
-bool DspPlugin::rspTimeSync(const DasCmdPacket *packet)
-{
-    if (m_timeSync)
-        m_timeSync->rspTimeSync(packet);
-    return true;
-}
-
 asynStatus DspPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (m_timeSync && m_timeSync->setParam(pasynUser->reason, value))
@@ -166,9 +157,7 @@ asynStatus DspPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 bool DspPlugin::processResponse(const DasCmdPacket *packet)
 {
-    if (packet->getCommand() == DasCmdPacket::CMD_TIME_SYNC && m_timeSync) {
-        (void)m_timeSync->rspTimeSync(packet);
-        return true;
-    }
+    if (packet->getCommand() == DasCmdPacket::CMD_TIME_SYNC && m_timeSync)
+        return m_timeSync->rspTimeSync(packet);
     return BaseModulePlugin::processResponse(packet);
 }

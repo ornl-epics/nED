@@ -13,7 +13,16 @@
 
 #include <cstring>
 
+// EPICS includes
+#include <alarm.h>
+
 EPICS_REGISTER_PLUGIN(RocPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
+
+/**
+ * Return a unique id for section and channel pair that can be used to
+ * identify the pair m_params tables.
+ */
+#define SECTION_ID(section, channel) (((channel) * 0x10) + ((section) & 0xF))
 
 /**
  * ROC V5 version response format
@@ -62,34 +71,36 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
     : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_ROC, 2)
     , m_version(version)
 {
+    bool havePreAmpTest = false;
+
     if (0) {
     } else if (m_version == "v14") {
-        setNumChannels(8);
+        m_numChannels = 8;
         setIntegerParam(Supported, 1);
         createParams_v14();
         setExpectedVersion(1, 4);
     } else if (m_version == "v43") {
-        setNumChannels(8);
+        m_numChannels = 8;
         setIntegerParam(Supported, 1);
         createParams_v43();
         setExpectedVersion(4, 3);
     } else if (m_version == "v44") {
-        setNumChannels(8);
+        m_numChannels = 8;
         setIntegerParam(Supported, 1);
         createParams_v45();
         setExpectedVersion(4, 4);
     } else if (m_version == "v45") {
-        setNumChannels(8);
+        m_numChannels = 8;
         setIntegerParam(Supported, 1);
         createParams_v45();
         setExpectedVersion(4, 5);
     } else if (m_version == "v47") {
-        setNumChannels(8);
+        m_numChannels = 8;
         setIntegerParam(Supported, 1);
         createParams_v47();
         setExpectedVersion(4, 7);
     } else if (m_version == "v50") {
-        setNumChannels(8);
+        m_numChannels = 8;
         setIntegerParam(Supported, 1);
         createParams_v50();
         setExpectedVersion(5, 0);
@@ -104,12 +115,11 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
     } else if (m_version == "v54") {
         setIntegerParam(Supported, 1);
         createParams_v54();
-        createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
+        m_cmdHandlers[DasCmdPacket::CMD_READ_CONFIG].second = std::bind(&RocPlugin::rspReadConfigV54, this, std::placeholders::_1);
         setExpectedVersion(5, 4);
     } else if (m_version == "v55") {
         setIntegerParam(Supported, 1);
         createParams_v54();
-        createParam("Acquiring", asynParamInt32, &Acquiring); // v5.4 doesn't support Acquiring through registers, we simulate by receiving ACK on START
         setExpectedVersion(5, 5);
     } else if (m_version == "v56") {
         setIntegerParam(Supported, 1);
@@ -123,56 +133,67 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
         setIntegerParam(Supported, 1);
         createParams_v58();
         setExpectedVersion(5, 8);
+        havePreAmpTest = true;
     } else if (m_version == "v59") {
         setIntegerParam(Supported, 1);
         createParams_v59();
         setExpectedVersion(5, 9);
+        havePreAmpTest = true;
     } else if (m_version == "v510") {
         setIntegerParam(Supported, 1);
         createParams_v510();
         setExpectedVersion(5, 10);
+        havePreAmpTest = true;
     } else if (m_version == "v511") {
         setIntegerParam(Supported, 1);
         createParams_v511();
         setExpectedVersion(5, 11);
+        havePreAmpTest = true;
     } else {
         setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);
     }
 
+    if (m_numChannels > 0) {
+        m_cmdQueueSize += m_numChannels;
+        m_cmdHandlers[DasCmdPacket::CMD_WRITE_CONFIG].first  = std::bind(&RocPlugin::reqWriteConfig, this);
+        m_cmdHandlers[DasCmdPacket::CMD_WRITE_CONFIG].second = std::bind(&RocPlugin::rspWriteConfig, this, std::placeholders::_1);
+        m_cmdHandlers[DasCmdPacket::CMD_READ_CONFIG].first   = std::bind(&RocPlugin::reqParamsChan, this, DasCmdPacket::CMD_READ_CONFIG);
+        m_cmdHandlers[DasCmdPacket::CMD_READ_CONFIG].second  = std::bind(&RocPlugin::rspParamsChan, this, std::placeholders::_1, "CONFIG");
+        m_cmdHandlers[DasCmdPacket::CMD_READ_STATUS].first   = std::bind(&RocPlugin::reqParamsChan, this, DasCmdPacket::CMD_READ_STATUS);
+        m_cmdHandlers[DasCmdPacket::CMD_READ_STATUS].second  = std::bind(&RocPlugin::rspParamsChan, this, std::placeholders::_1, "STATUS");
+    }
+    if (havePreAmpTest) {
+        m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_CONFIG].first   = std::bind(&BaseModulePlugin::reqParams,  this, DasCmdPacket::CMD_PREAMP_TEST_CONFIG, "PREAMP_CFG");
+        m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_CONFIG].second  = std::bind(&BaseModulePlugin::rspSimple,  this, std::placeholders::_1);
+        m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_TRIGGER].first  = std::bind(&BaseModulePlugin::reqParams, this, DasCmdPacket::CMD_PREAMP_TEST_TRIGGER, "PREAMP_TRIG");
+        m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_TRIGGER].second = std::bind(&BaseModulePlugin::rspSimple, this, std::placeholders::_1);
+    }
+    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].first                  = std::bind(&RocPlugin::reqHv,     this);
+    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].second                 = std::bind(&RocPlugin::rspHv,     this, std::placeholders::_1);
+    // CMD_HV_RECV is handled through custom processResponse()
+
     createParam("HvDelay",      asynParamFloat64, &HvDelay,     0.0); // READ - Time from HV request to first response character
     createParam("HvB2bDelay",   asynParamFloat64, &HvB2bDelay,  0.0); // READ - Time from HV request to last response character
 
-    initParams();
+    initParams(m_numChannels);
 }
 
-DasCmdPacket::CommandType RocPlugin::handleRequest(DasCmdPacket::CommandType command, double &timeout)
+asynStatus RocPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
-    switch (command) {
-    case DasCmdPacket::CMD_PREAMP_TEST_CONFIG:
-        return reqConfigPreAmp();
-    case DasCmdPacket::CMD_PREAMP_TEST_TRIGGER:
-        return reqTriggerPreAmp();
-    default:
-        return BaseModulePlugin::handleRequest(command, timeout);
-    }
-}
+    if (m_numChannels > 0 && pasynUser->reason == CmdReq) {
+        if (value == DasCmdPacket::CMD_WRITE_CONFIG ||
+            value == DasCmdPacket::CMD_READ_CONFIG ||
+            value == DasCmdPacket::CMD_READ_STATUS) {
 
-bool RocPlugin::handleResponse(const DasCmdPacket *packet)
-{
-    switch (packet->getCommand()) {
-    case DasCmdPacket::CMD_PREAMP_TEST_CONFIG:
-        return rspConfigPreAmp(packet);
-    case DasCmdPacket::CMD_PREAMP_TEST_TRIGGER:
-        return rspTriggerPreAmp(packet);
-    case DasCmdPacket::CMD_HV_SEND:
-        return asynSuccess;
-    case DasCmdPacket::CMD_HV_RECV:
-        rspHvCmd(packet);
-        return asynSuccess;
-    default:
-        return BaseModulePlugin::handleResponse(packet);
+            // Schedule sending 9 packets, our reqWriteConfig() will change the channel
+            for (uint8_t i = 0; i < 9; i++) {
+                processRequest(static_cast<DasCmdPacket::CommandType>(value));
+            }
+            return asynSuccess;
+        }
     }
+    return BaseModulePlugin::writeInt32(pasynUser, value);
 }
 
 asynStatus RocPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
@@ -180,7 +201,8 @@ asynStatus RocPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t 
     // Only serving StreamDevice - puts reason as -1
     if (pasynUser->reason == -1) {
         // StreamDevice is sending entire string => no need to buffer the request.
-        reqHvCmd(value, nChars);
+        m_hvRequest = std::string(value, nChars);
+        processRequest(DasCmdPacket::CMD_HV_SEND);
         *nActual = nChars;
         return asynSuccess;
     }
@@ -252,7 +274,105 @@ bool RocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Ve
     return false;
 }
 
-bool RocPlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel)
+bool RocPlugin::processResponse(const DasCmdPacket *packet)
+{
+    if (packet->getCommand() == DasCmdPacket::CMD_HV_RECV) {
+        return rspHv(packet);
+    }
+    return BaseModulePlugin::processResponse(packet);
+}
+
+bool RocPlugin::reqWriteConfig()
+{
+    uint32_t data[1024];
+    size_t len = packRegParams("CONFIG", data, sizeof(data), m_expectedChannel, 0);
+    if (len == 0) {
+        LOG_WARN("Skipping sending write config packet");
+        return false;
+    }
+
+    auto channel = m_expectedChannel;
+    if (channel > 0)
+        channel |= 0x10;
+
+    sendUpstream(DasCmdPacket::CMD_WRITE_CONFIG, channel, data, len);
+    return true;
+}
+
+bool RocPlugin::rspWriteConfig(const DasCmdPacket* packet)
+{
+    if (!packet->isAcknowledge())
+        return false;
+
+    auto channel = m_expectedChannel;
+    if (channel > 0)
+        channel |= 0x10;
+
+    // Turns back to 0 after last channel, works also for m_numChannels == 0
+    m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
+
+    if (packet->getCmdId() != channel) {
+        LOG_WARN("Expecting WRITE_CONFIG response for channel %u, received channel %u", channel & 0xF, packet->getCmdId() & 0xF);
+        return false;
+    }
+
+    return true;
+}
+
+bool RocPlugin::reqParamsChan(DasCmdPacket::CommandType command)
+{
+    auto channel = m_expectedChannel;
+    if (channel > 0)
+        channel |= 0x10;
+    sendUpstream(command, channel, nullptr, 0);
+    return true;
+}
+
+bool RocPlugin::rspParamsChan(const DasCmdPacket* packet, const std::string& params)
+{
+    if (!packet->isAcknowledge())
+        return false;
+
+    uint8_t wordSize = 2;
+    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
+    uint32_t section = SECTION_ID(0x0, m_expectedChannel);
+    uint32_t expectLength = ALIGN_UP(m_params[params].sizes[section]*wordSize, 4);
+    if (m_params[params].sizes.size() > 1) {
+        section = SECTION_ID(0xF, m_expectedChannel);
+        expectLength = ALIGN_UP((m_params["CONFIG"].offsets[section] + m_params["CONFIG"].sizes[section])*wordSize, 4);
+    }
+
+    auto channel = m_expectedChannel;
+    if (channel > 0)
+        channel |= 0x10;
+
+    // Turns back to 0 after last channel, works also for m_numChannels == 0
+    m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
+
+    if (packet->getCmdId() != channel) {
+        LOG_WARN("Expecting %s response for channel %u, received channel %u", params.c_str(), channel & 0xF, packet->getCmdId() & 0xF);
+        return false;
+    }
+
+    if (payloadLength != expectLength) {
+        if (channel == 0) {
+            LOG_ERROR("Received wrong %s response based on length; received %u, expected %u",
+                      params.c_str(), payloadLength, expectLength);
+        } else {
+            LOG_ERROR("Received wrong channel %u %s response based on length; received %u, expected %u",
+                      channel, params.c_str(), payloadLength, expectLength);
+        }
+        setParamsAlarm(params, epicsAlarmRead);
+        return false;
+    }
+
+    setParamsAlarm(params, epicsAlarmNone);
+    unpackRegParams(params, packet->getCmdPayload(), payloadLength, channel);
+
+    return true;
+}
+
+bool RocPlugin::rspReadConfigV54(const DasCmdPacket *packet)
 {
     uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
     if (m_version == "v54") {
@@ -274,44 +394,29 @@ bool RocPlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel)
                                     packet->getCmdPayload());
     }
 
-    return BaseModulePlugin::rspReadConfig(packet, channel);
+    return BaseModulePlugin::rspParams(packet, "CONFIG");
 }
 
-bool RocPlugin::rspStart(const DasCmdPacket *packet)
+bool RocPlugin::reqHv()
 {
-    bool ack = BaseModulePlugin::rspStart(packet);
-    if (m_version == "v54" || m_version == "v55") {
-        setIntegerParam(Acquiring, (ack ? 1 : 0));
-        callParamCallbacks();
-    }
-    return ack;
-}
+    if (m_hvRequest.empty())
+        return false;
 
-bool RocPlugin::rspStop(const DasCmdPacket *packet)
-{
-    bool ack = BaseModulePlugin::rspStop(packet);
-    if (m_version == "v54" || m_version == "v55") {
-        setIntegerParam(Acquiring, (ack ? 0 : 1));
-        callParamCallbacks();
-    }
-    return ack;
-}
-
-void RocPlugin::reqHvCmd(const char *data, uint32_t length)
-{
     uint32_t buffer[32] = { 0 }; // Initialize all to 0
-    uint32_t bufferLen = length * 2;
+    uint32_t bufferLen = m_hvRequest.length() * 2;
 
     // Every character in protocol needs to be prefixed with a zero byte when sent over OCC
-    for (uint32_t i = 0; i < length; i++) {
-        buffer[i/2] |= data[i] << (16*(i%2));
+    for (uint32_t i = 0; i < m_hvRequest.length(); i++) {
+        buffer[i/2] |= m_hvRequest.at(i) << (16*(i%2));
     }
     sendUpstream(DasCmdPacket::CMD_HV_SEND, 0, buffer, bufferLen);
 
     epicsTimeGetCurrent(&m_sendHvTime);
+    m_hvRequest.clear();
+    return true;
 }
 
-bool RocPlugin::rspHvCmd(const DasCmdPacket *packet)
+bool RocPlugin::rspHv(const DasCmdPacket *packet)
 {
     const uint32_t *payload = packet->getCmdPayload();
     epicsTimeStamp now;
@@ -340,42 +445,6 @@ bool RocPlugin::rspHvCmd(const DasCmdPacket *packet)
     m_hvBuffer.enqueue(&byte, 1);
 
     return true;
-}
-
-DasCmdPacket::CommandType RocPlugin::reqConfigPreAmp()
-{
-    uint32_t buffer[128];
-    uint32_t length = packRegParams("PREAMP_CFG", buffer, sizeof(buffer));
-
-    if (length == 0)
-        return static_cast<DasCmdPacket::CommandType>(0);
-
-    sendUpstream(DasCmdPacket::CMD_PREAMP_TEST_CONFIG, 0, buffer, length);
-    return DasCmdPacket::CMD_PREAMP_TEST_CONFIG;
-}
-
-DasCmdPacket::CommandType RocPlugin::reqTriggerPreAmp()
-{
-    uint32_t recharge = 0xFFFF;
-    uint32_t buffer[128];
-    uint32_t length = packRegParams("PREAMP_TRIG", buffer, sizeof(buffer));
-
-    if (length == 0)
-        return static_cast<DasCmdPacket::CommandType>(0);
-
-    sendUpstream(DasCmdPacket::CMD_PREAMP_TEST_TRIGGER, 0, &recharge, length);
-    sendUpstream(DasCmdPacket::CMD_PREAMP_TEST_TRIGGER, 0, buffer, length);
-    return DasCmdPacket::CMD_PREAMP_TEST_TRIGGER;
-}
-
-bool RocPlugin::rspConfigPreAmp(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
-}
-
-bool RocPlugin::rspTriggerPreAmp(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
 }
 
 void RocPlugin::createPreAmpCfgParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)

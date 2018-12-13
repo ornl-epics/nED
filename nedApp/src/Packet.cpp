@@ -229,6 +229,90 @@ std::string DasCmdPacket::getModuleIdStr() const
     return std::string(buf);
 }
 
+std::string DasCmdPacket::commandToText(DasCmdPacket::CommandType cmd)
+{
+    switch (cmd) {
+    case DasCmdPacket::CMD_READ_VERSION:
+        return "READ_VERSION";
+    case DasCmdPacket::CMD_READ_CONFIG:
+        return "READ_CONFIG";
+    case DasCmdPacket::CMD_READ_STATUS:
+        return "READ_STATUS";
+    case DasCmdPacket::CMD_READ_TEMPERATURE:
+        return "READ_TEMPERATURE";
+    case DasCmdPacket::CMD_READ_COUNTERS:
+        return "READ_COUNTERS";
+    case DasCmdPacket::CMD_RESET_COUNTERS:
+        return "RESET_COUNTERS";
+    case DasCmdPacket::CMD_WRITE_CONFIG:
+        return "WRITE_CONFIG";
+    case DasCmdPacket::CMD_WRITE_CONFIG_1:
+        return "WRITE_CONFIG_1";
+    case DasCmdPacket::CMD_WRITE_CONFIG_2:
+        return "WRITE_CONFIG_2";
+    case DasCmdPacket::CMD_WRITE_CONFIG_3:
+        return "WRITE_CONFIG_3";
+    case DasCmdPacket::CMD_WRITE_CONFIG_4:
+        return "WRITE_CONFIG_4";
+    case DasCmdPacket::CMD_WRITE_CONFIG_5:
+        return "WRITE_CONFIG_5";
+    case DasCmdPacket::CMD_WRITE_CONFIG_6:
+        return "WRITE_CONFIG_6";
+    case DasCmdPacket::CMD_WRITE_CONFIG_7:
+        return "WRITE_CONFIG_7";
+    case DasCmdPacket::CMD_WRITE_CONFIG_8:
+        return "WRITE_CONFIG_8";
+    case DasCmdPacket::CMD_WRITE_CONFIG_9:
+        return "WRITE_CONFIG_9";
+    case DasCmdPacket::CMD_WRITE_CONFIG_A:
+        return "WRITE_CONFIG_A";
+    case DasCmdPacket::CMD_WRITE_CONFIG_B:
+        return "WRITE_CONFIG_B";
+    case DasCmdPacket::CMD_WRITE_CONFIG_C:
+        return "WRITE_CONFIG_C";
+    case DasCmdPacket::CMD_WRITE_CONFIG_D:
+        return "WRITE_CONFIG_D";
+    case DasCmdPacket::CMD_WRITE_CONFIG_E:
+        return "WRITE_CONFIG_E";
+    case DasCmdPacket::CMD_WRITE_CONFIG_F:
+        return "WRITE_CONFIG";
+    case DasCmdPacket::CMD_HV_SEND:
+        return "HV_SEND";
+    case DasCmdPacket::CMD_HV_RECV:
+        return "HV_RECV";
+    case DasCmdPacket::CMD_UPGRADE:
+        return "UPGRADE";
+    case DasCmdPacket::CMD_DISCOVER:
+        return "DISCOVER";
+    case DasCmdPacket::CMD_RESET:
+        return "RESET";
+    case DasCmdPacket::CMD_RESET_LVDS:
+        return "RESET_LVDS";
+    case DasCmdPacket::CMD_TC_RESET:
+        return "T&C_RESET";
+    case DasCmdPacket::CMD_TC_RESET_LVDS:
+        return "T&C_RESET_LVDS";
+    case DasCmdPacket::CMD_START:
+        return "START";
+    case DasCmdPacket::CMD_STOP:
+        return "STOP";
+    case DasCmdPacket::CMD_PM_PULSE_RQST_ON:
+        return "PM_PULSE_ON";
+    case DasCmdPacket::CMD_PM_PULSE_RQST_OFF:
+        return "PM_PULSE_OFF";
+    case DasCmdPacket::CMD_PREAMP_TEST_CONFIG:
+        return "PREAMP_TEST_CONFIG";
+    case DasCmdPacket::CMD_PREAMP_TEST_TRIGGER:
+        return "PREAMP_TEST_TRIGGER";
+    default:
+        break;
+    }
+
+    std::stringstream s;
+    s << "command 0x" << std::hex << cmd;
+    return s.str();
+}
+
 /* ******************************* */
 /* *** DasDataPacket functions *** */
 /* ******************************* */

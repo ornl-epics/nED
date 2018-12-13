@@ -56,15 +56,13 @@ class DspPlugin : public BaseModulePlugin {
         }
 
         /**
-         * Handle time sync packets for DSP 7.1+
-         */
-        bool rspTimeSync(const DasCmdPacket *packet) override;
-
-        /**
          * Process local parameters.
          */
         asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value) override;
 
+        /**
+         * Process TimeSync responses, pass-thru the rest.
+         */
         bool processResponse(const DasCmdPacket *packet) override;
 
     private:

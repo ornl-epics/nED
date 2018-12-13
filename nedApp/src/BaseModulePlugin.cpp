@@ -21,6 +21,10 @@
 #include <sys/stat.h>
 #include <string.h>
 
+// EPICS includes
+#include <alarm.h>
+#include <osiSock.h>
+
 #define VERIFY_DISCOVER_OK      (1 << 0)
 #define VERIFY_DISCOVER_FAIL    (1 << 1)
 #define VERIFY_VERSION_OK       (1 << 2)
@@ -34,9 +38,6 @@
  */
 #define SECTION_ID(section, channel) (((channel) * 0x10) + ((section) & 0xF))
 
-const float BaseModulePlugin::NO_RESPONSE_TIMEOUT = 1.0; // Default value, user can override
-const float BaseModulePlugin::RESET_NO_RESPONSE_TIMEOUT = 5.0; // Overrides m_noResponseTimeout for CMD_RESET
-const float BaseModulePlugin::CONN_CLOSE_TIMEOUT = 0.5;
 const UnsignConvert *BaseModulePlugin::CONV_UNSIGN = new UnsignConvert();
 const Sign2sComplementConvert *BaseModulePlugin::CONV_SIGN_2COMP = new Sign2sComplementConvert();
 const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitudeConvert();
@@ -58,13 +59,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     , m_hardwareId(0)
     , m_hardwareType(hardwareType)
     , m_waitingResponse(static_cast<DasCmdPacket::CommandType>(0))
-    , m_expectedChannel(0)
-    , m_numChannels(0)
     , m_wordSize(wordSize)
-    , m_timeoutTimer(false)
-    , m_connTimer(false)
     , m_parentPlugins(parentPlugins)
-    , m_configDir("")
 {
     // DSP uses 4 byte words, everybody else 2 bytes
     assert(wordSize==2 || wordSize==4);
@@ -80,6 +76,42 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
         close(fd);
         unlink(tmpfile);
     }
+
+    // Initialize command/response handler array - 256 slots based on DasCmdPacket::CommandType
+    RequestHandler req;
+    ResponseHandler rsp;
+    for (auto i=0; i<256; i++) {
+        m_cmdHandlers.emplace_back(std::make_pair(req, rsp));
+    }
+
+    // Register some common command handlers.
+    // Other commands can be registered in module specific classes.
+    m_cmdHandlers[DasCmdPacket::CMD_DISCOVER].first         = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_DISCOVER);
+    m_cmdHandlers[DasCmdPacket::CMD_DISCOVER].second        = std::bind(&BaseModulePlugin::rspDiscover,     this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_READ_VERSION].first     = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_READ_VERSION);
+    m_cmdHandlers[DasCmdPacket::CMD_READ_VERSION].second    = std::bind(&BaseModulePlugin::rspReadVersion,  this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_START].first            = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_START);
+    m_cmdHandlers[DasCmdPacket::CMD_START].second           = std::bind(&BaseModulePlugin::rspSimple,       this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_STOP].first             = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_STOP);
+    m_cmdHandlers[DasCmdPacket::CMD_STOP].second            = std::bind(&BaseModulePlugin::rspSimple,       this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_RESET].first            = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_RESET);
+    m_cmdHandlers[DasCmdPacket::CMD_RESET].second           = std::bind(&BaseModulePlugin::rspSimple,       this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_RESET_LVDS].first       = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_RESET_LVDS);
+    m_cmdHandlers[DasCmdPacket::CMD_RESET_LVDS].second      = std::bind(&BaseModulePlugin::rspSimple,       this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_TC_RESET].first         = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_TC_RESET);
+    m_cmdHandlers[DasCmdPacket::CMD_TC_RESET].second        = std::bind(&BaseModulePlugin::rspSimple,       this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_TC_RESET_LVDS].first    = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_TC_RESET_LVDS);
+    m_cmdHandlers[DasCmdPacket::CMD_TC_RESET_LVDS].second   = std::bind(&BaseModulePlugin::rspSimple,       this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_WRITE_CONFIG].first     = std::bind(&BaseModulePlugin::reqParams,       this, DasCmdPacket::CMD_WRITE_CONFIG, "CONFIG");
+    m_cmdHandlers[DasCmdPacket::CMD_WRITE_CONFIG].second    = std::bind(&BaseModulePlugin::rspWriteConfig,  this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_READ_CONFIG].first      = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_READ_CONFIG);
+    m_cmdHandlers[DasCmdPacket::CMD_READ_CONFIG].second     = std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "CONFIG");
+    m_cmdHandlers[DasCmdPacket::CMD_READ_STATUS].first      = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_READ_STATUS);
+    m_cmdHandlers[DasCmdPacket::CMD_READ_STATUS].second     = std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "STATUS");
+    m_cmdHandlers[DasCmdPacket::CMD_READ_COUNTERS].first    = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_READ_COUNTERS);
+    m_cmdHandlers[DasCmdPacket::CMD_READ_COUNTERS].second   = std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "COUNTERS");
+    m_cmdHandlers[DasCmdPacket::CMD_READ_TEMPERATURE].first = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_READ_TEMPERATURE);
+    m_cmdHandlers[DasCmdPacket::CMD_READ_TEMPERATURE].second= std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "TEMPERATURE");
 
     createParam("Enable",       asynParamInt32, &Enable,    1);             // WRITE - Enables this module
     createParam("Features",     asynParamInt32, &Features, 0);              // READ - Features supported by this module
@@ -101,7 +133,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     createParam("Verified",     asynParamInt32, &Verified, 0);              // READ - Flag whether module type and version were verified
     createParam("CfgSection",   asynParamInt32, &CfgSection, 0x0);          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
     createParam("CfgChannel",   asynParamInt32, &CfgChannel, 0);            // WRITE - Select channel to be configured, 0 means main configuration
-    createParam("NoRspTimeout", asynParamFloat64, &NoRspTimeout, NO_RESPONSE_TIMEOUT); // WRITE - Time to wait for response
+    createParam("NoRspTimeout", asynParamFloat64, &NoRspTimeout, 0.5);      // WRITE - Time to wait for response
+    createParam("ConnValidDly", asynParamFloat64, &ConnValidDly, 1.0);      // WRITE - Time to wait before disconnecting from parent plugin(s)
 
     createParam("SaveConfig",   asynParamOctet, &SaveConfig);               // WRITE - Save configuration to file
     createParam("LoadConfig",   asynParamOctet, &LoadConfig);               // WRITE - Load configuration from file
@@ -131,18 +164,11 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     // Let connect the first time, helps diagnose start-up problems
     BasePlugin::connect(parentPlugins, MsgDasCmd);
     std::function<float(void)> checkConnCb = std::bind(&BaseModulePlugin::checkConnection, this);
-    m_connTimer.schedule(checkConnCb, CONN_CLOSE_TIMEOUT + 0.1);
+    m_connTimer.schedule(checkConnCb, 1.0);
 }
 
 BaseModulePlugin::~BaseModulePlugin()
 {}
-
-void BaseModulePlugin::setNumChannels(uint32_t n)
-{
-    assert(m_numChannels == 0); // Prevent running multiple times
-    assert(n <= 16);
-    m_numChannels = n;
-}
 
 asynStatus BaseModulePlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
 {
@@ -256,155 +282,104 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 
 bool BaseModulePlugin::processRequest(DasCmdPacket::CommandType command)
 {
-    bool enabled;
-    double timeout;
-    getDoubleParam(NoRspTimeout, &timeout);
-    getBooleanParam(Enable, enabled);
-
-    if (!enabled) {
+    if (getBooleanParam(Enable) == false) {
         LOG_WARN("Plugin not enabled");
         return false;
     }
+    if (m_hardwareId == 0) {
+        LOG_WARN("No hardware ID set");
+        return false;
+    }
 
-    if (m_waitingResponse != 0) {
-        LOG_WARN("Command '0x%02X' not allowed while waiting for 0x%02X response", command, m_waitingResponse);
+    auto req = m_cmdHandlers[static_cast<int>(command)].first;
+    auto rsp = m_cmdHandlers[static_cast<int>(command)].second;
+    if (!req) {
+        LOG_WARN("No handler registered for %s", DasCmdPacket::commandToText(command).c_str());
         setParamAlarmStatus(CmdReq, epicsAlarmWrite);
         setParamAlarmSeverity(CmdReq, epicsSevInvalid);
+        setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
         callParamCallbacks();
         return false;
     }
 
-    m_expectedChannel = 0;
-    m_cfgSectionCnt = 0; // used to correctly report CmdRsp when 0 channel succeeds but other channels don't have registers in particular section
+    if (m_cmdQueue.size() >= m_cmdQueueSize) {
+        LOG_WARN("Command queue full");
+        setParamAlarmStatus(CmdReq, epicsAlarmWrite);
+        setParamAlarmSeverity(CmdReq, epicsSevInvalid);
+        setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
+        callParamCallbacks();
+        return false;
+    }
 
-    setIntegerParam(CfgChannel, m_expectedChannel);
     setIntegerParam(CmdRsp, LAST_CMD_WAIT);
     callParamCallbacks();
 
-    do {
-        m_waitingResponse = handleRequest(command, timeout);
-
-        if (m_waitingResponse != static_cast<DasCmdPacket::CommandType>(0)) {
-            if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
-               LOG_WARN("Failed to schedule CmdRsp timeout callback");
-            setIntegerParam(CmdRsp, LAST_CMD_WAIT);
-
-            // Increase this for all packets, although only used in rspWriteConfig()
-            m_cfgSectionCnt++;
-        } else {
-            // No such section for non-channel command, are the more channels to try?
-            m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
-            if (m_expectedChannel > 0) {
-                continue;
-            }
-            setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
-        }
-        break; // Needs `break; } while(1)' because of continue
-    } while (1);
-
-    callParamCallbacks();
-
+    m_cmdQueue.push_back(command);
+    processQueuedRequests();
     return true;
 }
 
-DasCmdPacket::CommandType BaseModulePlugin::handleRequest(DasCmdPacket::CommandType command, double &timeout)
+void BaseModulePlugin::processQueuedRequests()
 {
-    int cfgSection;
-    switch (command) {
-    case DasCmdPacket::CMD_RESET:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        timeout = RESET_NO_RESPONSE_TIMEOUT;
-        return reqReset();
-    case DasCmdPacket::CMD_RESET_LVDS:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqResetLvds();
-    case DasCmdPacket::CMD_TC_RESET:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqTcReset();
-    case DasCmdPacket::CMD_TC_RESET_LVDS:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqTcResetLvds();
-    case DasCmdPacket::CMD_DISCOVER:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqDiscover();
-    case DasCmdPacket::CMD_READ_VERSION:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqReadVersion();
-    case DasCmdPacket::CMD_READ_STATUS:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqReadStatus(m_expectedChannel);
-    case DasCmdPacket::CMD_READ_STATUS_COUNTERS:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqReadStatusCounters();
-    case DasCmdPacket::CMD_RESET_STATUS_COUNTERS:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqResetStatusCounters();
-    case DasCmdPacket::CMD_READ_CONFIG:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqReadConfig(m_expectedChannel);
-    case DasCmdPacket::CMD_WRITE_CONFIG:
-        getIntegerParam(CfgSection, &cfgSection);
-        command = (DasCmdPacket::CommandType)((int)command + cfgSection);
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqWriteConfig(cfgSection, m_expectedChannel);
-    case DasCmdPacket::CMD_START:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqStart();
-    case DasCmdPacket::CMD_STOP:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqStop();
-    case DasCmdPacket::CMD_UPGRADE:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqUpgrade();
-    case DasCmdPacket::CMD_READ_TEMPERATURE:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqReadTemperature();
-    case DasCmdPacket::CMD_TIME_SYNC:
-        LOG_INFO("Sending %s command", cmd2str(command));
-        return reqTimeSync();
-    default:
-        LOG_ERROR("Skip unrecognized 0x%02X command", command);
-        return static_cast<DasCmdPacket::CommandType>(0);
+    while (m_waitingResponse == 0 && m_cmdQueue.empty() == false) {
+        auto command = m_cmdQueue.front();
+        m_cmdQueue.pop_front();
+        bool sent = m_cmdHandlers[command].first();
+        if (!sent) {
+            LOG_WARN("Failed to send %s request", DasCmdPacket::commandToText(command).c_str());
+            setParamAlarmStatus(CmdReq, epicsAlarmWrite);
+            setParamAlarmSeverity(CmdReq, epicsSevInvalid);
+            setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
+            callParamCallbacks();
+            continue;
+        }
+
+        if (m_cmdHandlers[command].second) {
+            LOG_INFO("Sent %s request, expecting response", DasCmdPacket::commandToText(command).c_str());
+            setIntegerParam(CmdRsp, LAST_CMD_WAIT);
+            callParamCallbacks();
+
+            m_waitingResponse = command;
+            scheduleTimeoutCallback(getDoubleParam(NoRspTimeout));
+            break;
+        } else {
+            LOG_INFO("Sent %s request, no response expected", DasCmdPacket::commandToText(command).c_str());
+            setIntegerParam(CmdRsp, LAST_CMD_OK);
+            callParamCallbacks();
+            // No need to prolong m_connLastActive as we're not expecting response
+        }
     }
 }
 
 void BaseModulePlugin::sendUpstream(DasCmdPacket::CommandType command, uint8_t channel, uint32_t *payload, uint32_t length)
 {
+    std::array<uint8_t, 1024> buffer;
+    DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, m_cmdVer, false, false, channel, length, payload);
+    if (!packet) {
+        LOG_ERROR("Failed to create and send packet");
+        return;
+    }
+
+    BaseModulePlugin::sendUpstream(packet);
+}
+
+void BaseModulePlugin::sendUpstream(const DasCmdPacket* packet)
+{
     if (m_hardwareId != 0) {
-        auto timeout = getDoubleParam(NoRspTimeout);
-        m_connStaleTime = epicsTime::getCurrent() + timeout + CONN_CLOSE_TIMEOUT;
+        m_connLastActive = epicsTime::getCurrent();
 
         if (!isConnected()) {
             connect(m_parentPlugins, {MsgDasCmd});
         }
 
-        std::array<uint8_t, 1024> buffer;
-        DasCmdPacket *packet = DasCmdPacket::init(buffer.data(), buffer.size(), m_hardwareId, command, m_cmdVer, false, false, channel, length, payload);
-        if (!packet) {
-            LOG_ERROR("Failed to create and send packet");
-            return;
-        }
-
+        LOG_INFO("Sending packet %s", packet->getCommandText().c_str());
         BasePlugin::sendUpstream(packet);
     }
 }
 
-void BaseModulePlugin::sendUpstream(const DasCmdPacket* packet)
-{
-    auto timeout = getDoubleParam(NoRspTimeout);
-    m_connStaleTime = epicsTime::getCurrent() + timeout + CONN_CLOSE_TIMEOUT;
-
-    if (!isConnected()) {
-        connect(m_parentPlugins, {MsgDasCmd});
-        LOG_ERROR("Connected to parent plugin");
-    }
-
-    BasePlugin::sendUpstream(packet);
-}
-
 void BaseModulePlugin::recvDownstream(const DasCmdPacketList &packetList)
 {
-    if (m_hardwareId != 0) {
+    if (getBooleanParam(Enable) == true && m_hardwareId != 0) {
         for (auto it = packetList.cbegin(); it != packetList.cend(); it++) {
             const DasCmdPacket *packet = *it;
 
@@ -419,269 +394,98 @@ void BaseModulePlugin::recvDownstream(const DasCmdPacketList &packetList)
 
 bool BaseModulePlugin::processResponse(const DasCmdPacket *packet)
 {
-    // Handle internal state machines first
-    for (auto it=m_stateMachines.begin(); it!=m_stateMachines.end(); it++) {
-        if ((*it)(packet) == true)
-            return true;
-    }
-
-    if (m_waitingResponse != packet->getCommand()) {
-        LOG_WARN("Ignoring unexpected response %s (0x%02X)", cmd2str(packet->getCommand()), packet->getCommand());
+    auto command = packet->getCommand();
+    if (m_waitingResponse != command) {
+        LOG_WARN("Ignoring unexpected response %s", packet->getCommandText().c_str());
         return false;
     }
+
     m_waitingResponse = static_cast<DasCmdPacket::CommandType>(0);
-
-    m_connStaleTime = epicsTime::getCurrent() + CONN_CLOSE_TIMEOUT;
     if (!cancelTimeoutCallback()) {
-        LOG_WARN("Received %s response after timeout", cmd2str(packet->getCommand()));
+        LOG_WARN("Received %s response after timeout", packet->getCommandText().c_str());
         return false;
     }
 
-    LOG_INFO("Received %s %s", cmd2str(packet->getCommand()), (packet->isAcknowledge() ? "ACK" : "NACK"));
+    LOG_INFO("Received %s %s", packet->getCommandText().c_str(), (packet->isAcknowledge() ? "ACK" : "NACK"));
 
-    bool ack = handleResponse(packet);
-
-    // What follows is a state machine for multiple channel commands.
-    // Until there are more channels, re-issue the same command for next
-    // channel in line. Don't update CmdRsp until the last channel or
-    // when there was an error. Bail out on first error.
-
-    // Turns back to 0 after last channel, works also for m_numChannels == 0
-    m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
-
-    if (ack == false) {
-        // Break sequence on any error, CfgChannel holds currently failed channel
-        setIntegerParam(CmdRsp, LAST_CMD_ERROR);
-    } else if (m_expectedChannel == 0) {
-        // This is response for last channel in sequence or module doesn't support channels
-        setIntegerParam(CmdRsp, LAST_CMD_OK);
-    } else {
-        bool processed = true;
-
-        switch (packet->getCommand()) {
-        case DasCmdPacket::CMD_READ_CONFIG:
-            m_waitingResponse = reqReadConfig(m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_READ_STATUS:
-            m_waitingResponse = reqReadStatus(m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG:
-            m_waitingResponse = reqWriteConfig(0, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_1:
-            m_waitingResponse = reqWriteConfig(1, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_2:
-            m_waitingResponse = reqWriteConfig(2, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_3:
-            m_waitingResponse = reqWriteConfig(3, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_4:
-            m_waitingResponse = reqWriteConfig(4, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_5:
-            m_waitingResponse = reqWriteConfig(5, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_6:
-            m_waitingResponse = reqWriteConfig(6, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_7:
-            m_waitingResponse = reqWriteConfig(7, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_8:
-            m_waitingResponse = reqWriteConfig(8, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_9:
-            m_waitingResponse = reqWriteConfig(9, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_A:
-            m_waitingResponse = reqWriteConfig(10, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_B:
-            m_waitingResponse = reqWriteConfig(11, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_C:
-            m_waitingResponse = reqWriteConfig(12, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_D:
-            m_waitingResponse = reqWriteConfig(13, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_E:
-            m_waitingResponse = reqWriteConfig(14, m_expectedChannel);
-            break;
-        case DasCmdPacket::CMD_WRITE_CONFIG_F:
-            m_waitingResponse = reqWriteConfig(15, m_expectedChannel);
-            break;
-        default:
-            setIntegerParam(CmdRsp, LAST_CMD_OK);
-            processed = false;
-            break;
-        }
-        if (processed) {
-            if (m_waitingResponse != static_cast<DasCmdPacket::CommandType>(0)) {
-                double timeout;
-                getDoubleParam(NoRspTimeout, &timeout);
-                m_connStaleTime = epicsTime::getCurrent() + timeout + CONN_CLOSE_TIMEOUT;
-                if (!scheduleTimeoutCallback(m_waitingResponse, timeout))
-                    LOG_WARN("Failed to schedule CmdRsp timeout callback");
-                setIntegerParam(CmdRsp, LAST_CMD_WAIT);
-
-                m_cfgSectionCnt++;
-            } else if (m_cfgSectionCnt > 0) {
-                setIntegerParam(CmdRsp, LAST_CMD_OK);
-            } else {
-                setIntegerParam(CmdRsp, LAST_CMD_SKIPPED);
-            }
-        }
+    auto handler = m_cmdHandlers[static_cast<int>(command)].second;
+    if (handler) {
+        setIntegerParam(CmdRsp, handler(packet) ? LAST_CMD_OK : LAST_CMD_ERROR);
+        callParamCallbacks();
     }
 
+    processQueuedRequests();
+    return true;
+}
+
+bool BaseModulePlugin::reqSimple(DasCmdPacket::CommandType command)
+{
+    sendUpstream(command);
+    return true;
+}
+
+bool BaseModulePlugin::rspSimple(const DasCmdPacket *packet)
+{
+    return packet->isAcknowledge();
+}
+
+bool BaseModulePlugin::rspWriteConfig(const DasCmdPacket *packet)
+{
+    if (!packet->isAcknowledge())
+        return false;
+
+    setIntegerParam(ConfigApplied, 1);
     callParamCallbacks();
     return true;
 }
 
-bool BaseModulePlugin::handleResponse(const DasCmdPacket *packet)
+bool BaseModulePlugin::reqParams(DasCmdPacket::CommandType command, const std::string& params)
 {
-    bool ack = false;
-    int verified;
-
-    getIntegerParam(Verified, &verified);
-
-    switch (packet->getCommand()) {
-    case DasCmdPacket::CMD_RESET:
-        return rspReset(packet);
-    case DasCmdPacket::CMD_RESET_LVDS:
-        return rspResetLvds(packet);
-    case DasCmdPacket::CMD_TC_RESET:
-        return rspTcReset(packet);
-    case DasCmdPacket::CMD_TC_RESET_LVDS:
-        return rspTcResetLvds(packet);
-    case DasCmdPacket::CMD_DISCOVER:
-        ack = rspDiscover(packet);
-        verified &= ~VERIFY_DISCOVER_MASK;
-        verified |= (ack ? VERIFY_DISCOVER_OK : VERIFY_DISCOVER_FAIL);
-        setIntegerParam(Verified, verified);
-        return ack;
-    case DasCmdPacket::CMD_READ_VERSION:
-        ack = rspReadVersion(packet);
-        verified &= ~VERIFY_VERSION_MASK;
-        verified |= (ack ? VERIFY_VERSION_OK : VERIFY_VERSION_FAIL);
-        setIntegerParam(Verified, verified);
-        return ack;
-    case DasCmdPacket::CMD_READ_CONFIG:
-        if (! ((m_expectedChannel == 0 && packet->getCmdId() == 0) || m_expectedChannel != packet->getCmdId()) ) {
-            LOG_ERROR("Expecting read config response for channel %d, got for channel %d\n", m_expectedChannel, packet->getCmdId());
-            return false;
-        }
-        return rspReadConfig(packet, m_expectedChannel);
-    case DasCmdPacket::CMD_READ_STATUS:
-        if (! ((m_expectedChannel == 0 && packet->getCmdId() == 0) || m_expectedChannel != packet->getCmdId()) ) {
-            LOG_ERROR("Expecting read status response for channel %d, got for channel %d\n", m_expectedChannel, packet->getCmdId());
-            return false;
-        }
-        return rspReadStatus(packet, m_expectedChannel);
-    case DasCmdPacket::CMD_READ_STATUS_COUNTERS:
-        return rspReadStatusCounters(packet);
-    case DasCmdPacket::CMD_RESET_STATUS_COUNTERS:
-        return rspResetStatusCounters(packet);
-    case DasCmdPacket::CMD_WRITE_CONFIG:
-    case DasCmdPacket::CMD_WRITE_CONFIG_1:
-    case DasCmdPacket::CMD_WRITE_CONFIG_2:
-    case DasCmdPacket::CMD_WRITE_CONFIG_3:
-    case DasCmdPacket::CMD_WRITE_CONFIG_4:
-    case DasCmdPacket::CMD_WRITE_CONFIG_5:
-    case DasCmdPacket::CMD_WRITE_CONFIG_6:
-    case DasCmdPacket::CMD_WRITE_CONFIG_7:
-    case DasCmdPacket::CMD_WRITE_CONFIG_8:
-    case DasCmdPacket::CMD_WRITE_CONFIG_9:
-    case DasCmdPacket::CMD_WRITE_CONFIG_A:
-    case DasCmdPacket::CMD_WRITE_CONFIG_B:
-    case DasCmdPacket::CMD_WRITE_CONFIG_C:
-    case DasCmdPacket::CMD_WRITE_CONFIG_D:
-    case DasCmdPacket::CMD_WRITE_CONFIG_E:
-    case DasCmdPacket::CMD_WRITE_CONFIG_F:
-        if (! ((m_expectedChannel == 0 && packet->getCmdId() == 0) || m_expectedChannel != packet->getCmdId()) ) {
-            LOG_ERROR("Expecting write config response for channel %d, got for channel %d\n", m_expectedChannel, packet->getCmdId());
-            return false;
-        }
-        return rspWriteConfig(packet, m_expectedChannel);
-    case DasCmdPacket::CMD_START:
-        return rspStart(packet);
-    case DasCmdPacket::CMD_STOP:
-        return rspStop(packet);
-    case DasCmdPacket::CMD_UPGRADE:
-        return rspUpgrade(packet);
-    case DasCmdPacket::CMD_READ_TEMPERATURE:
-        return rspReadTemperature(packet);
-    case DasCmdPacket::CMD_TIME_SYNC:
-        return rspTimeSync(packet);
-    default:
-        LOG_WARN("Unhandled %s response (0x%02X)", cmd2str(packet->getCommand()), packet->getCommand());
+    uint32_t data[1024];
+    size_t len = packRegParams(params, data, sizeof(data), 0, 0);
+    if (len == 0) {
+        LOG_WARN("No parameters named %s, skip sending packet", params.c_str());
         return false;
     }
+
+    sendUpstream(command, 0, data, len);
+    return true;
 }
 
-DasCmdPacket::CommandType BaseModulePlugin::reqReset()
+bool BaseModulePlugin::rspParams(const DasCmdPacket *packet, const std::string& params)
 {
-    sendUpstream(DasCmdPacket::CMD_RESET);
-    return DasCmdPacket::CMD_RESET;
-}
+    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
+    uint32_t expectLength = ALIGN_UP(m_params[params].sizes[0]*m_wordSize, 4);
+    if (m_params[params].sizes.size() > 1) {
+        expectLength = ALIGN_UP((m_params["CONFIG"].offsets[0xF] + m_params["CONFIG"].sizes[0xF])*m_wordSize, 4);
+    }
+    if (payloadLength != expectLength) {
+        LOG_ERROR("Received wrong %s response based on payload length; received %u, expected %u",
+                  packet->getCommandText().c_str(),
+                  packet->getCmdPayloadLength(),
+                  m_params[params].sizes[0]*m_wordSize);
+        setParamsAlarm(params, epicsAlarmRead);
+        return false;
+    }
 
-bool BaseModulePlugin::rspReset(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqResetLvds()
-{
-    sendUpstream(DasCmdPacket::CMD_RESET_LVDS);
-    return DasCmdPacket::CMD_RESET_LVDS;
-}
-
-bool BaseModulePlugin::rspResetLvds(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqTcReset()
-{
-    sendUpstream(DasCmdPacket::CMD_TC_RESET);
-    return DasCmdPacket::CMD_TC_RESET;
-}
-
-bool BaseModulePlugin::rspTcReset(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqTcResetLvds()
-{
-    sendUpstream(DasCmdPacket::CMD_TC_RESET_LVDS);
-    return DasCmdPacket::CMD_TC_RESET_LVDS;
-}
-
-bool BaseModulePlugin::rspTcResetLvds(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqDiscover()
-{
-    sendUpstream(DasCmdPacket::CMD_DISCOVER);
-    return DasCmdPacket::CMD_DISCOVER;
+    setParamsAlarm(params, epicsAlarmNone);
+    unpackRegParams(params, packet->getCmdPayload(), payloadLength, 0);
+    return true;
 }
 
 bool BaseModulePlugin::rspDiscover(const DasCmdPacket *packet)
 {
-    if (packet->getCmdPayloadLength() >= 1)
-        return (m_hardwareType == static_cast<DasCmdPacket::ModuleType>(packet->getCmdPayload()[0]));
-    return false;
-}
+    if (packet->getCmdPayloadLength() == 0)
+        return false;
 
-DasCmdPacket::CommandType BaseModulePlugin::reqReadVersion()
-{
-    sendUpstream(DasCmdPacket::CMD_READ_VERSION);
-    return DasCmdPacket::CMD_READ_VERSION;
+    bool typeOk = (m_hardwareType == static_cast<DasCmdPacket::ModuleType>(packet->getCmdPayload()[0]));
+
+    int verified = getIntegerParam(Verified);
+    verified &= ~VERIFY_DISCOVER_MASK;
+    verified |= (typeOk ? VERIFY_DISCOVER_OK : VERIFY_DISCOVER_FAIL);
+    setIntegerParam(Verified, verified);
+
+    return typeOk;
 }
 
 bool BaseModulePlugin::rspReadVersion(const DasCmdPacket *packet)
@@ -703,252 +507,23 @@ bool BaseModulePlugin::rspReadVersion(const DasCmdPacket *packet)
     snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
     setStringParam(FwDate, date);
 
+    bool versionOk = checkVersion(version);
+
+    int verified = getIntegerParam(Verified);
+    verified &= ~VERIFY_VERSION_MASK;
+    verified |= (versionOk ? VERIFY_VERSION_OK : VERIFY_VERSION_FAIL);
+    setIntegerParam(Verified, verified);
+
     callParamCallbacks();
 
-    return checkVersion(version);
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqReadStatus(uint8_t channel)
-{
-    // We can be called from anywhere, verify parameter
-    if (channel > m_numChannels) {
-        LOG_ERROR("Can not read channel %u configuration, module only supports %u channels", channel, m_numChannels);
-        return static_cast<DasCmdPacket::CommandType>(0);
-    }
-
-    if (m_params["STATUS"].mapping.empty()) {
-        // Detector has no status parameters
-        return static_cast<DasCmdPacket::CommandType>(0);
-    }
-
-    sendUpstream(DasCmdPacket::CMD_READ_STATUS, channel);
-    return DasCmdPacket::CMD_READ_STATUS;
-}
-
-bool BaseModulePlugin::rspReadStatus(const DasCmdPacket *packet, uint8_t channel)
-{
-    uint32_t section = SECTION_ID(0x0, channel);
-    uint32_t expectLength = ALIGN_UP(m_params["STATUS"].sizes[section]*m_wordSize, 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
-    if (payloadLength != expectLength) {
-        if (channel == 0)
-            LOG_ERROR("Received wrong READ_STATUS response based on length; "
-                      "received %u, expected %u", packet->getCmdPayloadLength(), m_params["STATUS"].sizes[section]*m_wordSize);
-        else
-            LOG_ERROR("Received wrong channel %u READ_STATUS response based on length; "
-                      "received %u, expected %u", channel, packet->getCmdPayloadLength(), m_params["STATUS"].sizes[section]*m_wordSize);
-        setParamsAlarm("STATUS", epicsAlarmRead);
-        return false;
-    }
-
-    setParamsAlarm("STATUS", epicsAlarmNone);
-    unpackRegParams("STATUS", packet->getCmdPayload(), payloadLength, channel);
-    return true;
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqReadStatusCounters()
-{
-    if (m_params["COUNTERS"].mapping.empty()) {
-        // Detector has no status parameters
-        return static_cast<DasCmdPacket::CommandType>(0);
-    }
-
-    sendUpstream(DasCmdPacket::CMD_READ_STATUS_COUNTERS);
-    return DasCmdPacket::CMD_READ_STATUS_COUNTERS;
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqResetStatusCounters()
-{
-    sendUpstream(DasCmdPacket::CMD_RESET_STATUS_COUNTERS);
-    return DasCmdPacket::CMD_RESET_STATUS_COUNTERS;
-}
-
-bool BaseModulePlugin::rspResetStatusCounters(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
-}
-
-bool BaseModulePlugin::rspReadStatusCounters(const DasCmdPacket *packet)
-{
-    uint32_t expectLength = ALIGN_UP(m_params["COUNTERS"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
-    if (payloadLength != expectLength) {
-        LOG_ERROR("Received wrong READ_STATUS_COUNTERS response based on length; received %u, expected %u",
-                  packet->getCmdPayloadLength(),
-                  m_params["COUNTERS"].sizes[0]*m_wordSize);
-        setParamsAlarm("COUNTERS", epicsAlarmRead);
-        return false;
-    }
-
-    setParamsAlarm("COUNTERS", epicsAlarmNone);
-    unpackRegParams("COUNTERS", packet->getCmdPayload(), payloadLength);
-    return true;
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqReadConfig(uint8_t channel)
-{
-    // We can be called from anywhere, verify parameter
-    if (channel > m_numChannels) {
-        LOG_ERROR("Can not read channel %u configuration, module only supports %u channels", channel, m_numChannels);
-        return static_cast<DasCmdPacket::CommandType>(0);
-    }
-
-    if (m_params["CONFIG"].mapping.empty()) {
-        // Detector has no configuration parameters
-        return static_cast<DasCmdPacket::CommandType>(0);
-    }
-
-    sendUpstream(DasCmdPacket::CMD_READ_CONFIG, channel);
-    return DasCmdPacket::CMD_READ_CONFIG;
-}
-
-bool BaseModulePlugin::rspReadConfig(const DasCmdPacket *packet, uint8_t channel)
-{
-    // Response contains registers for all sections for a selected channel or global configuration
-    uint32_t section_f = SECTION_ID(0xF, channel);
-    uint32_t expectLength = ALIGN_UP(m_wordSize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]), 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
-
-    if (payloadLength != expectLength) {
-        if (channel == 0)
-            LOG_ERROR("Received wrong READ_CONFIG response based on length; received %uB, expected %uB",
-                      packet->getCmdPayloadLength(),
-                      m_wordSize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]));
-        else
-            LOG_ERROR("Received wrong channel %u READ_CONFIG response based on length; received %uB, expected %uB",
-                      channel,
-                      packet->getCmdPayloadLength(),
-                      m_wordSize*(m_params["CONFIG"].offsets[section_f] + m_params["CONFIG"].sizes[section_f]));
-        setParamsAlarm("CONFIG", epicsAlarmRead);
-        return false;
-    }
-    setParamsAlarm("CONFIG", epicsAlarmNone);
-    unpackRegParams("CONFIG", packet->getCmdPayload(), payloadLength, channel);
-    return true;
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqWriteConfig(uint8_t section, uint8_t channel)
-{
-    uint32_t data[1024];
-    size_t len = packRegParams("CONFIG", data, sizeof(data), channel, section);
-    if (len == 0) {
-        LOG_WARN("Skipping sending write config packet");
-        return static_cast<DasCmdPacket::CommandType>(0);
-    }
-
-    DasCmdPacket::CommandType rsp;
-    switch (section) {
-        case 0x0: rsp = DasCmdPacket::CMD_WRITE_CONFIG;   break;
-        case 0x1: rsp = DasCmdPacket::CMD_WRITE_CONFIG_1; break;
-        case 0x2: rsp = DasCmdPacket::CMD_WRITE_CONFIG_2; break;
-        case 0x3: rsp = DasCmdPacket::CMD_WRITE_CONFIG_3; break;
-        case 0x4: rsp = DasCmdPacket::CMD_WRITE_CONFIG_4; break;
-        case 0x5: rsp = DasCmdPacket::CMD_WRITE_CONFIG_5; break;
-        case 0x6: rsp = DasCmdPacket::CMD_WRITE_CONFIG_6; break;
-        case 0x7: rsp = DasCmdPacket::CMD_WRITE_CONFIG_7; break;
-        case 0x8: rsp = DasCmdPacket::CMD_WRITE_CONFIG_8; break;
-        case 0x9: rsp = DasCmdPacket::CMD_WRITE_CONFIG_9; break;
-        case 0xA: rsp = DasCmdPacket::CMD_WRITE_CONFIG_A; break;
-        case 0xB: rsp = DasCmdPacket::CMD_WRITE_CONFIG_B; break;
-        case 0xC: rsp = DasCmdPacket::CMD_WRITE_CONFIG_C; break;
-        case 0xD: rsp = DasCmdPacket::CMD_WRITE_CONFIG_D; break;
-        case 0xE: rsp = DasCmdPacket::CMD_WRITE_CONFIG_E; break;
-        case 0xF: rsp = DasCmdPacket::CMD_WRITE_CONFIG_F; break;
-        default:
-            return static_cast<DasCmdPacket::CommandType>(0);
-    }
-    sendUpstream(rsp, channel, data, len);
-    return rsp;
-}
-
-bool BaseModulePlugin::rspWriteConfig(const DasCmdPacket *packet, uint8_t channel)
-{
-    if (packet->isAcknowledge()) setIntegerParam(ConfigApplied, 1);
-    int alarm = (packet->isAcknowledge() ? epicsAlarmNone : epicsAlarmWrite);
-    setParamsAlarm("CONFIG", alarm);
-    return packet->isAcknowledge();
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqStart()
-{
-    sendUpstream(DasCmdPacket::CMD_START);
-    return DasCmdPacket::CMD_START;
-}
-
-bool BaseModulePlugin::rspStart(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqStop()
-{
-    sendUpstream(DasCmdPacket::CMD_STOP);
-    return DasCmdPacket::CMD_STOP;
-}
-
-bool BaseModulePlugin::rspStop(const DasCmdPacket *packet)
-{
-    return packet->isAcknowledge();
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqUpgrade(const char *data, uint32_t size)
-{
-    if (data == 0 || size == 0) {
-        data = 0;
-        size = 0;
-    }
-    sendUpstream(DasCmdPacket::CMD_UPGRADE, 0, (uint32_t*)data, size);
-    return DasCmdPacket::CMD_UPGRADE;
-}
-
-bool BaseModulePlugin::rspUpgrade(const DasCmdPacket *packet)
-{
-    uint32_t expectLength = ALIGN_UP(m_params["UPGRADE"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
-    if (payloadLength != expectLength) {
-        LOG_ERROR("Received wrong READ_UPGRADE response based on length; received %u, expected %u",
-                  packet->getCmdPayloadLength(),
-                  m_params["UPGRADE"].sizes[0]*m_wordSize);
-        return false;
-    }
-
-    unpackRegParams("UPGRADE", packet->getCmdPayload(), payloadLength);
-    return true;
-}
-
-DasCmdPacket::CommandType BaseModulePlugin::reqReadTemperature()
-{
-    if (m_params["TEMPERATURE"].mapping.empty()) {
-        // Detector has no configuration parameters
-        return static_cast<DasCmdPacket::CommandType>(0);
-    }
-
-    sendUpstream(DasCmdPacket::CMD_READ_TEMPERATURE);
-    return DasCmdPacket::CMD_READ_TEMPERATURE;
-}
-
-bool BaseModulePlugin::rspReadTemperature(const DasCmdPacket *packet)
-{
-    uint32_t expectLength = ALIGN_UP(m_params["TEMPERATURE"].sizes[0]*m_wordSize, 4);
-    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
-    if (payloadLength != expectLength) {
-        LOG_ERROR("Received wrong READ_TEMP response based on length; received %u, expected %u",
-                  packet->getCmdPayloadLength(),
-                  m_params["TEMPERATURE"].sizes[0]*m_wordSize);
-        setParamsAlarm("TEMPERATURE", epicsAlarmNone);
-        return false;
-    }
-
-    setParamsAlarm("TEMPERATURE", epicsAlarmNone);
-    unpackRegParams("TEMPERATURE", packet->getCmdPayload(), payloadLength);
-    return true;
+    return versionOk;
 }
 
 void BaseModulePlugin::setParamsAlarm(DasCmdPacket::CommandType command, int alarm)
 {
     switch (command) {
     case DasCmdPacket::CMD_READ_STATUS:         setParamsAlarm("STATUS",      alarm); break;
-    case DasCmdPacket::CMD_READ_STATUS_COUNTERS:setParamsAlarm("COUNTERS",    alarm); break;
+    case DasCmdPacket::CMD_READ_COUNTERS:       setParamsAlarm("COUNTERS",    alarm); break;
     case DasCmdPacket::CMD_READ_CONFIG:         setParamsAlarm("CONFIG",      alarm); break;
     case DasCmdPacket::CMD_WRITE_CONFIG:        setParamsAlarm("CONFIG",      alarm); break;
     case DasCmdPacket::CMD_READ_TEMPERATURE:    setParamsAlarm("TEMPERATURE", alarm); break;
@@ -1048,26 +623,40 @@ std::string BaseModulePlugin::addr2ip(uint32_t addr)
     return std::string(buf);
 }
 
-float BaseModulePlugin::noResponseCleanup(DasCmdPacket::CommandType command)
+float BaseModulePlugin::noResponseCleanup()
 {
-    // This is called only from the Timer::expire()
+    float expire = 0.0;
+
+    // This callback called only from the Timer::expire() - must lock
     lock();
-    if (m_waitingResponse == command) {
-        LOG_WARN("Timeout waiting for %s response", cmd2str(command));
-        m_waitingResponse = static_cast<DasCmdPacket::CommandType>(0);
-        setParamsAlarm(command, epicsAlarmTimeout);
+
+    if (m_waitingResponse != 0) {
+        LOG_WARN("Timeout waiting for %s response", DasCmdPacket::commandToText(m_waitingResponse).c_str());
+        setParamsAlarm(m_waitingResponse, epicsAlarmTimeout);
         setIntegerParam(CmdRsp, LAST_CMD_TIMEOUT);
         callParamCallbacks();
+        m_waitingResponse = static_cast<DasCmdPacket::CommandType>(0);
     }
+
+    // Process any pending requests
+    processQueuedRequests();
+    if (m_waitingResponse != 0) {
+        // Scheduling m_noRspTimer must have failed in processQueueRequests()
+        // since it was called from timer callback routine.
+        // Let's fix that here.
+        expire = getDoubleParam(NoRspTimeout);
+    }
+
     unlock();
-    // Timer will auto-cancel since returning 0
-    return 0;
+
+    // Timer will auto-cancel when expire==0
+    return expire;
 }
 
-bool BaseModulePlugin::scheduleTimeoutCallback(DasCmdPacket::CommandType command, double delay)
+bool BaseModulePlugin::scheduleTimeoutCallback(double delay)
 {
-    std::function<float(void)> timeoutCb = std::bind(&BaseModulePlugin::noResponseCleanup, this, command);
-    return m_timeoutTimer.schedule(timeoutCb, delay);
+    std::function<float(void)> timeoutCb = std::bind(&BaseModulePlugin::noResponseCleanup, this);
+    return m_noRspTimer.schedule(timeoutCb, delay);
 }
 
 bool BaseModulePlugin::cancelTimeoutCallback()
@@ -1076,42 +665,19 @@ bool BaseModulePlugin::cancelTimeoutCallback()
     // expiring. The cancel() function will wait for the expire callback
     // to complete, which never happens if the port remains locked.
     unlock();
-    bool canceled = m_timeoutTimer.cancel();
+    bool canceled = m_noRspTimer.cancel();
     lock();
     return canceled;
 }
 
-void BaseModulePlugin::recalculateConfigParams()
+size_t BaseModulePlugin::packRegParams(const std::string& group, uint32_t *payload, size_t size, uint8_t channel, uint8_t section)
 {
-    // Section sizes have already been calculated in createConfigParams()
-    for (uint32_t channel = 0; channel <= m_numChannels; channel++) {
-        // Calculate section offsets
-        m_configSectionOffsets[SECTION_ID(0x1, channel)] = 0x0;
-        for (uint8_t section=0x2; section<=0xF; section++) {
-            uint32_t currSectionId = SECTION_ID(section, channel);
-            uint32_t prevSectionId = SECTION_ID(section - 1, channel);
-            m_configSectionOffsets[currSectionId] = m_configSectionOffsets[prevSectionId] + m_configSectionSizes[prevSectionId];
-            LOG_WARN("Section 0x%01X channel %u size=%u offset=%u", section, channel, m_configSectionSizes[currSectionId], m_configSectionOffsets[currSectionId]);
-        }
-    }
-}
-
-size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, size_t size, uint8_t channel, uint8_t section)
-{
-
-    // We can be called from anywhere, verify parameter
-    if (channel > m_numChannels) {
-        LOG_ERROR("Module only supports %u channels", m_numChannels);
-        return false;
-    }
-
     uint32_t payloadLength;
     if (section == 0x0) {
-        uint32_t section_f = SECTION_ID((m_params[group].sections ? 0xF : 0x0), channel);
+        uint32_t section_f = m_params[group].sections ? 0xF : 0x0;
         payloadLength = m_params[group].offsets[section_f] + m_params[group].sizes[section_f];
     } else {
-        uint32_t sectionId = SECTION_ID(section, channel);
-        payloadLength = m_params[group].sizes[sectionId];
+        payloadLength = m_params[group].sizes[section];
     }
     payloadLength *= m_wordSize;
 
@@ -1140,8 +706,7 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
         if (it->second.channel != channel) {
             continue;
         } else if (section == 0x0) {
-            uint32_t sectionId = SECTION_ID(it->second.section, it->second.channel);
-            offset += offsets[sectionId];
+            offset += offsets[it->second.section];
         } else if (section != it->second.section) {
             continue;
         }
@@ -1173,7 +738,7 @@ size_t BaseModulePlugin::packRegParams(const char *group, uint32_t *payload, siz
     return payloadLength;
 }
 
-void BaseModulePlugin::unpackRegParams(const char *group, const uint32_t *payload, size_t size, uint8_t channel)
+void BaseModulePlugin::unpackRegParams(const std::string& group, const uint32_t *payload, size_t size, uint8_t channel)
 {
     std::map<int, ParamDesc> &table = m_params[group].mapping;
     std::map<int, uint32_t> &offsets = m_params[group].offsets;
@@ -1189,7 +754,7 @@ void BaseModulePlugin::unpackRegParams(const char *group, const uint32_t *payloa
         // Handle configuration parameters
         if (it->second.section != 0) {
 
-            auto jt = offsets.find(SECTION_ID(it->second.section, it->second.channel));
+            auto jt = offsets.find(it->second.section);
             if (jt != offsets.end()) {
                 offset += jt->second;
             }
@@ -1238,8 +803,7 @@ void BaseModulePlugin::createRegParam(const char *group, const char *name, bool 
     if (m_wordSize == 2 && nBits > 16)
         length++;
 
-    uint32_t sectionId = SECTION_ID(section, channel);
-    m_params[group].sizes[sectionId] = std::max(m_params[group].sizes[sectionId], length);
+    m_params[group].sizes[section] = std::max(m_params[group].sizes[section], length);
 
     if (readonly == false)
         m_params[group].readonly = false;
@@ -1275,8 +839,7 @@ void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool re
         length++;
     length *= m_wordSize;
 
-    uint32_t sectionId = SECTION_ID(section, channel);
-    m_params[group].sizes[sectionId] = std::max(m_params[group].sizes[sectionId], length);
+    m_params[group].sizes[section] = std::max(m_params[group].sizes[section], length);
 
     if (readonly == false)
         m_params[group].readonly = false;
@@ -1284,7 +847,7 @@ void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool re
         m_params[group].sections = true;
 }
 
-void BaseModulePlugin::initParams()
+void BaseModulePlugin::initParams(uint32_t nChannels)
 {
     // Go through all groups and recalculate sections sizes and offsets
     for (auto it = m_params.begin(); it != m_params.end(); it++) {
@@ -1293,7 +856,7 @@ void BaseModulePlugin::initParams()
         std::map<int, uint32_t> &offsets = it->second.offsets;
 
         // Section sizes have already been calculated in createConfigParams()
-        for (uint32_t channel = 0; channel <= m_numChannels; channel++) {
+        for (uint32_t channel = 0; channel <= nChannels; channel++) {
 
             if (it->second.sections == true) {
                 // Calculate section offsets
@@ -1310,91 +873,6 @@ void BaseModulePlugin::initParams()
 
     setIntegerParam(Features, m_features);
     callParamCallbacks();
-}
-
-const char *BaseModulePlugin::cmd2str(const DasCmdPacket::CommandType cmd)
-{
-    switch (cmd) {
-    case DasCmdPacket::CMD_READ_VERSION:
-        return "READ_VERSION";
-    case DasCmdPacket::CMD_READ_CONFIG:
-        return "READ_CONFIG";
-    case DasCmdPacket::CMD_READ_STATUS:
-        return "READ_STATUS";
-    case DasCmdPacket::CMD_READ_TEMPERATURE:
-        return "READ_TEMPERATURE";
-    case DasCmdPacket::CMD_READ_STATUS_COUNTERS:
-        return "READ_COUNTERS";
-    case DasCmdPacket::CMD_RESET_STATUS_COUNTERS:
-        return "RESET_COUNTERS";
-    case DasCmdPacket::CMD_WRITE_CONFIG:
-        return "WRITE_CONFIG";
-    case DasCmdPacket::CMD_WRITE_CONFIG_1:
-        return "WRITE_CONFIG_1";
-    case DasCmdPacket::CMD_WRITE_CONFIG_2:
-        return "WRITE_CONFIG_2";
-    case DasCmdPacket::CMD_WRITE_CONFIG_3:
-        return "WRITE_CONFIG_3";
-    case DasCmdPacket::CMD_WRITE_CONFIG_4:
-        return "WRITE_CONFIG_4";
-    case DasCmdPacket::CMD_WRITE_CONFIG_5:
-        return "WRITE_CONFIG_5";
-    case DasCmdPacket::CMD_WRITE_CONFIG_6:
-        return "WRITE_CONFIG_6";
-    case DasCmdPacket::CMD_WRITE_CONFIG_7:
-        return "WRITE_CONFIG_7";
-    case DasCmdPacket::CMD_WRITE_CONFIG_8:
-        return "WRITE_CONFIG_8";
-    case DasCmdPacket::CMD_WRITE_CONFIG_9:
-        return "WRITE_CONFIG_9";
-    case DasCmdPacket::CMD_WRITE_CONFIG_A:
-        return "WRITE_CONFIG_A";
-    case DasCmdPacket::CMD_WRITE_CONFIG_B:
-        return "WRITE_CONFIG_B";
-    case DasCmdPacket::CMD_WRITE_CONFIG_C:
-        return "WRITE_CONFIG_C";
-    case DasCmdPacket::CMD_WRITE_CONFIG_D:
-        return "WRITE_CONFIG_D";
-    case DasCmdPacket::CMD_WRITE_CONFIG_E:
-        return "WRITE_CONFIG_E";
-    case DasCmdPacket::CMD_WRITE_CONFIG_F:
-        return "WRITE_CONFIG";
-    case DasCmdPacket::CMD_HV_SEND:
-        return "HV_SEND";
-    case DasCmdPacket::CMD_HV_RECV:
-        return "HV_RECV";
-    case DasCmdPacket::CMD_UPGRADE:
-        return "UPGRADE";
-    case DasCmdPacket::CMD_DISCOVER:
-        return "DISCOVER";
-    case DasCmdPacket::CMD_RESET:
-        return "RESET";
-    case DasCmdPacket::CMD_RESET_LVDS:
-        return "RESET_LVDS";
-    case DasCmdPacket::CMD_TC_RESET:
-        return "T&C_RESET";
-    case DasCmdPacket::CMD_TC_RESET_LVDS:
-        return "T&C_RESET_LVDS";
-    case DasCmdPacket::CMD_START:
-        return "START";
-    case DasCmdPacket::CMD_STOP:
-        return "STOP";
-    case DasCmdPacket::CMD_PM_PULSE_RQST_ON:
-        return "PM_PULSE_ON";
-    case DasCmdPacket::CMD_PM_PULSE_RQST_OFF:
-        return "PM_PULSE_OFF";
-    case DasCmdPacket::CMD_PREAMP_TEST_CONFIG:
-        return "PREAMP_TEST_CONFIG";
-    case DasCmdPacket::CMD_PREAMP_TEST_TRIGGER:
-        return "PREAMP_TEST_TRIGGER";
-    default:
-        return "<unknown>";
-    }
-}
-
-void BaseModulePlugin::registerResponseHandler(std::function<bool(const DasCmdPacket *)> &callback)
-{
-    m_stateMachines.push_back(callback);
 }
 
 bool BaseModulePlugin::checkVersion(const BaseModulePlugin::Version &version)
@@ -1459,12 +937,12 @@ void BaseModulePlugin::getModuleNames(std::list<std::string> &modules)
 float BaseModulePlugin::checkConnection()
 {
     this->lock();
-    bool cleanup = (isConnected() && m_connStaleTime < epicsTime::getCurrent());
-    if (cleanup) {
+    epicsTime expireTime = m_connLastActive + getDoubleParam(ConnValidDly);
+    if (isConnected() && expireTime < epicsTime::getCurrent()) {
         disconnect();
     }
     this->unlock();
-    return std::max(CONN_CLOSE_TIMEOUT, 0.5f) + 0.1;
+    return 1.0;
 }
 
 static bool invalidChar(char ch)
