@@ -2,6 +2,7 @@ import epics
 import pvaccess
 import re
 import os
+import time
 
 BL=os.environ['BL'] if "BL" in os.environ else "BL100"
 _pvprefix = os.environ['BL'] + ":Det:"
@@ -147,23 +148,15 @@ class Module:
                     params.append(m.group(1))
         return params
 
-    @staticmethod
-    def sendCommand(name, command):
-        if isinstance(name, Module):
-            self = name
-            if self._req_pv is None:
-                self._req_pv = getPv(self.name, "CmdReq")
-                self._rsp_pv = getPv(self.name, "CmdRsp")
-            req_pv = self._req_pv
-            rsp_pv = self._rsp_pv
-        else:
-            req_pv = getPv(name, "CmdReq")
-            rsp_pv = getPv(name, "CmdRsp")
+    def sendCommand(self, command):
+        if self._req_pv is None:
+            self._req_pv = self.getPv("CmdReq")
+            self._rsp_pv = self.getPv("CmdRsp")
 
-        req_pv.put(command)
-        while rsp_pv.get(as_string=True) == "Waiting":
+        self._req_pv.put(command)
+        while self._rsp_pv.get(as_string=True) == "Waiting":
             time.sleep(0.01)
-        return rsp_pv.get(as_string=True) != "Success"
+        return self._rsp_pv.get(as_string=True) == "Success"
 
     def saveConfig(self, name):
         pv = getPv(self.name, "SaveConfig")
@@ -178,11 +171,16 @@ class Module:
             raise UserWarning("Failed to restore {0} configuration '{1}'".format(self.name, name))
 
     def applyConfig(self, retries=3):
-        for retry in range(retries):
-            if self.sendCommand("Write config"):
-                break
+        if self.getPv("Acquiring").get() == 1:
+            cmds = [ "Stop acquisition", "Write config", "Start acquisition" ]
         else:
-            raise UserWarning("Failed to apply configuration to {0}".format(name))
+            cmds = [ "Write config" ]
+        for cmd in cmds:
+            for retry in range(retries):
+                if self.sendCommand(cmd):
+                    break
+            else:
+                raise UserWarning("Failed to apply configuration, command '{0}' failed".format(cmd))
 
 class _AutoRestore:
     """ This class is used for automatically restoring PV values when program exits.
