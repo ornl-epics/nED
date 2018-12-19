@@ -36,6 +36,8 @@ def getPv(plugin, param, wait_connect=True, timeout=1.0):
 
 def getDataChannel(event_type="Pixel"):
     """ Return a new not-connected instance of PVA channel """
+    global g_autorestore
+
     # Get PV channel name based on event type
     event_type = event_type.strip(":").title()
     pvaName = getPv("pva", event_type + "PvaName").get()
@@ -44,7 +46,7 @@ def getDataChannel(event_type="Pixel"):
     # Now make sure this channel is enabled, but keep it at its previous
     # settings after we're done with this program
     enablePv = getPv("pva", event_type + "Enable")
-    autorestore.save(enablePv)
+    g_autorestore.save(enablePv)
     enablePv.put(1)
 
     return ch
@@ -105,8 +107,9 @@ class Module:
             return pv.get(as_string=True)
         return pv.get()
 
-    def getPv(self, param):
+    def getPv(self, param, autorestore=False):
         global _verbose
+        global g_autorestore
 
         # User is likely asking for one of the registers and is likely to ask
         # for others in the same group of 'Config', 'Status', etc.
@@ -123,7 +126,10 @@ class Module:
                     break
 
         # Now select the requested one and make sure it's connected
-        return getPv(self.name, param, wait_connect=True)
+        pv = getPv(self.name, param, wait_connect=True)
+        if pv and autorestore:
+            g_autorestore.save(pv)
+        return pv
 
     def getParams(self, typ=None):
         if typ:
@@ -154,6 +160,7 @@ class Module:
             self._rsp_pv = self.getPv("CmdRsp")
 
         self._req_pv.put(command)
+        time.sleep(0.001)
         while self._rsp_pv.get(as_string=True) == "Waiting":
             time.sleep(0.01)
         return self._rsp_pv.get(as_string=True) == "Success"
@@ -200,14 +207,15 @@ class _AutoRestore:
         for pv,value in self._pvs.iteritems():
             pv.put(value)
 
-    def save(self, pv, restore_value=None):
+    def save(self, pv, restore_value=None, init_only=True):
         """ Saves a value to be restored on shutdown.
 
         If restore_value is not provided, current value from PV is used instead.
         This method can be called many times for same PV with new values if so
         desired.
         """
-        if restore_value is None:
-            restore_value = pv.get()
-        self._pvs[pv] = restore_value
-autorestore = _AutoRestore()
+        if not init_only or pv not in self._pvs:
+            if restore_value is None:
+                restore_value = pv.get()
+            self._pvs[pv] = restore_value
+g_autorestore = _AutoRestore()
