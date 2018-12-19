@@ -61,20 +61,20 @@ namespace Event {
             uint32_t position;  // LPSD ROC position index
             uint16_t sample_a1;
             uint16_t sample_b1;
-            uint16_t sample_b2;
             uint16_t sample_a2;
+            uint16_t sample_b2;
         };
 
         /**
-         * Structure representing RAW mode data packet
+         * Structure representing VERBOSE mode data packet
          */
         struct __attribute((__packed__)) Verbose {
             uint32_t tof;       // Regular format
             uint32_t position;  // LPSD ROC position index
             uint16_t sample_a1;
             uint16_t sample_b1;
-            uint16_t sample_b2;
             uint16_t sample_a2;
+            uint16_t sample_b2;
             uint32_t pixelid;
         };
 
