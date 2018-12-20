@@ -7,3 +7,8 @@ record(stringin, "$(P)PluginId")
 {
     field(VAL,  "AcpcFemPlugin_v22")
 }
+
+record(mbbi, "$(P)HwType")
+{
+    field(TESV, "NO_ALARM")
+}

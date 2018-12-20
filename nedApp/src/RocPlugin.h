@@ -60,7 +60,6 @@ class RocPlugin : public BaseModulePlugin {
         epicsTimeStamp m_sendHvTime;
 
     private: // variables
-        std::string m_version;                              //!< Version string as passed to constructor
         Fifo<char> m_hvBuffer;                              //!< FIFO buffer for data received from HV module but not yet processed
         std::string m_hvRequest{""};                        //!< When non empty, a HV request to be sent
         uint32_t m_numChannels{0};                          //!< Maximum number of channels supported by module
@@ -100,32 +99,6 @@ class RocPlugin : public BaseModulePlugin {
          * Receive string/byte data to PVs
          */
         asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual) override;
-
-        /**
-         * Try to parse the ROC version response packet an populate the structure.
-         *
-         * Function will parse all known ROC version responses and populate the
-         * version structure. If the function returns false, it does not recognize
-         * the response.
-         *
-         * All ROC boards except for v5.4 have the same response. v5.4 adds an extra
-         * vendor field which the function disregards.
-         *
-         * @param[in] packet to be parsed
-         * @param[out] version structure to be populated
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see RocPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
 
     private: // functions
 

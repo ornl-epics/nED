@@ -9,76 +9,27 @@
 
 #include "ArocPlugin.h"
 #include "Log.h"
-#include "Common.h"
 
 EPICS_REGISTER_PLUGIN(ArocPlugin, 4, "Port name", string, "Dispatcher port name", string, "Hw & SW version", string, "Config dir", string);
 
-/**
- * AROC version response format
- */
-struct RspReadVersion {
-#ifdef BITFIELD_LSB_FIRST
-    unsigned hw_revision:8;     //!< Board revision number
-    unsigned hw_version:8;      //!< Board version number
-    unsigned fw_revision:8;     //!< Firmware revision number
-    unsigned fw_version:8;      //!< Firmware version number
-    unsigned year:16;           //!< Year
-    unsigned day:8;             //!< Day
-    unsigned month:8;           //!< Month
-#else
-#error Missing RspReadVersion declaration
-#endif // BITFIELD_LSB_FIRST
-};
-
-ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_AROC, 2)
-    , m_version(version)
+ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
 {
-    if (m_version == "v22") {
-        setIntegerParam(Supported, 1);
+    std::string version(version_);
+    if (version == "v22") {
         createParams_v22();
-        setExpectedVersion(2, 2);
-    } else if (m_version == "v23") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v23") {
         createParams_v23();
-        setExpectedVersion(2, 3);
-    } else if (m_version == "v24") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v24") {
         createParams_v24();
-        setExpectedVersion(2, 4);
-    } else if (m_version == "v25") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v25") {
         createParams_v25();
-        setExpectedVersion(2, 5);
-    } else if (m_version == "v255255") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v255255") {
         createParams_v255255();
-        setExpectedVersion(255, 255);
     } else {
-        setIntegerParam(Supported, 0);
-        LOG_ERROR("Unsupported AROC version '%s'", version);
+        LOG_ERROR("Unsupported AROC version '%s'", version.c_str());
+        return;
     }
 
     initParams();
-}
-
-bool ArocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-{
-    if (packet->getCmdPayloadLength() != sizeof(RspReadVersion))
-        return false;
-
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion *>(packet->getCmdPayload());
-
-    version.hw_version  = response->hw_version;
-    version.hw_revision = response->hw_revision;
-    version.hw_year     = 0;
-    version.hw_month    = 0;
-    version.hw_day      = 0;
-    version.fw_version  = response->fw_version;
-    version.fw_revision = response->fw_revision;
-    version.fw_year     = HEX_BYTE_TO_DEC(response->year >> 8) * 100 + HEX_BYTE_TO_DEC(response->year);
-    version.fw_month    = HEX_BYTE_TO_DEC(response->month);
-    version.fw_day      = HEX_BYTE_TO_DEC(response->day);
-
-    return true;
 }

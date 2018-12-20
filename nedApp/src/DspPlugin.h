@@ -21,8 +21,6 @@ class TimeSync;
  */
 class DspPlugin : public BaseModulePlugin {
     private: // structures and definitions
-        static const double DSP_RESPONSE_TIMEOUT;           //!< Default DSP response timeout, in seconds
-        std::string m_version;
         std::unique_ptr<TimeSync> m_timeSync;
 
     public:
@@ -37,23 +35,6 @@ class DspPlugin : public BaseModulePlugin {
          * @param[in] version Configured module version, must match the actual version
          */
         DspPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
-
-        /**
-         * Try to parse the DSP version response packet an populate the structure.
-         *
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see DspPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
 
         /**
          * Process local parameters.

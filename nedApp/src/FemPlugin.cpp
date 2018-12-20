@@ -13,29 +13,11 @@
 
 EPICS_REGISTER_PLUGIN(FemPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
 
-struct RspReadVersion {
-#ifdef BITFIELD_LSB_FIRST
-    unsigned hw_revision:8;     // Board revision number
-    unsigned hw_version:8;      // Board version number
-    unsigned hw_year:16;        // Board year
-    unsigned hw_day:8;          // Board day
-    unsigned hw_month:8;        // Board month
-    unsigned fw_revision:8;     // Firmware revision number
-    unsigned fw_version:8;      // Firmware version number
-    unsigned fw_year:16;        // Firmware year
-    unsigned fw_day:8;          // Firmware day
-    unsigned fw_month:8;        // Firmware month
-#else
-#error Missing RspReadVersion declaration
-#endif // BITFIELD_LSB_FIRST
-};
-
 // GCC specific - but very efficient 1 CPU cycle
 #define BYTE_SWAP(a) __builtin_bswap32(a)
 
-FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_FEM, 2)
-    , m_version(version)
+FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
 {
     createParam("Upg:File",     asynParamOctet, &UpgradeFile);             // WRITE - Path to the firmware file to be programmed
     createParam("Upg:ChunkSize",asynParamInt32, &UpgradeChunkSize, 256);   // WRITE - Maximum payload size for split program file transfer
@@ -54,51 +36,33 @@ FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char
 
     m_remoteUpgrade.status = RemoteUpgrade::NOT_SUPPORTED;
 
-    if (m_version == "v32") {
-        setIntegerParam(Supported, 1);
+    std::string version(version_);
+    if (version == "v32") {
         createParams_v32();
-        setExpectedVersion(3, 2);
-    } else if (m_version == "v34") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v34") {
         createParams_v32();
-        setExpectedVersion(3, 4);
-    } else if (m_version == "v35") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v35") {
         createParams_v35();
-        setExpectedVersion(3, 5);
-    } else if (m_version == "v36") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v36") {
         createParams_v36();
-        setExpectedVersion(3, 6);
-    } else if (m_version == "v37") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v37") {
         createParams_v37();
-        setExpectedVersion(3, 7);
-    } else if (m_version == "v38") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v38") {
         createParams_v38();
-        setExpectedVersion(3, 8);
-    } else if (m_version == "v39") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v39") {
         createParams_v39();
         remoteUpgradeSM(RemoteUpgrade::INIT);
         m_cmdHandlers[DasCmdPacket::CMD_UPGRADE].first = std::bind(&FemPlugin::reqUpgrade, this);
         m_cmdHandlers[DasCmdPacket::CMD_UPGRADE].second = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
-        setExpectedVersion(3, 9, 10, 9);
-    } else if (m_version == "v310") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v310") {
         createParams_v310();
         remoteUpgradeSM(RemoteUpgrade::INIT);
         m_cmdHandlers[DasCmdPacket::CMD_UPGRADE].first = std::bind(&FemPlugin::reqUpgrade, this);
         m_cmdHandlers[DasCmdPacket::CMD_UPGRADE].second = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
-        setExpectedVersion(3, 10, 10, 9);
-    } else if (m_version == "v320") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v320") {
         createParams_v320();
-        setExpectedVersion(3, 20);
     } else {
-        setIntegerParam(Supported, 0);
-        LOG_ERROR("Unsupported FEM version '%s'", version);
+        LOG_ERROR("Unsupported FEM version '%s'", version.c_str());
         return;
     }
     setStringParam(UpgradeErrorStr, "");
@@ -139,27 +103,6 @@ bool FemPlugin::reqUpgrade()
     uint32_t size = m_remoteUpgrade.sendBuf.size();
     char* data = (size > 0 ? m_remoteUpgrade.sendBuf.data() : nullptr);
     sendUpstream(DasCmdPacket::CMD_UPGRADE, 0, (uint32_t*)data, size);
-    return true;
-}
-
-bool FemPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-{
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
-
-    if (packet->getCmdPayloadLength() != sizeof(RspReadVersion)) {
-        return false;
-    }
-
-    version.hw_version  = response->hw_version;
-    version.hw_revision = response->hw_revision;
-    version.hw_year     = HEX_BYTE_TO_DEC(response->hw_year >> 8) * 100 + HEX_BYTE_TO_DEC(response->hw_year);
-    version.hw_month    = HEX_BYTE_TO_DEC(response->fw_month);
-    version.hw_day      = HEX_BYTE_TO_DEC(response->hw_day);
-    version.fw_version  = response->fw_version;
-    version.fw_revision = response->fw_revision;
-    version.fw_year     = HEX_BYTE_TO_DEC(response->fw_year >> 8) * 100 + HEX_BYTE_TO_DEC(response->fw_year);
-    version.fw_month    = HEX_BYTE_TO_DEC(response->fw_month);
-    version.fw_day      = HEX_BYTE_TO_DEC(response->fw_day);
     return true;
 }
 

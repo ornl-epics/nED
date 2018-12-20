@@ -29,6 +29,7 @@ def parse_one(type, params_str, desc_str, extra_str):
         'temp':       [ "name", "offset", "width", "bit_offset" ],
         'preampcfg':  [ "name", "offset", "width", "bit_offset", "default" ],
         'preamptrig': [ "name", "offset", "width", "bit_offset", "default" ],
+        'version':    [ "name", "readonly", "offset", "width", "bit_offset", "default", "convert" ],
     }
 
     params = map(lambda x: x.strip(" \t\"\'"), params_str.split(","))
@@ -110,6 +111,7 @@ def parse_src_file(path, verbose=False):
         'temp':       re.compile("createTempParam\s*\((.*)\);(.*)$"),
         'preampcfg':  re.compile("createPreAmpCfgParam\s*\((.*)\);(.*)$"),
         'preamptrig': re.compile("createPreAmpTrigParam\s*\((.*)\);(.*)$"),
+        'version':    re.compile("createRegParam\s*\(\"VERSION\", *(.*)\);(.*)$"),
     }
     re_desc = re.compile("\s*//\s*([^\(]*)(.*)$")
 
@@ -374,7 +376,7 @@ def generate_db_record(param, outfile):
     outfile.write("}\n")
 
 def main():
-    usage = ("%prog -i <input .cpp file> -o <outdir>\n")
+    usage = ("%prog -i <input .cpp file> -o <outfile>\n")
 
     parse = OptionParser(usage=usage, version='%prog '+str(__version__))
     parse.add_option("-i", dest="infile",  default=None, help="Input .cpp file")

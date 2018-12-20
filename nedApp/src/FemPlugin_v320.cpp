@@ -22,6 +22,17 @@
 
 void FemPlugin::createParams_v320()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
+    createRegParam("VERSION", "HwYear", true, 1, 16,  0, 0, CONV_HEX2DEC); // Hardware year
+    createRegParam("VERSION", "HwDay",  true, 2,  8,  0, 0, CONV_HEX2DEC); // Hardware day
+    createRegParam("VERSION", "HwMonth",true, 2,  8,  8, 0, CONV_HEX2DEC); // Hardware month
+    createRegParam("VERSION", "FwRev",  true, 3,  8,  0); // Firmware revision                  (low:19,high:21)
+    createRegParam("VERSION", "FwVer",  true, 3,  8,  8); // Firmware version                   (low:2,high:4)
+    createRegParam("VERSION", "FwYear", true, 4, 16,  0, 0, CONV_HEX2DEC); // Firmware year
+    createRegParam("VERSION", "FwDay",  true, 5,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 5,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+
     // *************** Counter parameters ***************
 
 //     BLXXX:Det:FemXX:| sig name           |                 | EPICS record description | (bi and mbbi description)

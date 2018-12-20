@@ -42,3 +42,7 @@ record(calcout, "$(P)CountersRefreshInit")
     field(PINI, "YES")
 }
 
+record(mbbi, "$(P)HwType")
+{
+    field(TVSV, "NO_ALARM")
+}

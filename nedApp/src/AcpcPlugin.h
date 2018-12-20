@@ -16,9 +16,6 @@
  * Plugin for ACPC module.
  */
 class AcpcPlugin : public BaseModulePlugin {
-    private: // variables
-        std::string m_version;                              //!< Version string as passed to constructor
-
     public: // functions
 
         /**
@@ -31,29 +28,6 @@ class AcpcPlugin : public BaseModulePlugin {
          * @param[in] version ROC HW&SW version, ie. V5_50
          */
         AcpcPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
-
-        /**
-         * Try to parse the ACPC version response packet an populate the structure.
-         *
-         * Function will parse all known ACPC version responses and populate the
-         * version structure. If the function returns false, it does not recognize
-         * the response.
-         *
-         * @param[in] packet to be parsed
-         * @param[out] version structure to be populated
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see AcpcPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
 
     private: // functions
         /**

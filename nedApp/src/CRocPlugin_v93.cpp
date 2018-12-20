@@ -17,6 +17,14 @@
 
 void CRocPlugin::createParams_v93()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
+    createRegParam("VERSION", "FwRev",  true, 1,  8,  0); // Firmware revision                  (low:2,high:4)
+    createRegParam("VERSION", "FwVer",  true, 1,  8,  8); // Firmware version                   (low:8,high:10)
+    createRegParam("VERSION", "FwYear", true, 2, 16,  0); // Firmware year
+    createRegParam("VERSION", "FwDay",  true, 3,  8,  0); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 3,  8,  8); // Firmware month
+
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("Y1:Discrim",           0x0,  1,  0); // Discriminator hit on Y1      (0=no hit,1=hit)
     createStatusParam("Y2:Discrim",           0x0,  1,  1); // Discriminator hit on Y2      (0=no hit,1=hit)

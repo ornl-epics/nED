@@ -91,7 +91,7 @@ class BaseModulePlugin : public BasePlugin {
             uint8_t section;        //!< Section name, valid values [0x0..0xF] (configuration params only)
             uint8_t channel;        //!< Channel number in range [1..8], 0 means global configuration (configuration params only)
             int32_t initVal;        //!< Initial value after object is created or configuration reset is being requested (configuration params only)
-            std::shared_ptr<const BaseConvert> convert; //!< Selected from/to raw value converter
+            const BaseConvert* convert; //!< Selected from/to raw value converter
         };
 
         /**
@@ -137,11 +137,11 @@ class BaseModulePlugin : public BasePlugin {
         static const UnsignConvert *CONV_UNSIGN;
         static const Sign2sComplementConvert *CONV_SIGN_2COMP;
         static const SignMagnitudeConvert *CONV_SIGN_MAGN;
+        static const Hex2DecConvert *CONV_HEX2DEC;
 
     protected: // variables
         uint32_t m_features;
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
-        DasCmdPacket::ModuleType m_hardwareType;        //!< Hardware type
         std::map<std::string, ParamTable> m_params;     //!< Maps of exported parameters
         DasCmdPacket::CommandType m_waitingResponse;    //!< Expected response code while waiting for response or timeout event, 0 otherwise
         uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
@@ -173,7 +173,6 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
          * @param[in] configDir Folder to store module configurations.
-         * @param[in] hardwareType Type of hardware module.
          * @param[in] wordSize Number of bytes describing single register word
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
          * @param[in] numParams The number of parameters that the derived class supports.
@@ -181,8 +180,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
         BaseModulePlugin(const char *portName, const char *parentPlugins, const char *configDir,
-                         DasCmdPacket::ModuleType hardwareType, uint8_t wordSize,
-                         int interfaceMask=0, int interruptMask=0);
+                         uint8_t wordSize, int interfaceMask=0, int interruptMask=0);
 
         /**
          * Abstract destructor
@@ -336,26 +334,6 @@ class BaseModulePlugin : public BasePlugin {
         bool rspWriteConfig(const DasCmdPacket* packet);
 
         /**
-         * Default handler for DISCOVER response.
-         *
-         * Only check for timeout.
-         *
-         * @param[in] packet with response to DISCOVER
-         * @return true if timeout has not yet expired, false otherwise.
-         */
-        bool rspDiscover(const DasCmdPacket *packet);
-
-        /**
-         * Default handler for READ_VERSION response.
-         *
-         * Only check for timeout.
-         *
-         * @param[in] packet with response to READ_VERSION
-         * @return true if timeout has not yet expired, false otherwise.
-         */
-        bool rspReadVersion(const DasCmdPacket *packet);
-
-        /**
          * Sets all parameters corresponding to command with the same alarm.
          */
         void setParamsAlarm(DasCmdPacket::CommandType command, int alarm);
@@ -506,44 +484,6 @@ class BaseModulePlugin : public BasePlugin {
         bool cancelTimeoutCallback();
 
         /**
-         * Try to parse READ_VERSION packet payload into a Version structure.
-         *
-         * There's no common version response payload. Every module uses
-         * different format. It's up to the derived class to provide proper
-         * parsing.
-         * Derived classes implement this function as static so it can be used
-         * withouth object context (ie. in DiscoverPlugin). However C++ prohibits
-         * overloading static functions, so this member function has an extra M
-         * at the end.
-         *
-         * @param[in] packet to be parsed
-         * @param[out] version structure to be populated
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        virtual bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version) = 0;
-
-        /**
-         * Compare version returned from the module to the expected one.
-         *
-         * Only non-zero fields in expected version are compared.
-         *
-         * @return true when they match, false otherwise.
-         */
-        virtual bool checkVersion(const BaseModulePlugin::Version &version);
-
-        /**
-         * Sets the version to be matched against one returned from the module.
-         *
-         * Only non-zero fields in expected version are compared.
-         *
-         * @param[in] fw_version Firmware version number
-         * @param[in] fw_revision Firmware revision number
-         * @param[in] hw_version Hardware version number
-         * @param[in] hw_revision Hardware revision number
-         */
-        virtual void setExpectedVersion(uint8_t fw_version, uint8_t fw_revision, uint8_t hw_version=0, uint8_t hw_revision=0);
-
-        /**
          * Changes the LVDS command protocol format that this module is using.
          *
          * New LVDS protocol standardizes responses. It makes ACK/NACK responses
@@ -609,6 +549,23 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] conv selects from/to raw value converter
          */
         void createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, const BaseConvert *conv=CONV_UNSIGN);
+
+        /**
+         * Convenience function that removes channel and section parameters from its signature.
+         *
+         * @param[in] group of registers, like CONFIG, STATUS etc.
+         * @param[in] name of the register in software table
+         * @param[in] readonly flags whether the register value can be modified in software
+         * @param[in] offset is a word offset from the beginning of this group, word being 2 or 4 depending on the device
+         * @param[in] nBits tells number of bits used by device register
+         * @param[in] shift tells bit offset within word
+         * @param[in] value represents initial value for writable registers
+         * @param[in] conv selects from/to raw value converter
+         */
+        void createRegParam(const char *group, const char *name, bool readonly, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, const BaseConvert *conv=CONV_UNSIGN)
+        {
+            createRegParam(group, name, readonly, 0, 0, offset, nBits, shift, value, conv);
+        }
 
         /**
          * Link existing parameter to upgrade parameters table.
@@ -734,19 +691,6 @@ class BaseModulePlugin : public BasePlugin {
         int CmdReq;         //!< Command to plugin, like initialize the module, read configuration, verify module version etc.
         int CmdRsp;         //!< Last command response status
         int HwId;           //!< Hw ID that this object is controlling
-        int HwType;         //!< Configured module type
-        int HwVer;          //!< Module hardware version
-        int HwRev;          //!< Module hardware revision
-        int HwExpectVer;    //!< Module hardware version
-        int HwExpectRev;    //!< Module hardware revision
-        int HwDate;         //!< Module hardware date
-        int FwVer;          //!< Module firmware version
-        int FwRev;          //!< Module firmware revision
-        int FwExpectVer;    //!< Module firmware version
-        int FwExpectRev;    //!< Module firmware revision
-        int FwDate;         //!< Module firmware date
-        int Supported;      //!< Flag whether module is supported
-        int Verified;       //!< Hardware id, version and type all verified
         int CfgSection;     //!< Selected configuration section to be written
         int CfgChannel;     //!< Selected channel to be configured
         int NoRspTimeout;   //!< Time to wait for response

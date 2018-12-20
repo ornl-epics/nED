@@ -25,13 +25,6 @@
 #include <alarm.h>
 #include <osiSock.h>
 
-#define VERIFY_DISCOVER_OK      (1 << 0)
-#define VERIFY_DISCOVER_FAIL    (1 << 1)
-#define VERIFY_VERSION_OK       (1 << 2)
-#define VERIFY_VERSION_FAIL     (1 << 3)
-#define VERIFY_DISCOVER_MASK    (VERIFY_DISCOVER_OK | VERIFY_DISCOVER_FAIL)
-#define VERIFY_VERSION_MASK     (VERIFY_VERSION_OK  | VERIFY_VERSION_FAIL)
-
 /**
  * Return a unique id for section and channel pair that can be used to
  * identify the pair in m_configSectionSizes and m_configSectionOffsets
@@ -41,6 +34,7 @@
 const UnsignConvert *BaseModulePlugin::CONV_UNSIGN = new UnsignConvert();
 const Sign2sComplementConvert *BaseModulePlugin::CONV_SIGN_2COMP = new Sign2sComplementConvert();
 const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitudeConvert();
+const Hex2DecConvert *BaseModulePlugin::CONV_HEX2DEC = new Hex2DecConvert();
 
 /**
  * This is a global map from hardwareId to plugin name. Whenever a module is
@@ -52,12 +46,11 @@ static std::map<uint32_t, std::string> g_namesMap;
 static epicsMutex g_namesMapMutex;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugins,
-                                   const char *configDir, DasCmdPacket::ModuleType hardwareType,
-                                   uint8_t wordSize, int interfaceMask, int interruptMask)
+                                   const char *configDir, uint8_t wordSize,
+                                   int interfaceMask, int interruptMask)
     : BasePlugin(portName, 0, interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
     , m_features(0)
     , m_hardwareId(0)
-    , m_hardwareType(hardwareType)
     , m_waitingResponse(static_cast<DasCmdPacket::CommandType>(0))
     , m_wordSize(wordSize)
     , m_parentPlugins(parentPlugins)
@@ -87,9 +80,9 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     // Register some common command handlers.
     // Other commands can be registered in module specific classes.
     m_cmdHandlers[DasCmdPacket::CMD_DISCOVER].first         = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_DISCOVER);
-    m_cmdHandlers[DasCmdPacket::CMD_DISCOVER].second        = std::bind(&BaseModulePlugin::rspDiscover,     this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_DISCOVER].second        = std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "DISCOVER");
     m_cmdHandlers[DasCmdPacket::CMD_READ_VERSION].first     = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_READ_VERSION);
-    m_cmdHandlers[DasCmdPacket::CMD_READ_VERSION].second    = std::bind(&BaseModulePlugin::rspReadVersion,  this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_READ_VERSION].second    = std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "VERSION");
     m_cmdHandlers[DasCmdPacket::CMD_START].first            = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_START);
     m_cmdHandlers[DasCmdPacket::CMD_START].second           = std::bind(&BaseModulePlugin::rspSimple,       this, std::placeholders::_1);
     m_cmdHandlers[DasCmdPacket::CMD_STOP].first             = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_STOP);
@@ -118,19 +111,6 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
     createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasCmdPacket::CommandType)
     createParam("HwId",         asynParamOctet, &HwId);                     // WRITE - Connected module hardware id
-    createParam("HwType",       asynParamInt32, &HwType, hardwareType);     // READ - Module type                    (see DasCmdPacket::ModuleType)
-    createParam("HwDate",       asynParamOctet, &HwDate);                   // READ - Module hardware date
-    createParam("HwVer",        asynParamInt32, &HwVer);                    // READ - Module hardware version
-    createParam("HwRev",        asynParamInt32, &HwRev);                    // READ - Module hardware revision
-    createParam("HwExpectVer",  asynParamInt32, &HwExpectVer);              // READ - Module expected hardware version
-    createParam("HwExpectRev",  asynParamInt32, &HwExpectRev);              // READ - Module expected hardware revision
-    createParam("FwDate",       asynParamOctet, &FwDate);                   // READ - Module firmware date
-    createParam("FwVer",        asynParamInt32, &FwVer);                    // READ - Module firmware version
-    createParam("FwRev",        asynParamInt32, &FwRev);                    // READ - Module firmware revision
-    createParam("FwExpectVer",  asynParamInt32, &FwExpectVer);              // READ - Module expected firmware version
-    createParam("FwExpectRev",  asynParamInt32, &FwExpectRev);              // READ - Module expected firmware revision
-    createParam("Supported",    asynParamInt32, &Supported);                // READ - Is requested module version supported (0=not supported,1=supported)
-    createParam("Verified",     asynParamInt32, &Verified, 0);              // READ - Flag whether module type and version were verified
     createParam("CfgSection",   asynParamInt32, &CfgSection, 0x0);          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
     createParam("CfgChannel",   asynParamInt32, &CfgChannel, 0);            // WRITE - Select channel to be configured, 0 means main configuration
     createParam("NoRspTimeout", asynParamFloat64, &NoRspTimeout, 0.5);      // WRITE - Time to wait for response
@@ -148,6 +128,9 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     createParam("ConfigSaved",  asynParamInt32, &ConfigSaved, 0);           // WRITE - Flag =1 when all the PVs are in config control
     createParam("ConfigApplied",asynParamInt32, &ConfigApplied, 0);         // WRITE - Flag =1 when all PVs are synchronized to module
 
+    createRegParam("DISCOVER", "HwType",    true, 0, 0, 0,  8, 0, 0);
+    createRegParam("DISCOVER", "DiscFill",  true, 0, 0, 0, 24, 8, 0);
+
     setIntegerParam(CmdRsp, LAST_CMD_NONE);
 
     std::list<std::string> configs = getListConfigs();
@@ -162,9 +145,11 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     callParamCallbacks();
 
     // Let connect the first time, helps diagnose start-up problems
-    BasePlugin::connect(parentPlugins, MsgDasCmd);
-    std::function<float(void)> checkConnCb = std::bind(&BaseModulePlugin::checkConnection, this);
-    m_connTimer.schedule(checkConnCb, 1.0);
+    if (std::string(parentPlugins).empty() == false) {
+        BasePlugin::connect(parentPlugins, MsgDasCmd);
+        std::function<float(void)> checkConnCb = std::bind(&BaseModulePlugin::checkConnection, this);
+        m_connTimer.schedule(checkConnCb, 1.0);
+    }
 }
 
 BaseModulePlugin::~BaseModulePlugin()
@@ -192,7 +177,6 @@ asynStatus BaseModulePlugin::writeOctet(asynUser *pasynUser, const char *value, 
 
         m_hardwareId = hardwareId;
         setStringParam(HwId, addr2ip(hardwareId));
-        setIntegerParam(Verified, 0);
         callParamCallbacks();
         return asynSuccess;
     }
@@ -473,52 +457,6 @@ bool BaseModulePlugin::rspParams(const DasCmdPacket *packet, const std::string& 
     return true;
 }
 
-bool BaseModulePlugin::rspDiscover(const DasCmdPacket *packet)
-{
-    if (packet->getCmdPayloadLength() == 0)
-        return false;
-
-    bool typeOk = (m_hardwareType == static_cast<DasCmdPacket::ModuleType>(packet->getCmdPayload()[0]));
-
-    int verified = getIntegerParam(Verified);
-    verified &= ~VERIFY_DISCOVER_MASK;
-    verified |= (typeOk ? VERIFY_DISCOVER_OK : VERIFY_DISCOVER_FAIL);
-    setIntegerParam(Verified, verified);
-
-    return typeOk;
-}
-
-bool BaseModulePlugin::rspReadVersion(const DasCmdPacket *packet)
-{
-    char date[20];
-    Version version;
-
-    if (!parseVersionRspM(packet, version)) {
-        LOG_WARN("Bad READ_VERSION response");
-        return false;
-    }
-
-    setIntegerParam(HwVer, version.hw_version);
-    setIntegerParam(HwRev, version.hw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.hw_year, version.hw_month, version.hw_day);
-    setStringParam(HwDate, date);
-    setIntegerParam(FwVer, version.fw_version);
-    setIntegerParam(FwRev, version.fw_revision);
-    snprintf(date, sizeof(date), "%04d/%02d/%02d", version.fw_year, version.fw_month, version.fw_day);
-    setStringParam(FwDate, date);
-
-    bool versionOk = checkVersion(version);
-
-    int verified = getIntegerParam(Verified);
-    verified &= ~VERIFY_VERSION_MASK;
-    verified |= (versionOk ? VERIFY_VERSION_OK : VERIFY_VERSION_FAIL);
-    setIntegerParam(Verified, verified);
-
-    callParamCallbacks();
-
-    return versionOk;
-}
-
 void BaseModulePlugin::setParamsAlarm(DasCmdPacket::CommandType command, int alarm)
 {
     switch (command) {
@@ -796,7 +734,7 @@ void BaseModulePlugin::createRegParam(const char *group, const char *name, bool 
     desc.offset  = offset;
     desc.shift   = shift;
     desc.width   = nBits;
-    desc.convert.reset(conv);
+    desc.convert = conv;
     m_params[group].mapping[index] = desc;
 
     uint32_t length = offset + 1;
@@ -831,7 +769,7 @@ void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool re
     desc.offset  = offset;
     desc.shift   = shift;
     desc.width   = nBits;
-    desc.convert.reset(CONV_UNSIGN);
+    desc.convert = CONV_UNSIGN;
     m_params[group].mapping[index] = desc;
 
     uint32_t length = offset + 1;
@@ -873,44 +811,6 @@ void BaseModulePlugin::initParams(uint32_t nChannels)
 
     setIntegerParam(Features, m_features);
     callParamCallbacks();
-}
-
-bool BaseModulePlugin::checkVersion(const BaseModulePlugin::Version &version)
-{
-    int hw_version;
-    int hw_revision;
-    int fw_version;
-    int fw_revision;
-    getIntegerParam(HwExpectVer, &hw_version);
-    getIntegerParam(HwExpectRev, &hw_revision);
-    getIntegerParam(FwExpectVer, &fw_version);
-    getIntegerParam(FwExpectRev, &fw_revision);
-
-    if (fw_version != 0 && static_cast<uint8_t>(fw_version) != version.fw_version) {
-        LOG_ERROR("Expecting firmware version %d, module returned %u", fw_version, version.fw_version);
-        return false;
-    }
-    if (fw_revision != 0 && static_cast<uint8_t>(fw_revision) != version.fw_revision) {
-        LOG_ERROR("Expecting firmware revision %d, module returned %u", fw_revision, version.fw_revision);
-        return false;
-    }
-    if (hw_version != 0 && static_cast<uint8_t>(hw_version) != version.hw_version) {
-        LOG_ERROR("Expecting hardware version %d, module returned %u", hw_version, version.hw_version);
-        return false;
-    }
-    if (hw_revision != 0 && static_cast<uint8_t>(hw_revision) != version.hw_revision) {
-        LOG_ERROR("Expecting hardware revision %d, module returned %u", hw_revision, version.hw_revision);
-        return false;
-    }
-    return true;
-}
-
-void BaseModulePlugin::setExpectedVersion(uint8_t fw_version, uint8_t fw_revision, uint8_t hw_version, uint8_t hw_revision)
-{
-    setIntegerParam(HwExpectVer, hw_version);
-    setIntegerParam(HwExpectRev, hw_revision);
-    setIntegerParam(FwExpectVer, fw_version);
-    setIntegerParam(FwExpectRev, fw_revision);
 }
 
 std::string BaseModulePlugin::getModuleName(uint32_t hardwareId)

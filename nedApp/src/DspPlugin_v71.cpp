@@ -10,7 +10,15 @@
 #include "DspPlugin.h"
 
 void DspPlugin::createParams_v71() {
-//      BLXXX:Det:DspX:| sig nam|         '1' addr  size off default      | EPICS record description | (bi and mbbi description)
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0);   // Hardware revision        (low:3,high:5)
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8);   // Hardware revision        (low:1,high:3)
+    createRegParam("VERSION", "FwRev",  true, 0,  8, 16);   // Firmware revision        (low:0,high:2)
+    createRegParam("VERSION", "FwVer",  true, 0,  8, 24);   // Firmware revision        (low:6,high:8)
+    createRegParam("VERSION", "FwYear", true, 1, 16,  0, 0, CONV_HEX2DEC);
+    createRegParam("VERSION", "FwDay",  true, 1,  8, 16, 0, CONV_HEX2DEC);
+    createRegParam("VERSION", "FwMonth",true, 1,  8, 24, 0, CONV_HEX2DEC);
+
+    //      BLXXX:Det:DspX:| sig nam|         '1' addr  size off default      | EPICS record description | (bi and mbbi description)
     createConfigParam("Meta0:Type",       '1', 0x0,   4,  0, 0); // Meta channel 0 type - slow       (0=detector,1=unused,2=unused,3=unused,4=beam monitor,5=signal,6=ADC,7=chopper)
     createConfigParam("Meta0:PixId",      '1', 0x0,   4,  4, 0); // Meta channel 0 pixel id
     createConfigParam("Meta1:Type",       '1', 0x0,   4,  8, 0); // Meta channel 1 type - slow       (0=detector,1=unused,2=unused,3=unused,4=beam monitor,5=signal,6=ADC,7=chopper)

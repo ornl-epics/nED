@@ -11,6 +11,17 @@
 
 void AcpcFemPlugin::createParams_v22()
 {
+    createRegParam("VERSION", "HwDay",  true, 0,  8,  0, 0, CONV_HEX2DEC); // Hardware day
+    createRegParam("VERSION", "HwMonth",true, 0,  8,  8, 0, CONV_HEX2DEC); // Hardware month
+    createRegParam("VERSION", "HwYear", true, 1,  8,  0, 0, CONV_HEX2DEC); // Hardware year     (offset:2000)
+    createRegParam("VERSION", "HwRev",  true, 2,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 2,  8,  8); // Hardware version
+    createRegParam("VERSION", "FwDay",  true, 3,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 3,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+    createRegParam("VERSION", "FwYear", true, 4,  8,  0, 0, CONV_HEX2DEC); // Firmware year     (offset:2000)
+    createRegParam("VERSION", "FwRev",  true, 5,  8,  0); // Firmware revision                  (low:1,high:3)
+    createRegParam("VERSION", "FwVer",  true, 5,  8,  8); // Firmware version                   (low:1,high:3)
+
 //     BLXXX:Det:FemXX:| sig name |                          | EPICS record description | (bi and mbbi description)
     createStatusParam("Lvds2:ErrFifoFull",    0x0,  1, 15); // Chan2 FIFO went full         (0=no,1=yes)
     createStatusParam("Lvds2:ErrPreStart",    0x0,  1, 14); // Chan2 got START during packt (0=no error,1=error)

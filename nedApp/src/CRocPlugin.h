@@ -18,7 +18,6 @@
  */
 class CRocPlugin : public BaseModulePlugin {
     private: // variables
-        std::string m_version;                              //!< Version string as passed to constructor
         std::string m_posCalcPort;                          //!< Name of the CRocPosCalcPlugin port for sending this CROC parameters
 
     public: // functions
@@ -33,33 +32,7 @@ class CRocPlugin : public BaseModulePlugin {
          * @param[in] version ROC HW&SW version, ie. V5_50
          * @param[in] posCalcPortName Name of the CROC position calculation plugin
          */
-        CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir, const char *posCalcPortName=0);
-
-        /**
-         * Try to parse the ROC version response packet an populate the structure.
-         *
-         * Function will parse all known ROC version responses and populate the
-         * version structure. If the function returns false, it does not recognize
-         * the response.
-         *
-         * All ROC boards except for v5.4 have the same response. v5.4 adds an extra
-         * vendor field which the function disregards.
-         *
-         * @param[in] packet to be parsed
-         * @param[out] version structure to be populated
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see RocPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
+        CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir, const char *posCalcPortName="");
 
         /**
          * Handle passing parameters from other plugins.

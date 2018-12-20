@@ -24,133 +24,57 @@ EPICS_REGISTER_PLUGIN(RocPlugin, 4, "Port name", string, "Parent plugins", strin
  */
 #define SECTION_ID(section, channel) (((channel) * 0x10) + ((section) & 0xF))
 
-/**
- * ROC V5 version response format
- */
-struct RspReadVersion {
-#ifdef BITFIELD_LSB_FIRST
-    unsigned hw_revision:8;     // Board revision number
-    unsigned hw_version:8;      // Board version number
-    unsigned fw_revision:8;     // Firmware revision number
-    unsigned fw_version:8;      // Firmware version number
-    unsigned year:16;           // Year
-    unsigned day:8;             // Day
-    unsigned month:8;           // Month
-#else
-#error Missing RspReadVersionV5 declaration
-#endif // BITFIELD_LSB_FIRST
-};
-
-/**
- * ROC V5 fw 5.4 adds vendor field.
- */
-struct RspReadVersion_v54 : public RspReadVersion {
-    uint32_t vendor_id;
-};
-
-/**
- * GE ROC V2 version response format
- *
- * The upper byte is always 0x20=32. This doesn't play well
- * with the rest of the code so we redefine the version meaning
- * and only use half of the hw version an leave the rest 12 bits
- * for revision, which ends up much bigger than any SNS revisions.
- */
-struct RspReadVersionGE {
-#ifdef BITFIELD_LSB_FIRST
-    unsigned hw_revision:12;    // Board revision number
-    unsigned hw_version:4;      // Board version number
-    unsigned fw_revision:8;     // Firmware revision number
-    unsigned fw_version:8;      // Firmware version number
-#else
-#error Missing RspReadVersionV5 declaration
-#endif // BITFIELD_LSB_FIRST
-};
-
-RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_ROC, 2)
-    , m_version(version)
+RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
 {
     bool havePreAmpTest = false;
 
+    std::string version(version_);
     if (0) {
-    } else if (m_version == "v14") {
+    } else if (version == "v14") {
         m_numChannels = 8;
-        setIntegerParam(Supported, 1);
         createParams_v14();
-        setExpectedVersion(1, 4);
-    } else if (m_version == "v43") {
+    } else if (version == "v43") {
         m_numChannels = 8;
-        setIntegerParam(Supported, 1);
         createParams_v43();
-        setExpectedVersion(4, 3);
-    } else if (m_version == "v44") {
+    } else if (version == "v44") {
         m_numChannels = 8;
-        setIntegerParam(Supported, 1);
         createParams_v45();
-        setExpectedVersion(4, 4);
-    } else if (m_version == "v45") {
+    } else if (version == "v45") {
         m_numChannels = 8;
-        setIntegerParam(Supported, 1);
         createParams_v45();
-        setExpectedVersion(4, 5);
-    } else if (m_version == "v47") {
+    } else if (version == "v47") {
         m_numChannels = 8;
-        setIntegerParam(Supported, 1);
         createParams_v47();
-        setExpectedVersion(4, 7);
-    } else if (m_version == "v50") {
+    } else if (version == "v50") {
         m_numChannels = 8;
-        setIntegerParam(Supported, 1);
         createParams_v50();
-        setExpectedVersion(5, 0);
-    } else if (m_version == "v51") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v51") {
         createParams_v51();
-        setExpectedVersion(5, 1);
-    } else if (m_version == "v52") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v52") {
         createParams_v52();
-        setExpectedVersion(5, 2);
-    } else if (m_version == "v54") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v54") {
         createParams_v54();
         m_cmdHandlers[DasCmdPacket::CMD_READ_CONFIG].second = std::bind(&RocPlugin::rspReadConfigV54, this, std::placeholders::_1);
-        setExpectedVersion(5, 4);
-    } else if (m_version == "v55") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v55") {
         createParams_v54();
-        setExpectedVersion(5, 5);
-    } else if (m_version == "v56") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v56") {
         createParams_v56();
-        setExpectedVersion(5, 6);
-    } else if (m_version == "v57") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v57") {
         createParams_v57();
-        setExpectedVersion(5, 7);
-    } else if (m_version == "v58") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v58") {
         createParams_v58();
-        setExpectedVersion(5, 8);
         havePreAmpTest = true;
-    } else if (m_version == "v59") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v59") {
         createParams_v59();
-        setExpectedVersion(5, 9);
         havePreAmpTest = true;
-    } else if (m_version == "v510") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v510") {
         createParams_v510();
-        setExpectedVersion(5, 10);
         havePreAmpTest = true;
-    } else if (m_version == "v511") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v511") {
         createParams_v511();
-        setExpectedVersion(5, 11);
         havePreAmpTest = true;
     } else {
-        setIntegerParam(Supported, 0);
         LOG_ERROR("Unsupported ROC version '%s'", version);
     }
 
@@ -238,40 +162,6 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
         return status;
     }
     return BaseModulePlugin::readOctet(pasynUser, value, nChars, nActual, eomReason);
-}
-
-bool RocPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-{
-    memset(&version, 0, sizeof(BaseModulePlugin::Version));
-
-    if (packet->getCmdPayloadLength() == sizeof(RspReadVersionGE)) {
-        const RspReadVersionGE *response = reinterpret_cast<const RspReadVersionGE*>(packet->getCmdPayload());
-
-        version.hw_version  = response->hw_version;
-        version.hw_revision = response->hw_revision;
-        version.fw_version  = response->fw_version;
-        version.fw_revision = response->fw_revision;
-
-        return true;
-
-    } else if (packet->getCmdPayloadLength() == sizeof(RspReadVersion) ||
-               packet->getCmdPayloadLength() == sizeof(RspReadVersion_v54)) {
-
-        const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
-
-        version.hw_version  = response->hw_version;
-        version.hw_revision = response->hw_revision;
-        version.fw_version  = response->fw_version;
-        version.fw_revision = response->fw_revision;
-        version.fw_year     = HEX_BYTE_TO_DEC(response->year >> 8) * 100 + HEX_BYTE_TO_DEC(response->year);
-        version.fw_month    = HEX_BYTE_TO_DEC(response->month);
-        version.fw_day      = HEX_BYTE_TO_DEC(response->day);
-        // Skip vendor id from V5.4
-
-        return true;
-    }
-
-    return false;
 }
 
 bool RocPlugin::processResponse(const DasCmdPacket *packet)
@@ -375,24 +265,21 @@ bool RocPlugin::rspParamsChan(const DasCmdPacket* packet, const std::string& par
 bool RocPlugin::rspReadConfigV54(const DasCmdPacket *packet)
 {
     uint8_t buffer[480]; // actual size of the READ_CONFIG v5.4 packet
-    if (m_version == "v54") {
-
-        if (packet->getLength() > sizeof(buffer)) {
-            LOG_ERROR("Received v5.4 READ_CONFIG response bigger than expected");
-            return false;
-        }
-
-        // Packet in shared queue must not be modified. So we make a copy.
-        packet = DasCmdPacket::init(buffer, sizeof(buffer),
-                                    packet->getModuleId(),
-                                    packet->getCommand(),
-                                    0,
-                                    packet->isAcknowledge(),
-                                    packet->isResponse(),
-                                    /* channel= */0,
-                                    packet->getCmdPayloadLength()-4, // This is the only reason we're doing all the buffering
-                                    packet->getCmdPayload());
+    if (packet->getLength() > sizeof(buffer)) {
+        LOG_ERROR("Received v5.4 READ_CONFIG response bigger than expected");
+        return false;
     }
+
+    // Packet in shared queue must not be modified. So we make a copy.
+    packet = DasCmdPacket::init(buffer, sizeof(buffer),
+                                packet->getModuleId(),
+                                packet->getCommand(),
+                                0,
+                                packet->isAcknowledge(),
+                                packet->isResponse(),
+                                /* channel= */0,
+                                packet->getCmdPayloadLength()-4, // This is the only reason we're doing all the buffering
+                                packet->getCmdPayload());
 
     return BaseModulePlugin::rspParams(packet, "CONFIG");
 }

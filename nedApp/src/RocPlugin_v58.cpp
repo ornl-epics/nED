@@ -17,6 +17,14 @@
 
 void RocPlugin::createParams_v58()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8, 0);   // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8, 8);   // Hardware version
+    createRegParam("VERSION", "FwRev",  true, 1,  8, 0);   // Firmware revision        (low:7,high:9)
+    createRegParam("VERSION", "FwVer",  true, 1,  8, 8);   // Firmware version         (low:4,high:6)
+    createRegParam("VERSION", "FwYear", true, 2, 16, 0, 0, CONV_HEX2DEC);
+    createRegParam("VERSION", "FwDay",  true, 3,  8, 0, 0, CONV_HEX2DEC);
+    createRegParam("VERSION", "FwMonth",true, 3,  8, 8, 0, CONV_HEX2DEC);
+
     // Status registers
 
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)

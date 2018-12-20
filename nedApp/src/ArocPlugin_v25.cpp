@@ -19,6 +19,14 @@
  */
 void ArocPlugin::createParams_v25()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
+    createRegParam("VERSION", "FwRev",  true, 1,  8,  0); // Firmware revision                  (low:4,high:6)
+    createRegParam("VERSION", "FwVer",  true, 1,  8,  8); // Firmware version                   (low:1,high:3)
+    createRegParam("VERSION", "FwYear", true, 2, 16,  0, 0, CONV_HEX2DEC); // Firmware year
+    createRegParam("VERSION", "FwDay",  true, 3,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 3,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+
 //    BLXXX:Det:RocXXX:| sig nam|                           | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrParity",          0x0,  1,  0); // LVDS parity error            (0=no error,1=error)
     createStatusParam("ErrType",            0x0,  1,  1); // LVDS packet type error       (0=no error,1=error)

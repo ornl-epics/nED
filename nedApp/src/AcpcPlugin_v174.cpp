@@ -19,6 +19,19 @@
 
 void AcpcPlugin::createParams_v174()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
+    createRegParam("VERSION", "HwYear", true, 1,  8,  0, 0, CONV_HEX2DEC); // Hardware year     (offset:2000)
+    createRegParam("VERSION", "HwDay",  true, 2,  8,  0, 0, CONV_HEX2DEC); // Hardware day
+    createRegParam("VERSION", "HwMonth",true, 2,  8,  8, 0, CONV_HEX2DEC); // Hardware month
+    createRegParam("VERSION", "FwRev",  true, 3,  8,  0); // Firmware revision                  (low:3,high:5)
+    createRegParam("VERSION", "FwVer",  true, 3,  8,  8); // Firmware version                   (low:16,high:18)
+    createRegParam("VERSION", "FwYear", true, 4,  8,  0, 0, CONV_HEX2DEC); // Firmware year     (offset:2000)
+    createRegParam("VERSION", "FwDay",  true, 5,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 5,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+    createRegParam("VERSION", "Eeprom1",true, 6, 32,  0);
+    createRegParam("VERSION", "Eeprom2",true, 8, 32,  8);
+
     createStatusParam("ErrCmdBad",            0x0,  1,  0); // Unrecognized command error   (0=no error,1=error)
     createStatusParam("ErrPktLengthError",    0x0,  1,  1); // Packet length error          (0=no error,1=error)
     createStatusParam("ErrCfgError",          0x0,  1,  2); // Configuration error          (0=no error,1=error)
@@ -38,7 +51,7 @@ void AcpcPlugin::createParams_v174()
     createStatusParam("TsyncHigh",            0x1,  1,  3); // TSYNC Got HIGH                (0=no,1=yes)
     createStatusParam("TxenBLow",             0x1,  1,  4); // TXEN_B Got LOW                (0=no,1=yes)
     createStatusParam("TxenBHigh",            0x1,  1,  5); // TXEN_B Got HIGH               (0=no,1=yes)
-    createStatusParam("AROCsMissing",         0x1,  9,  6); // AROCs missing              
+    createStatusParam("AROCsMissing",         0x1,  9,  6); // AROCs missing
 
     createStatusParam("Lvds1:DataParseError", 0x2,  8,  0); // Data parser error status
     createStatusParam("Lvds1:DataParseGood",  0x2,  2,  8); // Data parser good status

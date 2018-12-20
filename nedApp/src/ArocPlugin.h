@@ -19,9 +19,6 @@
  * It mainly defines version specific register mappings.
  */
 class ArocPlugin : public BaseModulePlugin {
-    private: // variables
-        std::string m_version;                              //!< Version string as passed to constructor
-
     public: // functions
 
         /**
@@ -34,29 +31,6 @@ class ArocPlugin : public BaseModulePlugin {
          * @param[in] version AROC HW&SW version, ie. V5_50
          */
         ArocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
-
-        /**
-         * Try to parse the AROC version response packet an populate the structure.
-         *
-         * Function will parse all known AROC version responses and populate the
-         * version structure. If the function returns false, it does not recognize
-         * the response.
-         *
-         * @param[in] packet to be parsed
-         * @param[out] version structure to be populated
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see ArocPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
 
     private: // functions
 

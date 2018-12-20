@@ -21,7 +21,6 @@
  */
 class FemPlugin : public BaseModulePlugin {
     private: // variables
-        std::string m_version;              //!< Version string as passed to constructor
         struct RemoteUpgrade {
             /**
              * Valid remote update statuses
@@ -115,25 +114,6 @@ class FemPlugin : public BaseModulePlugin {
          * Handle writing strings.
          */
         virtual asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
-
-        /**
-         * Try to parse the FEM version response packet an populate the structure.
-         *
-         * @param[in] packet to be parsed
-         * @param[out] version structure to be populated
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see FemPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
 
     private: // functions
         /**
