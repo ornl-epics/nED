@@ -95,7 +95,7 @@ class Module:
         self._rsp_pv = None
 
         self._cached_pvs = []
-        for pv in [ "HwId", "Type", "FwVerStr.SVAL", "Status", "StatusText", "OutputMode" ]:
+        for pv in [ "HwId", "Type", "FwVersion", "Status", "StatusText", "OutputMode" ]:
             getPv(name, pv, wait_connect=False)
             self._cached_pvs.append(pv)
 

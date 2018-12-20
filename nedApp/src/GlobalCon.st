@@ -56,14 +56,7 @@ option -c;	/* do not wait for PVs to connect */
  * define valid values for Verified PVs
  */
 #define NOTVER		0
-#define TYPEOKVER	1
-#define TYPEMISVER	2
-#define VERSOKVER	3
-#define VERSMISVER	4
-#define BOTHMISVER	5
-#define BOTHOKVER	6
-#define VERSMISVER2	7
-#define TYPEMISVER2	8
+#define VERIFIED        1
 
 /*
  * define valid values for Acquiring PVs
@@ -503,7 +496,7 @@ ss GlobalControl {
     }
     CMD_RSP(Discover, DISCOVERCMD, ReadVersion)
     CMD_RSP(ReadVersion, READVERCMD, CheckVerify)
-    TEST_PV(CheckVerify, verified, BOTHOKVER, CheckReadStatus)
+    TEST_PV(CheckVerify, verified, VERIFIED, CheckReadStatus)
     CMD_RSP(CheckReadStatus, READSTATCMD, DoneDiscover)
     OP_DONE(DoneDiscover, globalCheck)
     state Ready {
