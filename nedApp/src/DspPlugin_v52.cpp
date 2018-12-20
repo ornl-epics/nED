@@ -10,6 +10,17 @@
 #include "DspPlugin.h"
 
 void DspPlugin::createParams_v52() {
+    createRegParam("VERSION", "HwDay",  true, 0,  8,  0, 0, CONV_HEX2DEC); // Hardware day
+    createRegParam("VERSION", "HwMonth",true, 0,  8,  8, 0, CONV_HEX2DEC); // Hardware month
+    createRegParam("VERSION", "HwYear", true, 0,  8, 16, 0, CONV_HEX2DEC); // Hardware year     (offset:2000)
+    createRegParam("VERSION", "HwRev",  true, 0,  4, 24); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  4, 28); // Hardware version
+    createRegParam("VERSION", "FwDay",  true, 1,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 1,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+    createRegParam("VERSION", "FwYear", true, 1,  8, 16, 0, CONV_HEX2DEC); // Firmware year     (offset:2000)
+    createRegParam("VERSION", "FwRev",  true, 1,  4, 24); // Firmware revision                  (low:1,high:3)
+    createRegParam("VERSION", "FwVer",  true, 1,  4, 28); // Firmware version                   (low:4,high:6)
+
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
     createConfigParam("PixId0",         'B', 0x0,  32,  0, 0); // State 0 Position Index Off
     createConfigParam("PixId1",         'B', 0x1,  32,  0, 0); // State 1 Position Index Off

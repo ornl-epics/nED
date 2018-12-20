@@ -19,6 +19,19 @@
 
 void AcpcPlugin::createParams_v144()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
+    createRegParam("VERSION", "HwYear", true, 1,  8,  0, 0, CONV_HEX2DEC); // Hardware year     (offset:2000)
+    createRegParam("VERSION", "HwDay",  true, 2,  8,  0, 0, CONV_HEX2DEC); // Hardware day
+    createRegParam("VERSION", "HwMonth",true, 2,  8,  8, 0, CONV_HEX2DEC); // Hardware month
+    createRegParam("VERSION", "FwRev",  true, 3,  8,  0); // Firmware revision                  (low:3,high:5)
+    createRegParam("VERSION", "FwVer",  true, 3,  8,  8); // Firmware version                   (low:13,high:15)
+    createRegParam("VERSION", "FwYear", true, 4,  8,  0, 0, CONV_HEX2DEC); // Firmware year     (offset:2000)
+    createRegParam("VERSION", "FwDay",  true, 5,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 5,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+    createRegParam("VERSION", "Eeprom1",true, 6, 32,  0);
+    createRegParam("VERSION", "Eeprom2",true, 8, 32,  8);
+
 //    BLXXX:Det:RocXXX:| sig nam|                            | EPICS record description | (bi and mbbi description)
     createStatusParam("Ctrl:RxFlg",           0x0,  8,  0); // CTRL error flags             (0=parity error,1=packet type err,2=start&last set,3=len >300 words,4=FIFO timeout,5=no first word,6=last befor first,7=out FIFO full)
     createStatusParam("Ctrl:GotDataPkt",      0x0,  1,  8); // CTRL got data packet         (0=no data pkt,1=got data pkt)

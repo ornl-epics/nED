@@ -10,6 +10,14 @@
 #include "DspWPlugin.h"
 
 void DspWPlugin::createParams_v20() {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0);   // Hardware revision        (low:3,high:5)
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8);   // Hardware revision        (low:1,high:3)
+    createRegParam("VERSION", "FwRev",  true, 0,  8, 16);   // Firmware revision        (low:1,high:3)
+    createRegParam("VERSION", "FwVer",  true, 0,  8, 24);   // Firmware revision        (low:6,high:8)
+    createRegParam("VERSION", "FwYear", true, 1,  8,  0, 0, CONV_HEX2DEC); // Firmware year (offset:2000)
+    createRegParam("VERSION", "FwDay",  true, 1,  8, 16, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 1,  8, 24, 0, CONV_HEX2DEC); // Firmware day
+
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
     createConfigParam("TestEventPeriod",  '1', 0x0,  8,  0, 15); // Test event period
     createConfigParam("TsyncFreq",        '1', 0x0,  8,  8, 60); // TSYNC frequency            (unit:Hz)

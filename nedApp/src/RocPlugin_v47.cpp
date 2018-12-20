@@ -11,6 +11,14 @@
 
 void RocPlugin::createParams_v47()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8, 0);   // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8, 8);   // Hardware version
+    createRegParam("VERSION", "FwRev",  true, 1,  8, 0);   // Firmware revision        (low:6,high:8)
+    createRegParam("VERSION", "FwVer",  true, 1,  8, 8);   // Firmware version         (low:3,high:5)
+    createRegParam("VERSION", "FwYear", true, 2, 16, 0, 0, CONV_HEX2DEC);
+    createRegParam("VERSION", "FwDay",  true, 3,  8, 0, 0, CONV_HEX2DEC);
+    createRegParam("VERSION", "FwMonth",true, 3,  8, 8, 0, CONV_HEX2DEC);
+
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrParity",            0x0,  1,  0); // LVDS parity error.           (0=no error,1=error)
     createStatusParam("ErrType",              0x0,  1,  1); // LVDS packet type error.      (0=no error,1=error)

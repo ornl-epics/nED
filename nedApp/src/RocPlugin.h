@@ -60,8 +60,10 @@ class RocPlugin : public BaseModulePlugin {
         epicsTimeStamp m_sendHvTime;
 
     private: // variables
-        std::string m_version;                              //!< Version string as passed to constructor
         Fifo<char> m_hvBuffer;                              //!< FIFO buffer for data received from HV module but not yet processed
+        std::string m_hvRequest{""};                        //!< When non empty, a HV request to be sent
+        uint32_t m_numChannels{0};                          //!< Maximum number of channels supported by module
+        uint8_t m_expectedChannel{0};                       //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
 
     public: // functions
 
@@ -77,62 +79,62 @@ class RocPlugin : public BaseModulePlugin {
         RocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
-         * Process ROC custom commands.
-         *
-         * This includes handling pre-amp configuration and trigger responses.
-         *
-         * @param[in] command requested.
-         * @param[out] timeout before giving up waiting for response, default is 2.0
-         * @return Response to be waited for.
-         */
-        DasCmdPacket::CommandType handleRequest(DasCmdPacket::CommandType command, double &timeout);
-
-        /**
-         * Process ROC custom response commands.
-         *
-         * This includes handling pre-amp configuration and trigger responses.
+         * Process ROC HV responses.
          *
          * @param[in] packet to be handled
          */
-        bool handleResponse(const DasCmdPacket *packet);
+        bool processResponse(const DasCmdPacket *packet) override;
+
+        /**
+         * Intercept CmdReq and send 1+8 commands to address all ROC v2 channels.
+         */
+        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
          * Send string/byte data to PVs
          */
-        asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason);
+        asynStatus readOctet(asynUser *pasynUser, char *value, size_t nChars, size_t *nActual, int *eomReason) override;
 
         /**
          * Receive string/byte data to PVs
          */
-        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
-
-        /**
-         * Try to parse the ROC version response packet an populate the structure.
-         *
-         * Function will parse all known ROC version responses and populate the
-         * version structure. If the function returns false, it does not recognize
-         * the response.
-         *
-         * All ROC boards except for v5.4 have the same response. v5.4 adds an extra
-         * vendor field which the function disregards.
-         *
-         * @param[in] packet to be parsed
-         * @param[out] version structure to be populated
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see RocPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
+        asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual) override;
 
     private: // functions
+
+        /**
+         * Custom ROC v2 WRITE_CONFIG request handler.
+         *
+         * Send out a WRITE_CONFIG packet with a channel number. This functions relies
+         * on response handler to properly adjust m_expectedChannel. It also depends
+         * on whoever is requesting this function to invoke it the 1+m_numChannel times.
+         */
+        bool reqWriteConfig();
+
+        /**
+         * Custom ROC v2 WRITE_CONFIG response handler.
+         *
+         * Verifies the expected channel number, it then increments m_expectedChannel
+         * number for the next reqWriteConfig() to pick it up.
+         */
+        bool rspWriteConfig(const DasCmdPacket* packet);
+
+        /**
+         * Custom ROC v2 READ_CONFIG and READ_STATUS request handler.
+         *
+         * Send out a READ_CONFIG packet with a channel number. This functions relies
+         * on response handler to properly adjust m_expectedChannel. It also depends
+         * on whoever is requesting this function to invoke it the 1+m_numChannel times.
+         */
+        bool reqParamsChan(DasCmdPacket::CommandType command);
+
+        /**
+         * Custom ROC v2 WRITE_CONFIG response handler.
+         *
+         * Verifies the expected channel number, extracts parameters, it then increments
+         * m_expectedChannel number for the next reqWriteConfig() to pick it up.
+         */
+        bool rspParamsChan(const DasCmdPacket* packet, const std::string& params);
 
         /**
          * Handle READ_CONFIG response from v5.4.
@@ -144,25 +146,7 @@ class RocPlugin : public BaseModulePlugin {
          * For non-v5.4 firmwares the function simply invokes BaseModulePlugin::rspReadConfig()
          * passing it the original packet.
          */
-        bool rspReadConfig(const DasCmdPacket *packet, uint8_t channel);
-
-        /**
-         * Override START response handler.
-         *
-         * Implemented only for v5.4 and v5.5 to detect successful acquisition start
-         * and record it through Acquiring parameter. Other ROC version have a dedicated
-         * status register for that.
-         */
-        bool rspStart(const DasCmdPacket *packet);
-
-        /**
-         * Override STOP response handler.
-         *
-         * Implemented only for v5.4 and v5.5 to detect successful acquisition stop
-         * and record it through Acquiring parameter. Other ROC version have a dedicated
-         * status register for that.
-         */
-        bool rspStop(const DasCmdPacket *packet);
+        bool rspReadConfigV54(const DasCmdPacket *packet);
 
         /**
          * Pass user command to HighVoltage module through RS232.
@@ -170,11 +154,8 @@ class RocPlugin : public BaseModulePlugin {
          * HV command string is packed into OCC packet and sent to the
          * HV module. HV module does not have its own hardware id,
          * instead the ROC board is used as a router.
-         *
-         * @param[in] data String representing HV command, must include CR (ASCII 13)
-         * @param[in] length Length of the string
          */
-        void reqHvCmd(const char *data, uint32_t length);
+        bool reqHv();
 
         /**
          * Receive and join responses from HV module.
@@ -186,35 +167,7 @@ class RocPlugin : public BaseModulePlugin {
          * @param[in] packet with HV module response
          * @return true if packet was processed
          */
-        bool rspHvCmd(const DasCmdPacket *packet);
-
-        /**
-         * Sends pre-amp configuration.
-         *
-         * Functionality not implemented and always returns 0.
-         *
-         * @return Response to wait for.
-         */
-        DasCmdPacket::CommandType reqConfigPreAmp();
-
-        /**
-         * Sends a pre-amp trigger command.
-         *
-         * Functionality not implemented and always returns 0.
-         *
-         * @return Response to wait for.
-         */
-        DasCmdPacket::CommandType reqTriggerPreAmp();
-
-        /**
-         * Handle pre-amp configuration response.
-         */
-        bool rspConfigPreAmp(const DasCmdPacket *packet);
-
-        /**
-         * Handle pre-amp trigger response.
-         */
-        bool rspTriggerPreAmp(const DasCmdPacket *packet);
+        bool rspHv(const DasCmdPacket *packet);
 
         /**
          * Create pre-amp config parameter.
@@ -297,11 +250,8 @@ class RocPlugin : public BaseModulePlugin {
         void createParams_v511();
 
     protected:
-        #define FIRST_ROCPLUGIN_PARAM Acquiring
-        int Acquiring;
         int HvDelay;
         int HvB2bDelay;
-        #define LAST_ROCPLUGIN_PARAM HvB2bDelay
 };
 
 #endif // DSP_PLUGIN_H

@@ -31,17 +31,14 @@ class ModulesPlugin : public BasePlugin {
          * Module description.
          */
         struct ModuleDesc {
-            DasCmdPacket::ModuleType type;
-            uint32_t parent;
+            DasCmdPacket::ModuleType type{static_cast<DasCmdPacket::ModuleType>(0)};
+            uint32_t parent{0};
             BaseModulePlugin::Version version;
-            bool verified;
-
-            ModuleDesc()
-                : type(static_cast<DasCmdPacket::ModuleType>(0))
-                , parent(0)
-                , verified(false)
-            {}
+            bool verified{false};
+            uint8_t aroc_ibc{0};
         };
+
+        std::map<DasCmdPacket::ModuleType, std::list<std::unique_ptr<BaseModulePlugin>>> m_moduleHandlers;
 
         /**
          * Record for a structure with a single string array field.
@@ -116,9 +113,14 @@ class ModulesPlugin : public BasePlugin {
         void reqDiscover(uint32_t moduleId=DasCmdPacket::BROADCAST_ID);
 
         /**
-         * Send a READ_VERSION command to a particular DSP.
+         * Send a READ_VERSION command to module.
          */
         void reqVersion(uint32_t moduleId);
+
+        /**
+         * Send a READ_STATUS command to module.
+         */
+        void reqStatus(uint32_t moduleId);
 
         /**
          * Send a READ_VERSION command to a particular module through LVDS.

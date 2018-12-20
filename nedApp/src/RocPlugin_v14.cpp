@@ -11,6 +11,11 @@
 
 void RocPlugin::createParams_v14()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8, 0);
+    createRegParam("VERSION", "HwVer",  true, 0,  8, 8);
+    createRegParam("VERSION", "FwRev",  true, 1,  8, 0);   // Hardware revision        (low:3,high:5)
+    createRegParam("VERSION", "FwVer",  true, 1,  8, 8);   // Hardware version         (low:0,high:2)
+
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("Ch1:FpgaReady",        0x0,  1,  0); // Chan1 FPGA status            (1=not ready,1=ready)
     createStatusParam("Ch2:FpgaReady",        0x0,  1,  1); // Chan2 FPGA status            (1=not ready,1=ready)

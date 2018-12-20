@@ -25,6 +25,7 @@ record(stringout, "$(P)HwId")
     field(OUT,  "@asyn($(PORT))HwId")
     field(VAL,  "0.0.0.0")
     field(PINI, "YES")
+    field(FLNK, "$(P)CheckSeq")
 }
 record(mbbo, "$(P)CmdReq")
 {
@@ -184,7 +185,7 @@ record(calc, "$(P)HwStatus")
     info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "Hardware status")
     field(INPA, "$(P)Enable NPP")
-    field(INPB, "$(P)Supported.SEVR NPP")
+    field(INPB, "")
     field(INPC, "$(P)Verified.SEVR NPP")
     field(INPD, "$(P)RspMissCount.SEVR NPP")
     field(INPE, "$(P)ConfigAlrm.SEVR PP")
@@ -195,7 +196,7 @@ record(calc, "$(P)HwStatus")
     field(INPJ, "0")
     field(INPK, "0")
     field(INPL, "0")
-    field(CALC, "A=0||(B+C+D+E+F+G+H+I+J+K+L)=0")
+    field(CALC, "A=0||(C+D+E+F+G+H+I+J+K+L)=0")
     field(LOW,  "0")
     field(LSV,  "MAJOR")
     field(FLNK, "$(P)StatusCalc")
@@ -251,210 +252,123 @@ record(stringin, "$(P)StatusText")
     field(DESC, "Module status text")
     field(INP,  "$(P)StatusTextCalc.SVAL PP MSS")
 }
+record(longin, "$(P)HwYear")
+{
+    field(FLNK, "$(P)HwDate")
+}
+record(longin, "$(P)HwMonth")
+{
+    field(FLNK, "$(P)HwDate")
+}
+record(longin, "$(P)HwDay")
+{
+    field(FLNK, "$(P)HwDate")
+}
+record(scalcout, "$(P)HwDateCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)HwYear NPP NMS")
+    field(INPB, "$(P)HwMonth NPP NMS")
+    field(INPC, "$(P)HwDay NPP NMS")
+    field(CALC, "PRINTF('%04i',A)+'/'+PRINTF('%02i',B)+'/'+PRINTF('%02i',C)")
+    field(FLNK, "$(P)HwDate")
+}
 record(stringin, "$(P)HwDate")
 {
     info(archive, "Monitor, 00:01:00, VAL")
-    field(DTYP, "asynOctetRead")
-    field(INP,  "@asyn($(PORT))HwDate")
-    field(VAL,  "Unknown")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)HwRev")
-{
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))HwRev")
-    field(VAL,  "0")
-    field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)HwVerStr")
-    field(HSV,  "MAJOR")
-    field(LSV,  "MAJOR")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Firmware date")
+    field(INP,  "$(P)HwDateCalc.SVAL PP")
 }
 record(longin, "$(P)HwVer")
 {
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))HwVer")
-    field(VAL,  "0")
-    field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)HwVerStr")
-    field(HSV,  "MAJOR")
-    field(LSV,  "MAJOR")
+    field(FLNK, "$(P)HwVersion")
 }
-record(longin, "$(P)HwExpectRev")
+record(longin, "$(P)HwRev")
 {
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))HwExpectRev")
-    field(PINI, "YES")
-    field(FLNK, "$(P)HwRevMax")
+    field(FLNK, "$(P)HwVersion")
 }
-record(calcout, "$(P)HwRevMax")
+record(scalcout, "$(P)HwVersionCalc")
 {
-    field(INPA, "$(P)HwExpectRev NPP")
-    field(CALC, "A#0?A+1:1000")
-    field(OUT,  "$(P)HwRev.HIGH")
-    field(FLNK, "$(P)HwRevMin")
-}
-record(calcout, "$(P)HwRevMin")
-{
-    field(INPA, "$(P)HwExpectRev NPP")
-    field(CALC, "A#0?A-1:-1")
-    field(OUT,  "$(P)HwRev.LOW")
-}
-record(longin, "$(P)HwExpectVer")
-{
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))HwExpectVer")
-    field(PINI, "YES")
-    field(FLNK, "$(P)HwVerMax")
-}
-record(calcout, "$(P)HwVerMax")
-{
-    field(INPA, "$(P)HwExpectVer NPP")
-    field(CALC, "A#0?A+1:1000")
-    field(OUT,  "$(P)HwVer.HIGH")
-    field(FLNK, "$(P)HwVerMin")
-}
-record(calcout, "$(P)HwVerMin")
-{
-    field(INPA, "$(P)HwExpectVer NPP")
-    field(CALC, "A#0?A-1:-1")
-    field(OUT,  "$(P)HwVer.LOW")
-}
-record(scalcout, "$(P)HwVerStr")
-{
-    field(DESC, "HW version concatenated")
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "FW version concatenated")
     field(INPA, "$(P)HwVer NPP MS")
     field(INPB, "$(P)HwRev NPP MS")
     field(CALC, "PRINTF('%i',A)+'.'+PRINTF('%i',B)")
+    field(FLNK, "$(P)HwVersion")
+}
+record(stringin, "$(P)HwVersion")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Firmware date")
+    field(INP,  "$(P)HwVersionCalc.SVAL PP")
+}
+record(longin, "$(P)FwYear")
+{
+    field(FLNK, "$(P)FwDate")
+}
+record(longin, "$(P)FwMonth")
+{
+    field(FLNK, "$(P)FwDate")
+}
+record(longin, "$(P)FwDay")
+{
+    field(FLNK, "$(P)FwDate")
+}
+record(scalcout, "$(P)FwDateCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)FwYear NPP NMS")
+    field(INPB, "$(P)FwMonth NPP NMS")
+    field(INPC, "$(P)FwDay NPP NMS")
+    field(CALC, "PRINTF('%04i',A)+'/'+PRINTF('%02i',B)+'/'+PRINTF('%02i',C)")
+    field(FLNK, "$(P)FwDate")
 }
 record(stringin, "$(P)FwDate")
 {
     info(archive, "Monitor, 00:01:00, VAL")
-    field(DTYP, "asynOctetRead")
-    field(INP,  "@asyn($(PORT))FwDate")
-    field(VAL,  "Unknown")
-    field(SCAN, "I/O Intr")
-}
-record(longin, "$(P)FwRev")
-{
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))FwRev")
-    field(VAL,  "0")
-    field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)FwVerStr")
-    field(HSV,  "MAJOR")
-    field(LSV,  "MAJOR")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Firmware date")
+    field(INP,  "$(P)FwDateCalc.SVAL PP")
 }
 record(longin, "$(P)FwVer")
 {
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))FwVer")
-    field(VAL,  "0")
-    field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)FwVerStr")
-    field(HSV,  "MAJOR")
-    field(LSV,  "MAJOR")
+    field(FLNK, "$(P)FwVersion")
 }
-record(longin, "$(P)FwExpectRev")
+record(longin, "$(P)FwRev")
 {
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))FwExpectRev")
-    field(PINI, "YES")
-    field(FLNK, "$(P)FwRevMax")
+    field(FLNK, "$(P)FwVersion")
 }
-record(calcout, "$(P)FwRevMax")
-{
-    field(INPA, "$(P)FwExpectRev NPP")
-    field(CALC, "A#0?A+1:1000")
-    field(OUT,  "$(P)FwRev.HIGH")
-    field(FLNK, "$(P)FwRevMin")
-}
-record(calcout, "$(P)FwRevMin")
-{
-    field(INPA, "$(P)FwExpectRev NPP")
-    field(CALC, "A#0?A-1:-1")
-    field(OUT,  "$(P)FwRev.LOW")
-}
-record(longin, "$(P)FwExpectVer")
-{
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))FwExpectVer")
-    field(PINI, "YES")
-    field(FLNK, "$(P)FwVerMax")
-}
-record(calcout, "$(P)FwVerMax")
-{
-    field(INPA, "$(P)FwExpectVer NPP")
-    field(CALC, "A#0?A+1:1000")
-    field(OUT,  "$(P)FwVer.HIGH")
-    field(FLNK, "$(P)FwVerMin")
-}
-record(calcout, "$(P)FwVerMin")
-{
-    field(INPA, "$(P)FwExpectVer NPP")
-    field(CALC, "A#0?A-1:-1")
-    field(OUT,  "$(P)FwVer.LOW")
-}
-record(scalcout, "$(P)FwVerStr")
+record(scalcout, "$(P)FwVersionCalc")
 {
     info(archive, "Monitor, 00:01:00, VAL")
     field(DESC, "FW version concatenated")
     field(INPA, "$(P)FwVer NPP MS")
     field(INPB, "$(P)FwRev NPP MS")
     field(CALC, "PRINTF('%i',A)+'.'+PRINTF('%i',B)")
+    field(FLNK, "$(P)FwVersion")
 }
-record(bi, "$(P)Supported")
+record(stringin, "$(P)FwVersion")
 {
-    field(DESC, "Is module supported")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Supported")
-    field(SCAN, "Passive")
-    field(PINI, "YES")
-    field(ZNAM, "Not supported")
-    field(ZSV,  "MAJOR")
-    field(ONAM, "Supported")
-    field(FLNK, "$(P)HwStatus")
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Firmware date")
+    field(INP,  "$(P)FwVersionCalc.SVAL PP")
+    field(FLNK, "$(P)Verified")
 }
-record(mbbi, "$(P)Verified")
+record(calc, "$(P)Verified")
 {
-    field(DESC, "Conn,version,type verified")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))Verified")
-    field(SCAN, "I/O Intr")
-    field(ZRVL, "0")
-    field(ZRST, "Not verified")
-    field(ZRSV, "INVALID")
-    field(ONVL, "1")
-    field(ONST, "Type OK")
-    field(ONSV, "MINOR")
-    field(TWVL, "2")
-    field(TWST, "Type mismatch")
-    field(TWSV, "MAJOR")
-    field(THVL, "4")
-    field(THST, "Version OK")
-    field(THSV, "MINOR")
-    field(FRVL, "8")
-    field(FRST, "Version mismatch")
-    field(FRSV, "MAJOR")
-    field(FVVL, "10") # b1010
-    field(FVST, "Bad type & version")
-    field(FVSV, "MAJOR")
-    field(SXVL, "5") # b0101
-    field(SXST, "Type & version OK")
-    field(SXSV, "NO_ALARM")
-    field(SVVL, "9") # b1001
-    field(SVST, "Version mismatch")
-    field(SVSV, "MAJOR")
-    field(EIVL, "6") # b0110
-    field(EIST, "Type mismatch")
-    field(EISV, "MAJOR")
-    field(FLNK, "$(P)HwStatus")
+    field(INPA, "$(P)HwType.SEVR NPP MS")
+    field(INPB, "$(P)FwVersion.SEVR NPP MS")
+    field(CALC, "(A+B)=0")
 }
 record(mbbi, "$(P)HwType")
 {
     field(DESC, "Module type")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT))HwType")
-    field(SCAN, "Passive")
+    field(SCAN, "I/O Intr")
     field(PINI, "YES")
     field(ZRVL, "32")
     field(ONVL, "33")
@@ -486,6 +400,22 @@ record(mbbi, "$(P)HwType")
     field(TVST, "FEM")
     field(TTST, "ADCROC")
     field(FTST, "DSP WAND")
+    field(ZRSV, "MAJOR")
+    field(ONSV, "MAJOR")
+    field(TWSV, "MAJOR")
+    field(THSV, "MAJOR")
+    field(FRSV, "MAJOR")
+    field(FVSV, "MAJOR")
+    field(SXSV, "MAJOR")
+    field(SVSV, "MAJOR")
+    field(EISV, "MAJOR")
+    field(NISV, "MAJOR")
+    field(TESV, "MAJOR")
+    field(ELSV, "MAJOR")
+    field(TVSV, "MAJOR")
+    field(TTSV, "MAJOR")
+    field(FTSV, "MAJOR")
+    field(FLNK, "$(P)Verified")
 }
 record(mbbo, "$(P)CfgSection")
 {
@@ -537,26 +467,6 @@ record(mbbi, "$(P)CfgChannel")
     field(ZRVL, "0")
     field(ZRST, "Main")
 }
-# Periodic .5 second sseq record serializes processing of user configurable
-# periodic records. When run in parallel they would fight for CmdReq, where
-# only one request can be on-going until response is received.
-# *Refresh records heavily depend on SCAN period to be .5 second.
-record(sseq, "$(P)PeriodicCheckUp")
-{
-    field(DESC,  "Periodic check fanout")
-    field(SCAN,  ".5 second")
-    field(DOL1,  "1")
-    field(DOL2,  "1")
-    field(DOL3,  "1")
-    field(LNK1,  "$(P)StatusRefresh.PROC CA")
-    field(LNK2,  "$(P)CountersRefresh.PROC CA")
-    field(LNK3,  "$(P)TempRefresh.PROC CA")
-    field(WAIT1, "Wait")
-    field(WAIT2, "Wait")
-    field(WAIT3, "Wait")
-    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
-    field(DISV, "0")
-}
 record(longin, "$(P)StatusRefreshInt")
 {
     info(autosaveFields, "VAL")
@@ -572,13 +482,14 @@ record(calcout, "$(P)StatusRefresh")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)StatusRefreshInt NPP")
     field(INPB, "$(P)StatusRefresh NPP")
-    field(INPC, "$(P)CmdRsp NPP")
-    # Possibly delays Transition To Zero for 2 seconds if CmdRsp=Waiting
-    field(CALC, "(C=2||A=0||((B+1)<(2*A)))?B+1:0")
+    field(SCAN, "1 second")
+    field(CALC, "(A=0||((B+1)<(2*A)))?B+1:0")
     field(OCAL, "2") # Send Read status
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
+    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
+    field(DISV, "0")
     field(FLNK, "$(P)StatusRefreshNext")
 }
 record(calc, "$(P)StatusRefreshNext")
@@ -614,13 +525,13 @@ record(calcout, "$(P)CountersRefresh")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)CountersRefreshInt NPP")
     field(INPB, "$(P)CountersRefresh NPP")
-    field(INPC, "$(P)CmdRsp NPP")
-    # Possibly delay Transition To Zero for 1 second if CmdRsp=Waiting
-    field(CALC, "(C=2||A=0||((B+1)<(2*A)))?B+1:0")
+    field(CALC, "(A=0||((B+1)<(2*A)))?B+1:0")
     field(OCAL, "7") # Send Read counters
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
+    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
+    field(DISV, "0")
     field(FLNK, "$(P)CountersRefreshNext")
 }
 record(calc, "$(P)CountersRefreshNext")
@@ -656,13 +567,13 @@ record(calcout, "$(P)TempRefresh")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)TempRefreshInt NPP")
     field(INPB, "$(P)TempRefresh NPP")
-    field(INPC, "$(P)CmdRsp NPP")
-    # Possibly delay Transition To Zero for 1 second if CmdRsp=Waiting
-    field(CALC, "(C=2||A=0||((B+1)<(2*A)))?B+1:0")
+    field(CALC, "(A=0||((B+1)<(2*A)))?B+1:0")
     field(OCAL, "9") # Send Read temperatures
     field(OUT,  "$(P)CmdReq PP")
     field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
+    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
+    field(DISV, "0")
     field(FLNK, "$(P)TempRefreshNext")
 }
 record(calc, "$(P)TempRefreshNext")
@@ -708,7 +619,6 @@ record(seq, "$(P)StartSeq")
     field(DO1,  "5")
     field(LNK2, "$(P)CmdReq PP")
     field(DO2,  "2")
-    field(DLY2, "0.2")
 }
 
 record(seq, "$(P)StopSeq")
@@ -719,7 +629,6 @@ record(seq, "$(P)StopSeq")
     field(DO1,  "6")
     field(LNK2, "$(P)CmdReq PP")
     field(DO2,  "2")
-    field(DLY2, "0.2")
 }
 
 record(seq, "$(P)CheckSeq")
@@ -730,10 +639,8 @@ record(seq, "$(P)CheckSeq")
     field(DO1,  "2")
     field(LNK2, "$(P)CmdReq PP")
     field(DO2,  "0")
-    field(DLY2, "0.1")
     field(LNK3, "$(P)CmdReq PP")
     field(DO3,  "1")
-    field(DLY3, "0.2")
 }
 
 record(seq, "$(P)ConfSeq")
@@ -744,13 +651,12 @@ record(seq, "$(P)ConfSeq")
     field(DO1,  "6")
     field(LNK2, "$(P)CmdReq PP")
     field(DO2,  "4")
-    field(DLY2, "0.1")
     field(LNK3, "$(P)CmdReq PP")
-    field(DO3,  "5")
-    field(DLY3, "0.2")
+    field(DO3,  "3")
     field(LNK4, "$(P)CmdReq PP")
-    field(DO4,  "2")
-    field(DLY4, "0.3")
+    field(DO4,  "5")
+    field(LNK5, "$(P)CmdReq PP")
+    field(DO5,  "2")
 }
 record(stringout, "$(P)SaveConfig")
 {
@@ -819,7 +725,8 @@ record(stringin, "$(P)Config1")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))Config1")
     field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)Config1Sync")
+    # We need CA link to break the records loop and avoid asyn dead-lock
+    field(FLNK, "$(P)Config1Sync CA")
 }
 record(stringin, "$(P)Config2")
 {
@@ -914,6 +821,32 @@ record(bi, "$(P)ConfigApplied")
     field(ONAM, "applied")
     field(SCAN, "I/O Intr")
     field(PINI, "YES")
+    field(FLNK, "$(P)AutoConfig")
+}
+record(bo, "$(P)AutoConfigEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Send config to module upon param change")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(calcout, "$(P)AutoConfig")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DISV, "0")
+    field(SDIS, "$(P)AutoConfigEn PP")
+    field(INPA, "$(P)ConfigApplied NPP")
+    field(CALC, "A")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OOPT, "Transition To Zero")
+    field(OUT,  "$(P)ConfSeq.PROC")
+    # Try to group multiple param changes into a single config request
+    field(ODLY, "0.5")
 }
 record(bo, "$(P)CopyConfig")
 {

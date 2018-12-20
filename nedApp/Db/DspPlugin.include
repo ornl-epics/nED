@@ -142,3 +142,8 @@ record(mbbo, "$(P)CrocDiagEn")
     field(OUT,  "$(P)OutputMode PP")
     field(DTYP, "Raw Soft Channel")
 }
+
+record(mbbi, "$(P)HwType")
+{
+    field(SVSV, "NO_ALARM")
+}

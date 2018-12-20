@@ -22,7 +22,7 @@ Timer::~Timer()
 
 bool Timer::schedule(std::function<float()> &callback, float delay)
 {
-    if (m_timer.getExpireDelay() == DBL_MAX)
+    if (isActive())
         return false;
     m_callback = callback;
     m_timer.start(*this, delay);
@@ -49,5 +49,6 @@ bool Timer::cancel()
 
 bool Timer::isActive()
 {
-    return (m_timer.getExpireDelay() != DBL_MAX);
+    epicsTimer::expireInfo info = m_timer.getExpireInfo();
+    return info.active;
 }

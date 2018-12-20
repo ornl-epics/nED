@@ -12,6 +12,14 @@
 
 void AdcRocPlugin::createParams_v03()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
+    createRegParam("VERSION", "FwRev",  true, 1,  8,  0); // Firmware revision                  (low:2,high:4)
+    createRegParam("VERSION", "FwVer",  true, 1,  8,  8); // Firmware version                   (low:-1,high:1)
+    createRegParam("VERSION", "FwYear", true, 2, 16,  0, 0, CONV_HEX2DEC); // Firmware year
+    createRegParam("VERSION", "FwDay",  true, 3,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 3,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+
 //    BLXXX:Det:RocXXX:| sig nam|      | EPICS record description | (bi and mbbi description)
     createStatusParam("Ch8:ADCTrig",          0x0,  1, 15);   // Detected ADC7 triggered
     createStatusParam("Ch7:ADCTrig",          0x0,  1, 14);   // Detected ADC6 triggered

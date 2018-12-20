@@ -16,12 +16,6 @@
  * Plugin for ACPC FEM module.
  */
 class AcpcFemPlugin : public BaseModulePlugin {
-    private: // structures and definitions
-        static const unsigned NUM_ACPCFEMPLUGIN_DYNPARAMS;  //!< Maximum number of asyn parameters, including the status and configuration parameters
-
-    private: // variables
-        std::string m_version;              //!< Version string as passed to constructor
-
     public: // functions
 
         /**
@@ -34,30 +28,6 @@ class AcpcFemPlugin : public BaseModulePlugin {
          * @param[in] version ACPC FEM HW&SW version, ie. V10_50
          */
         AcpcFemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
-
-        /**
-         * Try to parse the ACPC FEM version response packet an populate the structure.
-         *
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see AcpcFemPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
-
-        /**
-         * Configured version must match actual.
-         *
-         * @return true when they match, false otherwise.
-         */
-        bool checkVersion(const BaseModulePlugin::Version &version);
 
     private: // functions
         /**

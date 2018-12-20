@@ -8,3 +8,7 @@ record(mbbo, "$(P)DiagEn")
     field(OUT,  "$(P)OutputMode PP")
 }
 
+record(mbbi, "$(P)HwType")
+{
+    field(FRSV, "NO_ALARM")
+}

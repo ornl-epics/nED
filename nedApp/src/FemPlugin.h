@@ -21,7 +21,6 @@
  */
 class FemPlugin : public BaseModulePlugin {
     private: // variables
-        std::string m_version;              //!< Version string as passed to constructor
         struct RemoteUpgrade {
             /**
              * Valid remote update statuses
@@ -64,6 +63,7 @@ class FemPlugin : public BaseModulePlugin {
             std::shared_ptr<char> buffer;
             uint32_t bufferSize;
             uint32_t pktPayloadSize;//!< Size of allocated space in packet payload
+            std::vector<char> sendBuf;
             uint32_t offset;        //!< Current data position, used as progress
             uint32_t lastCount;     //!< Number of bytes sent in previous chunk
             Timer responseTimer{false};//!< Currently running timer for response timeout handling
@@ -91,14 +91,11 @@ class FemPlugin : public BaseModulePlugin {
         FemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
 
         /**
-         * Overload start request and return 0 - skipped.
+         * Handler for CMD_UPGRADE command.
+         *
+         * Sends out a CMD_UPGRADE request packet, with payload copied from m_sendBuf if any.
          */
-        virtual DasCmdPacket::CommandType reqStart();
-
-        /**
-         * Overload stop request and return 0 - skipped.
-         */
-        virtual DasCmdPacket::CommandType reqStop();
+        bool reqUpgrade();
 
         /**
          * Handle parameters write requests for integer type.
@@ -117,25 +114,6 @@ class FemPlugin : public BaseModulePlugin {
          * Handle writing strings.
          */
         virtual asynStatus writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual);
-
-        /**
-         * Try to parse the FEM version response packet an populate the structure.
-         *
-         * @param[in] packet to be parsed
-         * @param[out] version structure to be populated
-         * @return true if succesful, false if version response packet could not be parsed.
-         */
-        static bool parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version);
-
-        /**
-         * Member counterpart of parseVersionRsp().
-         *
-         * @see FemPlugin::parseVersionRsp()
-         */
-        bool parseVersionRspM(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-        {
-            return parseVersionRsp(packet, version);
-        }
 
     private: // functions
         /**
@@ -177,13 +155,6 @@ class FemPlugin : public BaseModulePlugin {
          * Create and register all FEM9 v38 parameters to be exposed to EPICS.
          */
         void createParams_v320();
-
-        /**
-         * Response handler to be registers into BaseModulePlugin
-         *
-         * @return true when packet has been handled
-         */
-        bool remoteUpgradeRsp(const DasCmdPacket *packet);
 
         /**
          * Remote upgrade state machine function.

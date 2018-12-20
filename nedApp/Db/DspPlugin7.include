@@ -127,3 +127,22 @@ record(mbbi, "$(P)OutputMode")
     field(VAL,  "1")
     field(INP,  "$(P)DataFormatId CP")
 }
+
+record(mbbi, "$(P)HwType")
+{
+    field(SVSV, "NO_ALARM")
+}
+
+record(longin, "$(P)HwDay")
+{
+    field(VAL,  "0")
+}
+record(longin, "$(P)HwMonth")
+{
+    field(VAL,  "0")
+}
+record(longin, "$(P)HwYear")
+{
+    field(VAL,  "0")
+    field(PINI, "YES")
+}

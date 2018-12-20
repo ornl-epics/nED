@@ -13,29 +13,11 @@
 
 EPICS_REGISTER_PLUGIN(FemPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
 
-struct RspReadVersion {
-#ifdef BITFIELD_LSB_FIRST
-    unsigned hw_revision:8;     // Board revision number
-    unsigned hw_version:8;      // Board version number
-    unsigned hw_year:16;        // Board year
-    unsigned hw_day:8;          // Board day
-    unsigned hw_month:8;        // Board month
-    unsigned fw_revision:8;     // Firmware revision number
-    unsigned fw_version:8;      // Firmware version number
-    unsigned fw_year:16;        // Firmware year
-    unsigned fw_day:8;          // Firmware day
-    unsigned fw_month:8;        // Firmware month
-#else
-#error Missing RspReadVersion declaration
-#endif // BITFIELD_LSB_FIRST
-};
-
 // GCC specific - but very efficient 1 CPU cycle
 #define BYTE_SWAP(a) __builtin_bswap32(a)
 
-FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, DasCmdPacket::MOD_TYPE_FEM, 2)
-    , m_version(version)
+FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
 {
     createParam("Upg:File",     asynParamOctet, &UpgradeFile);             // WRITE - Path to the firmware file to be programmed
     createParam("Upg:ChunkSize",asynParamInt32, &UpgradeChunkSize, 256);   // WRITE - Maximum payload size for split program file transfer
@@ -54,50 +36,40 @@ FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char
 
     m_remoteUpgrade.status = RemoteUpgrade::NOT_SUPPORTED;
 
-    if (m_version == "v32") {
-        setIntegerParam(Supported, 1);
+    std::string version(version_);
+    if (version == "v32") {
         createParams_v32();
-        setExpectedVersion(3, 2);
-    } else if (m_version == "v34") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v34") {
         createParams_v32();
-        setExpectedVersion(3, 4);
-    } else if (m_version == "v35") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v35") {
         createParams_v35();
-        setExpectedVersion(3, 5);
-    } else if (m_version == "v36") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v36") {
         createParams_v36();
-        setExpectedVersion(3, 6);
-    } else if (m_version == "v37") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v37") {
         createParams_v37();
-        setExpectedVersion(3, 7);
-    } else if (m_version == "v38") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v38") {
         createParams_v38();
-        setExpectedVersion(3, 8);
-    } else if (m_version == "v39") {
-        setIntegerParam(Supported, 1);
+    } else if (version == "v39") {
         createParams_v39();
         remoteUpgradeSM(RemoteUpgrade::INIT);
-        setExpectedVersion(3, 9, 10, 9);
-    } else if (m_version == "v310") {
-        setIntegerParam(Supported, 1);
+        m_cmdHandlers[DasCmdPacket::CMD_UPGRADE].first = std::bind(&FemPlugin::reqUpgrade, this);
+        m_cmdHandlers[DasCmdPacket::CMD_UPGRADE].second = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
+    } else if (version == "v310") {
         createParams_v310();
         remoteUpgradeSM(RemoteUpgrade::INIT);
-        setExpectedVersion(3, 10, 10, 9);
-    } else if (m_version == "v320") {
-        setIntegerParam(Supported, 1);
+        m_cmdHandlers[DasCmdPacket::CMD_UPGRADE].first = std::bind(&FemPlugin::reqUpgrade, this);
+        m_cmdHandlers[DasCmdPacket::CMD_UPGRADE].second = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
+    } else if (version == "v320") {
         createParams_v320();
-        setExpectedVersion(3, 20);
     } else {
-        setIntegerParam(Supported, 0);
-        LOG_ERROR("Unsupported FEM version '%s'", version);
+        LOG_ERROR("Unsupported FEM version '%s'", version.c_str());
         return;
     }
     setStringParam(UpgradeErrorStr, "");
+
+    // FEMs don't support starting/stopping
+    m_cmdHandlers[DasCmdPacket::CMD_START].first = std::function<bool()>();
+    m_cmdHandlers[DasCmdPacket::CMD_STOP].first  = std::function<bool()>();
 
     initParams();
 }
@@ -126,39 +98,11 @@ asynStatus FemPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t 
     return ret;
 }
 
-
-DasCmdPacket::CommandType FemPlugin::reqStart()
+bool FemPlugin::reqUpgrade()
 {
-    // FEMs don't support starting/stopping
-    return static_cast<DasCmdPacket::CommandType>(0);
-}
-
-
-DasCmdPacket::CommandType FemPlugin::reqStop()
-{
-    // FEMs don't support starting/stopping
-    return static_cast<DasCmdPacket::CommandType>(0);
-}
-
-
-bool FemPlugin::parseVersionRsp(const DasCmdPacket *packet, BaseModulePlugin::Version &version)
-{
-    const RspReadVersion *response = reinterpret_cast<const RspReadVersion*>(packet->getCmdPayload());
-
-    if (packet->getCmdPayloadLength() != sizeof(RspReadVersion)) {
-        return false;
-    }
-
-    version.hw_version  = response->hw_version;
-    version.hw_revision = response->hw_revision;
-    version.hw_year     = HEX_BYTE_TO_DEC(response->hw_year >> 8) * 100 + HEX_BYTE_TO_DEC(response->hw_year);
-    version.hw_month    = HEX_BYTE_TO_DEC(response->fw_month);
-    version.hw_day      = HEX_BYTE_TO_DEC(response->hw_day);
-    version.fw_version  = response->fw_version;
-    version.fw_revision = response->fw_revision;
-    version.fw_year     = HEX_BYTE_TO_DEC(response->fw_year >> 8) * 100 + HEX_BYTE_TO_DEC(response->fw_year);
-    version.fw_month    = HEX_BYTE_TO_DEC(response->fw_month);
-    version.fw_day      = HEX_BYTE_TO_DEC(response->fw_day);
+    uint32_t size = m_remoteUpgrade.sendBuf.size();
+    char* data = (size > 0 ? m_remoteUpgrade.sendBuf.data() : nullptr);
+    sendUpstream(DasCmdPacket::CMD_UPGRADE, 0, (uint32_t*)data, size);
     return true;
 }
 
@@ -169,11 +113,6 @@ bool FemPlugin::timerExpired(epicsTimeStamp *timer, int timeoutParam)
     epicsTimeStamp now;
     epicsTimeGetCurrent(&now);
     return (epicsTimeDiffInSeconds(&now, timer) > timeout);
-}
-
-bool FemPlugin::remoteUpgradeRsp(const DasCmdPacket *packet)
-{
-    return remoteUpgradeSM(RemoteUpgrade::PROCESS_RESPONSE, packet);
 }
 
 // Big fat state machine
@@ -187,9 +126,6 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
     case RemoteUpgrade::INIT:
         // Everyone starts as not supported, when invoked this state changes that
         if (m_remoteUpgrade.status == RemoteUpgrade::NOT_SUPPORTED) {
-            std::function<bool(const DasCmdPacket *)> handler = std::bind(&FemPlugin::remoteUpgradeSM, this, RemoteUpgrade::PROCESS_RESPONSE, std::placeholders::_1);
-            registerResponseHandler(handler);
-
             m_remoteUpgrade.status = RemoteUpgrade::NOT_READY;
             m_remoteUpgrade.expectedWrCfg = 0;
             m_remoteUpgrade.seqRetries = 0;
@@ -282,7 +218,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                     break;
                 }
                 m_remoteUpgrade.expectedWrCfg++;
-                reqWriteConfig();
+                processRequest(DasCmdPacket::CMD_WRITE_CONFIG);
 
                 epicsThreadSleep(0.1);
             }
@@ -321,7 +257,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                 ret = false;
             }
             break;
-        } else if (rspUpgrade(packet) == false) {
+        } else if (rspParams(packet, "UPGRADE") == false) {
             m_remoteUpgrade.status = RemoteUpgrade::ERROR;
             setStringParam(UpgradeErrorStr, "bad response");
             ret = false;
@@ -341,7 +277,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                 m_remoteUpgrade.statusTimer.cancel();
 
                 // Sending another status request is redundant, but keeps SM sane
-                reqUpgrade();
+                m_remoteUpgrade.sendBuf.clear();
+                processRequest(DasCmdPacket::CMD_UPGRADE);
                 m_remoteUpgrade.expectedSeqId = 0; // FEM resets counter to 0 every time upgrade is started
 
                 LOG_INFO("Upgrade - sending data");
@@ -420,7 +357,11 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                 }
 
                 LOG_DEBUG("Upgrade progress, sending firmware chunk size %u at offset %u", m_remoteUpgrade.lastCount, m_remoteUpgrade.offset);
-                reqUpgrade(m_remoteUpgrade.buffer.get(), m_remoteUpgrade.lastCount);
+                m_remoteUpgrade.sendBuf.clear();
+                for (size_t i = 0; i < m_remoteUpgrade.lastCount; i++) {
+                    m_remoteUpgrade.sendBuf.push_back(m_remoteUpgrade.buffer.get()[i]);
+                }
+                processRequest(DasCmdPacket::CMD_UPGRADE);
 
                 // A packet was sent out, setup a timeout timer
                 double timeout;
@@ -445,7 +386,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
 
                 // Send a silent request to retrieve the status again
                 LOG_DEBUG("Upgrade busy, sending upgrade status refresh request");
-                reqUpgrade();
+                m_remoteUpgrade.sendBuf.clear();
+                processRequest(DasCmdPacket::CMD_UPGRADE);
 
                 // A packet was sent out, setup a timeout timer
                 double timeout;
@@ -478,7 +420,7 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
                     // Push new configuration, but don't refresh upgrade status
                     // as it clears most registers
                     m_remoteUpgrade.expectedWrCfg++;
-                    reqWriteConfig();
+                    processRequest(DasCmdPacket::CMD_WRITE_CONFIG);
                 }
 
                 LOG_INFO("Upgrade - complete");
@@ -540,7 +482,8 @@ bool FemPlugin::remoteUpgradeSM(RemoteUpgrade::Action action, const DasCmdPacket
             } else {
                 // Refresh status to see what packet has been received,
                 // rest of SM will take care of that
-                reqUpgrade();
+                m_remoteUpgrade.sendBuf.clear();
+                processRequest(DasCmdPacket::CMD_UPGRADE);
                 m_remoteUpgrade.seqRetries++;
                 m_remoteUpgrade.totRetries++;
                 setIntegerParam(UpgradeNoRspSeqRetries, m_remoteUpgrade.seqRetries);
@@ -606,7 +549,8 @@ float FemPlugin::remoteUpgradeStatusRefresh()
 {
     lock();
 
-    reqUpgrade();
+    m_remoteUpgrade.sendBuf.clear();
+    processRequest(DasCmdPacket::CMD_UPGRADE);
 
     // A packet was sent out, setup a timeout timer
     double timeout;

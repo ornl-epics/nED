@@ -42,3 +42,9 @@ record(calc, "$(P)HwStatus")
     field(INPH, "$(P)TempPreampBAlrm PP")
 }
 
+
+record(mbbi, "$(P)HwType")
+{
+    field(ZRSV, "NO_ALARM")
+}
+

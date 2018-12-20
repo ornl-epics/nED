@@ -1,0 +1,4 @@
+record(mbbi, "$(P)HwType")
+{
+    field(TTSV, "NO_ALARM")
+}

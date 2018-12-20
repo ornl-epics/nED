@@ -8,7 +8,7 @@
   <widget type="group" version="2.0.0">
     <name>Info</name>
     <width>337</width>
-    <height>223</height>
+    <height>190</height>
     <font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
       </font>
@@ -21,7 +21,7 @@
     </actions>
     <widget type="textupdate" version="2.0.0">
       <name>HwVer_Update</name>
-      <pv_name>$(P)HwVerStr.SVAL</pv_name>
+      <pv_name>$(P)HwVersion</pv_name>
       <x>150</x>
       <y>50</y>
       <width>127</width>
@@ -81,7 +81,7 @@
     </widget>
     <widget type="textupdate" version="2.0.0">
       <name>FwVer_Update</name>
-      <pv_name>$(P)FwVerStr.SVAL</pv_name>
+      <pv_name>$(P)FwVersion</pv_name>
       <x>150</x>
       <y>100</y>
       <width>127</width>
@@ -194,7 +194,7 @@
     <name>Status</name>
     <x>336</x>
     <width>349</width>
-    <height>223</height>
+    <height>190</height>
     <font>
       <font name="Default Bold" family="Liberation Sans" style="BOLD" size="14.0">
       </font>
@@ -263,43 +263,9 @@
       </actions>
     </widget>
     <widget type="label" version="2.0.0">
-      <name>Supported_Label</name>
-      <text>Module supported</text>
-      <y>30</y>
-      <width>139</width>
-      <height>26</height>
-      <vertical_alignment>1</vertical_alignment>
-      <actions>
-      </actions>
-      <border_color>
-        <color red="0" green="128" blue="255">
-        </color>
-      </border_color>
-    </widget>
-    <widget type="led" version="2.0.0">
-      <name>Supported_LED</name>
-      <pv_name>$(P)Supported</pv_name>
-      <bit>0</bit>
-      <x>138</x>
-      <y>32</y>
-      <width>22</width>
-      <height>22</height>
-      <off_color>
-        <color name="STOP" red="255" green="0" blue="0">
-        </color>
-      </off_color>
-      <on_color>
-        <color name="On" red="0" green="255" blue="0">
-        </color>
-      </on_color>
-      <actions>
-      </actions>
-      <border_alarm_sensitive>false</border_alarm_sensitive>
-    </widget>
-    <widget type="label" version="2.0.0">
       <name>Initialized_Label</name>
       <text>Module verified</text>
-      <y>55</y>
+      <y>25</y>
       <width>139</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -314,25 +280,8 @@
       <name>Text Update_1</name>
       <pv_name>$(P)OutputMode</pv_name>
       <x>210</x>
-      <y>127</y>
+      <y>97</y>
       <width>96</width>
-      <height>26</height>
-      <vertical_alignment>1</vertical_alignment>
-      <wrap_words>false</wrap_words>
-      <actions>
-      </actions>
-      <border_alarm_sensitive>false</border_alarm_sensitive>
-      <border_color>
-        <color red="0" green="128" blue="255">
-        </color>
-      </border_color>
-    </widget>
-    <widget type="textupdate" version="2.0.0">
-      <name>Text Update_1</name>
-      <pv_name>$(P)Verified</pv_name>
-      <x>168</x>
-      <y>55</y>
-      <width>138</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
       <wrap_words>false</wrap_words>
@@ -348,7 +297,7 @@
       <name>Initialized_LED</name>
       <pv_name>$(P)ConfStatus.SEVR</pv_name>
       <x>138</x>
-      <y>132</y>
+      <y>102</y>
       <width>22</width>
       <height>22</height>
       <actions>
@@ -398,7 +347,7 @@
       <name>Initialized_LED</name>
       <pv_name>$(P)Verified.SEVR</pv_name>
       <x>138</x>
-      <y>57</y>
+      <y>27</y>
       <width>22</width>
       <height>22</height>
       <actions>
@@ -448,7 +397,7 @@
       <name>Acquire_LED</name>
       <pv_name>$(P)AcquiringCheck</pv_name>
       <x>138</x>
-      <y>82</y>
+      <y>52</y>
       <width>22</width>
       <height>22</height>
       <actions>
@@ -489,7 +438,7 @@
     <widget type="label" version="2.0.0">
       <name>Acquire_Label</name>
       <text>Acquiring data</text>
-      <y>80</y>
+      <y>50</y>
       <width>139</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -503,7 +452,7 @@
     <widget type="label" version="2.0.0">
       <name>HwStatus_Label</name>
       <text>HW status check</text>
-      <y>105</y>
+      <y>75</y>
       <width>139</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -517,7 +466,7 @@
     <widget type="label" version="2.0.0">
       <name>HwStatus_Label</name>
       <text>Config status</text>
-      <y>130</y>
+      <y>100</y>
       <width>139</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -533,7 +482,7 @@
       <pv_name>$(P)HwStatus</pv_name>
       <bit>0</bit>
       <x>138</x>
-      <y>107</y>
+      <y>77</y>
       <width>22</width>
       <height>22</height>
       <off_color>
@@ -551,7 +500,7 @@
     <widget type="label" version="2.0.0">
       <name>Supported_Label</name>
       <text>Comm failures</text>
-      <y>155</y>
+      <y>125</y>
       <width>139</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -566,7 +515,7 @@
       <name>Text Update</name>
       <pv_name>$(P)RspMissCount</pv_name>
       <x>138</x>
-      <y>156</y>
+      <y>126</y>
       <width>39</width>
       <height>22</height>
       <vertical_alignment>1</vertical_alignment>
@@ -582,7 +531,7 @@
       <name>Label</name>
       <text>Max</text>
       <x>181</x>
-      <y>155</y>
+      <y>125</y>
       <width>43</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -597,7 +546,7 @@
       <name>Text Input</name>
       <pv_name>$(P)RspMissCount.HIHI</pv_name>
       <x>210</x>
-      <y>156</y>
+      <y>126</y>
       <width>30</width>
       <height>22</height>
       <background_color>
@@ -615,7 +564,7 @@
       <name>HwStatus_Label</name>
       <text>Mode</text>
       <x>168</x>
-      <y>127</y>
+      <y>97</y>
       <width>51</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -637,7 +586,7 @@
       <pv_name>$(P)RspMissCount</pv_name>
       <text>Reset</text>
       <x>240</x>
-      <y>156</y>
+      <y>126</y>
       <width>65</width>
       <height>22</height>
       <background_color>
@@ -647,9 +596,9 @@
     </widget>
     <widget type="rectangle" version="2.0.0">
       <name>Rectangle</name>
-      <y>30</y>
+      <y>27</y>
       <width>306</width>
-      <height>149</height>
+      <height>122</height>
       <line_width>0</line_width>
       <line_color>
         <color red="128" green="0" blue="255">
@@ -676,7 +625,7 @@ $(pv_value)</tooltip>
   <widget type="group" version="2.0.0">
     <name>Manual operation</name>
     <x>336</x>
-    <y>222</y>
+    <y>190</y>
     <width>349</width>
     <height>175</height>
     <font>
@@ -808,6 +757,23 @@ $(pv_value)</tooltip>
       </background_color>
       <border_alarm_sensitive>false</border_alarm_sensitive>
     </widget>
+    <widget type="label" version="2.0.0">
+      <name>Label_1</name>
+      <text>Auto apply config on change:</text>
+      <x>2</x>
+      <y>112</y>
+      <width>210</width>
+      <height>31</height>
+    </widget>
+    <widget type="checkbox" version="2.0.0">
+      <name>Check Box</name>
+      <pv_name>$(P)AutoConfigEn</pv_name>
+      <label></label>
+      <x>212</x>
+      <y>107</y>
+      <width>90</width>
+      <height>30</height>
+    </widget>
     <widget type="rectangle" version="2.0.0">
       <name>Rectangle_1</name>
       <y>6</y>
@@ -838,7 +804,7 @@ $(pv_value)</tooltip>
   </widget>
   <widget type="group" version="2.0.0">
     <name>Automatic settings</name>
-    <y>222</y>
+    <y>190</y>
     <width>337</width>
     <height>175</height>
     <font>

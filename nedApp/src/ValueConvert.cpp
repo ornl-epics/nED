@@ -104,3 +104,42 @@ bool SignMagnitudeConvert::checkBounds(int value, uint8_t bits) const
     return (min <= value && value <= max);
 }
 
+
+Hex2DecConvert::Hex2DecConvert()
+: BaseConvert()
+{}
+
+int Hex2DecConvert::fromRaw(uint32_t value, uint8_t bits) const
+{
+    int converted = 0;
+    int mult = 1;
+    for (int i = 0; i < 4; i++) {
+        int byte = value & 0xFF;
+        converted += mult * ((byte/16)*10 + (byte%16));
+        mult *= 100;
+        value >>= 8;
+    }
+    return converted;
+}
+
+uint32_t Hex2DecConvert::toRaw(int value, uint8_t bits) const
+{
+    if (checkBounds(value, bits) == false)
+        return 0;
+
+    int converted = 0;
+    for (int i = 0; i < 4; i++) {
+        int temp = value % 100;
+        converted |= ((temp/10)*16 + temp%10) << (8*i);
+        value /= 100;
+    }
+    return converted;
+}
+
+bool Hex2DecConvert::checkBounds(int value, uint8_t bits) const
+{
+    int max = (0x1ULL << (bits - 1)) - 1;
+    int min = -1 * max;
+    return (min <= value && value <= max);
+}
+

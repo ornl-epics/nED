@@ -12,6 +12,14 @@
 
 void BnlRocPlugin::createParams_v20()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
+    createRegParam("VERSION", "FwRev",  true, 1,  8,  0); // Firmware revision                  (low:-1,high:1)
+    createRegParam("VERSION", "FwVer",  true, 1,  8,  8); // Firmware version                   (low:1,high:3)
+    createRegParam("VERSION", "FwYear", true, 2, 16,  0, 0, CONV_HEX2DEC); // Firmware year
+    createRegParam("VERSION", "FwDay",  true, 3,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 3,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+
 //    BLXXX:Det:RocXXX:| sig nam|                                   | EPICS record description | (bi and mbbi description)
     createStatusParam("GotStart",             0x0,  1,  15);   // Got START
     createStatusParam("Start",                0x0,  2,  13);   // START

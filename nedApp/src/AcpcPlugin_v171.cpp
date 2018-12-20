@@ -19,6 +19,19 @@
 
 void AcpcPlugin::createParams_v171()
 {
+    createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
+    createRegParam("VERSION", "HwYear", true, 1,  8,  0, 0, CONV_HEX2DEC); // Hardware year     (offset:2000)
+    createRegParam("VERSION", "HwDay",  true, 2,  8,  0, 0, CONV_HEX2DEC); // Hardware day
+    createRegParam("VERSION", "HwMonth",true, 2,  8,  8, 0, CONV_HEX2DEC); // Hardware month
+    createRegParam("VERSION", "FwRev",  true, 3,  8,  0); // Firmware revision                  (low:0,high:2)
+    createRegParam("VERSION", "FwVer",  true, 3,  8,  8); // Firmware version                   (low:16,high:18)
+    createRegParam("VERSION", "FwYear", true, 4,  8,  0, 0, CONV_HEX2DEC); // Firmware year     (offset:2000)
+    createRegParam("VERSION", "FwDay",  true, 5,  8,  0, 0, CONV_HEX2DEC); // Firmware day
+    createRegParam("VERSION", "FwMonth",true, 5,  8,  8, 0, CONV_HEX2DEC); // Firmware month
+    createRegParam("VERSION", "Eeprom1",true, 6, 32,  0);
+    createRegParam("VERSION", "Eeprom2",true, 8, 32,  8);
+
     createStatusParam("ErrCmdBad",            0x0,  1,  0); // Unrecognized command error   (0=no error,1=error)
     createStatusParam("ErrPktLengthError",    0x0,  1,  1); // Packet length error          (0=no error,1=error)
     createStatusParam("ErrCfgError",          0x0,  1,  2); // Configuration error          (0=no error,1=error)
