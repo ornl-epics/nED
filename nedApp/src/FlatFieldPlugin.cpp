@@ -171,12 +171,13 @@ asynStatus FlatFieldPlugin::writeOctet(asynUser *pasynUser, const char *value, s
                 setIntegerParam(ImportStatus, IMPORT_STATUS_ERROR);
                 callParamCallbacks();
                 return asynError;
-            } else if (m_importTimer.isActive() != 0) {
+            } else if (m_importTimer.isActive()) {
                 // Since importFilesCb locks the port, the only case we're here
                 // is when waiting for timer to executeImportCb()
-                LOG_ERROR("Importing files in progress");
+                LOG_ERROR("Importing files in progress, can't start new import");
                 return asynError;
             } else {
+                LOG_INFO("Importing files from %s", path.c_str());
                 std::function<float(void)> importCb = std::bind(&FlatFieldPlugin::importFilesCb, this, path);
                 if (m_importTimer.schedule(importCb, 0.1) == false) {
                     LOG_ERROR("Failed to schedule importing directory");
