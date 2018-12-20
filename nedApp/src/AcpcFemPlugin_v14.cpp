@@ -13,12 +13,12 @@ void AcpcFemPlugin::createParams_v14()
 {
     createRegParam("VERSION", "HwDay",  true, 0,  8,  0, 0, CONV_HEX2DEC); // Hardware day
     createRegParam("VERSION", "HwMonth",true, 0,  8,  8, 0, CONV_HEX2DEC); // Hardware month
-    createRegParam("VERSION", "HwYear", true, 1,  8,  0, 0, CONV_HEX2DEC); // Hardware year     (offset:2000)
+    createRegParam("VERSION", "HwYear", true, 1,  8,  0, 0, CONV_HEX2DEC2K); // Hardware year
     createRegParam("VERSION", "HwRev",  true, 2,  8,  0); // Hardware revision
     createRegParam("VERSION", "HwVer",  true, 2,  8,  8); // Hardware version
     createRegParam("VERSION", "FwDay",  true, 3,  8,  0, 0, CONV_HEX2DEC); // Firmware day
     createRegParam("VERSION", "FwMonth",true, 3,  8,  8, 0, CONV_HEX2DEC); // Firmware month
-    createRegParam("VERSION", "FwYear", true, 4,  8,  0, 0, CONV_HEX2DEC); // Firmware year     (offset:2000)
+    createRegParam("VERSION", "FwYear", true, 4,  8,  0, 0, CONV_HEX2DEC2K); // Firmware year
     createRegParam("VERSION", "FwRev",  true, 5,  8,  0); // Firmware revision                  (low:3,high:5)
     createRegParam("VERSION", "FwVer",  true, 5,  8,  8); // Firmware version                   (low:0,high:2)
 

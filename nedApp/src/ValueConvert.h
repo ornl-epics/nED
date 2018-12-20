@@ -71,4 +71,13 @@ class Hex2DecConvert : public BaseConvert {
         bool checkBounds(int value, uint8_t bits=32) const;
 };
 
+class Hex2DecConvert2K : public Hex2DecConvert {
+    public:
+        Hex2DecConvert2K();
+
+        int fromRaw(uint32_t value, uint8_t bits=32) const;
+
+        uint32_t toRaw(int value, uint8_t bits=32) const;
+};
+
 #endif // VALUE_CONVERT_H

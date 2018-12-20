@@ -143,3 +143,16 @@ bool Hex2DecConvert::checkBounds(int value, uint8_t bits) const
     return (min <= value && value <= max);
 }
 
+Hex2DecConvert2K::Hex2DecConvert2K()
+: Hex2DecConvert()
+{}
+
+int Hex2DecConvert2K::fromRaw(uint32_t value, uint8_t bits) const
+{
+    return Hex2DecConvert::fromRaw(value, bits) + 2000;
+}
+
+uint32_t Hex2DecConvert2K::toRaw(int value, uint8_t bits) const
+{
+    return Hex2DecConvert::toRaw(value-2000, bits);
+}

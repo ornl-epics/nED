@@ -17,12 +17,12 @@ void AcpcPlugin::createParams_v180()
 {
     createRegParam("VERSION", "HwRev",  true, 0,  8,  0); // Hardware revision
     createRegParam("VERSION", "HwVer",  true, 0,  8,  8); // Hardware version
-    createRegParam("VERSION", "HwYear", true, 1,  8,  0, 0, CONV_HEX2DEC); // Hardware year     (offset:2000)
+    createRegParam("VERSION", "HwYear", true, 1,  8,  0, 0, CONV_HEX2DEC2K); // Hardware year
     createRegParam("VERSION", "HwDay",  true, 2,  8,  0, 0, CONV_HEX2DEC); // Hardware day
     createRegParam("VERSION", "HwMonth",true, 2,  8,  8, 0, CONV_HEX2DEC); // Hardware month
     createRegParam("VERSION", "FwRev",  true, 3,  8,  0); // Firmware revision                  (low:-1,high:1)
     createRegParam("VERSION", "FwVer",  true, 3,  8,  8); // Firmware version                   (low:17,high:19)
-    createRegParam("VERSION", "FwYear", true, 4,  8,  0, 0, CONV_HEX2DEC); // Firmware year     (offset:2000)
+    createRegParam("VERSION", "FwYear", true, 4,  8,  0, 0, CONV_HEX2DEC2K); // Firmware year
     createRegParam("VERSION", "FwDay",  true, 5,  8,  0, 0, CONV_HEX2DEC); // Firmware day
     createRegParam("VERSION", "FwMonth",true, 5,  8,  8, 0, CONV_HEX2DEC); // Firmware month
     createRegParam("VERSION", "Eeprom1",true, 6, 32,  0);

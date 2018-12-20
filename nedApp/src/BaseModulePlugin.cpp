@@ -35,6 +35,7 @@ const UnsignConvert *BaseModulePlugin::CONV_UNSIGN = new UnsignConvert();
 const Sign2sComplementConvert *BaseModulePlugin::CONV_SIGN_2COMP = new Sign2sComplementConvert();
 const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitudeConvert();
 const Hex2DecConvert *BaseModulePlugin::CONV_HEX2DEC = new Hex2DecConvert();
+const Hex2DecConvert2K *BaseModulePlugin::CONV_HEX2DEC2K = new Hex2DecConvert2K();
 
 /**
  * This is a global map from hardwareId to plugin name. Whenever a module is

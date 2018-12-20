@@ -138,6 +138,7 @@ class BaseModulePlugin : public BasePlugin {
         static const Sign2sComplementConvert *CONV_SIGN_2COMP;
         static const SignMagnitudeConvert *CONV_SIGN_MAGN;
         static const Hex2DecConvert *CONV_HEX2DEC;
+        static const Hex2DecConvert2K *CONV_HEX2DEC2K;
 
     protected: // variables
         uint32_t m_features;

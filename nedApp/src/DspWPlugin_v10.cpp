@@ -14,7 +14,7 @@ void DspWPlugin::createParams_v10() {
     createRegParam("VERSION", "HwVer",  true, 0,  8,  8);   // Hardware revision        (low:1,high:3)
     createRegParam("VERSION", "FwRev",  true, 0,  8, 16);   // Firmware revision        (low:1,high:3)
     createRegParam("VERSION", "FwVer",  true, 0,  8, 24);   // Firmware revision        (low:6,high:8)
-    createRegParam("VERSION", "FwYear", true, 1,  8,  0, 0, CONV_HEX2DEC); // Firmware year (offset:2000)
+    createRegParam("VERSION", "FwYear", true, 1,  8,  0, 0, CONV_HEX2DEC2K); // Firmware year
     createRegParam("VERSION", "FwDay",  true, 1,  8, 16, 0, CONV_HEX2DEC); // Firmware day
     createRegParam("VERSION", "FwMonth",true, 1,  8, 24, 0, CONV_HEX2DEC); // Firmware day
 
