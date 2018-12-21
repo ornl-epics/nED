@@ -482,7 +482,6 @@ record(calcout, "$(P)StatusRefresh")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)StatusRefreshInt NPP")
     field(INPB, "$(P)StatusRefresh NPP")
-    field(SCAN, "1 second")
     field(CALC, "(A=0||((B+1)<(2*A)))?B+1:0")
     field(OCAL, "2") # Send Read status
     field(OUT,  "$(P)CmdReq PP")
@@ -490,6 +489,7 @@ record(calcout, "$(P)StatusRefresh")
     field(DOPT, "Use OCAL")
     field(SDIS, "$(P)Enable NPP") # Don't run if disabled
     field(DISV, "0")
+    field(SCAN, ".5 second")
     field(FLNK, "$(P)StatusRefreshNext")
 }
 record(calc, "$(P)StatusRefreshNext")
@@ -532,6 +532,7 @@ record(calcout, "$(P)CountersRefresh")
     field(DOPT, "Use OCAL")
     field(SDIS, "$(P)Enable NPP") # Don't run if disabled
     field(DISV, "0")
+    field(SCAN, ".5 second")
     field(FLNK, "$(P)CountersRefreshNext")
 }
 record(calc, "$(P)CountersRefreshNext")
@@ -574,6 +575,7 @@ record(calcout, "$(P)TempRefresh")
     field(DOPT, "Use OCAL")
     field(SDIS, "$(P)Enable NPP") # Don't run if disabled
     field(DISV, "0")
+    field(SCAN, ".5 second")
     field(FLNK, "$(P)TempRefreshNext")
 }
 record(calc, "$(P)TempRefreshNext")
