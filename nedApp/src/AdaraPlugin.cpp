@@ -163,12 +163,14 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     outpacket[8] = 0; // TSYNC period
     outpacket[9] = 0; // TSYNC delay
 
+    len = 10;
     for (uint32_t i = 0; i < nEvents; i++) {
         uint8_t type = (events[i].pixelid >> 28) & 0x7;
         if (m_eventsSel[type] == true) {
             outpacket[0] += sizeof(Event::Pixel);
             outpacket[10+2*i] = events[i].tof;
             outpacket[11+2*i] = events[i].pixelid;
+            len += sizeof(Event::Pixel) / sizeof(uint32_t);
         }
     }
 
