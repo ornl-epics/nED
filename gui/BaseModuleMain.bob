@@ -50,40 +50,10 @@
       </border_color>
     </widget>
     <widget type="textupdate" version="2.0.0">
-      <name>HwDate_Update</name>
-      <pv_name>$(P)HwDate</pv_name>
-      <x>150</x>
-      <y>75</y>
-      <width>127</width>
-      <height>26</height>
-      <vertical_alignment>1</vertical_alignment>
-      <wrap_words>false</wrap_words>
-      <actions>
-      </actions>
-      <border_color>
-        <color red="0" green="128" blue="255">
-        </color>
-      </border_color>
-    </widget>
-    <widget type="label" version="2.0.0">
-      <name>HwDate_Label</name>
-      <text>Hardware date</text>
-      <y>75</y>
-      <width>145</width>
-      <height>26</height>
-      <vertical_alignment>1</vertical_alignment>
-      <actions>
-      </actions>
-      <border_color>
-        <color red="0" green="128" blue="255">
-        </color>
-      </border_color>
-    </widget>
-    <widget type="textupdate" version="2.0.0">
       <name>FwVer_Update</name>
       <pv_name>$(P)FwVersion</pv_name>
       <x>150</x>
-      <y>100</y>
+      <y>75</y>
       <width>127</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -98,7 +68,7 @@
     <widget type="label" version="2.0.0">
       <name>FwVer_Label</name>
       <text>Firmware version</text>
-      <y>100</y>
+      <y>75</y>
       <width>145</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -113,7 +83,7 @@
       <name>FwDate_Update</name>
       <pv_name>$(P)FwDate</pv_name>
       <x>150</x>
-      <y>125</y>
+      <y>100</y>
       <width>127</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>
@@ -128,7 +98,7 @@
     <widget type="label" version="2.0.0">
       <name>FwDate_Label</name>
       <text>Firmware date</text>
-      <y>125</y>
+      <y>100</y>
       <width>145</width>
       <height>26</height>
       <vertical_alignment>1</vertical_alignment>

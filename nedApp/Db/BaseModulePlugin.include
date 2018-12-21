@@ -834,13 +834,22 @@ record(bo, "$(P)AutoConfigEn")
     field(ONAM, "yes")
     field(VAL,  "0")
     field(PINI, "YES")
+    field(FLNK, "$(P)AutoConfigInit")
+}
+record(calcout, "$(P)AutoConfigInit")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)AutoConfigEn NPP")
+    field(CALC, "A")
+    field(OOPT, "When Non-Zero")
+    field(OUT,  "$(P)ConfSeq.PROC")
 }
 record(calcout, "$(P)AutoConfig")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
     field(DISV, "0")
-    field(SDIS, "$(P)AutoConfigEn PP")
+    field(SDIS, "$(P)AutoConfigEn NPP")
     field(INPA, "$(P)ConfigApplied NPP")
     field(CALC, "A")
     field(OCAL, "1")
