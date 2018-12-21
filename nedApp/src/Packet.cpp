@@ -350,7 +350,7 @@ bool DasDataPacket::checkIntegrity() const
 {
     if (this->length < sizeof(DasDataPacket))
         return false;
-    if (this->length < DasDataPacket::getLength(event_format, num_events))
+    if (this->length != DasDataPacket::getLength(event_format, num_events))
         return false;
     if (this->getTimeStamp().nsec > 1000000000)
         return false;

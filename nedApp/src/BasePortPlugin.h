@@ -135,6 +135,7 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         int OldPktsEn;
         int EventsFmt;
         int DumpCmdPkts;
+        int CntDropPkts;
 };
 
 #endif // BASE_PORT_PLUGIN_H

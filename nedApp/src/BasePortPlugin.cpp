@@ -28,6 +28,7 @@ BasePortPlugin::BasePortPlugin(const char *pluginName, int blocking, int interfa
     createParam("OldPktsEn",        asynParamInt32,     &OldPktsEn, 0);             // WRITE - Enable support for old DAS 1.0 packets
     createParam("EventsFmt",        asynParamInt32,     &EventsFmt, 0);             // WRITE - Data type when not defined in packet (DAS 1.0 only)
     createParam("DumpCmdPkts",      asynParamInt32,     &DumpCmdPkts, 0);           // WRITE - When enabled, dump inbound and outbound packets to console in hex format
+    createParam("CntDropPkts",      asynParamInt32,     &CntDropPkts, 0);           // READ - Number of packets dropped by SW
     callParamCallbacks();
 
     m_processThread = std::unique_ptr<Thread>(new Thread(
@@ -208,6 +209,7 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
     ErrorPacketList errors;
     std::list<std::shared_ptr<uint8_t>> fromPool; //!< Packets to be returned back to pool
     uint32_t nPackets = 0; // Used for throwing an exception on first packet
+    uint32_t nDropped = 0;
 
     const uint8_t *end = ptr + size;
     while (ptr < end) {
@@ -263,32 +265,40 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
             case Packet::TYPE_DAS_DATA:
                 try {
                     auto dataPacket = reinterpret_cast<const DasDataPacket *>(packet);
-                    if (dataPacket->checkIntegrity())
+                    if (dataPacket->checkIntegrity()) {
                         dasData.push_back(dataPacket);
-                    else
+                    } else {
                         LOG_WARN("Discarding DAS data packet, integrity check failed");
+                        nDropped++;
+                    }
                 } catch (std::runtime_error &e) {
                     LOG_WARN("Discarding DAS data packet, %s", e.what());
+                    nDropped++;
                 }
                 break;
             case Packet::TYPE_RTDL:
                 try {
                     auto rtdlPacket = reinterpret_cast<const RtdlPacket *>(packet);
-                    if (rtdlPacket->checkIntegrity())
+                    if (rtdlPacket->checkIntegrity()) {
                         rtdls.push_back(rtdlPacket);
-                    else
+                    } else {
                         LOG_WARN("Discarding RTDL packet, integrity check failed");
+                        nDropped++;
+                    }
                 } catch (std::runtime_error &e) {
                     LOG_WARN("Discarding RTDL packet, %s", e.what());
+                    nDropped++;
                 }
                 break;
             case Packet::TYPE_DAS_CMD:
                 try {
                     auto cmdPacket = reinterpret_cast<const DasCmdPacket *>(packet);
-                    if (cmdPacket->checkIntegrity())
+                    if (cmdPacket->checkIntegrity()) {
                         dasCmd.push_back(cmdPacket);
-                    else
+                    } else {
                         LOG_WARN("Discarding DAS command packet, integrity check failed");
+                        nDropped++;
+                    }
 
                     if (getBooleanParam(DumpCmdPkts) == true) {
                         LOG_DEBUG("Received command packet");
@@ -296,12 +306,14 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
                     }
                 } catch (std::runtime_error &e) {
                     LOG_WARN("Discarding DAS command packet, %s", e.what());
+                    nDropped++;
                 }
                 break;
             case Packet::TYPE_ERROR:
                 errors.push_back(reinterpret_cast<const ErrorPacket *>(packet));
                 break;
             default:
+                nDropped++;
                 break;
             }
         }
@@ -319,6 +331,12 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
         messages.push_back(sendDownstream(rtdls, false));
     if (!errors.empty())
         messages.push_back(sendDownstream(errors, false));
+
+    // ... in the mean time update PVs ...
+    if (nDropped > 0) {
+        addIntegerParam(CntDropPkts, nDropped);
+        callParamCallbacks();
+    }
 
     // .. and wait for all of them to get released
     for (const auto& m: messages) {

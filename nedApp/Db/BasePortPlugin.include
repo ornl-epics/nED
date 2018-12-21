@@ -145,3 +145,14 @@ record(bo, "$(P)DumpCmdPkts")
     field(ONAM, "enabled")
     field(PINI, "YES")
 }
+record(longin, "$(P)CntDropPkts")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Num packets dropped by software")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntDropPkts")
+    field(VAL,  "0")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
