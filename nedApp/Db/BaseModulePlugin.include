@@ -727,7 +727,8 @@ record(stringin, "$(P)Config1")
     field(DTYP, "asynOctetRead")
     field(INP,  "@asyn($(PORT))Config1")
     field(SCAN, "I/O Intr")
-    field(FLNK, "$(P)Config1Sync")
+    # We need CA link to break the records loop and avoid asyn dead-lock
+    field(FLNK, "$(P)Config1Sync.PROC CA")
 }
 record(stringin, "$(P)Config2")
 {
@@ -771,8 +772,6 @@ record(stringout, "$(P)Config1Sync")
     field(DOL,  "$(P)Config1")
     field(OMSL, "closed_loop")
     field(OUT,  "$(P)LoadConfigMenu.ZRST NPP")
-    # We need CA link to break the records loop and avoid asyn dead-lock
-    field(FLNK, "$(P)LoadConfigMenuPini.PROC CA")
 }
 record(stringout, "$(P)Config2Sync")
 {
