@@ -57,12 +57,30 @@ record(mbbo, "$(P)CmdReq")
     field(TEST, "Reset")
     field(ELVL, "39")
     field(ELST, "Reset LVDS")
+    field(FLNK, "$(P)CmdReqBusySet PP")
+}
+record(longout, "$(P)CmdReqBusySet")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "1")
+    field(OUT,  "$(P)CmdReqBusy PP")
     field(FLNK, "$(P)CmdRspEn")
 }
 record(longout, "$(P)CmdRspEn")
 {
+    field(ASG,  "BEAMLINE")
     field(VAL,  "1")
     field(OUT,  "$(P)CmdRsp.DISA")
+}
+record(longout, "$(P)CmdReqBusyClear")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "0")
+    field(OUT,  "$(P)CmdReqBusy PP")
+}
+record(busy, "$(P)CmdReqBusy")
+{
+    field(ASG,  "BEAMLINE")
 }
 record(longin, "$(P)CmdRspRaw")
 {
@@ -88,12 +106,19 @@ record(mbbi, "$(P)CmdRsp")
     field(FRST, "Error")
     field(FVVL, "5")
     field(FVST, "Skipped")
-    field(FLNK, "$(P)CmdRspDis")
+    field(FLNK, "$(P)CmdRspDone")
 }
-# Disable CmdRsp as soon as leaving Waiting state
-record(calcout, "$(P)CmdRspDis")
+record(calcout, "$(P)CmdRspDone")
 {
     field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#2")
+    field(OUT,  "$(P)CmdReqBusyClear.PROC PP")
+    field(OOPT, "When Non-zero")
+    field(FLNK, "$(P)CmdRspDis")
+}
+record(calcout, "$(P)CmdRspDis")
+{
+    field(INPA, "$(P)CmdRsp PP")
     field(CALC, "A=2")
     field(OUT,  "$(P)CmdRsp.DISA")
     field(OOPT, "When Zero")
@@ -840,7 +865,7 @@ record(calcout, "$(P)AutoConfigInit")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)AutoConfigEn NPP")
     field(CALC, "A")
-    field(OOPT, "When Non-Zero")
+    field(OOPT, "When Non-zero")
     field(OUT,  "$(P)ConfSeq.PROC")
 }
 record(calcout, "$(P)AutoConfig")
