@@ -379,7 +379,7 @@ record(stringin, "$(P)FwVersion")
     info(archive, "Monitor, 00:01:00, VAL")
     field(ASG,  "BEAMLINE")
     field(DESC, "Firmware date")
-    field(INP,  "$(P)FwVersionCalc.SVAL PP")
+    field(INP,  "$(P)FwVersionCalc.SVAL PP MS")
     field(FLNK, "$(P)Verified")
 }
 record(calc, "$(P)Verified")
