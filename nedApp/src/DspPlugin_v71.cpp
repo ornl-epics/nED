@@ -111,10 +111,10 @@ void DspPlugin::createParams_v71() {
     createConfigParam("Lvds4:TsyncSel",   '1', 0x1A,  1, 15, 0); // LVDS4 Tsync Select          (0=new format,1=legacy)
     createConfigParam("Lvds5:TsyncSel",   '1', 0x1A,  1, 16, 0); // LVDS5 Tsync Select          (0=new format,1=legacy)
     createConfigParam("Lvds6:TsyncSel",   '1', 0x1A,  1, 17, 0); // LVDS6 Tsync Select          (0=new format,1=legacy)
-    createConfigParam("Meta8:Source",     '1', 0x1A,  1, 18, 0); // Meta channel 8 Source       (0=ODB_In13,1=ttl_in0)
-    createConfigParam("Meta9:Source",     '1', 0x1A,  1, 19, 0); // Meta channel 9 Source       (0=ODB_In14,1=ttl_in1)
-    createConfigParam("Meta10:Source",    '1', 0x1A,  1, 20, 0); // Meta channel 10 Source      (0=ODB_In15,1=ttl_in2)
-    createConfigParam("Meta11:Source",    '1', 0x1A,  1, 21, 0); // Meta channel 11 Source      (0=ODB_In15,1=ttl_in3)
+    createConfigParam("Meta8:Source",     '1', 0x1A,  1, 18, 0); // Meta channel 8 Source       (0=ODB_In8,1=ttl_in0)
+    createConfigParam("Meta9:Source",     '1', 0x1A,  1, 19, 0); // Meta channel 9 Source       (0=ODB_In9,1=ttl_in1)
+    createConfigParam("Meta10:Source",    '1', 0x1A,  1, 20, 0); // Meta channel 10 Source      (0=ODB_In10,1=ttl_in2)
+    createConfigParam("Meta11:Source",    '1', 0x1A,  1, 21, 0); // Meta channel 11 Source      (0=ODB_In11,1=ttl_in3)
     createConfigParam("Meta12:Source",    '1', 0x1A,  1, 22, 0); // Meta channel 12 Source      (0=ODB_In12,1=tsync_in)
     createConfigParam("Meta13:Source",    '1', 0x1A,  1, 23, 0); // Meta channel 13 Source      (0=ODB_In13,1=tclk_in)
     createConfigParam("Meta14:Source",    '1', 0x1A,  1, 24, 0); // Meta channel 14 Source      (0=ODB_In14,1=sysrstb_in)
@@ -253,8 +253,8 @@ void DspPlugin::createParams_v71() {
     createStatusParam("TsyncCountsRF",     0x3,  32,  0); // TsyncCountRF
     createStatusParam("TsyncCountsInt",    0x4,  32,  0); // TsyncCountInt
     createStatusParam("TsyncCountsGPS",    0x5,  32,  0); // TsyncCountGPS
-    createStatusParam("BucketA:Used",      0x6,   4,  0); // Used A buckets (unit:of 12)
-    createStatusParam("BucketB:Used",      0x6,   4,  4); // Used B buckets (unit:of 12)
+    createStatusParam("BucketA:Used",      0x6,   4,  0); // Used A buckets (calc:12-A,unit:of 12)
+    createStatusParam("BucketB:Used",      0x6,   4,  4); // Used B buckets (calc:12-A,unit:of 12)
     createStatusParam("BucketsInActive1",  0x6,   1,  8); // BucketsInLvds1Active
     createStatusParam("BucketsInActive2",  0x6,   1,  9); // BucketsInLvds2Active
     createStatusParam("BucketsInActive3",  0x6,   1, 10); // BucketsInLvds3Active
