@@ -270,7 +270,7 @@ int severity;
        } state NAME##1						\
     }								\
     state NAME##1 {						\
-       when(cmdRsp[i] == SUCCESSRSP) {				\
+       when(cmdRsp[i] == SUCCESSRSP || SKIPPEDRSP) {		\
        } state NAME##0							\
        when (cmdRsp[i] == ERRORRSP || cmdRsp[i] == TIMEOUTRSP ||	\
              cmdRsp[i] == NORSP) { 					\
