@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <cstring>
+#include <set>
 #include <sstream>
 
 EPICS_REGISTER_PLUGIN(ModulesPlugin, 3, "Port name", string, "Parent plugins", string, "PVA name", string);
@@ -85,6 +86,12 @@ ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, co
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v52", "", "v52", "")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v54", "", "v54", "")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v14", "", "v14", "")));
+
+    // We need all AROCs because of READ_STATUS command parsing and getting IBC number
+    m_arocHandlers["v22"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v22", "", "v22", ""));
+    m_arocHandlers["v23"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v23", "", "v23", ""));
+    m_arocHandlers["v24"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v24", "", "v24", ""));
+    m_arocHandlers["v25"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v25", "", "v25", ""));
 
     // Disable logging for all modules
     for (auto it = m_moduleHandlers.begin(); it != m_moduleHandlers.end(); it++) {
@@ -171,14 +178,21 @@ void ModulesPlugin::recvDownstream(const DasCmdPacketList &packets)
                 }
             }
         } else if (packet->getCommand() == DasCmdPacket::CMD_READ_STATUS) {
-            if (m_discovered[packet->getModuleId()].type == DasCmdPacket::MOD_TYPE_ROC) {
-                auto& module = m_moduleHandlers[DasCmdPacket::MOD_TYPE_AROC].front();
-                if (module->rspParams(packet, "STATUS") == true) {
-                    for (int i = 1; i <= 9; i++) {
-                        std::string param = "Ibc" + std::to_string(i);
-                        if (module->getIntegerParam(param) == 1) {
-                            m_discovered[packet->getModuleId()].aroc_ibc = i;
-                            break;
+            if (m_discovered[packet->getModuleId()].type == DasCmdPacket::MOD_TYPE_AROC) {
+                auto it = m_moduleHandlers.find(DasCmdPacket::MOD_TYPE_AROC);
+                if (it != m_moduleHandlers.end()) {
+                    std::string version = "v";
+                    version += std::to_string(m_discovered[packet->getModuleId()].version.fw_version);
+                    version += std::to_string(m_discovered[packet->getModuleId()].version.fw_revision);
+
+                    auto jt = m_arocHandlers.find(version);
+                    if (jt != m_arocHandlers.end() && jt->second->rspParams(packet, "STATUS") == true) {
+                        for (int i = 1; i <= 9; i++) {
+                            std::string param = "Ibc" + std::to_string(i);
+                            if (jt->second->getIntegerParam(param) == 1) {
+                                m_discovered[packet->getModuleId()].aroc_ibc = i;
+                                break;
+                            }
                         }
                     }
                 }
@@ -217,9 +231,8 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
 {
     int ret;
     size_t length = size;
-    uint32_t i = 1;
-    std::map<std::string, uint32_t> ids;
     std::vector<std::string> lines;
+    std::set<std::string> names;
 
     ret = snprintf(buffer, length, "Discovered modules:\n");
     if (ret > (int)length)
@@ -227,18 +240,20 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
     length -= ret;
     buffer += ret;
 
-    for (std::map<uint32_t, ModuleDesc>::iterator it = m_discovered.begin(); it != m_discovered.end(); it++, i++) {
+    for (std::map<uint32_t, ModuleDesc>::iterator it = m_discovered.begin(); it != m_discovered.end(); it++) {
         std::string moduleId(BaseModulePlugin::addr2ip(it->first));
         std::string parentId(BaseModulePlugin::addr2ip(it->second.parent));
         std::string name(BaseModulePlugin::getModuleName(it->first));
-        BaseModulePlugin::Version version = it->second.version;
+        Version version = it->second.version;
         char line[128];
 
-        const char *notInDb = "";
-        std::stringstream id;
+        const char *note = "";
+        std::string id;
         if (!name.empty()) {
-            id << name;
+            id = name;
         } else {
+            note = " *** NOT IN DATABASE ***";
+
             std::string type;
             switch (it->second.type) {
                 case DasCmdPacket::MOD_TYPE_ACPC:      type = "acpc";      break;
@@ -259,26 +274,33 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
                 default:                               type = "invalid";
             }
 
-            if (ids.find(type) == ids.end())
-                ids.insert(std::pair<std::string, uint32_t>(type, 1));
-            id << type << ids[type]++;
-            if (it->second.aroc_ibc != 0)
-                id << "_" << it->second.aroc_ibc;
-            notInDb = " *** NOT IN DATABASE ***";
+            // 1000 seems reasonable number that we'll never exceed
+            // we're just trying to prevent the endless loop
+            id = "new_" + type;
+            for (int i = 0; i < 1000; i++) {
+                std::string name = id + std::to_string(i);
+                if (it->second.aroc_ibc != 0)
+                    name += "_" + std::to_string(it->second.aroc_ibc);
+                if (names.find(name) == names.end()) {
+                    id = name;
+                    names.emplace(name);
+                    break;
+                }
+            }
         }
 
         if (it->second.parent != 0) {
             ret = snprintf(line, sizeof(line),
-                           "%-12s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d (DSP=%s)%s\n",
-                           id.str().c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
+                           "%-15s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d (DSP=%s)%s\n",
+                           id.c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
                            version.fw_version, version.fw_revision, version.fw_year,
-                           version.fw_month, version.fw_day, parentId.c_str(), notInDb);
+                           version.fw_month, version.fw_day, parentId.c_str(), note);
         } else {
             ret = snprintf(line, sizeof(line),
-                           "%-12s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d%s\n",
-                           id.str().c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
+                           "%-15s: %-15s ver %d.%d/%d.%d date %.04d/%.02d/%.02d%s\n",
+                           id.c_str(), moduleId.c_str(), version.hw_version, version.hw_revision,
                            version.fw_version, version.fw_revision, version.fw_year,
-                           version.fw_month, version.fw_day, notInDb);
+                           version.fw_month, version.fw_day, note);
         }
         if (ret == -1) {
             LOG_WARN("String exceeds limit of %u bytes", (unsigned)sizeof(line));

@@ -27,18 +27,46 @@
 class ModulesPlugin : public BasePlugin {
 
     private:
+
+        struct Version {
+            uint8_t hw_version;
+            uint8_t hw_revision;
+            uint16_t hw_year;
+            uint8_t hw_month;
+            uint8_t hw_day;
+            uint8_t fw_version;
+            uint8_t fw_revision;
+            uint16_t fw_year;
+            uint8_t fw_month;
+            uint8_t fw_day;
+
+            Version()
+                : hw_version(0)
+                , hw_revision(0)
+                , hw_year(0)
+                , hw_month(0)
+                , hw_day(0)
+                , fw_version(0)
+                , fw_revision(0)
+                , fw_year(0)
+                , fw_month(0)
+                , fw_day(0)
+            {}
+        };
+
         /**
          * Module description.
          */
         struct ModuleDesc {
             DasCmdPacket::ModuleType type{static_cast<DasCmdPacket::ModuleType>(0)};
             uint32_t parent{0};
-            BaseModulePlugin::Version version;
+            Version version;
             bool verified{false};
             uint8_t aroc_ibc{0};
         };
 
         std::map<DasCmdPacket::ModuleType, std::list<std::unique_ptr<BaseModulePlugin>>> m_moduleHandlers;
+        std::map<std::string, std::unique_ptr<BaseModulePlugin>> m_arocHandlers;
 
         /**
          * Record for a structure with a single string array field.

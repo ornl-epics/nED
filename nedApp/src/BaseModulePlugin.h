@@ -105,32 +105,6 @@ class BaseModulePlugin : public BasePlugin {
             bool readonly;                      //!< Flag whether all parameters in this group are read-only
         };
 
-        struct Version {
-            uint8_t hw_version;
-            uint8_t hw_revision;
-            uint16_t hw_year;
-            uint8_t hw_month;
-            uint8_t hw_day;
-            uint8_t fw_version;
-            uint8_t fw_revision;
-            uint16_t fw_year;
-            uint8_t fw_month;
-            uint8_t fw_day;
-
-            Version()
-                : hw_version(0)
-                , hw_revision(0)
-                , hw_year(0)
-                , hw_month(0)
-                , hw_day(0)
-                , fw_version(0)
-                , fw_revision(0)
-                , fw_year(0)
-                , fw_month(0)
-                , fw_day(0)
-            {}
-        };
-
     public: // variables
         static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask | asynFloat64Mask;
         static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask | asynFloat64Mask;
