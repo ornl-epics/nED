@@ -59,10 +59,11 @@ record(mbbo, "$(P)CmdReq")
     field(ELST, "Reset LVDS")
     field(FLNK, "$(P)CmdReqBusySet PP")
 }
-record(longout, "$(P)CmdReqBusySet")
+record(calcout, "$(P)CmdReqBusySet")
 {
     field(ASG,  "BEAMLINE")
-    field(VAL,  "1")
+    field(INPA, "$(P)CmdReq.SEVR NPP")
+    field(CALC, "A=0")
     field(OUT,  "$(P)CmdReqBusy PP")
     field(FLNK, "$(P)CmdRspEn")
 }
