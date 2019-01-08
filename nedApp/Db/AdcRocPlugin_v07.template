@@ -16,3 +16,14 @@ record(bo, "$(P)OutputMode")
     field(PINI, "YES")
 }
 
+record(mbbi, "$(P)OutputMode")
+{
+    field(ASG,  "BEAMLINE")
+    field(ZRVL, "1")
+    field(ZRST, "meta")
+    field(ONVL, "2")
+    field(ONST, "pixel")
+    field(INP,  "$(P)DataFormatId CP")
+}
+
+
