@@ -9,13 +9,6 @@ record(stringin, "$(P)PluginId")
     field(VAL,  "AdcRocPlugin_v07")
 }
 
-record(bo, "$(P)OutputMode")
-{
-    field(ZNAM, "pass thru")
-    field(VAL,  "0")
-    field(PINI, "YES")
-}
-
 record(mbbi, "$(P)OutputMode")
 {
     field(ASG,  "BEAMLINE")
