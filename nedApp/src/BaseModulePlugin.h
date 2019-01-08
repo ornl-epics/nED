@@ -338,15 +338,7 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] nBits Width of the parameter in number of bits.
          * @param[in] shift Starting bit position within the word/dword.
          */
-        void createStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift);
-
-        /**
-         * Convenience function for modules that don't split status for channels.
-         */
-        void createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
-        {
-            createStatusParam(name, 0, offset, nBits, shift);
-        }
+        void createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift);
 
         /**
          * Create and register single integer status counter parameter.
@@ -358,15 +350,7 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Create and register single integer config parameter.
          */
-        void createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv=CONV_UNSIGN);
-
-        /**
-         * Convenience function for modules that don't split configuration for channels.
-         */
-        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv=CONV_UNSIGN)
-        {
-            createChanConfigParam(name, 0, section, offset, nBits, shift, value, conv);
-        }
+        void createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv=CONV_UNSIGN);
 
         /**
          * Create meta-parameter

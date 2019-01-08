@@ -24,6 +24,11 @@ EPICS_REGISTER_PLUGIN(RocPlugin, 4, "Port name", string, "Parent plugins", strin
  */
 #define SECTION_ID(section, channel) (((channel) * 0x10) + ((section) & 0xF))
 
+/**
+ * Convert channel number to VerifyId field in command packet.
+ */
+#define CHAN2VERID(channel) ((channel == 0) ? 0 : 0x10 | (channel - 1))
+
 RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
     : BaseModulePlugin(portName, parentPlugins, configDir, 2)
 {
@@ -104,12 +109,43 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
     initParams(m_numChannels);
 }
 
+void RocPlugin::createChanStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift)
+{
+    uint8_t section = SECTION_ID(0, channel);
+    createRegParam("STATUS", name, true, channel, section, offset, nBits, shift, 0);
+    m_features |= (uint32_t)ModuleFeatures::STATUS;
+}
+
+void RocPlugin::createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv)
+{
+    if (section >= '1' && section <= '9')
+        section = section - '1' + 1;
+    else if (section >= 'A' && section <= 'F')
+        section = section - 'A' + 0xA;
+    else {
+        LOG_ERROR("Invalid section '%c' specified for parameter '%s'", section, name);
+        return;
+    }
+
+    uint8_t sectionId = SECTION_ID(section, channel);
+    createRegParam("CONFIG", name, false, channel, sectionId, offset, nBits, shift, value, conv);
+
+    std::string nameSaved(name);
+    nameSaved += "_Saved";
+    int index;
+    if (createParam(nameSaved.c_str(), asynParamInt32, &index) != asynSuccess)
+        LOG_ERROR("CONFIG save parameter '%s' cannot be created (already exist?)", nameSaved.c_str());
+    m_features |= (uint32_t)ModuleFeatures::CONFIG;
+}
+
 asynStatus RocPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
     if (m_numChannels > 0 && pasynUser->reason == CmdReq) {
         if (value == DasCmdPacket::CMD_WRITE_CONFIG ||
             value == DasCmdPacket::CMD_READ_CONFIG ||
             value == DasCmdPacket::CMD_READ_STATUS) {
+
+            m_expectedChannel = 0;
 
             // Schedule sending 9 packets, our reqWriteConfig() will change the channel
             for (uint8_t i = 0; i < 9; i++) {
@@ -176,15 +212,15 @@ bool RocPlugin::processResponse(const DasCmdPacket *packet)
 bool RocPlugin::reqWriteConfig()
 {
     uint32_t data[1024];
-    size_t len = packRegParams("CONFIG", data, sizeof(data), m_expectedChannel, 0);
+    size_t len = packRegParams("CONFIG", data, sizeof(data), m_expectedChannel);
     if (len == 0) {
         LOG_WARN("Skipping sending write config packet");
         return false;
     }
 
-    auto channel = m_expectedChannel;
-    if (channel > 0)
-        channel |= 0x10;
+    uint8_t channel = 0;
+    if (m_expectedChannel > 0)
+        channel = 0x10 | (m_expectedChannel - 1);
 
     sendUpstream(DasCmdPacket::CMD_WRITE_CONFIG, channel, data, len);
     return true;
@@ -192,15 +228,15 @@ bool RocPlugin::reqWriteConfig()
 
 bool RocPlugin::rspWriteConfig(const DasCmdPacket* packet)
 {
-    if (!packet->isAcknowledge())
-        return false;
-
-    auto channel = m_expectedChannel;
-    if (channel > 0)
-        channel |= 0x10;
+    uint8_t channel = 0;
+    if (m_expectedChannel > 0)
+        channel = 0x10 | (m_expectedChannel - 1);
 
     // Turns back to 0 after last channel, works also for m_numChannels == 0
     m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
+
+    if (!packet->isAcknowledge())
+        return false;
 
     if (packet->getCmdId() != channel) {
         LOG_WARN("Expecting WRITE_CONFIG response for channel %u, received channel %u", channel & 0xF, packet->getCmdId() & 0xF);
@@ -212,9 +248,7 @@ bool RocPlugin::rspWriteConfig(const DasCmdPacket* packet)
 
 bool RocPlugin::reqParamsChan(DasCmdPacket::CommandType command)
 {
-    auto channel = m_expectedChannel;
-    if (channel > 0)
-        channel |= 0x10;
+    uint8_t channel = CHAN2VERID(m_expectedChannel);
     sendUpstream(command, channel, nullptr, 0);
     return true;
 }
@@ -228,20 +262,18 @@ bool RocPlugin::rspParamsChan(const DasCmdPacket* packet, const std::string& par
     uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
     uint32_t section = SECTION_ID(0x0, m_expectedChannel);
     uint32_t expectLength = ALIGN_UP(m_params[params].sizes[section]*wordSize, 4);
-    if (m_params[params].sizes.size() > 1) {
+    if (m_params[params].sizes.size() > 1 && params == "CONFIG") {
         section = SECTION_ID(0xF, m_expectedChannel);
         expectLength = ALIGN_UP((m_params["CONFIG"].offsets[section] + m_params["CONFIG"].sizes[section])*wordSize, 4);
     }
 
-    auto channel = m_expectedChannel;
-    if (channel > 0)
-        channel |= 0x10;
+    uint8_t channel = m_expectedChannel;
 
     // Turns back to 0 after last channel, works also for m_numChannels == 0
     m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
 
-    if (packet->getCmdId() != channel) {
-        LOG_WARN("Expecting %s response for channel %u, received channel %u", params.c_str(), channel & 0xF, packet->getCmdId() & 0xF);
+    if (packet->getCmdId() != CHAN2VERID(channel)) {
+        LOG_WARN("Expecting %s response for channel %u, received channel %u", params.c_str(), channel, (packet->getCmdId()+1) & 0xF);
         return false;
     }
 

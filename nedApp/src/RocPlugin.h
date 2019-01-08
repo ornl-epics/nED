@@ -103,6 +103,16 @@ class RocPlugin : public BaseModulePlugin {
     private: // functions
 
         /**
+         * Handle ROC2 status parameters for 9 individual channels.
+         */
+        void createChanStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift);
+
+        /**
+         * Handle ROC2 config parameters for 9 individual channels.
+         */
+        void createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv=CONV_UNSIGN);
+
+        /**
          * Custom ROC v2 WRITE_CONFIG request handler.
          *
          * Send out a WRITE_CONFIG packet with a channel number. This functions relies

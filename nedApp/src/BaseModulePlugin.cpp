@@ -481,9 +481,9 @@ void BaseModulePlugin::setParamsAlarm(const std::string &section, int alarm)
     }
 }
 
-void BaseModulePlugin::createStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift)
+void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    createRegParam("STATUS", name, true, channel, 0x0, offset, nBits, shift, 0);
+    createRegParam("STATUS", name, true, 0, 0x0, offset, nBits, shift, 0);
     m_features |= (uint32_t)ModuleFeatures::STATUS;
 }
 
@@ -493,7 +493,7 @@ void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uin
     m_features |= (uint32_t)ModuleFeatures::COUNTERS;
 }
 
-void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv)
+void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv)
 {
     if (section >= '1' && section <= '9')
         section = section - '1' + 1;
@@ -504,7 +504,7 @@ void BaseModulePlugin::createChanConfigParam(const char *name, uint8_t channel, 
         return;
     }
 
-    createRegParam("CONFIG", name, false, channel, section, offset, nBits, shift, value, conv);
+    createRegParam("CONFIG", name, false, 0, section, offset, nBits, shift, value, conv);
 
     std::string nameSaved(name);
     nameSaved += "_Saved";
@@ -613,10 +613,11 @@ size_t BaseModulePlugin::packRegParams(const std::string& group, uint32_t *paylo
 {
     uint32_t payloadLength;
     if (section == 0x0) {
-        uint32_t section_f = m_params[group].sections ? 0xF : 0x0;
+        uint32_t section_f = SECTION_ID((m_params[group].sections ? 0xF : 0x0), channel);
         payloadLength = m_params[group].offsets[section_f] + m_params[group].sizes[section_f];
     } else {
-        payloadLength = m_params[group].sizes[section];
+        uint32_t sectionId = SECTION_ID(section, channel);
+        payloadLength = m_params[group].sizes[sectionId];
     }
     payloadLength *= m_wordSize;
 
@@ -645,7 +646,8 @@ size_t BaseModulePlugin::packRegParams(const std::string& group, uint32_t *paylo
         if (it->second.channel != channel) {
             continue;
         } else if (section == 0x0) {
-            offset += offsets[it->second.section];
+            uint32_t sectionId = SECTION_ID(it->second.section, it->second.channel);
+            offset += offsets[sectionId];
         } else if (section != it->second.section) {
             continue;
         }
