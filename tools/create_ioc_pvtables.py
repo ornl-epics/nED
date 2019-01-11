@@ -128,8 +128,8 @@ def parse_src_file(path, mode):
                                 val = match.group(2)
                             vars_cache[path][type].append({ 'name': match.group(1), 'val': val })
                         break
-                if not matched and line.strip(" \t").startswith("create"):
-                    raise RuntimeError("Line '{0}' not parsed".format(line))
+#                if not matched and line.strip(" \t").startswith("create"):
+#                    raise RuntimeError("Line '{0}' not parsed".format(line))
 
     return vars_cache[path][mode]
 
