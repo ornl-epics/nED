@@ -239,7 +239,7 @@ void RocPlugin::createParams_v43()
     createConfigParam("ScaleFactor",      'E',  0x6,  16, 0, 0);    // Scale factor
 
     createConfigParam("LvdsRate",         'F',  0x0,  1, 15, 0);    // LVDS output rate              (0=20Mhz,1=10Mhz)
-    createConfigParam("HighResMode",      'F',  0x0,  1, 9,  0);    // High resolution mode          (0=low res 0-127,1=high res 0-255)
+    createConfigParam("Resolution",       'F',  0x0,  1, 9,  0);    // High resolution mode          (0=128,1=256)
     createConfigParam("TcTxEnMode",       'F',  0x0,  1, 8,  1);    // T&C TX enable mode            (0=external,1=internal)
     createConfigParam("OutputMode",       'F',  0x0,  2, 6,  0);    // Output mode                   (0=normal,1=raw [alarm],2=extended [alarm])
     createConfigParam("AcquireEn",        'F',  0x0,  1, 5,  1);    // ROC enable acquisition        (0=disable,1=enable)

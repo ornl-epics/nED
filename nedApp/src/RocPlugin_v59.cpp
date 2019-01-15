@@ -343,47 +343,47 @@ void RocPlugin::createParams_v59()
     createCounterParam("CntUartParity",      0xB, 16,  0); // UART parity error counter
     createCounterParam("CntUartByte",        0xC, 16,  0); // UART byte error counter
     createCounterParam("CntDataAlmostFull" , 0xD, 16,  0); // Data almost full counter
-    createCounterParam("Ch0:CntFifoFull",    0xE, 16,  0); // Ch0 ADC FIFO full counter
-    createCounterParam("Ch1:CntFifoFull",    0xF, 16,  0); // Ch1 ADC FIFO full counter
-    createCounterParam("Ch2:CntFifoFull",   0x10, 16,  0); // Ch2 ADC FIFO full counter
-    createCounterParam("Ch3:CntFifoFull",   0x11, 16,  0); // Ch3 ADC FIFO full counter
-    createCounterParam("Ch4:CntFifoFull",   0x12, 16,  0); // Ch4 ADC FIFO full counter
-    createCounterParam("Ch5:CntFifoFull",   0x13, 16,  0); // Ch5 ADC FIFO full counter
-    createCounterParam("Ch6:CntFifoFull",   0x14, 16,  0); // Ch6 ADC FIFO full counter
-    createCounterParam("Ch7:CntFifoFull",   0x15, 16,  0); // Ch7 ADC FIFO full counter
+    createCounterParam("Ch1:CntFifoFull",    0xE, 16,  0); // Ch1 ADC FIFO full counter
+    createCounterParam("Ch2:CntFifoFull",    0xF, 16,  0); // Ch2 ADC FIFO full counter
+    createCounterParam("Ch3:CntFifoFull",   0x10, 16,  0); // Ch3 ADC FIFO full counter
+    createCounterParam("Ch4:CntFifoFull",   0x11, 16,  0); // Ch4 ADC FIFO full counter
+    createCounterParam("Ch5:CntFifoFull",   0x12, 16,  0); // Ch5 ADC FIFO full counter
+    createCounterParam("Ch6:CntFifoFull",   0x13, 16,  0); // Ch6 ADC FIFO full counter
+    createCounterParam("Ch7:CntFifoFull",   0x14, 16,  0); // Ch7 ADC FIFO full counter
+    createCounterParam("Ch8:CntFifoFull",   0x15, 16,  0); // Ch8 ADC FIFO full counter
     createCounterParam("CntMissClk",        0x16, 16,  0); // Link RX clock missing cnt
-    createCounterParam("Ch0:RatePosEdge",   0x17, 16,  0); // Ch0 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch1:RatePosEdge",   0x18, 16,  0); // Ch1 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch2:RatePosEdge",   0x19, 16,  0); // Ch2 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch3:RatePosEdge",   0x1A, 16,  0); // Ch3 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch4:RatePosEdge",   0x1B, 16,  0); // Ch4 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch5:RatePosEdge",   0x1C, 16,  0); // Ch5 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch6:RatePosEdge",   0x1D, 16,  0); // Ch6 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch7:RatePosEdge",   0x1E, 16,  0); // Ch7 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch0:RateSumHigh",   0x1F, 16,  0); // Ch0 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch1:RateSumHigh",   0x20, 16,  0); // Ch1 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch2:RateSumHigh",   0x21, 16,  0); // Ch2 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch3:RateSumHigh",   0x22, 16,  0); // Ch3 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch4:RateSumHigh",   0x23, 16,  0); // Ch4 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch5:RateSumHigh",   0x24, 16,  0); // Ch5 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch6:RateSumHigh",   0x25, 16,  0); // Ch6 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch7:RateSumHigh",   0x26, 16,  0); // Ch7 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch0:RateSumLow",    0x27, 16,  0); // Ch0 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch1:RateSumLow",    0x28, 16,  0); // Ch1 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch2:RateSumLow",    0x29, 16,  0); // Ch2 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch3:RateSumLow",    0x2A, 16,  0); // Ch3 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch4:RateSumLow",    0x2B, 16,  0); // Ch4 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch5:RateSumLow",    0x2C, 16,  0); // Ch5 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch6:RateSumLow",    0x2D, 16,  0); // Ch6 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch7:RateSumLow",    0x2E, 16,  0); // Ch7 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch0:RateOut",       0x2F, 16,  0); // Ch0 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch1:RateOut",       0x30, 16,  0); // Ch1 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch2:RateOut",       0x31, 16,  0); // Ch2 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch3:RateOut",       0x32, 16,  0); // Ch3 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch4:RateOut",       0x33, 16,  0); // Ch4 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch5:RateOut",       0x34, 16,  0); // Ch5 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch6:RateOut",       0x35, 16,  0); // Ch6 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
-    createCounterParam("Ch7:RateOut",       0x36, 16,  0); // Ch7 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch1:RatePosEdge",   0x17, 16,  0); // Ch1 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:RatePosEdge",   0x18, 16,  0); // Ch2 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:RatePosEdge",   0x19, 16,  0); // Ch3 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:RatePosEdge",   0x1A, 16,  0); // Ch4 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:RatePosEdge",   0x1B, 16,  0); // Ch5 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:RatePosEdge",   0x1C, 16,  0); // Ch6 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:RatePosEdge",   0x1D, 16,  0); // Ch7 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch8:RatePosEdge",   0x1E, 16,  0); // Ch8 positive edge rate      (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch1:RateSumHigh",   0x1F, 16,  0); // Ch1 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:RateSumHigh",   0x20, 16,  0); // Ch2 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:RateSumHigh",   0x21, 16,  0); // Ch3 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:RateSumHigh",   0x22, 16,  0); // Ch4 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:RateSumHigh",   0x23, 16,  0); // Ch5 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:RateSumHigh",   0x24, 16,  0); // Ch6 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:RateSumHigh",   0x25, 16,  0); // Ch7 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch8:RateSumHigh",   0x26, 16,  0); // Ch8 SUM high rate           (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch1:RateSumLow",    0x27, 16,  0); // Ch1 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:RateSumLow",    0x28, 16,  0); // Ch2 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:RateSumLow",    0x29, 16,  0); // Ch3 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:RateSumLow",    0x2A, 16,  0); // Ch4 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:RateSumLow",    0x2B, 16,  0); // Ch5 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:RateSumLow",    0x2C, 16,  0); // Ch6 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:RateSumLow",    0x2D, 16,  0); // Ch7 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch8:RateSumLow",    0x2E, 16,  0); // Ch8 SUM low rate            (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch1:RateOut",       0x2F, 16,  0); // Ch1 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch2:RateOut",       0x30, 16,  0); // Ch2 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch3:RateOut",       0x31, 16,  0); // Ch3 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch4:RateOut",       0x32, 16,  0); // Ch4 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch5:RateOut",       0x33, 16,  0); // Ch5 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch6:RateOut",       0x34, 16,  0); // Ch6 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch7:RateOut",       0x35, 16,  0); // Ch7 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
+    createCounterParam("Ch8:RateOut",       0x36, 16,  0); // Ch8 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
     createCounterParam("RateOut",           0x37, 16,  0); // Total outrate               (scale:19.0735,unit:cnts/s,prec:1)
 
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
@@ -638,7 +638,7 @@ void RocPlugin::createParams_v59()
     createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
     createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
     createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  1);     // Auto correction mode          (0=enabled,1=disabled)
-    createConfigParam("HighResMode",      'F', 0x0,  1, 8,  1);     // High resolution mode          (0=low res 0-127,1=high res 0-255)
+    createConfigParam("Resolution",       'F', 0x0,  1, 8,  1);     // High resolution mode          (0=128,1=256)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw [alarm],2=extended [alarm])
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
     createConfigParam("TcTxEnMode",       'F', 0x0,  1, 3,  1);     // T&C TX enable mode            (0=external,1=internal)
