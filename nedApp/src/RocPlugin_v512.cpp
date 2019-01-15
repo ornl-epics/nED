@@ -621,16 +621,16 @@ void RocPlugin::createParams_v512()
     createConfigParam("Ch7:VerboseEn",    'E', 0x0,  1, 14, 0);     // Chan7 verbose enable          (0=disable,1=enable)
     createConfigParam("Ch8:VerboseEn",    'E', 0x0,  1, 15, 0);     // Chan8 verbose enable          (0=disable,1=enable)
 
-    createConfigParam("TimeVetoLow",      'E', 0x1,  32, 0, 0);     // Timestamp veto low
-    createConfigParam("TimeVetoHigh",     'E', 0x3,  32, 0, 333333);// Timestamp veto high
-    createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 20000); // Fake trigger delay
+    createConfigParam("TimeVetoLow",      'E', 0x1,  32, 0, 0);     // Timestamp veto low            (scale:100,unit:ns,prec:1)
+    createConfigParam("TimeVetoHigh",     'E', 0x3,  32, 0, 333);   // Timestamp veto high           (scale:100,unit:ns,prec:1)
+    createConfigParam("FakeTrigDelay",    'E', 0x5,  16, 0, 200);   // Fake trigger delay            (scale:100,unit:ns,prec:1)
     createConfigParam("MinAdc",           'E', 0x6,  14, 0, 100);   // Minimum ADC
     createConfigParam("MaxAdc",           'E', 0x7,  14, 0, 1000);  // Maximum ADC
     createConfigParam("IntRelease",       'E', 0x8,   9, 0, -6, CONV_SIGN_2COMP); // Integrator release point
     createConfigParam("MinDiscrimWidth",  'E', 0x9,   9, 0, 1);     // Minimum discriminator width
     createConfigParam("Sample1",          'E', 0xA,   9, 0, 2);     // Sample 1 point [0:10]
     createConfigParam("Sample2",          'E', 0xB,   9, 0, 14);    // Sample 1 point [2:50]
-    createConfigParam("TsyncDelay",       'E', 0xC,  32, 0, 0);     // TSYNC delay
+    createConfigParam("TsyncDelay",       'E', 0xC,  32, 0, 0);     // TSYNC delay                   (scale:100,unit:ns,prec:1)
 
     createConfigParam("LvdsRate",         'F', 0x0,  1, 15, 1);     // LVDS output rate              (0=20Mhz,1=40Mhz)
     createConfigParam("AutoCorrectMode",  'F', 0x0,  1, 14, 0);     // Auto correction sample mode   (0=TSYNC,1=fake trigger)
