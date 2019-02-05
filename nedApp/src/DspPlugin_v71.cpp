@@ -97,7 +97,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("TsyncFlywheelEn",  '1', 0x15,  1, 31, 0); // Tsync Flywheel Enable       (0=disable,1=enable)
     createConfigParam("TsyncDelay",       '1', 0x17, 32,  0, 0); // Legacy Tsync Delay          (scale:100,unit:ns,prec:1)
     createConfigParam("EventLength",      '1', 0x18, 24,  0, 8); // Legacy Event Length         (unit:bytes)
-    createConfigParam("DataFormatId",     '1', 0x18,  8, 24, 2); // Legacy Data Format          (1=meta,2=pixel,3=LPSD verbose [alarm],5=XY PS,8=AROC raw [alarm],10=BNL raw,7=CROC raw)
+    createConfigParam("DataFormatId",     '1', 0x18,  8, 24, 2); // Legacy Data Format          (1=meta,2=pixel,4=LPSD verbose [alarm],5=XY PS,8=AROC raw [alarm],10=BNL raw,7=CROC raw)
 
     createConfigParam("ClockCorrUpd",     '1', 0x19, 30,  0, 0); // DSP 40MHz Clock Corr Update
     createConfigParam("ClockCorrCtrl",    '1', 0x19,  2, 30, 0); // DSP 40MHz Clock Corr Ctrl   (0=disable,1=disable,2=stall,3=advance)
