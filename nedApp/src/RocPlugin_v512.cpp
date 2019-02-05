@@ -1,6 +1,6 @@
-/* RocPlugin_v58.cpp
+/* RocPlugin_v512.cpp
  *
- * Copyright (c) 2015 Oak Ridge National Laboratory.
+ * Copyright (c) 2019 Oak Ridge National Laboratory.
  * All rights reserved.
  * See file LICENSE that is included with this distribution.
  *
@@ -10,22 +10,22 @@
 #include "RocPlugin.h"
 
 /**
- * @file RocPlugin_v58.cpp
+ * @file RocPlugin_v512.cpp
  *
- * ROC 5.8 is based on ROC 5.6, it adds pre-amp commands.
+ * ROC 5.12 parameters
+ *
+ * The ROC 5.12 firmware is same as 5.11 but adds resolution of 512 pixels per tube.
  */
 
-void RocPlugin::createParams_v58()
+void RocPlugin::createParams_v512()
 {
     createRegParam("VERSION", "HwRev",  true, 0,  8, 0);   // Hardware revision
     createRegParam("VERSION", "HwVer",  true, 0,  8, 8);   // Hardware version
-    createRegParam("VERSION", "FwRev",  true, 1,  8, 0);   // Firmware revision        (low:7,high:9)
+    createRegParam("VERSION", "FwRev",  true, 1,  8, 0);   // Firmware revision        (low:11,high:13)
     createRegParam("VERSION", "FwVer",  true, 1,  8, 8);   // Firmware version         (low:4,high:6)
     createRegParam("VERSION", "FwYear", true, 2, 16, 0, 0, CONV_HEX2DEC);
     createRegParam("VERSION", "FwDay",  true, 3,  8, 0, 0, CONV_HEX2DEC);
     createRegParam("VERSION", "FwMonth",true, 3,  8, 8, 0, CONV_HEX2DEC);
-
-    // Status registers
 
 //    BLXXX:Det:RocXXX:| sig nam|                              | EPICS record description | (bi and mbbi description)
     createStatusParam("ErrUartByte",          0x0,  1, 13); // UART: Byte error             (0=no error,1=error)
@@ -386,8 +386,6 @@ void RocPlugin::createParams_v58()
     createCounterParam("Ch8:RateOut",       0x36, 16,  0); // Ch8 outrate                 (scale:19.0735,unit:cnts/s,prec:1)
     createCounterParam("RateOut",           0x37, 16,  0); // Total outrate               (scale:19.0735,unit:cnts/s,prec:1)
 
-    // Configuration registers
-
 //    BLXXX:Det:RocXXX:| sig nam |                                     | EPICS record description  | (bi and mbbi description)
     createConfigParam("Ch1:PositionIdx",  '1', 0x0,  32, 0, 0);     // Chan1 position index
     createConfigParam("Ch2:PositionIdx",  '1', 0x2,  32, 0, 256);   // Chan2 position index
@@ -640,7 +638,6 @@ void RocPlugin::createParams_v58()
     createConfigParam("MastDiscrimMode",  'F', 0x0,  2, 11, 0);     // Master discriminator select   (0=SUM discr,1=A discr,2=B discr,3=all)
     createConfigParam("AcquireEn",        'F', 0x0,  1, 10, 1);     // ROC enable acquisition        (0=disable,1=enable)
     createConfigParam("AutoCorrectionEn", 'F', 0x0,  1, 9,  1);     // Auto correction mode          (0=enabled,1=disabled)
-    createConfigParam("Resolution",       'F', 0x0,  1, 8,  1);     // High resolution mode          (0=128,1=256)
     createConfigParam("OutputMode",       'F', 0x0,  2, 6,  0);     // Output mode                   (0=normal,1=raw [alarm],2=extended [alarm])
     createConfigParam("AcquireMode",      'F', 0x0,  2, 4,  0);     // Acquire mode                  (0=normal,1=verbose,2=fakedata,3=trigger)
     createConfigParam("TcTxEnMode",       'F', 0x0,  1, 3,  1);     // T&C TX enable mode            (0=external,1=internal)
@@ -651,10 +648,22 @@ void RocPlugin::createParams_v58()
     createConfigParam("TestPatternEn",    'F', 0x1,  1, 15, 0);     // Test pattern enable           (0=disable,1=enable)
     createConfigParam("TestPatternAltEn", 'F', 0x1,  1, 14, 0);     // Alternate test pattern enable (0=disable,1=enable)
     createConfigParam("TestPatternDebug", 'F', 0x1,  2, 12, 0);     // Engineering Use only
-    createConfigParam("TestPatternId",    'F', 0x1, 12, 0,  0);     // Test pattern id
-    createConfigParam("TestPatternRate",  'F', 0x2, 16, 0,  65535); // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
-
-    // Temperature registers
+    createConfigParam("TestPatternId",    'F', 0x1, 12,  0, 0);     // Test pattern id
+    createConfigParam("TestPatternRate",  'F', 0x2, 16,  0, 65535); // Test pattern rate             (65535=153 ev/s,9999=1 Kev/s,4999=2 Kev/s,1999=5 Kev/s,999=10 Kev/s,399=25 Kev/s,199=50 Kev/s,99=100 Kev/s,13=800 Kev/s,9=1 Mev/s,4=2 Mev/s,1=5 Mev/s,0=10 Mev/s)
+    createConfigParam("CycleAdvance",     'F', 0x3, 10,  0, 1);     // Num cycles to advance @TSYNC  (1=60Hz,2=30Hz,3=20Hz,4=15Hz,6=10Hz,12=5Hz,60=1Hz)
+    createConfigParam("DataFormat",       'F', 0x4,  8,  0, 2);     // Data format identifier        (2=pixel,3=raw,4=verbose)
+    createConfigParam("Protocol",         'F', 0x4,  1, 15, 0);     // Extended event format         (0=legacy,1=new)
+    createConfigParam("PreampIface",      'F', 0x5,  1,  0, 0);     // Preamplifier Interface        (0=SPI old preamps,1=I2C new preamps)
+    createConfigParam("HVPSIface",        'F', 0x5,  1,  1, 0);     // HV PS Interface               (0=Serial old HVPS,1=I2C new HVPS)
+    createConfigParam("Resolution",       'F', 0x5,  2,  2, 1);     // Resolution mode               (0=128, 1=256, 2=512, 3=1024)
+    createConfigParam("Ch1:Direction",    'F', 0x5,  1,  8, 0);     // Channel 1 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch2:Direction",    'F', 0x5,  1,  9, 0);     // Channel 2 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch3:Direction",    'F', 0x5,  1, 10, 0);     // Channel 3 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch4:Direction",    'F', 0x5,  1, 11, 0);     // Channel 4 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch5:Direction",    'F', 0x5,  1, 12, 0);     // Channel 5 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch6:Direction",    'F', 0x5,  1, 13, 0);     // Channel 6 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch7:Direction",    'F', 0x5,  1, 14, 0);     // Channel 7 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch8:Direction",    'F', 0x5,  1, 15, 0);     // Channel 8 direction           (0=B low A high,1=A low B high)
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
     createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
@@ -662,7 +671,6 @@ void RocPlugin::createParams_v58()
     createTempParam("TempPreampB",      0x2, 16, 0, CONV_SIGN_2COMP); // Preamp B temperature in degC    (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
 
     // Pre-amp registers
-
     createPreAmpCfgParam("PreampA:Dac",         0x0, 16,  0, 32768); // Pre-amp A DAC code
     createPreAmpCfgParam("PreampB:Dac",         0x1, 16,  0, 32768); // Pre-amp B DAC code
 

@@ -104,6 +104,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     m_cmdHandlers[DasCmdPacket::CMD_READ_STATUS].second     = std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "STATUS");
     m_cmdHandlers[DasCmdPacket::CMD_READ_COUNTERS].first    = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_READ_COUNTERS);
     m_cmdHandlers[DasCmdPacket::CMD_READ_COUNTERS].second   = std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "COUNTERS");
+    m_cmdHandlers[DasCmdPacket::CMD_RESET_COUNTERS].first   = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_RESET_COUNTERS);
+    m_cmdHandlers[DasCmdPacket::CMD_RESET_COUNTERS].second  = std::bind(&BaseModulePlugin::rspSimple,       this, std::placeholders::_1);
     m_cmdHandlers[DasCmdPacket::CMD_READ_TEMPERATURE].first = std::bind(&BaseModulePlugin::reqSimple,       this, DasCmdPacket::CMD_READ_TEMPERATURE);
     m_cmdHandlers[DasCmdPacket::CMD_READ_TEMPERATURE].second= std::bind(&BaseModulePlugin::rspParams,       this, std::placeholders::_1, "TEMPERATURE");
 

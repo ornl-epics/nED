@@ -1,0 +1,44 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "RocPlugin_v512.generated"
+include "RocPlugin.include"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "RocPlugin_v512")
+}
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TTVL, "146")
+    field(TTST, "Pre-amp config")
+    field(FTVL, "147")
+    field(FTST, "Pre-amp trigger")
+}
+
+# Protect from user mistakes
+record(mbbo, "$(P)OutputMode")
+{
+    field(FLNK, "$(P)DataFormat")
+}
+record(mbbo, "$(P)DataFormat")
+{
+    field(DOL,  "$(P)OutputMode.RVAL NPP")
+    field(OMSL, "closed_loop")
+}
+record(bo, "$(P)TestPatternAltEn")
+{
+    field(FLNK, "$(P)OutputModeNrm")
+}
+record(bo, "$(P)TestPatternEn")
+{
+    field(FLNK, "$(P)OutputModeNrm")
+}
+record(stringout, "$(P)OutputModeNrm")
+{
+    field(ASG,  "NOONE")
+    field(OUT,  "$(P)OutputMode PP")
+    field(VAL,  "normal")
+    field(OMSL, "supervisory")
+}

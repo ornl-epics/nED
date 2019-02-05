@@ -470,14 +470,14 @@ void ArocPlugin::createParams_v24()
 
     createConfigParam("MaximumSlope",     'D', 0x40, 16,  0,   20); // Maximum slope
 
-    createConfigParam("TimeVetoLow",      'E',  0x0, 32,  0,    0); // Timestamp veto low
-    createConfigParam("TimeVetoHigh",     'E',  0x2, 32,  0, 2147483647); // Timestamp veto high
-    createConfigParam("FakeTrigDelay",    'E',  0x4, 16,  0, 5000); // Type1 calibration trigger delay
+    createConfigParam("TimeVetoLow",      'E',  0x0, 32,  0,    0); // Timestamp veto low            (scale:100,unit:ns,prec:1)
+    createConfigParam("TimeVetoHigh",     'E',  0x2, 32,  0,  333); // Timestamp veto high           (scale:100,unit:ns,prec:1)
+    createConfigParam("FakeTrigDelay",    'E',  0x4, 16,  0,   50); // Type1 calib trigger delay     (scale:100,unit:ns,prec:1)
     createConfigParam("Sample1",          'E',  0x5, 10,  0,    2); // Type1 calibration sample1
     createConfigParam("Sample2",          'E',  0x6, 10,  0,   12); // Type1 calibration sample2
     createConfigParam("IntRelease",       'E',  0x7, 10,  0,  -6, CONV_SIGN_2COMP); // Integrator release point
     createConfigParam("IbcMask",          'E',  0x8,  9,  0,  511); // IBC mask
-    createConfigParam("TsyncDelay",       'E',  0x9, 32,  0,    0); // TSYNC delay
+    createConfigParam("TsyncDelay",       'E',  0x9, 32,  0,    0); // TSYNC delay                   (scale:100,unit:ns,prec:1)
 
     createConfigParam("TcResetMode",      'F',  0x0,  1,  0,    0); // Reset enable                  (0=disable,1=enable)
     createConfigParam("TcTclkMode",       'F',  0x0,  1,  1,    0); // TCLK select                   (0=external,1=internal 10MHz)

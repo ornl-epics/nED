@@ -404,12 +404,12 @@ void RocPlugin::createParams_v45()
     createConfigParam("Ch7:VerboseEn",    'E',  0x0,  1, 14, 0);    // Chan7 verbose enable          (0=disable,1=enable)
     createConfigParam("Ch8:VerboseEn",    'E',  0x0,  1, 15, 0);    // Chan8 verbose enable          (0=disable,1=enable)
 
-    createConfigParam("TimeVetoLow",      'E',  0x1,  32, 0, 5000); // Timestamp veto low
-    createConfigParam("TimeVetoHigh",     'E',  0x3,  32, 0, 4031616); // Timestamp veto high
-    createConfigParam("FakeTrigDelay",    'E',  0x5,  16, 0, 65535);// Fake trigger delay
+    createConfigParam("TimeVetoLow",      'E',  0x1,  32, 0, 0);    // Timestamp veto low            (scale:100,unit:ns,prec:1)
+    createConfigParam("TimeVetoHigh",     'E',  0x3,  32, 0, 333);  // Timestamp veto high           (scale:100,unit:ns,prec:1)
+    createConfigParam("FakeTrigDelay",    'E',  0x5,  16, 0, 200);  // Fake trigger delay            (scale:100,unit:ns,prec:1)
 
     createConfigParam("LvdsRate",         'F',  0x0,  1, 15, 0);    // LVDS output rate              (0=20Mhz,1=10Mhz)
-    createConfigParam("HighResMode",      'F',  0x0,  1, 9,  0);    // High resolution mode          (0=low res 0-127,1=high res 0-255)
+    createConfigParam("Resolution",       'F',  0x0,  1, 9,  0);    // High resolution mode          (0=128,1=256)
     createConfigParam("TcTxEnMode",       'F',  0x0,  1, 8,  1);    // T&C TX enable mode            (0=external,1=internal)
     createConfigParam("OutputMode",       'F',  0x0,  2, 6,  0);    // Output mode                   (0=normal,1=raw [alarm],2=extended [alarm])
     createConfigParam("AcquireEn",        'F',  0x0,  1, 5,  1);    // ROC enable acquisition        (0=disable,1=enable)

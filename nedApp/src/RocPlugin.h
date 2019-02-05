@@ -259,6 +259,11 @@ class RocPlugin : public BaseModulePlugin {
          */
         void createParams_v511();
 
+        /**
+         * Create and register all ROC v5.12 parameters.
+         */
+        void createParams_v512();
+
     protected:
         int HvDelay;
         int HvB2bDelay;
