@@ -506,40 +506,50 @@ record(calcout, "$(P)StatusRefresh")
 {
     field(DESC, "Periodically update status")
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)StatusRefreshInt NPP")
-    field(INPB, "$(P)StatusRefresh NPP")
-    field(CALC, "(A=0||((B+1)<(2*A)))?B+1:0")
     field(OCAL, "2") # Send Read status
     field(OUT,  "$(P)CmdReq PP")
-    field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
     field(SDIS, "$(P)Enable NPP") # Don't run if disabled
     field(DISV, "0")
-    field(SCAN, ".5 second")
-    field(FLNK, "$(P)StatusRefreshNext")
 }
-record(calc, "$(P)StatusRefreshNext")
-{
-    field(DESC, "Seconds remaining until next refresh")
-    field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)StatusRefreshInt NPP")
-    field(INPB, "$(P)StatusRefresh NPP")
-    field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
-    field(PINI, "YES")
-}
-record(calcout, "$(P)StatusRefreshNow")
+record(longout, "$(P)StatusRefreshNow")
 {
     field(DESC, "Cause counter to expire and refresh now")
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)StatusRefreshInt NPP")
-    field(CALC, "2*A-1")
-    field(OUT,  "$(P)StatusRefresh PP")
-    field(OOPT, "Every Time")
+    field(DOL,  "1")
+    field(OUT,  "$(P)StatusRefreshNext NPP")
+    field(FLNK, "$(P)StatusRefreshNext.PROC CA")
 }
-record(longout, "$(P)CountersRefreshInt")
+record(calcout, "$(P)StatusRefreshNext")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)StatusRefreshNext NPP")
+    field(INPB, "$(P)StatusRefreshInt NPP")
+    field(CALC, "B<=0?-1:A<=0?B-1:MIN(A,B)-1")
+    field(VAL,  "0")
+    field(OOPT, "When Zero")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)StatusRefresh.PROC")
+    field(SCAN, "1 second")
+}
+### The next record are used to spread out periodic status requests
+### from multiple modules. They randomize the first time Status is refreshed
+### and all the consequtive requests will follow it. This allows the multi
+### module installations to not send multiple requests in burst.
+record(calcout, "$(P)StatusRefreshBoot")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Randomize status refresh offset")
+    field(INPA, "$(P)StatusRefreshInt NPP")
+    field(CALC, "CEIL(A*RNDM)")
+    field(OUT,  "$(P)StatusRefreshNext NPP")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CountersRefreshInt")
 {
     info(autosaveFields, "VAL")
-    field(DESC, "Periodically update counters interval")
+    field(DESC, "Periodically update status interval")
     field(FLNK, "$(P)CountersRefresh PP")
     field(PINI, "YES")
     field(VAL,  "0") # Refresh interval in seconds, 0 to disable
@@ -547,80 +557,100 @@ record(longout, "$(P)CountersRefreshInt")
 }
 record(calcout, "$(P)CountersRefresh")
 {
-    field(DESC, "Periodically update counters")
+    field(DESC, "Periodically update status")
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)CountersRefreshInt NPP")
-    field(INPB, "$(P)CountersRefresh NPP")
-    field(CALC, "(A=0||((B+1)<(2*A)))?B+1:0")
-    field(OCAL, "7") # Send Read counters
+    field(OCAL, "2") # Send Read status
     field(OUT,  "$(P)CmdReq PP")
-    field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
     field(SDIS, "$(P)Enable NPP") # Don't run if disabled
     field(DISV, "0")
-    field(SCAN, ".5 second")
-    field(FLNK, "$(P)CountersRefreshNext")
 }
-record(calc, "$(P)CountersRefreshNext")
-{
-    field(DESC, "Seconds remaining until next refresh")
-    field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)CountersRefreshInt NPP")
-    field(INPB, "$(P)CountersRefresh NPP")
-    field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
-    field(PINI, "YES")
-}
-record(calcout, "$(P)CountersRefreshNow")
+record(longout, "$(P)CountersRefreshNow")
 {
     field(DESC, "Cause counter to expire and refresh now")
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)CountersRefreshInt NPP")
-    field(CALC, "2*A-1")
-    field(OUT,  "$(P)CountersRefresh PP")
-    field(OOPT, "Every Time")
+    field(DOL,  "1")
+    field(OUT,  "$(P)CountersRefreshNext NPP")
+    field(FLNK, "$(P)CountersRefreshNext.PROC CA")
 }
-record(longout, "$(P)TempRefreshInt")
+record(calcout, "$(P)CountersRefreshNext")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CountersRefreshNext NPP")
+    field(INPB, "$(P)CountersRefreshInt NPP")
+    field(CALC, "B<=0?-1:A<=0?B-1:MIN(A,B)-1")
+    field(VAL,  "0")
+    field(OOPT, "When Zero")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)CountersRefresh.PROC")
+    field(SCAN, "1 second")
+}
+### The next record are used to spread out periodic status requests
+### from multiple modules. They randomize the first time Counters is refreshed
+### and all the consequtive requests will follow it. This allows the multi
+### module installations to not send multiple requests in burst.
+record(calcout, "$(P)CountersRefreshBoot")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Randomize status refresh offset")
+    field(INPA, "$(P)CountersRefreshInt NPP")
+    field(CALC, "CEIL(A*RNDM)")
+    field(OUT,  "$(P)CountersRefreshNext NPP")
+    field(PINI, "YES")
+}
+record(longin, "$(P)TempRefreshInt")
 {
     info(autosaveFields, "VAL")
-    field(DESC, "Periodically update temp. interval")
+    field(DESC, "Periodically update status interval")
     field(FLNK, "$(P)TempRefresh PP")
     field(PINI, "YES")
-    field(VAL,  "0") # Refresh interval in seconds, 0 to disable. Override in modules which support it
+    field(VAL,  "0") # Refresh interval in seconds, 0 to disable
     field(EGU,  "seconds")
 }
 record(calcout, "$(P)TempRefresh")
 {
-    field(DESC, "Periodically update temperatures")
+    field(DESC, "Periodically update status")
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)TempRefreshInt NPP")
-    field(INPB, "$(P)TempRefresh NPP")
-    field(CALC, "(A=0||((B+1)<(2*A)))?B+1:0")
-    field(OCAL, "9") # Send Read temperatures
+    field(OCAL, "2") # Send Read status
     field(OUT,  "$(P)CmdReq PP")
-    field(OOPT, "Transition To Zero")
     field(DOPT, "Use OCAL")
     field(SDIS, "$(P)Enable NPP") # Don't run if disabled
     field(DISV, "0")
-    field(SCAN, ".5 second")
-    field(FLNK, "$(P)TempRefreshNext")
 }
-record(calc, "$(P)TempRefreshNext")
-{
-    field(DESC, "Seconds remaining until next refresh")
-    field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)TempRefreshInt NPP")
-    field(INPB, "$(P)TempRefresh NPP")
-    field(CALC, "(2*A-B)>=0?CEIL(A-B/2):-1")
-    field(PINI, "YES")
-}
-record(calcout, "$(P)TempRefreshNow")
+record(longout, "$(P)TempRefreshNow")
 {
     field(DESC, "Cause counter to expire and refresh now")
     field(ASG,  "BEAMLINE")
+    field(DOL,  "1")
+    field(OUT,  "$(P)TempRefreshNext NPP")
+    field(FLNK, "$(P)TempRefreshNext.PROC CA")
+}
+record(calcout, "$(P)TempRefreshNext")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)TempRefreshNext NPP")
+    field(INPB, "$(P)TempRefreshInt NPP")
+    field(CALC, "B<=0?-1:A<=0?B-1:MIN(A,B)-1")
+    field(VAL,  "0")
+    field(OOPT, "When Zero")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)TempRefresh.PROC")
+    field(SCAN, "1 second")
+}
+### The next record are used to spread out periodic status requests
+### from multiple modules. They randomize the first time Temp is refreshed
+### and all the consequtive requests will follow it. This allows the multi
+### module installations to not send multiple requests in burst.
+record(calcout, "$(P)TempRefreshBoot")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Randomize status refresh offset")
     field(INPA, "$(P)TempRefreshInt NPP")
-    field(CALC, "2*A-1")
-    field(OUT,  "$(P)TempRefresh PP")
-    field(OOPT, "Every Time")
+    field(CALC, "CEIL(A*RNDM)")
+    field(OUT,  "$(P)TempRefreshNext NPP")
+    field(PINI, "YES")
 }
 record(ao, "$(P)NoRspTimeout")
 {
