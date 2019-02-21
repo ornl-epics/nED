@@ -16,6 +16,7 @@
 #include <map>
 #include <math.h>
 #include <sstream>
+#include <unistd.h>
 
 BasePortPlugin::BasePortPlugin(const char *pluginName, int blocking, int interfaceMask, int interruptMask,
                                int queueSize, int asynFlags, int priority, int stackSize)
@@ -28,7 +29,8 @@ BasePortPlugin::BasePortPlugin(const char *pluginName, int blocking, int interfa
     createParam("OldPktsEn",        asynParamInt32,     &OldPktsEn, 0);             // WRITE - Enable support for old DAS 1.0 packets
     createParam("EventsFmt",        asynParamInt32,     &EventsFmt, 0);             // WRITE - Data type when not defined in packet (DAS 1.0 only)
     createParam("DumpCmdPkts",      asynParamInt32,     &DumpCmdPkts, 0);           // WRITE - When enabled, dump inbound and outbound packets to console in hex format
-    createParam("CntDropPkts",      asynParamInt32,     &CntDropPkts, 0);           // READ - Number of packets dropped by SW
+    createParam("DumpDroppedPkts",  asynParamInt32,     &DumpDroppedPkts, 0);       // WRITE - When enabled, dump dropped packets
+    createParam("CntDropPkts",      asynParamInt32,     &CntDropPkts, 0);        // READ - Number of packets dropped by SW
     callParamCallbacks();
 
     m_processThread = std::unique_ptr<Thread>(new Thread(
@@ -188,6 +190,11 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
 
             // Still doesn't have enough data, abort thread
             LOG_ERROR("Aborting processing thread: %s", e.what());
+            if (m_lastGoodPacket) {
+                LOG_DEBUG("Last good packet (addr=%p) %s", m_lastGoodPacket, (data < m_lastGoodPacket) ? "(potentially overwritten)" : " ");
+                dump(reinterpret_cast<const char *>(m_lastGoodPacket), m_lastGoodPacket->getLength());
+            }
+            LOG_DEBUG("Current packet (addr=%p)", data);
             dump(reinterpret_cast<const char *>(data), length);
             handleRecvError(-ERANGE);
             break;
@@ -260,61 +267,56 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
         }
 
         if (packet != nullptr) {
+            m_lastGoodPacket = packet;
+            bool dropped = false;
             // Put packet in the corresponding list
             switch (packet->getType()) {
             case Packet::TYPE_DAS_DATA:
                 try {
                     auto dataPacket = reinterpret_cast<const DasDataPacket *>(packet);
-                    if (dataPacket->checkIntegrity()) {
-                        dasData.push_back(dataPacket);
-                    } else {
-                        LOG_WARN("Discarding DAS data packet, integrity check failed");
-                        nDropped++;
-                    }
+                    if (!dataPacket->checkIntegrity())
+                        throw std::runtime_error("integrity check failed");
+                    dasData.push_back(dataPacket);
                 } catch (std::runtime_error &e) {
                     LOG_WARN("Discarding DAS data packet, %s", e.what());
-                    nDropped++;
+                    dropped = true;
                 }
                 break;
             case Packet::TYPE_RTDL:
                 try {
                     auto rtdlPacket = reinterpret_cast<const RtdlPacket *>(packet);
-                    if (rtdlPacket->checkIntegrity()) {
-                        rtdls.push_back(rtdlPacket);
-                    } else {
-                        LOG_WARN("Discarding RTDL packet, integrity check failed");
-                        nDropped++;
-                    }
+                    if (!rtdlPacket->checkIntegrity())
+                        throw std::runtime_error("integrity check failed");
+                    rtdls.push_back(rtdlPacket);
                 } catch (std::runtime_error &e) {
                     LOG_WARN("Discarding RTDL packet, %s", e.what());
-                    nDropped++;
+                    dropped = true;
                 }
                 break;
             case Packet::TYPE_DAS_CMD:
                 try {
                     auto cmdPacket = reinterpret_cast<const DasCmdPacket *>(packet);
-                    if (cmdPacket->checkIntegrity()) {
-                        dasCmd.push_back(cmdPacket);
-                    } else {
-                        LOG_WARN("Discarding DAS command packet, integrity check failed");
-                        nDropped++;
-                    }
-
-                    if (getBooleanParam(DumpCmdPkts) == true) {
-                        LOG_DEBUG("Received command packet");
-                        dump((const char*)cmdPacket, cmdPacket->getLength());
-                    }
+                    if (!cmdPacket->checkIntegrity())
+                        throw std::runtime_error("integrity check failed");
+                    dasCmd.push_back(cmdPacket);
                 } catch (std::runtime_error &e) {
                     LOG_WARN("Discarding DAS command packet, %s", e.what());
-                    nDropped++;
+                    dropped = true;
                 }
                 break;
             case Packet::TYPE_ERROR:
                 errors.push_back(reinterpret_cast<const ErrorPacket *>(packet));
                 break;
             default:
-                nDropped++;
+                LOG_WARN("Discarding unknown packet");
+                dropped = true;
                 break;
+            }
+
+            if (dropped) {
+                nDropped++;
+                if (getBooleanParam(DumpDroppedPkts) == true)
+                    dump((const char*)packet, packet->getLength());
             }
         }
     }
@@ -350,30 +352,30 @@ uint32_t BasePortPlugin::processData(const uint8_t *ptr, uint32_t size)
 
 void BasePortPlugin::dump(const char *data, uint32_t len)
 {
-    char buffer[64] = { 0 };
+    char buffer[5000] = { 0 };
     char *ptr = buffer;
     const uint32_t maxlen = 4096;
 
-    LOG_DEBUG("Dump %u bytes of raw data at offset %p", len, data);
+    snprintf(ptr, sizeof(buffer), "Dump %u bytes of raw data at offset %p\n", len, data);
+    ptr += strlen(buffer);
 
     // OCC library is always 4-byte aligned, so the buffer should
     // be good for 4-byte reads even if the packet is not 4-byte
     // aligned.
     for (uint32_t i = 0; i < std::min(len, maxlen)/4; i++) {
         if ((i % 4) == 0 && i > 0) {
-            LOG_DEBUG("%s", buffer);
-            buffer[0] = 0;
-            ptr = buffer;
+            snprintf(ptr, buffer + sizeof(buffer) - ptr, "\n");
+            ptr += 1;
         }
         snprintf(ptr, buffer + sizeof(buffer) - ptr, "0x%08X ", *(uint32_t *)(data + i*4));
         ptr += 11;
     }
-    if (ptr > 0) {
-        LOG_DEBUG("%s", buffer);
-    }
     if (len > maxlen) {
-        LOG_DEBUG("... truncated to %u bytes", maxlen);
+        snprintf(ptr, buffer + sizeof(buffer) - ptr, "... truncated to %u bytes\n", maxlen);
+    } else {
+        snprintf(ptr, buffer + sizeof(buffer) - ptr, "\n");
     }
+    fwrite(buffer, strlen(buffer), 1, stdout);
 }
 
 void BasePortPlugin::report(FILE *fp, int details)
