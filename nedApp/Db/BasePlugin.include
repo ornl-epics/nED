@@ -24,3 +24,15 @@ record(stringin, "$(P)StatusText")
 {
     field(VAL,  "")
 }
+
+record(ao, "$(P)ParamsUpdateRate")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))ParamsUpdateRate")
+    field(DESC, "Number of seconds between parameters update")
+    field(PINI, "YES")
+    field(VAL,  "1.0")
+}
+

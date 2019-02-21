@@ -253,6 +253,6 @@ void AdaraPlugin::recvDownstream(const DasDataPacketList &packets)
     if (packets.size() > 0) {
         epicsTimeGetCurrent(&m_lastDataTimestamp);
         addIntegerParam(CntDataPkts, sentPackets);
-        callParamCallbacks();
+        callParamCallbacksRatelimit();
     }
 }

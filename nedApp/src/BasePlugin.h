@@ -80,7 +80,7 @@ typedef std::vector<const ErrorPacket*> ErrorPacketList;
  */
 class BasePlugin : public asynPortDriver {
     public:
-        static const int defaultInterfaceMask = asynInt32Mask | asynGenericPointerMask | asynDrvUserMask;
+        static const int defaultInterfaceMask = asynInt32Mask | asynGenericPointerMask | asynDrvUserMask | asynFloat64Mask;
         static const int defaultInterruptMask = asynInt32Mask | asynGenericPointerMask;
 
         /**
@@ -575,6 +575,21 @@ class BasePlugin : public asynPortDriver {
          */
         std::string getPortName() { return m_portName; };
 
+	/**
+	 * Limit the number of times callparamCallbacks() is invoked for this plugin.
+	 *
+	 * Data processing plugins may by updating their parameters
+	 * very often depending on the packet size and rate. In most
+	 * cases the parameters are for informational purposes only
+	 * and don't need to be updated at high frequencies. In those
+	 * cases the plugin can choose to call this function which
+	 * will limit the rate at which it actually calls expensive
+	 * asyn function callParamCallbacks().
+	 *
+	 * Limit rate is defined by ParamsUpdateRate.
+	 */
+        void callParamCallbacksRatelimit();
+
     private:
         /**
          * Receive threads' main function when in blocking mode.
@@ -607,6 +622,7 @@ class BasePlugin : public asynPortDriver {
         Thread *m_thread;                           //!< Thread ID if created during constructor, 0 otherwise
         bool m_shutdown;                            //!< Flag to shutdown the thread, used in conjunction with messageQueue wakeup
         bool m_locked{false};
+	epicsTime m_lastParamsCallback;             //!< Last time callParamCallbacksRatelimit() was called
 
     protected:
         int MsgOldDas;
@@ -615,6 +631,7 @@ class BasePlugin : public asynPortDriver {
         int MsgDasCmd;
         int MsgDasRtdl;
         int MsgParamExch;
+	int ParamsUpdateRate;
 };
 
 #endif // PLUGIN_DRIVER_H

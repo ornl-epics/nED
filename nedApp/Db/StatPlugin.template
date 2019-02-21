@@ -1,5 +1,11 @@
 include "BasePlugin.include"
 
+# Upgrade from BasePlugin
+record(ao, "$(P)ParamsUpdateRate")
+{
+    field(VAL,  "0.1")
+}
+
 record(ai, "$(P)CmdPkts")
 {
     field(DTYP,  "asynFloat64")

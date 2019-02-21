@@ -171,7 +171,7 @@ void PixelMapPlugin::recvDownstream(const DasDataPacketList &packets)
     }
 
     setIntegerParam(CntUnmap, errors);
-    callParamCallbacks();
+    callParamCallbacksRatelimit();
 }
 
 PixelMapPlugin::ImportError PixelMapPlugin::importPixelMapFile(const char *filepath)
