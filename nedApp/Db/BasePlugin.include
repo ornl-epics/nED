@@ -31,7 +31,7 @@ record(ao, "$(P)ParamsUpdateRate")
     field(ASG,  "BEAMLINE")
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT))ParamsUpdateRate")
-    field(DESC, "Number of seconds between parameters update")
+    field(DESC, "Seconds between parameters update")
     field(PINI, "YES")
     field(VAL,  "1.0")
 }

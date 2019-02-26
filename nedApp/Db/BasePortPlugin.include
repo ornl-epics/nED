@@ -160,7 +160,7 @@ record(bo, "$(P)DumpDroppedPkts")
 {
     info(autosaveFields, "VAL")
     field(ASG,  "BEAMLINE")
-    field(DESC, "Toggle logging dropped packets to console")
+    field(DESC, "Dump dropped packets to console")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT))DumpDroppedPkts")
     field(ZNAM, "disable")
