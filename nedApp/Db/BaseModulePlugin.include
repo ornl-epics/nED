@@ -525,7 +525,10 @@ record(calcout, "$(P)StatusRefreshNext")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)StatusRefreshNext NPP")
     field(INPB, "$(P)StatusRefreshInt NPP")
-    field(CALC, "B<=0?-1:A<=0?B-1:MIN(A,B)-1")
+    # If StatusRefreshNow pushed 1 => process immediately
+    # If StatusRefreshInt > 0, decrement by 1 every time, on 0 rollover
+    # Otherwise -1
+    field(CALC, "A=1?0:B<=0?-1:A>0?A-1:B-1")
     field(VAL,  "0")
     field(OOPT, "When Zero")
     field(OCAL, "1")
@@ -559,7 +562,7 @@ record(calcout, "$(P)CountersRefresh")
 {
     field(DESC, "Periodically update status")
     field(ASG,  "BEAMLINE")
-    field(OCAL, "2") # Send Read status
+    field(OCAL, "7") # Send Read counters
     field(OUT,  "$(P)CmdReq PP")
     field(DOPT, "Use OCAL")
     field(SDIS, "$(P)Enable NPP") # Don't run if disabled
@@ -578,7 +581,7 @@ record(calcout, "$(P)CountersRefreshNext")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)CountersRefreshNext NPP")
     field(INPB, "$(P)CountersRefreshInt NPP")
-    field(CALC, "B<=0?-1:A<=0?B-1:MIN(A,B)-1")
+    field(CALC, "A=1?0:B<=0?-1:A>0?A-1:B-1")
     field(VAL,  "0")
     field(OOPT, "When Zero")
     field(OCAL, "1")
@@ -612,7 +615,7 @@ record(calcout, "$(P)TempRefresh")
 {
     field(DESC, "Periodically update status")
     field(ASG,  "BEAMLINE")
-    field(OCAL, "2") # Send Read status
+    field(OCAL, "9") # Send Read temperature
     field(OUT,  "$(P)CmdReq PP")
     field(DOPT, "Use OCAL")
     field(SDIS, "$(P)Enable NPP") # Don't run if disabled
@@ -631,7 +634,7 @@ record(calcout, "$(P)TempRefreshNext")
     field(ASG,  "BEAMLINE")
     field(INPA, "$(P)TempRefreshNext NPP")
     field(INPB, "$(P)TempRefreshInt NPP")
-    field(CALC, "B<=0?-1:A<=0?B-1:MIN(A,B)-1")
+    field(CALC, "A=1?0:B<=0?-1:A>0?A-1:B-1")
     field(VAL,  "0")
     field(OOPT, "When Zero")
     field(OCAL, "1")
