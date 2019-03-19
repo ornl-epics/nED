@@ -34,6 +34,7 @@ EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 3, "Port name", string, "Parent plugins",
 
 FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins, const char *positions)
     : BasePlugin(portName, 1, asynOctetMask | asynFloat64Mask | asynInt32ArrayMask, asynOctetMask | asynFloat64Mask)
+    , m_lastCountersTime(epicsTime::getCurrent())
     , m_parentPlugins(parentPlugins)
 {
     createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
