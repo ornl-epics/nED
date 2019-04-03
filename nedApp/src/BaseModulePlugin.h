@@ -85,11 +85,10 @@ class BaseModulePlugin : public BasePlugin {
          * Structure describing the status parameters obtained from modules.
          */
         struct ParamDesc {
-            uint32_t offset;        //!< An 4-byte offset within the payload
+            uint32_t offset;        //!< An offset within the payload in m_wordSize units
             uint32_t shift;         //!< Position of the field bits within 32 bits dword at given offset
             uint32_t width;         //!< Number of bits used for the value
             uint8_t section;        //!< Section name, valid values [0x0..0xF] (configuration params only)
-            uint8_t channel;        //!< Channel number in range [1..8], 0 means global configuration (configuration params only)
             int32_t initVal;        //!< Initial value after object is created or configuration reset is being requested (configuration params only)
             const BaseConvert* convert; //!< Selected from/to raw value converter
         };
@@ -99,10 +98,8 @@ class BaseModulePlugin : public BasePlugin {
          */
         struct ParamTable {
             std::map<int, ParamDesc> mapping;   //!< Mapping table, int index is asyn parameter index
-            bool sections;                      //!< Are parameters split into sections
-            std::map<int, uint32_t> sizes;      //!< Section sizes in bytes
-            std::map<int, uint32_t> offsets;    //!< Section offsets in bytes
-            bool readonly;                      //!< Flag whether all parameters in this group are read-only
+            uint32_t size{0};                   //!< Total payload length in bytes
+            bool readonly{true};                //!< Flag whether all parameters in this group are read-only
         };
 
     public: // variables
@@ -119,7 +116,6 @@ class BaseModulePlugin : public BasePlugin {
         uint32_t m_hardwareId;                          //!< Hardware ID which this plugin is connected to
         std::map<std::string, ParamTable> m_params;     //!< Maps of exported parameters
         DasCmdPacket::CommandType m_waitingResponse;    //!< Expected response code while waiting for response or timeout event, 0 otherwise
-        uint8_t m_cfgSectionCnt;                        //!< Used with sending channels configuration, tells number of times this section succeeded for previous channels
         uint8_t m_cmdQueueSize{10};                     //!< Max size of m_cmdQueue
 
         typedef std::function<bool()> RequestHandler;
@@ -193,11 +189,11 @@ class BaseModulePlugin : public BasePlugin {
          * array of 4 byte unsigned integers. The length should be dividable by 2.
          *
          * @param[in] command A command of the packet to be sent out.
-         * @param[in] channel Select a target channel, 0 means no specific channel.
+         * @param[in] commandId Command identifier, matched in command response packet if supported by module.
          * @param[in] payload Payload to be sent out, can be NULL if length is also 0.
          * @param[in] length Payload length in bytes.
          */
-        void sendUpstream(DasCmdPacket::CommandType command, uint8_t channel=0, uint32_t *payload=0, uint32_t length=0);
+        void sendUpstream(DasCmdPacket::CommandType command, uint8_t commandId=0, uint32_t *payload=0, uint32_t length=0);
 
         /**
          * Send packet to parent plugins.
@@ -234,8 +230,6 @@ class BaseModulePlugin : public BasePlugin {
          * another command can be issued. This function checks both conditions
          * and skips the response if either not expected or received after
          * timeout.
-         *
-         * Function supports channel specific status and config responses.
          *
          * @param[in] packet to be processed.
          * @return true if packet has been processed, false otherwise
@@ -316,7 +310,7 @@ class BaseModulePlugin : public BasePlugin {
         /**
          * Sets all parameters in section with the same alarm.
          */
-        void setParamsAlarm(const std::string &section, int alarm);
+        void setParamsAlarm(const std::string &params, int alarm);
 
         /**
          * Create and register single integer status parameter.
@@ -333,7 +327,6 @@ class BaseModulePlugin : public BasePlugin {
          * specified as 0x7).
          *
          * @param[in] name Parameter name must be unique within the plugin scope.
-         * @param[in] channel Selected channel
          * @param[in] offset word/dword offset within the payload.
          * @param[in] nBits Width of the parameter in number of bits.
          * @param[in] shift Starting bit position within the word/dword.
@@ -465,11 +458,10 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] group Parameters group
          * @param[out] payload buffer to be populated
          * @param[in] size of the payload buffer in bytes
-         * @param[in] channel
          * @param[in] section
          * @return Number of bytes pushed to payload or 0 on error.
          */
-        size_t packRegParams(const std::string& group, uint32_t *payload, size_t size, uint8_t channel=0, uint8_t section=0x0);
+        size_t packRegParams(const std::string& group, uint32_t *payload, size_t size, uint8_t section=0x0);
 
         /**
          * Method parses packet payload and extracts parameter values.
@@ -481,9 +473,8 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] group of registers, like CONFIG, STATUS etc.
          * @param[in] payload to be parsed
          * @param[in] size of the payload
-         * @param[in] channel expected
          */
-        void unpackRegParams(const std::string& group, const uint32_t *payload, size_t size, uint8_t channel=0);
+        void unpackRegParams(const std::string& group, const uint32_t *payload, size_t size);
 
         /**
          * Create a generic register parameter in specified group table.
@@ -499,32 +490,14 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] group of registers, like CONFIG, STATUS etc.
          * @param[in] name of the register in software table
          * @param[in] readonly flags whether the register value can be modified in software
-         * @param[in] channel addresses specific sub-fpga on device
-         * @param[in] section is an offset in the register table when supported by command (only config commands)
          * @param[in] offset is a word offset from the start address, word being 2 or 4 depending on the device
          * @param[in] nBits tells number of bits used by device register
          * @param[in] shift tells bit offset within word
          * @param[in] value represents initial value for writable registers
          * @param[in] conv selects from/to raw value converter
+         * @param[in] section is an offset in the register table when supported by command (only config commands)
          */
-        void createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, const BaseConvert *conv=CONV_UNSIGN);
-
-        /**
-         * Convenience function that removes channel and section parameters from its signature.
-         *
-         * @param[in] group of registers, like CONFIG, STATUS etc.
-         * @param[in] name of the register in software table
-         * @param[in] readonly flags whether the register value can be modified in software
-         * @param[in] offset is a word offset from the beginning of this group, word being 2 or 4 depending on the device
-         * @param[in] nBits tells number of bits used by device register
-         * @param[in] shift tells bit offset within word
-         * @param[in] value represents initial value for writable registers
-         * @param[in] conv selects from/to raw value converter
-         */
-        void createRegParam(const char *group, const char *name, bool readonly, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, const BaseConvert *conv=CONV_UNSIGN)
-        {
-            createRegParam(group, name, readonly, 0, 0, offset, nBits, shift, value, conv);
-        }
+        void createRegParam(const std::string& group, const char *name, bool readonly, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value=0, const BaseConvert *conv=CONV_UNSIGN, uint8_t section=0);
 
         /**
          * Link existing parameter to upgrade parameters table.
@@ -537,13 +510,11 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] group of registers, like CONFIG, STATUS etc.
          * @param[in] name of the register in software table
          * @param[in] readonly flags whether the register value can be modified in software
-         * @param[in] channel addresses specific sub-fpga on device
-         * @param[in] section is an offset in the register table when supported by command (only config commands)
          * @param[in] offset is a word offset from the start address, word being 2 or 4 depending on the device
          * @param[in] nBits tells number of bits used by device register
          * @param[in] shift tells bit offset within word
          */
-        void linkRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift);
+        void linkRegParam(const std::string& group, const char *name, bool readonly, uint16_t offset, uint8_t nBits, uint8_t shift, uint8_t section);
 
         /**
          * Initialize parameters tables.
@@ -559,7 +530,7 @@ class BaseModulePlugin : public BasePlugin {
          * Every derived class should call this function from its constructor
          * just before return.
          */
-        void initParams(uint32_t nChannels=0);
+        void initParams();
 
         /**
          * Returns a name of the module from the global database.
@@ -651,7 +622,6 @@ class BaseModulePlugin : public BasePlugin {
         int CmdRsp;         //!< Last command response status
         int HwId;           //!< Hw ID that this object is controlling
         int CfgSection;     //!< Selected configuration section to be written
-        int CfgChannel;     //!< Selected channel to be configured
         int NoRspTimeout;   //!< Time to wait for response
         int ConnValidDly;   //!< Time to wait before disconnecting from parent plugin
         int SaveConfig;     //!< Save configuration to file

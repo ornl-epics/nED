@@ -25,12 +25,6 @@
 #include <alarm.h>
 #include <osiSock.h>
 
-/**
- * Return a unique id for section and channel pair that can be used to
- * identify the pair in m_configSectionSizes and m_configSectionOffsets
- */
-#define SECTION_ID(section, channel) (((channel) * 0x10) + ((section) & 0xF))
-
 const UnsignConvert *BaseModulePlugin::CONV_UNSIGN = new UnsignConvert();
 const Sign2sComplementConvert *BaseModulePlugin::CONV_SIGN_2COMP = new Sign2sComplementConvert();
 const SignMagnitudeConvert *BaseModulePlugin::CONV_SIGN_MAGN = new SignMagnitudeConvert();
@@ -114,8 +108,6 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     createParam("CmdRsp",       asynParamInt32, &CmdRsp,    LAST_CMD_NONE); // READ - Last command response status   (see BaseModulePlugin::LastCommandResponse)
     createParam("CmdReq",       asynParamInt32, &CmdReq);                   // WRITE - Send command to module        (see DasCmdPacket::CommandType)
     createParam("HwId",         asynParamOctet, &HwId);                     // WRITE - Connected module hardware id
-    createParam("CfgSection",   asynParamInt32, &CfgSection, 0x0);          // WRITE - Select configuration section to be written with next WRITE_CONFIG request, 0 for all
-    createParam("CfgChannel",   asynParamInt32, &CfgChannel, 0);            // WRITE - Select channel to be configured, 0 means main configuration
     createParam("NoRspTimeout", asynParamFloat64, &NoRspTimeout, 0.5);      // WRITE - Time to wait for response
     createParam("ConnValidDly", asynParamFloat64, &ConnValidDly, 1.0);      // WRITE - Time to wait before disconnecting from parent plugin(s)
 
@@ -131,8 +123,8 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     createParam("ConfigSaved",  asynParamInt32, &ConfigSaved, 0);           // WRITE - Flag =1 when all the PVs are in config control
     createParam("ConfigApplied",asynParamInt32, &ConfigApplied, 0);         // WRITE - Flag =1 when all PVs are synchronized to module
 
-    createRegParam("DISCOVER", "HwType",    true, 0, 0, 0,  8, 0, 0);
-    createRegParam("DISCOVER", "DiscFill",  true, 0, 0, 0, 24, 8, 0);
+    createRegParam("DISCOVER", "HwType",    true, 0,  8, 0);
+    createRegParam("DISCOVER", "DiscFill",  true, 0, 24, 8);
 
     setIntegerParam(CmdRsp, LAST_CMD_NONE);
 
@@ -225,15 +217,6 @@ asynStatus BaseModulePlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
     if (pasynUser->reason == CmdReq) {
         if (!processRequest(static_cast<DasCmdPacket::CommandType>(value)))
             return asynError;
-        return asynSuccess;
-    }
-    if (pasynUser->reason == CfgSection) {
-        if (value < 0x0 || value > 0xF) {
-            LOG_ERROR("Invalid configuration section %d", value);
-            return asynError;
-        }
-        setIntegerParam(CfgSection, value);
-        callParamCallbacks();
         return asynSuccess;
     }
     if (pasynUser->reason == CopyConfig) {
@@ -429,7 +412,7 @@ bool BaseModulePlugin::rspWriteConfig(const DasCmdPacket *packet)
 bool BaseModulePlugin::reqParams(DasCmdPacket::CommandType command, const std::string& params)
 {
     uint32_t data[1024];
-    size_t len = packRegParams(params, data, sizeof(data), 0, 0);
+    size_t len = packRegParams(params, data, sizeof(data), 0);
     if (len == 0) {
         LOG_WARN("No parameters named %s, skip sending packet", params.c_str());
         return false;
@@ -442,21 +425,18 @@ bool BaseModulePlugin::reqParams(DasCmdPacket::CommandType command, const std::s
 bool BaseModulePlugin::rspParams(const DasCmdPacket *packet, const std::string& params)
 {
     uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
-    uint32_t expectLength = ALIGN_UP(m_params[params].sizes[0]*m_wordSize, 4);
-    if (m_params[params].sizes.size() > 1) {
-        expectLength = ALIGN_UP((m_params["CONFIG"].offsets[0xF] + m_params["CONFIG"].sizes[0xF])*m_wordSize, 4);
-    }
+    uint32_t expectLength = ALIGN_UP(m_params[params].size*m_wordSize, 4);
     if (payloadLength != expectLength) {
         LOG_ERROR("Received wrong %s response based on payload length; received %u, expected %u",
                   packet->getCommandText().c_str(),
                   packet->getCmdPayloadLength(),
-                  m_params[params].sizes[0]*m_wordSize);
+                  m_params[params].size*m_wordSize);
         setParamsAlarm(params, epicsAlarmRead);
         return false;
     }
 
     setParamsAlarm(params, epicsAlarmNone);
-    unpackRegParams(params, packet->getCmdPayload(), payloadLength, 0);
+    unpackRegParams(params, packet->getCmdPayload(), payloadLength);
     return true;
 }
 
@@ -472,9 +452,9 @@ void BaseModulePlugin::setParamsAlarm(DasCmdPacket::CommandType command, int ala
     }
 }
 
-void BaseModulePlugin::setParamsAlarm(const std::string &section, int alarm)
+void BaseModulePlugin::setParamsAlarm(const std::string &params, int alarm)
 {
-    auto it = m_params.find(section);
+    auto it = m_params.find(params);
     if (it != m_params.end()) {
         for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++){
             setParamAlarmStatus(jt->first, alarm);
@@ -485,13 +465,13 @@ void BaseModulePlugin::setParamsAlarm(const std::string &section, int alarm)
 
 void BaseModulePlugin::createStatusParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    createRegParam("STATUS", name, true, 0, 0x0, offset, nBits, shift, 0);
+    createRegParam("STATUS", name, true, offset, nBits, shift, 0, CONV_UNSIGN);
     m_features |= (uint32_t)ModuleFeatures::STATUS;
 }
 
 void BaseModulePlugin::createCounterParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    createRegParam("COUNTERS", name, true, 0, 0x0, offset, nBits, shift, 0);
+    createRegParam("COUNTERS", name, true, offset, nBits, shift, 0, CONV_UNSIGN);
     m_features |= (uint32_t)ModuleFeatures::COUNTERS;
 }
 
@@ -506,7 +486,7 @@ void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_
         return;
     }
 
-    createRegParam("CONFIG", name, false, 0, section, offset, nBits, shift, value, conv);
+    createRegParam("CONFIG", name, false, offset, nBits, shift, value, conv, section);
 
     std::string nameSaved(name);
     nameSaved += "_Saved";
@@ -518,24 +498,24 @@ void BaseModulePlugin::createConfigParam(const char *name, char section, uint32_
 
 void BaseModulePlugin::createMetaConfigParam(const char *name, uint32_t nBits, int value, const BaseConvert *conv)
 {
-    createRegParam("META", name, false, 0, 0, 0, nBits, 0, value, conv);
+    createRegParam("META", name, false, 0, nBits, 0, value, conv);
 }
 
 void BaseModulePlugin::createTempParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, const BaseConvert *conv)
 {
-    createRegParam("TEMPERATURE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
+    createRegParam("TEMPERATURE", name, true, offset, nBits, shift, 0, conv);
     m_features |= (uint32_t)ModuleFeatures::TEMPERATURE;
 }
 
 void BaseModulePlugin::createUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, const BaseConvert *conv)
 {
-    createRegParam("UPGRADE", name, true, 0, 0x0, offset, nBits, shift, 0, conv);
+    createRegParam("UPGRADE", name, true, offset, nBits, shift, 0, conv);
     m_features |= (uint32_t)ModuleFeatures::UPGRADE;
 }
 
 void BaseModulePlugin::linkUpgradeParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    linkRegParam("UPGRADE", name, true, 0, 0x0, offset, nBits, shift);
+    linkRegParam("UPGRADE", name, true, offset, nBits, shift, 0);
     m_features |= (uint32_t)ModuleFeatures::UPGRADE;
 }
 
@@ -611,17 +591,9 @@ bool BaseModulePlugin::cancelTimeoutCallback()
     return canceled;
 }
 
-size_t BaseModulePlugin::packRegParams(const std::string& group, uint32_t *payload, size_t size, uint8_t channel, uint8_t section)
+size_t BaseModulePlugin::packRegParams(const std::string& group, uint32_t *payload, size_t size, uint8_t section)
 {
-    uint32_t payloadLength;
-    if (section == 0x0) {
-        uint32_t section_f = SECTION_ID((m_params[group].sections ? 0xF : 0x0), channel);
-        payloadLength = m_params[group].offsets[section_f] + m_params[group].sizes[section_f];
-    } else {
-        uint32_t sectionId = SECTION_ID(section, channel);
-        payloadLength = m_params[group].sizes[sectionId];
-    }
-    payloadLength *= m_wordSize;
+    uint32_t payloadLength = m_params[group].size * m_wordSize;
 
     if (payloadLength > size) {
         LOG_ERROR("Buffer not big enough to put register data into");
@@ -634,28 +606,17 @@ size_t BaseModulePlugin::packRegParams(const std::string& group, uint32_t *paylo
     }
 
     uint32_t length = ALIGN_UP(payloadLength, 4) / 4;
-    for (uint32_t i=0; i<length; i++) {
-        payload[i] = 0;
-    }
+    memset(payload, 0, payloadLength);
 
+    int value = 0;
+    uint32_t offset = 0;
     std::map<int, ParamDesc> &table = m_params[group].mapping;
-    std::map<int, uint32_t> &offsets = m_params[group].offsets;
     for (auto it=table.begin(); it != table.end(); it++) {
         int shift = it->second.shift;
-        int value = 0;
-        uint32_t offset = it->second.offset;
-
-        if (it->second.channel != channel) {
-            continue;
-        } else if (section == 0x0) {
-            uint32_t sectionId = SECTION_ID(it->second.section, it->second.channel);
-            offset += offsets[sectionId];
-        } else if (section != it->second.section) {
-            continue;
-        }
+        offset = it->second.offset;
 
         if (getIntegerParam(it->first, &value) != asynSuccess) {
-            // This should not happen. It's certainly error when creating and parameters.
+            // This should not happen. It's certainly error when creating asyn parameters.
             LOG_ERROR("Failed to get parameter %s value", getParamName(it->first).c_str());
             return false;
         }
@@ -681,27 +642,13 @@ size_t BaseModulePlugin::packRegParams(const std::string& group, uint32_t *paylo
     return payloadLength;
 }
 
-void BaseModulePlugin::unpackRegParams(const std::string& group, const uint32_t *payload, size_t size, uint8_t channel)
+void BaseModulePlugin::unpackRegParams(const std::string& group, const uint32_t *payload, size_t size)
 {
     std::map<int, ParamDesc> &table = m_params[group].mapping;
-    std::map<int, uint32_t> &offsets = m_params[group].offsets;
 
     for (auto it=table.begin(); it != table.end(); it++) {
         int shift = it->second.shift;
         int offset = it->second.offset;
-
-        // Skip parameters that are not included in this response
-        if (it->second.channel != channel)
-            continue;
-
-        // Handle configuration parameters
-        if (it->second.section != 0) {
-
-            auto jt = offsets.find(it->second.section);
-            if (jt != offsets.end()) {
-                offset += jt->second;
-            }
-        }
 
         if (m_wordSize == 2) {
             shift += (offset % 2 == 0 ? 0 : 16);
@@ -718,43 +665,27 @@ void BaseModulePlugin::unpackRegParams(const std::string& group, const uint32_t 
     callParamCallbacks();
 }
 
-void BaseModulePlugin::createRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value, const BaseConvert *conv)
+void BaseModulePlugin::createRegParam(const std::string& group, const char *name, bool readonly, uint16_t offset, uint8_t nBits, uint8_t shift, uint32_t value, const BaseConvert *conv, uint8_t section)
 {
     int index;
     if (createParam(name, asynParamInt32, &index) != asynSuccess) {
-        LOG_ERROR("%s parameter '%s' cannot be created (already exist?)", group, name);
+        LOG_ERROR("%s parameter '%s' cannot be created (already exist?)", group.c_str(), name);
         return;
     }
     setIntegerParam(index, value);
 
-    if (m_params.find(group) == m_params.end()) {
-        m_params[group].readonly = true;
-        m_params[group].sections = false;
-    }
-
     ParamDesc desc;
     desc.section = section;
-    desc.channel = channel;
     desc.initVal = value;
     desc.offset  = offset;
     desc.shift   = shift;
     desc.width   = nBits;
     desc.convert = conv;
     m_params[group].mapping[index] = desc;
-
-    uint32_t length = offset + 1;
-    if (m_wordSize == 2 && nBits > 16)
-        length++;
-
-    m_params[group].sizes[section] = std::max(m_params[group].sizes[section], length);
-
-    if (readonly == false)
-        m_params[group].readonly = false;
-    if (section != 0x0)
-        m_params[group].sections = true;
+    m_params[group].readonly = readonly;
 }
 
-void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool readonly, uint8_t channel, uint8_t section, uint16_t offset, uint8_t nBits, uint8_t shift)
+void BaseModulePlugin::linkRegParam(const std::string& group, const char *name, bool readonly, uint16_t offset, uint8_t nBits, uint8_t shift, uint8_t section)
 {
     int index;
     if (findParam(name, &index) != asynSuccess) {
@@ -762,55 +693,46 @@ void BaseModulePlugin::linkRegParam(const char *group, const char *name, bool re
         return;
     }
 
-    if (m_params.find(group) == m_params.end()) {
-        m_params[group].readonly = true;
-        m_params[group].sections = false;
-    }
-
     ParamDesc desc;
     desc.section = section;
-    desc.channel = channel;
     desc.initVal = 0;
     desc.offset  = offset;
     desc.shift   = shift;
     desc.width   = nBits;
     desc.convert = CONV_UNSIGN;
     m_params[group].mapping[index] = desc;
-
-    uint32_t length = offset + 1;
-    if (m_wordSize == 2 && nBits > 16)
-        length++;
-    length *= m_wordSize;
-
-    m_params[group].sizes[section] = std::max(m_params[group].sizes[section], length);
-
-    if (readonly == false)
-        m_params[group].readonly = false;
-    if (section != 0x0)
-        m_params[group].sections = true;
+    m_params[group].readonly = readonly;
 }
 
-void BaseModulePlugin::initParams(uint32_t nChannels)
+void BaseModulePlugin::initParams()
 {
-    // Go through all groups and recalculate sections sizes and offsets
+    // Go through all groups and calculate payload size from all sections
     for (auto it = m_params.begin(); it != m_params.end(); it++) {
 
-        std::map<int, uint32_t> &sizes = it->second.sizes;
-        std::map<int, uint32_t> &offsets = it->second.offsets;
+        // Calculate section sizes
+        std::vector<uint32_t> sizes;
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+            uint32_t length = jt->second.offset + 1;
+            if (m_wordSize == 2 && jt->second.width > 16)
+                length++;
+            if (sizes.size() <= jt->second.section)
+                sizes.resize(jt->second.section+1);
+            if (sizes[jt->second.section] < length)
+                sizes[jt->second.section] = length;
+        }
 
-        // Section sizes have already been calculated in createConfigParams()
-        for (uint32_t channel = 0; channel <= nChannels; channel++) {
+        // Sum up all sections to calculate payload size
+        // NOTE: We keep it in m_wordSize units, not bytes
+        std::vector<uint32_t> offsets(sizes.size());
+        it->second.size = 0;
+        for (size_t i = 0; i < sizes.size(); i++) {
+            offsets[i] = it->second.size;
+            it->second.size += sizes[i];
+        }
 
-            if (it->second.sections == true) {
-                // Calculate section offsets
-                offsets[SECTION_ID(0x1, channel)] = 0x0;
-                for (uint8_t section=0x2; section<=0xF; section++) {
-                    uint32_t currSectionId = SECTION_ID(section, channel);
-                    uint32_t prevSectionId = SECTION_ID(section - 1, channel);
-                    offsets[currSectionId] = offsets[prevSectionId] + sizes[prevSectionId];
-                    LOG_DEBUG("Section 0x%01X channel %u size=%u offset=%u", section, channel, sizes[currSectionId], offsets[currSectionId]);
-                }
-            }
+        // Turn relative offsets into absolute ones
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+            jt->second.offset += offsets[jt->second.section];
         }
     }
 

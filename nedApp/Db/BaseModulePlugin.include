@@ -72,6 +72,13 @@ record(longout, "$(P)CmdRspEn")
     field(ASG,  "BEAMLINE")
     field(VAL,  "1")
     field(OUT,  "$(P)CmdRsp.DISA")
+    field(FLNK, "$(P)CmdRspEnWait")
+}
+record(longout, "$(P)CmdRspEnWait")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "2")
+    field(OUT,  "$(P)CmdRsp NPP")
 }
 record(longout, "$(P)CmdReqBusyClear")
 {
@@ -443,56 +450,6 @@ record(mbbi, "$(P)HwType")
     field(FTSV, "MAJOR")
     field(FLNK, "$(P)Verified")
 }
-record(mbbo, "$(P)CfgSection")
-{
-    field(DESC, "Config section to write")
-    field(DTYP, "asynInt32")
-    field(OUT,  "@asyn($(PORT))CfgSection")
-    field(PINI, "YES")
-    field(ZRVL, "0")
-    field(ZRST, "Full config")
-    field(ONVL, "1")
-    field(ONST, "Section 1")
-    field(TWVL, "2")
-    field(TWST, "Section 2")
-    field(THVL, "3")
-    field(THST, "Section 3")
-    field(FRVL, "4")
-    field(FRST, "Section 4")
-    field(FVVL, "5")
-    field(FVST, "Section 5")
-    field(SXVL, "6")
-    field(SXST, "Section 6")
-    field(SVVL, "7")
-    field(SVST, "Section 7")
-    field(EIVL, "8")
-    field(EIST, "Section 8")
-    field(NIVL, "9")
-    field(NIST, "Section 9")
-    field(TEVL, "10")
-    field(TEST, "Section A")
-    field(ELVL, "11")
-    field(ELST, "Section B")
-    field(TVVL, "12")
-    field(TVST, "Section C")
-    field(TTVL, "13")
-    field(TTST, "Section D")
-    field(FTVL, "14")
-    field(FTST, "Section E")
-    field(FFVL, "15")
-    field(FFST, "Section F")
-}
-record(mbbi, "$(P)CfgChannel")
-{
-    field(DESC, "Selected config channel")
-    field(DTYP, "asynInt32")
-    field(INP,  "@asyn($(PORT))CfgChannel")
-    field(SCAN, "I/O Intr")
-    field(PINI, "YES")
-    field(VAL,  "0")
-    field(ZRVL, "0")
-    field(ZRST, "Main")
-}
 record(longin, "$(P)StatusRefreshInt")
 {
     info(autosaveFields, "VAL")
@@ -705,7 +662,7 @@ record(seq, "$(P)CheckSeq")
     field(DLY3, "0.2")
 }
 
-record(seq, "$(P)ConfSeq")
+record(seq, "$(P)ConfSeq:old")
 {
     field(ASG,  "BEAMLINE")
     field(DESC, "Check sequence")
@@ -724,6 +681,85 @@ record(seq, "$(P)ConfSeq")
     field(DO5,  "2")
     field(DLY5, "0.4")
 }
+
+record(longout, "$(P)CmdReqStop")
+{
+    field(DOL,  "6")
+    field(OUT,  "$(P)CmdReq PP")
+}
+
+record(longout, "$(P)CmdReqStart")
+{
+    field(DOL,  "5")
+    field(OUT,  "$(P)CmdReq PP")
+}
+
+record(longout, "$(P)CmdReqWrCfg")
+{
+    field(DOL,  "4")
+    field(OUT,  "$(P)CmdReq PP")
+}
+
+record(longout, "$(P)CmdReqRdCfg")
+{
+    field(DOL,  "3")
+    field(OUT,  "$(P)CmdReq PP")
+}
+
+record(longout, "$(P)CmdReqStatus")
+{
+    field(DOL,  "2")
+    field(OUT,  "$(P)CmdReq PP")
+}
+
+record(calcout, "$(P)ConfSeq")
+{
+    field(ASG,  "BEAMLINE")
+#    field(INPA, "$(P)CmdReqStop PP")
+#    field(INPB, "$(P)CmdRsp NPP")
+    field(INPB, "1")
+    field(CALC, "B=1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)ConfSeq1.PROC CA")
+}
+
+record(calcout, "$(P)ConfSeq1")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdReqWrCfg PP")
+    field(INPB, "$(P)CmdRsp NPP")
+    field(CALC, "B=1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)ConfSeq2.PROC CA")
+}
+
+record(calcout, "$(P)ConfSeq2")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdReqRdCfg PP")
+    field(INPB, "$(P)CmdRsp NPP")
+    field(CALC, "B=1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)ConfSeq3.PROC CA")
+}
+
+record(calcout, "$(P)ConfSeq3")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdReqStatus PP")
+    field(INPB, "$(P)CmdRsp NPP")
+    field(CALC, "B=1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)ConfSeq4.PROC CA")
+}
+
+record(calcout, "$(P)ConfSeq4")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdReqStart PP")
+    field(INPB, "$(P)CmdRsp NPP")
+}
+
 record(stringout, "$(P)SaveConfig")
 {
     field(ASG,  "BEAMLINE")

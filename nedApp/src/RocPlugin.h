@@ -63,7 +63,7 @@ class RocPlugin : public BaseModulePlugin {
         Fifo<char> m_hvBuffer;                              //!< FIFO buffer for data received from HV module but not yet processed
         std::string m_hvRequest{""};                        //!< When non empty, a HV request to be sent
         uint32_t m_numChannels{0};                          //!< Maximum number of channels supported by module
-        uint8_t m_expectedChannel{0};                       //!< Channel to be configured or read config next, 0 means global config, resets to 0 when reaches 8
+        std::map<DasCmdPacket::CommandType, std::vector<bool>> m_receivedRsp; //!< Account for responses from 8+1 FPGAs
 
     public: // functions
 
@@ -84,11 +84,6 @@ class RocPlugin : public BaseModulePlugin {
          * @param[in] packet to be handled
          */
         bool processResponse(const DasCmdPacket *packet) override;
-
-        /**
-         * Intercept CmdReq and send 1+8 commands to address all ROC v2 channels.
-         */
-        asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
 
         /**
          * Send string/byte data to PVs
@@ -115,17 +110,26 @@ class RocPlugin : public BaseModulePlugin {
         /**
          * Custom ROC v2 WRITE_CONFIG request handler.
          *
-         * Send out a WRITE_CONFIG packet with a channel number. This functions relies
-         * on response handler to properly adjust m_expectedChannel. It also depends
-         * on whoever is requesting this function to invoke it the 1+m_numChannel times.
+         * Sends out one WRITE_CONFIG packet per channel, starting with highest channel
+         * number first. Since packets are processed in series by the ROC, the last
+         * expected response is for channel=0 (main FPGA). We use that assumption to
+         * process responses (see rspWriteConfig).
+         *
+         * This function is only invoked for ROC v2 modules, for all others the default
+         * BaseModulePlugin applies.
          */
         bool reqWriteConfig();
 
         /**
          * Custom ROC v2 WRITE_CONFIG response handler.
          *
-         * Verifies the expected channel number, it then increments m_expectedChannel
-         * number for the next reqWriteConfig() to pick it up.
+         * It checks WRITE_CONFIG responses. When responses from all channels and the
+         * main FPGA are received, ConfigApplied PV is set. Because responses are sorted,
+         * the last time this function gets
+         * invoked for a given train of WRITE_CONFIG responses is for channel=0.
+         * We process channel=0 response through BaseModulePlugin response handling
+         * functionality to allow book-keeping, we intercept all other responses by
+         * overriding processResponse() function.
          */
         bool rspWriteConfig(const DasCmdPacket* packet);
 
