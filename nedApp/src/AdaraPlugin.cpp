@@ -156,17 +156,17 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
 
     for (auto it = m_cachedRtdl.begin(); it != m_cachedRtdl.end(); it++) {
         if (it->first == timestamp) {
-            // update packets-per-pulse sequence
-            it->second.pulseSeq = (it->second.pulseSeq + 1) & 0xFFFF;
-            // update total packets sent sequence
-            m_packetSeq = (m_packetSeq + 1) & 0x7FFF;
-
             outpacket[4] = it->second.sourceId;
-            outpacket[5] = (m_packetSeq << 16) | (it->second.pulseSeq);
+            outpacket[5] = ((it->second.pulseSeq & 0x7FFF) << 16) | (m_packetSeq & 0xFFFF);
             outpacket[6] = it->second.rtdl.charge;
             outpacket[7] = it->second.rtdl.general_info;
             //outpacket[8] = 0; // TSYNC period
             //outpacket[9] = 0; // TSYNC delay
+
+            // update packets-per-pulse sequence
+            it->second.pulseSeq = (it->second.pulseSeq + 1) & 0x7FFF;
+            // update total packets sent sequence
+            m_packetSeq = (m_packetSeq + 1) & 0xFFFF;
 
             break;
         }
