@@ -190,7 +190,7 @@ void BnlPosCalcPlugin::recvDownstream(const DasDataPacketList &packets)
     setIntegerParam(CntGoodEvents,     m_stats.nGood);
     setIntegerParam(CntTotalEvents,    m_stats.nTotal);
     setIntegerParam(BadConfig,         m_stats.nBadConfig > 0 ? 1 : 0);
-    callParamCallbacks();
+    callParamCallbacksRatelimit();
 }
 
 std::pair<DasDataPacket *, BnlPosCalcPlugin::Stats> BnlPosCalcPlugin::processPacket(const DasDataPacket *srcPacket, const BnlPosCalcPlugin::CalcParams &calcParams)

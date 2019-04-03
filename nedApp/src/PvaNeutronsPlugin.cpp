@@ -2272,7 +2272,7 @@ void PvaNeutronsPlugin::recvDownstream(const DasDataPacketList &packets)
         }
     }
 
-    callParamCallbacks();
+    callParamCallbacksRatelimit();
 }
 
 void PvaNeutronsPlugin::recvDownstream(const RtdlPacketList &packets)

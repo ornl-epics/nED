@@ -16,6 +16,8 @@
 
 #include <map>
 
+#include <epicsTime.h>
+
 class FlatFieldTable;
 
 /**
@@ -284,6 +286,7 @@ class FlatFieldPlugin : public BasePlugin {
         std::map<uint32_t, PositionTables> m_tables; //!< Map of lookup tables/number of detectors is usually small so hashing should be somewhat equally fast as vector, index is pixel_offset
         std::string m_importReport; //!< Text to be printed when asynReport() is called
         Timer m_importTimer{false}; //!< Timer is used as a worker thread for importing files
+        epicsTime m_lastCountersTime;
 
         // Following member variables must be carefully set since they're used un-locked
         double m_xScaleIn;          //!< Scaling factor to transform raw X to floating point

@@ -321,6 +321,7 @@ void OccPlugin::reset() {
     // Flag resetting mode, status thread will recover
     this->lock();
     setIntegerParam(Status, STAT_OK);
+    setIntegerParam(CntDropPkts, 0);
     callParamCallbacks();
     this->unlock();
 }

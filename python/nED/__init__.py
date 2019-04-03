@@ -56,7 +56,7 @@ def getModuleNames(expr=".*"):
     global _verbose
 
     try:
-        o = pvaccess.Channel(_pvprefix + "pva:Modules").get()
+        o = pvaccess.Channel(_pvprefix + "pva:Modules").get("")
         modules = o.getScalarArray('modules.value')
     except:
         raise RuntimeError("Failed to communicate to nED")

@@ -116,6 +116,7 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         ObjectPool<uint8_t> m_packetsPool{true};        //!< Packets pool management, used for converting DAS 1.0 -> DAS 2.0 packets
         const void *m_lastData{nullptr};                //!< Last data received
         uint32_t m_lastDataLen{0};                      //!< Length of last data received
+        const Packet *m_lastGoodPacket{nullptr};        //!< Last good packet received and processed
 
         /**
          * Process data from buffer and dispatch it to the registered plugins.
@@ -135,6 +136,7 @@ class epicsShareFunc BasePortPlugin : public BasePlugin {
         int OldPktsEn;
         int EventsFmt;
         int DumpCmdPkts;
+        int DumpDroppedPkts;
         int CntDropPkts;
 };
 

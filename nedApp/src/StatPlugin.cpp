@@ -78,7 +78,7 @@ void StatPlugin::recvDownstream(const DasDataPacketList &packets)
     setDoubleParam(MetaCnts,        metaCnts % LLONG_MAX);
     setDoubleParam(MetaBytes,       metaBytes % LLONG_MAX);
     setDoubleParam(TotBytes,        totBytes % LLONG_MAX);
-    callParamCallbacks();
+    callParamCallbacksRatelimit();
 }
 
 void StatPlugin::recvDownstream(const DasCmdPacketList &packets)

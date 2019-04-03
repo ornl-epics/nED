@@ -129,7 +129,7 @@ epicsTimeStamp RtdlPacket::getTimeStamp() const
 
 RtdlHeader RtdlPacket::getRtdlHeader() const
 {
-    RtdlHeader hdr{0};
+    RtdlHeader hdr;
 
     epicsTimeStamp timestamp = getTimeStamp();
     hdr.timestamp_sec = timestamp.secPastEpoch;

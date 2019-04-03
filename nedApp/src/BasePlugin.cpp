@@ -45,6 +45,7 @@ BasePlugin::BasePlugin(const char *portName, int blocking, int interfaceMask, in
     , m_messageQueue(queueSize, sizeof(void*))
     , m_thread(0)
     , m_shutdown(false)
+    , m_lastParamsCallback(epicsTime::getCurrent())
 {
     createParam("MsgOldDas",    asynParamGenericPointer,    &MsgOldDas);
     createParam("MsgError",     asynParamGenericPointer,    &MsgError);
@@ -52,6 +53,7 @@ BasePlugin::BasePlugin(const char *portName, int blocking, int interfaceMask, in
     createParam("MsgDasCmd",    asynParamGenericPointer,    &MsgDasCmd);
     createParam("MsgDasRtdl",   asynParamGenericPointer,    &MsgDasRtdl);
     createParam("MsgParamExch", asynParamGenericPointer,    &MsgParamExch);
+    createParam("ParamsUpdateRate", asynParamFloat64,       &ParamsUpdateRate);
 
     if (blocking) {
         std::string threadName = m_portName + "_Thread";
@@ -519,3 +521,12 @@ asynStatus BasePlugin::addIntegerParam(int param, int increment) {
     asynPortDriver::getIntegerParam(param, &tmp);
     return asynPortDriver::setIntegerParam(param, tmp+increment);
 };
+
+void BasePlugin::callParamCallbacksRatelimit() {
+    double rate = getDoubleParam(ParamsUpdateRate);
+    epicsTime now = epicsTime::getCurrent();
+    if ((now - m_lastParamsCallback) > rate) {
+        callParamCallbacks();
+        m_lastParamsCallback = now;
+    }
+}

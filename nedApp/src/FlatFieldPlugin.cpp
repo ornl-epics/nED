@@ -34,6 +34,7 @@ EPICS_REGISTER_PLUGIN(FlatFieldPlugin, 3, "Port name", string, "Parent plugins",
 
 FlatFieldPlugin::FlatFieldPlugin(const char *portName, const char *parentPlugins, const char *positions)
     : BasePlugin(portName, 1, asynOctetMask | asynFloat64Mask | asynInt32ArrayMask, asynOctetMask | asynFloat64Mask)
+    , m_lastCountersTime(epicsTime::getCurrent())
     , m_parentPlugins(parentPlugins)
 {
     createParam("ImportReport", asynParamOctet, &ImportReport);         // Generate textual file import report
@@ -270,7 +271,13 @@ void FlatFieldPlugin::recvDownstream(const DasDataPacketList &packets)
     setIntegerParam(CntRangeVetos,  m_counters[VETO_RANGE]        % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntPosCfgVetos, m_counters[VETO_POSITION_CFG] % std::numeric_limits<int32_t>::max());
     setIntegerParam(CntPsVetos,     m_counters[VETO_PHOTOSUM]     % std::numeric_limits<int32_t>::max());
-    callParamCallbacks();
+
+    // Reduce the rate at which counters are updated through asyn
+    // There tends to be 'ring buffer overflow' messages coming
+    // from asyn otherwise and maybe we can save some performance
+    // by not doing it that often. It's for informational purposes
+    // only anyway.
+    callParamCallbacksRatelimit();
 }
 
 // Only implement processEvents() for known input events.

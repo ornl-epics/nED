@@ -156,3 +156,15 @@ record(longin, "$(P)CntDropPkts")
     field(SCAN, "I/O Intr")
     field(PINI, "YES")
 }
+record(bo, "$(P)DumpDroppedPkts")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Dump dropped packets to console")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))DumpDroppedPkts")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
