@@ -153,6 +153,7 @@ record(calcout, "$(P)RspCheckAcq")
 }
 record(bi, "$(P)AcquiringSet")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     info(autosaveFields, "VAL")
     field(ZNAM, "not acquiring")
     field(ONAM, "acquiring")
@@ -176,8 +177,9 @@ record(calcout, "$(P)AcquiringCheckCalc")
     field(OUT,  "$(P)AcquiringCheck PP")
     field(FLNK, "$(P)StatusCalc")
 }
-record(mbbo, "$(P)AcquiringCheck")
+record(mbbi, "$(P)AcquiringCheck")
 {
+    info(archive, "Monitor, 00:01:00, VAL")
     field(ZRVL, "0")
     field(ZRST, "mismatch")
     field(ZRSV, "MAJOR")
