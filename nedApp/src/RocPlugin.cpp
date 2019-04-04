@@ -99,8 +99,8 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
         m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_TRIGGER].first  = std::bind(&BaseModulePlugin::reqParams, this, DasCmdPacket::CMD_PREAMP_TEST_TRIGGER, "PREAMP_TRIG");
         m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_TRIGGER].second = std::bind(&BaseModulePlugin::rspSimple, this, std::placeholders::_1);
     }
-    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].first                  = std::bind(&RocPlugin::reqHv,     this);
-    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].second                 = std::bind(&RocPlugin::rspHv,     this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].first                  = std::bind(&RocPlugin::reqHv, this);
+    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].second                 = std::bind(&BaseModulePlugin::rspSimple, this, std::placeholders::_1);
     // CMD_HV_RECV is handled through custom processResponse()
 
     createParam("HvDelay",      asynParamFloat64, &HvDelay,     0.0); // READ - Time from HV request to first response character
