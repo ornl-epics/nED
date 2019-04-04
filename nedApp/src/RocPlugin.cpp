@@ -173,7 +173,7 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
         char buffer[256];
         memset(buffer, 0, 256);
         strncpy(buffer, value, *nActual);
-        LOG_DEBUG("HV: %s", buffer);
+        //LOG_DEBUG("HV: %s", buffer);
 
         this->lock();
 
@@ -444,6 +444,76 @@ void RocPlugin::createPreAmpTrigParam(const char *name, uint32_t offset, uint32_
 {
     createRegParam("PREAMP_TRIG", name, false, offset, nBits, shift, value, CONV_UNSIGN);
 }
+
+bool RocPlugin::saveConfig(const std::string &name)
+{
+    if (m_numChannels == 0)
+        return BaseModulePlugin::saveConfig(name);
+
+    std::string filepath = getConfigPath(name, false);
+    if (filepath.empty() == true)
+        return false;
+
+    std::ofstream f(filepath);
+    auto it = m_params.find("CONFIG");
+    if (it != m_params.end()) {
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+            std::string param = getParamName(jt->first);
+            int value = getIntegerParam(jt->first);
+            f << param << " " << value << std::endl;
+        }
+    }
+    for (unsigned channel = 1; channel <= m_numChannels; channel++) {
+        auto it = m_params.find("CONFIG_" + std::to_string(channel));
+        if (it != m_params.end()) {
+            for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+                std::string param = getParamName(jt->first);
+                int value = getIntegerParam(jt->first);
+                f << param << " " << value << std::endl;
+            }
+        }
+    }
+    return true;
+}
+
+void RocPlugin::copyConfig()
+{
+    if (m_numChannels == 0)
+        return BaseModulePlugin::copyConfig();
+
+    auto it = m_params.find("CONFIG");
+    if (it != m_params.end()) {
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+            std::string param = getParamName(jt->first) + "_Saved";
+            int index;
+            asynStatus ret = asynPortDriver::findParam(param.c_str(), &index);
+            if (ret == asynSuccess) {
+                int value;
+                ret = getIntegerParam(index, &value);
+                if (ret == asynSuccess)
+                    setIntegerParam(jt->first, value);
+            }
+        }
+    }
+    for (unsigned channel = 1; channel <= m_numChannels; channel++) {
+        auto it = m_params.find("CONFIG_" + std::to_string(channel));
+        if (it != m_params.end()) {
+            for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+                std::string param = getParamName(jt->first) + "_Saved";
+                int index;
+                asynStatus ret = asynPortDriver::findParam(param.c_str(), &index);
+                if (ret == asynSuccess) {
+                    int value;
+                    ret = getIntegerParam(index, &value);
+                    if (ret == asynSuccess)
+                        setIntegerParam(jt->first, value);
+                }
+            }
+        }
+    }
+    callParamCallbacks();
+}
+
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
 // reasons:

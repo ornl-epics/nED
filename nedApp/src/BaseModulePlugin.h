@@ -555,6 +555,35 @@ class BaseModulePlugin : public BasePlugin {
          */
         uint32_t getHardwareId() { return m_hardwareId; }
 
+        /**
+         * Determine configuration file path.
+         *
+         * If existing is true, file must exist. Returns empty string if path doesn't exist.
+         */
+        std::string getConfigPath(const std::string &name, bool existing);
+
+        /**
+         * Save all configuration PVs to a file.
+         *
+         * Filename is based on the name parameter, with a '.sav' suffix. File is
+         * saved to a pre-defined folder.
+         */
+        virtual bool saveConfig(const std::string &name);
+
+        /**
+         * Load configuration PVs from a file and populate '_Saved' counterparts.
+         *
+         * Filename is based on the name parameter, with a '.sav' suffix. File is
+         * saved to a pre-defined folder.
+         */
+        virtual bool loadConfig(const std::string &name);
+
+        /**
+         * Copies configuration PV values from '_Saved' counterparts.
+         *
+         */
+        virtual void copyConfig();
+
     private: // functions
         /**
          * Check if connection to parent plugins can be closed and close it.
@@ -571,35 +600,6 @@ class BaseModulePlugin : public BasePlugin {
          * not disconnect from parent plugins.
          */
         float checkConnection();
-
-        /**
-         * Save all configuration PVs to a file.
-         *
-         * Filename is based on the name parameter, with a '.sav' suffix. File is
-         * saved to a pre-defined folder.
-         */
-        bool saveConfig(const std::string &name);
-
-        /**
-         * Load configuration PVs from a file and populate '_Saved' counterparts.
-         *
-         * Filename is based on the name parameter, with a '.sav' suffix. File is
-         * saved to a pre-defined folder.
-         */
-        bool loadConfig(const std::string &name);
-
-        /**
-         * Copies configuration PV values from '_Saved' counterparts.
-         *
-         */
-        void copyConfig();
-
-        /**
-         * Determine configuration file path.
-         *
-         * If existing is true, file must exist. Returns empty string if path doesn't exist.
-         */
-        std::string getConfigPath(const std::string &name, bool existing);
 
         /**
          * Parse filename (not path) and return configuration name.

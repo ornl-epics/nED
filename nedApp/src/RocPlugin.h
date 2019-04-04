@@ -194,6 +194,17 @@ class RocPlugin : public BaseModulePlugin {
         void createPreAmpTrigParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value);
 
         /**
+         * Save all configuration PVs to a file, for ROC2 only, defer to BaseModulePlugin otherwise.
+         */
+        bool saveConfig(const std::string &name);
+
+        /**
+         * Copies configuration PV values from '_Saved' counterparts, for ROC2 only, defer to BaseModulePlugin otherwise.
+         */
+        void copyConfig();
+
+
+        /**
          * Create and register all ROC v1.4 parameters to be exposed to EPICS.
          */
         void createParams_v14();
