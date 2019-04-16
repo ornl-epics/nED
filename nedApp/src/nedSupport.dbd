@@ -52,6 +52,7 @@ registrar("registerDspPlugin")
 registrar("registerDspWPlugin")
 registrar("registerFemPlugin")
 registrar("registerRocPlugin")
+registrar("registerWRocPlugin")
 
 # Sequences
 registrar("GlobalConRegistrar")

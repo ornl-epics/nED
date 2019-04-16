@@ -560,6 +560,7 @@ class DasCmdPacket : public Packet {
             MOD_TYPE_IROC               = 0x2A,
             MOD_TYPE_BIDIMROC           = 0x2B,
             MOD_TYPE_ADCROC             = 0x2D,
+            MOD_TYPE_WROC               = 0x2F,
             MOD_TYPE_DSP                = 0x30,
             MOD_TYPE_DSPW               = 0x31,
             MOD_TYPE_SANSROC            = 0x40,

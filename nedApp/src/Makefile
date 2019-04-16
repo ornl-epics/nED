@@ -115,6 +115,7 @@ $(PROD_NAME)_SRCS  += DspWPlugin.cpp
 $(PROD_NAME)_SRCS  += CRocPlugin.cpp
 $(PROD_NAME)_SRCS  += FemPlugin.cpp
 $(PROD_NAME)_SRCS  += RocPlugin.cpp
+$(PROD_NAME)_SRCS  += WRocPlugin.cpp
 $(PROD_NAME)_SRCS  += $(notdir $(wildcard ../*Plugin_v*.cpp))
 
 #===========================

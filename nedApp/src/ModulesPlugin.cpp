@@ -19,6 +19,7 @@
 #include "FemPlugin.h"
 #include "Log.h"
 #include "RocPlugin.h"
+#include "WRocPlugin.h"
 
 #include <algorithm>
 #include <cstring>
@@ -86,6 +87,8 @@ ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, co
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v52", "", "v52", "")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v54", "", "v54", "")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v14", "", "v14", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_WROC];
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_WROC].push_back(std::unique_ptr<BaseModulePlugin>(new WRocPlugin("disc_wroc_v01", "", "v01", "")));
 
     // We need all AROCs because of READ_STATUS command parsing and getting IBC number
     m_arocHandlers["v22"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v22", "", "v22", ""));
@@ -271,6 +274,7 @@ uint32_t ModulesPlugin::formatTxt(char *buffer, uint32_t size)
                 case DasCmdPacket::MOD_TYPE_ROC:       type = "roc";       break;
                 case DasCmdPacket::MOD_TYPE_ADCROC:    type = "adcroc";    break;
                 case DasCmdPacket::MOD_TYPE_SANSROC:   type = "sansroc";   break;
+                case DasCmdPacket::MOD_TYPE_WROC:      type = "wroc";      break;
                 default:                               type = "invalid";
             }
 
