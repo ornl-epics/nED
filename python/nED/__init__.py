@@ -36,7 +36,7 @@ def getPv(plugin, param, wait_connect=True, timeout=1.0):
 
 def getDataChannel(event_type="Pixel"):
     """ Return a new not-connected instance of PVA channel """
-    global g_autorestore
+    global autorestore
 
     # Get PV channel name based on event type
     event_type = event_type.strip(":").title()
@@ -46,7 +46,7 @@ def getDataChannel(event_type="Pixel"):
     # Now make sure this channel is enabled, but keep it at its previous
     # settings after we're done with this program
     enablePv = getPv("pva", event_type + "Enable")
-    g_autorestore.save(enablePv)
+    autorestore.save(enablePv)
     enablePv.put(1)
 
     return ch
@@ -107,9 +107,9 @@ class Module:
             return pv.get(as_string=True)
         return pv.get()
 
-    def getPv(self, param, autorestore=False):
+    def getPv(self, param, auto_restore=False):
         global _verbose
-        global g_autorestore
+        global autorestore
 
         # User is likely asking for one of the registers and is likely to ask
         # for others in the same group of 'Config', 'Status', etc.
@@ -127,8 +127,8 @@ class Module:
 
         # Now select the requested one and make sure it's connected
         pv = getPv(self.name, param, wait_connect=True)
-        if pv and autorestore:
-            g_autorestore.save(pv)
+        if pv and auto_restore:
+            autorestore.save(pv)
         return pv
 
     def getParams(self, typ=None):
@@ -159,11 +159,8 @@ class Module:
             self._req_pv = self.getPv("CmdReq")
             self._rsp_pv = self.getPv("CmdRsp")
 
-        self._req_pv.put(command)
-        time.sleep(0.001)
-        while self._rsp_pv.get(as_string=True) == "Waiting":
-            time.sleep(0.01)
-        return self._rsp_pv.get(as_string=True) == "Success"
+        self._req_pv.put(command, wait=True, timeout=10)
+        return self._req_pv.severity == 0 and self._rsp_pv.get(as_string=True) == "Success"
 
     def saveConfig(self, name):
         pv = getPv(self.name, "SaveConfig")
@@ -188,6 +185,9 @@ class Module:
                     break
             else:
                 raise UserWarning("Failed to apply configuration, command '{0}' failed".format(cmd))
+
+    def listConfigs(self):
+        return self.getPv("LoadConfigMenu").enum_strs
 
 class _AutoRestore:
     """ This class is used for automatically restoring PV values when program exits.
@@ -218,4 +218,4 @@ class _AutoRestore:
             if restore_value is None:
                 restore_value = pv.get()
             self._pvs[pv] = restore_value
-g_autorestore = _AutoRestore()
+autorestore = _AutoRestore()

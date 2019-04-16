@@ -579,6 +579,8 @@ record(mbbi, "$(P)RspDataFormat")
     field(TVST, "CROC XY")
     field(TTVL, "13")
     field(TTST, "CROC raw")
+    field(FTVL, "50")
+    field(FTST, "TSYNC time")
 }
 
 record(stringin, "$(P)RspDataTime")

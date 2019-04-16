@@ -21,6 +21,7 @@ def parse_one(type, params_str, desc_str, extra_str):
 
     names = {
         'status':     [ "name", "offset", "width", "bit_offset" ],
+        'status_ch':  [ "name", "channel", "offset", "width", "bit_offset" ],
         'counter':    [ "name", "offset", "width", "bit_offset" ],
         'config':     [ "name", "section", "section_offset", "width", "bit_offset", "default", "convert" ],
         'config_ch':  [ "name", "channel", "section", "section_offset", "width", "bit_offset", "default", "convert" ],
@@ -103,6 +104,7 @@ def parse_src_file(path, verbose=False):
 
     regexes = {
         'status':     re.compile("createStatusParam\s*\((.*)\);(.*)$"),
+        'status_ch':  re.compile("createChanStatusParam\s*\((.*)\);(.*)$"),
         'counter':    re.compile("createCounterParam\s*\((.*)\);(.*)$"),
         'config_meta':re.compile("createMetaConfigParam\s*\((\s*\"[^\"]*\"\s*,[^\,]*,[^\,]*)\);(.*)$"),
         'config':     re.compile("createConfigParam\s*\((.*)\);(.*)$"),

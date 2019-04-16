@@ -144,24 +144,33 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
 
     uint32_t *outpacket = m_buffer.data();
 
-    DataInfo info;
-    for (auto it = m_cachedRtdl.begin(); it != m_cachedRtdl.end(); it++) {
-        if (it->first == timestamp) {
-            info = it->second;
-            break;
-        }
-    }
-
+    // Initialize packet header
+    memset(outpacket, 0, 10*sizeof(uint32_t));
     outpacket[0] = 24;
     outpacket[1] = (mapped ? ADARA_PKT_TYPE_MAPPED_EVENT : ADARA_PKT_TYPE_RAW_EVENT);
     outpacket[2] = timestamp.secPastEpoch;
     outpacket[3] = timestamp.nsec;
-    outpacket[4] = info.sourceId;
-    outpacket[5] = ((info.pulseSeq++ & 0x7FFF) << 16) | (m_packetSeq++);
-    outpacket[6] = info.rtdl.charge;
-    outpacket[7] = info.rtdl.general_info;
-    outpacket[8] = 0; // TSYNC period
-    outpacket[9] = 0; // TSYNC delay
+
+    // Put default RTDL.Cycle=0x3FF for SMS to identify we didn't find RTDL packet
+    outpacket[7] = 0x3FF;
+
+    for (auto it = m_cachedRtdl.begin(); it != m_cachedRtdl.end(); it++) {
+        if (it->first == timestamp) {
+            outpacket[4] = it->second.sourceId;
+            outpacket[5] = ((it->second.pulseSeq & 0x7FFF) << 16) | (m_packetSeq & 0xFFFF);
+            outpacket[6] = it->second.rtdl.charge;
+            outpacket[7] = it->second.rtdl.general_info;
+            //outpacket[8] = 0; // TSYNC period
+            //outpacket[9] = 0; // TSYNC delay
+
+            // update packets-per-pulse sequence
+            it->second.pulseSeq = (it->second.pulseSeq + 1) & 0x7FFF;
+            // update total packets sent sequence
+            m_packetSeq = (m_packetSeq + 1) & 0xFFFF;
+
+            break;
+        }
+    }
 
     len = 10;
     for (uint32_t i = 0; i < nEvents; i++) {
@@ -193,6 +202,8 @@ void AdaraPlugin::recvDownstream(const RtdlPacketList &packets)
         epicsTime timestamp(packet->getTimeStamp());
         auto frames = packet->getRtdlFrames();
         info.rtdl = packet->getRtdlHeader();
+        // info.pulseSeq starts from 0 with every new packet in pulse
+        // info.sourceId is only only one so we can leave it 0
 
         bool sent = false;
         for (auto it = m_cachedRtdl.begin(); it != m_cachedRtdl.end(); it++) {

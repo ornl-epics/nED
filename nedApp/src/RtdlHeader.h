@@ -97,6 +97,15 @@ struct RtdlHeader {
         };
 #endif
     };
+
+    RtdlHeader()
+    : timestamp_sec(0)
+    , timestamp_nsec(0)
+    , charge(0)
+    , general_info(0)
+    , tsync_period(0)
+    , tsync_delay(0)
+    {}
 };
 
 #endif // RTDL_HEADER_HPP

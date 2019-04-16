@@ -19,10 +19,10 @@
 EPICS_REGISTER_PLUGIN(RocPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
 
 /**
- * Return a unique id for section and channel pair that can be used to
- * identify the pair m_params tables.
+ * Convert channel number to VerifyId field in command packet.
  */
-#define SECTION_ID(section, channel) (((channel) * 0x10) + ((section) & 0xF))
+#define CHAN2CMDID(channel) ((channel == 0) ? 0 : 0x10 | (channel - 1))
+#define CMDID2CHAN(cmdId)   ((cmdId & 0x10) ? ((cmdId & 0xF) + 1) : 0)
 
 RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
     : BaseModulePlugin(portName, parentPlugins, configDir, 2)
@@ -83,13 +83,15 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
     }
 
     if (m_numChannels > 0) {
-        m_cmdQueueSize += m_numChannels;
         m_cmdHandlers[DasCmdPacket::CMD_WRITE_CONFIG].first  = std::bind(&RocPlugin::reqWriteConfig, this);
         m_cmdHandlers[DasCmdPacket::CMD_WRITE_CONFIG].second = std::bind(&RocPlugin::rspWriteConfig, this, std::placeholders::_1);
         m_cmdHandlers[DasCmdPacket::CMD_READ_CONFIG].first   = std::bind(&RocPlugin::reqParamsChan, this, DasCmdPacket::CMD_READ_CONFIG);
         m_cmdHandlers[DasCmdPacket::CMD_READ_CONFIG].second  = std::bind(&RocPlugin::rspParamsChan, this, std::placeholders::_1, "CONFIG");
         m_cmdHandlers[DasCmdPacket::CMD_READ_STATUS].first   = std::bind(&RocPlugin::reqParamsChan, this, DasCmdPacket::CMD_READ_STATUS);
         m_cmdHandlers[DasCmdPacket::CMD_READ_STATUS].second  = std::bind(&RocPlugin::rspParamsChan, this, std::placeholders::_1, "STATUS");
+        m_receivedRsp[DasCmdPacket::CMD_WRITE_CONFIG].reserve(m_numChannels+1);
+        m_receivedRsp[DasCmdPacket::CMD_READ_CONFIG].reserve(m_numChannels+1);
+        m_receivedRsp[DasCmdPacket::CMD_READ_STATUS].reserve(m_numChannels+1);
     }
     if (havePreAmpTest) {
         m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_CONFIG].first   = std::bind(&BaseModulePlugin::reqParams,  this, DasCmdPacket::CMD_PREAMP_TEST_CONFIG, "PREAMP_CFG");
@@ -97,31 +99,43 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
         m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_TRIGGER].first  = std::bind(&BaseModulePlugin::reqParams, this, DasCmdPacket::CMD_PREAMP_TEST_TRIGGER, "PREAMP_TRIG");
         m_cmdHandlers[DasCmdPacket::CMD_PREAMP_TEST_TRIGGER].second = std::bind(&BaseModulePlugin::rspSimple, this, std::placeholders::_1);
     }
-    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].first                  = std::bind(&RocPlugin::reqHv,     this);
-    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].second                 = std::bind(&RocPlugin::rspHv,     this, std::placeholders::_1);
+    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].first                  = std::bind(&RocPlugin::reqHv, this);
+    m_cmdHandlers[DasCmdPacket::CMD_HV_SEND].second                 = std::bind(&BaseModulePlugin::rspSimple, this, std::placeholders::_1);
     // CMD_HV_RECV is handled through custom processResponse()
 
     createParam("HvDelay",      asynParamFloat64, &HvDelay,     0.0); // READ - Time from HV request to first response character
     createParam("HvB2bDelay",   asynParamFloat64, &HvB2bDelay,  0.0); // READ - Time from HV request to last response character
 
-    initParams(m_numChannels);
+    initParams();
 }
 
-asynStatus RocPlugin::writeInt32(asynUser *pasynUser, epicsInt32 value)
+void RocPlugin::createChanStatusParam(const char *name, uint8_t channel, uint32_t offset, uint32_t nBits, uint32_t shift)
 {
-    if (m_numChannels > 0 && pasynUser->reason == CmdReq) {
-        if (value == DasCmdPacket::CMD_WRITE_CONFIG ||
-            value == DasCmdPacket::CMD_READ_CONFIG ||
-            value == DasCmdPacket::CMD_READ_STATUS) {
+    std::string chanParams = "STATUS_" + std::to_string(channel);
+    createRegParam(chanParams.c_str(), name, true, offset, nBits, shift, 0, CONV_UNSIGN);
+    m_features |= (uint32_t)ModuleFeatures::STATUS;
+}
 
-            // Schedule sending 9 packets, our reqWriteConfig() will change the channel
-            for (uint8_t i = 0; i < 9; i++) {
-                processRequest(static_cast<DasCmdPacket::CommandType>(value));
-            }
-            return asynSuccess;
-        }
+void RocPlugin::createChanConfigParam(const char *name, uint8_t channel, char section, uint32_t offset, uint32_t nBits, uint32_t shift, int value, const BaseConvert *conv)
+{
+    if (section >= '1' && section <= '9')
+        section = section - '1' + 1;
+    else if (section >= 'A' && section <= 'F')
+        section = section - 'A' + 0xA;
+    else {
+        LOG_ERROR("Invalid section '%c' specified for parameter '%s'", section, name);
+        return;
     }
-    return BaseModulePlugin::writeInt32(pasynUser, value);
+
+    std::string chanParams = "CONFIG_" + std::to_string(channel);
+    createRegParam(chanParams.c_str(), name, false, offset, nBits, shift, value, conv, section);
+
+    std::string nameSaved(name);
+    nameSaved += "_Saved";
+    int index;
+    if (createParam(nameSaved.c_str(), asynParamInt32, &index) != asynSuccess)
+        LOG_ERROR("CONFIG save parameter '%s' cannot be created (already exist?)", nameSaved.c_str());
+    m_features |= (uint32_t)ModuleFeatures::CONFIG;
 }
 
 asynStatus RocPlugin::writeOctet(asynUser *pasynUser, const char *value, size_t nChars, size_t *nActual)
@@ -159,7 +173,7 @@ asynStatus RocPlugin::readOctet(asynUser *pasynUser, char *value, size_t nChars,
         char buffer[256];
         memset(buffer, 0, 256);
         strncpy(buffer, value, *nActual);
-        LOG_DEBUG("HV: %s", buffer);
+        //LOG_DEBUG("HV: %s", buffer);
 
         this->lock();
 
@@ -173,80 +187,148 @@ bool RocPlugin::processResponse(const DasCmdPacket *packet)
     if (packet->getCommand() == DasCmdPacket::CMD_HV_RECV) {
         return rspHv(packet);
     }
+    if (m_numChannels > 0 && packet->getCmdId() != 0) {
+        // We only process responses from sub-FPGAs. Handle main FPGA
+        // response through BaseModulePlugin mechanism to engage
+        // its book-keeping mechanism (for timeout etc.)
+        if (packet->getCommand() == DasCmdPacket::CMD_WRITE_CONFIG) {
+            return rspWriteConfig(packet);
+        }
+        if (packet->getCommand() == DasCmdPacket::CMD_READ_CONFIG) {
+            return rspParamsChan(packet, "CONFIG");
+        }
+        if (packet->getCommand() == DasCmdPacket::CMD_READ_STATUS) {
+            return rspParamsChan(packet, "STATUS");
+        }
+    }
     return BaseModulePlugin::processResponse(packet);
 }
 
 bool RocPlugin::reqWriteConfig()
 {
+    assert(m_numChannels > 0);
+
+    // Send out channel requests first so that main FPGA response comes in
+    // last and we can process it through regular response handlers.
     uint32_t data[1024];
-    size_t len = packRegParams("CONFIG", data, sizeof(data), m_expectedChannel, 0);
-    if (len == 0) {
-        LOG_WARN("Skipping sending write config packet");
-        return false;
+    for (int channel = m_numChannels; channel > 0; channel--) {
+        std::string chanParams = "CONFIG_" + std::to_string(channel);
+        size_t len = packRegParams(chanParams, data, sizeof(data), 0);
+        if (len == 0) {
+            LOG_WARN("Skipping sending write config packet");
+            continue;
+        }
+        sendUpstream(DasCmdPacket::CMD_WRITE_CONFIG, CHAN2CMDID(channel), data, len);
+        m_receivedRsp[DasCmdPacket::CMD_WRITE_CONFIG][channel] = false;
+        LOG_DEBUG("Sent WRITE_CONFIG packet for channel %u", channel);
     }
 
-    auto channel = m_expectedChannel;
-    if (channel > 0)
-        channel |= 0x10;
+    size_t len = packRegParams("CONFIG", data, sizeof(data), 0);
+    if (len == 0) {
+        LOG_WARN("Skipping sending write config packet");
+    } else {
+        sendUpstream(DasCmdPacket::CMD_WRITE_CONFIG, CHAN2CMDID(0), data, len);
+        m_receivedRsp[DasCmdPacket::CMD_WRITE_CONFIG][0] = false;
+    }
 
-    sendUpstream(DasCmdPacket::CMD_WRITE_CONFIG, channel, data, len);
     return true;
 }
 
 bool RocPlugin::rspWriteConfig(const DasCmdPacket* packet)
 {
-    if (!packet->isAcknowledge())
-        return false;
+    std::string cmdStr = DasCmdPacket::commandToText(DasCmdPacket::CMD_WRITE_CONFIG);
+    uint8_t channel = CMDID2CHAN(packet->getCmdId());
 
-    auto channel = m_expectedChannel;
-    if (channel > 0)
-        channel |= 0x10;
-
-    // Turns back to 0 after last channel, works also for m_numChannels == 0
-    m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
-
-    if (packet->getCmdId() != channel) {
-        LOG_WARN("Expecting WRITE_CONFIG response for channel %u, received channel %u", channel & 0xF, packet->getCmdId() & 0xF);
+    if (channel > m_numChannels) {
+        LOG_WARN("Unexpected %s response for channel %u", cmdStr.c_str(), channel);
         return false;
     }
 
-    return true;
+    if (channel > 0) {
+        // Main FPGA response is logged from BaseModulePlugin but not others
+        LOG_INFO("Received %s %s for channel %u", cmdStr.c_str(), packet->isAcknowledge() ? "ACK" : "NACK", channel);
+    }
+
+    if (m_receivedRsp[DasCmdPacket::CMD_WRITE_CONFIG][channel] == true)
+        LOG_WARN("Already received %s response for channel %u, ignoring", cmdStr.c_str(), channel);
+    else
+        m_receivedRsp[DasCmdPacket::CMD_WRITE_CONFIG][channel] = true;
+
+    if (!packet->isAcknowledge())
+        return false;
+
+    // So far so good. Unless we're processing the main FPGA response
+    // (which comes in last), we can exit.
+    if (channel > 0)
+        return true;
+
+    uint8_t missingResponses = m_numChannels + 1;
+    for (uint8_t i = 0; i <= m_numChannels; i++) {
+        if (m_receivedRsp[DasCmdPacket::CMD_WRITE_CONFIG][i] == true) {
+            missingResponses--;
+        }
+    }
+    if (missingResponses == 0) {
+        setIntegerParam(ConfigApplied, 1);
+        callParamCallbacks();
+        return true;
+    } else {
+        LOG_DEBUG("Missing %s response from %u channels", cmdStr.c_str(), missingResponses);
+        return false;
+    }
 }
 
 bool RocPlugin::reqParamsChan(DasCmdPacket::CommandType command)
 {
-    auto channel = m_expectedChannel;
-    if (channel > 0)
-        channel |= 0x10;
-    sendUpstream(command, channel, nullptr, 0);
+    assert(m_numChannels > 0);
+
+    // Send out channel requests first so that main FPGA response comes in
+    // last and we can process it through BaseModulePlugin response handlers.
+    for (int channel = m_numChannels; channel > 0; channel--) {
+        uint8_t cmdId = CHAN2CMDID(channel);
+        sendUpstream(command, cmdId, nullptr, 0);
+        m_receivedRsp[command][channel] = false;
+        LOG_DEBUG("Sent %s packet for channel %u", DasCmdPacket::commandToText(command).c_str(), channel);
+    }
+
+    sendUpstream(command);
+    m_receivedRsp[command][0] = false;
     return true;
 }
 
 bool RocPlugin::rspParamsChan(const DasCmdPacket* packet, const std::string& params)
 {
+    uint8_t channel = CMDID2CHAN(packet->getCmdId());
+
+    if (channel > m_numChannels) {
+        LOG_WARN("Unexpected %s response for channel %u", packet->getCommandText().c_str(), channel);
+        return false;
+    }
+
+    if (channel > 0) {
+        // Main FPGA response is logged from BaseModulePlugin but not others
+        LOG_INFO("Received %s %s for channel %u", packet->getCommandText().c_str(), packet->isAcknowledge() ? "ACK" : "NACK", channel);
+    }
+
+    if (m_receivedRsp.find(packet->getCommand()) == m_receivedRsp.end()) {
+        LOG_ERROR("Unsupported response type %s for module with channels", packet->getCommandText().c_str());
+        return false;
+    }
+
+    if (m_receivedRsp[packet->getCommand()][channel] == true)
+        LOG_WARN("Already received %s response for channel %u, ignoring", packet->getCommandText().c_str(), channel);
+    else
+        m_receivedRsp[packet->getCommand()][channel] = true;
+
     if (!packet->isAcknowledge())
         return false;
 
     uint8_t wordSize = 2;
-    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
-    uint32_t section = SECTION_ID(0x0, m_expectedChannel);
-    uint32_t expectLength = ALIGN_UP(m_params[params].sizes[section]*wordSize, 4);
-    if (m_params[params].sizes.size() > 1) {
-        section = SECTION_ID(0xF, m_expectedChannel);
-        expectLength = ALIGN_UP((m_params["CONFIG"].offsets[section] + m_params["CONFIG"].sizes[section])*wordSize, 4);
-    }
-
-    auto channel = m_expectedChannel;
+    std::string chanParam = params;
     if (channel > 0)
-        channel |= 0x10;
-
-    // Turns back to 0 after last channel, works also for m_numChannels == 0
-    m_expectedChannel = (m_expectedChannel + 1) % (m_numChannels + 1);
-
-    if (packet->getCmdId() != channel) {
-        LOG_WARN("Expecting %s response for channel %u, received channel %u", params.c_str(), channel & 0xF, packet->getCmdId() & 0xF);
-        return false;
-    }
+        chanParam += "_" + std::to_string(channel);
+    uint32_t payloadLength = ALIGN_UP(packet->getCmdPayloadLength(), 4);
+    uint32_t expectLength = ALIGN_UP(m_params[chanParam].size*wordSize, 4);
 
     if (payloadLength != expectLength) {
         if (channel == 0) {
@@ -256,12 +338,27 @@ bool RocPlugin::rspParamsChan(const DasCmdPacket* packet, const std::string& par
             LOG_ERROR("Received wrong channel %u %s response based on length; received %u, expected %u",
                       channel, params.c_str(), payloadLength, expectLength);
         }
-        setParamsAlarm(params, epicsAlarmRead);
+        setParamsAlarm(chanParam, epicsAlarmRead);
         return false;
     }
 
-    setParamsAlarm(params, epicsAlarmNone);
-    unpackRegParams(params, packet->getCmdPayload(), payloadLength, channel);
+    setParamsAlarm(chanParam, epicsAlarmNone);
+    unpackRegParams(chanParam, packet->getCmdPayload(), payloadLength);
+
+    if (channel == 0) {
+        // Main FPGA response is last, so at this point we should have received
+        // all the others.
+        uint8_t missingResponses = m_numChannels + 1;
+        for (uint8_t i = 0; i <= m_numChannels; i++) {
+            if (m_receivedRsp[packet->getCommand()][i] == true) {
+                missingResponses--;
+            }
+        }
+        if (missingResponses > 0) {
+            LOG_DEBUG("Missing %s response from %u channels", packet->getCommandText().c_str(), missingResponses);
+            return false;
+        }
+    }
 
     return true;
 }
@@ -340,13 +437,83 @@ bool RocPlugin::rspHv(const DasCmdPacket *packet)
 
 void RocPlugin::createPreAmpCfgParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
 {
-    createRegParam("PREAMP_CFG", name, false, 0, 0x0, offset, nBits, shift, value, CONV_UNSIGN);
+    createRegParam("PREAMP_CFG", name, false, offset, nBits, shift, value, CONV_UNSIGN);
 }
 
 void RocPlugin::createPreAmpTrigParam(const char *name, uint32_t offset, uint32_t nBits, uint32_t shift, int value)
 {
-    createRegParam("PREAMP_TRIG", name, false, 0, 0x0, offset, nBits, shift, value, CONV_UNSIGN);
+    createRegParam("PREAMP_TRIG", name, false, offset, nBits, shift, value, CONV_UNSIGN);
 }
+
+bool RocPlugin::saveConfig(const std::string &name)
+{
+    if (m_numChannels == 0)
+        return BaseModulePlugin::saveConfig(name);
+
+    std::string filepath = getConfigPath(name, false);
+    if (filepath.empty() == true)
+        return false;
+
+    std::ofstream f(filepath);
+    auto it = m_params.find("CONFIG");
+    if (it != m_params.end()) {
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+            std::string param = getParamName(jt->first);
+            int value = getIntegerParam(jt->first);
+            f << param << " " << value << std::endl;
+        }
+    }
+    for (unsigned channel = 1; channel <= m_numChannels; channel++) {
+        auto it = m_params.find("CONFIG_" + std::to_string(channel));
+        if (it != m_params.end()) {
+            for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+                std::string param = getParamName(jt->first);
+                int value = getIntegerParam(jt->first);
+                f << param << " " << value << std::endl;
+            }
+        }
+    }
+    return true;
+}
+
+void RocPlugin::copyConfig()
+{
+    if (m_numChannels == 0)
+        return BaseModulePlugin::copyConfig();
+
+    auto it = m_params.find("CONFIG");
+    if (it != m_params.end()) {
+        for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+            std::string param = getParamName(jt->first) + "_Saved";
+            int index;
+            asynStatus ret = asynPortDriver::findParam(param.c_str(), &index);
+            if (ret == asynSuccess) {
+                int value;
+                ret = getIntegerParam(index, &value);
+                if (ret == asynSuccess)
+                    setIntegerParam(jt->first, value);
+            }
+        }
+    }
+    for (unsigned channel = 1; channel <= m_numChannels; channel++) {
+        auto it = m_params.find("CONFIG_" + std::to_string(channel));
+        if (it != m_params.end()) {
+            for (auto jt = it->second.mapping.begin(); jt != it->second.mapping.end(); jt++) {
+                std::string param = getParamName(jt->first) + "_Saved";
+                int index;
+                asynStatus ret = asynPortDriver::findParam(param.c_str(), &index);
+                if (ret == asynSuccess) {
+                    int value;
+                    ret = getIntegerParam(index, &value);
+                    if (ret == asynSuccess)
+                        setIntegerParam(jt->first, value);
+                }
+            }
+        }
+    }
+    callParamCallbacks();
+}
+
 
 // createStatusParams_v* and createConfigParams_v* functions are implemented in custom files for two
 // reasons:
