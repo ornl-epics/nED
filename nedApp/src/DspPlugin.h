@@ -96,6 +96,11 @@ class DspPlugin : public BaseModulePlugin {
          * Create and register all 7.2 parameters to be exposed to EPICS.
          */
         void createParams_v72();
+
+        /**
+         * Create and register all 8.1 parameters to be exposed to EPICS.
+         */
+        void createParams_v81();
 };
 
 #endif // DSP_PLUGIN_H

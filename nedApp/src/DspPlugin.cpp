@@ -48,6 +48,11 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
         setCmdVersion(1);
         m_timeSync.reset(new TimeSync(this));
         m_features |= (uint32_t)ModuleFeatures::TIME_SYNC;
+    } else if (version == "v81") {
+        createParams_v81();
+        setCmdVersion(1);
+        m_timeSync.reset(new TimeSync(this));
+        m_features |= (uint32_t)ModuleFeatures::TIME_SYNC;
     } else {
         LOG_ERROR("Unsupported DSP version '%s'", version.c_str());
         return;
