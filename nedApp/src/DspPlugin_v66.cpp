@@ -20,6 +20,7 @@ void DspPlugin::createParams_v66() {
     createRegParam("VERSION", "FwYear", true, 1,  8, 16, 0, CONV_HEX2DEC2K); // Firmware year
     createRegParam("VERSION", "FwRev",  true, 1,  4, 24); // Firmware revision                  (low:5,high:7)
     createRegParam("VERSION", "FwVer",  true, 1,  4, 28); // Firmware version                   (low:5,high:7)
+    createRegParam("VERSION", "FillVer",true, 3, 32,  0); // Filler
 
 //      BLXXX:Det:DspX:| sig nam|                                 | EPICS record description | (bi and mbbi description)
     createConfigParam("PixIdOff",       'B', 0x0,  32,  0, 0); // Pixel id offset
