@@ -30,9 +30,11 @@ FemPlugin::FemPlugin(const char *portName, const char *parentPlugins, const char
     createParam("Upg:BusyTimeout", asynParamFloat64, &UpgradeBusyTimeout,  1);     // WRITE - Max time to wait for ready flag
     createParam("Upg:ProgramTimeout",asynParamFloat64, &UpgradeProgramTimeout, 10);// WRITE - Max time to wait for programmed flag
     createParam("Upg:NoRspTimeout",asynParamFloat64, &UpgradeNoRspTimeout, 0.2);   // WRITE - Max time to wait for response
-    createParam("Upg:NoRspMaxRetries",asynParamInt32,&UpgradeNoRspMaxRetries, 5);     // WRITE - Max times to retry when no response received
-    createParam("Upg:NoRspSeqRetries",asynParamInt32,&UpgradeNoRspSeqRetries, 5);  // READ - Number of consecutive retries
-    createParam("Upg:NoRspTotRetries",asynParamInt32,&UpgradeNoRspTotRetries, 5);  // READ - Number of all retries in one upgrade session
+// When uncommented, these cause segmentation fault in EPICS base
+// They worked in nED1 though
+//    createParam("Upg:NoRspMaxRetries",asynParamInt32,&UpgradeNoRspMaxRetries, 5);     // WRITE - Max times to retry when no response received
+//    createParam("Upg:NoRspSeqRetries",asynParamInt32,&UpgradeNoRspSeqRetries, 5);  // READ - Number of consecutive retries
+//    createParam("Upg:NoRspTotRetries",asynParamInt32,&UpgradeNoRspTotRetries, 5);  // READ - Number of all retries in one upgrade session
 
     m_remoteUpgrade.status = RemoteUpgrade::NOT_SUPPORTED;
 
