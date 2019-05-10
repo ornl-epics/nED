@@ -1,12 +1,13 @@
 include "BasePlugin.include"
 include "BaseModulePlugin.include"
 include "DspPlugin_v80.generated"
-include "DspPlugin7.include"
+include "DspPlugin8.include"
 include "GlobalConD.include"
+include "TimeSync.include"
 
 record(stringin, "$(P)PluginId")
 {
-    field(VAL,  "DspPlugin_v72")
+    field(VAL,  "DspPlugin_v80")
 }
 
 record(mbbo, "$(P)CmdReq")
@@ -16,4 +17,3 @@ record(mbbo, "$(P)CmdReq")
     field(TTVL, "39")
     field(TTST, "Down reset LVDS")
 }
-
