@@ -401,9 +401,12 @@ bool BaseModulePlugin::rspSimple(const DasCmdPacket *packet)
 
 bool BaseModulePlugin::rspWriteConfig(const DasCmdPacket *packet)
 {
-    if (!packet->isAcknowledge())
+    if (!packet->isAcknowledge()) {
+        setParamAlarmStatus(DasCmdPacket::CMD_WRITE_CONFIG, epicsAlarmWrite);
         return false;
+    }
 
+    setParamAlarmStatus(DasCmdPacket::CMD_WRITE_CONFIG, epicsAlarmNone);
     setIntegerParam(ConfigApplied, 1);
     callParamCallbacks();
     return true;
