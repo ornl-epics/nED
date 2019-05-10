@@ -619,6 +619,7 @@ record(calcout, "$(P)TempRefreshBoot")
 }
 record(ao, "$(P)NoRspTimeout")
 {
+    field(ASG,  "BEAMLINE")
     field(DESC, "Time to wait for response")
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT))NoRspTimeout")
@@ -634,138 +635,96 @@ record(bo, "$(P)Upg:Supported")
     field(VAL,  "0")
 }
 
-record(seq, "$(P)StartSeq")
+record(calcout, "$(P)StartSeqCheck")
 {
     field(ASG,  "BEAMLINE")
-    field(DESC, "Start acq sequence")
-    field(LNK1, "$(P)CmdReq PP")
-    field(DO1,  "5")
-    field(LNK2, "$(P)CmdReq PP")
-    field(DO2,  "2")
-    field(DLY2, "0.1")
-}
-
-record(seq, "$(P)StopSeq")
-{
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Stop acq sequence")
-    field(LNK1, "$(P)CmdReq PP")
-    field(DO1,  "6")
-    field(LNK2, "$(P)CmdReq PP")
-    field(DO2,  "2")
-    field(DLY2, "0.1")
-}
-
-record(seq, "$(P)CheckSeq")
-{
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Check sequence")
-    field(LNK1, "$(P)CmdReq PP")
-    field(DO1,  "2")
-    field(LNK2, "$(P)CmdReq PP")
-    field(DO2,  "0")
-    field(DLY2, "0.1")
-    field(LNK3, "$(P)CmdReq PP")
-    field(DO3,  "1")
-    field(DLY3, "0.2")
-}
-
-record(seq, "$(P)ConfSeq:old")
-{
-    field(ASG,  "BEAMLINE")
-    field(DESC, "Check sequence")
-    field(LNK1, "$(P)CmdReq PP")
-    field(DO1,  "6")
-    field(LNK2, "$(P)CmdReq PP")
-    field(DO2,  "4")
-    field(DLY2, "0.1")
-    field(LNK3, "$(P)CmdReq PP")
-    field(DO3,  "3")
-    field(DLY3, "0.2")
-    field(LNK4, "$(P)CmdReq PP")
-    field(DO4,  "5")
-    field(DLY4, "0.3")
-    field(LNK5, "$(P)CmdReq PP")
-    field(DO5,  "2")
-    field(DLY5, "0.4")
-}
-
-record(longout, "$(P)CmdReqStop")
-{
-    field(DOL,  "6")
-    field(OUT,  "$(P)CmdReq PP")
-}
-
-record(longout, "$(P)CmdReqStart")
-{
-    field(DOL,  "5")
-    field(OUT,  "$(P)CmdReq PP")
-}
-
-record(longout, "$(P)CmdReqWrCfg")
-{
-    field(DOL,  "4")
-    field(OUT,  "$(P)CmdReq PP")
-}
-
-record(longout, "$(P)CmdReqRdCfg")
-{
-    field(DOL,  "3")
-    field(OUT,  "$(P)CmdReq PP")
-}
-
-record(longout, "$(P)CmdReqStatus")
-{
-    field(DOL,  "2")
-    field(OUT,  "$(P)CmdReq PP")
-}
-
-record(calcout, "$(P)ConfSeq")
-{
-    field(ASG,  "BEAMLINE")
-#    field(INPA, "$(P)CmdReqStop PP")
-#    field(INPB, "$(P)CmdRsp NPP")
-    field(INPB, "1")
-    field(CALC, "B=1")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#1")
     field(OOPT, "When Non-zero")
-    field(OUT,  "$(P)ConfSeq1.PROC CA")
+    field(OUT,  "$(P)StartSeq.ABORT PP")
 }
 
-record(calcout, "$(P)ConfSeq1")
+record(sseq, "$(P)StartSeq")
 {
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)CmdReqWrCfg PP")
-    field(INPB, "$(P)CmdRsp NPP")
-    field(CALC, "B=1")
+    field(DOL1,  "5")
+    field(DOL3,  "2")
+    field(LNK1,  "$(P)CmdReq CA")
+    field(LNK2,  "$(P)StartSeqCheck PP")
+    field(LNK3,  "$(P)CmdReq CA")
+    field(WAIT1, "Wait")
+    field(WAIT3, "Wait")
+}
+
+record(calcout, "$(P)StopSeqCheck")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#1")
     field(OOPT, "When Non-zero")
-    field(OUT,  "$(P)ConfSeq2.PROC CA")
+    field(OUT,  "$(P)StopSeq.ABORT PP")
 }
 
-record(calcout, "$(P)ConfSeq2")
+record(sseq, "$(P)StopSeq")
 {
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)CmdReqRdCfg PP")
-    field(INPB, "$(P)CmdRsp NPP")
-    field(CALC, "B=1")
+    field(DOL1,  "6")
+    field(DOL3,  "2")
+    field(LNK1,  "$(P)CmdReq CA")
+    field(LNK2,  "$(P)StopSeqCheck PP")
+    field(LNK3,  "$(P)CmdReq CA")
+    field(WAIT1, "Wait")
+    field(WAIT3, "Wait")
+}
+
+record(calcout, "$(P)CheckSeqCheck")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#1")
     field(OOPT, "When Non-zero")
-    field(OUT,  "$(P)ConfSeq3.PROC CA")
+    field(OUT,  "$(P)CheckSeq.ABORT PP")
 }
 
-record(calcout, "$(P)ConfSeq3")
+record(sseq, "$(P)CheckSeq")
 {
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)CmdReqStatus PP")
-    field(INPB, "$(P)CmdRsp NPP")
-    field(CALC, "B=1")
+    field(DOL1,  "0")
+    field(DOL3,  "1")
+    field(DOL5,  "2")
+    field(LNK1,  "$(P)CmdReq CA")
+    field(LNK2,  "$(P)CheckSeqCheck PP")
+    field(LNK3,  "$(P)CmdReq CA")
+    field(LNK4,  "$(P)CheckSeqCheck PP")
+    field(LNK5,  "$(P)CmdReq CA")
+    field(WAIT1, "Wait")
+    field(WAIT3, "Wait")
+    field(WAIT5, "Wait")
+}
+
+record(calcout, "$(P)ConfSeqCheck")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#1")
     field(OOPT, "When Non-zero")
-    field(OUT,  "$(P)ConfSeq4.PROC CA")
+    field(OUT,  "$(P)ConfSeq.ABORT PP")
 }
 
-record(calcout, "$(P)ConfSeq4")
+record(sseq, "$(P)ConfSeq")
 {
     field(ASG,  "BEAMLINE")
-    field(INPA, "$(P)CmdReqStart PP")
-    field(INPB, "$(P)CmdRsp NPP")
+    field(DOL1,  "4")
+    field(DOL3,  "3")
+    field(DOL5,  "2")
+    field(LNK1,  "$(P)CmdReq CA")
+    field(LNK2,  "$(P)ConfSeqCheck PP")
+    field(LNK3,  "$(P)CmdReq CA")
+    field(LNK4,  "$(P)ConfSeqCheck PP")
+    field(LNK5,  "$(P)CmdReq CA")
+    field(WAIT1, "Wait")
+    field(WAIT3, "Wait")
+    field(WAIT5, "Wait")
 }
 
 record(stringout, "$(P)SaveConfig")
