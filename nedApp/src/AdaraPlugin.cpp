@@ -150,6 +150,10 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     outpacket[1] = (mapped ? ADARA_PKT_TYPE_MAPPED_EVENT : ADARA_PKT_TYPE_RAW_EVENT);
     outpacket[2] = timestamp.secPastEpoch;
     outpacket[3] = timestamp.nsec;
+    outpacket[5] = (m_packetSeq & 0xFFFF);
+
+    // update total packets sent sequence
+    m_packetSeq = (m_packetSeq + 1) & 0xFFFF;
 
     // Put default RTDL.Cycle=0x3FF for SMS to identify we didn't find RTDL packet
     outpacket[7] = 0x3FF;
@@ -157,7 +161,7 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     for (auto it = m_cachedRtdl.begin(); it != m_cachedRtdl.end(); it++) {
         if (it->first == timestamp) {
             outpacket[4] = it->second.sourceId;
-            outpacket[5] = ((it->second.pulseSeq & 0x7FFF) << 16) | (m_packetSeq & 0xFFFF);
+            outpacket[5] |= ((it->second.pulseSeq & 0x7FFF) << 16);
             outpacket[6] = it->second.rtdl.charge;
             outpacket[7] = it->second.rtdl.general_info;
             //outpacket[8] = 0; // TSYNC period
@@ -165,8 +169,6 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
 
             // update packets-per-pulse sequence
             it->second.pulseSeq = (it->second.pulseSeq + 1) & 0x7FFF;
-            // update total packets sent sequence
-            m_packetSeq = (m_packetSeq + 1) & 0xFFFF;
 
             break;
         }
