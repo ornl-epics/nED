@@ -58,6 +58,7 @@ OccPlugin::OccPlugin(const char *portName, const char *devfile, uint32_t localBu
     createParam("RxEnRb",           asynParamInt32,     &RxEnRb);                   // READ - Incoming data enabled         (0=disabled,1=enabled)
     createParam("ErrPktEn",         asynParamInt32,     &ErrPktEn);                 // WRITE - Error packets output switch   (0=disable,1=enable)
     createParam("ErrPktEnRb",       asynParamInt32,     &ErrPktEnRb);               // READ - Error packets enabled         (0=disabled,1=enabled)
+    createParam("ReportFile",       asynParamOctet,     &ReportFile, "");           // WRITE - Filename to save OCC info when processing thread stops
 
     occ_interface_type occtype = OCC_INTERFACE_OPTICAL;
     if (strchr(devfile, ':') != 0)
@@ -354,4 +355,21 @@ void OccPlugin::handleRecvError(int ret)
 
     callParamCallbacks();
     this->unlock();
+
+    // When enabled, dump OCC information to a file
+    char filename[256] = { 0 };
+    getStringParam(ReportFile, sizeof(filename), filename);
+    if (strlen(filename) > 0) {
+        FILE *fp = fopen(filename, "w");
+        if (fp == nullptr) {
+            LOG_ERROR("Failed to save OCC information to %s: %s", filename, strerror(errno));
+        } else {
+            int ret = occ_report(m_occ, fp);
+            if (ret == 0)
+                LOG_INFO("Saved OCC information to %s", filename);
+            else
+                LOG_ERROR("Failed to save OCC information to %s: %s", filename, strerror(-ret));
+            fclose(fp);
+        }
+    }
 }

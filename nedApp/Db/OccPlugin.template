@@ -557,3 +557,15 @@ record(stringin, "$(P)StatusText")
     field(DESC, "Global OCC status text")
     field(INP,  "$(P)StatusTextCalc.SVAL PP MSS")
 }
+record(waveform, "$(P)ReportFile")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "File to save OCC info on error")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT))ReportFile")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(PINI, "YES")
+}
+

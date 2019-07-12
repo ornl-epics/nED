@@ -183,19 +183,13 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
         } catch (std::runtime_error &e) {
             if (retryCounter < 7) {
                 LOG_DEBUG("Partial data in buffer, waiting for more (retry %u/6)", retryCounter);
-                // Exponentially sleep up to ~1.1s, first pass doesn't sleep
+                // Exponentially sleep up to ~10s, first pass doesn't sleep
                 epicsThreadSleep(1e-5 * pow(10, retryCounter++));
                 continue;
             }
 
-            // Still doesn't have enough data, abort thread
+            // Still doesn't have enough data, abort thread. handleRecvError() will do OCC report if enabled
             LOG_ERROR("Aborting processing thread: %s", e.what());
-            if (m_lastGoodPacket) {
-                LOG_DEBUG("Last good packet (addr=%p) %s", m_lastGoodPacket, (data < m_lastGoodPacket) ? "(potentially overwritten)" : " ");
-                dump(reinterpret_cast<const char *>(m_lastGoodPacket), m_lastGoodPacket->getLength());
-            }
-            LOG_DEBUG("Current packet (addr=%p)", data);
-            dump(reinterpret_cast<const char *>(data), length);
             handleRecvError(-ERANGE);
             break;
         }
