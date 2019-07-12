@@ -26,7 +26,8 @@ void WRocPlugin::createParams_v01()
     createRegParam("VERSION", "FwDay",  true, 1,  8, 16, 0, CONV_HEX2DEC);
     createRegParam("VERSION", "FwMonth",true, 1,  8, 24, 0, CONV_HEX2DEC);
 
-    createConfigParam("NewFormat",  '1', 0,  1, 0, 0);    
+    createConfigParam("NewFormat",  '1', 0,  1, 0, 0);  
+    createConfigParam("TclkSel",    '1', 0,  1, 1, 0);   
     createConfigParam("ChannelEn0", '1', 1,  1, 0, 1);
     createConfigParam("ChannelEn1", '1', 1,  1, 1, 1);
     createConfigParam("ChannelEn2", '1', 1,  1, 2, 1);
