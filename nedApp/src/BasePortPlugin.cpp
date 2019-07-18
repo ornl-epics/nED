@@ -188,14 +188,8 @@ void BasePortPlugin::processDataThread(epicsEvent *shutdown)
                 continue;
             }
 
-            // Still doesn't have enough data, abort thread
+            // Still doesn't have enough data, abort thread. handleRecvError() will do OCC report if enabled
             LOG_ERROR("Aborting processing thread: %s", e.what());
-            if (m_lastGoodPacket) {
-                LOG_DEBUG("Last good packet (addr=%p) %s", m_lastGoodPacket, (data < m_lastGoodPacket) ? "(potentially overwritten)" : " ");
-                dump(reinterpret_cast<const char *>(m_lastGoodPacket), m_lastGoodPacket->getLength());
-            }
-            LOG_DEBUG("Current packet (addr=%p)", data);
-            dump(reinterpret_cast<const char *>(data), length);
             handleRecvError(-ERANGE);
             break;
         }

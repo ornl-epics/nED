@@ -151,6 +151,7 @@ class epicsShareFunc OccPlugin : public BasePortPlugin {
         int RxEnRb;
         int ErrPktEn;
         int ErrPktEnRb;
+        int ReportFile;
 };
 
 #endif // OCC_PLUGIN_H
