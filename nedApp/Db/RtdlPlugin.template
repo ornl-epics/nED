@@ -13,6 +13,34 @@ record(stringin, "$(P)Timestamp")
     field(INP,  "@asyn($(PORT))Timestamp")
     field(SCAN, "I/O Intr")
 }
+record(longin, "$(P)TimestampSec")
+{
+    field(DESC, "Timestamp Nano Seconds")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimestampSec")
+    field(SCAN, "I/O Intr")
+    # July 18, 2099 4:46:00 PM - time doesn't go backwards
+    field(LOW,  "932316360")
+    field(LSV,  "MAJOR")
+}
+record(longin, "$(P)TimestampNsec")
+{
+    field(DESC, "Timestamp Nano Seconds")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimestampNsec")
+    field(SCAN, "I/O Intr")
+    field(HIGH, "1000000000")
+    field(LOW,  "-1")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
+}
+record(longin, "$(P)TimestampSec")
+{
+    field(DESC, "Timestamp Seconds")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimestampSec")
+    field(SCAN, "I/O Intr")
+}
 record(mbbi, "$(P)PulseFlavor")
 {
     field(DESC, "Pulse flavor")
@@ -72,6 +100,10 @@ record(longin, "$(P)Cycle")
     field(INP,  "@asyn($(PORT))Cycle")
     field(SCAN, "I/O Intr")
     field(FLNK, "$(P)Refresh")
+    field(HIGH, "600")
+    field(LOW,  "-1")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
 }
 record(longin, "$(P)TsyncPeriod")
 {
@@ -282,4 +314,9 @@ record(ai, "$(P)FrameLen")
     field(EGU,  "ms")
     field(PREC, "6")
     field(SCAN, "I/O Intr")
+    field(HIGH, "17.0")
+    field(LOW,  "16.3")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
+    field(ADEL, "0.01")
 }

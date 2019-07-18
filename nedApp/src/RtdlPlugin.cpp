@@ -23,6 +23,8 @@ RtdlPlugin::RtdlPlugin(const char *portName, const char *parentPlugins, const ch
     : BasePlugin(portName, std::string(parentPlugins).find(',')!=std::string::npos, asynFloat64Mask|asynOctetMask, asynFloat64Mask|asynOctetMask)
 {
     createParam("Timestamp",        asynParamOctet, &Timestamp);    // READ - Timestamp string of last RTDL
+    createParam("TimestampSec",     asynParamInt32, &TimestampSec); // READ - Timestamp seconds
+    createParam("TimestampNsec",    asynParamInt32, &TimestampNsec);// READ - Timestamp nano-seconds
     createParam("PulseFlavor",      asynParamInt32, &PulseFlavor);  // READ - Pulse flavor
     createParam("ProtonCharge",     asynParamFloat64, &ProtonCharge); // READ - Pulse proton charge
     createParam("TimingStatus",     asynParamInt32, &TimingStatus); // READ - Timing status
@@ -111,6 +113,8 @@ void RtdlPlugin::update(const epicsTimeStamp &timestamp, const RtdlHeader &rtdl,
     epicsTimeToStrftime(rtdlTimeStr, sizeof(rtdlTimeStr), TIMESTAMP_FORMAT, &timestamp);
 
     setStringParam(Timestamp,           rtdlTimeStr);
+    setIntegerParam(TimestampSec,       timestamp.secPastEpoch);
+    setIntegerParam(TimestampNsec,      timestamp.nsec);
     setIntegerParam(PulseFlavor,        rtdl.pulse.flavor);
     setDoubleParam(ProtonCharge,        rtdl.pulse.charge * 10e-12);
     setIntegerParam(TimingStatus,       rtdl.timing_status);

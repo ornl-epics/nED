@@ -92,6 +92,8 @@ class RtdlPlugin : public BasePlugin {
 
     private: // asyn parameters
         int Timestamp;
+        int TimestampSec;
+        int TimestampNsec;
         int PulseFlavor;
         int ProtonCharge;
         int TimingStatus;
