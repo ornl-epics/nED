@@ -19,7 +19,7 @@ record(calc, "$(P)TempBoardAlrm")
 
 record(calc, "$(P)TempPreampAAlrm")
 {
-    info(autosaveFields, "VAL")
+    info(autosaveFields, "A")
     field(ASG,  "BEAMLINE")
     field(INPA, "1")
     field(INPB, "$(P)TempPreampA.SEVR NPP NMS")
@@ -28,7 +28,7 @@ record(calc, "$(P)TempPreampAAlrm")
 
 record(calc, "$(P)TempPreampBAlrm")
 {
-    info(autosaveFields, "VAL")
+    info(autosaveFields, "A")
     field(ASG,  "BEAMLINE")
     field(INPA, "1")
     field(INPB, "$(P)TempPreampB.SEVR NPP NMS")
