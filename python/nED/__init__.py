@@ -62,7 +62,7 @@ def getModuleNames(expr=".*"):
         raise RuntimeError("Failed to communicate to nED")
 
     # Convert simple globing to regular expression
-    expr = re.sub(r"([^\.]?)\*", r"\1.*", expr)
+    expr = "^" + re.sub(r"([^\.]?)\*", r"\1.*", expr) + "$"
 
     # Select only modules user cares about
     regex = re.compile(expr)
@@ -95,9 +95,20 @@ class Module:
         self._rsp_pv = None
 
         self._cached_pvs = []
-        for pv in [ "HwId", "Type", "FwVersion", "Status", "StatusText", "OutputMode" ]:
+        for pv in [ "HwId", "HwType", "FwVersion", "Status", "StatusText", "OutputMode" ]:
             getPv(name, pv, wait_connect=False)
             self._cached_pvs.append(pv)
+
+        try:
+            o = pvaccess.Channel(_pvprefix + "pva:" + name + ":Params").get("")
+            self.params = {
+                'config': o.getScalarArray('config.value'),
+                'status': o.getScalarArray('status.value'),
+                'counter': o.getScalarArray('counter.value'),
+                'temperature': o.getScalarArray('temperature.value')
+            }
+        except:
+            raise RuntimeError("Failed to retrieve module parameters")
 
     def __getattr__(self, param):
         if param.startswith("__"):
@@ -115,15 +126,11 @@ class Module:
         # for others in the same group of 'Config', 'Status', etc.
         # Let's start to connect them all to minimize the connection delay
         if param not in self._cached_pvs:
-            for group in [ "Status", "Config", "Temp", "Counter" ]:
-                params = self.getParams(group)
-                if param in params:
-                    if _verbose:
-                        print "Caching '{0}' parameters".format(group)
-                    for p in params:
-                        getPv(self.name, p, wait_connect=False)
-                    self._cached_pvs += params
-                    break
+            self._cached_pvs = self.getParams()
+            if _verbose:
+                print "Caching all parameters"
+            for p in self._cached_pvs:
+                getPv(self.name, p, wait_connect=False)
 
         # Now select the requested one and make sure it's connected
         pv = getPv(self.name, param, wait_connect=True)
@@ -133,15 +140,26 @@ class Module:
 
     def getParams(self, typ=None):
         if typ:
-            return self._getParams(typ)
+            if typ in self.params and not self.params[typ]:
+                return self._getParamsFromFiles(typ)
+            return self.params[typ]
 
-        params  = self._getParams("Status")
-        params += self._getParams("Config")
-        params += self._getParams("Temp")
-        params += self._getParams("Counter")
+        params  = self.getParams("status")
+        params += self.getParams("config")
+        params += self.getParams("temperature")
+        params += self.getParams("counter")
         return params
 
-    def _getParams(self, typ=None):
+    def _getParamsFromFiles(self, typ=None):
+        remap = {
+            "config": "Config",
+            "status": "Status",
+            "counter": "Counters",
+            "temperature": "Temp"
+        }
+        if typ in remap:
+            typ = remap[typ]
+
         pluginid = getPv(self.name, "PluginId").get(as_string=True)
         params = []
         top = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
