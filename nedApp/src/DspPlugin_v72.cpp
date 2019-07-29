@@ -9,10 +9,11 @@
 
 #include "DspPlugin.h"
 
-void DspPlugin::createParams_v72() {
+void DspPlugin::createParams_v72() 
+{
     createRegParam("VERSION", "HwRev",  true, 0,  8,  0);   // Hardware revision        (low:3,high:5)
     createRegParam("VERSION", "HwVer",  true, 0,  8,  8);   // Hardware revision        (low:1,high:3)
-    createRegParam("VERSION", "FwRev",  true, 0,  8, 16);   // Firmware revision        (low:0,high:2)
+    createRegParam("VERSION", "FwRev",  true, 0,  8, 16);   // Firmware revision        (low:1,high:3)
     createRegParam("VERSION", "FwVer",  true, 0,  8, 24);   // Firmware revision        (low:6,high:8)
     createRegParam("VERSION", "FwYear", true, 1, 16,  0, 0, CONV_HEX2DEC);
     createRegParam("VERSION", "FwDay",  true, 1,  8, 16, 0, CONV_HEX2DEC);
@@ -119,7 +120,7 @@ void DspPlugin::createParams_v72() {
     createConfigParam("Meta13:Source",    '1', 0x1A,  1, 23, 0); // Meta channel 13 Source      (0=ODB_In13,1=tclk_in)
     createConfigParam("Meta14:Source",    '1', 0x1A,  1, 24, 0); // Meta channel 14 Source      (0=ODB_In14,1=sysrstb_in)
     createConfigParam("Meta15:Source",    '1', 0x1A,  1, 25, 0); // Meta channel 15 Source      (0=ODB_In15,1=txenb_in)
-    createConfigParam("TimingPassthrough",'1', 0x1A,  1, 26, 0); // Timing passthrough          (0=enable,1=disable)
+    createConfigParam("TimingPassthrough",'1', 0x1A,  1, 26, 0); // Timing passthrough          (0=disable,1=enable)
     createConfigParam("RTDLTXDis",        '1', 0x1A,  1, 27, 0); // RTDL TX disable             (0=enable,1=disable)
     createConfigParam("ELTXDis",          '1', 0x1A,  1, 28, 0); // EL TX disable               (0=enable,1=disable)
     createConfigParam("Trig0:Freq",       '1', 0x1E,  4,  0, 0); // Trigger 0 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
