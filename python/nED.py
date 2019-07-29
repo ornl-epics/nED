@@ -40,7 +40,7 @@ def actionInfo(args=[]):
         print "Name     : {0}".format(module.name)
         print "Address  : {0}".format(module.HwId)
         print "Type     : {0}".format(module.HwType)
-        print "Version  : {0} ({1})".format(module.FwVerStr, module.FwDate)
+        print "Version  : {0} ({1})".format(module.FwVersion, module.FwDate)
         print "Status   : {0}".format(module.Status)
         print "Data mode: {0}".format(module.OutputMode)
 
