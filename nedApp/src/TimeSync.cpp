@@ -71,6 +71,7 @@ TimeSync::TimeSync(BaseModulePlugin* parent)
     m_parent->createParam("TS:RemoteTimeSec",   asynParamInt32,   &RemoteTimeSec,   0);
     m_parent->createParam("TS:RemoteTimeNSec",  asynParamInt32,   &RemoteTimeNSec,  0);
     m_parent->createParam("TS:RemoteTimeOff",   asynParamFloat64, &RemoteTimeOff,   0.0);
+    m_parent->createParam("TS:RemoteTimePace",  asynParamInt32,   &RemoteTimePace,  0);
     m_parent->createParam("TS:GpsTimeSec",      asynParamInt32,   &GpsTimeSec,      0);
     m_parent->createParam("TS:GpsTimeNSec",     asynParamInt32,   &GpsTimeNSec,     0);
     m_parent->createParam("TS:GpsTimeOff",      asynParamFloat64, &GpsTimeOff,      0.0);
@@ -106,6 +107,8 @@ bool TimeSync::setParam(int param, int value)
         return true;
     }
     if (param == Enable) {
+        m_records.clear();
+        m_lastError = 0.0;
         m_parent->setIntegerParam(State, static_cast<int>(value ? STATE_SYNCED : STATE_DISABLED));
         m_parent->callParamCallbacks();
         return true;
@@ -200,6 +203,7 @@ bool TimeSync::rspTimeSync(const DasCmdPacket* packet)
     m_parent->setParamAlarmSeverity(GpsTimeSec, 0);
     m_parent->setParamAlarmSeverity(GpsTimeNSec, 0);
     m_parent->setParamAlarmSeverity(GpsTimeOff, 0);
+    m_parent->setIntegerParam(RemoteTimePace, syncpkt->pace);
 
     PIloop(syncpkt);
     m_parent->callParamCallbacks();

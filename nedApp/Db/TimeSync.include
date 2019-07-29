@@ -194,8 +194,15 @@ record(longout, "$(P)TS:RemoteTimePace")
     field(OUT,  "@asyn($(PORT))TS:RemoteTimePace")
     field(DTYP, "asynInt32")
     field(VAL,  "536870911")
+    field(FLNK, "$(P)TS:RemoteTimeAdj")
 }
-
+record(calc, "$(P)TS:RemoteTimeAdj")
+{
+    field(INPA, "40000000")
+    field(INPB, "$(P)TS:RemoteTimePace NPP")
+    field(CALC, "25*A/B")
+    field(EGU,  "ns")
+}
 
 record(ai, "$(P)TS:SyncInErr")
 {

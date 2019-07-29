@@ -76,6 +76,7 @@ class TimeSync {
         int RemoteTimeSec;
         int RemoteTimeNSec;
         int RemoteTimeOff;
+        int RemoteTimePace;
         int GpsTimeSec;
         int GpsTimeNSec;
         int GpsTimeOff;
