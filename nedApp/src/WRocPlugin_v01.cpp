@@ -52,7 +52,7 @@ void WRocPlugin::createParams_v01()
     createConfigParam("TestEn5",    '1', 1,  1,21, 0);  // Test5 Enable           (0=disable,1=enable)
     createConfigParam("TestEn6",    '1', 1,  1,22, 0);  // Test6 Enable           (0=disable,1=enable)
     createConfigParam("TestEn7",    '1', 1,  1,23, 0);  // Test7 Enable           (0=disable,1=enable)
-    createConfigParam("TestPeriod", '1', 1,  8,24, 100);// Test Period            (unit=ns)
+    createConfigParam("TestPeriod", '1', 1,  8,24, 1000);// Test Period           (offset:1260,scale:1280,unit:ns)
 
     createStatusParam("SfpLoss0",      0,  1, 0);
     createStatusParam("SfpLoss1",      0,  1, 1);
