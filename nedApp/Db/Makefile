@@ -75,6 +75,7 @@ DB += RocPlugin_v59.db
 DB += RocPlugin_v510.db
 DB += RocPlugin_v511.db
 DB += RocPlugin_v512.db
+DB += RocPlugin_v513.db
 DB += AdcRocPlugin_v02.db
 DB += AdcRocPlugin_v03.db
 DB += AdcRocPlugin_v05.db
@@ -145,6 +146,7 @@ RocPlugin_v59.template: RocPlugin_v59.generated
 RocPlugin_v510.template: RocPlugin_v510.generated
 RocPlugin_v511.template: RocPlugin_v511.generated
 RocPlugin_v512.template: RocPlugin_v512.generated
+RocPlugin_v513.template: RocPlugin_v513.generated
 AdcRocPlugin_v02.template: AdcRocPlugin_v02.generated
 AdcRocPlugin_v03.template: AdcRocPlugin_v03.generated
 AdcRocPlugin_v05.template: AdcRocPlugin_v05.generated

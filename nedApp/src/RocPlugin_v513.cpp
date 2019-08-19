@@ -1,4 +1,4 @@
-/* RocPlugin_v512.cpp
+/* RocPlugin_v513.cpp
  *
  * Copyright (c) 2019 Oak Ridge National Laboratory.
  * All rights reserved.
@@ -10,14 +10,14 @@
 #include "RocPlugin.h"
 
 /**
- * @file RocPlugin_v512.cpp
+ * @file RocPlugin_v513.cpp
  *
- * ROC 5.12 parameters
+ * ROC 5.13 parameters
  *
- * The ROC 5.12 firmware is same as 5.11 but adds resolution of 512 pixels per tube.
+ * The ROC 5.13 firmware is same as 5.12 but adds I2C HVPS control.
  */
 
-void RocPlugin::createParams_v512()
+void RocPlugin::createParams_v513()
 {
     createRegParam("VERSION", "HwRev",  true, 0,  8, 0);   // Hardware revision
     createRegParam("VERSION", "HwVer",  true, 0,  8, 8);   // Hardware version
@@ -327,6 +327,16 @@ void RocPlugin::createParams_v512()
     createStatusParam("PreampB:Mac6",         0x27, 8,  8); // Pre-amp B MAC byte 6
     createStatusParam("PreampB:Crc",          0x28, 8,  0); // Pre-amp B CRC
     createStatusParam("PreampB:Config",       0x28, 8,  8); // Pre-amp B configuration
+    createStatusParam("HVPS:Family",          0x29, 8,  0); // HVPS family
+    createStatusParam("HVPS:Mac1",            0x29, 8,  8); // HVPS MAC byte 1
+    createStatusParam("HVPS:Mac2",            0x2A, 8,  0); // HVPS MAC byte 2
+    createStatusParam("HVPS:Mac3",            0x2A, 8,  8); // HVPS MAC byte 3
+    createStatusParam("HVPS:Mac4",            0x2B, 8,  0); // HVPS MAC byte 4
+    createStatusParam("HVPS:Mac5",            0x2B, 8,  8); // HVPS MAC byte 5
+    createStatusParam("HVPS:Mac6",            0x2C, 8,  0); // HVPS MAC byte 6
+    createStatusParam("HVPS:Crc",             0x2C, 8,  8); // HVPS CRC
+    createStatusParam("HVPS:Config",          0x2D, 8,  0); // HVPS configuration
+    createStatusParam("HVPS:Reserved",        0x2D, 8,  8); // Reserved
 
 //     BLXXX:Det:RocXXX:| sig name       |                    | EPICS record description  | (bi and mbbi description)
     createCounterParam("CntParity",          0x0, 16,  0); // LVDS parity error counter
@@ -653,17 +663,18 @@ void RocPlugin::createParams_v512()
     createConfigParam("AcqFreq",          'F', 0x3, 10,  0, 1);     // Num cycles to advance @TSYNC  (1=60Hz,2=30Hz,3=20Hz,4=15Hz,6=10Hz,12=5Hz,30=2Hz,60=1Hz)
     createConfigParam("DataFormat",       'F', 0x4,  8,  0, 2);     // Data format identifier        (2=pixel,3=raw,4=verbose)
     createConfigParam("Protocol",         'F', 0x4,  1, 15, 0);     // Extended event format         (0=legacy,1=new)
-    createConfigParam("PreampIface",      'F', 0x5,  1,  0, 0);     // Preamplifier Interface        (0=SPI old preamps,1=I2C new preamps)
-    createConfigParam("HVPS:Iface",       'F', 0x5,  1,  1, 0);     // HV PS Interface               (0=Serial old HVPS,1=I2C new HVPS)
-    createConfigParam("Resolution",       'F', 0x5,  2,  2, 1);     // Resolution mode               (0=128, 1=256, 2=512, 3=1024)
-    createConfigParam("Ch1:Direction",    'F', 0x5,  1,  8, 0);     // Channel 1 direction           (0=B low A high,1=A low B high)
-    createConfigParam("Ch2:Direction",    'F', 0x5,  1,  9, 0);     // Channel 2 direction           (0=B low A high,1=A low B high)
-    createConfigParam("Ch3:Direction",    'F', 0x5,  1, 10, 0);     // Channel 3 direction           (0=B low A high,1=A low B high)
-    createConfigParam("Ch4:Direction",    'F', 0x5,  1, 11, 0);     // Channel 4 direction           (0=B low A high,1=A low B high)
-    createConfigParam("Ch5:Direction",    'F', 0x5,  1, 12, 0);     // Channel 5 direction           (0=B low A high,1=A low B high)
-    createConfigParam("Ch6:Direction",    'F', 0x5,  1, 13, 0);     // Channel 6 direction           (0=B low A high,1=A low B high)
-    createConfigParam("Ch7:Direction",    'F', 0x5,  1, 14, 0);     // Channel 7 direction           (0=B low A high,1=A low B high)
-    createConfigParam("Ch8:Direction",    'F', 0x5,  1, 15, 0);     // Channel 8 direction           (0=B low A high,1=A low B high)
+    createConfigParam("PreampIface",      'F', 0x5,  1,  0, 0);     // Preamplifier Interface        (0=SPI,1=I2C)
+    createConfigParam("HVPS:Iface",       'F', 0x5,  1,  1, 0);     // HV PS Interface               (0=serial,1=I2C)
+    createConfigParam("HVPS:Enable",      'F', 0x5,  1,  2, 0);     // HV PS I2C Enable              (0=disabled, 1=enabled)
+    createConfigParam("Resolution",       'F', 0x6,  2,  0, 1);     // Resolution mode               (0=128, 1=256, 2=512, 3=1024)
+    createConfigParam("Ch1:Direction",    'F', 0x6,  1,  8, 0);     // Channel 1 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch2:Direction",    'F', 0x6,  1,  9, 0);     // Channel 2 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch3:Direction",    'F', 0x6,  1, 10, 0);     // Channel 3 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch4:Direction",    'F', 0x6,  1, 11, 0);     // Channel 4 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch5:Direction",    'F', 0x6,  1, 12, 0);     // Channel 5 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch6:Direction",    'F', 0x6,  1, 13, 0);     // Channel 6 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch7:Direction",    'F', 0x6,  1, 14, 0);     // Channel 7 direction           (0=B low A high,1=A low B high)
+    createConfigParam("Ch8:Direction",    'F', 0x6,  1, 15, 0);     // Channel 8 direction           (0=B low A high,1=A low B high)
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
     createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
