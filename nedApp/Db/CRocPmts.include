@@ -51,6 +51,7 @@ record(calc, "$(P)Pmt:Status")
     field(INPD, "$(P)Pmt:Status4.SEVR PP MS")
     field(CALC, "A#2&&B#2&&C#2&&D#2")
     field(PINI, "YES")
+    field(SCAN, "1 second")
 }
 
 record(dfanout, "$(P)Pmt:StatusEn1")

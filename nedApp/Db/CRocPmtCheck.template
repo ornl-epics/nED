@@ -14,7 +14,6 @@ record(mbbi, "$(S):Pmt:Status")
     field(TWST, "OK")
     field(THVL, "3")
     field(THST, "checking disabled")
-    field(FLNK, "$(P)Pmt:Status")
 }
 
 # Debounced status for the failing PMT
