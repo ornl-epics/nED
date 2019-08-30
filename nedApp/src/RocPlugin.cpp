@@ -77,6 +77,9 @@ RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char
     } else if (version == "v512") {
         createParams_v512();
         havePreAmpTest = true;
+    } else if (version == "v513") {
+        createParams_v513();
+        havePreAmpTest = true;
     } else {
         LOG_ERROR("Unsupported ROC version '%s'", version.c_str());
         return;

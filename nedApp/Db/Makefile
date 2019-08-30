@@ -46,6 +46,7 @@ DB += DspPlugin_v65.db
 DB += DspPlugin_v66.db
 DB += DspPlugin_v67.db
 DB += DspPlugin_v71.db
+DB += DspPlugin_v72.db
 DB += DspPlugin_v80.db
 DB += DspPlugin_v81.db
 DB += DspWPlugin_v10.db
@@ -75,6 +76,7 @@ DB += RocPlugin_v59.db
 DB += RocPlugin_v510.db
 DB += RocPlugin_v511.db
 DB += RocPlugin_v512.db
+DB += RocPlugin_v513.db
 DB += AdcRocPlugin_v02.db
 DB += AdcRocPlugin_v03.db
 DB += AdcRocPlugin_v05.db
@@ -116,6 +118,7 @@ DspPlugin_v65.template: DspPlugin_v65.generated
 DspPlugin_v66.template: DspPlugin_v66.generated
 DspPlugin_v67.template: DspPlugin_v67.generated
 DspPlugin_v71.template: DspPlugin_v71.generated
+DspPlugin_v72.template: DspPlugin_v72.generated
 DspPlugin_v80.template: DspPlugin_v80.generated
 DspPlugin_v81.template: DspPlugin_v81.generated
 DspWPlugin_v10.template: DspWPlugin_v10.generated
@@ -145,6 +148,7 @@ RocPlugin_v59.template: RocPlugin_v59.generated
 RocPlugin_v510.template: RocPlugin_v510.generated
 RocPlugin_v511.template: RocPlugin_v511.generated
 RocPlugin_v512.template: RocPlugin_v512.generated
+RocPlugin_v513.template: RocPlugin_v513.generated
 AdcRocPlugin_v02.template: AdcRocPlugin_v02.generated
 AdcRocPlugin_v03.template: AdcRocPlugin_v03.generated
 AdcRocPlugin_v05.template: AdcRocPlugin_v05.generated

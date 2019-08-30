@@ -94,7 +94,7 @@ void DspPlugin::createParams_v71() {
     createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x033E); // Bucket Timeout         (scale:0.0024094117,unit:ms)
     createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable     (0=enable,1=disable)
     createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select   (1=internal,0=acc timing)
-    createConfigParam("RTDLDisable",      '1', 0x15,  1, 31, 0); // RTDL Disable                (0=enable,1=disable)
+    createConfigParam("RTDLDisable",      '1', 0x15,  1, 31, 0); // RTDL packets enable         (0=enable,1=disable)
     createConfigParam("TsyncDelay",       '1', 0x17, 32,  0, 0); // Legacy Tsync Delay          (scale:100,unit:ns,prec:1)
     createConfigParam("EventLength",      '1', 0x18, 24,  0, 8); // Legacy Event Length         (unit:bytes)
     createConfigParam("DataFormatId",     '1', 0x18,  8, 24, 2); // Legacy Data Format          (1=meta,2=pixel,4=LPSD verbose [alarm],5=XY PS,8=AROC raw [alarm],10=BNL raw,7=CROC raw)

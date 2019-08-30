@@ -48,3 +48,8 @@ record(mbbi, "$(P)HwType")
     field(FFSV, "NO_ALARM")
 }
 
+record(mbbo, "$(P)OutputMode")
+{
+    field(ZRST, "normal")
+    field(ZRVL, "0")
+}

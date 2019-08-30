@@ -22,6 +22,8 @@ EPICS_REGISTER_PLUGIN(AdaraPlugin, 3, "port name", string, "Parent data plugins"
 #define ADARA_PKT_TYPE_MAPPED_EVENT 0x00000300
 #define ADARA_PKT_TYPE_HEARTBEAT    0x00400900
 
+#define ADARA_INVALID_CYCLE_ID      0x3FF
+
 AdaraPlugin::AdaraPlugin(const char *portName, const char *dataPlugins, const char *rtdlPlugins)
     : BaseSocketPlugin(portName)
 {
@@ -143,6 +145,7 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     }
 
     uint32_t *outpacket = m_buffer.data();
+    uint32_t maxCacheLen = getIntegerParam(RtdlCacheSize);
 
     // Initialize packet header
     memset(outpacket, 0, 10*sizeof(uint32_t));
@@ -155,24 +158,33 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
     // update total packets sent sequence
     m_packetSeq = (m_packetSeq + 1) & 0xFFFF;
 
-    // Put default RTDL.Cycle=0x3FF for SMS to identify we didn't find RTDL packet
-    outpacket[7] = 0x3FF;
-
-    for (auto it = m_cachedRtdl.begin(); it != m_cachedRtdl.end(); it++) {
-        if (it->first == timestamp) {
-            outpacket[4] = it->second.sourceId;
-            outpacket[5] |= ((it->second.pulseSeq & 0x7FFF) << 16);
-            outpacket[6] = it->second.rtdl.charge;
-            outpacket[7] = it->second.rtdl.general_info;
-            //outpacket[8] = 0; // TSYNC period
-            //outpacket[9] = 0; // TSYNC delay
-
-            // update packets-per-pulse sequence
-            it->second.pulseSeq = (it->second.pulseSeq + 1) & 0x7FFF;
-
+    auto pulseInfo = m_cachedRtdl.begin();
+    bool pulseFound = false;
+    for ( ; pulseInfo != m_cachedRtdl.end(); pulseInfo++) {
+        if (pulseInfo->first == timestamp) {
+            pulseFound = true;
             break;
         }
     }
+    if (!pulseFound) {
+        DataInfo info;
+        info.rtdl.cycle = ADARA_INVALID_CYCLE_ID;
+        m_cachedRtdl.emplace_front(std::make_pair(timestamp, info));
+        while (m_cachedRtdl.size() > maxCacheLen) {
+            m_cachedRtdl.pop_back();
+        }
+        pulseInfo = m_cachedRtdl.begin();
+    }
+
+    outpacket[4] = pulseInfo->second.sourceId;
+    outpacket[5] |= ((pulseInfo->second.pulseSeq & 0x7FFF) << 16);
+    outpacket[6] = pulseInfo->second.rtdl.charge;
+    outpacket[7] = pulseInfo->second.rtdl.general_info;
+    //outpacket[8] = 0; // TSYNC period
+    //outpacket[9] = 0; // TSYNC delay
+
+    // update packets-per-pulse sequence
+    pulseInfo->second.pulseSeq = (pulseInfo->second.pulseSeq + 1) & 0x7FFF;
 
     len = 10;
     for (uint32_t i = 0; i < nEvents; i++) {
@@ -209,7 +221,7 @@ void AdaraPlugin::recvDownstream(const RtdlPacketList &packets)
 
         bool sent = false;
         for (auto it = m_cachedRtdl.begin(); it != m_cachedRtdl.end(); it++) {
-            if (it->first == timestamp) {
+            if (it->first == timestamp && it->second.rtdl.cycle != ADARA_INVALID_CYCLE_ID) {
                 sent = true;
                 break;
             }

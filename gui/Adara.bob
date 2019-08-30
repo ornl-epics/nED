@@ -299,7 +299,7 @@
     </widget>
     <widget type="label" version="2.0.0">
       <name>ProcCount_Label</name>
-      <text>RTDL cache size</text>
+      <text>Pulse cache size</text>
       <y>152</y>
       <width>163</width>
       <height>26</height>
