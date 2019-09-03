@@ -253,8 +253,8 @@ void DspPlugin::createParams_v81() {
     createStatusParam("Lvds6:Overflow",    0x2,   1, 30); // LVDS6 overflow
     createStatusParam("Lvds6:BadPacket",   0x2,   1, 31); // LVDS6 had bad packet
     createStatusParam("TsyncCountsRF",     0x3,  32,  0); // Tsync Count in RF Clocks
-    createStatusParam("TsyncCountsInt",    0x4,  32,  0); // Tsync Count in 10m Internal Clocks
-    createStatusParam("TsyncCountsExt",    0x5,  32,  0); // Tsync Count in 10m RTDL Clocks
+    createStatusParam("TsyncCountsNTP",    0x4,  32,  0); // Tsync Count in NTP Clocks
+    createStatusParam("TsyncCountsRTDL",   0x5,  32,  0); // Tsync Count in RTDL Clocks
     createStatusParam("BucketA:Used",      0x6,   4,  0); // Used A buckets (calc:12-A,unit:of 12)
     createStatusParam("BucketB:Used",      0x6,   4,  4); // Used B buckets (calc:12-A,unit:of 12)
     createStatusParam("BucketsInActive1",  0x6,   1,  8); // BucketsInLvds1Active
