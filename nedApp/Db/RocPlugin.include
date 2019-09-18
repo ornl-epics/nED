@@ -35,6 +35,21 @@ record(calc, "$(P)TempPreampBAlrm")
     field(CALC, "A=1&&B=2")
 }
 
+record(ao, "$(P,undefined)TempBoard")
+{
+    info(autosaveFields, "HIGH,LOW")
+}
+
+record(ao, "$(P,undefined)TempPreampA")
+{
+    info(autosaveFields, "HIGH,LOW")
+}
+
+record(ao, "$(P,undefined)TempPreampB")
+{
+    info(autosaveFields, "HIGH,LOW")
+}
+
 record(calc, "$(P)HwStatus")
 {
     field(INPF, "$(P)TempBoardAlrm PP")
