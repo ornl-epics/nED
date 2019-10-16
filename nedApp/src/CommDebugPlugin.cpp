@@ -164,14 +164,15 @@ void CommDebugPlugin::generatePacket(bool fromRawPvs)
         getIntegerParam(ReqRaw7, &param);   m_buffer[7] = param;
 
     } else {
+        uint32_t payload[4];
         int bufferLen = sizeof(m_buffer) - sizeof(DasCmdPacket);
         int payloadLen = getIntegerParam(ReqCmdLen)-6;
         payloadLen = std::max(0, std::min(bufferLen, payloadLen));
 
-        if (payloadLen >=  4) { int param; getIntegerParam(ReqRaw4, &param); m_buffer[0] = param; }
-        if (payloadLen >=  8) { int param; getIntegerParam(ReqRaw5, &param); m_buffer[1] = param; }
-        if (payloadLen >= 12) { int param; getIntegerParam(ReqRaw6, &param); m_buffer[2] = param; }
-        if (payloadLen >= 16) { int param; getIntegerParam(ReqRaw7, &param); m_buffer[3] = param; }
+        if (payloadLen >=  0) { int param; getIntegerParam(ReqRaw4, &param); payload[0] = param; }
+        if (payloadLen >=  4) { int param; getIntegerParam(ReqRaw5, &param); payload[1] = param; }
+        if (payloadLen >=  8) { int param; getIntegerParam(ReqRaw6, &param); payload[2] = param; }
+        if (payloadLen >= 12) { int param; getIntegerParam(ReqRaw7, &param); payload[3] = param; }
 
         DasCmdPacket::init(reinterpret_cast<uint8_t *>(m_buffer),
                            sizeof(m_buffer),
@@ -182,7 +183,7 @@ void CommDebugPlugin::generatePacket(bool fromRawPvs)
                            getBooleanParam(ReqRsp),
                            getIntegerParam(ReqVerifyId) & 0x1FF,
                            payloadLen,
-                           m_buffer);
+                           payload);
 
         m_packet->setPriority(getBooleanParam(ReqPriority));
         m_packet->setVersion(getIntegerParam(ReqVersion) & 0xF);
