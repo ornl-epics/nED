@@ -29,10 +29,13 @@ def getPv(plugin, param, wait_connect=True, timeout=1.0):
     global _verbose
     # We use epics.get_pv() as it caches PVs and they don't have to reconnect every time
     # get_pv() also doesn't create new PV object except the first time => faster
-    pv = _pvprefix + plugin + ":" + param
+    pv = getPvName(plugin, param)
     if _verbose:
         print "nED get PV: ", pv
     return epics.get_pv(pv, connect=wait_connect, timeout=timeout)
+
+def getPvName(plugin, param):
+    return _pvprefix + plugin + ":" + param
 
 def getDataChannel(event_type="Pixel"):
     """ Return a new not-connected instance of PVA channel """
@@ -111,7 +114,7 @@ class Module:
             raise RuntimeError("Failed to retrieve module parameters")
 
     def __getattr__(self, param):
-        if param.startswith("__"):
+        if param.startswith("_"):
             raise AttributeError("Module class has no attribute {0}".format(param))
         pv = self.getPv(param)
         if "enum" in pv.type:
@@ -137,6 +140,9 @@ class Module:
         if pv and auto_restore:
             autorestore.save(pv)
         return pv
+
+    def getPvName(self, param):
+        return getPvName(self.name, param)
 
     def getParams(self, typ=None):
         if typ:
