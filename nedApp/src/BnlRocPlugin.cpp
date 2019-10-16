@@ -10,12 +10,12 @@
 #include "BnlRocPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(BnlRocPlugin, 5, "Port name", string,
+EPICS_REGISTER_PLUGIN(BnlRocPlugin, 6, "Port name", string,
         "Parent plugins", string, "Hw & SW version", string,
-        "Config dir", string, "BnlPosCalc plugin", string);
+        "Params PV", string, "Config dir", string, "BnlPosCalc plugin", string);
 
-BnlRocPlugin::BnlRocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir, const char *posCalcPortName)
-    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
+BnlRocPlugin::BnlRocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *pvaParamsName, const char *configDir, const char *posCalcPortName)
+    : BaseModulePlugin(portName, parentPlugins, pvaParamsName, configDir, 2)
     , m_posCalcPort(posCalcPortName)
 {
     std::string version(version_);

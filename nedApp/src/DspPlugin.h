@@ -33,8 +33,9 @@ class DspPlugin : public BaseModulePlugin {
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version Configured module version, must match the actual version
+         * @param[in] pvaParamsName Name of PVA pv to export parameters lists
          */
-        DspPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
+        DspPlugin(const char *portName, const char *parentPlugins, const char *version, const char *pvaParamsName=nullptr, const char *configDir=nullptr);
 
         /**
          * Process local parameters.

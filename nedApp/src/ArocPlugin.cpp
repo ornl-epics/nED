@@ -10,10 +10,10 @@
 #include "ArocPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(ArocPlugin, 4, "Port name", string, "Dispatcher port name", string, "Hw & SW version", string, "Config dir", string);
+EPICS_REGISTER_PLUGIN(ArocPlugin, 5, "Port name", string, "Dispatcher port name", string, "Hw & SW version", string, "Params PV", string, "Config dir", string);
 
-ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
+ArocPlugin::ArocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *pvaParamsName, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, pvaParamsName, configDir, 2)
 {
     std::string version(version_);
     if (version == "v22") {

@@ -42,9 +42,10 @@ class BnlRocPlugin : public BaseModulePlugin {
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version BNLROC HW&SW version, ie. V5_50
+         * @param[in] pvaParamsName Name of PVA pv to export parameters lists
          * @param[in] posCalcPortName Plugin to send parameters to.
          */
-        BnlRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir, const char *posCalcPortName);
+        BnlRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *pvaParamsName=nullptr, const char *configDir=nullptr, const char *posCalcPortName="");
 
         /**
          * Overloaded method to send all parameters to BnlPosCalcPlugin

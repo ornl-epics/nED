@@ -10,10 +10,10 @@
 #include "AdcRocPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(AdcRocPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
+EPICS_REGISTER_PLUGIN(AdcRocPlugin, 5, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Params PV", string, "Config dir", string);
 
-AdcRocPlugin::AdcRocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
+AdcRocPlugin::AdcRocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *pvaParamsName, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, pvaParamsName, configDir, 2)
 {
     std::string version(version_);
     if (0) {

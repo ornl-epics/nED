@@ -30,9 +30,10 @@ class CRocPlugin : public BaseModulePlugin {
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins Plugins to connect to
          * @param[in] version ROC HW&SW version, ie. V5_50
+         * @param[in] pvaParamsName Name of PVA pv to export parameters lists
          * @param[in] posCalcPortName Name of the CROC position calculation plugin
          */
-        CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir, const char *posCalcPortName="");
+        CRocPlugin(const char *portName, const char *parentPlugins, const char *version, const char *pvaParamsName=nullptr, const char *configDir=nullptr, const char *posCalcPortName="");
 
         /**
          * Handle passing parameters from other plugins.

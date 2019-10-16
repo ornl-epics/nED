@@ -87,8 +87,9 @@ class FemPlugin : public BaseModulePlugin {
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins to connect to.
          * @param[in] version FEM HW&SW version, ie. V10_50
+         * @param[in] pvaParamsName Name of PVA pv to export parameters lists
          */
-        FemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
+        FemPlugin(const char *portName, const char *parentPlugins, const char *version, const char *pvaParamsName=nullptr, const char *configDir=nullptr);
 
         /**
          * Handler for CMD_UPGRADE command.

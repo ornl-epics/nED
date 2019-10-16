@@ -14,6 +14,9 @@
 #include "Timer.h"
 #include "ValueConvert.h"
 
+#include <pv/pvDatabase.h>
+#include <pv/standardPVField.h>
+
 #include <fstream>
 #include <map>
 #include <memory>
@@ -102,6 +105,44 @@ class BaseModulePlugin : public BasePlugin {
             bool readonly{true};                //!< Flag whether all parameters in this group are read-only
         };
 
+    private:
+        /**
+         * ParamsRecord for a structure listing registered parameters through PVA.
+         */
+        class ParamsRecord : public epics::pvDatabase::PVRecord {
+            public:
+                POINTER_DEFINITIONS(ParamsRecord);
+
+                /**
+                 * Allocate and initialize ModulesPlugin and store it as g_modulesListRecord.
+                 */
+                static ParamsRecord::shared_pointer create(const std::string &recordName);
+
+                /**
+                 * Push new list of modules to the PV.
+                 */
+                bool update(const std::vector<std::string> &config,
+                            const std::vector<std::string> &status,
+                            const std::vector<std::string> &counters,
+                            const std::vector<std::string> &temperature);
+
+            private:
+                epics::pvData::PVStringArrayPtr pvListConfig;
+                epics::pvData::PVStringArrayPtr pvListStatus;
+                epics::pvData::PVStringArrayPtr pvListCounter;
+                epics::pvData::PVStringArrayPtr pvListTemperature;
+
+                /**
+                 * C'tor.
+                 */
+                ParamsRecord(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure);
+
+                /**
+                 * Attach all PV structures.
+                 */
+                bool init();
+        };
+
     public: // variables
         static const int defaultInterfaceMask = BasePlugin::defaultInterfaceMask | asynOctetMask | asynFloat64Mask;
         static const int defaultInterruptMask = BasePlugin::defaultInterruptMask | asynOctetMask | asynFloat64Mask;
@@ -133,6 +174,7 @@ class BaseModulePlugin : public BasePlugin {
         std::string m_parentPlugins;                    //!< Parent plugins to connect to
         std::string m_configDir{""};                    //!< Directory where to save all configurations
         std::list<DasCmdPacket::CommandType> m_cmdQueue;//!< FIFO queue of commands, max 10 in queue
+        ParamsRecord::shared_pointer m_paramsRecord;    //!< PVA records for exporting list of parameters
 
     public: // functions
 
@@ -143,6 +185,7 @@ class BaseModulePlugin : public BasePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] dispatcherPortName Name of the dispatcher asyn port to connect to.
+         * @param[in] pvaParamsName Name of the PVA pv for exporting parameters list.
          * @param[in] configDir Folder to store module configurations.
          * @param[in] wordSize Number of bytes describing single register word
          * @param[in] blocking Flag whether the processing should be done in the context of caller thread or in background thread.
@@ -150,8 +193,8 @@ class BaseModulePlugin : public BasePlugin {
          * @param[in] interfaceMask Bit mask defining the asyn interfaces that this driver supports.
          * @param[in] interruptMask Bit mask definining the asyn interfaces that can generate interrupts (callbacks)
          */
-        BaseModulePlugin(const char *portName, const char *parentPlugins, const char *configDir,
-                         uint8_t wordSize, int interfaceMask=0, int interruptMask=0);
+        BaseModulePlugin(const char *portName, const char *parentPlugins, const char *pvaParamsName=nullptr, const char *configDir=nullptr,
+                         uint8_t wordSize=4, int interfaceMask=0, int interruptMask=0);
 
         /**
          * Abstract destructor

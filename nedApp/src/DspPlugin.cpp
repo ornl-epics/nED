@@ -20,10 +20,10 @@
 #include <functional>
 #include <string>
 
-EPICS_REGISTER_PLUGIN(DspPlugin, 4, "Port name", string, "Parent plugins", string, "Version", string, "Config dir", string);
+EPICS_REGISTER_PLUGIN(DspPlugin, 5, "Port name", string, "Parent plugins", string, "Version", string, "PVA params", string, "Config dir", string);
 
-DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, 4)
+DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *pvaParamsName, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, pvaParamsName, configDir, 4)
 {
     std::string version(version_);
     if (version == "v51") {

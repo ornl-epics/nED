@@ -16,7 +16,7 @@
 // EPICS includes
 #include <alarm.h>
 
-EPICS_REGISTER_PLUGIN(RocPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
+EPICS_REGISTER_PLUGIN(RocPlugin, 5, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Params PV", string, "Config dir", string);
 
 /**
  * Convert channel number to VerifyId field in command packet.
@@ -24,8 +24,8 @@ EPICS_REGISTER_PLUGIN(RocPlugin, 4, "Port name", string, "Parent plugins", strin
 #define CHAN2CMDID(channel) ((channel == 0) ? 0 : 0x10 | (channel - 1))
 #define CMDID2CHAN(cmdId)   ((cmdId & 0x10) ? ((cmdId & 0xF) + 1) : 0)
 
-RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
+RocPlugin::RocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *pvaParamsName, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, pvaParamsName, configDir, 2)
 {
     bool havePreAmpTest = false;
 

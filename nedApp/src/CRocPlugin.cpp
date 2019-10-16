@@ -10,10 +10,10 @@
 #include "CRocPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(CRocPlugin, 5, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string, "PosCalc port name", string);
+EPICS_REGISTER_PLUGIN(CRocPlugin, 6, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Params PV", string, "Config dir", string, "PosCalc port name", string);
 
-CRocPlugin::CRocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir, const char *posCalcPortName)
-    : BaseModulePlugin(portName, parentPlugins, configDir, 2)
+CRocPlugin::CRocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *pvaParamsName, const char *configDir, const char *posCalcPortName)
+    : BaseModulePlugin(portName, parentPlugins, pvaParamsName, configDir, 2)
     , m_posCalcPort(posCalcPortName)
 {
     std::string version(version_);

@@ -10,10 +10,10 @@
 #include "DspWPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(DspWPlugin, 4, "Port name", string, "Parent plugins", string, "Version", string, "Config dir", string);
+EPICS_REGISTER_PLUGIN(DspWPlugin, 5, "Port name", string, "Parent plugins", string, "Version", string, "Params PV", string, "Config dir", string);
 
-DspWPlugin::DspWPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, 4)
+DspWPlugin::DspWPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *pvaParamsName, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, pvaParamsName, configDir, 4)
 {
     std::string version(version_);
     if (version == "v10") {

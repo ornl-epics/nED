@@ -10,10 +10,10 @@
 #include "WRocPlugin.h"
 #include "Log.h"
 
-EPICS_REGISTER_PLUGIN(WRocPlugin, 4, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Config dir", string);
+EPICS_REGISTER_PLUGIN(WRocPlugin, 5, "Port name", string, "Parent plugins", string, "Hw & SW version", string, "Params PV", string, "Config dir", string);
 
-WRocPlugin::WRocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *configDir)
-    : BaseModulePlugin(portName, parentPlugins, configDir, 4)
+WRocPlugin::WRocPlugin(const char *portName, const char *parentPlugins, const char *version_, const char *pvaParamsName, const char *configDir)
+    : BaseModulePlugin(portName, parentPlugins, pvaParamsName, configDir, 4)
 {
     std::string version(version_);
     if (version == "v01") {

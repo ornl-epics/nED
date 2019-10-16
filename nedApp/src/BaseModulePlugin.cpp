@@ -41,6 +41,7 @@ static std::map<uint32_t, std::string> g_namesMap;
 static epicsMutex g_namesMapMutex;
 
 BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugins,
+                                   const char *pvaParamsName,
                                    const char *configDir, uint8_t wordSize,
                                    int interfaceMask, int interruptMask)
     : BasePlugin(portName, 0, interfaceMask | defaultInterfaceMask, interruptMask | defaultInterruptMask)
@@ -53,16 +54,18 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
     // DSP uses 4 byte words, everybody else 2 bytes
     assert(wordSize==2 || wordSize==4);
 
-    // configDir must be existing writable directory!
-    char tmpfile[1024];
-    snprintf(tmpfile, 1024, "%s/XXXXXX", configDir);
-    int fd = mkstemp(tmpfile);
-    if (fd == -1) {
-        LOG_ERROR("Configuration directory '%s' does not exist or is not writable directory!", configDir);
-    } else {
-        m_configDir = configDir;
-        close(fd);
-        unlink(tmpfile);
+    if (configDir && strlen(configDir) > 0) {
+        // configDir must be existing writable directory!
+        char tmpfile[1024];
+        snprintf(tmpfile, 1024, "%s/XXXXXX", configDir);
+        int fd = mkstemp(tmpfile);
+        if (fd == -1) {
+            LOG_ERROR("Configuration directory '%s' does not exist or is not writable directory!", configDir);
+        } else {
+            m_configDir = configDir;
+            close(fd);
+            unlink(tmpfile);
+        }
     }
 
     // Initialize command/response handler array - 256 slots based on DasCmdPacket::CommandType
@@ -144,6 +147,15 @@ BaseModulePlugin::BaseModulePlugin(const char *portName, const char *parentPlugi
         BasePlugin::connect(parentPlugins, MsgDasCmd);
         std::function<float(void)> checkConnCb = std::bind(&BaseModulePlugin::checkConnection, this);
         m_connTimer.schedule(checkConnCb, 1.0);
+    }
+
+    if (pvaParamsName && strlen(pvaParamsName) > 0) {
+        // Create PVA record for exporting list of parameters that can be obtained through CA
+        m_paramsRecord = ParamsRecord::create(pvaParamsName);
+        if (!m_paramsRecord)
+            LOG_ERROR("Failed to create PVA record '%s'", pvaParamsName);
+        else if (epics::pvDatabase::PVDatabase::getMaster()->addRecord(m_paramsRecord) == false)
+            LOG_ERROR("Failed to register PVA record '%s'", pvaParamsName);
     }
 }
 
@@ -709,6 +721,13 @@ void BaseModulePlugin::linkRegParam(const std::string& group, const char *name, 
 
 void BaseModulePlugin::initParams()
 {
+    // Prepare list of parameters to be exported through PVA
+    std::map<std::string, std::vector<std::string>> params;
+    params["CONFIG"] = {};
+    params["STATUS"] = {};
+    params["COUNTERS"] = {};
+    params["TEMPERATURE"] = {};
+
     // Go through all groups and calculate payload size from all sections
     for (auto it = m_params.begin(); it != m_params.end(); it++) {
 
@@ -722,6 +741,9 @@ void BaseModulePlugin::initParams()
                 sizes.resize(jt->second.section+1);
             if (sizes[jt->second.section] < length)
                 sizes[jt->second.section] = length;
+
+            std::string param = getParamName(jt->first);
+            params[it->first].push_back(std::move(param));
         }
 
         // Sum up all sections to calculate payload size
@@ -741,6 +763,9 @@ void BaseModulePlugin::initParams()
 
     setIntegerParam(Features, m_features);
     callParamCallbacks();
+
+    if (m_paramsRecord && !m_paramsRecord->update(params["CONFIG"], params["STATUS"], params["COUNTERS"], params["TEMPERATURE"]))
+        LOG_ERROR("Failed to populate parameters list PVA record");
 }
 
 std::string BaseModulePlugin::getModuleName(uint32_t hardwareId)
@@ -904,4 +929,96 @@ std::list<std::string> BaseModulePlugin::getListConfigs()
         closedir(dirp);
     }
     return configs;
+}
+
+BaseModulePlugin::ParamsRecord::ParamsRecord(const std::string &recordName, const epics::pvData::PVStructurePtr &pvStructure)
+    : epics::pvDatabase::PVRecord(recordName, pvStructure)
+{
+}
+
+/**
+ * Allocate and initialize BaseModulePlugin::ParamsRecord.
+ */
+BaseModulePlugin::ParamsRecord::shared_pointer BaseModulePlugin::ParamsRecord::create(const std::string &recordName)
+{
+    using namespace epics::pvData;
+
+    StandardFieldPtr standardField = getStandardField();
+    FieldCreatePtr fieldCreate     = getFieldCreate();
+    PVDataCreatePtr pvDataCreate   = getPVDataCreate();
+
+    PVStructurePtr pvStructure = pvDataCreate->createPVStructure(
+        fieldCreate->createFieldBuilder()->
+            add("config", standardField->scalarArray(epics::pvData::pvString, ""))->
+            add("status", standardField->scalarArray(epics::pvData::pvString, ""))->
+            add("counter", standardField->scalarArray(epics::pvData::pvString, ""))->
+            add("temperature", standardField->scalarArray(epics::pvData::pvString, ""))->
+            createStructure()
+    );
+
+    ParamsRecord::shared_pointer pvRecord(new BaseModulePlugin::ParamsRecord(recordName, pvStructure));
+    if (pvRecord && !pvRecord->init()) {
+        pvRecord.reset();
+    }
+
+    return pvRecord;
+}
+
+/**
+ * Attach all PV structures.
+ */
+bool BaseModulePlugin::ParamsRecord::init()
+{
+    initPVRecord();
+
+    pvListConfig = getPVStructure()->getSubField<epics::pvData::PVStringArray>("config.value");
+    if (pvListConfig.get() == NULL)
+        return false;
+
+    pvListStatus = getPVStructure()->getSubField<epics::pvData::PVStringArray>("status.value");
+    if (pvListStatus.get() == NULL)
+        return false;
+
+    pvListCounter = getPVStructure()->getSubField<epics::pvData::PVStringArray>("counter.value");
+    if (pvListCounter.get() == NULL)
+        return false;
+
+    pvListTemperature = getPVStructure()->getSubField<epics::pvData::PVStringArray>("temperature.value");
+    if (pvListTemperature.get() == NULL)
+        return false;
+
+    return true;
+}
+
+/**
+ * Publish a single atomic update of the PV, take values from packet.
+ */
+bool BaseModulePlugin::ParamsRecord::update(const std::vector<std::string> &config, const std::vector<std::string> &status, const std::vector<std::string> &counter, const std::vector<std::string> &temperature)
+{
+    bool updated = true;
+
+    epics::pvData::PVStringArray::svector config_;
+    epics::pvData::PVStringArray::svector status_;
+    epics::pvData::PVStringArray::svector counter_;
+    epics::pvData::PVStringArray::svector temperature_;
+
+    std::copy(config.begin(), config.end(), std::back_inserter(config_));
+    std::copy(status.begin(), status.end(), std::back_inserter(status_));
+    std::copy(counter.begin(), counter.end(), std::back_inserter(counter_));
+    std::copy(temperature.begin(), temperature.end(), std::back_inserter(temperature_));
+
+    lock();
+    try {
+        beginGroupPut();
+        pvListConfig->replace(epics::pvData::freeze(config_));
+        pvListStatus->replace(epics::pvData::freeze(status_));
+        pvListCounter->replace(epics::pvData::freeze(counter_));
+        pvListTemperature->replace(epics::pvData::freeze(temperature_));
+        endGroupPut();
+    } catch (...) {
+        updated = false;
+    }
+    unlock();
+
+    return updated;
 }

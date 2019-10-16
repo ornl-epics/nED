@@ -65,36 +65,36 @@ ModulesPlugin::ModulesPlugin(const char *portName, const char *parentPlugins, co
     // We need only one handler per module type, except where VERSION response size
     // is different depending on which version the module is
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ACPC];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ACPC].push_back(std::unique_ptr<BaseModulePlugin>(new AcpcPlugin("disc_acpc_v174", "", "v174", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ACPC].push_back(std::unique_ptr<BaseModulePlugin>(new AcpcPlugin("disc_acpc_v174", "", "v174")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ACPCFEM];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ACPCFEM].push_back(std::unique_ptr<BaseModulePlugin>(new AcpcFemPlugin("disc_acpcfem_v22", "", "v22", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ACPCFEM].push_back(std::unique_ptr<BaseModulePlugin>(new AcpcFemPlugin("disc_acpcfem_v22", "", "v22")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ADCROC];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ADCROC].push_back(std::unique_ptr<BaseModulePlugin>(new AdcRocPlugin("disc_adcroc_v02", "", "v02", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ADCROC].push_back(std::unique_ptr<BaseModulePlugin>(new AdcRocPlugin("disc_adcroc_v02", "", "v02")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_AROC];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_AROC].push_back(std::unique_ptr<BaseModulePlugin>(new ArocPlugin("disc_aroc_v22", "", "v22", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_AROC].push_back(std::unique_ptr<BaseModulePlugin>(new ArocPlugin("disc_aroc_v22", "", "v22")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_BNLROC];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_BNLROC].push_back(std::unique_ptr<BaseModulePlugin>(new BnlRocPlugin("disc_bnlroc_v20", "", "v20", "", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_BNLROC].push_back(std::unique_ptr<BaseModulePlugin>(new BnlRocPlugin("disc_bnlroc_v20", "", "v20")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_CROC];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_CROC].push_back(std::unique_ptr<BaseModulePlugin>(new CRocPlugin("disc_croc_v93", "", "v93", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_CROC].push_back(std::unique_ptr<BaseModulePlugin>(new CRocPlugin("disc_croc_v93", "", "v93")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_DSP];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_DSP].push_back(std::unique_ptr<BaseModulePlugin>(new DspPlugin("disc_dsp_v71", "", "v71", "")));
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_DSP].push_back(std::unique_ptr<BaseModulePlugin>(new DspPlugin("disc_dsp_v64", "", "v64", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_DSP].push_back(std::unique_ptr<BaseModulePlugin>(new DspPlugin("disc_dsp_v71", "", "v71")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_DSP].push_back(std::unique_ptr<BaseModulePlugin>(new DspPlugin("disc_dsp_v64", "", "v64")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_DSPW];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_DSPW].push_back(std::unique_ptr<BaseModulePlugin>(new DspWPlugin("disc_dspw2_v20", "", "v20", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_DSPW].push_back(std::unique_ptr<BaseModulePlugin>(new DspWPlugin("disc_dspw2_v20", "", "v20")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_FEM];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_FEM].push_back(std::unique_ptr<BaseModulePlugin>(new FemPlugin("disc_fem_v32", "", "v32", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_FEM].push_back(std::unique_ptr<BaseModulePlugin>(new FemPlugin("disc_fem_v32", "", "v32")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v52", "", "v52", "")));
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v54", "", "v54", "")));
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v14", "", "v14", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v52", "", "v52")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v54", "", "v54")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_ROC].push_back(std::unique_ptr<BaseModulePlugin>(new RocPlugin("disc_roc_v14", "", "v14")));
     m_moduleHandlers[DasCmdPacket::MOD_TYPE_WROC];
-    m_moduleHandlers[DasCmdPacket::MOD_TYPE_WROC].push_back(std::unique_ptr<BaseModulePlugin>(new WRocPlugin("disc_wroc_v01", "", "v01", "")));
+    m_moduleHandlers[DasCmdPacket::MOD_TYPE_WROC].push_back(std::unique_ptr<BaseModulePlugin>(new WRocPlugin("disc_wroc_v01", "", "v01")));
 
     // We need all AROCs because of READ_STATUS command parsing and getting IBC number
-    m_arocHandlers["v22"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v22", "", "v22", ""));
-    m_arocHandlers["v23"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v23", "", "v23", ""));
-    m_arocHandlers["v24"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v24", "", "v24", ""));
-    m_arocHandlers["v25"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v25", "", "v25", ""));
+    m_arocHandlers["v22"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v22", "", "v22"));
+    m_arocHandlers["v23"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v23", "", "v23"));
+    m_arocHandlers["v24"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v24", "", "v24"));
+    m_arocHandlers["v25"] = std::unique_ptr<BaseModulePlugin>(new ArocPlugin("status_aroc_v25", "", "v25"));
 
     // Disable logging for all modules
     for (auto it = m_moduleHandlers.begin(); it != m_moduleHandlers.end(); it++) {

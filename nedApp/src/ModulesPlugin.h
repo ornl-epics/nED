@@ -87,7 +87,6 @@ class ModulesPlugin : public BasePlugin {
 
             private:
                 epics::pvData::PVStringArrayPtr pvModules;      //<! List of registered modules
-                std::vector<std::string> m_modules;
 
                 /**
                  * C'tor.

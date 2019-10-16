@@ -25,9 +25,10 @@ class AcpcPlugin : public BaseModulePlugin {
          *
          * @param[in] portName asyn port name.
          * @param[in] parentPlugins Plugins to connect to
+         * @param[in] pvaParamsName Name of PVA pv to export parameters lists
          * @param[in] version ROC HW&SW version, ie. V5_50
          */
-        AcpcPlugin(const char *portName, const char *parentPlugins, const char *version, const char *configDir);
+        AcpcPlugin(const char *portName, const char *parentPlugins, const char *version, const char *pvaParamsName=nullptr, const char *configDir=nullptr);
 
     private: // functions
         /**

@@ -104,4 +104,20 @@ extern "C" { \
     epicsExportRegistrar(register##name); \
 }
 
+#define EPICS_REGISTER_6(name, class, arg0name, arg0type, arg1name, arg1type, arg2name, arg2type, arg3name, arg3type, arg4name, arg4type, arg5name, arg5type) \
+static const iocshArg initArg0 = { arg0name, EPICS_TYPE_##arg0type}; \
+static const iocshArg initArg1 = { arg1name, EPICS_TYPE_##arg1type}; \
+static const iocshArg initArg2 = { arg2name, EPICS_TYPE_##arg2type}; \
+static const iocshArg initArg3 = { arg3name, EPICS_TYPE_##arg3type}; \
+static const iocshArg initArg4 = { arg4name, EPICS_TYPE_##arg4type}; \
+static const iocshArg initArg5 = { arg5name, EPICS_TYPE_##arg5type}; \
+static const iocshArg * const initArgs[] = {&initArg0,&initArg1,&initArg2,&initArg3,&initArg4,&initArg5}; \
+static const iocshFuncDef initFuncDef = { XSTR(init ## name), 6, initArgs}; \
+extern "C" { \
+    int init##name(EPICS_CTYPE_##arg0type arg0, EPICS_CTYPE_##arg1type arg1, EPICS_CTYPE_##arg2type arg2, EPICS_CTYPE_##arg3type arg3, EPICS_CTYPE_##arg4type arg4, EPICS_CTYPE_##arg5type arg5) { new class(arg0, arg1, arg2, arg3, arg4, arg5); return 0; } \
+    static void initCallFunc(const iocshArgBuf *args) { init##name(args[0].EPICS_VAL_##arg0type, args[1].EPICS_VAL_##arg1type, args[2].EPICS_VAL_##arg2type, args[3].EPICS_VAL_##arg3type, args[4].EPICS_VAL_##arg4type, args[5].EPICS_VAL_##arg5type); } \
+    static void register##name(void) { iocshRegister(&initFuncDef,initCallFunc); } \
+    epicsExportRegistrar(register##name); \
+}
+
 #endif // EPICS_REGISTER_H
