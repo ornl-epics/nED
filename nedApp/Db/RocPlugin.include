@@ -37,17 +37,17 @@ record(calc, "$(P)TempPreampBAlrm")
 
 record(ao, "$(P,undefined)TempBoard")
 {
-    info(autosaveFields, "HIGH,LOW")
+    info(autosaveFields, "LOW HIGH")
 }
 
 record(ao, "$(P,undefined)TempPreampA")
 {
-    info(autosaveFields, "HIGH,LOW")
+    info(autosaveFields, "LOW HIGH")
 }
 
 record(ao, "$(P,undefined)TempPreampB")
 {
-    info(autosaveFields, "HIGH,LOW")
+    info(autosaveFields, "HIGH LOW")
 }
 
 record(calc, "$(P)HwStatus")

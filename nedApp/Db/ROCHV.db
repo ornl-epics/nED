@@ -268,7 +268,7 @@ record(ao, "$(P)hv:MaxVSet") {
    field(HOPR, "2200")
    field(EGU, "V")
    field(DISV, "1")
-   info(autosaveFields, "VAL,DISA")
+   info(autosaveFields, "VAL DISA")
    field(FLNK, "$(P)hv:MaxV")
 }
 
