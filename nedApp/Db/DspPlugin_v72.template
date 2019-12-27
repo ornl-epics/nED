@@ -8,11 +8,3 @@ record(stringin, "$(P)PluginId")
 {
     field(VAL,  "DspPlugin_v72")
 }
-
-record(mbbo, "$(P)CmdReq")
-{
-    field(TVVL, "129")
-    field(TVST, "Down reset")
-    field(TTVL, "39")
-    field(TTST, "Down reset LVDS")
-}

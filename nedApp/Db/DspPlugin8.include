@@ -146,3 +146,18 @@ record(longin, "$(P)HwYear")
     field(VAL,  "0")
     field(PINI, "YES")
 }
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TVVL, "41")
+    field(TVST, "Down reset")
+    field(TTVL, "40")
+    field(TTST, "Down reset LVDS")
+}
+
+# Upgraded HwStatus record
+record(calc, "$(P)HwStatus")
+{
+    field(INPF, "$(P)TS:State.SEVR CP")
+}
+

@@ -9,18 +9,3 @@ record(stringin, "$(P)PluginId")
 {
     field(VAL,  "DspPlugin_v81")
 }
-
-record(mbbo, "$(P)CmdReq")
-{
-    field(TVVL, "129")
-    field(TVST, "Down reset")
-    field(TTVL, "39")
-    field(TTST, "Down reset LVDS")
-}
-
-# Upgraded HwStatus record
-record(calc, "$(P)HwStatus")
-{
-    field(INPF, "$(P)TS:State.SEVR CP")
-}
-
