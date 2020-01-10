@@ -11,9 +11,9 @@
 
 void DspPlugin::createParams_v710() {
     createRegParam("VERSION", "HwRev",  true, 0,  8,  0);   // Hardware revision        (low:3,high:5)
-    createRegParam("VERSION", "HwVer",  true, 0,  8,  8);   // Hardware version         (low:1,high:3)
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8);   // Hardware revision        (low:1,high:3)
     createRegParam("VERSION", "FwRev",  true, 0,  8, 16);   // Firmware revision        (low:9,high:11)
-    createRegParam("VERSION", "FwVer",  true, 0,  8, 24);   // Firmware version         (low:6,high:8)
+    createRegParam("VERSION", "FwVer",  true, 0,  8, 24);   // Firmware revision        (low:6,high:8)
     createRegParam("VERSION", "FwYear", true, 1, 16,  0, 0, CONV_HEX2DEC);
     createRegParam("VERSION", "FwDay",  true, 1,  8, 16, 0, CONV_HEX2DEC);
     createRegParam("VERSION", "FwMonth",true, 1,  8, 24, 0, CONV_HEX2DEC);
@@ -95,15 +95,14 @@ void DspPlugin::createParams_v710() {
     createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable     (0=enable,1=disable)
     createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select   (1=internal,0=acc timing)
     createConfigParam("RTDLDisable",      '1', 0x15,  1, 31, 0); // RTDL packets enable         (0=enable,1=disable)
-    createConfigParam("ODBOut8Gated",     '1', 0x16,  1,  0, 0); // ODB Out8 gated              (0=not gated,1=gated)
-    createConfigParam("ODBOut9Gated",     '1', 0x16,  1,  1, 0); // ODB Out8 gated              (0=not gated,1=gated)
-    createConfigParam("ODBOut10Gated",    '1', 0x16,  1,  2, 0); // ODB Out8 gated              (0=not gated,1=gated)
-    createConfigParam("ODBOut11Gated",    '1', 0x16,  1,  3, 0); // ODB Out8 gated              (0=not gated,1=gated)
-    createConfigParam("ODBOut12Gated",    '1', 0x16,  1,  4, 0); // ODB Out8 gated              (0=not gated,1=gated)
-    createConfigParam("ODBOut13Gated",    '1', 0x16,  1,  5, 0); // ODB Out8 gated              (0=not gated,1=gated)
-    createConfigParam("ODBOut14Gated",    '1', 0x16,  1,  6, 0); // ODB Out8 gated              (0=not gated,1=gated)
-    createConfigParam("ODBOut15Gated",    '1', 0x16,  1,  7, 0); // ODB Out8 gated              (0=not gated,1=gated)
-    createConfigParam("PulseFlavorSel",   '1', 0x16,  3,  8, 0); // Pulse Flavor Select         (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2)
+    createConfigParam("ODBOut8Gated",     '1', 0x16,  4,  0, 0); // ODB Out8 gated              (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2,8=not gated)
+    createConfigParam("ODBOut9Gated",     '1', 0x16,  4,  4, 0); // ODB Out9 gated               (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2,8=not gated)
+    createConfigParam("ODBOut10Gated",    '1', 0x16,  4,  8, 0); // ODB Out10 gated              (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2,8=not gated)
+    createConfigParam("ODBOut11Gated",    '1', 0x16,  4, 12, 0); // ODB Out11 gated              (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2,8=not gated)
+    createConfigParam("ODBOut12Gated",    '1', 0x16,  4, 16, 0); // ODB Out12 gated              (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2,8=not gated)
+    createConfigParam("ODBOut13Gated",    '1', 0x16,  4, 20, 0); // ODB Out13 gated              (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2,8=not gated)
+    createConfigParam("ODBOut14Gated",    '1', 0x16,  4, 24, 0); // ODB Out14 gated              (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2,8=not gated)
+    createConfigParam("ODBOut15Gated",    '1', 0x16,  4, 28, 0); // ODB Out15 gated              (0=no beam,1=normal beam FT,2=normal beam ST,3=not used,4=diag pulse1,5=diag pulse2,6=physiscs pulse1,7=physics pulse2,8=not gated)
 
     createConfigParam("TsyncDelay",       '1', 0x17, 32,  0, 0); // Legacy Tsync Delay          (scale:100,unit:ns,prec:1)
     createConfigParam("EventLength",      '1', 0x18, 24,  0, 8); // Legacy Event Length         (unit:bytes)
