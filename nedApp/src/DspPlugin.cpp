@@ -46,6 +46,9 @@ DspPlugin::DspPlugin(const char *portName, const char *parentPlugins, const char
     } else if (version == "v72") {
         createParams_v72();
         setCmdVersion(1);
+    } else if (version == "v710") {
+        createParams_v710();
+        setCmdVersion(1);
     } else if (version == "v80") {
         createParams_v80();
         setCmdVersion(1);
