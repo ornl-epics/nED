@@ -135,6 +135,12 @@ void DspPlugin::createParams_v710() {
     createConfigParam("ODBOut13:Freq",    '1', 0x1E,  4, 12, 0); // Trigger 3 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("ODBOut13:Width",   '1', 0x1F,  4,  4, 0); // Trigger 3 Width             (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
     createConfigParam("ODBOut13:Delay",   '1', 0x1D, 32,  0, 0); // Trigger 3 Delay             (scale:9.4117,unit:ns)
+    createConfigParam("Trigger0Polarity", '1', 0x1E,  1, 16, 0); // Trigger0 Pulse Polarity     (0=not inverted,1=inverted)
+    createConfigParam("Trigger1Polarity", '1', 0x1E,  1, 17, 0); // Trigger1 Pulse Polarity     (0=not inverted,1=inverted)
+    createConfigParam("Trigger2Polarity", '1', 0x1E,  1, 18, 0); // Trigger2 Pulse Polarity     (0=not inverted,1=inverted)
+    createConfigParam("Trigger3Polarity", '1', 0x1E,  1, 19, 0); // Trigger3 Pulse Polarity     (0=not inverted,1=inverted)
+    createConfigParam("Trigger4Polarity", '1', 0x1E,  1, 20, 0); // Trigger4 Pulse Polarity     (0=not inverted,1=inverted)
+    createConfigParam("Trigger5Polarity", '1', 0x1E,  1, 21, 0); // Trigger5 Pulse Polarity     (0=not inverted,1=inverted)
     createConfigParam("ODBOut14:Delay",   '1', 0x1B, 16,  0, 0); // Test Pattern Delay          (scale:0.0024094117,unit:ms)
     createConfigParam("ODBOut14:PulsePer",'1', 0x1B, 16, 16, 10625); // Test Pattern Pulse Period   (scale:0.0094117,unit:us)
 
