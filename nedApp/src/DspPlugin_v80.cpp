@@ -120,7 +120,7 @@ void DspPlugin::createParams_v80() {
     createConfigParam("Meta15:Source",    '1', 0x1A,  1, 25, 0); // Meta channel 15 Source      (0=ODB_In15,1=txenb_in)
     createConfigParam("Trig0:Freq",       '1', 0x1E,  4,  0, 0); // Trigger 0 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("Trig1:Freq",       '1', 0x1E,  4,  4, 0); // Trigger 1 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
-    createConfigParam("Trig1FrameDelay",  '1', 0x1F,  8, 24, 0); // Trigger 1 Frame Delay       (unit:frames)
+    createConfigParam("Trig1:FrameDelay", '1', 0x1F,  8, 24, 0); // Trigger 1 Frame Delay       (unit:frames)
     createConfigParam("Trig2:Freq",       '1', 0x1E,  4,  8, 0); // Trigger 2 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("Trig2:Width",      '1', 0x1F,  4,  0, 0); // Trigger 2 Width             (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
     createConfigParam("Trig2:Delay",      '1', 0x1C, 32,  0, 0); // Trigger 2 Delay             (scale:9.4117,unit:ns)
