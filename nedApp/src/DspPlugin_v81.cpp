@@ -11,9 +11,9 @@
 
 void DspPlugin::createParams_v81() {
     createRegParam("VERSION", "HwRev",  true, 0,  8,  0);   // Hardware revision        (low:3,high:5)
-    createRegParam("VERSION", "HwVer",  true, 0,  8,  8);   // Hardware revision        (low:1,high:3)
+    createRegParam("VERSION", "HwVer",  true, 0,  8,  8);   // Hardware version         (low:1,high:3)
     createRegParam("VERSION", "FwRev",  true, 0,  8, 16);   // Firmware revision        (low:0,high:2)
-    createRegParam("VERSION", "FwVer",  true, 0,  8, 24);   // Firmware revision        (low:7,high:9)
+    createRegParam("VERSION", "FwVer",  true, 0,  8, 24);   // Firmware version         (low:7,high:9)
     createRegParam("VERSION", "FwYear", true, 1, 16,  0, 0, CONV_HEX2DEC);
     createRegParam("VERSION", "FwDay",  true, 1,  8, 16, 0, CONV_HEX2DEC);
     createRegParam("VERSION", "FwMonth",true, 1,  8, 24, 0, CONV_HEX2DEC);
@@ -93,7 +93,7 @@ void DspPlugin::createParams_v81() {
     createConfigParam("Meta:En",          '1', 0x15,  1, 14, 0); // Meta channels disable       (0=enable,1=disable)
     createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x033E); // Bucket Timeout         (scale:0.0024094117,unit:ms)
     createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable     (0=enable,1=disable)
-    createConfigParam("TimeMode",         '1', 0x15,  2, 30, 0); // Select timing mode          (0=NTP test mode,1=invalid,2=lab test mode,3=NTP run mode)
+    createConfigParam("TimeMode",         '1', 0x15,  2, 30, 0); // Select timing mode          (0=NTP test mode,1=lab test mode,2=invalid,3=NTP run mode)
     createConfigParam("TsyncDelay",       '1', 0x17, 32,  0, 0); // Legacy Tsync Delay          (scale:100,unit:ns,prec:1)
     createConfigParam("EventLength",      '1', 0x18, 24,  0, 8); // Legacy Event Length         (unit:bytes)
     createConfigParam("DataFormatId",     '1', 0x18,  8, 24, 2); // Legacy Data Format          (1=meta,2=pixel,4=LPSD verbose [alarm],5=XY PS,8=AROC raw [alarm],10=BNL raw,7=CROC raw)
@@ -118,12 +118,12 @@ void DspPlugin::createParams_v81() {
     createConfigParam("Meta13:Source",    '1', 0x1A,  1, 23, 0); // Meta channel 13 Source      (0=ODB_In13,1=tclk_in)
     createConfigParam("Meta14:Source",    '1', 0x1A,  1, 24, 0); // Meta channel 14 Source      (0=ODB_In14,1=sysrstb_in)
     createConfigParam("Meta15:Source",    '1', 0x1A,  1, 25, 0); // Meta channel 15 Source      (0=ODB_In15,1=txenb_in)
-    createConfigParam("RTDL_EL_Source",   '1', 0x1A,  1, 26, 0); // RTDL EL Source              (0=internal,1=external)
-    createConfigParam("RTDL_SFP_TX_Dis",  '1', 0x1A,  1, 27, 0); // RTDL SFP TX disable         (0=enable,1=disable)
-    createConfigParam("EL_SFP_TX_Dis",    '1', 0x1A,  1, 28, 0); // EL SFP TX disable           (0=enable,1=disable)
+    createConfigParam("Time:El:Source",   '1', 0x1A,  1, 26, 0); // RTDL EL Source              (0=internal,1=external)
+    createConfigParam("Time:Rtdl:TxEn",   '1', 0x1A,  1, 27, 0); // RTDL SFP TX disable         (0=enable,1=disable)
+    createConfigParam("Time:El:TxEn",     '1', 0x1A,  1, 28, 0); // EL SFP TX disable           (0=enable,1=disable)
     createConfigParam("Trig0:Freq",       '1', 0x1E,  4,  0, 0); // Trigger 0 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("Trig1:Freq",       '1', 0x1E,  4,  4, 0); // Trigger 1 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
-    createConfigParam("Trig1:FrameDelay", '1', 0x1F,  8, 24, 0); // Trigger 1 Frame delay       (unit:frames)
+    createConfigParam("Trig1:Delay",      '1', 0x1F,  8, 24, 0); // Trigger 1 Frame Delay       (unit:frames)
     createConfigParam("Trig2:Freq",       '1', 0x1E,  4,  8, 0); // Trigger 2 Frequency         (0=60Hz,1=30Hz,2=20Hz,3=15Hz,4=10Hz,5=5Hz,6=2Hz,7=1Hz)
     createConfigParam("Trig2:Width",      '1', 0x1F,  4,  0, 0); // Trigger 2 Width             (0=0.1us,1=1us,2=10us,3=100us,4=1ms,5=2ms,6=3ms,7=4ms)
     createConfigParam("Trig2:Delay",      '1', 0x1C, 32,  0, 0); // Trigger 2 Delay             (scale:9.4117,unit:ns)
@@ -252,9 +252,9 @@ void DspPlugin::createParams_v81() {
     createStatusParam("Lvds6:DataPresent", 0x2,   1, 29); // LVDS6 data FIFO has data
     createStatusParam("Lvds6:Overflow",    0x2,   1, 30); // LVDS6 overflow
     createStatusParam("Lvds6:BadPacket",   0x2,   1, 31); // LVDS6 had bad packet
-    createStatusParam("TsyncCountsRF",     0x3,  32,  0); // Tsync Count in RF Clocks
-    createStatusParam("TsyncCountsNTP",    0x4,  32,  0); // Tsync Count in NTP Clocks
-    createStatusParam("TsyncCountsRTDL",   0x5,  32,  0); // Tsync Count in RTDL Clocks
+    createStatusParam("Tsync:CountsRF",    0x3,  32,  0); // Tsync Count in RF Clocks
+    createStatusParam("Tsync:CountsInt",   0x4,  32,  0); // Tsync Count in Int Clocks
+    createStatusParam("Tsync:CountsExt",   0x5,  32,  0); // Tsync Count in RTDL Clocks
     createStatusParam("BucketA:Used",      0x6,   4,  0); // Used A buckets (calc:12-A,unit:of 12)
     createStatusParam("BucketB:Used",      0x6,   4,  4); // Used B buckets (calc:12-A,unit:of 12)
     createStatusParam("BucketsInActive1",  0x6,   1,  8); // BucketsInLvds1Active

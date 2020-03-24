@@ -94,7 +94,7 @@ void DspPlugin::createParams_v710() {
     createConfigParam("BucketTimeout",    '1', 0x15, 14, 15, 0x033E); // Bucket Timeout         (scale:0.0024094117,unit:ms)
     createConfigParam("TsyncTsDis",       '1', 0x15,  1, 29, 0); // Tsync Timestamp Disable     (0=enable,1=disable)
     createConfigParam("TimeSource",       '1', 0x15,  1, 30, 0); // RTDL and EL source select   (1=internal,0=acc timing)
-    createConfigParam("RTDLDisable",      '1', 0x15,  1, 31, 0); // RTDL packets enable         (0=enable,1=disable)
+    createConfigParam("RtdlDisable",      '1', 0x15,  1, 31, 0); // RTDL packets enable         (0=enable,1=disable)
     createConfigParam("TsyncDelay",       '1', 0x17, 32,  0, 0); // Legacy Tsync Delay          (scale:100,unit:ns,prec:1)
     createConfigParam("EventLength",      '1', 0x18, 24,  0, 8); // Legacy Event Length         (unit:bytes)
     createConfigParam("DataFormatId",     '1', 0x18,  8, 24, 2); // Legacy Data Format          (1=meta,2=pixel,4=LPSD verbose [alarm],5=XY PS,8=AROC raw [alarm],10=BNL raw,7=CROC raw)
@@ -259,9 +259,9 @@ void DspPlugin::createParams_v710() {
     createStatusParam("Lvds6:DataPresent", 0x2,   1, 29); // LVDS6 data FIFO has data
     createStatusParam("Lvds6:Overflow",    0x2,   1, 30); // LVDS6 overflow
     createStatusParam("Lvds6:BadPacket",   0x2,   1, 31); // LVDS6 had bad packet
-    createStatusParam("TsyncCountsRF",     0x3,  32,  0); // TsyncCountRF
-    createStatusParam("TsyncCountsInt",    0x4,  32,  0); // TsyncCountInt
-    createStatusParam("TsyncCountsGPS",    0x5,  32,  0); // TsyncCountGPS
+    createStatusParam("Tsync:CountsRF",    0x3,  32,  0); // Tsync Count in RF Clocks
+    createStatusParam("Tsync:CountsInt",   0x4,  32,  0); // Tsync Count in Int Clocks
+    createStatusParam("Tsync:CountsExt",   0x5,  32,  0); // Tsync Count in RTDL Clocks
     createStatusParam("BucketA:Used",      0x6,   4,  0); // Used A buckets (calc:12-A,unit:of 12)
     createStatusParam("BucketB:Used",      0x6,   4,  4); // Used B buckets (calc:12-A,unit:of 12)
     createStatusParam("BucketsInActive1",  0x6,   1,  8); // BucketsInLvds1Active
