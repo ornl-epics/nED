@@ -378,7 +378,6 @@ float BaseSocketPlugin::checkClient()
 
     unlock();
 
-    if (checkInt <= 0)
-        checkInt = 1;
-    return checkInt;
+    // Check more often than CheckInt is setup for
+    return 0.5;
 }
