@@ -655,7 +655,7 @@ void RocPlugin::createParams_v511()
     createConfigParam("DataFormat",       'F', 0x4,  8,  0, 2);     // Data format identifier        (2=pixel,3=raw,4=verbose)
     createConfigParam("Protocol",         'F', 0x4,  1, 15, 0);     // Extended event format         (0=legacy,1=new)
     createConfigParam("PreampIface",      'F', 0x5,  1,  0, 0);     // Preamplifier Interface        (0=SPI old preamps,1=I2C new preamps)
-    createConfigParam("HVPSIface",        'F', 0x5,  1,  1, 0);     // HV PS Interface               (0=Serial old HVPS,1=I2C new HVPS)
+    createConfigParam("HVPS:Iface",       'F', 0x5,  1,  1, 0);     // HV PS Interface               (0=Serial old HVPS,1=I2C new HVPS)
 
 //  BLXXX:Det:RocXXX:| parameter name |                 | EPICS record description  | (bi and mbbi description)
     createTempParam("TempBoard",        0x0, 16, 0, CONV_SIGN_2COMP); // ROC board temperature in degC   (calc:0.25*A,unit:C,prec:1,low:-50,high:50, archive:monitor)
