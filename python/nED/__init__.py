@@ -91,27 +91,20 @@ def getModules(expr=".*"):
     return modules
 
 class Module:
-    def __init__(self, name):
+    def __init__(self, name, cache_params=True):
         self.name = name
         self.__dict__['name'] = name
         self._req_pv = None
         self._rsp_pv = None
+        self._params = None
 
         self._cached_pvs = []
         for pv in [ "HwId", "HwType", "FwVersion", "Status", "StatusText", "OutputMode" ]:
             getPv(name, pv, wait_connect=False)
             self._cached_pvs.append(pv)
 
-        try:
-            o = pvaccess.Channel(_pvprefix + "pva:" + name + ":Params").get("")
-            self.params = {
-                'config': o.getScalarArray('config.value'),
-                'status': o.getScalarArray('status.value'),
-                'counter': o.getScalarArray('counter.value'),
-                'temperature': o.getScalarArray('temperature.value')
-            }
-        except:
-            raise RuntimeError("Failed to retrieve module parameters")
+        if cache_params:
+            self.getParams()
 
     def __getattr__(self, param):
         if param.startswith("_"):
@@ -145,15 +138,40 @@ class Module:
         return getPvName(self.name, param)
 
     def getParams(self, typ=None):
-        if typ:
-            if typ in self.params and not self.params[typ]:
-                return self._getParamsFromFiles(typ)
-            return self.params[typ]
+        """ Returns a list of module parameters.
 
-        params  = self.getParams("status")
-        params += self.getParams("config")
-        params += self.getParams("temperature")
-        params += self.getParams("counter")
+        Module parameters in nED are grouped based on 4 types:
+        config, status, temperature, counter.
+        `typ' argument can be used to select only parameters from one of those
+        4 groups.
+        """
+        if  self._params is None:
+            # Late initialization
+            self._params = {}
+            try:
+                o = pvaccess.Channel(_pvprefix + "pva:" + name + ":Params").get("")
+                self._params['config'] = o.getScalarArray('config.value')
+                self._params['status'] = o.getScalarArray('status.value')
+                self._params['counter'] = o.getScalarArray('counter.value')
+                self._params['temperature'] = o.getScalarArray('temperature.value')
+            except:
+                self._params['config'] = self._getParamsFromFiles('config')
+                self._params['status'] = self._getParamsFromFiles('status')
+                self._params['counter'] = self._getParamsFromFiles('counter')
+                self._params['temperature'] = self._getParamsFromFiles('temperature')
+
+        if typ is not None:
+            if typ not in [ 'config', 'status', 'counter', 'temperature' ]:
+                raise UserWarning("Invalid module parameter group `%s'".format(typ))
+            params  = self._params[typ]
+        else:
+            try:
+                params  = self._params["status"]
+                params += self._params["config"]
+                params += self._params["temperature"]
+                params += self._params["counter"]
+            except KeyError:
+                raise UserWarning("Failed to initialize module parameters")
         return params
 
     def _getParamsFromFiles(self, typ=None):
