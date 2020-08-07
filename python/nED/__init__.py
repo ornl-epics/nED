@@ -149,24 +149,27 @@ class Module:
             # Late initialization
             self._params = {}
             try:
-                o = pvaccess.Channel(_pvprefix + "pva:" + name + ":Params").get("")
-                self._params['config'] = o.getScalarArray('config.value')
-                self._params['status'] = o.getScalarArray('status.value')
-                self._params['counter'] = o.getScalarArray('counter.value')
-                self._params['temperature'] = o.getScalarArray('temperature.value')
+                o = pvaccess.Channel(_pvprefix + "pva:" + self.name + ":Params").get("")
+                self._params['config'] = list(o.getScalarArray('config.value'))
+                self._params['status'] = list(o.getScalarArray('status.value'))
+                self._params['counter'] = list(o.getScalarArray('counter.value'))
+                self._params['temperature'] = list(o.getScalarArray('temperature.value'))
+                pprint(self._params)
             except:
                 self._params['config'] = self._getParamsFromFiles('config')
                 self._params['status'] = self._getParamsFromFiles('status')
                 self._params['counter'] = self._getParamsFromFiles('counter')
                 self._params['temperature'] = self._getParamsFromFiles('temperature')
 
+        # Create a new list and prevent caller access to private member
+        params = list()
         if typ is not None:
             if typ not in [ 'config', 'status', 'counter', 'temperature' ]:
                 raise UserWarning("Invalid module parameter group `%s'".format(typ))
-            params  = self._params[typ]
+            params += self._params[typ]
         else:
             try:
-                params  = self._params["status"]
+                params += self._params["status"]
                 params += self._params["config"]
                 params += self._params["temperature"]
                 params += self._params["counter"]
