@@ -222,6 +222,7 @@ def main():
     }
     for plugin in plugins:
         macros['P'] = plugin['pv_prefix']
+        macros['G'] = bl_prefix+"HVG"
         inpath = os.path.realpath(do_substitutions(plugin['file'], macros ))
         archived.update(parse_archive_records(inpath, macros, options.verbose))
 
