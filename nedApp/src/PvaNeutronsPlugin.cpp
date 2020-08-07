@@ -34,18 +34,18 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
         {}
 
         template <typename T>
-        std::tuple<uint32_t, epics::pvData::PVUIntArray::svector, epics::pvData::PVUIntArray::svector> getTofPixels(const DasDataPacket *packet)
+        void getTofPixels(const DasDataPacket *packet, std::vector<unsigned>& tofs, std::vector<unsigned>& pixels)
         {
             uint32_t nEvents = packet->getNumEvents();
             const T *events = packet->getEvents<T>();
 
-            epics::pvData::PVUIntArray::svector tofs(nEvents);
-            epics::pvData::PVUIntArray::svector pixels(nEvents);
+            size_t start = tofs.size();
+            tofs.resize(start+nEvents);
+            pixels.resize(start+nEvents);
             for (uint32_t i = 0; i < nEvents; i++) {
-                tofs[i]   = events[i].tof;
-                pixels[i] = events[i].pixelid;
+                tofs[start+i]   = events[i].tof;
+                pixels[start+i] = events[i].pixelid;
             }
-            return std::make_tuple(nEvents, tofs, pixels);
         }
 
     public:
@@ -112,44 +112,66 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
          */
         bool update(const DasDataPacket *packet, uint32_t &nEvents, double pCharge)
         {
-            bool posted = false;
-
-            // 31 bit sequence number is good for around 9 months.
-            // (based on 5mio events/s, IRQ coallescing = 40, max OCC packet size = 3600B)
-            // In worst case client will skip one packet on rollover and then recover
-            // the sequence.
-            epicsTimeStamp ts = packet->getTimeStamp();
-            epics::pvData::TimeStamp timestamp(
-                epics::pvData::posixEpochAtEpicsEpoch + ts.secPastEpoch,
-                ts.nsec,
-                m_sequence++ % 0x7FFFFFFF
-            );
+            epicsTimeStamp timeStamp = packet->getTimeStamp();
 
             // Now extract events from packet
-            epics::pvData::PVUIntArray::svector tofs;
-            epics::pvData::PVUIntArray::svector pixels;
             bool mapped = packet->getEventsMapped();
+
+            // Send an update only if timestamp change is detected -- this would not work for mixed
+            // `mapped` flags.
+            if (lastTimeStamp != timeStamp) {
+                lastTimeStamp = timeStamp;
+
+                epics::pvData::TimeStamp timestamp(
+                    epics::pvData::posixEpochAtEpicsEpoch + timeStamp.secPastEpoch,
+                    timeStamp.nsec,
+                    m_sequence++ % 0x7FFFFFFF
+                );
+                epics::pvData::PVUIntArray::svector tofsArray(tofs.data(), [](unsigned*){}, 0, tofs.size());
+                epics::pvData::PVUIntArray::svector pixelsArray(pixels.data(), [](unsigned*){}, 0, pixels.size());
+
+                lock();
+                try {
+                    beginGroupPut();
+    
+                    pvTimeStamp.set(timestamp);
+                    pvLogical->put(mapped);
+                    pvNumEvents->put(nEvents);
+                    pvTimeOfFlight->replace(epics::pvData::freeze(tofsArray));
+                    pvPixel->replace(epics::pvData::freeze(pixelsArray));
+                    pvProtonCharge->put(pCharge);
+    
+                    endGroupPut();
+                } catch (...) {
+                }
+                unlock();
+
+                // clear() keeps memory allocated... in this case it's a feature not a bug!
+                tofs.clear();
+                pixels.clear();
+            }
+
             switch (packet->getEventsFormat()) {
                 case DasDataPacket::EVENT_FMT_PIXEL:
-                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::Pixel>(packet);
+                    getTofPixels<Event::Pixel>(packet, tofs, pixels);
                     break;
                 case DasDataPacket::EVENT_FMT_META:
-                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::Pixel>(packet);
+                    getTofPixels<Event::Pixel>(packet, tofs, pixels);
                     break;
                 case DasDataPacket::EVENT_FMT_LPSD_VERBOSE:
-                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::LPSD::Verbose>(packet);
+                    getTofPixels<Event::LPSD::Verbose>(packet, tofs, pixels);
                     break;
                 case DasDataPacket::EVENT_FMT_LPSD_DIAG:
-                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::LPSD::Diag>(packet);
+                    getTofPixels<Event::LPSD::Diag>(packet, tofs, pixels);
                     break;
                 case DasDataPacket::EVENT_FMT_BNL_VERBOSE:
-                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::BNL::Verbose>(packet);
+                    getTofPixels<Event::BNL::Verbose>(packet, tofs, pixels);
                     break;
                 case DasDataPacket::EVENT_FMT_BNL_DIAG:
-                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::BNL::Diag>(packet);
+                    getTofPixels<Event::BNL::Diag>(packet, tofs, pixels);
                     break;
                 case DasDataPacket::EVENT_FMT_ACPC_DIAG:
-                    std::tie(nEvents, tofs, pixels) = getTofPixels<Event::ACPC::Diag>(packet);
+                    getTofPixels<Event::ACPC::Diag>(packet, tofs, pixels);
                     break;
                 case DasDataPacket::EVENT_FMT_TIME_CALIB:
                     nEvents = 0;
@@ -159,24 +181,7 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
                     return false;
             }
 
-            lock();
-            try {
-                beginGroupPut();
-
-                pvTimeStamp.set(timestamp);
-                pvLogical->put(mapped);
-                pvNumEvents->put(nEvents);
-                pvTimeOfFlight->replace(epics::pvData::freeze(tofs));
-                pvPixel->replace(epics::pvData::freeze(pixels));
-                pvProtonCharge->put(pCharge);
-
-                endGroupPut();
-                posted = true;
-            } catch (...) {
-            }
-            unlock();
-
-            return posted;
+            return true;
         }
 
     private:
@@ -187,6 +192,10 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
         epics::pvData::PVUIntArrayPtr   pvTimeOfFlight; //!< Time offset relative to time stamp
         epics::pvData::PVUIntArrayPtr   pvPixel;        //!< Pixel ID
         epics::pvData::PVDoublePtr      pvProtonCharge; //!< Proton charge in for this pulse
+        // tofs and pixels vectors serve as memory buffers to optimize memory allocation
+        std::vector<unsigned> tofs;
+        std::vector<unsigned> pixels;
+        epicsTime lastTimeStamp;
 
 };
 
