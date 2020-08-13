@@ -116,6 +116,7 @@ class PvaNeutronsPlugin::PvaRecordPixel : public epics::pvDatabase::PVRecord {
 
             // Now extract events from packet
             bool mapped = packet->getEventsMapped();
+            nEvents = packet->getNumEvents();
 
             // Send an update only if timestamp change is detected -- this would not work for mixed
             // `mapped` flags.
