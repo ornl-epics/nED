@@ -13,5 +13,7 @@ install: $(GEN_FILES)
 $(GEN_DIR)/%.bob: $(SRC_DIR)/%.cpp
 	./export2bob.py $< generated/
 
+realclean:	clean
+
 clean:
 	rm -fR generated/
