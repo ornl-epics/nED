@@ -92,7 +92,7 @@ int Wait(uint32_t bufSize, uint32_t pushSize1, uint32_t consumeSize1=0, uint32_t
         free += consumeSize1;
         if (free > 0) {
             expected -= consumeSize1;
-            buf.wait(&ptr, &len);
+            buf.wait(&ptr, &len, 1);
             if (len != expected) return TEST_FAIL;
         }
     }

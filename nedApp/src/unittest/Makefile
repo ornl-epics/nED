@@ -13,10 +13,13 @@ USR_INCLUDES += -I../..
 # Tests for the parameters
 TESTPROD_HOST += testCircularBuffer
 TESTPROD_HOST += testValueConvert
+TESTPROD_HOST += testObjectPool
 testCircularBuffer_SRCS += testCircularBuffer.cpp
 testValueConvert_SRCS += testValueConvert.cpp
+testObjectPool_SRCS += testObjectPool.cpp
 TESTS += testCircularBuffer
 TESTS += testValueConvert
+TESTS += testObjectPool
 
 TESTSCRIPTS_HOST += $(TESTS:%=%.t)
 
