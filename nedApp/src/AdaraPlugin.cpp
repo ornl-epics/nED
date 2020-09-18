@@ -168,7 +168,9 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
             break;
         }
     }
-    if (!pulseFound && enableNoRtdlPkts) {
+    if (!pulseFound) {
+        if (!enableNoRtdlPkts)
+            return false;
         DataInfo info;
         info.rtdl.cycle = ADARA_INVALID_CYCLE_ID;
         m_cachedRtdl.emplace_front(std::make_pair(timestamp, info));
