@@ -195,3 +195,15 @@ record(bo, "$(P)ChopEventsEn")
     field(ONAM,  "pass")
     field(PINI,  "YES")
 }
+record(bo, "$(P)NoRtdlPktsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass packets without matching RTDL")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))hopEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}

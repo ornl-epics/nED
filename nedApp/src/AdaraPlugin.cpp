@@ -38,6 +38,7 @@ AdaraPlugin::AdaraPlugin(const char *portName, const char *dataPlugins, const ch
     createParam("SigEventsEn",  asynParamInt32, &SigEventsEn, 1);// WRITE - Enable forwarding signal events
     createParam("AdcEventsEn",  asynParamInt32, &AdcEventsEn, 1);// WRITE - Enable forwarding ADC events
     createParam("ChopEventsEn", asynParamInt32, &ChopEventsEn, 1);// WRITE - Enable forwarding chopper events
+    createParam("NoRtdlPktsEn", asynParamInt32, &NoRtdlPktsEn, 1);// WRITE - Enable packets without RTDL information
     callParamCallbacks();
 
     BasePlugin::connect(dataPlugins, MsgDasData);
@@ -146,6 +147,7 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
 
     uint32_t *outpacket = m_buffer.data();
     uint32_t maxCacheLen = getIntegerParam(RtdlCacheSize);
+    bool enableNoRtdlPkts = getBooleanParam(NoRtdlPktsEn);
 
     // Initialize packet header
     memset(outpacket, 0, 10*sizeof(uint32_t));
@@ -166,7 +168,7 @@ bool AdaraPlugin::sendEvents(epicsTimeStamp &timestamp, bool mapped, const T *ev
             break;
         }
     }
-    if (!pulseFound) {
+    if (!pulseFound && enableNoRtdlPkts) {
         DataInfo info;
         info.rtdl.cycle = ADARA_INVALID_CYCLE_ID;
         m_cachedRtdl.emplace_front(std::make_pair(timestamp, info));

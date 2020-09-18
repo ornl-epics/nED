@@ -134,6 +134,7 @@ class AdaraPlugin : public BaseSocketPlugin {
         int SigEventsEn;
         int AdcEventsEn;
         int ChopEventsEn;
+        int NoRtdlPktsEn;
 };
 
 #endif // ADARA_PLUGIN_H
