@@ -1,0 +1,18 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "FemPlugin.include"
+include "FemPlugin_v38.generated"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "FemPlugin_v38")
+}
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TVVL, "41")
+    field(TVST, "Down reset")
+    field(TTVL, "40")
+    field(TTST, "Down reset LVDS")
+}

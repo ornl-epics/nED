@@ -1,0 +1,126 @@
+include "BasePlugin.include"
+include "BasePortPlugin.include"
+
+record(longin, "$(P)Status")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Status")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))StatusText")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(bi, "$(P)Running")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Running status")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Running")
+    field(ZNAM, "Stopped")
+    field(ONAM, "Running")
+    field(SCAN, "I/O Intr")
+}
+record(mbbo, "$(P)Run")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Start or continue replaying")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Control")
+    field(ZRVL, "-1")
+    field(ZRST, "")
+    field(ONVL, "1")
+    field(ONST, "Run")
+    field(SDIS, "$(P)Running NPP")
+    field(DISV, "1")
+}
+record(mbbo, "$(P)Pause")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Pause replaying")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Control")
+    field(ZRVL, "-1")
+    field(ZRST, "")
+    field(ONVL, "0")
+    field(ONST, "Pause")
+    field(SDIS, "$(P)Running NPP")
+    field(DISV, "0")
+}
+record(mbbo, "$(P)Restart")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Restart replaying")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Control")
+    field(ZRVL, "-1")
+    field(ZRST, "")
+    field(ONVL, "2")
+    field(ONST, "Restart")
+}
+record(waveform, "$(P)FilePath")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "File to replay")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT))FilePath")
+    field(FTVL, "CHAR")
+    field(NELM, "256")
+}
+record(mbbo, "$(P)SpeedMenu")
+{
+    field(DESC, "Replay speed")
+    field(PINI, "YES")
+    field(VAL,  "3")
+    field(ZRVL, "1")
+    field(ZRST, "0.1x")
+    field(ONVL, "2")
+    field(ONST, "0.2x")
+    field(TWVL, "5")
+    field(TWST, "0.5x")
+    field(THVL, "10")
+    field(THST, "1x")
+    field(FRVL, "15")
+    field(FRST, "1.5x")
+    field(FVVL, "20")
+    field(FVST, "2x")
+    field(SXVL, "25")
+    field(SXST, "2.5x")
+    field(SVVL, "30")
+    field(SVST, "3x")
+    field(EIVL, "50")
+    field(EIST, "5x")
+    field(NIVL, "100")
+    field(NIST, "10x")
+    field(TEVL, "1000000")
+    field(TEST, "full speed")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)SpeedScale.A PP")
+}
+record(calcout, "$(P)SpeedScale")
+{
+    field(CALC, "A/10")
+    field(OUT,  "$(P)Speed PP")
+}
+record(ao, "$(P)Speed")
+{
+    field(DESC, "Replay speed as number")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))Speed")
+    field(DRVL, "0.1")
+    field(DRVH, "10000")
+    field(PREC, "1")
+}
+record(longout, "$(P)MaxPackets")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Max number of packets to be sent")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MaxPackets")
+    field(VAL,  "100")
+}

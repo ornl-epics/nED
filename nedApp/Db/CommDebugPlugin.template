@@ -1,0 +1,685 @@
+include "BasePlugin.include"
+
+record(bo, "$(P)ReqSend")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Send current packet")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqSend")
+    field(ZNAM, "none")
+    field(ONAM, "send")
+    field(VAL,  "1")
+    field(SDIS, "$(P)ReqSniffer NPP")
+    field(DISV, "1")
+}
+record(longout, "$(P)ResetQues")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Clear packet FIFOs")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetQues")
+    field(VAL,  "1")
+}
+record(bo, "$(P)Sniffer")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Listen to other plugins messages")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Sniffer")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(mbbo, "$(P)FilterCmdMenu")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Filter command")
+    field(OUT,  "$(P)FilterCmd PP")
+    field(DTYP, "Raw Soft Channel")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "All")
+    field(ONVL, "128")
+    field(ONST, "Discover")
+    field(TWVL, "32")
+    field(TWST, "Read version")
+    field(THVL, "34")
+    field(THST, "Read status")
+    field(FRVL, "33")
+    field(FRST, "Read config")
+    field(FVVL, "48")
+    field(FVST, "Write config")
+    field(SXVL, "130")
+    field(SXST, "Start acquisition")
+    field(SVVL, "131")
+    field(SVST, "Stop acquisition")
+    field(EIVL, "129")
+    field(EIST, "Reset")
+    field(NIVL, "35")
+    field(NIST, "Read temperature")
+    field(TEVL, "39")
+    field(TEST, "Reset LVDS")
+    field(ELVL, "40")
+    field(ELST, "Down reset LVDS")
+    field(TVVL, "36")
+    field(TVST, "Read counters")
+    field(TTVL, "41")
+    field(TTST, "Down reset")
+}
+record(mbbo, "$(P)FilterPktType")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))FilterPktType")
+    field(ZRVL, "0")
+    field(ZRST, "All")
+    field(ONVL, "1")
+    field(ONST, "Error packets")
+    field(TWVL, "8")
+    field(TWST, "DAS commands")
+    field(THVL, "6")
+    field(THST, "RTDL packets")
+    field(FRVL, "7")
+    field(FRST, "Data packets")
+    field(VAL,  "2")
+    field(PINI, "YES")
+}
+record(longout, "$(P)FilterCmd")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))FilterCmd")
+    field(LOPR, "0")
+    field(HOPR, "255")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(stringout, "$(P)FilterModule")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))FilterModule")
+    field(VAL,  "0.0.0.0")
+    field(PINI, "YES")
+}
+
+####################
+### Request  PVs ###
+####################
+
+record(longout, "$(P)ReqVersion")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "0")
+    field(HOPR, "15")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqVersion")
+}
+record(longout, "$(P)ReqPriority")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "0")
+    field(HOPR, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqPriority")
+}
+record(mbbo, "$(P)ReqType")
+{
+    info(asyn:READBACK, "1")
+    field(DESC, "Response command")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqType")
+    field(ZRVL, "0")
+    field(ZRST, "Legacy")
+    field(ONVL, "6")
+    field(ONST, "RTDL")
+    field(TWVL, "7")
+    field(TWST, "DAS data")
+    field(THVL, "8")
+    field(THST, "DAS command")
+    field(FRVL, "16")
+    field(FRST, "Acc timing")
+    field(FVVL, "255")
+    field(FVST, "Bad packet")
+}
+record(longout, "$(P)ReqSequence")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "0")
+    field(HOPR, "255")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqSequence")
+}
+record(longout, "$(P)ReqLength")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "16")
+    field(HOPR, "16777215")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqLength")
+}
+record(longout, "$(P)ReqCmdLen")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "0")
+    field(HOPR, "4095")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqCmdLen")
+}
+record(mbbo, "$(P)ReqCmd")
+{
+    info(asyn:READBACK, "1")
+    field(DESC, "Response command")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqCmd")
+    field(ZRVL, "128")
+    field(ZRST, "Discover")
+    field(ONVL, "32")
+    field(ONST, "Read version")
+    field(TWVL, "34")
+    field(TWST, "Read status")
+    field(THVL, "33")
+    field(THST, "Read config")
+    field(FRVL, "48")
+    field(FRST, "Write config")
+    field(FVVL, "130")
+    field(FVST, "Start acquisition")
+    field(SXVL, "131")
+    field(SXST, "Stop acquisition")
+    field(SVVL, "129")
+    field(SVST, "Reset")
+    field(EIVL, "35")
+    field(EIST, "Read temperature")
+    field(NIVL, "39")
+    field(NIST, "Reset LVDS")
+    field(TEVL, "40")
+    field(TEST, "Down reset LVDS")
+    field(ELVL, "36")
+    field(ELST, "Read counters")
+    field(TVVL, "41")
+    field(TVST, "Down reset")
+}
+record(longout, "$(P)ReqVerifyId")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "0")
+    field(HOPR, "31")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqVerifyId")
+}
+record(longout, "$(P)ReqAck")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "0")
+    field(HOPR, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqAck")
+}
+record(longout, "$(P)ReqRsp")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "0")
+    field(HOPR, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRsp")
+}
+record(longout, "$(P)ReqCmdVer")
+{
+    info(asyn:READBACK, "1")
+    field(LOPR, "0")
+    field(HOPR, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqCmdVer")
+}
+record(stringout, "$(P)ReqModule")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))ReqModule")
+}
+record(longout, "$(P)ReqRaw0")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRaw0")
+}
+record(longout, "$(P)ReqRaw1")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRaw1")
+}
+record(longout, "$(P)ReqRaw2")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRaw2")
+}
+record(longout, "$(P)ReqRaw3")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRaw3")
+}
+record(longout, "$(P)ReqRaw4")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRaw4")
+}
+record(longout, "$(P)ReqRaw5")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRaw5")
+}
+record(longout, "$(P)ReqRaw6")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRaw6")
+}
+record(longout, "$(P)ReqRaw7")
+{
+    info(asyn:READBACK, "1")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ReqRaw7")
+}
+
+####################
+### Response PVs ###
+####################
+
+record(longin, "$(P)RspVersion")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspVersion")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspPriority")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspPriority")
+    field(SCAN, "I/O Intr")
+}
+record(mbbi, "$(P)RspType")
+{
+    field(DESC, "Response command")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspType")
+    field(SCAN, "I/O Intr")
+    field(ZRVL, "0")
+    field(ZRST, "Legacy")
+    field(ONVL, "6")
+    field(ONST, "RTDL")
+    field(TWVL, "7")
+    field(TWST, "DAS data")
+    field(THVL, "8")
+    field(THST, "DAS command")
+    field(FRVL, "16")
+    field(FRST, "Acc timing")
+    field(FVVL, "255")
+    field(FVST, "Bad packet")
+}
+record(longin, "$(P)RspSequence")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspSequence")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspLength")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspLength")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)RspRaw0")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRaw0")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspRaw1")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRaw1")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspRaw2")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRaw2")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspRaw3")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRaw3")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspRaw4")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRaw4")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspRaw5")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRaw5")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspRaw6")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRaw6")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspRaw7")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRaw7")
+    field(SCAN, "I/O Intr")
+}
+
+############################
+### Command response PVs ###
+############################
+
+record(longin, "$(P)RspCmdLen")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspCmdLen")
+    field(SCAN, "I/O Intr")
+}
+record(mbbi, "$(P)RspCmd")
+{
+    field(DESC, "Response command")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspCmd")
+    field(SCAN, "I/O Intr")
+    field(ZRVL, "0")
+    field(ZRST, "")
+    field(ONVL, "128")
+    field(ONST, "Discover")
+    field(TWVL, "32")
+    field(TWST, "Read version")
+    field(THVL, "34")
+    field(THST, "Read status")
+    field(FRVL, "33")
+    field(FRST, "Read config")
+    field(FVVL, "48")
+    field(FVST, "Write config")
+    field(SXVL, "130")
+    field(SXST, "Start acquisition")
+    field(SVVL, "131")
+    field(SVST, "Stop acquisition")
+    field(EIVL, "66")
+    field(EIST, "Bad packet")
+    field(EIVL, "80")
+    field(EIST, "HV send")
+    field(EIVL, "81")
+    field(EIST, "HV response")
+    field(NIVL, "129")
+    field(NIST, "Reset")
+    field(TEVL, "35")
+    field(TEST, "Read temperature")
+    field(ELVL, "39")
+    field(ELST, "Reset LVDS")
+    field(TVVL, "40")
+    field(TVST, "Down reset LVDS")
+    field(TTVL, "36")
+    field(TTST, "Read counters")
+    field(FTVL, "41")
+    field(FTST, "Down reset")
+}
+record(longin, "$(P)RspCmdVerifyId")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspCmdVerifyId")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspCmdAck")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspCmdAck")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspCmdRsp")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspCmdRsp")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)RspCmdVer")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspCmdVer")
+    field(SCAN, "I/O Intr")
+}
+record(stringin, "$(P)RspCmdModule")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))RspCmdModule")
+    field(SCAN, "I/O Intr")
+}
+record(ai, "$(P)RspTimeStamp")
+{
+    field(DTYP, "asynFloat64")
+    field(DESC, "Response time")
+    field(INP,  "@asyn($(PORT))RspTimeStamp")
+    field(EGU,  "ms")
+    field(SCAN, "I/O Intr")
+}
+
+####################################################
+### Error packet PVs                             ###
+####################################################
+
+record(longin, "$(P)RspErrSourceId")
+{
+    field(DESC, "Error packet source")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspErrSourceId")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(P)RspErrCode")
+{
+    field(DESC, "Error code")
+    field(DTYP, "asynInt32")
+    field(DESC, "Error type")
+    field(INP,  "@asyn($(PORT))RspErrCode")
+    field(SCAN, "I/O Intr")
+    field(ZRVL, "0")
+    field(ZRST, "no error")
+    field(ONVL, "1")
+    field(ONST, "frame error")
+    field(TWVL, "2")
+    field(TWST, "length error")
+    field(THVL, "3")
+    field(THST, "CRC error")
+}
+
+record(longin, "$(P)RspErrFrame")
+{
+    field(DESC, "Frame error index")
+    field(INP,  "$(P)RspRaw3 CP")
+}
+
+record(longin, "$(P)RspErrLength")
+{
+    field(DESC, "Length error index")
+    field(INP,  "$(P)RspRaw4 CP")
+}
+
+record(longin, "$(P)RspErrCrc")
+{
+    field(DESC, "CRC error index")
+    field(INP,  "$(P)RspRaw5 CP")
+}
+
+####################################################
+### RTDL response PVs                            ###
+####################################################
+
+record(longin, "$(P)RspRtdlFrames")
+{
+    field(DESC, "RTDL number of frames")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspRtdlFrames")
+    field(SCAN, "I/O Intr")
+}
+
+####################################################
+### Data response PVs                            ###
+####################################################
+
+record(longin, "$(P)RspDataSourceId")
+{
+    field(DESC, "Data packet source")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspDataSourceId")
+    field(SCAN, "I/O Intr")
+}
+
+record(mbbi, "$(P)RspDataFormat")
+{
+    field(DESC, "Data number of format")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspDataFormat")
+    field(SCAN, "I/O Intr")
+    field(ZRVL, "0")
+    field(ZRST, "All")
+    field(ONVL, "1")
+    field(ONST, "Meta data")
+    field(TWVL, "2")
+    field(TWST, "Pixel")
+    field(THVL, "3")
+    field(THST, "LPSD raw")
+    field(FRVL, "4")
+    field(FRST, "LPSD verbose")
+    field(FVVL, "5")
+    field(FVST, "XY PS")
+    field(SXVL, "6")
+    field(SXST, "ACPC raw")
+    field(SVVL, "7")
+    field(SVST, "ACPC verbose")
+    field(EIVL, "8")
+    field(EIST, "AROC raw")
+    field(NIVL, "9")
+    field(NIST, "BNL XY")
+    field(TEVL, "10")
+    field(TEST, "BNL raw")
+    field(ELVL, "11")
+    field(ELST, "BNL verbose")
+    field(TVVL, "12")
+    field(TVST, "CROC XY")
+    field(TTVL, "13")
+    field(TTST, "CROC raw")
+    field(FTVL, "50")
+    field(FTST, "TSYNC time")
+}
+
+record(stringin, "$(P)RspDataTime")
+{
+    field(DESC, "Data time")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))RspDataTime")
+    field(SCAN, "I/O Intr")
+}
+
+record(longin, "$(P)RspDataTimeNsec")
+{
+    field(DESC, "Data time nanoseconds")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RspDataTimeNsec")
+    field(SCAN, "I/O Intr")
+}
+
+####################################################
+### PVs for moving within receive packets buffer ###
+####################################################
+
+record(longout, "$(P)SendQueIndex")
+{
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(LOPR, "0")
+    field(HOPR, "1")
+    field(OUT,  "@asyn($(PORT))SendQueIndex")
+}
+record(longout, "$(P)SendQueMaxSize")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max buffered packets")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(VAL,  "100")
+    field(LOPR, "1")
+    field(OUT,  "@asyn($(PORT))SendQueMaxSize")
+}
+record(longin, "$(P)SendQueSize")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Num buffered packets")
+    field(DTYP, "asynInt32")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(INP,  "@asyn($(PORT))SendQueSize")
+    field(FLNK, "$(P)SendQueLim")
+}
+record(calc, "$(P)SendQueLim")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Last valid index")
+    field(INPA, "$(P)SendQueSize NPP")
+    field(CALC, "A-1")
+}
+record(longout, "$(P)RecvQueIndex")
+{
+    info(asyn:READBACK, "1")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(LOPR, "0")
+    field(HOPR, "1")
+    field(OUT,  "@asyn($(PORT))RecvQueIndex")
+}
+record(longout, "$(P)RecvQueMaxSize")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max buffered packets")
+    field(DTYP, "asynInt32")
+    field(PINI, "YES")
+    field(VAL,  "100")
+    field(LOPR, "1")
+    field(OUT,  "@asyn($(PORT))RecvQueMaxSize")
+}
+record(longin, "$(P)RecvQueSize")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Num buffered packets")
+    field(DTYP, "asynInt32")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(INP,  "@asyn($(PORT))RecvQueSize")
+    field(FLNK, "$(P)RecvQueLim")
+}
+record(calc, "$(P)RecvQueLim")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Last valid index")
+    field(INPA, "$(P)RecvQueSize NPP")
+    field(CALC, "A-1")
+}

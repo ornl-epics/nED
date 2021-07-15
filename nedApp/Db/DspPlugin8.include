@@ -1,0 +1,163 @@
+record(mbbo, "$(P)DetTypeSel")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select detector type")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "LPSD")
+    field(ONVL, "1")
+    field(ONST, "ACPC")
+    field(TWVL, "2")
+    field(TWST, "BNL")
+    field(THVL, "3")
+    field(THST, "CROC")
+    field(FRVL, "4")
+    field(FRST, "ADCROC")
+    field(FLNK, "$(P)DiagEn")
+}
+
+record(mbbo, "$(P)DiagEn")
+{
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(FLNK, "$(P)DataFormatIdSet PP")
+}
+
+record(longout, "$(P)DataFormatIdSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)DataFormatIdSel PP")
+    field(OUT,  "$(P)DataFormatId PP")
+    field(OMSL, "closed_loop")
+    field(DTYP, "Soft Channel")
+}
+
+record(sel, "$(P)DataFormatIdSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(NVL,  "$(P)DetTypeSel NPP")
+    field(INPA, "$(P)DataFormatIdLpsd PP")
+    field(INPB, "$(P)DataFormatIdAcpc PP")
+    field(INPC, "$(P)DataFormatIdBnl PP")
+    field(INPD, "$(P)DataFormatIdCroc PP")
+    field(INPE, "$(P)DataFormatIdAdcroc PP")
+}
+
+record(calc, "$(P)DataFormatIdLpsd")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)DiagEn NPP")
+    field(CALC, "A=0?1:2")
+}
+
+record(calc, "$(P)DataFormatIdAcpc")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)DiagEn NPP")
+    field(CALC, "A=0?3:4")
+}
+
+record(longout, "$(P)DataFormatIdBnl")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "5")
+}
+
+record(longout, "$(P)DataFormatIdCroc")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "6")
+}
+
+record(longout, "$(P)DataFormatIdAdcroc")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "1")
+}
+
+# Connect DataFormatId register to EventLength register
+record(sel, "$(P)DataFormatIdCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(NVL,  "$(P)DataFormatId CPP")
+    field(INPA, "8")
+    field(INPB, "8")
+    field(INPC, "20")
+    field(INPD, "24")
+    field(INPE, "72")
+    field(INPF, "84")
+    field(INPG, "48")
+    field(FLNK, "$(P)EventLengthSet")
+}
+
+record(longout, "$(P)EventLengthSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)DataFormatIdCalc NPP")
+    field(OUT,  "$(P)EventLength PP")
+    field(OMSL, "closed_loop")
+    field(DTYP, "Soft Channel")
+}
+
+# Make a copy of DataFormatId to make screen happy
+record(mbbi, "$(P)OutputMode")
+{
+    field(ASG,  "BEAMLINE")
+    field(ZRVL, "1")
+    field(ZRST, "meta")
+    field(ONVL, "2")
+    field(ONST, "pixel")
+    field(TWVL, "3")
+    field(TWST, "LPSD verbose")
+    field(TWSV, "MAJOR")
+    field(THVL, "5")
+    field(THST, "XY PS")
+    field(FRVL, "8")
+    field(FRST, "AROC raw")
+    field(FRSV, "MAJOR")
+    field(FVVL, "10")
+    field(FVST, "BNL raw")
+    field(SXVL, "7")
+    field(SXST, "CROC raw")
+    field(VAL,  "1")
+    field(INP,  "$(P)DataFormatId CP")
+}
+
+record(mbbi, "$(P)HwType")
+{
+    field(SVSV, "NO_ALARM")
+}
+
+record(longin, "$(P)HwDay")
+{
+    field(VAL,  "0")
+}
+record(longin, "$(P)HwMonth")
+{
+    field(VAL,  "0")
+}
+record(longin, "$(P)HwYear")
+{
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(mbbo, "$(P)CmdReq")
+{
+    field(TVVL, "41")
+    field(TVST, "Down reset")
+    field(TTVL, "40")
+    field(TTST, "Down reset LVDS")
+}
+
+# Upgraded HwStatus record
+record(calc, "$(P)HwStatus")
+{
+    field(INPF, "$(P)TS:State.SEVR CP")
+}
+

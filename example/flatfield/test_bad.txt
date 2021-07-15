@@ -1,0 +1,6 @@
+# File that looks like flat-field correction table but is corrupted.
+# Format version: 1
+# Table size: 3x3
+# No Table dimension: X
+# Position id: 17
+

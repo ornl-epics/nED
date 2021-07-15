@@ -1,0 +1,10 @@
+#
+# template file for PVs that are global to an instance of GlobalCon.st. 
+#
+
+record(stringout, "$(P)Detector") {
+   field(DESC, "Detector id")
+}
+record(stringout, "$(P)StatusStr") {
+    field(DESC, "Sequence status")
+}

@@ -1,0 +1,82 @@
+1.8.5 - Nov 7 2017
+Bugfix:
+* AdaraPlugin race condition between sending RTDL and heart beat packets
+
+1.8.4 - Oct 20 2017
+Enhancements:
+* Support for ROC2 firmware 5.0
+* Support for ROC2 firmware 4.3
+* Prevent pixel-mapping metadata in Neutron packets.
+* Use autosaved detectors status on startup to prevent false errors
+* DSP-T alarm to prevet false port A&B configuration
+* DSP-W register updates
+* Old HV boards support without MaxV functionality
+* Increased inter-plugin queue size to 5, needed for VULCAN 3 OCCs setup
+* ROC 4.3 registers update, added missing register mapping
+* CROC position calculation fix, previously ignoring position 0
+* Archive all temperature PVs
+* CROC position calculation update, add LN-4WideGap algorithm from dcom
+* HV difference threshold now configurable
+* FEM 3.10 support
+* DSP 6.7 suport
+* asyn R3-10 support
+* New EmptyPulsePlugin
+
+1.8.1 - May 08 2017
+Enhancements:
+* FEM remote upgrade
+* Configurable max DAS packet size
+* Changed FlatField position id handling
+* PVA Neutrons structure expanded for AROCs
+* Support for ACPC 17.1 and AROC 2.4
+* Debug plugin keeps multiple responses
+* Discovery supports 3 discovery methods
+* Support for DSP-T v6.6
+* Dynamic number of pixel to adjust TOF
+* create_ioc_pvtable script supports modifying existing files
+* DSP registers changes
+* Support for ACPC 17.2
+* Change the way we verify module version
+* Support for DSP-W
+* DataDiag plugin
+* AROC temperature alarms set to 38C
+* FlatField can be reloaded through PV
+* Beam power&energy PVs extracted from optics
+
+Fixed bugs:
+* Config register alignment problem
+* segfault when not able to connect to other plugin
+* OCC PV updated to work properly when not enabled
+* segfault: CmdDispatcher does not wait for consumer plugins
+
+Impact:
+* BL-4B - flat field position id change
+* DSP-T register changed, care when upgrading as some might not get restored
+* Version checking has changed
+
+1.7.1 - Nov 21 2016
+Enhancements:
+* multi-parent plugin support
+* inter-plugin parameter sharing
+* memory dump when unable to process data from DMA
+* PVA channel extended with CROC fields
+* GE LPSD ROC support
+* more accurate and stable per-plugin status and alarming
+* improved RTDL injection
+* added 'meta' configuration parameter support
+
+Fixed bugs:
+
+Impact:
+* ADARA plugin heart-beat changes (tested on multiple beamlines)
+* status and overall health PVs changed
+
+Pre-1.7.1 records:
+
+2015-06-12:
+* Db/export2epics.py uses asyn 4.26 feature asyn:READBACK
+2015-06-15
+* renamed DSP registers
+  LvdsTsyncDelay -> TsyncDelay
+  ChopTrefFreq   -> TsyncFreq
+  ChopRtdlOffset -> TsyncFrame

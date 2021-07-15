@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Display</name>
+  <width>740</width>
+  <height>500</height>
+  <actions>
+  </actions>
+  <widget type="label" version="2.0.0">
+    <name>Label</name>
+    <text>IOC status:</text>
+    <width>106</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+    <actions>
+    </actions>
+    <border_color>
+      <color red="0" green="128" blue="255">
+      </color>
+    </border_color>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update</name>
+    <pv_name>$(PROCSERV)STATUS</pv_name>
+    <x>114</x>
+    <width>136</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+    <wrap_words>false</wrap_words>
+    <actions>
+    </actions>
+    <border_color>
+      <color red="0" green="128" blue="255">
+      </color>
+    </border_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name)</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <pv_name>$(PROCSERV)START</pv_name>
+    <text>Start</text>
+    <x>255</x>
+    <width>80</width>
+    <height>26</height>
+    <background_color>
+      <color red="240" green="240" blue="240">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="Enabled" prop_id="enabled" out_exp="true">
+        <exp bool_exp="true">
+          <expression>pv0==1</expression>
+        </exp>
+        <pv_name>$(PROCSERV)STATUS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button_1</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name)</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <pv_name>$(PROCSERV)STOP</pv_name>
+    <text>Stop</text>
+    <x>339</x>
+    <width>80</width>
+    <height>26</height>
+    <background_color>
+      <color red="240" green="240" blue="240">
+      </color>
+    </background_color>
+    <rules>
+      <rule name="Enabled" prop_id="enabled" out_exp="true">
+        <exp bool_exp="true">
+          <expression>pv0==0</expression>
+        </exp>
+        <pv_name>$(PROCSERV)STATUS</pv_name>
+      </rule>
+    </rules>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_1</name>
+    <text>Detectors DB:</text>
+    <y>114</y>
+    <width>115</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+    <actions>
+    </actions>
+    <border_color>
+      <color red="0" green="128" blue="255">
+      </color>
+    </border_color>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>DetectorsDbFile</name>
+    <pv_name>loc://the_text("")</pv_name>
+    <x>115</x>
+    <y>114</y>
+    <width>511</width>
+    <height>373</height>
+    <background_color>
+      <color name="WritePV_Background" red="128" green="255" blue="255">
+      </color>
+    </background_color>
+    <format>6</format>
+    <multi_line>true</multi_line>
+    <actions>
+    </actions>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil, ScriptUtil
+from org.csstudio.display.builder.model.macros import MacroHandler
+
+def readFromFile(file_path, show_dialog):
+    ScriptUtil.getLogger().info("Reading detectors file: '" + file_path + "'")
+    try:
+        with open(file_path, "r") as f:
+            return f.read()
+    except IOError as e:
+        if show_dialog:
+            ScriptUtil.showMessageDialog(widget, "Failed to read file: " + e.strerror)
+        else:
+            return "Failed to read file: " + e.strerror
+    except:
+        if show_dialog:
+            ScriptUtil.showMessageDialog(widget, "Failed to read file")
+        else:
+            return "Failed to read file: " + e.strerror
+    return None
+
+def writeToFile(file_path, text):
+    ScriptUtil.getLogger().info("Writing detectors file: '" + file_path + "'")
+    try:
+        with open(file_path, "w") as f:
+            f.write(text)
+    except IOError as e:
+        ScriptUtil.showMessageDialog(widget, "Failed to write file: " + e.strerror)
+    except:
+        ScriptUtil.showMessageDialog(widget, "Failed to write file")
+
+show_dialog = PVUtil.getInt(pvs[3])
+pvs[3].write(1)
+
+file_path = MacroHandler.replace(widget.getEffectiveMacros(), "$(DET_DB)")
+
+if PVUtil.getInt(pvs[0]) == 1:
+    content = readFromFile(file_path, show_dialog)
+    if content:
+        pvs[2].write(content)
+    pvs[0].write(0)
+elif PVUtil.getInt(pvs[1]) == 1:
+    writeToFile(file_path, PVUtil.getString(pvs[2]))
+    pvs[1].write(0)
+]]></text>
+        <pv_name>loc://$(DID)read_db</pv_name>
+        <pv_name>loc://$(DID)save_db</pv_name>
+        <pv_name trigger="false">loc://the_text("")</pv_name>
+        <pv_name trigger="false">loc://$(DID)show_dialog(0)</pv_name>
+      </script>
+    </scripts>
+    <tooltip></tooltip>
+    <border_color>
+      <color red="0" green="128" blue="255">
+      </color>
+    </border_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button_2</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name)</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <pv_name>loc://$(DID)read_db(1)</pv_name>
+    <text>Revert</text>
+    <x>630</x>
+    <y>114</y>
+    <width>104</width>
+    <height>26</height>
+    <background_color>
+      <color red="240" green="240" blue="240">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button_3</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name)</pv_name>
+        <value>1</value>
+      </action>
+    </actions>
+    <pv_name>loc://$(DID)save_db(0)</pv_name>
+    <text>Save</text>
+    <x>630</x>
+    <y>144</y>
+    <width>104</width>
+    <height>26</height>
+    <background_color>
+      <color red="240" green="240" blue="240">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_2</name>
+    <text>Data mode:</text>
+    <y>42</y>
+    <width>106</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+    <actions>
+    </actions>
+    <border_color>
+      <color red="0" green="128" blue="255">
+      </color>
+    </border_color>
+  </widget>
+  <widget type="combo" version="2.0.0">
+    <name>Menu Button</name>
+    <pv_name>$(P)nED:OutDataMode</pv_name>
+    <x>114</x>
+    <y>42</y>
+    <width>136</width>
+    <height>26</height>
+    <background_color>
+      <color red="240" green="240" blue="240">
+      </color>
+    </background_color>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_3</name>
+    <text>Overall health:</text>
+    <x>1</x>
+    <y>78</y>
+    <width>105</width>
+    <height>26</height>
+    <vertical_alignment>1</vertical_alignment>
+    <actions>
+    </actions>
+    <border_color>
+      <color red="0" green="128" blue="255">
+      </color>
+    </border_color>
+  </widget>
+  <widget type="led" version="2.0.0">
+    <name>LED</name>
+    <pv_name>$(P)nED:Status</pv_name>
+    <bit>0</bit>
+    <x>116</x>
+    <y>80</y>
+    <width>22</width>
+    <height>22</height>
+    <off_color>
+      <color name="Off" red="60" green="100" blue="60">
+      </color>
+    </off_color>
+    <on_color>
+      <color name="On" red="0" green="255" blue="0">
+      </color>
+    </on_color>
+    <actions>
+    </actions>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_4</name>
+    <text>Note: After saving new configuration, IOC must be restarted for changes to take effect.</text>
+    <x>630</x>
+    <y>170</y>
+    <height>110</height>
+    <font>
+      <font family="Liberation Sans" style="REGULAR" size="12.0">
+      </font>
+    </font>
+  </widget>
+</display>

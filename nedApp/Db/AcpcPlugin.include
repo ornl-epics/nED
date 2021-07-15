@@ -1,0 +1,14 @@
+record(mbbo, "$(P)DiagEn")
+{
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)OutputMode PP")
+}
+
+record(mbbi, "$(P)HwType")
+{
+    field(NISV, "NO_ALARM")
+}

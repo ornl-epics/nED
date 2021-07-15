@@ -1,0 +1,60 @@
+include "base.dbd"
+include "stream.dbd"
+include "asyn.dbd"
+include "PVAClientRegister.dbd"
+include "PVAServerRegister.dbd"
+include "registerChannelProviderLocal.dbd"
+#include "dbPv.dbd"
+include "calcSupport.dbd"
+include "sCalcoutRecord.dbd"
+
+# Make system() command available
+registrar(iocshSystemCommand)
+
+# Non-detector plugins (alphabetically)
+registrar("registerTcpClientPlugin")
+registrar("registerFileReplayPlugin")
+registrar("registerOccPlugin")
+registrar("registerDas1CommDebugPlugin")
+registrar("registerModulesPlugin")
+registrar("registerCommDebugPlugin")
+registrar("registerPvaNeutronsPlugin")
+registrar("registerPixelMapPlugin")
+registrar("registerRtdlPlugin")
+registrar("registerStatPlugin")
+registrar("registerStateAnalyzerPlugin")
+
+#registrar("registerAcpcPvaPlugin")
+registrar("registerAdaraPlugin")
+#registrar("registerBnlFlatFieldPlugin")
+registrar("registerBnlPosCalcPlugin")
+#registrar("registerBnlRocPvaPlugin")
+#registrar("registerCRocPosCalcPlugin")
+#registrar("registerCRocPvaPlugin")
+#registrar("registerCmdDispatcher")
+#registrar("registerDataDiagPlugin")
+registrar("registerDumpPlugin")
+registrar("registerFlatFieldPlugin")
+#registrar("registerProxyPlugin")
+#registrar("registerRocPvaPlugin")
+#registrar("registerTimingPlugin")
+#registrar("registerTofCorrectPlugin")
+#registrar("registerEmptyPulsePlugin")
+
+# Detector support plugins (alphabetically)
+registrar("registerAcpcFemPlugin")
+registrar("registerAcpcPlugin")
+registrar("registerAdcRocPlugin")
+registrar("registerArocPlugin")
+registrar("registerBnlRocPlugin")
+registrar("registerCRocPlugin")
+registrar("registerDspPlugin")
+registrar("registerDspWPlugin")
+registrar("registerFemPlugin")
+registrar("registerRocPlugin")
+registrar("registerWRocPlugin")
+
+# Sequences
+registrar("GlobalConRegistrar")
+registrar("HVScanRegistrar")
+registrar("ApplyConfigRegistrar")

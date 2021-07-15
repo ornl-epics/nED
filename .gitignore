@@ -1,0 +1,15 @@
+bin/
+db/
+dbd/
+include/
+lib/
+O.Common/
+O.linux-x86_64/
+*.log
+*~
+*.pyc
+nedApp/doc/html/
+nedApp/doc/latex/
+nedApp/doc/tmp/
+core*
+gui/generated/*

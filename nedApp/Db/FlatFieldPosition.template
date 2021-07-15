@@ -1,0 +1,53 @@
+record(longin, "$(P)pos$(POS):Id")
+{
+    field(DESC, "Position id")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):Id")
+    field(PINI, "YES")
+}
+record(bi, "$(P)pos$(POS):Enabled")
+{
+    field(DESC, "Position enable readback")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):Enable")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+    field(ZSV,  "MAJOR")
+}
+record(bi, "$(P)pos$(POS):CorrX")
+{
+    field(DESC, "Correction X table loaded flag")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):CorrX")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)pos$(POS):CorrY")
+{
+    field(DESC, "Correction Y table loaded flag")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):CorrY")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)pos$(POS):PsLowX")
+{
+    field(DESC, "Photo Sum X lower table loaded flag")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):PsLowX")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}
+record(bi, "$(P)pos$(POS):PsUpX")
+{
+    field(DESC, "Photo Sum X upper table loaded flag")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Pos$(POS):PsUpX")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+}

@@ -1,0 +1,84 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "RocPlugin_v4x.include"
+include "RocPlugin_v50.generated"
+include "RocPlugin.include"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "RocPlugin_v50")
+}
+
+record(dfanout, "$(P)A:SampleMin")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "A Sample minimum")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:A:SampleMin PP")
+    field(OUTB, "$(P)Ch2:A:SampleMin PP")
+    field(OUTC, "$(P)Ch3:A:SampleMin PP")
+    field(OUTD, "$(P)Ch4:A:SampleMin PP")
+    field(OUTE, "$(P)Ch5:A:SampleMin PP")
+    field(OUTF, "$(P)Ch6:A:SampleMin PP")
+    field(OUTG, "$(P)Ch7:A:SampleMin PP")
+    field(OUTH, "$(P)Ch8:A:SampleMin PP")
+    field(LOPR, "0")
+    field(HOPR, "4095")
+    field(VAL,  "0")
+}
+record(dfanout, "$(P)A:SampleMax")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "A Sample maximum")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:A:SampleMax PP")
+    field(OUTB, "$(P)Ch2:A:SampleMax PP")
+    field(OUTC, "$(P)Ch3:A:SampleMax PP")
+    field(OUTD, "$(P)Ch4:A:SampleMax PP")
+    field(OUTE, "$(P)Ch5:A:SampleMax PP")
+    field(OUTF, "$(P)Ch6:A:SampleMax PP")
+    field(OUTG, "$(P)Ch7:A:SampleMax PP")
+    field(OUTH, "$(P)Ch8:A:SampleMax PP")
+    field(LOPR, "0")
+    field(HOPR, "4095")
+    field(VAL,  "0")
+}
+record(dfanout, "$(P)B:SampleMin")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "B Sample minimum")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:B:SampleMin PP")
+    field(OUTB, "$(P)Ch2:B:SampleMin PP")
+    field(OUTC, "$(P)Ch3:B:SampleMin PP")
+    field(OUTD, "$(P)Ch4:B:SampleMin PP")
+    field(OUTE, "$(P)Ch5:B:SampleMin PP")
+    field(OUTF, "$(P)Ch6:B:SampleMin PP")
+    field(OUTG, "$(P)Ch7:B:SampleMin PP")
+    field(OUTH, "$(P)Ch8:B:SampleMin PP")
+    field(LOPR, "0")
+    field(HOPR, "4095")
+    field(VAL,  "0")
+}
+record(dfanout, "$(P)B:SampleMax")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "B Sample maximum")
+    field(PINI, "YES")
+    field(OUTA, "$(P)Ch1:B:SampleMax PP")
+    field(OUTB, "$(P)Ch2:B:SampleMax PP")
+    field(OUTC, "$(P)Ch3:B:SampleMax PP")
+    field(OUTD, "$(P)Ch4:B:SampleMax PP")
+    field(OUTE, "$(P)Ch5:B:SampleMax PP")
+    field(OUTF, "$(P)Ch6:B:SampleMax PP")
+    field(OUTG, "$(P)Ch7:B:SampleMax PP")
+    field(OUTH, "$(P)Ch8:B:SampleMax PP")
+    field(LOPR, "0")
+    field(HOPR, "4095")
+    field(VAL,  "0")
+}

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Display</name>
+  <width>720</width>
+  <height>520</height>
+  <widget type="embedded" version="2.0.0">
+    <name>Embedded Display</name>
+    <file>generated/DspPlugin_v71_config.bob</file>
+    <y>25</y>
+    <width>720</width>
+    <height>495</height>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil, ScriptUtil
+widget.setPropertyValue('file', "generated/" + PVUtil.getString(pvs[0]) + "_config.bob")]]></text>
+        <pv_name>$(P)PluginId</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label</name>
+    <text>Register</text>
+    <width>150</width>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_1</name>
+    <text>Current value</text>
+    <x>150</x>
+    <width>90</width>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button_1</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name)</pv_name>
+        <value>1</value>
+        <description>Write PV</description>
+      </action>
+    </actions>
+    <pv_name>$(P)ConfSeq.PROC</pv_name>
+    <text>Apply</text>
+    <x>245</x>
+    <width>80</width>
+    <height>20</height>
+    <rules>
+      <rule name="Enabled" prop_id="text" out_exp="false">
+        <exp bool_exp="pv0==0">
+          <value>Apply*</value>
+        </exp>
+        <exp bool_exp="pv0==1">
+          <value>Apply</value>
+        </exp>
+        <pv_name>$(P)ConfigApplied</pv_name>
+      </rule>
+    </rules>
+    <tooltip>Push current configuration to module</tooltip>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name)</pv_name>
+        <value>1</value>
+        <description>Write PV</description>
+      </action>
+    </actions>
+    <pv_name>$(P)CopyConfig.PROC</pv_name>
+    <text>&lt;=</text>
+    <x>335</x>
+    <width>40</width>
+    <height>20</height>
+    <tooltip>Revert to saved configuration</tooltip>
+    <show_confirm_dialog>true</show_confirm_dialog>
+    <confirm_message>Are your sure you want overwrite current module configuration?</confirm_message>
+  </widget>
+  <widget type="combo" version="2.0.0">
+    <name>Combo Box</name>
+    <pv_name>$(P)LoadConfigMenu</pv_name>
+    <x>380</x>
+    <width>130</width>
+    <height>20</height>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>Text Entry</name>
+    <pv_name>$(P)SaveConfigName</pv_name>
+    <x>515</x>
+    <width>110</width>
+    <background_color>
+      <color name="Read_Background" red="240" green="240" blue="240">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button_2</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name)</pv_name>
+        <value>1</value>
+        <description>Write PV</description>
+      </action>
+    </actions>
+    <pv_name>$(P)SaveConfigTrig.PROC</pv_name>
+    <text>Save</text>
+    <x>630</x>
+    <width>80</width>
+    <height>20</height>
+    <rules>
+      <rule name="Enabled" prop_id="text" out_exp="false">
+        <exp bool_exp="pv0==0">
+          <value>Save*</value>
+        </exp>
+        <exp bool_exp="pv0==1">
+          <value>Save</value>
+        </exp>
+        <pv_name>$(P)ConfigSaved</pv_name>
+      </rule>
+    </rules>
+    <tooltip>Save new configuration</tooltip>
+  </widget>
+</display>

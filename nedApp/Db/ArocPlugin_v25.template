@@ -1,0 +1,38 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "ArocPlugin_v25.generated"
+include "ArocPlugin.include"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "ArocPlugin_v25")
+}
+
+# Protect from user mistakes
+record(mbbo, "$(P)OutputMode")
+{
+    field(FLNK, "$(P)DataFormatCalc")
+}
+record(calcout, "$(P)DataFormatCalc")
+{
+    field(INPA, "$(P)OutputMode.RVAL NPP")
+    field(CALC, "A=0?1:0")
+    field(OUT,  "$(P)DataFormat PP")
+}
+record(bo, "$(P)TestPatternAltEn")
+{
+    field(FLNK, "$(P)OutputModeNrm")
+}
+record(bo, "$(P)TestPatternEn")
+{
+    field(FLNK, "$(P)OutputModeNrm")
+}
+record(stringout, "$(P)OutputModeNrm")
+{
+    field(ASG,  "NOONE")
+    field(OUT,  "$(P)OutputMode PP")
+    field(VAL,  "normal")
+    field(OMSL, "supervisory")
+}
+

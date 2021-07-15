@@ -1,0 +1,209 @@
+include "BasePlugin.include"
+include "BaseSocketPlugin.include"
+
+# Upgrade BaseSocketPlugin::* PVs
+record(stringout, "$(P)ListenIp")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(longout, "$(P)ListenPort")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(longout, "$(P)CheckInt")
+{
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+}
+record(stringin, "$(P)ClientIp")
+{
+    info(archive, "Monitor, 00:00:10, VAL")
+    field(FLNK, "$(P)StatusCalc.PROC")
+}
+
+# AdaraPlugin only PVs
+record(bo, "$(P)Enable")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    info(autosaveFields, "VAL")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Enable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(scalcout, "$(P)StatusCalc")
+{
+    field(DESC, "Determine global plugin status")
+    field(INAA, "$(P)ClientIp NPP")
+    field(INPA, "$(P)Enable NPP")
+    field(CALC, "A#1?2:LEN(AA)>0")
+    field(OUT,  "$(P)Status PP")
+    field(DTYP, "Soft Channel")
+    field(FLNK, "$(P)StatusTextCalc")
+}
+record(longin, "$(P)Status")
+{
+    info(archive, "Monitor, 00:00:10, VAL")
+    field(DESC, "ADARA plugin status")
+}
+record(scalcout, "$(P)StatusTextCalc")
+{
+    field(DESC, "Determine global plugin status")
+    field(INAA, "$(P)ClientIp NPP")
+    field(INPA, "$(P)Enable NPP")
+    field(INPB, "$(P)Status NPP MS")
+    field(BB,   "not connected")
+    field(CC,   "ready")
+    field(DD,   "disabled")
+    field(CALC, "A#1?DD:LEN(AA)>0?CC:BB")
+    #field(OUT,  "$(P)StatusText PP")
+    #field(DTYP, "Soft Channel")
+    field(FLNK, "$(P)StatusText")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(INP,  "$(P)StatusTextCalc.SVAL NPP MS")
+}
+record(ao, "$(P)InactiveTimeout")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Max client inactive timeout")
+    field(VAL,  "0.0") # 0.0 means disabled
+    field(PINI, "YES")
+    field(EGU,  "seconds")
+    field(PREC, "1")
+}
+record(calcout, "$(P)AutoReset")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Auto disconnect client")
+    field(INPA, "$(P)InactiveTimeout NPP")
+    field(INPB, "$(P)ClientInactive NPP")
+    field(CALC, "(A>0.0)&&(B>A)") # 1 when true, 0 otherwise
+    field(OUT,  "$(P)CloseClient PP")
+    field(OOPT, "When Non-zero")
+}
+# Upgrade ClientInactive from BaseSocketPlugin
+record(ai, "$(P)ClientInactive")
+{
+    field(FLNK, "$(P)AutoReset PP")
+}
+record(longin, "$(P)CntDataPkts")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntDataPkts")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)CntRtdlPkts")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntRtdlPkts")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)CntPingPkts")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntPingPkts")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)Reset")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Reset internal counters")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))Reset")
+    field(VAL,   "0")
+    field(ZNAM,  "No reset")
+    field(ONAM,  "Reset")
+}
+record(longout, "$(P)RtdlCacheSize")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of RTDLs to cache")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))RtdlCacheSize")
+    field(VAL,  "30")
+    field(PINI, "YES")
+    field(LOPR, "1")
+    field(HOPR, "600")
+}
+record(bo, "$(P)DetEventsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass detector events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))DetEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)MonEventsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass monitor events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))MonEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)SigEventsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass signal events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))SigEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)AdcEventsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass ADC events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))AdcEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)ChopEventsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass chopper events")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))ChopEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)NoRtdlPktsEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC,  "Pass packets without matching RTDL")
+    field(DTYP,  "asynInt32")
+    field(OUT,   "@asyn($(PORT))hopEventsEn")
+    field(VAL,   "1")
+    field(ZNAM,  "block")
+    field(ONAM,  "pass")
+    field(PINI,  "YES")
+}

@@ -1,0 +1,102 @@
+include "BasePlugin.include"
+
+record(calcout, "$(P)InitPvaList")
+{
+    field(ASG,  "BEAMLINE")
+    field(CALC, "1")
+    field(OUT,  "$(P)RefreshPvaList.PROC")
+    field(ODLY, "5")
+    field(PINI, "YES")
+}
+record(longout, "$(P)RefreshPvaList")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))RefreshPvaList")
+    field(PINI, "YES")
+}
+record(waveform, "$(P)TxtDisplay")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))TxtDisplay")
+    field(FTVL, "CHAR")
+    field(NELM, "100000")
+    field(SCAN, "I/O Intr")
+}
+record(longout, "$(P)Discover")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Discover")
+}
+record(longin, "$(P)Discovered")
+{
+    field(DESC, "Number of discovered detectors")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Discovered")
+}
+record(longin, "$(P)Verified")
+{
+    field(DESC, "Number of verified detectors")
+    field(SCAN, "I/O Intr")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Verified")
+}
+
+# Compatibility PVs to keep old OPI happy
+record(waveform, "$(P)Output")
+{
+    field(ASG,  "BEAMLINE")
+    field(INP,  "$(P)TxtDisplay CPP")
+    field(FTVL, "CHAR")
+    field(NELM, "100000")
+}
+record(longout, "$(P)Trigger")
+{
+    field(ASG,  "BEAMLINE")
+    field(FLNK, "$(P)TriggerFlnk")
+}
+record(calcout, "$(P)TriggerFlnk")
+{
+    field(ASG,  "BEAMLINE")
+    field(CALC, "0")
+    field(OUT,  "$(P)Discover PP")
+}
+record(bo, "$(P)Format")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "No-op")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "Human")
+    field(ONAM, "Substitution")
+}
+record(bo, "$(P)OptBcast")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "No-op")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)LvdsBcast")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "No-op")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)LvdsSingle")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "No-op")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}

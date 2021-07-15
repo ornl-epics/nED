@@ -1,0 +1,53 @@
+include "BasePlugin.include"
+include "BasePortPlugin.include"
+
+record(longin, "$(P)Status")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Status")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))StatusText")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)Connect")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Connect socket")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Connect")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(bo, "$(P)Disconnect")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Disconnect socket")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Disconnect")
+    field(ZNAM, "None")
+    field(ONAM, "Disconnect")
+}
+record(stringout, "$(P)RemoteHost")
+{
+    info(autosaveFields, "VAL")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))RemoteHost")
+    field(PINI, "YES")
+}
+record(longout, "$(P)RemotePort")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Remote server TCP port")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))RemotePort")
+    field(LOPR, "0")
+    field(HOPR, "65535")
+}

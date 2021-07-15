@@ -1,0 +1,38 @@
+# Records common to all plugins
+
+# Every plugin must implement Status PV with these values:
+# * 0 ... error condition (MAJOR alarm gets set)
+# * 1 ... ready
+# * 2 ... warning contition (MINOR alarm gets set)
+# It's Plugins' responsibility to link/process this PV as well as any further
+# processing required.
+record(longin, "$(P)Status")
+{
+    info(archive, "Monitor, 00:00:10, VAL")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(HIGH, "2")
+    field(HSV,  "MINOR")
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
+
+# Every plugin must implement StatusText PV.
+# It's Plugins' responsibility to link/process this PV as well as any further
+# processing required.
+record(stringin, "$(P)StatusText")
+{
+    field(VAL,  "")
+}
+
+record(ao, "$(P)ParamsUpdateRate")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))ParamsUpdateRate")
+    field(DESC, "Seconds between parameters update")
+    field(PINI, "YES")
+    field(VAL,  "1.0")
+}
+

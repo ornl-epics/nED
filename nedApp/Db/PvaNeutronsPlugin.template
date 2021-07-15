@@ -1,0 +1,252 @@
+include "BasePlugin.include"
+
+record(longin, "$(P)StatusRaw")
+{
+    field(DTYP,  "asynInt32")
+    field(INP,   "@asyn($(PORT))Status")
+    field(SCAN,  "I/O Intr")
+    field(PINI,  "YES")
+    field(FLNK,  "$(P)StatusCalc PP")
+}
+record(calcout, "$(P)StatusCalc")
+{
+    field(INPA, "$(P)StatusRaw NPP")
+    field(CALC, "A=0?1:A=1||A=2?0:2")
+    field(OUT,  "$(P)Status PP")
+}
+record(longin, "$(P)Status")
+{
+    field(DESC, "Global PvaNeutrons status")
+    field(INP,  "$(P)StatusCalc PP NMS")
+    field(PINI, "YES")
+    field(FLNK, "$(P)StatusText")
+}
+record(mbbi, "$(P)StatusTextCalc")
+{
+    field(INP,  "$(P)StatusRaw NPP")
+    field(ZRVL, "0")
+    field(ZRST, "Ready")
+    field(ONVL, "1")
+    field(ONST, "Config error")
+    field(ONSV, "MAJOR")
+    field(TWVL, "2")
+    field(TWST, "Init error")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Send error")
+    field(THSV, "MINOR")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(DESC, "Global PvaNeutrons status text")
+    field(INP,  "$(P)StatusTextCalc PP MSS")
+}
+
+# ACPC diagnostic channel
+record(stringin, "$(P)AcpcPvaName")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "ACPC diagnostic PVA channel")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))AcpcPvaName")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)AcpcNumEvents")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of events in ACPC ch")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))AcpcNumEvents")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)AcpcEnable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable ACPC diagnostic channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))AcpcEnable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+}
+
+# AROC diagnostic channel
+record(stringin, "$(P)ArocPvaName")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "AROC diagnostic PVA channel")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))ArocPvaName")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)ArocNumEvents")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of events in AROC ch")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ArocNumEvents")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)ArocEnable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable AROC diagnostic channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ArocEnable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+}
+
+# Neutrons channel
+record(stringin, "$(P)PixelPvaName")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Neutrons PVA channel")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))PixelPvaName")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)PixelNumEvents")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of events in neutrons ch")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))PixelNumEvents")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)PixelEnable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable neutrons channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PixelEnable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+}
+
+# Metadata channel
+record(stringin, "$(P)MetaPvaName")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Meta PVA channel")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))MetaPvaName")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)MetaNumEvents")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of events in meta ch")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))MetaNumEvents")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)MetaEnable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable meta channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MetaEnable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+}
+
+# LPSD diagnostic channel
+record(stringin, "$(P)LpsdPvaName")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "LPSD diagnostic PVA channel")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))LpsdPvaName")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)LpsdNumEvents")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of events in LPSD ch")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LpsdNumEvents")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)LpsdEnable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable LPSD diagnostic channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))LpsdEnable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+
+# BNL diagnostic channel
+record(stringin, "$(P)BnlPvaName")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "BNL diagnostic PVA channel")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))BnlPvaName")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)BnlNumEvents")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of events in BNL ch")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))BnlNumEvents")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)BnlEnable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable BNL diagnostic channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))BnlEnable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+}
+
+# CROC diagnostic channel
+record(stringin, "$(P)CrocPvaName")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "CROC diagnostic PVA channel")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))CrocPvaName")
+    field(PINI, "YES")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)CrocNumEvents")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of events in CROC ch")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CrocNumEvents")
+    field(SCAN, "I/O Intr")
+}
+record(bo, "$(P)CrocEnable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable CROC diagnostic channel")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CrocEnable")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+}

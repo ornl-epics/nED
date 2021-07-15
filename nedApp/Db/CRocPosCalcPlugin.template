@@ -1,0 +1,550 @@
+include "BasePlugin.include"
+
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI,  "YES")
+}
+record(bo, "$(P)CalcEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Toggle position calculation")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CalcEn")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(longin, "$(P)CntSplit")
+{
+    field(DESC, "Number of splits occurred")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntSplit")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bo, "$(P)ResetCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset counters")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetCnt")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(calcout, "$(P)AutoResetCnt")
+{
+    info(autosaveFields, "VAL INPA")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Auto reset counters")
+    field(INPA, "10000000")
+    field(INPB, "$(P)CntTotalEvents NPP")
+    field(CALC, "B>A?1:0")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)ResetCnt PP")
+    field(PINI, "YES")
+    field(SCAN, "1 second")
+}
+record(bo, "$(P)PassVetoes")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Allow vetoes in output stream")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PassVetoes")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(bo, "$(P)EfficiencyBoost")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Toggle efficiency boost")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))EfficiencyBoost")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}
+record(longout, "$(P)GNongapMaxRatio")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Second max G ratio")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))GNongapMaxRatio")
+    field(PINI, "YES")
+    field(EGU,  "%")
+}
+record(longout, "$(P)TimeRange1Min")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Min counts in first time range")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRange1Min")
+    field(VAL,  "6")
+    field(PINI, "YES")
+    field(EGU,  "counts")
+}
+record(longout, "$(P)TimeRange2Min")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Min counts in second time range")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRange2Min")
+    field(VAL,  "5")
+    field(PINI, "YES")
+    field(EGU,  "counts")
+}
+record(longout, "$(P)TimeRangeDelayMin")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Delayed event count threshold")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRangeDelayMin")
+    field(VAL,  "15")
+    field(PINI, "YES")
+    field(EGU,  "counts")
+}
+record(longout, "$(P)TimeRangeSumMax")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "High threshold for sum time ranges")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))TimeRangeSumMax")
+    field(VAL,  "600")
+    field(PINI, "YES")
+    field(EGU,  "counts")
+}
+record(ao, "$(P)EchoDeadTime")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Back to back time for echo detection")
+    field(DTYP, "asynInt32")
+    field(VAL,  "0")
+    field(EGU,  "ns")
+    field(ESLO, "100")
+    field(LINR, "SLOPE")
+    info(autosaveFields, "VAL")
+    field(PINI, "YES")
+    field(OUT,  "@asyn($(PORT))EchoDeadTime")
+    field(ASG,  "BEAMLINE")
+}
+record(longout, "$(P)EchoDeadArea")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Pixel area for echo detection")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))EchoDeadArea")
+    field(VAL,  "168")
+    field(PINI, "YES")
+    field(EGU,  "pixels")
+}
+record(bo, "$(P)OutExtMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select the output event format")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))OutExtMode")
+    field(PINI, "YES")
+    field(ZNAM, "normal")
+    field(ONAM, "extended")
+}
+
+record(longin, "$(P)CntTotalEvents")
+{
+    field(DESC, "Number of all events")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntTotalEvents")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntGoodEvents")
+{
+    field(DESC, "Number good events")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntGoodEvents")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoYLow")
+{
+    field(DESC, "Number Y low signal vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoYLow")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoYNoise")
+{
+    field(DESC, "Number Y noise vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoYNoise")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoXLow")
+{
+    field(DESC, "Number X low signal vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoXLow")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoXNoise")
+{
+    field(DESC, "Number X noise vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoXNoise")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoGLow")
+{
+    field(DESC, "Number G low signal vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoGLow")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoGNoise")
+{
+    field(DESC, "Number G noise vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoGNoise")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoGGhost")
+{
+    field(DESC, "Number G ghost vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoGGhost")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoGNonAdj")
+{
+    field(DESC, "Number G non-adj vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoGNonAdj")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoBadPos")
+{
+    field(DESC, "Number bad position vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoBadPos")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoBadCalc")
+{
+    field(DESC, "Number bad calculation vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoBadCalc")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoEcho")
+{
+    field(DESC, "Number echo vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoEcho")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoTimeRange")
+{
+    field(DESC, "Number time range vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoTimeRange")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntVetoDelayed")
+{
+    field(DESC, "Number delayed vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntVetoDelayed")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+
+record(calc, "$(P)RateVetoAll")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of all vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntGoodEvents NPP")
+    field(CALC, "A=0?0:100.0*(A-B)/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(SCAN, "1 second")
+    field(FLNK, "$(P)RateVetoYLow")
+}
+
+record(calc, "$(P)RateVetoYLow")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of Y low vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoYLow NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoYNoise")
+}
+
+record(calc, "$(P)RateVetoYNoise")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of Y noise vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoYNoise NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoXLow")
+}
+
+record(calc, "$(P)RateVetoXLow")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of X low vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoXLow NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoXNoise")
+}
+
+record(calc, "$(P)RateVetoXNoise")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of X noise vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoXNoise NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoGLow")
+}
+
+record(calc, "$(P)RateVetoGLow")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of G low vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoGLow NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoGNoise")
+}
+
+record(calc, "$(P)RateVetoGNoise")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of G noise vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoGNoise NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoGGhost")
+}
+
+record(calc, "$(P)RateVetoGGhost")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of G ghost vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoGGhost NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoGNonAdj")
+}
+
+record(calc, "$(P)RateVetoGNonAdj")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of G non-adj vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoGNonAdj NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoBadPos")
+}
+
+record(calc, "$(P)RateVetoBadPos")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of bad position vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoBadPos NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoBadCalc")
+}
+
+record(calc, "$(P)RateVetoBadCalc")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of bad calc vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoBadCalc NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoEcho")
+}
+
+record(calc, "$(P)RateVetoEcho")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of echo vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoEcho NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoTimeRange")
+}
+
+record(calc, "$(P)RateVetoTimeRange")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of time range vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoTimeRange NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+    field(FLNK, "$(P)RateVetoDelayed")
+}
+
+record(calc, "$(P)RateVetoDelayed")
+{
+    info(autosaveFields, "HIGH")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Percent of delayed vetoes")
+    field(INPA, "$(P)CntTotalEvents NPP")
+    field(INPB, "$(P)CntVetoDelayed NPP")
+    field(CALC, "A=0?0:100.0*B/A")
+    field(HIGH, "100")
+    field(HSV,  "MAJOR")
+    field(HYST, "1.0")
+    field(PREC, "2")
+    field(EGU,  "%")
+}
+record(bo, "$(P)ProcessMode")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Event verification algorithm")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ProcessMode")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "legacy")
+    field(ONAM, "new")
+}

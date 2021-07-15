@@ -1,0 +1,10 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "RocPlugin_v52.generated"
+include "RocPlugin.include"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "RocPlugin_v52")
+}

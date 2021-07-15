@@ -1,0 +1,322 @@
+include "BasePlugin.include"
+
+record(fanout, "$(P)Refresh")
+{
+    field(LNK1, "$(P)PrevPulseFlavor")
+    # LNK2 must be the only trigger to beam power/energy calculations
+    # to prevent double triggering that can cause to false results
+    field(LNK2, "$(P)BeamEnergy")
+}
+record(stringin, "$(P)Timestamp")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Timestamp")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TimestampSec")
+{
+    field(DESC, "Timestamp Nano Seconds")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimestampSec")
+    field(SCAN, "I/O Intr")
+    # July 18, 2099 4:46:00 PM - time doesn't go backwards
+    field(LOW,  "932316360")
+    field(LSV,  "MAJOR")
+}
+record(longin, "$(P)TimestampNsec")
+{
+    field(DESC, "Timestamp Nano Seconds")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimestampNsec")
+    field(SCAN, "I/O Intr")
+    field(HIGH, "1000000000")
+    field(LOW,  "-1")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
+}
+record(longin, "$(P)TimestampSec")
+{
+    field(DESC, "Timestamp Seconds")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimestampSec")
+    field(SCAN, "I/O Intr")
+}
+record(mbbi, "$(P)PulseFlavor")
+{
+    field(DESC, "Pulse flavor")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))PulseFlavor")
+    field(SCAN, "I/O Intr")
+    field(ZRVL, "0")
+    field(ZRST, "No beam")
+    field(ONVL, "1")
+    field(ONST, "Target 1")
+    field(TWVL, "2")
+    field(TWST, "Target 2")
+    field(THVL, "3")
+    field(THST, "10us diagnostic")
+    field(FRVL, "4")
+    field(FRST, "50us diagnostic")
+    field(FVVL, "5")
+    field(FVST, "100us diagnostic")
+    field(SXVL, "6")
+    field(SXST, "Physics 1")
+    field(SVVL, "7")
+    field(SVST, "Physics 2")
+    #field(FLNK, "$(P)PrevPulseFlavor")
+}
+record(calc, "$(P)PrevPulseFlavor")
+{
+    field(INPA, "$(P)PulseFlavor NPP")
+    field(CALC, "B; B:=A")
+}
+record(ai, "$(P)ProtonCharge")
+{
+    field(DESC, "Pulse charge")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))ProtonCharge")
+    field(EGU,  "C")
+    field(PREC, "12")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TimingStatus")
+{
+    field(DESC, "TSTAT")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TimingStatus")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)LastCycleVeto")
+{
+    field(DESC, "Last cycle veto bitfield")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LastCycleVeto")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)Cycle")
+{
+    field(DESC, "Cycle number")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Cycle")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Refresh")
+    field(HIGH, "600")
+    field(LOW,  "-1")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
+}
+record(longin, "$(P)TsyncPeriod")
+{
+    field(DESC, "Number of ns between reference pulses")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TsyncPeriod")
+    field(EGU,  "ns")
+    field(SCAN, "I/O Intr")
+}
+record(bi, "$(P)TofFullOffset")
+{
+    field(DESC, "TOF full offset enabled")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TofFullOffset")
+    field(ZNAM, "Disabled")
+    field(ONAM, "Enabled")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)FrameOffset")
+{
+    field(DESC, "RTDL frame offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))FrameOffset")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TofFixOffset")
+{
+    field(DESC, "TOF fixed offset")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TofFixOffset")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "ns")
+}
+record(longin, "$(P)RingPeriod")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Ring revolution period")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RingPeriod")
+    field(SCAN, "I/O Intr")
+    field(EGU,  "ps")
+    field(FLNK, "$(P)Beta")
+}
+# Logic to obtain proton repetition rate from accelerator network. Due to
+# complex network topology, this may get disconnected in a strange way and
+# the only way to reconnect is to force new INP value.
+record(ai, "$(P)RepRate")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Acc repetition rate")
+    field(INP,  "ICS_Tim:Gate_BeamOn:RR CP MSI")
+    field(PREC, "1")
+    field(EGU,  "Hz")
+}
+record(calcout, "$(P)RepRateCheck")
+{
+    field(INPA, "$(P)RepRate.SEVR NPP NMS")
+    field(CALC, "A=3")
+    field(OOPT, "When Non-zero")
+    field(SCAN, "5 second")
+    field(OUT,  "$(P)RepRateNull.PROC")
+}
+record(stringout, "$(P)RepRateNull")
+{
+    field(VAL,  "")
+    field(OUT,  "$(P)RepRate.INP CA")
+    field(DTYP, "Soft Channel")
+    field(FLNK, "$(P)RepRateSetDly")
+}
+record(calcout, "$(P)RepRateSetDly")
+{
+    field(CALC, "1")
+    field(OOPT, "Every Time")
+    field(OUT,  "$(P)RepRateSet.PROC")
+    field(ODLY, "2.0")
+}
+record(stringout, "$(P)RepRateSet")
+{
+    field(VAL,  "ICS_Tim:Gate_BeamOn:RR CP MSI")
+    field(OUT,  "$(P)RepRate.INP CA")
+    field(DTYP, "Soft Channel")
+}
+# The following fields are using RepRate from accelerator and local PVs from
+# RTDL to calculate local beam energy and power.
+record(calc, "$(P)Beta")
+{
+    field(ASG,  "BEAMLINE")
+    # Ring distance
+    field(INPA, "248")
+    field(INPB, "$(P)RingPeriod NPP")
+    # Speed of light
+    field(INPC, "299792458")
+    field(CALC, "B>0?1e12*A/B/C:0")
+}
+record(mbbo, "$(P)PulseFlavorSel")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Selected pulse flavor")
+    field(ZRVL, "0")
+    field(ZRST, "No beam")
+    field(ONVL, "1")
+    field(ONST, "Target 1")
+    field(TWVL, "2")
+    field(TWST, "Target 2")
+    field(THVL, "3")
+    field(THST, "10us diagnostic")
+    field(FRVL, "4")
+    field(FRST, "50us diagnostic")
+    field(FVVL, "5")
+    field(FVST, "100us diagnostic")
+    field(SXVL, "6")
+    field(SXST, "Physics 1")
+    field(SVVL, "7")
+    field(SVST, "Physics 2")
+    field(PINI, "YES")
+}
+record(calc, "$(P)BeamEnergy")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)PulseFlavorSel NPP")
+    field(INPB, "$(P)PrevPulseFlavor NPP")
+    # Rest energy of proton
+    field(INPC, "938.26")
+    field(INPD, "$(P)Beta NPP")
+    field(CALC, "A=B?(C/SQR(1-(D*D)))-C:0")
+    field(EGU,  "MeV")
+    field(PREC, "1")
+    field(FLNK, "$(P)BeamPower")
+}
+record(calc, "$(P)BeamPower")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)BeamEnergy NPP")
+    field(INPB, "$(P)ProtonCharge NPP")
+    field(INPC, "$(P)RepRate PP")
+    field(CALC, "A*B*C")
+    field(EGU,  "MW")
+    field(PREC, "3")
+    field(FLNK, "$(P)BeamPowerSel")
+}
+record(calc, "$(P)BeamPowerSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)PulseFlavorSel NPP")
+    field(INPB, "$(P)PrevPulseFlavor NPP")
+    field(INPC, "$(P)BeamPower NPP")
+    field(INPD, "$(P)BeamPowerSel NPP")
+    field(CALC, "A=B?C:D")
+    field(EGU,  "MW")
+    field(PREC, "3")
+    field(FLNK, "$(P)BeamPowerAvg")
+}
+record(ai, "$(P)BeamPowerAvg")
+{
+    field(ASG,  "BEAMLINE")
+    field(SMOO, "0.8")
+    field(INP,  "$(P)BeamPower NPP")
+    field(PREC, "3")
+    field(EGU,  "MW")
+}
+record(longin, "$(P)ErrorsFutureTime")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of future time errors")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrorsFutureTime")
+    field(SCAN, "I/O Intr")
+    field(HIGH, "1")
+    field(HSV,  "MINOR")
+}
+record(longin, "$(P)ErrorsPastTime")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of past time errors")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrorsPastTime")
+    field(SCAN, "I/O Intr")
+    field(HIGH, "1")
+    field(HSV,  "MINOR")
+}
+record(stringin, "$(P)PvaName")
+{
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))PvaName")
+    field(PINI, "YES")
+    field(SCAN, "Passive")
+}
+record(longout, "$(P)CacheSize")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Size of RTDL cache")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CacheSize")
+    field(PINI, "YES")
+    field(VAL,  "10")
+    field(HIGH, "20")
+    field(HSV,  "MINOR")
+}
+record(ai, "$(P)FrameLen")
+{
+    field(DESC, "Frame length")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))FrameLen")
+    field(EGU,  "ms")
+    field(PREC, "6")
+    field(SCAN, "I/O Intr")
+    field(HIGH, "17.0")
+    field(LOW,  "16.3")
+    field(HSV,  "MAJOR")
+    field(LSV,  "MAJOR")
+    field(ADEL, "0.01")
+}

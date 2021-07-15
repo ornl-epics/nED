@@ -1,0 +1,515 @@
+#
+# This is for the full implementation of the embedded HV interface.  This
+# includes using the hardware unit conversions and slew rate limits.  
+#
+
+
+record(calc, "$(P)hv:VoltDiff") {
+   field(CALC, "(abs(A-B))>C")
+   field(INPA, "$(P)hv:Volt CP NMS")
+   field(INPB, "$(P)hv:VoltCmd CP NMS")
+   field(INPC, "50")
+   field(HIHI, "0.5")
+   field(HHSV, "MAJOR")
+   info(autosaveFields, "C")
+}
+#
+# Summary alarm status
+#
+record(calc, "$(P)hv:AlarmSum") {
+   field(CALC, "(A||C||D)&&E&&F")
+   field(INPA, "$(P)hv:VoltDiff CP NMS")
+   field(INPC, "$(P)hv:CommAlarm.SEVR CP NMS")
+   field(INPD, "$(P)hv:Volt.SEVR CP NMS")
+   field(INPE, "$(P)Enable CP NMS")
+   field(INPF, "$(P)hv:AlarmEna CP NMS")
+   field(HIHI, "0.5")
+   field(HHSV, "MAJOR")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+
+record(bo, "$(P)hv:AlarmEna") {
+   field(ONAM, "Enabled")
+   field(ZNAM, "Disabled")
+   field(ASG, "BEAMLINE")
+   field(DOL, "1")
+   info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+
+#
+# initialization fanout.  This is because PINI doesn't work well in this
+# driver.  Therefore, this fanout needs to be processed, maybe from st.cmd,
+# at startup.
+#
+record(fanout, "$(P)hv:InitProc") {
+   field(LNK1, "$(P)hv:RampRate")
+   field(LNK2, "$(P)hv:MaxV")
+#   field(LNK3, "$(P)hv:Enable")
+#   field(LNK4, "$(P)hv:VoltSet")
+   field(LNK5, "$(P)hv:VConvX")
+   field(LNK6, "$(P)hv:DConvX")
+   field(FLNK, "$(P)hv:InitProc1")
+}
+
+record(fanout, "$(P)hv:InitProc1") {
+   field(LNK1, "$(P)hv:ReadADC") 
+   field(LNK2, "$(P)hv:ErrorInp") 
+}
+
+#
+#  Use this one for display
+#
+record(ai, "$(P)hv:RampRate") {
+   field(DTYP, "stream")
+   field(DESC, "Readback ramp rate")
+   field(INP, "@ROCHV.proto getNum(RR) $(PORT) 0")
+   field(HOPR, "255")
+   field(LOPR, "0")
+   field(EGU, "ms/step")
+} 
+
+#
+record(ao, "$(P)hv:RampRateSet") {
+   field(DTYP, "stream")
+   field(DESC, "Set ramp rate")
+   field(ASG, "BEAMLINE")
+   field(OUT, "@ROCHV.proto setNum(SR) $(PORT) 0")
+   field(EGU, "ms/step")
+   field(HOPR, "255")
+   field(DRVH, "255")
+   field(LOPR, "0")
+   field(DRVL, "0")
+   info(autosaveFields, "VAL")
+   field(FLNK, "$(P)hv:RampRate")
+}
+
+#
+# This is the raw DAC control, ie, what an ao record would usually send rval to.
+# In this case it may not be used at all, or only for a crash off.  Therefore
+# this ao record does not convert.
+#
+record(ao, "$(P)hv:DACSet") {
+   field(DTYP, "stream")
+   field(ASG, "BEAMLINE")
+   field(DESC, "Set DAC")
+   field(OUT, "@ROCHV.proto setNum(&) $(PORT) 0")
+   field(EGU, "Counts")
+   field(HOPR, "4096")
+   field(DRVH, "4096")
+   field(LOPR, "0")
+   field(DRVL, "0")
+}
+  
+#
+# This is the raw voltage ADC reading. Normally an ai record would read this
+# and convert to engineering units, but in this case there is another readout
+# for the converted value, so no conversion is done here. do we need to scan
+# it at all?
+#
+record(ai, "$(P)hv:ReadADC") {
+   field(DTYP, "stream")
+   field(DESC, "Read raw voltage")
+   field(INP, "@ROCHV.proto getNum(RV) $(PORT) 0")
+   field(LOPR, 0)
+   field(HOPR, 4096)
+   field(EGU, "Counts")
+} 
+
+#
+# Requested voltage setpoint
+#
+record(ao, "$(P)hv:VoltSet") {
+   field(DESC, "Requested voltage setpoint")
+   field(ASG, "BEAMLINE")
+   field(DRVL, "0")
+   field(LOPR, "0")
+   field(DRVH, "3000")
+   field(HOPR, "3000")
+   field(EGU, "V")
+   field(FLNK, "$(P)hv:VoltCmd PP")
+   info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+
+#
+# Global on/off switch.  Note this occurs in each template but it will 
+# produce only one PV as long as they all get called with the same $(G) and
+# they are all in the same IOC.
+#
+record(bo, "$(G):OnOff") {
+   field(DESC, "Global HV on/off PV")
+   field(ASG, "BEAMLINE")
+   field(DTYP, "Soft Channel")
+   field(ONAM, "ON")
+   field(ZNAM, "OFF")
+   info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+
+#
+# Global receiver
+#
+record(calcout, "$(P)hv:OnOffRcvr") {
+   field(DESC, "Global HV on/off RECEIVER")
+   field(INPA, "$(G):OnOff CPP MS") 
+   field(CALC, "A")
+   field(IVOA, "Don't drive outputs")
+   field(OUT, "$(P)hv:OnOff PP MS")
+}
+
+
+#
+#  This is the local copy of on/off. It can be driven by GUI, or by 
+#  Global receiver.  
+#
+record(bo, "$(P)hv:OnOff") {
+   field(DESC, "HV on/off using setpoint")
+   field(DTYP, "Soft Channel")
+   field(IVOA, "Don't drive outputs")
+   field(ONAM, "ON")
+   field(ZNAM, "OFF")
+   info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+
+#
+# Determine the actual state of HV. When HV is off the hv:Volt reads
+# around 20-30V.
+#
+record(calc, "$(P)hv:OnOffRbv") {
+   field(DESC, "HV on/off readback")
+   field(INPA, "$(P)hv:Volt NPP")
+   field(CALC, "A<35?0:1")
+}
+
+#
+# Requested voltage command
+#
+record(calcout, "$(P)hv:VoltCmd") {
+   field(DTYP, "stream")
+   field(DESC, "Requested voltage setpoint")
+   field(OUT, "@ROCHV.proto setNum(#) $(PORT) 0")
+   field(IVOA, "Don't drive outputs")
+   field(CALC, "A?B:0")
+   field(INPA, "$(P)hv:OnOff CPP MS")
+   field(INPB, "$(P)hv:VoltSet CPP NMS")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+  
+#
+# Voltage Readback in volts. 
+#
+record(ai, "$(P)hv:Volt") {
+   field(DTYP, "stream")
+   field(DESC, "Readback in volts")
+   field(INP, "@ROCHV.proto getNum(LV) $(PORT) 0")
+   field(LOPR, "-100")
+   field(HOPR, "2300")
+   field(HSV, "MAJOR")
+   field(LSV, "MAJOR")
+   field(EGU, "V")
+#   field(SCAN, "5 second")
+   field(SDIS, "$(P)Enable NPP") # Prevent CommAlarm
+   field(DISV, "0")
+   field(FLNK, "$(P)hv:VoltAlarm")
+   info(autosaveFields, "HIGH LOW")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+record(calc, "$(P)hv:VoltAlarm") {
+   field(DESC, "Volt alarm")
+   field(INPA, "$(P)hv:Volt.SEVR NPP")
+   field(INPB, "$(P)hv:OnOffRbv NPP") # No low alarm if off
+   field(CALC, "B=0?0:A")
+   field(HIGH, "1")
+   field(HSV,  "MAJOR")
+}
+
+record(calc, "$(P)hv:StatusCalc") {
+   field(INPA, "$(P)hv:OnOffRbv PP")
+   field(INPB, "$(P)hv:AlarmSum.SEVR PP")
+   field(CALC, "A=0?1:B=0?2:0")
+}
+
+record(mbbi, "$(P)hv:Status") {
+   field(INP, "$(P)hv:StatusCalc PP")
+   field(ZRVL, "0")
+   field(ZRST, "Error")
+   field(ONVL, "1")
+   field(ONST, "Off")
+   field(TWVL, "2")
+   field(TWST, "On")
+   field(SCAN, "1 second")
+}
+
+#
+# Max Voltage readback. 
+#
+record(ai, "$(P)hv:MaxV") {
+   info(autosaveFields, "DISA")
+   field(DTYP, "stream")
+   field(DESC, "maximum voltage Readback")
+   field(INP,  "@ROCHV.proto getNum(MV) $(PORT) 0")
+   field(DISV, "1")
+   field(EGU,  "V")
+}
+
+#
+# set max voltage.  This is in volts, not raw DAC counts...
+#
+record(ao, "$(P)hv:MaxVSet") {
+   field(DTYP, "stream")
+   field(DESC, "Requested voltage limit")
+   field(ASG, "BEAMLINE")
+   field(OUT, "@ROCHV.proto setNum(M) $(PORT) 0")
+   field(DRVL, "0")
+   field(LOPR, "0")
+   field(DRVH, "2200")
+   field(HOPR, "2200")
+   field(EGU, "V")
+   field(DISV, "1")
+   info(autosaveFields, "VAL DISA")
+   field(FLNK, "$(P)hv:MaxV")
+}
+
+#
+# here we have a nice switch 
+#
+record(bo, "$(P)hv:Enable") {
+   field(DESC, "enable/disable switch for GUI")
+   field(ASG, "BEAMLINE")
+   field(DTYP, "Soft Channel")
+   field(OUT, "$(P)hv:EnableHW PP MS")
+   field(ONAM, "ON")
+   field(ZNAM, "OFF")
+   info(autosaveFields, "VAL")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+
+#
+# ONAM and ZNAM look silly because they contain the actual commands to send
+#
+record(bo, "$(P)hv:EnableHW") {
+   field(DESC, "hardware enable/disable")
+   field(DTYP, "stream")
+   field(OUT, "@ROCHV.proto sendBoCmd() $(PORT) 0")
+   field(ONAM, "8")
+   field(ZNAM, "*")
+   info(autosaveFields, "VAL")
+}
+
+#
+# Do the following controls by just sending "PROC"
+#
+record(bo, "$(P)hv:ClearErr") {
+   field(DESC, "Clear error code")
+   field(ASG, "BEAMLINE")
+   field(DTYP, "stream")
+   field(OUT, "@ROCHV.proto sendCmd(X) $(PORT) 0")
+   field(DOL, "1")
+   field(ONAM, "Clear")
+   field(ZNAM, "Clear")
+}
+record(bo, "$(P)hv:ResetDAC") {
+   field(DESC, "Yes reset the DAC")
+   field(ASG, "BEAMLINE")
+   field(DTYP, "stream")
+   field(OUT, "@ROCHV.proto sendCmd(Y) $(PORT) 0")
+   field(DOL, "1")
+   field(ONAM, "Reset")
+   field(ZNAM, "Reset")
+}
+
+#
+# Get error code. 
+#
+record(waveform, "$(P)hv:ErrorInp") {
+   field(DESC, "Input error byte")
+   field(DTYP, "stream")
+   field(INP, "@ROCHV.proto getError() $(PORT) 0")
+   field(FTVL, "UCHAR")
+   field(NELM, "2")
+   field(FLNK, "$(P)hv:ErrorBits")
+}
+
+#
+# convert to bits. Point byte widget to VAL or RVAL
+#
+record(mbbiDirect, "$(P)hv:ErrorBits") {
+   field(DESC, "Provide Error Bits")
+   field(DTYP, "Raw Soft Channel")
+   field(INP, "$(P)hv:ErrorInp NPP MS")
+}
+
+record(bi, "$(P)hv:CommAlarm") {
+   field(DTYP, "Raw Soft Channel")
+   field(INP, "$(P)hv:ErrorBits.RVAL CPP NMS")
+   field(OSV, "MAJOR")
+   field(ZSV, "NO_ALARM")
+   info(archive, "Monitor, 00:00:10, VAL")
+}
+
+#
+# This is for debugging
+#
+record(asyn,"$(P)hv:AsynRec")
+{
+    field(DTYP,"asynRecordDevice")
+    field(PORT,"$(PORT)")
+    field(ADDR,"0")
+    field(OMAX,"30")
+    field(IMAX,"30")
+}
+
+#
+# Conversion (Calibration) parameters set.  the idea here is that you
+# set the 3 individual records, then PROC the top one to drive them...
+#
+# Set for the DAC
+#
+record(ao, "$(P)hv:DConvSet") {
+   field(DTYP, "stream")
+   field(ASG, "BEAMLINE")
+   field(OUT, "@ROCHV.proto setCalA(SD,$(P)hv:DConvSet) $(PORT) 0")
+   field(FLNK, "$(P)hv:DConvX")
+}
+record(ao, "$(P)hv:DConvSetX") {
+   field(DRVH, "65535")
+   field(HOPR, "65535")
+   field(ASG, "BEAMLINE")
+   field(LOPR, "0")
+   field(DRVL, "0")
+   info(autosaveFields, "VAL")
+}
+record(ao, "$(P)hv:DConvSetY") {
+   field(DRVH, "65535")
+   field(HOPR, "65535")
+   field(ASG, "BEAMLINE")
+   field(LOPR, "0")
+   field(DRVL, "0")
+   info(autosaveFields, "VAL")
+}
+record(ao, "$(P)hv:DConvSetZ") {
+   field(HOPR, "65535")
+   field(ASG, "BEAMLINE")
+   field(LOPR, "0")
+   info(autosaveFields, "VAL")
+}
+
+#
+# Check out what it does.  note this works before writing. Produces DAC setting
+#
+record(calc, "$(P)hv:DSim") {
+   field(INPA, "$(P)hv:DConvSetX CPP")
+   field(INPB, "$(P)hv:DConvSetY CPP")
+   field(INPC, "$(P)hv:DConvSetZ CPP")
+   field(INPD, "$(P)hv:VoltSet CPP MS")
+   field(CALC, "D*(A/B)+C")
+}
+
+#
+# get records 
+#
+record(ai, "$(P)hv:DConvX") {
+   field(DTYP, "stream")
+   field(INP, "@ROCHV.proto getCalXYZ(CD,$(P)hv:DConv) $(PORT) 0")
+   field(HOPR, "65535")
+   field(LOPR, "0")
+}
+record(ai, "$(P)hv:DConvY") {
+   field(HOPR, "65535")
+   field(LOPR, "0")
+}
+record(ai, "$(P)hv:DConvZ") {
+   field(HOPR, "65535")
+   field(LOPR, "0")
+}
+
+#
+# Conversion (Calibration) parameters set.  the idea here is that you
+# set the 3 individual records, then PROC the top one to drive them...
+#
+# Set for the ADC
+#
+record(ao, "$(P)hv:VConvSet") {
+   field(ASG, "BEAMLINE")
+   field(DTYP, "stream")
+   field(OUT, "@ROCHV.proto setCalA(SV,$(P)hv:VConvSet) $(PORT) 0")
+   field(FLNK, "$(P)hv:VConvX")
+}
+record(ao, "$(P)hv:VConvSetX") {
+   field(ASG, "BEAMLINE")
+   field(DRVH, "65535")
+   field(HOPR, "65535")
+   field(LOPR, "0")
+   field(DRVL, "0")
+   info(autosaveFields, "VAL")
+}
+record(ao, "$(P)hv:VConvSetY") {
+   field(ASG, "BEAMLINE")
+   field(DRVH, "65535")
+   field(HOPR, "65535")
+   field(LOPR, "0")
+   field(DRVL, "0")
+   info(autosaveFields, "VAL")
+}
+record(ao, "$(P)hv:VConvSetZ") {
+   field(ASG, "BEAMLINE")
+   field(HOPR, "65535")
+   field(LOPR, "0")
+   info(autosaveFields, "VAL")
+}
+
+#
+# Check out what it does.  note this works before writing. 
+#
+record(calc, "$(P)hv:VSim") {
+   field(INPA, "$(P)hv:VConvSetX CPP")
+   field(INPB, "$(P)hv:VConvSetY CPP")
+   field(INPC, "$(P)hv:VConvSetZ CPP")
+   field(INPD, "$(P)hv:ReadADC PP MS")
+   field(CALC, "D*(A/B)+C")
+}
+
+#
+# get records 
+#
+record(ai, "$(P)hv:VConvX") {
+   field(DTYP, "stream")
+   field(INP, "@ROCHV.proto getCalXYZ(CV,$(P)hv:VConv) $(PORT) 0")
+   field(HOPR, "65535")
+   field(LOPR, "0")
+}
+record(ai, "$(P)hv:VConvY") {
+   field(HOPR, "65535")
+   field(LOPR, "0")
+}
+record(ai, "$(P)hv:VConvZ") {
+   field(HOPR, "65535")
+   field(LOPR, "0")
+   field(FLNK, "$(P)hv:ReadADC") 
+}
+
+# Measures the time between HV request and first character of the response
+record(ai, "$(P)hv:RspDelay") {
+   field(DESC, "Response delay")
+   field(ADEL, "0.005")
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn($(PORT))HvDelay")
+   field(PREC, "3")
+   field(HOPR, "0.5")
+   field(EGU,  "seconds")
+   field(SCAN, "I/O Intr")
+} 
+
+# Measures the time between HV request and last character of the response
+record(ai, "$(P)hv:RspTime") {
+   field(DESC, "Response time")
+   field(ADEL, "0.005")
+   field(DTYP, "asynFloat64")
+   field(INP,  "@asyn($(PORT))HvB2bDelay")
+   field(PREC, "3")
+   field(HOPR, "0.9")
+   field(EGU,  "seconds")
+   field(SCAN, "I/O Intr")
+} 

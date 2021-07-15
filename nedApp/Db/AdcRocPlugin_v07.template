@@ -1,0 +1,22 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "AdcRocPlugin.include"
+include "AdcRocPlugin_v07.generated"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "AdcRocPlugin_v07")
+}
+
+record(mbbi, "$(P)OutputMode")
+{
+    field(ASG,  "BEAMLINE")
+    field(ZRVL, "1")
+    field(ZRST, "meta")
+    field(ONVL, "2")
+    field(ONST, "pixel")
+    field(INP,  "$(P)DataFormatId CP")
+}
+
+

@@ -1,0 +1,25 @@
+include "BasePlugin.include"
+
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(PINI,  "YES")
+}
+record(longin, "$(P)PoolSize")
+{
+    field(DESC,  "Num allocated packets")
+    field(DTYP,  "asynInt32")
+    field(INP,   "@asyn($(PORT))PoolSize")
+    field(SCAN,  "I/O Intr")
+    field(PINI,  "YES")
+}
+record(longout, "$(P)FrameLen")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Frame length")
+    field(EGU,  "nsec")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))FrameLen")
+    field(PINI, "YES")
+}

@@ -1,0 +1,74 @@
+record(mbbi, "$(S):Pmt:Status")
+{
+    info(archive, "Monitor, 00:00:10, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "PMT status")
+    field(INP,  "$(S):Pmt:StatusDebounced NPP")
+    field(ZRVL, "0")
+    field(ZRST, "permanent failure")
+    field(ZRSV, "MAJOR")
+    field(ONVL, "1")
+    field(ONST, "intermitent failure")
+    field(ONSV, "MINOR")
+    field(TWVL, "2")
+    field(TWST, "OK")
+    field(THVL, "3")
+    field(THST, "checking disabled")
+}
+
+# Debounced status for the failing PMT
+# 0 .. permanent failure
+# 1 .. intermitent failure
+# 2 .. OK
+# 3 .. checking disabled
+record(calc, "$(S):Pmt:StatusDebounced")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(S):Pmt:StatusCalc NPP")
+    field(INPB, "$(S):Pmt:DebounceTime NPP")
+    field(INPC, "$(S):Pmt:DebounceCounter NPP")
+    field(CALC, "C>B?0:A+1")
+    field(FLNK, "$(S):Pmt:Status")
+}
+
+# Instant status for the failing PMT, 0 for failure, 1 for OK, 2 when checking disabled
+# INPA and INPB are alarm enable flags. INPA is supposed to be used
+# at run time to temporarily disable alarm checking when no counts
+# are expected.
+# INPB is to be used by the user to turn of the alarm when PMT is known to
+# be failing but they want to keep running.
+# Status is also disabled while Discrim PV is in INVALID state - until init.
+# Otherwise the alarm is triggered by the Discrim PV=0
+record(calc, "$(S):Pmt:StatusCalc")
+{
+    info(autosaveFields, "A B")
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "1")
+    field(INPC, "$(S):Discrim.SEVR NPP")
+    field(INPD, "$(S):Discrim NPP")
+    field(CALC, "(A=0||B=0||C=3)?2:D")
+}
+# User input - max time the PMT can stay in failed mode before
+# triggering alarm.
+record(longin, "$(S):Pmt:DebounceTime")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Time for PMT to stay failed before alarm")
+    field(EGU,  "seconds")
+    field(VAL,  "300")
+    field(PINI, "YES")
+    field(FLNK, "$(S):Pmt:StatusDebounced")
+}
+# Time in seconds since PMT failed, resets itself when PMT recoveres
+record(calc, "$(S):Pmt:DebounceCounter")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(S):Pmt:DebounceCounter NPP")
+    field(INPB, "$(S):Pmt:StatusCalc PP")
+    field(CALC, "B=0?A+1:0")
+    field(VAL,  "0")
+    field(SCAN, "1 second")
+    field(FLNK, "$(S):Pmt:StatusDebounced")
+}

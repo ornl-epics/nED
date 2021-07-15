@@ -1,0 +1,571 @@
+include "BasePlugin.include"
+include "BasePortPlugin.include"
+
+record(mbbi, "$(P)PortStatus")
+{
+    info(archive, "Monitor, 00:00:10, VAL")
+    field(DESC, "Status of OccPortDriver")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(FLNK, "$(P)PortStatusFanout")
+    field(INP,  "@asyn($(PORT))Status")
+    field(ZRVL, "0")
+    field(ZRST, "Ready")
+    field(ONVL, "2")
+    field(ONST, "Copy buffer full")
+    field(ONSV, "MAJOR")
+    field(TWVL, "12")
+    field(TWST, "OCC error")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Corrupted data")
+    field(THSV, "MAJOR")
+    field(FRVL, "1")
+    field(FRST, "Resetting")
+    field(FVVL, "11")
+    field(FVST, "OCC no init")
+    field(FVSV, "MAJOR")
+    field(SXVL, "13")
+    field(SXST, "OCC DMA stall")
+    field(SXSV, "MAJOR")
+    field(SVVL, "14")
+    field(SVST, "OCC FIFO full")
+    field(SVSV, "MAJOR")
+    field(EIVL, "4")
+    field(EIST, "Partial data")
+    field(EISV, "MAJOR")
+    field(UNSV, "MINOR")
+    field(SCAN, "I/O Intr")
+}
+record(fanout, "$(P)PortStatusFanout")
+{
+    field(LNK1, "$(P)Status")
+    field(LNK2, "$(P)CntErrFanout")
+    field(LNK3, "$(P)AutoResetCalc")
+    field(LNK4, "$(P)RxDisableOnErr")
+}
+record(calcout, "$(P)AutoResetCalc")
+{
+    field(INPA, "$(P)AutoReset NPP")
+    field(INPB, "$(P)PortStatus.SEVR NPP")
+    field(CALC, "A=1&&B#0&&B#4")
+    field(OUT,  "$(P)Reset PP")
+    field(OOPT, "When Non-zero")
+    field(ODLY, "0.1")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+}
+# Record helps keep system healthy on run-away beamlines.
+# It was identified on SEQUOIA that heavy traffic of small packets can bring
+# system down. Corrupted data, FIFO overrun or DMA stall messages are all early
+# whispers of such event. Shutting of the receive side prevents that.
+record(calcout, "$(P)RxDisableOnErr")
+{
+    field(DESC, "Stop receiving on errors")
+    field(INPA, "$(P)RxEnRb NPP")
+    field(INPB, "$(P)PortStatus.SEVR NPP")
+    field(CALC, "A=1&&B=1")
+    field(OUT,  "$(P)RxEn PP")
+    field(OOPT, "When Non-zero")
+    field(OCAL, "0")
+    field(DOPT, "Use OCAL")
+}
+record(bo, "$(P)Reset")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset OCC and buffers")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Reset")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(mbbi, "$(P)LastErr")
+{
+    field(DESC, "Last error returned from OCC library")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))LastErr")
+    # Those match to return code of occ_*() functions
+    field(ZRVL, "0")
+    field(ONVL, "1")  # EPERM
+    field(TWVL, "2")  # ENOENT
+    field(THVL, "42") # ENOMSG
+    field(FRVL, "61") # ENODATA
+    field(FVVL, "75") # EOVERFLOW
+    field(SXVL, "104") # ECONNRESET
+    field(ZRST, "No error")
+    field(ONST, "Permission denied")
+    field(TWST, "No device")
+    field(THST, "Version mismatch")
+    field(FRST, "Interface error")
+    field(FVST, "Buffer full")
+    field(SXST, "Device reset")
+    field(SCAN, "I/O Intr")
+}
+record(mbbi, "$(P)HwType")
+{
+    field(DESC, "OCC board type")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))HwType")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(ZRST, "None")
+    field(ONST, "SNS PCI-X")
+    field(TWST, "SNS PCI Express")
+    field(FFST, "Simulator")
+}
+record(stringin, "$(P)FpgaSn")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))FpgaSn")
+    field(PINI, "YES")
+}
+record(longin, "$(P)HwVer")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DESC, "OCC board hardware version")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))HwVer")
+}
+record(longin, "$(P)FwVer")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DESC, "OCC board firmware version")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))FwVer")
+}
+record(stringin, "$(P)FwDate")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "OCC board firmware date")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))FwDate")
+    field(VAL,  "unknown")
+    field(SCAN, "I/O Intr")
+}
+record(mbbi, "$(P)ConStatus")
+{
+    info(archive, "Monitor, 00:00:05, VAL")
+    field(DESC, "Optical signal status")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(FLNK, "$(P)Status")
+    field(INP,  "@asyn($(PORT))ConStatus")
+    field(SCAN, "I/O Intr")
+    field(UNSV, "MINOR")
+    field(ZRVL, "0")
+    field(ZRST, "Connected")
+    field(ONSV, "NO_ALARM")
+    field(ONVL, "1")
+    field(ONST, "No SFP")
+    field(ONSV, "MAJOR")
+    field(TWVL, "2")
+    field(TWST, "RX signal lost")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Laser fault")
+    field(THSV, "MAJOR")
+}
+record(bo, "$(P)RxEn")
+{
+    info(archive, "Monitor, 00:00:05, VAL")
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable incoming data")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))RxEn")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(VAL,  "1")
+    field(PINI, "YES")
+    field(FLNK, "$(P)Status")
+}
+record(bi, "$(P)RxEnRb")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "Incoming data enabled")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RxEnRb")
+    field(ZNAM, "Disabled")
+    field(ONAM, "Enabled")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Status")
+}
+record(bo, "$(P)ErrPktEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Error packets output switch")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ErrPktEn")
+    field(ZNAM, "Disable")
+    field(ONAM, "Enable")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bi, "$(P)ErrPktEnRb")
+{
+    field(DESC, "Error packets output enabled")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrPktEnRb")
+    field(ZNAM, "Disabled")
+    field(ONAM, "Enabled")
+    field(SCAN, "I/O Intr")
+}
+record(ai, "$(P)FpgaTemp")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "FPGA temperature")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))FpgaTemp")
+    field(EGU,  "degC")
+    field(ADEL, "1.0")
+    field(PREC, "2")
+    field(HIGH, "60")
+    field(HSV,  "MINOR")
+    field(HIHI, "70")
+    field(HHSV, "MAJOR")
+    field(HYST, "2")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)FpgaTempAlarm")
+}
+record(calcout, "$(P)FpgaTempAlarm")
+{
+    field(DESC, "Take action on MAJOR alarm")
+    field(INPA, "$(P)RxEn.RVAL NPP")
+    field(INPB, "$(P)FpgaTemp.VAL NPP")
+    field(INPC, "$(P)FpgaTemp.HIHI NPP")
+    field(CALC, "(B>C)?0:A")
+    field(OUT,  "$(P)RxEn PP")
+    field(OOPT, "Transition To Zero")
+    field(FLNK, "$(P)Status")
+}
+record(ai, "$(P)FpgaCoreV")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "FPGA core voltage")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))FpgaCoreV")
+    field(EGU,  "V")
+    field(PREC, "3")
+    field(LOLO, "0.97")
+    field(HIHI, "1.03")
+    field(ADEL, "0.03")
+    field(LLSV, "MAJOR")
+    field(HHSV, "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+record(ai, "$(P)FpgaAuxV")
+{
+    field(DESC, "FPGA AUX voltage")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))FpgaAuxV")
+    field(EGU,  "V")
+    field(PREC, "3")
+    field(LOLO, "1.71")
+    field(HIHI, "1.89")
+    field(ADEL, "0.05")
+    field(LLSV, "MAJOR")
+    field(HHSV, "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+record(stringin, "$(P)SfpSerNo")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DESC, "SFP serial number")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))SfpSerNo")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(stringin, "$(P)SfpPartNo")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DESC, "SFP part number")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))SfpPartNo")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(mbbi, "$(P)SfpType")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DESC, "SFP type")
+    field(PINI, "YES")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))SfpType")
+    field(ZRVL, "0")
+    field(ZRST, "Unknown")
+    field(ONVL, "1")
+    field(ONST, "Single mode")
+    field(TWVL, "2")
+    field(TWST, "Multi mode")
+    field(UNSV, "MINOR")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)SfpTxPowerLim")
+}
+record(ai, "$(P)SfpTemp")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DESC, "SFP temperature")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))SfpTemp")
+    field(EGU,  "degC")
+    field(ADEL, "1.0")
+    field(PREC, "2")
+    field(HIGH, "60")
+    field(HSV,  "MINOR")
+    field(HIHI, "70")
+    field(HYST, "2")
+    field(SCAN, "I/O Intr")
+}
+record(ai, "$(P)SfpRxPower")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "SFP RX power")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))SfpRxPower")
+    field(EGU,  "uW")
+    field(ADEL, "5.0")
+    field(PREC, "0")
+    field(LOLO, "100")
+    field(LLSV, "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+record(calcout, "$(P)SfpTxPowerLim")
+{
+    field(DESC, "Adjust SFP TX power low limit")
+    field(INPA, "$(P)SfpType.RVAL NPP")
+    field(CALC, "(A==1)?216:(A==2)?196:0") # Single mode specification 216uW, multi mode 216uW
+    field(OUT,  "$(P)SfpTxPower.LOLO PP")
+    field(OOPT, "On Change")
+}
+record(ai, "$(P)SfpTxPower")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "SFP TX power")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))SfpTxPower")
+    field(EGU,  "uW")
+    field(ADEL, "5.0")
+    field(LOLO, "0") # Configured automatically by SfpTxPowerLim
+    field(LLSV, "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+record(ai, "$(P)SfpVccPow")
+{
+    field(DESC, "SFP VCC power")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))SfpVccPow")
+    field(EGU,  "V")
+    field(PREC, "3")
+    field(LOLO, "3.1")
+    field(HIHI, "3.4")
+    field(LLSV, "MAJOR")
+    field(HHSV, "MAJOR")
+    field(SCAN, "I/O Intr")
+}
+record(ai, "$(P)SfpTxBiasC")
+{
+    field(DESC, "SFP TX bias current")
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT))SfpTxBiasC")
+    field(EGU,  "uA")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)ErrCrc")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "FPGA detected CRC errors counter")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrCrc")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)ErrLength")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "FPGA detected length errors counter")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrLength")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)ErrFrame")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "FPGA detected frame errors counter")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrFrame")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)DmaUsed")
+{
+    field(DESC, "DMA buffer used space")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))DmaUsed")
+    field(FLNK, "$(P)DmaUsedMb")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(EGU,  "B")
+}
+record(calc, "$(P)DmaUsedMb")
+{
+    field(DESC, "DMA buffer used space")
+    field(INPA, "$(P)DmaUsed NPP")
+    field(CALC, "A/(1024*1024)")
+    field(SCAN, "Passive")
+    field(EGU,  "MiB")
+}
+record(longin, "$(P)DmaSize")
+{
+    field(DESC, "DMA buffer total size")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))DmaSize")
+    field(FLNK, "$(P)DmaSizeMb")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(EGU,  "B")
+}
+record(calc, "$(P)DmaSizeMb")
+{
+    field(DESC, "DMA buffer used space")
+    field(INPA, "$(P)DmaSize NPP")
+    field(CALC, "A/(1024*1024)")
+    field(SCAN, "Passive")
+    field(EGU,  "MiB")
+}
+record(longout, "$(P)StatusInt")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Basic status update interval")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))StatusInt")
+    field(EGU,  "seconds")
+}
+record(longout, "$(P)ExtStatInt")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Extended status update interval")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ExtStatInt")
+    field(EGU,  "seconds")
+}
+record(longin, "$(P)RecvRate")
+{
+    field(DESC, "Optical data rate")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))RecvRate")
+    field(FLNK, "$(P)RecvRateScaled")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(EGU,  "B/s")
+}
+record(scalcout, "$(P)RecvRateScaled")
+{
+    field(DESC, "Optical data rate self-scale")
+    field(INPA, "$(P)RecvRate NPP")
+    field(AA,   "B/s")
+    field(BB,   "kB/s")
+    field(CC,   "MB/s")
+    field(CALC, "A>1e6?A/1e6:A>1e3?A/1e3:A")
+    field(OCAL, "A>1e6?CC:A>1e3?BB:AA")
+    field(OOPT, "On Change")
+    field(OUT,  "$(P)RecvRateScaled.EGU NPP")
+    field(DOPT, "Use OCAL")
+    field(PREC, "2")
+    field(EGU,  "B/s")
+}
+record(bo, "$(P)AutoReset")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Automatic reset on any error")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disabled")
+    field(ONAM, "enabled")
+}
+record(fanout, "$(P)CntErrFanout")
+{
+    field(LNK1, "$(P)CntErrBufFull")
+    field(LNK2, "$(P)CntErrOther")
+    field(LNK3, "$(P)CntErrBadData")
+    field(SELM, "Specified")
+    field(SELL, "$(P)PortStatus NPP")
+}
+record(calc, "$(P)CntErrBadData")
+{
+    field(DESC, "Num of bad data errors")
+    field(INPA, "$(P)CntErrBadData NPP")
+    field(CALC, "A+1")
+    field(VAL,  "-1")
+    field(PINI, "YES")
+}
+record(calc, "$(P)CntErrBufFul")
+{
+    field(DESC, "Num of buffer full errors")
+    field(INPA, "$(P)CntErrBufFul NPP")
+    field(CALC, "A+1")
+    field(VAL,  "-1")
+    field(PINI, "YES")
+}
+record(calc, "$(P)CntErrOther")
+{
+    field(DESC, "Num of other errors")
+    field(INPA, "$(P)CntErrOther NPP")
+    field(CALC, "A+1")
+    field(VAL,  "-1")
+    field(PINI, "YES")
+}
+record(calc, "$(P)StatusCalc")
+{
+    field(INPA, "$(P)PortStatus.SEVR NPP")
+    field(INPB, "$(P)ConStatus.SEVR NPP")
+    field(INPC, "$(P)FpgaTemp.SEVR NPP")
+    field(INPD, "$(P)RxEn NPP")
+    field(INPE, "$(P)RxEnRb NPP")
+    field(CALC, "(A+B+C)=0&&D=E")
+}
+record(longin, "$(P)Status")
+{
+    field(DESC, "Global OCC status")
+    field(INP,  "$(P)StatusCalc PP NMS")
+    field(PINI, "YES")
+    field(FLNK, "$(P)StatusText")
+}
+record(scalcout, "$(P)StatusTextCalc")
+{
+    field(INPA, "$(P)PortStatus NPP")
+    field(INPB, "$(P)ConStatus NPP")
+    field(INPC, "$(P)FpgaTemp.SEVR NPP")
+    field(INPD, "$(P)RxEnRb NPP")
+    field(INPE, "$(P)Status NPP MSS")
+    field(INAA, "$(P)PortStatus NPP")
+    field(INBB, "$(P)ConStatus NPP")
+    field(CC,   "Over temperature")
+    field(INDD, "$(P)RxEnRb NPP")
+    field(CALC, "D#1?DD:C#0?CC:B#0?BB:AA")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(DESC, "Global OCC status text")
+    field(INP,  "$(P)StatusTextCalc.SVAL PP MSS")
+}
+record(waveform, "$(P)ReportFile")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "File to save OCC info on error")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT))ReportFile")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(PINI, "YES")
+}
+

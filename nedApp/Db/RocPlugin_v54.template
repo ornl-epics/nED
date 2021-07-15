@@ -1,0 +1,28 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "RocPlugin_v54.generated"
+include "RocPlugin.include"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "RocPlugin_v54")
+}
+
+# Acquiring record is not created automatically.
+record(bi, "$(P)Acquiring")
+{
+    field(DESC, "Acquiring data")
+    field(INP,  "$(P)AcquiringSet CP")
+    field(SCAN, "I/O Intr")
+    field(ZNAM, "not acquiring")
+    field(ONAM, "acquiring")
+}
+
+# ROC doesn't update any valueable fields, like Discovered or Configured
+record(calc, "$(P)HwStatus")
+{
+    field(INPE, "0")
+    field(INPF, "0")
+    field(INPG, "0")
+}

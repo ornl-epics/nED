@@ -1,0 +1,13 @@
+There's a common procedure how to tag and release SNS EPICS repositories:
+https://trac.sns.gov/slowcontrols/wiki/HowtoRelease
+
+In addition to that, there are some specific steps for nED repository.
+After making a new release branch using the steps from tutorial, these changes
+must be made and commited to the branch:
+* update configure/RELEASE directory and make sure dependant projects are also
+  released and are inter-compatible with nED
+* make sure the C/C++ sources are built in release mode
+  Go to nedApp/src/Makefile and check CXXFLAGS doesn't include '-g -ggdb' but
+  does include '-O2' flags
+* bump nED version PV number in nEDApp/Db/nEDCommon.db file in release branch
+  and on master

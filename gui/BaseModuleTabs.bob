@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>$(D)</name>
+  <width>740</width>
+  <widget type="navtabs" version="2.0.0">
+    <name>ModuleTabs</name>
+    <tabs>
+      <tab>
+        <name>Main</name>
+        <file>BaseModuleMain.bob</file>
+        <macros>
+        </macros>
+        <group_name></group_name>
+      </tab>
+    </tabs>
+    <width>740</width>
+    <height>600</height>
+    <direction>0</direction>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import ScriptUtil, PVUtil
+
+tabs = ScriptUtil.findWidgetByName(widget, "ModuleTabs").propTabs()
+
+features = PVUtil.getInt(pvs[0])
+init_script = PVUtil.getInt(pvs[1])
+
+# Order maters
+featuresMap = [
+    (1,  "Config"),
+    (2,  "Status"),
+    (8,  "Counters"),
+    (4,  "Temp"),
+    (32, "TimeSync"),
+]
+
+if init_script == 1:
+  pvs[1].write(0)
+  for mask,feature in featuresMap:
+    if features & mask:
+      tab = tabs.addElement()
+      tab.name().setValue(feature)
+      tab.file().setValue("BaseModule%s.bob" % feature)
+      ScriptUtil.getLogger().info("Added %s tab for $(D)" % feature.lower())
+]]></text>
+        <pv_name>$(P)Features</pv_name>
+        <pv_name trigger="false">loc://init_script$(DID)(1)</pv_name>
+      </script>
+    </scripts>
+  </widget>
+</display>

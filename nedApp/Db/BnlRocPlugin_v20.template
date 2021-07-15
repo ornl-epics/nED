@@ -1,0 +1,24 @@
+include "BasePlugin.include"
+include "BaseModulePlugin.include"
+include "BnlRocPlugin_v20.generated"
+include "GlobalConD.include"
+
+record(stringin, "$(P)PluginId")
+{
+    field(VAL,  "BnlRocPlugin_v20")
+}
+
+record(mbbo, "$(P)DiagEn")
+{
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "1")
+    field(ONVL, "1")
+    field(DTYP, "Raw Soft Channel")
+    field(OUT,  "$(P)OutputMode PP")
+}
+
+record(mbbi, "$(P)HwType")
+{
+    field(THSV, "NO_ALARM")
+}

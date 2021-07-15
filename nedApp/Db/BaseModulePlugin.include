@@ -1,0 +1,941 @@
+record(bo, "$(P)Enable")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))Enable")
+    field(ZNAM, "No")
+    field(ONAM, "Yes")
+    field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(longin, "$(P)Features")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))Features")
+    field(PINI, "YES")
+}
+record(stringout, "$(P)HwId")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    info(autosaveFields, "VAL")
+    field(DESC, "Hardware ID address")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))HwId")
+    field(VAL,  "0.0.0.0")
+    field(PINI, "YES")
+    field(FLNK, "$(P)CheckSeq")
+}
+record(mbbo, "$(P)CmdReq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Send command to module")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CmdReq")
+    field(ZRVL, "128")
+    field(ZRST, "Discover")
+    field(ONVL, "32")
+    field(ONST, "Read version")
+    field(TWVL, "34")
+    field(TWST, "Read status")
+    field(THVL, "33")
+    field(THST, "Read config")
+    field(FRVL, "48")
+    field(FRST, "Write config")
+    field(FVVL, "130")
+    field(FVST, "Start acquisition")
+    field(SXVL, "131")
+    field(SXST, "Stop acquisition")
+    field(SVVL, "36")
+    field(SVST, "Read counters")
+    field(EIVL, "37")
+    field(EIST, "Reset counters")
+    field(NIVL, "35")
+    field(NIST, "Read temperature")
+    field(TEVL, "129")
+    field(TEST, "Reset")
+    field(ELVL, "39")
+    field(ELST, "Reset LVDS")
+    field(FLNK, "$(P)CmdReqBusySet PP")
+}
+record(calcout, "$(P)CmdReqBusySet")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdReq.SEVR NPP")
+    field(CALC, "A=0")
+    field(OUT,  "$(P)CmdReqBusy PP")
+    field(FLNK, "$(P)CmdRspEn")
+}
+record(longout, "$(P)CmdRspEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "1")
+    field(OUT,  "$(P)CmdRsp.DISA")
+    field(FLNK, "$(P)CmdRspEnWait")
+}
+record(longout, "$(P)CmdRspEnWait")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "2")
+    field(OUT,  "$(P)CmdRsp NPP")
+}
+record(longout, "$(P)CmdReqBusyClear")
+{
+    field(ASG,  "BEAMLINE")
+    field(VAL,  "0")
+    field(OUT,  "$(P)CmdReqBusy PP")
+}
+record(busy, "$(P)CmdReqBusy")
+{
+    field(ASG,  "BEAMLINE")
+}
+record(longin, "$(P)CmdRspRaw")
+{
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CmdRsp")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)CmdRsp")
+}
+record(mbbi, "$(P)CmdRsp")
+{
+    field(INP,  "$(P)CmdRspRaw NPP")
+    field(DISV, "0")
+    field(DESC, "Last command response")
+    field(ZRVL, "0")
+    field(ZRST, "None issued")
+    field(ONVL, "1")
+    field(ONST, "Success")
+    field(TWVL, "2")
+    field(TWST, "Waiting")
+    field(THVL, "3")
+    field(THST, "Timeout")
+    field(FRVL, "4")
+    field(FRST, "Error")
+    field(FVVL, "5")
+    field(FVST, "Skipped")
+    field(FLNK, "$(P)CmdRspDone")
+}
+record(calcout, "$(P)CmdRspDone")
+{
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#2")
+    field(OUT,  "$(P)CmdReqBusyClear.PROC PP")
+    field(OOPT, "When Non-zero")
+    field(FLNK, "$(P)CmdRspDis")
+}
+record(calcout, "$(P)CmdRspDis")
+{
+    field(INPA, "$(P)CmdRsp PP")
+    field(CALC, "A=2")
+    field(OUT,  "$(P)CmdRsp.DISA")
+    field(OOPT, "When Zero")
+    field(FLNK, "$(P)RspCheck")
+}
+record(fanout, "$(P)RspCheck")
+{
+    field(DESC, "Response check fanout")
+    field(LNK1, "$(P)RspMissCount PP")
+    field(LNK2, "$(P)HwStatus PP")
+    field(LNK3, "$(P)RspCheckAcq PP")
+    # LNK5,LNK6 reserved for custom use by modules
+}
+# Monitor CmdReq for start/stop commands and set AcquireSet to yes/no
+record(calcout, "$(P)RspCheckAcq")
+{
+    field(INPA, "$(P)CmdReq NPP")
+    field(INPB, "$(P)CmdRsp NPP")
+    field(CALC, "B=1&&(A=5||A=6)")
+    field(OOPT, "When Non-zero")
+    field(OCAL, "A=5")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)AcquiringSet PP")
+}
+record(bi, "$(P)AcquiringSet")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    info(autosaveFields, "VAL")
+    field(ZNAM, "not acquiring")
+    field(ONAM, "acquiring")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(FLNK, "$(P)AcquiringCheckCalc")
+}
+# Verifies that acquiring state matches the request
+# 0 .. mismatch (MAJOR alarm)
+# 1 .. not acquiring
+# 2 .. acquiring
+# When module is disabled, we follow the request
+record(calcout, "$(P)AcquiringCheckCalc")
+{
+    field(INPA, "$(P)Acquiring NPP")
+    field(INPB, "$(P)AcquiringSet NPP")
+    field(INPC, "$(P)Enable NPP")
+    field(CALC, "C=0?B+1:A=B?A+1:0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(OUT,  "$(P)AcquiringCheck PP")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(mbbi, "$(P)AcquiringCheck")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ZRVL, "0")
+    field(ZRST, "mismatch")
+    field(ZRSV, "MAJOR")
+    field(ONVL, "1")
+    field(ONST, "not acquiring")
+    field(TWVL, "2")
+    field(TWST, "acquiring")
+}
+record(bi, "$(P)Acquiring")
+{
+    field(FLNK, "$(P)AcquiringCheckCalc")
+}
+# ConfStatus record should include all configuration checks that ensure
+# production data. Be careful with SEVR as timeout alarm is common due
+# to non-reliable communication. Records generated from .cpp files and
+# using [alarm] specification all translate to MAJOR alarm.
+record(calc, "$(P)ConfStatus")
+{
+    field(DESC, "Configuration status")
+    field(INPA, "$(P)Enable CP")
+    field(INPB, "$(P)OutputMode.SEVR CP MS")
+    field(CALC, "A=0||B#2")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(calc, "$(P)ConfigAlrm")
+{
+    field(INPA, "$(P)Configured.SEVR NPP NMS")
+    field(CALC, "A=1||A=2")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
+}
+# Placeholder record, may be extended by module.
+# MAJOR alarm is captured in overall status.
+record(calc, "$(P)HwStatus")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "Hardware status")
+    field(INPA, "$(P)Enable NPP")
+    field(INPB, "")
+    field(INPC, "$(P)Verified.SEVR NPP")
+    field(INPD, "$(P)RspMissCount.SEVR NPP")
+    field(INPE, "$(P)ConfigAlrm.SEVR PP")
+    field(INPF, "0")
+    field(INPG, "0")
+    field(INPH, "0")
+    field(INPI, "0")
+    field(INPJ, "0")
+    field(INPK, "0")
+    field(INPL, "0")
+    field(CALC, "A=0||(C+D+E+F+G+H+I+J+K+L)=0")
+    field(LOW,  "0")
+    field(LSV,  "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+# Detector is considered missing if it doesn't respond to at 2 or more
+# subsequent commands. Record recoveres (goes out of alarm) if it responds
+# afterwards.
+record(calc, "$(P)RspMissCount")
+{
+    info(archive, "Monitor, 00:00:10, VAL")
+    info(autosaveFields, "HIHI")
+    field(DESC, "Count missing responses")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(INPB, "$(P)RspMissCount NPP")
+    field(INPC, "$(P)Enable NPP")
+    field(CALC, "C=0?0:(A=3)?B+1:(A=2)?B:0")
+    field(HIHI, "3")
+    field(HHSV, "MAJOR")
+    field(FLNK, "$(P)HwStatus")
+}
+record(calcout, "$(P)StatusCalc")
+{
+    field(INPA, "$(P)Enable NPP")
+    field(INPB, "$(P)HwStatus.SEVR NPP")
+    field(INPC, "$(P)AcquiringCheck.SEVR NPP")
+    field(INPD, "$(P)ConfStatus NPP")
+    field(INPE, "$(P)AcquiringCheck NPP")
+    field(CALC, "A=0?1:(B+C)#0?0:(D#1||E=0)?2:1")
+    field(PINI, "YES")
+    field(OUT,  "$(P)Status PP")
+    field(FLNK, "$(P)StatusTextCalc")
+}
+record(scalcout, "$(P)StatusTextCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)Enable NPP")
+    field(AA,   "comm disabled")
+    field(INPB, "$(P)HwStatus.SEVR NPP MSS")
+    field(BB,   "hw error")
+    field(INPC, "$(P)ConfStatus.SEVR NPP")
+    field(CC,   "check config")
+    field(INPD, "$(P)AcquiringCheck NPP")
+    field(DD,   "acquiring mismatch")
+    field(EE,   "not acquiring")
+    field(FF,   "acquiring")
+    field(CALC, "A=0?AA:B#0?BB:C#0?CC:D=0?DD:D=1?EE:FF")
+    field(PINI, "YES")
+    field(FLNK, "$(P)StatusText")
+}
+record(stringin, "$(P)StatusText")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Module status text")
+    field(INP,  "$(P)StatusTextCalc.SVAL PP MSS")
+}
+record(longin, "$(P)HwYear")
+{
+    field(FLNK, "$(P)HwDate")
+}
+record(longin, "$(P)HwMonth")
+{
+    field(FLNK, "$(P)HwDate")
+}
+record(longin, "$(P)HwDay")
+{
+    field(FLNK, "$(P)HwDate")
+}
+record(scalcout, "$(P)HwDateCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)HwYear NPP NMS")
+    field(INPB, "$(P)HwMonth NPP NMS")
+    field(INPC, "$(P)HwDay NPP NMS")
+    field(CALC, "PRINTF('%04i',A)+'/'+PRINTF('%02i',B)+'/'+PRINTF('%02i',C)")
+    field(FLNK, "$(P)HwDate")
+}
+record(stringin, "$(P)HwDate")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Firmware date")
+    field(INP,  "$(P)HwDateCalc.SVAL PP")
+}
+record(longin, "$(P)HwVer")
+{
+    field(FLNK, "$(P)HwVersion")
+}
+record(longin, "$(P)HwRev")
+{
+    field(FLNK, "$(P)HwVersion")
+}
+record(scalcout, "$(P)HwVersionCalc")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "FW version concatenated")
+    field(INPA, "$(P)HwVer NPP MS")
+    field(INPB, "$(P)HwRev NPP MS")
+    field(CALC, "PRINTF('%i',A)+'.'+PRINTF('%i',B)")
+    field(FLNK, "$(P)HwVersion")
+}
+record(stringin, "$(P)HwVersion")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Firmware date")
+    field(INP,  "$(P)HwVersionCalc.SVAL PP")
+}
+record(longin, "$(P)FwYear")
+{
+    field(FLNK, "$(P)FwDate")
+}
+record(longin, "$(P)FwMonth")
+{
+    field(FLNK, "$(P)FwDate")
+}
+record(longin, "$(P)FwDay")
+{
+    field(FLNK, "$(P)FwDate")
+}
+record(scalcout, "$(P)FwDateCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)FwYear NPP NMS")
+    field(INPB, "$(P)FwMonth NPP NMS")
+    field(INPC, "$(P)FwDay NPP NMS")
+    field(CALC, "PRINTF('%04i',A)+'/'+PRINTF('%02i',B)+'/'+PRINTF('%02i',C)")
+    field(FLNK, "$(P)FwDate")
+}
+record(stringin, "$(P)FwDate")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Firmware date")
+    field(INP,  "$(P)FwDateCalc.SVAL PP")
+}
+record(longin, "$(P)FwVer")
+{
+    field(FLNK, "$(P)FwVersion")
+}
+record(longin, "$(P)FwRev")
+{
+    field(FLNK, "$(P)FwVersion")
+}
+record(scalcout, "$(P)FwVersionCalc")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(DESC, "FW version concatenated")
+    field(INPA, "$(P)FwVer NPP MS")
+    field(INPB, "$(P)FwRev NPP MS")
+    field(CALC, "PRINTF('%i',A)+'.'+PRINTF('%i',B)")
+    field(FLNK, "$(P)FwVersion")
+}
+record(stringin, "$(P)FwVersion")
+{
+    info(archive, "Monitor, 00:01:00, VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Firmware date")
+    field(INP,  "$(P)FwVersionCalc.SVAL PP MS")
+    field(FLNK, "$(P)Verified")
+}
+record(calc, "$(P)Verified")
+{
+    field(INPA, "$(P)HwType.SEVR NPP MS")
+    field(INPB, "$(P)FwVersion.SEVR NPP MS")
+    field(CALC, "(A+B)=0")
+}
+record(mbbi, "$(P)HwType")
+{
+    field(DESC, "Module type")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))HwType")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZRVL, "32")
+    field(ONVL, "33")
+    field(TWVL, "34")
+    field(THVL, "37")
+    field(FRVL, "41")
+    field(FVVL, "42")
+    field(SXVL, "43")
+    field(SVVL, "48")
+    field(EIVL, "64")
+    field(NIVL, "160")
+    field(TEVL, "161")
+    field(ELVL, "162")
+    field(TVVL, "170")
+    field(TTVL, "45")
+    field(FTVL, "49")
+    field(FFVL, "47")
+    field(ZRST, "ROC")
+    field(ONST, "AROC")
+    field(TWST, "HROC")
+    field(THST, "BNLROC")
+    field(FRST, "CROC")
+    field(FVST, "IROC")
+    field(SXST, "BIDIM ROC")
+    field(SVST, "DSP")
+    field(EIST, "SANS ROC")
+    field(NIST, "ACPC")
+    field(TEST, "ACPC FEM")
+    field(ELST, "FFC")
+    field(TVST, "FEM")
+    field(TTST, "ADCROC")
+    field(FTST, "DSP WAND")
+    field(FFST, "WROC")
+    field(ZRSV, "MAJOR")
+    field(ONSV, "MAJOR")
+    field(TWSV, "MAJOR")
+    field(THSV, "MAJOR")
+    field(FRSV, "MAJOR")
+    field(FVSV, "MAJOR")
+    field(SXSV, "MAJOR")
+    field(SVSV, "MAJOR")
+    field(EISV, "MAJOR")
+    field(NISV, "MAJOR")
+    field(TESV, "MAJOR")
+    field(ELSV, "MAJOR")
+    field(TVSV, "MAJOR")
+    field(TTSV, "MAJOR")
+    field(FTSV, "MAJOR")
+    field(FFSV, "MAJOR")
+    field(FLNK, "$(P)Verified")
+}
+record(longin, "$(P)StatusRefreshInt")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Periodically update status interval")
+    field(FLNK, "$(P)StatusRefresh PP")
+    field(PINI, "YES")
+    field(VAL,  "0") # Refresh interval in seconds, 0 to disable
+    field(EGU,  "seconds")
+}
+record(calcout, "$(P)StatusRefresh")
+{
+    field(DESC, "Periodically update status")
+    field(ASG,  "BEAMLINE")
+    field(OCAL, "2") # Send Read status
+    field(OUT,  "$(P)CmdReq PP")
+    field(DOPT, "Use OCAL")
+    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
+    field(DISV, "0")
+}
+record(longout, "$(P)StatusRefreshNow")
+{
+    field(DESC, "Cause counter to expire and refresh now")
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "1")
+    field(OUT,  "$(P)StatusRefreshNext NPP")
+    field(FLNK, "$(P)StatusRefreshNext.PROC CA")
+}
+record(calcout, "$(P)StatusRefreshNext")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)StatusRefreshNext NPP")
+    field(INPB, "$(P)StatusRefreshInt NPP")
+    # If StatusRefreshNow pushed 1 => process immediately
+    # If StatusRefreshInt > 0, decrement by 1 every time, on 0 rollover
+    # Otherwise -1
+    field(CALC, "A=1?0:B<=0?-1:A>0?A-1:B-1")
+    field(VAL,  "0")
+    field(OOPT, "When Zero")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)StatusRefresh.PROC")
+    field(SCAN, "1 second")
+}
+### The next record are used to spread out periodic status requests
+### from multiple modules. They randomize the first time Status is refreshed
+### and all the consequtive requests will follow it. This allows the multi
+### module installations to not send multiple requests in burst.
+record(calcout, "$(P)StatusRefreshBoot")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Randomize status refresh offset")
+    field(INPA, "$(P)StatusRefreshInt NPP")
+    field(CALC, "CEIL(A*RNDM)")
+    field(OUT,  "$(P)StatusRefreshNext NPP")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CountersRefreshInt")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Periodically update status interval")
+    field(FLNK, "$(P)CountersRefresh PP")
+    field(PINI, "YES")
+    field(VAL,  "0") # Refresh interval in seconds, 0 to disable
+    field(EGU,  "seconds")
+}
+record(calcout, "$(P)CountersRefresh")
+{
+    field(DESC, "Periodically update status")
+    field(ASG,  "BEAMLINE")
+    field(OCAL, "7") # Send Read counters
+    field(OUT,  "$(P)CmdReq PP")
+    field(DOPT, "Use OCAL")
+    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
+    field(DISV, "0")
+}
+record(longout, "$(P)CountersRefreshNow")
+{
+    field(DESC, "Cause counter to expire and refresh now")
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "1")
+    field(OUT,  "$(P)CountersRefreshNext NPP")
+    field(FLNK, "$(P)CountersRefreshNext.PROC CA")
+}
+record(calcout, "$(P)CountersRefreshNext")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CountersRefreshNext NPP")
+    field(INPB, "$(P)CountersRefreshInt NPP")
+    field(CALC, "A=1?0:B<=0?-1:A>0?A-1:B-1")
+    field(VAL,  "0")
+    field(OOPT, "When Zero")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)CountersRefresh.PROC")
+    field(SCAN, "1 second")
+}
+### The next record are used to spread out periodic status requests
+### from multiple modules. They randomize the first time Counters is refreshed
+### and all the consequtive requests will follow it. This allows the multi
+### module installations to not send multiple requests in burst.
+record(calcout, "$(P)CountersRefreshBoot")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Randomize status refresh offset")
+    field(INPA, "$(P)CountersRefreshInt NPP")
+    field(CALC, "CEIL(A*RNDM)")
+    field(OUT,  "$(P)CountersRefreshNext NPP")
+    field(PINI, "YES")
+}
+record(longin, "$(P)TempRefreshInt")
+{
+    info(autosaveFields, "VAL")
+    field(DESC, "Periodically update status interval")
+    field(FLNK, "$(P)TempRefresh PP")
+    field(PINI, "YES")
+    field(VAL,  "0") # Refresh interval in seconds, 0 to disable
+    field(EGU,  "seconds")
+}
+record(calcout, "$(P)TempRefresh")
+{
+    field(DESC, "Periodically update status")
+    field(ASG,  "BEAMLINE")
+    field(OCAL, "9") # Send Read temperature
+    field(OUT,  "$(P)CmdReq PP")
+    field(DOPT, "Use OCAL")
+    field(SDIS, "$(P)Enable NPP") # Don't run if disabled
+    field(DISV, "0")
+}
+record(longout, "$(P)TempRefreshNow")
+{
+    field(DESC, "Cause counter to expire and refresh now")
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "1")
+    field(OUT,  "$(P)TempRefreshNext NPP")
+    field(FLNK, "$(P)TempRefreshNext.PROC CA")
+}
+record(calcout, "$(P)TempRefreshNext")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)TempRefreshNext NPP")
+    field(INPB, "$(P)TempRefreshInt NPP")
+    field(CALC, "A=1?0:B<=0?-1:A>0?A-1:B-1")
+    field(VAL,  "0")
+    field(OOPT, "When Zero")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)TempRefresh.PROC")
+    field(SCAN, "1 second")
+}
+### The next record are used to spread out periodic status requests
+### from multiple modules. They randomize the first time Temp is refreshed
+### and all the consequtive requests will follow it. This allows the multi
+### module installations to not send multiple requests in burst.
+record(calcout, "$(P)TempRefreshBoot")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Randomize status refresh offset")
+    field(INPA, "$(P)TempRefreshInt NPP")
+    field(CALC, "CEIL(A*RNDM)")
+    field(OUT,  "$(P)TempRefreshNext NPP")
+    field(PINI, "YES")
+}
+record(ao, "$(P)NoRspTimeout")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Time to wait for response")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))NoRspTimeout")
+    field(EGU,  "seconds")
+    field(PREC, "1")
+}
+record(bo, "$(P)Upg:Supported")
+{
+    field(DESC, "Flags support for remote update")
+    field(ZNAM, "not supported")
+    field(ONAM, "supported")
+    field(PINI, "YES")
+    field(VAL,  "0")
+}
+
+record(calcout, "$(P)StartSeqCheck")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)StartSeq.ABORT PP")
+}
+
+record(sseq, "$(P)StartSeq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL1,  "5")
+    field(DOL3,  "2")
+    field(LNK1,  "$(P)CmdReq CA")
+    field(LNK2,  "$(P)StartSeqCheck PP")
+    field(LNK3,  "$(P)CmdReq CA")
+    field(WAIT1, "Wait")
+    field(WAIT3, "Wait")
+}
+
+record(calcout, "$(P)StopSeqCheck")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)StopSeq.ABORT PP")
+}
+
+record(sseq, "$(P)StopSeq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL1,  "6")
+    field(DOL3,  "2")
+    field(LNK1,  "$(P)CmdReq CA")
+    field(LNK2,  "$(P)StopSeqCheck PP")
+    field(LNK3,  "$(P)CmdReq CA")
+    field(WAIT1, "Wait")
+    field(WAIT3, "Wait")
+}
+
+record(calcout, "$(P)CheckSeqCheck")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)CheckSeq.ABORT PP")
+}
+
+record(sseq, "$(P)CheckSeq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL1,  "0")
+    field(DOL3,  "1")
+    field(DOL5,  "2")
+    field(LNK1,  "$(P)CmdReq CA")
+    field(LNK2,  "$(P)CheckSeqCheck PP")
+    field(LNK3,  "$(P)CmdReq CA")
+    field(LNK4,  "$(P)CheckSeqCheck PP")
+    field(LNK5,  "$(P)CmdReq CA")
+    field(WAIT1, "Wait")
+    field(WAIT3, "Wait")
+    field(WAIT5, "Wait")
+}
+
+record(calcout, "$(P)ConfSeqCheck")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)CmdRsp NPP")
+    field(CALC, "A#1")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)ConfSeq.ABORT PP")
+}
+
+record(sseq, "$(P)ConfSeq")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL1,  "4")
+    field(DOL3,  "3")
+    field(DOL5,  "2")
+    field(LNK1,  "$(P)CmdReq CA")
+    field(LNK2,  "$(P)ConfSeqCheck PP")
+    field(LNK3,  "$(P)CmdReq CA")
+    field(LNK4,  "$(P)ConfSeqCheck PP")
+    field(LNK5,  "$(P)CmdReq CA")
+    field(WAIT1, "Wait")
+    field(WAIT3, "Wait")
+    field(WAIT5, "Wait")
+}
+
+record(stringout, "$(P)SaveConfig")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Save config to file")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))SaveConfig")
+}
+record(stringout, "$(P)SaveConfigName")
+{
+    field(ASG,  "BEAMLINE")
+    field(PINI, "YES")
+}
+record(stringout, "$(P)SaveConfigTrig")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)SaveConfigName NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)SaveConfig PP")
+}
+record(stringout, "$(P)LoadConfig")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Load config from file to temp PVs")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT))LoadConfig")
+}
+record(mbbo, "$(P)LoadConfigMenu")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Configuration to load")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(FRVL, "4")
+    field(ZRST, "")
+    field(ONST, "")
+    field(TWST, "")
+    field(THST, "")
+    field(FRST, "")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(FLNK, "$(P)LoadConfigMenuTrig")
+}
+record(calcout, "$(P)LoadConfigMenuPini")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)LoadConfigMenuPini NPP")
+    field(CALC, "A=0")
+    field(VAL,  "0")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)LoadConfigMenu.PROC")
+}
+record(stringout, "$(P)LoadConfigMenuTrig")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)LoadConfigMenu NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfig PP")
+}
+record(stringin, "$(P)Config1")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config1")
+    field(SCAN, "I/O Intr")
+    # We need CA link to break the records loop and avoid asyn dead-lock
+    field(FLNK, "$(P)Config1Sync.PROC CA")
+}
+record(stringin, "$(P)Config2")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "2nd newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config2")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config2Sync")
+}
+record(stringin, "$(P)Config3")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "3rd newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config3")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config3Sync")
+}
+record(stringin, "$(P)Config4")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "4th newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config4")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config4Sync")
+}
+record(stringin, "$(P)Config5")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "5th newest config name")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))Config5")
+    field(SCAN, "I/O Intr")
+    field(FLNK, "$(P)Config5Sync")
+}
+record(stringout, "$(P)Config1Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config1")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.ZRST NPP")
+}
+record(stringout, "$(P)Config2Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config2")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.ONST NPP")
+}
+record(stringout, "$(P)Config3Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config3")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.TWST NPP")
+}
+record(stringout, "$(P)Config4Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config4")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.THST NPP")
+}
+record(stringout, "$(P)Config5Sync")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)Config5")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)LoadConfigMenu.FRST NPP")
+}
+record(bi, "$(P)ConfigSaved")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ConfigSaved")
+    field(ZNAM, "not saved")
+    field(ONAM, "saved")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+}
+record(bi, "$(P)ConfigApplied")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ConfigApplied")
+    field(ZNAM, "not applied")
+    field(ONAM, "applied")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(FLNK, "$(P)AutoConfig")
+}
+record(bo, "$(P)AutoConfigEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Send config to module upon param change")
+    field(ZNAM, "no")
+    field(ONAM, "yes")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(FLNK, "$(P)AutoConfigInit")
+}
+record(calcout, "$(P)AutoConfigInit")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)AutoConfigEn NPP")
+    field(CALC, "A")
+    field(OOPT, "When Non-zero")
+    field(OUT,  "$(P)ConfSeq.PROC")
+}
+record(calcout, "$(P)AutoConfig")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DISV, "0")
+    field(SDIS, "$(P)AutoConfigEn NPP")
+    field(INPA, "$(P)ConfigApplied NPP")
+    field(CALC, "A")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OOPT, "Transition To Zero")
+    field(OUT,  "$(P)ConfSeq.PROC")
+    # Try to group multiple param changes into a single config request
+    field(ODLY, "0.5")
+}
+record(bo, "$(P)CopyConfig")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Copy current loaded config to actual")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))CopyConfig")
+    field(ZNAM, "no action")
+    field(ONAM, "copy")
+}
+record(stringin, "$(P)PluginId")
+{
+    field(ASG,  "BEAMLINE")
+}

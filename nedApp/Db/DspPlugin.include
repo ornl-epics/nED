@@ -1,0 +1,149 @@
+record(mbbo, "$(P)OutputMode")
+{
+    field(FLNK, "$(P)EventLenSet PP")
+}
+
+record(longout, "$(P)EventLenSet")
+{
+    field(OMSL, "closed_loop")
+    field(DOL,  "$(P)EventLenSel PP")
+    field(DTYP, "Soft Channel")
+    field(OUT,  "$(P)EventLength PP")
+}
+
+record(sel, "$(P)EventLenSel")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select length of events")
+    field(EGU,  "bytes")
+    field(INPA, "8")
+    field(INPB, "8")
+    field(INPC, "36")
+    field(INPD, "24")
+    field(INPE, "72")
+    field(INPF, "84")
+    field(INPG, "48")
+    field(NVL,  "$(P)OutputMode.VAL NPP")
+}
+
+record(mbbo, "$(P)DetTypeSel")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Select detector type")
+    field(FLNK, "$(P)DiagEn")
+    field(SCAN, "Passive")
+    field(PINI, "YES")
+    field(VAL,  "0")
+    field(ZRVL, "0")
+    field(ZRST, "LPSD")
+    field(ONVL, "1")
+    field(ONST, "ACPC")
+    field(TWVL, "2")
+    field(TWST, "BNL")
+    field(THVL, "3")
+    field(THST, "CROC")
+}
+
+record(mbbo, "$(P)DiagEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(DTYP, "Soft Channel")
+    field(OUT,  "$(P)DiagEnFan PP")
+}
+
+record(dfanout, "$(P)DiagEnFan")
+{
+    field(ASG,  "BEAMLINE")
+    field(OUTA, "$(P)AcpcDiagEn PP")
+    field(OUTB, "$(P)BnlDiagEn PP")
+    field(OUTC, "$(P)CrocDiagEn PP")
+    field(OUTD, "$(P)LpsdDiagEn PP")
+}
+
+record(calc, "$(P)LpsdDiagEnDisv")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)DetTypeSel NPP")
+    field(CALC, "A#0")
+}
+record(mbbo, "$(P)LpsdDiagEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "1")
+    field(ONVL, "2")
+    field(SDIS, "$(P)LpsdDiagEnDisv PP")
+    field(DISV, "1")
+    field(OUT,  "$(P)OutputMode PP")
+    field(DTYP, "Raw Soft Channel")
+}
+
+record(calc, "$(P)AcpcDiagEnDisv")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)DetTypeSel NPP")
+    field(CALC, "A#1")
+}
+record(mbbo, "$(P)AcpcDiagEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "3")
+    field(ONVL, "4")
+    field(SDIS, "$(P)AcpcDiagEnDisv PP")
+    field(DISV, "1")
+    field(OUT,  "$(P)OutputMode PP")
+    field(DTYP, "Raw Soft Channel")
+}
+
+record(calc, "$(P)BnlDiagEnDisv")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)DetTypeSel NPP")
+    field(CALC, "A#2")
+}
+record(mbbo, "$(P)BnlDiagEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "5")
+    field(ONVL, "5")
+    field(SDIS, "$(P)BnlDiagEnDisv PP")
+    field(DISV, "1")
+    field(OUT,  "$(P)OutputMode PP")
+    field(DTYP, "Raw Soft Channel")
+}
+
+record(calc, "$(P)CrocDiagEnDisv")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)DetTypeSel NPP")
+    field(CALC, "A#3")
+}
+record(mbbo, "$(P)CrocDiagEn")
+{
+    field(ASG,  "BEAMLINE")
+    field(ZRST, "disable")
+    field(ONST, "enable")
+    field(ZRVL, "6")
+    field(ONVL, "6")
+    field(SDIS, "$(P)CrocDiagEnDisv PP")
+    field(DISV, "1")
+    field(OUT,  "$(P)OutputMode PP")
+    field(DTYP, "Raw Soft Channel")
+}
+
+record(mbbi, "$(P)HwType")
+{
+    field(SVSV, "NO_ALARM")
+}

@@ -1,0 +1,81 @@
+include "BasePlugin.include"
+
+record(calcout, "$(P)StatusCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Pixel mapping plugin status")
+    field(INPA, "$(P)ErrImport.SEVR NPP")
+    field(CALC, "A=0?1:A=1?2:0")
+    field(OUT,  "$(P)Status PP")
+    field(FLNK, "$(P)StatusTextCalc")
+}
+record(scalcout, "$(P)StatusTextCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Pixel mapping plugin status")
+    field(INPA, "$(P)ErrImport.SEVR NPP")
+    field(INAA, "$(P)ErrImport NPP")
+    field(BB,   "ready")
+    field(CALC, "A=0?BB:AA")
+    field(OUT,  "$(P)StatusText PP")
+}
+record(waveform, "$(P)FilePath")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))FilePath")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(PINI, "YES")
+}
+record(mbbi, "$(P)ErrImport")
+{
+    info(archive, "Monitor, 00:10:00, VAL")
+    field(DESC, "Error importing file")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ErrImport")
+    field(SCAN, "I/O Intr")
+    field(PINI, "YES")
+    field(ZRVL, "0")
+    field(ZRST, "No error")
+    field(ONVL, "1")
+    field(ONST, "No pixelmap file")
+    field(ONSV, "MINOR")
+    field(TWVL, "2")
+    field(TWST, "File parse error")
+    field(TWSV, "MAJOR")
+    field(THVL, "3")
+    field(THST, "Memory alloc err")
+    field(THSV, "MAJOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(longin, "$(P)CntUnmap")
+{
+    field(DESC, "Number unmapped pixels")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntUnmap")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bo, "$(P)ResetCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset counters")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetCnt")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(bo, "$(P)MapEn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Toggle pixel mapping")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))MapEn")
+    field(VAL,  "0")
+    field(PINI, "YES")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+}

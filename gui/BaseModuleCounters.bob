@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<display version="2.0.0">
+  <name>Display</name>
+  <width>720</width>
+  <height>520</height>
+  <widget type="embedded" version="2.0.0">
+    <name>Embedded Display</name>
+    <y>25</y>
+    <width>720</width>
+    <height>495</height>
+    <scripts>
+      <script file="EmbeddedPy">
+        <text><![CDATA[from org.csstudio.display.builder.runtime.script import PVUtil, ScriptUtil
+plugin = PVUtil.getString(pvs[0])
+filepath = "generated/%s_counters.bob" % (plugin)
+widget.setPropertyValue("file", filepath)]]></text>
+        <pv_name>$(P)PluginId</pv_name>
+      </script>
+    </scripts>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label</name>
+    <text>Register</text>
+    <width>150</width>
+    <horizontal_alignment>1</horizontal_alignment>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_1</name>
+    <text>Current value</text>
+    <x>150</x>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_2</name>
+    <text>Update interval </text>
+    <x>340</x>
+    <width>108</width>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+  <widget type="textupdate" version="2.0.0">
+    <name>Text Update</name>
+    <pv_name>$(P)CountersRefreshNext</pv_name>
+    <x>610</x>
+    <width>30</width>
+    <background_color>
+      <color name="OPI_Background" red="255" green="255" blue="255">
+      </color>
+    </background_color>
+  </widget>
+  <widget type="action_button" version="3.0.0">
+    <name>Action Button</name>
+    <actions>
+      <action type="write_pv">
+        <pv_name>$(pv_name)</pv_name>
+        <value>1</value>
+        <description>Refresh</description>
+      </action>
+    </actions>
+    <pv_name>$(P)CountersRefreshNow.PROC</pv_name>
+    <text>Now</text>
+    <x>640</x>
+    <width>80</width>
+    <height>20</height>
+    <tooltip>$(actions)</tooltip>
+  </widget>
+  <widget type="textentry" version="3.0.0">
+    <name>Text Entry</name>
+    <pv_name>$(P)CountersRefreshInt</pv_name>
+    <x>448</x>
+    <width>40</width>
+    <show_units>false</show_units>
+    <border_alarm_sensitive>false</border_alarm_sensitive>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_3</name>
+    <text>s</text>
+    <x>490</x>
+    <width>20</width>
+  </widget>
+  <widget type="label" version="2.0.0">
+    <name>Label_4</name>
+    <text>Next update in </text>
+    <x>510</x>
+    <horizontal_alignment>2</horizontal_alignment>
+  </widget>
+</display>

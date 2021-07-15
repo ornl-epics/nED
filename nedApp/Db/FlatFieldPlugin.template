@@ -1,0 +1,399 @@
+include "BasePlugin.include"
+
+record(bo, "$(P)EnableCorr")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Enable flat-field correction")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))EnableCorr")
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(PINI, "YES")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(calcout, "$(P)StatusCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Flat field plugin status")
+    field(INPA, "$(P)ImportStatus.SEVR NPP")
+    field(INPB, "$(P)EnableCorr NPP")
+    field(CALC, "B=0?2:A=0?1:A=1?2:0")
+    field(OUT,  "$(P)Status PP")
+    field(FLNK, "$(P)StatusTextCalc")
+}
+record(scalcout, "$(P)StatusTextCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Flat field plugin status")
+    field(INPA, "$(P)ImportStatus.SEVR NPP")
+    field(INPB, "$(P)EnableCorr NPP")
+    field(AA,   "disabled")
+    field(BB,   "OK")
+    field(CC,   "error")
+    field(CALC, "B=0?AA:A=0?BB:A=1?AA:CC")
+    field(OUT,  "$(P)StatusText PP")
+}
+record(mbbi, "$(P)ImportStatus")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))ImportStatus")
+    field(SCAN, "I/O Intr")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(THVL, "3")
+    field(ZRST, "None")
+    field(ONST, "Error")
+    field(TWST, "In progress")
+    field(THST, "Done")
+    field(ZRSV, "MINOR")
+    field(ONSV, "MAJOR")
+    field(TWSV, "MINOR")
+    field(FLNK, "$(P)StatusCalc")
+}
+record(waveform, "$(P)ImportReport")
+{
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT))ImportReport")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(PINI, "YES")
+}
+record(waveform, "$(P)ImportDir")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DTYP, "asynOctetWrite")
+    field(INP,  "@asyn($(PORT))ImportDir")
+    field(FTVL, "CHAR")
+    field(NELM, "1024")
+    field(PINI, "YES")
+}
+record(longin, "$(P)NumPositions")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Number of configured positions")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))NumPositions")
+    field(PINI, "YES")
+}
+record(waveform, "$(P)Positions")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "List of configured positions")
+    field(DTYP, "asynInt32ArrayIn")
+    field(INP,  "@asyn($(PORT))Positions")
+    field(FTVL, "LONG")
+    field(NELM, "100")
+    field(PINI, "YES")
+}
+
+record(longin, "$(P)CntGoodEvents")
+{
+    field(DESC, "Number of good events")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntGoodEvents")
+    field(SCAN, "Passive")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(calc, "$(P)RateGoodEvents")
+{
+    field(DESC, "Good events rate")
+    field(INPA, "$(P)CntGoodEvents NPP")
+    field(INPB, "$(P)CntGoodEvents PP")
+    field(CALC, "B-A")
+    field(EGU,  "ev/s")
+    field(SCAN, "1 second")
+}
+record(calc, "$(P)CntSumVetos")
+{
+    field(INPA, "$(P)CntPosVetos NPP MS")
+    field(INPB, "$(P)CntRangeVetos NPP MS")
+    field(INPC, "$(P)CntPosCfgVetos NPP MS")
+    field(INPD, "$(P)CntPsVetos NPP MS")
+    field(INPE, "$(P)CntInhVetos NPP MS")
+    field(CALC, "A+B+C+D+E")
+}
+record(calc, "$(P)RateVetoEvents")
+{
+    field(DESC, "Veto events rate")
+    field(INPA, "$(P)CntSumVetos NPP MS")
+    field(INPB, "$(P)CntSumVetos PP MS")
+    field(CALC, "B-A")
+    field(EGU,  "ev/s")
+    field(SCAN, "1 second")
+}
+record(longin, "$(P)CntInhVetos")
+{
+    field(DESC, "Number of inherited vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntInhVetos")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntPosVetos")
+{
+    field(DESC, "Number of bad position vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntPosVetos")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntRangeVetos")
+{
+    field(DESC, "Number of X,Y range vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntRangeVetos")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntPosCfgVetos")
+{
+    field(DESC, "Number of position config vetoes")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntPosCfgVetos")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(HIGH, "1")
+    field(HSV,  "MAJOR")
+    field(PINI, "YES")
+}
+record(longin, "$(P)CntPsVetos")
+{
+    field(DESC, "Number of photosum discriminated ev")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))CntPsVetos")
+    field(SCAN, "I/O Intr")
+    field(VAL,  "0")
+    field(PINI, "YES")
+}
+record(bo, "$(P)ResetCnt")
+{
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Reset counters")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))ResetCnt")
+    field(ZNAM, "None")
+    field(ONAM, "Reset")
+}
+record(longout, "$(P)XyFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "X,Y UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))XyFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "30")
+}
+record(ao, "$(P)XMaxIn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max X value from detector")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))XMaxIn")
+    field(PINI, "YES")
+    field(LOPR, "1")
+    field(HOPR, "1023")
+    field(PREC, "2")
+}
+record(ao, "$(P)YMaxIn")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max Y value from detector")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT))YMaxIn")
+    field(PINI, "YES")
+    field(LOPR, "1")
+    field(HOPR, "1023")
+    field(PREC, "2")
+}
+record(longout, "$(P)XMaxOut")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max X out value")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))XMaxOut")
+    field(PINI, "YES")
+    field(LOPR, "1")
+    field(HOPR, "1023")
+}
+record(longout, "$(P)YMaxOut")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Max Y out value")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))YMaxOut")
+    field(PINI, "YES")
+    field(LOPR, "1")
+    field(HOPR, "1023")
+}
+record(longout, "$(P)PsFractWidth")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Photo sum UQm.n fraction width")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT))PsFractWidth")
+    field(PINI, "YES")
+    field(HOPR, "30")
+}
+record(longin, "$(P)TablesSizeX")
+{
+    field(DESC, "Size X of all tables")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TablesSizeX")
+    field(VAL,  "0")
+    field(SCAN, "I/O Intr")
+}
+record(longin, "$(P)TablesSizeY")
+{
+    field(DESC, "Size Y of all tables")
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT))TablesSizeY")
+    field(VAL,  "0")
+    field(SCAN, "I/O Intr")
+}
+
+##### Next set of PVs deals with preset config params depending on selected type #####
+record(mbbo, "$(P)Presets")
+{
+    info(autosaveFields, "VAL")
+    field(ASG,  "BEAMLINE")
+    field(DESC, "Detector preset config")
+    field(ZRVL, "0")
+    field(ONVL, "1")
+    field(TWVL, "2")
+    field(ZRST, "")
+    field(ONST, "BNL")
+    field(TWST, "ACPC")
+    field(OUT,  "$(P)PresetsCalc PP")
+    field(PINI, "NO")
+}
+record(calcout, "$(P)PresetsCalc")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "$(P)Presets NPP")
+    field(CALC, "A")
+    field(OOPT, "When Non-zero")
+    field(OCAL, "1")
+    field(DOPT, "Use OCAL")
+    field(OUT,  "$(P)PresetsFan.PROC")
+}
+record(fanout, "$(P)PresetsFan")
+{
+    field(ASG,  "BEAMLINE")
+    field(LNK1, "$(P)XyFractWidthSel")
+    field(LNK2, "$(P)PsFractWidthSel")
+    field(LNK3, "$(P)XMaxInSel")
+    field(LNK4, "$(P)YMaxInSel")
+    field(LNK5, "$(P)XMaxOutSel")
+    field(LNK6, "$(P)YMaxOutSel")
+}
+record(sel, "$(P)XMaxInSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "19")
+    field(INPC, "158")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)XMaxInSet")
+}
+record(longout, "$(P)XMaxInSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)XMaxInSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)XMaxIn PP")
+}
+record(sel, "$(P)YMaxInSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "16")
+    field(INPC, "158")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)YMaxInSet")
+}
+record(longout, "$(P)YMaxInSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)YMaxInSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)YMaxIn PP")
+}
+record(sel, "$(P)XMaxOutSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "303")
+    field(INPC, "255")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)XMaxOutSet")
+}
+record(longout, "$(P)XMaxOutSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)XMaxOutSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)XMaxOut PP")
+}
+record(sel, "$(P)YMaxOutSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "255")
+    field(INPC, "255")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)YMaxOutSet")
+}
+record(longout, "$(P)YMaxOutSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)YMaxOutSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)YMaxOut PP")
+}
+record(sel, "$(P)XyFractWidthSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "11")
+    field(INPC, "24")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)XyFractWidthSet")
+}
+record(longout, "$(P)XyFractWidthSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)XyFractWidthSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)XyFractWidth PP")
+}
+record(sel, "$(P)PsFractWidthSel")
+{
+    field(ASG,  "BEAMLINE")
+    field(INPA, "1")
+    field(INPB, "1")
+    field(INPC, "15")
+    field(NVL,  "$(P)Presets NPP")
+    field(FLNK, "$(P)PsFractWidthSet")
+}
+record(longout, "$(P)PsFractWidthSet")
+{
+    field(ASG,  "BEAMLINE")
+    field(DOL,  "$(P)PsFractWidthSel NPP")
+    field(OMSL, "closed_loop")
+    field(OUT,  "$(P)PsFractWidth PP")
+}

@@ -1,0 +1,125 @@
+record(calc, "$(P)Pmt:Status1")
+{
+    field(INPA, "$(P)Y1:Pmt:Status PP MS")
+    field(INPB, "$(P)Y2:Pmt:Status PP MS")
+    field(INPC, "$(P)Y3:Pmt:Status PP MS")
+    field(INPD, "$(P)Y4:Pmt:Status PP MS")
+    field(INPE, "$(P)Y5:Pmt:Status PP MS")
+    field(INPF, "$(P)Y6:Pmt:Status PP MS")
+    field(INPG, "$(P)Y7:Pmt:Status PP MS")
+}
+record(calc, "$(P)Pmt:Status2")
+{
+    field(INPA, "$(P)X1:Pmt:Status PP MS")
+    field(INPB, "$(P)X2:Pmt:Status PP MS")
+    field(INPC, "$(P)X3:Pmt:Status PP MS")
+    field(INPD, "$(P)X4:Pmt:Status PP MS")
+    field(INPE, "$(P)X5:Pmt:Status PP MS")
+    field(INPF, "$(P)X6:Pmt:Status PP MS")
+    field(INPG, "$(P)X7:Pmt:Status PP MS")
+    field(INPH, "$(P)X8:Pmt:Status PP MS")
+    field(INPI, "$(P)X9:Pmt:Status PP MS")
+    field(INPJ, "$(P)X10:Pmt:Status PP MS")
+    field(INPK, "$(P)X11:Pmt:Status PP MS")
+}
+record(calc, "$(P)Pmt:Status3")
+{
+    field(INPA, "$(P)G1:Pmt:Status PP MS")
+    field(INPB, "$(P)G2:Pmt:Status PP MS")
+    field(INPC, "$(P)G3:Pmt:Status PP MS")
+    field(INPD, "$(P)G4:Pmt:Status PP MS")
+    field(INPE, "$(P)G5:Pmt:Status PP MS")
+    field(INPF, "$(P)G6:Pmt:Status PP MS")
+    field(INPG, "$(P)G7:Pmt:Status PP MS")
+    field(INPH, "$(P)G8:Pmt:Status PP MS")
+    field(INPI, "$(P)G9:Pmt:Status PP MS")
+    field(INPJ, "$(P)G10:Pmt:Status PP MS")
+    field(INPK, "$(P)G11:Pmt:Status PP MS")
+    field(INPL, "$(P)G12:Pmt:Status PP MS")
+}
+record(calc, "$(P)Pmt:Status4")
+{
+    field(INPA, "$(P)G13:Pmt:Status PP MS")
+    field(INPB, "$(P)G14:Pmt:Status PP MS")
+}
+record(calc, "$(P)Pmt:Status")
+{
+    info(archive, "Monitor, 00:00:10, VAL")
+    field(INPA, "$(P)Pmt:Status1.SEVR PP MS")
+    field(INPB, "$(P)Pmt:Status2.SEVR PP MS")
+    field(INPC, "$(P)Pmt:Status3.SEVR PP MS")
+    field(INPD, "$(P)Pmt:Status4.SEVR PP MS")
+    field(CALC, "A#2&&B#2&&C#2&&D#2")
+    field(PINI, "YES")
+    field(SCAN, "1 second")
+}
+
+record(dfanout, "$(P)Pmt:StatusEn1")
+{
+    field(OUTA, "$(P)Y1:Pmt:StatusCalc.A PP")
+    field(OUTB, "$(P)Y2:Pmt:StatusCalc.A PP")
+    field(OUTC, "$(P)Y3:Pmt:StatusCalc.A PP")
+    field(OUTD, "$(P)Y4:Pmt:StatusCalc.A PP")
+    field(OUTE, "$(P)Y5:Pmt:StatusCalc.A PP")
+    field(OUTF, "$(P)Y6:Pmt:StatusCalc.A PP")
+    field(OUTG, "$(P)Y7:Pmt:StatusCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)Pmt:StatusEn2")
+{
+    field(OUTA, "$(P)X1:Pmt:StatusCalc.A PP")
+    field(OUTB, "$(P)X2:Pmt:StatusCalc.A PP")
+    field(OUTC, "$(P)X3:Pmt:StatusCalc.A PP")
+    field(OUTD, "$(P)X4:Pmt:StatusCalc.A PP")
+    field(OUTE, "$(P)X5:Pmt:StatusCalc.A PP")
+    field(OUTF, "$(P)X6:Pmt:StatusCalc.A PP")
+    field(OUTG, "$(P)X7:Pmt:StatusCalc.A PP")
+    field(OUTH, "$(P)X8:Pmt:StatusCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)Pmt:StatusEn3")
+{
+    field(OUTA, "$(P)X9:Pmt:StatusCalc.A PP")
+    field(OUTB, "$(P)X10:Pmt:StatusCalc.A PP")
+    field(OUTC, "$(P)X11:Pmt:StatusCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)Pmt:StatusEn4")
+{
+    field(OUTA, "$(P)G1:Pmt:StatusCalc.A PP")
+    field(OUTB, "$(P)G2:Pmt:StatusCalc.A PP")
+    field(OUTC, "$(P)G3:Pmt:StatusCalc.A PP")
+    field(OUTD, "$(P)G4:Pmt:StatusCalc.A PP")
+    field(OUTE, "$(P)G5:Pmt:StatusCalc.A PP")
+    field(OUTF, "$(P)G6:Pmt:StatusCalc.A PP")
+    field(OUTG, "$(P)G7:Pmt:StatusCalc.A PP")
+    field(OUTH, "$(P)G8:Pmt:StatusCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)Pmt:StatusEn5")
+{
+    field(OUTA, "$(P)G9:Pmt:StatusCalc.A PP")
+    field(OUTB, "$(P)G10:Pmt:StatusCalc.A PP")
+    field(OUTC, "$(P)G11:Pmt:StatusCalc.A PP")
+    field(OUTD, "$(P)G12:Pmt:StatusCalc.A PP")
+    field(OUTE, "$(P)G13:Pmt:StatusCalc.A PP")
+    field(OUTF, "$(P)G14:Pmt:StatusCalc.A PP")
+    field(OMSL, "supervisory")
+}
+record(dfanout, "$(P)Pmt:StatusEnG")
+{
+    field(OUTA, "$(P)Pmt:StatusEn1 PP")
+    field(OUTB, "$(P)Pmt:StatusEn2 PP")
+    field(OUTC, "$(P)Pmt:StatusEn3 PP")
+    field(OUTD, "$(P)Pmt:StatusEn4 PP")
+    field(OUTE, "$(P)Pmt:StatusEn5 PP")
+    field(OMSL, "supervisory")
+}
+record(bo, "$(P)Pmt:StatusEn")
+{
+    field(ZNAM, "disable")
+    field(ONAM, "enable")
+    field(OUT,  "$(P)Pmt:StatusEnG PP")
+    field(VAL,  "1")
+    field(PINI, "YES")
+}
